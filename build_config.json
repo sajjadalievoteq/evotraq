@@ -1,0 +1,16 @@
+{
+  "environments": {
+    "local": {
+      "API_BASE_URL": "http://localhost:8080/api",
+      "ENVIRONMENT": "development"
+    },
+    "azure": {
+      "API_BASE_URL": "https://backend.calmdesert-164bc904.eastus2.azurecontainerapps.io/api",
+      "ENVIRONMENT": "production"
+    },
+    "production": {
+      "API_BASE_URL": "https://api.traqtrace.com/api",
+      "ENVIRONMENT": "production"
+    }
+  }
+}

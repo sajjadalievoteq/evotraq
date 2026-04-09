@@ -1,0 +1,104 @@
+name: traqtrace_app
+description: "GS1-compliant track and trace system for pharmaceutical products"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # State management
+  provider: ^6.1.2
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+  
+  # Network and API
+  http: ^1.5.0
+  dio: ^5.9.0
+  json_annotation: ^4.9.0
+  web_socket_channel: ^3.0.0
+  
+  # Storage
+  shared_preferences: ^2.5.3
+  flutter_secure_storage: ^10.0.0
+  
+  # UI components
+  flutter_svg: ^2.2.1
+  google_fonts: ^6.3.1
+  flutter_form_builder: ^10.2.0
+  form_builder_validators: ^11.2.0
+  
+  # Navigation
+  go_router: ^16.2.2
+  
+  # Utils
+  intl: ^0.20.2
+  logger: ^2.6.1
+  url_launcher: ^6.3.0
+  uuid: ^4.5.1
+  flutter_markdown: ^0.7.5
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  universal_html: ^2.2.4
+  
+  # Charts and Data Visualization
+  fl_chart: ^1.1.1
+  syncfusion_flutter_charts: ^31.1.20
+  timeline_tile: ^2.0.0
+  
+  # Date and Time
+  timezone: ^0.10.1
+  
+  # QR Code and Barcode
+  qr_code_scanner: ^1.0.1
+  
+  # PDF Generation
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  
+  # Export functionality
+  csv: ^6.0.0
+  
+  # Platform Integration
+  device_info_plus: ^12.1.0
+  package_info_plus: ^8.3.1
+  
+  # Camera and ML Vision
+  camera: ^0.11.2
+  google_mlkit_barcode_scanning: ^0.14.1
+  image: ^4.3.0
+  permission_handler: ^11.3.1
+  
+  # Maps and Location
+  google_maps_flutter: ^2.13.1
+  geolocator: ^13.0.0
+  flutter_map: ^8.0.0
+  latlong2: ^0.9.1
+  get_it: ^9.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.13.1
+  json_serializable: ^6.8.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.4
+  mockito: ^5.6.4
+  
+  # Testing
+  bloc_test: ^10.0.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/

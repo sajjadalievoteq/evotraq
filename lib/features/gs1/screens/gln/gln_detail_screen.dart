@@ -4,9 +4,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/gs1/bloc/gln/gln_cubit.dart';
@@ -238,7 +238,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen> with GS1FormValidatio
     try {
       final extension = tobaccoState.buildExtension(glnId: glnId, glnCode: glnCode);
       if (extension != null) {
-        final tobaccoService = Provider.of<GLNTobaccoExtensionService>(context, listen: false);
+        final tobaccoService = getIt<GLNTobaccoExtensionService>();
         await tobaccoService.createByGlnCode(glnCode, extension);
         debugPrint('GLN Tobacco extension saved for GLN: $glnCode');
       }
@@ -259,7 +259,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen> with GS1FormValidatio
     try {
       final extension = pharmaState.buildExtension(glnId: glnId, glnCode: glnCode);
       if (extension != null) {
-        final pharmaService = Provider.of<GLNPharmaceuticalExtensionService>(context, listen: false);
+        final pharmaService = getIt<GLNPharmaceuticalExtensionService>();
         await pharmaService.createByGlnCode(glnCode, extension);
         debugPrint('GLN Pharmaceutical extension saved for GLN: $glnCode');
       }

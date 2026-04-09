@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
@@ -195,7 +195,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     try {
       final extension = tobaccoState.buildExtension(gtinId: gtinId, gtinCode: gtinCode);
       if (extension != null) {
-        final tobaccoService = Provider.of<GTINTobaccoExtensionService>(context, listen: false);
+        final tobaccoService = getIt<GTINTobaccoExtensionService>();
         // Use the method that accepts GTIN code instead of ID
         await tobaccoService.createByGtinCode(gtinCode, extension);
         debugPrint('Tobacco extension saved for GTIN: $gtinCode');
@@ -217,7 +217,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     try {
       final extension = pharmaState.buildExtension(gtinId: gtinId, gtinCode: gtinCode);
       if (extension != null) {
-        final pharmaService = Provider.of<PharmaceuticalService>(context, listen: false);
+        final pharmaService = getIt<PharmaceuticalService>();
         await pharmaService.createExtension(gtinCode, extension);
         debugPrint('Pharmaceutical extension saved for GTIN: $gtinCode');
       }

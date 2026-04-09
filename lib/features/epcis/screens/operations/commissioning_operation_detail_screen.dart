@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
@@ -43,7 +43,7 @@ class _CommissioningOperationDetailScreenState
     });
 
     try {
-      final commissioningService = context.read<CommissioningOperationService>();
+      final commissioningService = getIt<CommissioningOperationService>();
       final operation =
           await commissioningService.getCommissioningOperation(widget.operationId);
       setState(() {
@@ -65,7 +65,7 @@ class _CommissioningOperationDetailScreenState
     if (_operation == null) return;
 
     try {
-      final glnService = context.read<GLNService>();
+      final glnService = getIt<GLNService>();
 
       if (_operation!.commissioningLocationGLN != null) {
         try {

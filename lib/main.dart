@@ -13,7 +13,6 @@ import 'package:traqtrace_app/features/admin/cubit/admin_cubit.dart';
 import 'package:traqtrace_app/features/admin/services/admin_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/services/auth_service.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
@@ -138,16 +137,6 @@ class TraqTraceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthCubit>.value(value: getIt<AuthCubit>()),
-        Provider<EPCConversionService>.value(
-          value: getIt<EPCConversionService>(),
-        ),
-        Provider<AppConfig>.value(value: getIt<AppConfig>()),
-        Provider<TokenManager>.value(value: getIt<TokenManager>()),
-        BlocProvider<AggregationEventsCubit>(
-          create: (context) =>
-              AggregationEventsCubit(appConfig: getIt<AppConfig>()),
-        ),
         ChangeNotifierProvider<TransactionEventsProvider>(
           create: (context) =>
               TransactionEventsProvider(appConfig: getIt<AppConfig>()),
@@ -174,76 +163,25 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) =>
               ValidationRuleProvider(appConfig: getIt<AppConfig>()),
         ),
-        Provider<AdvancedQueryService>.value(
-          value: getIt<AdvancedQueryService>(),
-        ),
-        BlocProvider<AdvancedQueryCubit>(
-          create: (context) =>
-              AdvancedQueryCubit(getIt<AdvancedQueryService>()),
-        ),
         ChangeNotifierProvider<TraversalQueryProvider>(
           create: (context) =>
               TraversalQueryProvider(getIt<AdvancedQueryService>()),
-        ),
-        Provider<ShippingOperationService>.value(
-          value: getIt<ShippingOperationService>(),
-        ),
-        BlocProvider<ShippingOperationCubit>(
-          create: (context) =>
-              ShippingOperationCubit(getIt<ShippingOperationService>()),
-        ),
-        Provider<ReceivingOperationService>.value(
-          value: getIt<ReceivingOperationService>(),
-        ),
-        Provider<PackingOperationService>.value(
-          value: getIt<PackingOperationService>(),
-        ),
-        Provider<CommissioningOperationService>.value(
-          value: getIt<CommissioningOperationService>(),
-        ),
-        Provider<ReferenceDataValidationService>.value(
-          value: getIt<ReferenceDataValidationService>(),
-        ),
-        Provider<GTINService>.value(value: getIt<GTINService>()),
-        Provider<PharmaceuticalService>.value(
-          value: getIt<PharmaceuticalService>(),
-        ),
-        Provider<GLNPharmaceuticalExtensionService>.value(
-          value: getIt<GLNPharmaceuticalExtensionService>(),
-        ),
-        Provider<GTINTobaccoExtensionService>.value(
-          value: getIt<GTINTobaccoExtensionService>(),
-        ),
-        Provider<GLNTobaccoExtensionService>.value(
-          value: getIt<GLNTobaccoExtensionService>(),
-        ),
-        Provider<SSCCTobaccoExtensionService>.value(
-          value: getIt<SSCCTobaccoExtensionService>(),
-        ),
-        Provider<SSCCPharmaceuticalExtensionService>.value(
-          value: getIt<SSCCPharmaceuticalExtensionService>(),
-        ),
-        Provider<ProductJourneyService>.value(
-          value: getIt<ProductJourneyService>(),
-        ),
-        ChangeNotifierProvider<ServiceAccountProvider>(
-          create: (context) =>
-              ServiceAccountProvider(service: getIt<ServiceAccountService>()),
-        ),
-        ChangeNotifierProvider<PartnerAccessProvider>(
-          create: (context) => PartnerAccessProvider(
-            httpClient: getIt<http.Client>(),
-            tokenManager: getIt<TokenManager>(),
-            appConfig: getIt<AppConfig>(),
-          ),
         ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+          BlocProvider<AggregationEventsCubit>(
+            create: (context) =>
+                AggregationEventsCubit(appConfig: getIt<AppConfig>()),
+          ),
           BlocProvider<ProfileCubit>(
             create: (context) =>
                 ProfileCubit(userService: getIt<UserService>()),
+          ),
+          BlocProvider<ThemeCubit>(
+            create: (context) =>
+                ThemeCubit(profileCubit: context.read<ProfileCubit>()),
           ),
           BlocProvider<AdminCubit>(
             create: (context) =>
@@ -279,6 +217,17 @@ class TraqTraceApp extends StatelessWidget {
               appConfig: getIt<AppConfig>(),
             ),
           ),
+          BlocProvider<PartnerAccessCubit>(
+            create: (context) => PartnerAccessCubit(
+              httpClient: getIt<http.Client>(),
+              tokenManager: getIt<TokenManager>(),
+              appConfig: getIt<AppConfig>(),
+            ),
+          ),
+          BlocProvider<ServiceAccountCubit>(
+            create: (context) =>
+                ServiceAccountCubit(service: getIt<ServiceAccountService>()),
+          ),
           BlocProvider<ObjectEventsCubit>(
             create: (context) => ObjectEventsCubit(
               httpClient: getIt<http.Client>(),
@@ -288,6 +237,14 @@ class TraqTraceApp extends StatelessWidget {
           ),
           BlocProvider<EPCISEventsCubit>(
             create: (context) => EPCISEventsCubit(getIt<EPCISEventService>()),
+          ),
+          BlocProvider<AdvancedQueryCubit>(
+            create: (context) =>
+                AdvancedQueryCubit(getIt<AdvancedQueryService>()),
+          ),
+          BlocProvider<ShippingOperationCubit>(
+            create: (context) =>
+                ShippingOperationCubit(getIt<ShippingOperationService>()),
           ),
           BlocProvider<SystemSettingsCubit>(
             create: (context) =>
@@ -301,31 +258,25 @@ class TraqTraceApp extends StatelessWidget {
             ),
           ),
         ],
-        child: Builder(
-          builder: (context) {
-            return ChangeNotifierProvider(
-              create: (context) =>
-                  ThemeProvider(profileCubit: context.read<ProfileCubit>()),
-              child: Consumer<ThemeProvider>(
-                builder: (context, themeProvider, child) {
-                  return BlocListener<AuthCubit, AuthState>(
-                    listener: (context, state) {
-                      if (state.isAuthenticated && state.user != null) {
-                        context.read<SystemSettingsCubit>().initialize();
-                      } else if (!state.isAuthenticated) {
-                        context.read<SystemSettingsCubit>().reset();
-                      }
-                    },
-                    child: MaterialApp.router(
-                      title: getIt<AppConfig>().appName,
-                      theme: AppTheme.lightTheme(),
-                      debugShowCheckedModeBanner: false,
-                      darkTheme: AppTheme.darkTheme(),
-                      themeMode: themeProvider.themeMode,
-                      routerConfig: getIt<AppRouter>().router,
-                    ),
-                  );
-                },
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          buildWhen: (previous, current) =>
+              previous.isDarkMode != current.isDarkMode,
+          builder: (context, themeState) {
+            return BlocListener<AuthCubit, AuthState>(
+              listener: (context, state) {
+                if (state.isAuthenticated && state.user != null) {
+                  context.read<SystemSettingsCubit>().initialize();
+                } else if (!state.isAuthenticated) {
+                  context.read<SystemSettingsCubit>().reset();
+                }
+              },
+              child: MaterialApp.router(
+                title: getIt<AppConfig>().appName,
+                theme: AppTheme.lightTheme(),
+                debugShowCheckedModeBanner: false,
+                darkTheme: AppTheme.darkTheme(),
+                themeMode: themeState.themeMode,
+                routerConfig: getIt<AppRouter>().router,
               ),
             );
           },

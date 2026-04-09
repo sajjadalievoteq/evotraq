@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
@@ -45,8 +45,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _testDataService ??= IndustryTestDataService(
-      tokenManager: Provider.of<TokenManager>(context, listen: false),
-      appConfig: Provider.of<AppConfig>(context, listen: false),
+      tokenManager: getIt<TokenManager>(),
+      appConfig: getIt<AppConfig>(),
     );
   }
 

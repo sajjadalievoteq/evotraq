@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../models/gln_pharmaceutical_extension_model.dart';
 import '../services/gln_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)
 /// Can be embedded in GLN detail screens or used standalone
@@ -226,7 +226,7 @@ class GLNPharmaceuticalExtensionWidgetState
     }
 
     try {
-      final service = Provider.of<GLNPharmaceuticalExtensionService>(context, listen: false);
+      final service = getIt<GLNPharmaceuticalExtensionService>();
 
       GLNPharmaceuticalExtension? ext;
       if (hasValidGlnCode) {
@@ -606,7 +606,7 @@ class GLNPharmaceuticalExtensionWidgetState
     }
 
     try {
-      final service = Provider.of<GLNPharmaceuticalExtensionService>(context, listen: false);
+      final service = getIt<GLNPharmaceuticalExtensionService>();
       final extension = _buildExtensionFromForm();
 
       GLNPharmaceuticalExtension? result;

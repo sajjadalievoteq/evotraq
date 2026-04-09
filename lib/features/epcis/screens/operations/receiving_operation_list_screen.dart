@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/receiving_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/receiving_operation_service.dart';
@@ -47,7 +47,7 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
     });
 
     try {
-      final receivingService = context.read<ReceivingOperationService>();
+      final receivingService = getIt<ReceivingOperationService>();
       final operations = await receivingService.getAllReceivingOperations();
       setState(() {
         _operations = operations;

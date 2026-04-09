@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import '../models/sscc_tobacco_extension_model.dart';
 import '../services/sscc_tobacco_extension_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 
 /// ISO 3166-1 alpha-3 country codes for dropdowns
@@ -241,7 +241,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
     }
 
     try {
-      final service = Provider.of<SSCCTobaccoExtensionService>(context, listen: false);
+      final service = getIt<SSCCTobaccoExtensionService>();
       SSCCTobaccoExtension? extension;
 
       // Prefer loading by ssccId, fallback to ssccCode
@@ -414,7 +414,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
   /// Save the extension - can be called from parent widget
   Future<SSCCTobaccoExtension?> saveExtension(int ssccId, String ssccCode) async {
     try {
-      final service = Provider.of<SSCCTobaccoExtensionService>(context, listen: false);
+      final service = getIt<SSCCTobaccoExtensionService>();
       final extensionToSave = _buildExtensionFromFields().copyWith(
         ssccId: ssccId,
         ssccCode: ssccCode,

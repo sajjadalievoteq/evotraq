@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_api_service.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 /// Callback type for when a GS1 barcode is successfully scanned
@@ -57,9 +57,9 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   void _initializeServices() {
     // Initialize API service
     _barcodeApiService = GS1BarcodeApiService(
-      client: http.Client(),
-      tokenManager: TokenManager(),
-      appConfig: Provider.of<AppConfig>(context, listen: false),
+      client: getIt<http.Client>(),
+      tokenManager: getIt<TokenManager>(),
+      appConfig: getIt<AppConfig>(),
     );
   }
   Future<void> _handleBarcodeDetection(String gs1ElementString) async {

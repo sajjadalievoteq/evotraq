@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
@@ -15,11 +15,7 @@ import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart'
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
 /// Scanning mode options for different input methods
-enum ScanningMode {
-  camera,
-  wired,
-  manual,
-}
+enum ScanningMode { camera, wired, manual }
 
 /// Multi-step packing operations screen
 /// Step 1: Reference details (work order, batch, packing location)
@@ -36,7 +32,7 @@ class PackingOperationScreen extends StatefulWidget {
 class _PackingOperationScreenState extends State<PackingOperationScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  
+
   // Form controllers and data
   final _referenceController = TextEditingController();
   final _workOrderController = TextEditingController();
@@ -51,17 +47,21 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   final _containerWiredScannerController = TextEditingController();
   final FocusNode _wiredScannerFocusNode = FocusNode();
   final FocusNode _containerWiredScannerFocusNode = FocusNode();
-  
+
   GLN? _packingLocationGLN;
   String? _packingLocationGLNError;
-  
+
   String? _parentContainerId; // SSCC for the container
   final List<String> _scannedEPCs = [];
   bool _isLoading = false;
-  
+
   // Scanning mode state
-  ScanningMode _scanningMode = kIsWeb ? ScanningMode.wired : ScanningMode.camera;
-  ScanningMode _containerScanningMode = kIsWeb ? ScanningMode.wired : ScanningMode.camera;
+  ScanningMode _scanningMode = kIsWeb
+      ? ScanningMode.wired
+      : ScanningMode.camera;
+  ScanningMode _containerScanningMode = kIsWeb
+      ? ScanningMode.wired
+      : ScanningMode.camera;
   bool _isWiredScannerActive = false;
   bool _isContainerWiredScannerActive = false;
 
@@ -79,7 +79,8 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     });
     _containerWiredScannerFocusNode.addListener(() {
       setState(() {
-        _isContainerWiredScannerActive = _containerWiredScannerFocusNode.hasFocus;
+        _isContainerWiredScannerActive =
+            _containerWiredScannerFocusNode.hasFocus;
       });
     });
   }
@@ -88,10 +89,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_validationService == null) {
-      _validationService = context.read<ReferenceDataValidationService>();
+      _validationService = getIt<ReferenceDataValidationService>();
     }
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -135,12 +136,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     setState(() {
       _packingLocationGLNError = null;
     });
-    
+
     switch (_currentStep) {
       case 0:
         // Step 1: Validate reference details
         bool isValid = true;
-        
+
         if (_referenceController.text.trim().isEmpty) {
           _showError('Packing Reference is required');
           isValid = false;
@@ -212,32 +213,42 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final packingService = context.read<PackingOperationService>();
-      
+      final packingService = getIt<PackingOperationService>();
+
       // Convert all scanned barcodes to EPC URIs before sending
-      debugPrint('Packing: Converting ${_scannedEPCs.length} scanned items to EPC URIs');
+      debugPrint(
+        'Packing: Converting ${_scannedEPCs.length} scanned items to EPC URIs',
+      );
       for (var barcode in _scannedEPCs) {
         debugPrint('  Item barcode: $barcode');
       }
-      
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEPCs);
+
+      final conversionResult = EPCURIConverter.convertBatchToEPCUri(
+        _scannedEPCs,
+      );
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-      final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
-      
-      debugPrint('Packing: Conversion result - ${epcUris.length} successful, ${failedConversions.length} failed');
+      final failedConversions = List<String>.from(
+        conversionResult['failed'] ?? [],
+      );
+
+      debugPrint(
+        'Packing: Conversion result - ${epcUris.length} successful, ${failedConversions.length} failed',
+      );
       for (var epc in epcUris) {
         debugPrint('  Converted EPC: $epc');
       }
       for (var failed in failedConversions) {
         debugPrint('  Failed barcode: $failed');
       }
-      
+
       if (failedConversions.isNotEmpty) {
-        _showError('Failed to convert ${failedConversions.length} barcode(s) to EPC format:\n${failedConversions.join('\n')}');
+        _showError(
+          'Failed to convert ${failedConversions.length} barcode(s) to EPC format:\n${failedConversions.join('\n')}',
+        );
         setState(() => _isLoading = false);
         return;
       }
-      
+
       if (epcUris.isEmpty) {
         _showError('No valid EPCs to pack');
         setState(() => _isLoading = false);
@@ -246,35 +257,39 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
       // Convert container ID to EPC URI if needed
       debugPrint('Packing: Converting container ID: $_parentContainerId');
-      final containerEpc = EPCURIConverter.convertToEPCUri(_parentContainerId!) ?? _parentContainerId!;
+      final containerEpc =
+          EPCURIConverter.convertToEPCUri(_parentContainerId!) ??
+          _parentContainerId!;
       debugPrint('Packing: Converted container EPC: $containerEpc');
-      
+
       final packingRequest = PackingRequest(
         packingReference: _referenceController.text.trim(),
         parentContainerId: containerEpc,
         childEpcs: epcUris,
         packingLocationGLN: _packingLocationGLN!.glnCode,
-        workOrderNumber: _workOrderController.text.trim().isNotEmpty 
-            ? _workOrderController.text.trim() 
+        workOrderNumber: _workOrderController.text.trim().isNotEmpty
+            ? _workOrderController.text.trim()
             : null,
-        batchNumber: _batchNumberController.text.trim().isNotEmpty 
-            ? _batchNumberController.text.trim() 
+        batchNumber: _batchNumberController.text.trim().isNotEmpty
+            ? _batchNumberController.text.trim()
             : null,
-        productionOrder: _productionOrderController.text.trim().isNotEmpty 
-            ? _productionOrderController.text.trim() 
+        productionOrder: _productionOrderController.text.trim().isNotEmpty
+            ? _productionOrderController.text.trim()
             : null,
-        packingLine: _packingLineController.text.trim().isNotEmpty 
-            ? _packingLineController.text.trim() 
+        packingLine: _packingLineController.text.trim().isNotEmpty
+            ? _packingLineController.text.trim()
             : null,
-        operatorId: _operatorIdController.text.trim().isNotEmpty 
-            ? _operatorIdController.text.trim() 
+        operatorId: _operatorIdController.text.trim().isNotEmpty
+            ? _operatorIdController.text.trim()
             : null,
-        comments: _notesController.text.trim().isNotEmpty 
-            ? _notesController.text.trim() 
+        comments: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
             : null,
       );
 
-      final response = await packingService.createPackingOperation(packingRequest);
+      final response = await packingService.createPackingOperation(
+        packingRequest,
+      );
 
       if (response.isSuccess) {
         _showSuccess('Packing operation created successfully');
@@ -282,8 +297,8 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           context.go('/operations/packing');
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true 
-            ? response.messages!.first 
+        final errorMessage = response.messages?.isNotEmpty == true
+            ? response.messages!.first
             : 'Failed to create packing operation';
         _showError(errorMessage);
       }
@@ -301,7 +316,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       final barcode = result.data;
       // Parse the barcode to extract SSCC
       final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-      
+
       if (parsed['SSCC'] != null) {
         // SSCC found
         setState(() {
@@ -321,13 +336,13 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   void _onItemScanResult(ScanResult result) {
     if (result.isValid) {
       final barcode = result.data;
-      
+
       // Check for duplicates
       if (_scannedEPCs.contains(barcode)) {
         _showError('Item already scanned: $barcode');
         return;
       }
-      
+
       setState(() {
         _scannedEPCs.add(barcode);
       });
@@ -341,10 +356,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       _showError('Please enter a container barcode/SSCC');
       return;
     }
-    
+
     // Parse the barcode
     final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-    
+
     if (parsed['SSCC'] != null) {
       setState(() {
         _parentContainerId = parsed['SSCC'];
@@ -354,7 +369,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         _parentContainerId = barcode;
       });
     }
-    
+
     _containerManualEntryController.clear();
     //_showSuccess('Container added: $_parentContainerId');
   }
@@ -365,12 +380,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       _showError('Please enter a barcode');
       return;
     }
-    
+
     if (_scannedEPCs.contains(barcode)) {
       _showError('Item already added: $barcode');
       return;
     }
-    
+
     setState(() {
       _scannedEPCs.add(barcode);
     });
@@ -380,9 +395,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
   void _handleContainerWiredScan(String barcode) {
     if (barcode.isEmpty) return;
-    
+
     final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-    
+
     if (parsed['SSCC'] != null) {
       setState(() {
         _parentContainerId = parsed['SSCC'];
@@ -392,20 +407,20 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         _parentContainerId = barcode;
       });
     }
-    
+
     _containerWiredScannerController.clear();
     _showSuccess('Container scanned: $_parentContainerId');
   }
 
   void _handleItemWiredScan(String barcode) {
     if (barcode.isEmpty) return;
-    
+
     if (_scannedEPCs.contains(barcode)) {
       _showError('Item already scanned: $barcode');
       _wiredScannerController.clear();
       return;
     }
-    
+
     setState(() {
       _scannedEPCs.add(barcode);
     });
@@ -438,7 +453,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           children: [
             // Progress indicator
             _buildStepIndicator(),
-            
+
             // Main content
             Expanded(
               child: PageView(
@@ -455,7 +470,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                 ],
               ),
             ),
-            
+
             // Navigation buttons
             _buildNavigationButtons(),
           ],
@@ -484,7 +499,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   Widget _buildStepCircle(int step, String label) {
     final isActive = _currentStep >= step;
     final isCurrent = _currentStep == step;
-    
+
     return Expanded(
       child: Column(
         children: [
@@ -493,8 +508,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isActive ? Theme.of(context).primaryColor : Colors.grey[300],
-              border: isCurrent 
+              color: isActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[300],
+              border: isCurrent
                   ? Border.all(color: Theme.of(context).primaryColor, width: 2)
                   : null,
             ),
@@ -515,7 +532,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: isActive ? Theme.of(context).primaryColor : Colors.grey[600],
+              color: isActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[600],
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -800,7 +819,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
             Icon(
               _isContainerWiredScannerActive ? Icons.usb : Icons.usb_off,
               size: 48,
-              color: _isContainerWiredScannerActive ? Colors.green : Colors.grey,
+              color: _isContainerWiredScannerActive
+                  ? Colors.green
+                  : Colors.grey,
             ),
             const SizedBox(height: 16),
             Text(
@@ -808,7 +829,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                   ? 'Scanner Active - Ready to scan container'
                   : 'Click field below to activate scanner',
               style: TextStyle(
-                color: _isContainerWiredScannerActive ? Colors.green : Colors.grey,
+                color: _isContainerWiredScannerActive
+                    ? Colors.green
+                    : Colors.grey,
               ),
             ),
             const SizedBox(height: 16),
@@ -1148,14 +1171,24 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                       const SizedBox(width: 8),
                       const Text(
                         'Reference Details',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const Divider(),
-                  _buildReviewRow('Packing Reference', _referenceController.text),
-                  _buildReviewRow('Packing Location', 
-                      _packingLocationGLN?.locationName ?? _packingLocationGLN?.glnCode ?? 'N/A'),
+                  _buildReviewRow(
+                    'Packing Reference',
+                    _referenceController.text,
+                  ),
+                  _buildReviewRow(
+                    'Packing Location',
+                    _packingLocationGLN?.locationName ??
+                        _packingLocationGLN?.glnCode ??
+                        'N/A',
+                  ),
                 ],
               ),
             ),
@@ -1167,41 +1200,58 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
               _batchNumberController.text.isNotEmpty ||
               _productionOrderController.text.isNotEmpty ||
               _packingLineController.text.isNotEmpty ||
-              _operatorIdController.text.isNotEmpty)
-            ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.precision_manufacturing, color: Colors.orange),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Production Details',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              _operatorIdController.text.isNotEmpty) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.precision_manufacturing,
+                          color: Colors.orange,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Production Details',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    if (_workOrderController.text.isNotEmpty)
+                      _buildReviewRow('Work Order', _workOrderController.text),
+                    if (_batchNumberController.text.isNotEmpty)
+                      _buildReviewRow(
+                        'Batch Number',
+                        _batchNumberController.text,
                       ),
-                      const Divider(),
-                      if (_workOrderController.text.isNotEmpty)
-                        _buildReviewRow('Work Order', _workOrderController.text),
-                      if (_batchNumberController.text.isNotEmpty)
-                        _buildReviewRow('Batch Number', _batchNumberController.text),
-                      if (_productionOrderController.text.isNotEmpty)
-                        _buildReviewRow('Production Order', _productionOrderController.text),
-                      if (_packingLineController.text.isNotEmpty)
-                        _buildReviewRow('Packing Line', _packingLineController.text),
-                      if (_operatorIdController.text.isNotEmpty)
-                        _buildReviewRow('Operator ID', _operatorIdController.text),
-                    ],
-                  ),
+                    if (_productionOrderController.text.isNotEmpty)
+                      _buildReviewRow(
+                        'Production Order',
+                        _productionOrderController.text,
+                      ),
+                    if (_packingLineController.text.isNotEmpty)
+                      _buildReviewRow(
+                        'Packing Line',
+                        _packingLineController.text,
+                      ),
+                    if (_operatorIdController.text.isNotEmpty)
+                      _buildReviewRow(
+                        'Operator ID',
+                        _operatorIdController.text,
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Container Details
           Card(
@@ -1216,12 +1266,18 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                       const SizedBox(width: 8),
                       const Text(
                         'Container',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const Divider(),
-                  _buildReviewRow('Parent Container', _parentContainerId ?? 'N/A'),
+                  _buildReviewRow(
+                    'Parent Container',
+                    _parentContainerId ?? 'N/A',
+                  ),
                 ],
               ),
             ),
@@ -1241,7 +1297,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                       const SizedBox(width: 8),
                       Text(
                         'Items to Pack (${_scannedEPCs.length})',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -1287,7 +1346,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                         const SizedBox(width: 8),
                         const Text(
                           'Comments',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -1310,10 +1372,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
           ),
           Expanded(
             child: Text(
@@ -1348,13 +1407,16 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
                 child: const Text('Back'),
               ),
             ),
-          if (_currentStep > 0)
-            const SizedBox(width: 16),
+          if (_currentStep > 0) const SizedBox(width: 16),
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _currentStep == 3 ? _submitPackingOperation : _nextStep,
-              child: Text(_currentStep == 3 ? 'Create Packing Operation' : 'Next'),
+              onPressed: _currentStep == 3
+                  ? _submitPackingOperation
+                  : _nextStep,
+              child: Text(
+                _currentStep == 3 ? 'Create Packing Operation' : 'Next',
+              ),
             ),
           ),
         ],

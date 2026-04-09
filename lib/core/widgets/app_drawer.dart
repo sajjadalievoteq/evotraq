@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_provider.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -32,11 +31,13 @@ class AppDrawer extends StatelessWidget {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              Consumer<ThemeProvider>(
-                builder: (context, themeProvider, child) {
+              BlocBuilder<ThemeCubit, ThemeState>(
+                buildWhen: (previous, current) =>
+                    previous.isDarkMode != current.isDarkMode,
+                builder: (context, themeState) {
                   return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
                     builder: (context, settingsState) {
-                      final isDarkMode = themeProvider.isDarkMode;
+                      final isDarkMode = themeState.isDarkMode;
                       final settings = settingsState.settings;
                       final isTobaccoMode = settings.isTobaccoMode;
 
@@ -118,11 +119,14 @@ class AppDrawer extends StatelessWidget {
                                     AppTheme.backgroundColorDark,
                                   ]
                                 : isTobaccoMode
-                                ? [Colors.brown.shade800, Colors.brown.shade400]
-                                : [
-                                    const Color(0xFF121F17),
-                                    const Color(0xFF2D4A3E),
-                                  ],
+                                    ? [
+                                        Colors.brown.shade800,
+                                        Colors.brown.shade400,
+                                      ]
+                                    : [
+                                        const Color(0xFF121F17),
+                                        const Color(0xFF2D4A3E),
+                                      ],
                           ),
                         ),
                         otherAccountsPictures: [
@@ -132,7 +136,7 @@ class AppDrawer extends StatelessWidget {
                               color: Colors.white,
                             ),
                             onPressed: () async {
-                              await themeProvider.toggleTheme();
+                              await context.read<ThemeCubit>().toggleTheme();
                             },
                           ),
                         ],

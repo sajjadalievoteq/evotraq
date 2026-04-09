@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
@@ -146,7 +146,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen> with GS1FormValidat
       final extension = tobaccoState.buildExtension(ssccId: ssccId, ssccCode: ssccCode);
       debugPrint('Built tobacco extension: ${extension != null}');
       if (extension != null) {
-        final tobaccoService = Provider.of<SSCCTobaccoExtensionService>(context, listen: false);
+        final tobaccoService = getIt<SSCCTobaccoExtensionService>();
         await tobaccoService.createBySsccCode(ssccCode, extension);
         debugPrint('SSCC Tobacco extension saved for SSCC: $ssccCode');
       }
@@ -176,7 +176,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen> with GS1FormValidat
       final extension = pharmaState.buildExtension(ssccId: ssccId, ssccCode: ssccCode);
       debugPrint('Built pharma extension: ${extension != null}');
       if (extension != null) {
-        final pharmaService = Provider.of<SSCCPharmaceuticalExtensionService>(context, listen: false);
+        final pharmaService = getIt<SSCCPharmaceuticalExtensionService>();
         await pharmaService.createBySsccCode(ssccCode, extension);
         debugPrint('SSCC Pharmaceutical extension saved for SSCC: $ssccCode');
       }

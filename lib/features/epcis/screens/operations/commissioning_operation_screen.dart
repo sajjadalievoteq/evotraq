@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
@@ -83,7 +83,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
   Future<void> _loadGTINs() async {
     setState(() => _isLoadingGTINs = true);
     try {
-      final gtinService = context.read<GTINService>();
+      final gtinService = getIt<GTINService>();
       final gtins = await gtinService.getGTINs();
       setState(() {
         _availableGTINs = gtins;
@@ -210,7 +210,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
     setState(() => _isLoading = true);
 
     try {
-      final commissioningService = context.read<CommissioningOperationService>();
+      final commissioningService = getIt<CommissioningOperationService>();
       
       final gtinCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
       

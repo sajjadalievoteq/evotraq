@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart';
 
@@ -13,7 +14,7 @@ class ValidationRuleManagementRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => ValidationRuleProvider(
-        appConfig: Provider.of<AppConfig>(context, listen: false),
+        appConfig: getIt<AppConfig>(),
       ),
       child: const ValidationRuleManagementScreen(),
     );

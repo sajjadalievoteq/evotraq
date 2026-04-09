@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import '../models/sscc_pharmaceutical_extension_model.dart';
 import '../services/sscc_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 
 /// DEA Schedule options for controlled substances
@@ -169,7 +169,7 @@ class SSCCPharmaceuticalExtensionWidgetState
     }
 
     try {
-      final service = Provider.of<SSCCPharmaceuticalExtensionService>(context, listen: false);
+      final service = getIt<SSCCPharmaceuticalExtensionService>();
       SSCCPharmaceuticalExtension? extension;
 
       // Prefer loading by ssccId, fallback to ssccCode
@@ -383,7 +383,7 @@ class SSCCPharmaceuticalExtensionWidgetState
   Future<SSCCPharmaceuticalExtension?> saveExtension(
       int ssccId, String ssccCode) async {
     try {
-      final service = Provider.of<SSCCPharmaceuticalExtensionService>(context, listen: false);
+      final service = getIt<SSCCPharmaceuticalExtensionService>();
       final extensionToSave = _buildExtensionFromFields().copyWith(
         ssccId: ssccId,
         ssccCode: ssccCode,

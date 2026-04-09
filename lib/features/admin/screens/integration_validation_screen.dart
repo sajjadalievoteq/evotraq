@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
@@ -27,7 +27,7 @@ class _IntegrationValidationScreenState
     super.didChangeDependencies();
     // Initialize the service
     _validationService ??= IntegrationValidationService(
-      baseUrl: Provider.of<AppConfig>(context, listen: false).apiBaseUrl,
+      baseUrl: getIt<AppConfig>().apiBaseUrl,
     );
   }
 

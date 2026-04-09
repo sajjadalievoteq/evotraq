@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/shipping_models.dart';
@@ -40,7 +40,7 @@ class _ShippingOperationDetailScreenState
     });
 
     try {
-      final glnService = context.read<GLNService>();
+      final glnService = getIt<GLNService>();
 
       if (operation.sourceGLN != null) {
         try {

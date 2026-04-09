@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/api_collection.dart';
 import '../providers/partner_access_provider.dart';
@@ -15,10 +14,12 @@ class PartnerAccessManagementScreen extends StatefulWidget {
   const PartnerAccessManagementScreen({super.key, this.initialPartnerId});
 
   @override
-  State<PartnerAccessManagementScreen> createState() => _PartnerAccessManagementScreenState();
+  State<PartnerAccessManagementScreen> createState() =>
+      _PartnerAccessManagementScreenState();
 }
 
-class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementScreen>
+class _PartnerAccessManagementScreenState
+    extends State<PartnerAccessManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _selectedPartnerId;
@@ -40,7 +41,7 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
     context.read<ApiCollectionCubit>().loadCollections();
 
     if (_selectedPartnerId != null) {
-      context.read<PartnerAccessProvider>().loadAccessSummary(_selectedPartnerId!);
+      context.read<PartnerAccessCubit>().loadAccessSummary(_selectedPartnerId!);
     }
   }
 
@@ -66,7 +67,9 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _selectedPartnerId != null
-                ? () => context.read<PartnerAccessProvider>().loadAccessSummary(_selectedPartnerId!)
+                ? () => context.read<PartnerAccessCubit>().loadAccessSummary(
+                    _selectedPartnerId!,
+                  )
                 : null,
             tooltip: 'Refresh',
           ),
@@ -81,10 +84,7 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                 ? _buildNoPartnerSelected()
                 : TabBarView(
                     controller: _tabController,
-                    children: [
-                      _buildSummaryTab(),
-                      _buildCollectionAccessTab(),
-                    ],
+                    children: [_buildSummaryTab(), _buildCollectionAccessTab()],
                   ),
           ),
         ],
@@ -104,14 +104,22 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
             children: [
               const Icon(Icons.business),
               const SizedBox(width: 12),
-              const Text('Partner:', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                'Partner:',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: _selectedPartnerId,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     isDense: true,
                   ),
                   hint: const Text('Select a partner'),
@@ -122,10 +130,15 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor: p.active ? Colors.green : Colors.grey,
+                            backgroundColor: p.active
+                                ? Colors.green
+                                : Colors.grey,
                             child: Text(
                               p.companyName.substring(0, 1).toUpperCase(),
-                              style: const TextStyle(fontSize: 10, color: Colors.white),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -133,8 +146,12 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                           if (!p.active) ...[
                             const SizedBox(width: 8),
                             const Chip(
-                              label: Text('Inactive', style: TextStyle(fontSize: 10)),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              label: Text(
+                                'Inactive',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                               visualDensity: VisualDensity.compact,
                             ),
                           ],
@@ -145,7 +162,9 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                   onChanged: (value) {
                     setState(() => _selectedPartnerId = value);
                     if (value != null) {
-                      context.read<PartnerAccessProvider>().loadAccessSummary(value);
+                      context.read<PartnerAccessCubit>().loadAccessSummary(
+                        value,
+                      );
                     }
                   },
                 ),
@@ -174,26 +193,32 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
   }
 
   Widget _buildSummaryTab() {
-    return Consumer<PartnerAccessProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
+    return BlocBuilder<PartnerAccessCubit, PartnerAccessState>(
+      buildWhen: (previous, current) =>
+          previous.isLoading != current.isLoading ||
+          previous.error != current.error ||
+          previous.accessSummary != current.accessSummary ||
+          previous.collectionAccess != current.collectionAccess ||
+          previous.apiAccess != current.apiAccess,
+      builder: (context, state) {
+        if (state.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (provider.error != null) {
+        if (state.error != null) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                 const SizedBox(height: 16),
-                Text('Error: ${provider.error}'),
+                Text('Error: ${state.error}'),
               ],
             ),
           );
         }
 
-        final summary = provider.accessSummary;
+        final summary = state.accessSummary;
         if (summary == null) {
           return const Center(child: Text('No access data available'));
         }
@@ -229,9 +254,12 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Quick Actions
-              const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Quick Actions',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 12,
@@ -250,66 +278,106 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
               const SizedBox(height: 24),
 
               // Collection Access Overview
-              if (provider.collectionAccess.isNotEmpty) ...[
-                const Text('Collection Access', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              if (state.collectionAccess.isNotEmpty) ...[
+                const Text(
+                  'Collection Access',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
-                ...provider.collectionAccess.take(5).map((access) => Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: access.accessLevel == AccessLevel.full
-                          ? Colors.green
-                          : Colors.orange,
-                      child: Icon(
-                        access.accessLevel == AccessLevel.full
-                            ? Icons.lock_open
-                            : Icons.tune,
-                        color: Colors.white,
-                        size: 20,
+                ...state.collectionAccess
+                    .take(5)
+                    .map(
+                      (access) => Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                access.accessLevel == AccessLevel.full
+                                ? Colors.green
+                                : Colors.orange,
+                            child: Icon(
+                              access.accessLevel == AccessLevel.full
+                                  ? Icons.lock_open
+                                  : Icons.tune,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(access.collectionName),
+                          subtitle: Text(
+                            '${access.accessLevel.displayName} • ${access.statusText}',
+                          ),
+                          trailing: access.isValid
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                              : const Icon(Icons.warning, color: Colors.orange),
+                        ),
                       ),
                     ),
-                    title: Text(access.collectionName),
-                    subtitle: Text('${access.accessLevel.displayName} • ${access.statusText}'),
-                    trailing: access.isValid
-                        ? const Icon(Icons.check_circle, color: Colors.green)
-                        : const Icon(Icons.warning, color: Colors.orange),
-                  ),
-                )),
-                if (provider.collectionAccess.length > 5)
+                if (state.collectionAccess.length > 5)
                   TextButton(
                     onPressed: () => _tabController.animateTo(1),
-                    child: Text('View all ${provider.collectionAccess.length} collections'),
+                    child: Text(
+                      'View all ${state.collectionAccess.length} collections',
+                    ),
                   ),
                 const SizedBox(height: 24),
               ],
 
               // Individual API Access Overview
-              if (provider.apiAccess.isNotEmpty) ...[
-                const Text('Individual API Access', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              if (state.apiAccess.isNotEmpty) ...[
+                const Text(
+                  'Individual API Access',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
-                ...provider.apiAccess.take(5).map((access) => Card(
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getMethodColor(access.httpMethod),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        access.httpMethod,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
+                ...state.apiAccess
+                    .take(5)
+                    .map(
+                      (access) => Card(
+                        child: ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getMethodColor(access.httpMethod),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              access.httpMethod,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          title: Text(access.apiName),
+                          subtitle: Text(
+                            access.externalPath,
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: access.isValid
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                              : const Icon(Icons.warning, color: Colors.orange),
+                        ),
                       ),
                     ),
-                    title: Text(access.apiName),
-                    subtitle: Text(access.externalPath, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                    trailing: access.isValid
-                        ? const Icon(Icons.check_circle, color: Colors.green)
-                        : const Icon(Icons.warning, color: Colors.orange),
-                  ),
-                )),
-                if (provider.apiAccess.length > 5)
+                if (state.apiAccess.length > 5)
                   TextButton(
                     onPressed: () => _tabController.animateTo(1),
-                    child: Text('View all ${provider.apiAccess.length} APIs in Collection Access'),
+                    child: Text(
+                      'View all ${state.apiAccess.length} APIs in Collection Access',
+                    ),
                   ),
               ],
             ],
@@ -319,7 +387,12 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Card(
         color: color.withOpacity(0.1),
@@ -331,7 +404,11 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
               const SizedBox(height: 12),
               Text(
                 value,
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: color),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
               Text(title, style: TextStyle(color: color)),
             ],
@@ -342,9 +419,14 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
   }
 
   Widget _buildCollectionAccessTab() {
-    return Consumer<PartnerAccessProvider>(
-      builder: (context, accessProvider, child) {
-        if (accessProvider.isLoading) {
+    return BlocBuilder<PartnerAccessCubit, PartnerAccessState>(
+      buildWhen: (previous, current) =>
+          previous.isLoading != current.isLoading ||
+          previous.collectionAccess != current.collectionAccess ||
+          previous.apiAccess != current.apiAccess ||
+          previous.error != current.error,
+      builder: (context, accessState) {
+        if (accessState.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -356,8 +438,11 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
               child: Row(
                 children: [
                   Text(
-                    'Collection Access (${accessProvider.collectionAccess.length})',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    'Collection Access (${accessState.collectionAccess.length})',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
                   ElevatedButton.icon(
@@ -371,14 +456,21 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
             const Divider(height: 1),
             // List
             Expanded(
-              child: accessProvider.collectionAccess.isEmpty
+              child: accessState.collectionAccess.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.folder_off, size: 64, color: Colors.grey[300]),
+                          Icon(
+                            Icons.folder_off,
+                            size: 64,
+                            color: Colors.grey[300],
+                          ),
                           const SizedBox(height: 16),
-                          Text('No collection access granted', style: TextStyle(color: Colors.grey[600])),
+                          Text(
+                            'No collection access granted',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: _showGrantCollectionAccessDialog,
@@ -389,23 +481,27 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(12),
-                      itemCount: accessProvider.collectionAccess.length,
+                      itemCount: accessState.collectionAccess.length,
                       itemBuilder: (context, index) {
-                        final access = accessProvider.collectionAccess[index];
+                        final access = accessState.collectionAccess[index];
+                        final cubit = context.read<PartnerAccessCubit>();
                         return _ExpandableCollectionAccessCard(
                           access: access,
-                          provider: accessProvider,
-                          allApiAccess: accessProvider.apiAccess,
+                          allApiAccess: accessState.apiAccess,
                           partnerId: _selectedPartnerId!,
                           onEdit: () {
                             // TODO: Implement edit
                           },
-                          onRevoke: () => _confirmRevokeCollectionAccess(access, accessProvider),
+                          onRevoke: () =>
+                              _confirmRevokeCollectionAccess(access),
                           onApiRevoke: (apiId) async {
-                            await accessProvider.revokeApiAccess(_selectedPartnerId!, apiId);
+                            await cubit.revokeApiAccess(
+                              _selectedPartnerId!,
+                              apiId,
+                            );
                           },
                           onApisAdded: () async {
-                            await accessProvider.loadAccessSummary(_selectedPartnerId!);
+                            await cubit.loadAccessSummary(_selectedPartnerId!);
                           },
                         );
                       },
@@ -417,14 +513,19 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
     );
   }
 
-  void _confirmRevokeCollectionAccess(PartnerCollectionAccess access, PartnerAccessProvider provider) async {
+  void _confirmRevokeCollectionAccess(PartnerCollectionAccess access) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Revoke Collection Access'),
-        content: Text('Are you sure you want to revoke access to "${access.collectionName}"?'),
+        content: Text(
+          'Are you sure you want to revoke access to "${access.collectionName}"?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Revoke', style: TextStyle(color: Colors.red)),
@@ -433,7 +534,10 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
       ),
     );
     if (confirm == true && _selectedPartnerId != null) {
-      await provider.revokeCollectionAccess(_selectedPartnerId!, access.collectionId);
+      await context.read<PartnerAccessCubit>().revokeCollectionAccess(
+        _selectedPartnerId!,
+        access.collectionId,
+      );
     }
   }
 
@@ -464,13 +568,13 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
     // Get collections from cubit (already loaded when screen opened)
     final collectionCubit = context.read<ApiCollectionCubit>();
     final collections = collectionCubit.state.collections;
-    
+
     String? selectedCollectionId;
     AccessLevel accessLevel = AccessLevel.full;
     final rateLimitController = TextEditingController();
     DateTime? validFrom;
     DateTime? validUntil;
-    
+
     // For selective access - track APIs
     List<ApiDefinition> availableApis = [];
     List<String> selectedApiIds = [];
@@ -503,7 +607,10 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (collections.isEmpty)
-                      const Text('No collections available', style: TextStyle(color: Colors.red))
+                      const Text(
+                        'No collections available',
+                        style: TextStyle(color: Colors.red),
+                      )
                     else
                       DropdownButtonFormField<String>(
                         value: selectedCollectionId,
@@ -528,13 +635,17 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                             selectedApiIds = [];
                           });
                           // If selective access, load APIs immediately
-                          if (value != null && accessLevel == AccessLevel.selective) {
+                          if (value != null &&
+                              accessLevel == AccessLevel.selective) {
                             loadApisForCollection(value);
                           }
                         },
                       ),
                     const SizedBox(height: 16),
-                    const Text('Access Level', style: TextStyle(fontWeight: FontWeight.w500)),
+                    const Text(
+                      'Access Level',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -569,7 +680,7 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                         ),
                       ],
                     ),
-                    
+
                     // Show API selection when Selective is chosen
                     if (accessLevel == AccessLevel.selective) ...[
                       const SizedBox(height: 16),
@@ -578,25 +689,36 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                         decoration: BoxDecoration(
                           color: Colors.blue.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.2),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.api, size: 18, color: Colors.blue),
+                                const Icon(
+                                  Icons.api,
+                                  size: 18,
+                                  color: Colors.blue,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Select APIs (${selectedApiIds.length}/${availableApis.length})',
-                                  style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.blue),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.blue,
+                                  ),
                                 ),
                                 const Spacer(),
                                 if (availableApis.isNotEmpty) ...[
                                   TextButton(
                                     onPressed: () {
                                       setState(() {
-                                        selectedApiIds = availableApis.map((api) => api.id).toList();
+                                        selectedApiIds = availableApis
+                                            .map((api) => api.id)
+                                            .toList();
                                       });
                                     },
                                     child: const Text('Select All'),
@@ -614,79 +736,97 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                             SizedBox(
                               height: 200,
                               child: isLoadingApis
-                                  ? const Center(child: CircularProgressIndicator())
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : selectedCollectionId == null
-                                      ? Center(
-                                          child: Text(
-                                            'Select a collection first',
-                                            style: TextStyle(color: Colors.grey[600]),
-                                          ),
-                                        )
-                                      : availableApis.isEmpty
-                                          ? Center(
-                                              child: Text(
-                                                'No APIs in this collection',
-                                                style: TextStyle(color: Colors.grey[600]),
-                                              ),
-                                            )
-                                          : ListView.builder(
-                                              itemCount: availableApis.length,
-                                              itemBuilder: (context, index) {
-                                                final api = availableApis[index];
-                                                final isSelected = selectedApiIds.contains(api.id);
+                                  ? Center(
+                                      child: Text(
+                                        'Select a collection first',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    )
+                                  : availableApis.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No APIs in this collection',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      itemCount: availableApis.length,
+                                      itemBuilder: (context, index) {
+                                        final api = availableApis[index];
+                                        final isSelected = selectedApiIds
+                                            .contains(api.id);
 
-                                                return CheckboxListTile(
-                                                  dense: true,
-                                                  value: isSelected,
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      if (value == true) {
-                                                        selectedApiIds.add(api.id);
-                                                      } else {
-                                                        selectedApiIds.remove(api.id);
-                                                      }
-                                                    });
-                                                  },
-                                                  title: Row(
-                                                    children: [
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                        decoration: BoxDecoration(
-                                                          color: _getMethodColor(api.httpMethod),
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        child: Text(
-                                                          api.httpMethod,
-                                                          style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: 10,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Expanded(
-                                                        child: Text(
-                                                          api.name,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ],
+                                        return CheckboxListTile(
+                                          dense: true,
+                                          value: isSelected,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              if (value == true) {
+                                                selectedApiIds.add(api.id);
+                                              } else {
+                                                selectedApiIds.remove(api.id);
+                                              }
+                                            });
+                                          },
+                                          title: Row(
+                                            children: [
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: _getMethodColor(
+                                                    api.httpMethod,
                                                   ),
-                                                  subtitle: Text(
-                                                    api.externalPath,
-                                                    style: const TextStyle(fontFamily: 'monospace', fontSize: 10),
-                                                    overflow: TextOverflow.ellipsis,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  api.httpMethod,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 10,
                                                   ),
-                                                );
-                                              },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  api.name,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          subtitle: Text(
+                                            api.externalPath,
+                                            style: const TextStyle(
+                                              fontFamily: 'monospace',
+                                              fontSize: 10,
                                             ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      },
+                                    ),
                             ),
                           ],
                         ),
                       ),
                     ],
-                    
+
                     const SizedBox(height: 16),
                     TextField(
                       controller: rateLimitController,
@@ -707,14 +847,20 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                                 context: context,
                                 initialDate: DateTime.now(),
                                 firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365 * 5),
+                                ),
                               );
                               if (date != null) {
                                 setState(() => validFrom = date);
                               }
                             },
                             icon: const Icon(Icons.schedule),
-                            label: Text(validFrom != null ? _formatDate(validFrom!) : 'Valid From'),
+                            label: Text(
+                              validFrom != null
+                                  ? _formatDate(validFrom!)
+                                  : 'Valid From',
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -723,16 +869,24 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                             onPressed: () async {
                               final date = await showDatePicker(
                                 context: context,
-                                initialDate: DateTime.now().add(const Duration(days: 30)),
+                                initialDate: DateTime.now().add(
+                                  const Duration(days: 30),
+                                ),
                                 firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365 * 5),
+                                ),
                               );
                               if (date != null) {
                                 setState(() => validUntil = date);
                               }
                             },
                             icon: const Icon(Icons.event_busy),
-                            label: Text(validUntil != null ? _formatDate(validUntil!) : 'Valid Until'),
+                            label: Text(
+                              validUntil != null
+                                  ? _formatDate(validUntil!)
+                                  : 'Valid Until',
+                            ),
                           ),
                         ),
                       ],
@@ -742,32 +896,42 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
               ElevatedButton(
-                onPressed: selectedCollectionId == null ||
-                        (accessLevel == AccessLevel.selective && selectedApiIds.isEmpty)
+                onPressed:
+                    selectedCollectionId == null ||
+                        (accessLevel == AccessLevel.selective &&
+                            selectedApiIds.isEmpty)
                     ? null
                     : () async {
-                        final provider = this.context.read<PartnerAccessProvider>();
-                        
+                        final cubit = this.context.read<PartnerAccessCubit>();
+
                         // 1. Grant collection access
-                        final collectionResult = await provider.grantCollectionAccess(
-                          _selectedPartnerId!,
-                          selectedCollectionId!,
-                          accessLevel: accessLevel,
-                          rateLimitOverride: int.tryParse(rateLimitController.text),
-                          validFrom: validFrom,
-                          validUntil: validUntil,
-                        );
+                        final collectionResult = await cubit
+                            .grantCollectionAccess(
+                              _selectedPartnerId!,
+                              selectedCollectionId!,
+                              accessLevel: accessLevel,
+                              rateLimitOverride: int.tryParse(
+                                rateLimitController.text,
+                              ),
+                              validFrom: validFrom,
+                              validUntil: validUntil,
+                            );
 
                         // 2. If selective access, also grant individual API access
-                        if (collectionResult != null && 
-                            accessLevel == AccessLevel.selective && 
+                        if (collectionResult != null &&
+                            accessLevel == AccessLevel.selective &&
                             selectedApiIds.isNotEmpty) {
-                          await provider.grantBulkApiAccess(
+                          await cubit.grantBulkApiAccess(
                             _selectedPartnerId!,
                             selectedApiIds,
-                            rateLimitOverride: int.tryParse(rateLimitController.text),
+                            rateLimitOverride: int.tryParse(
+                              rateLimitController.text,
+                            ),
                             validFrom: validFrom,
                             validUntil: validUntil,
                           );
@@ -778,13 +942,14 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
                           final message = accessLevel == AccessLevel.selective
                               ? 'Collection access granted with ${selectedApiIds.length} API(s)'
                               : 'Full collection access granted';
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(content: Text(message)),
-                          );
+                          ScaffoldMessenger.of(
+                            this.context,
+                          ).showSnackBar(SnackBar(content: Text(message)));
                         }
                       },
                 child: Text(
-                  accessLevel == AccessLevel.selective && selectedApiIds.isNotEmpty
+                  accessLevel == AccessLevel.selective &&
+                          selectedApiIds.isNotEmpty
                       ? 'Grant Access (${selectedApiIds.length} APIs)'
                       : 'Grant Access',
                 ),
@@ -800,7 +965,6 @@ class _PartnerAccessManagementScreenState extends State<PartnerAccessManagementS
 /// Expandable Collection Access Card - shows APIs inline for selective access
 class _ExpandableCollectionAccessCard extends StatefulWidget {
   final PartnerCollectionAccess access;
-  final PartnerAccessProvider provider;
   final List<PartnerApiAccess> allApiAccess;
   final String partnerId;
   final VoidCallback onEdit;
@@ -810,7 +974,6 @@ class _ExpandableCollectionAccessCard extends StatefulWidget {
 
   const _ExpandableCollectionAccessCard({
     required this.access,
-    required this.provider,
     required this.allApiAccess,
     required this.partnerId,
     required this.onEdit,
@@ -820,10 +983,12 @@ class _ExpandableCollectionAccessCard extends StatefulWidget {
   });
 
   @override
-  State<_ExpandableCollectionAccessCard> createState() => _ExpandableCollectionAccessCardState();
+  State<_ExpandableCollectionAccessCard> createState() =>
+      _ExpandableCollectionAccessCardState();
 }
 
-class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAccessCard> {
+class _ExpandableCollectionAccessCardState
+    extends State<_ExpandableCollectionAccessCard> {
   bool _isExpanded = false;
   bool _isLoadingApis = false;
   List<ApiDefinition> _collectionApis = [];
@@ -863,11 +1028,18 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                         children: [
                           Text(
                             access.collectionName,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           Text(
                             access.collectionCode,
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontFamily: 'monospace'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontFamily: 'monospace',
+                            ),
                           ),
                         ],
                       ),
@@ -900,13 +1072,16 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                         const PopupMenuDivider(),
                         const PopupMenuItem(
                           value: 'revoke',
-                          child: Text('Revoke Access', style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            'Revoke Access',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                
+
                 // Expandable section for selective access
                 if (isSelective) ...[
                   const SizedBox(height: 8),
@@ -914,11 +1089,16 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                     onTap: _toggleExpand,
                     borderRadius: BorderRadius.circular(4),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.orange.withOpacity(0.2)),
+                        border: Border.all(
+                          color: Colors.orange.withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -932,10 +1112,14 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              _isExpanded 
-                                  ? 'Hide granted APIs' 
+                              _isExpanded
+                                  ? 'Hide granted APIs'
                                   : 'View granted APIs for this collection',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.orange[700]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.orange[700],
+                              ),
                             ),
                           ),
                           if (_isLoadingApis)
@@ -949,7 +1133,7 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                     ),
                   ),
                 ],
-                
+
                 // Metadata chips
                 const SizedBox(height: 12),
                 Wrap(
@@ -970,7 +1154,9 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                     if (access.validUntil != null)
                       Chip(
                         avatar: const Icon(Icons.event_busy, size: 16),
-                        label: Text('Until: ${_formatDate(access.validUntil!)}'),
+                        label: Text(
+                          'Until: ${_formatDate(access.validUntil!)}',
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                   ],
@@ -978,7 +1164,7 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
               ],
             ),
           ),
-          
+
           // Expanded API list
           if (_isExpanded && isSelective) ...[
             const Divider(height: 1),
@@ -1009,13 +1195,19 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
 
   Widget _buildExpandedApiList() {
     // Get the granted API IDs for this partner
-    final grantedApiIds = widget.allApiAccess.map((a) => a.apiDefinitionId).toSet();
-    
+    final grantedApiIds = widget.allApiAccess
+        .map((a) => a.apiDefinitionId)
+        .toSet();
+
     // Filter to only show APIs from this collection that are granted
-    final grantedApis = _collectionApis.where((api) => grantedApiIds.contains(api.id)).toList();
-    
+    final grantedApis = _collectionApis
+        .where((api) => grantedApiIds.contains(api.id))
+        .toList();
+
     // APIs available but not granted yet
-    final availableApis = _collectionApis.where((api) => !grantedApiIds.contains(api.id)).toList();
+    final availableApis = _collectionApis
+        .where((api) => !grantedApiIds.contains(api.id))
+        .toList();
 
     if (_isLoadingApis) {
       return const Padding(
@@ -1055,7 +1247,7 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
             ],
           ),
           const SizedBox(height: 8),
-          
+
           // Empty state
           if (grantedApis.isEmpty)
             Padding(
@@ -1087,10 +1279,13 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                 (a) => a.apiDefinitionId == api.id,
                 orElse: () => widget.allApiAccess.first,
               );
-              
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(4),
@@ -1099,7 +1294,10 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: _getMethodColor(api.httpMethod),
                         borderRadius: BorderRadius.circular(4),
@@ -1120,7 +1318,10 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                         children: [
                           Text(
                             api.name,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           Text(
                             api.externalPath,
@@ -1146,7 +1347,10 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                       tooltip: 'Revoke API access',
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ],
                 ),
@@ -1162,7 +1366,9 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Revoke API Access'),
-        content: Text('Are you sure you want to revoke access to "${api.name}"?'),
+        content: Text(
+          'Are you sure you want to revoke access to "${api.name}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1175,7 +1381,7 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
         ],
       ),
     );
-    
+
     if (confirm == true) {
       await widget.onApiRevoke(api.id);
     }
@@ -1205,7 +1411,9 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                     TextButton(
                       onPressed: () {
                         setState(() {
-                          selectedApiIds = availableApis.map((a) => a.id).toList();
+                          selectedApiIds = availableApis
+                              .map((a) => a.id)
+                              .toList();
                         });
                       },
                       child: const Text('Select All'),
@@ -1241,7 +1449,10 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                         title: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: _getMethodColor(api.httpMethod),
                                 borderRadius: BorderRadius.circular(4),
@@ -1266,7 +1477,10 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                         ),
                         subtitle: Text(
                           api.externalPath,
-                          style: const TextStyle(fontFamily: 'monospace', fontSize: 10),
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 10,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       );
@@ -1286,15 +1500,18 @@ class _ExpandableCollectionAccessCardState extends State<_ExpandableCollectionAc
                   ? null
                   : () async {
                       // Grant the selected APIs
-                      await widget.provider.grantBulkApiAccess(
-                        widget.partnerId,
-                        selectedApiIds,
-                      );
+                      await context
+                          .read<PartnerAccessCubit>()
+                          .grantBulkApiAccess(widget.partnerId, selectedApiIds);
                       Navigator.pop(context);
                       await widget.onApisAdded();
                       if (mounted) {
                         ScaffoldMessenger.of(this.context).showSnackBar(
-                          SnackBar(content: Text('${selectedApiIds.length} API(s) added')),
+                          SnackBar(
+                            content: Text(
+                              '${selectedApiIds.length} API(s) added',
+                            ),
+                          ),
                         );
                       }
                     },

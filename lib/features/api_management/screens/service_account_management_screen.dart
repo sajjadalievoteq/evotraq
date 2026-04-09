@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
@@ -11,10 +11,12 @@ class ServiceAccountManagementScreen extends StatefulWidget {
   const ServiceAccountManagementScreen({super.key});
 
   @override
-  State<ServiceAccountManagementScreen> createState() => _ServiceAccountManagementScreenState();
+  State<ServiceAccountManagementScreen> createState() =>
+      _ServiceAccountManagementScreenState();
 }
 
-class _ServiceAccountManagementScreenState extends State<ServiceAccountManagementScreen> {
+class _ServiceAccountManagementScreenState
+    extends State<ServiceAccountManagementScreen> {
   String _searchQuery = '';
   String _statusFilter = 'all';
 
@@ -23,7 +25,7 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Token is automatically retrieved from TokenManager by the service
-      context.read<ServiceAccountProvider>().loadAccounts();
+      context.read<ServiceAccountCubit>().loadAccounts();
     });
   }
 
@@ -35,7 +37,7 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<ServiceAccountProvider>().loadAccounts(),
+            onPressed: () => context.read<ServiceAccountCubit>().loadAccounts(),
           ),
         ],
       ),
@@ -45,18 +47,22 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
         icon: const Icon(Icons.add),
         label: const Text('New Service Account'),
       ),
-      body: Consumer<ServiceAccountProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading && provider.accounts.isEmpty) {
+      body: BlocBuilder<ServiceAccountCubit, ServiceAccountState>(
+        buildWhen: (previous, current) =>
+            previous.isLoading != current.isLoading ||
+            previous.accounts != current.accounts ||
+            previous.errorMessage != current.errorMessage,
+        builder: (context, state) {
+          if (state.isLoading && state.accounts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
           return Column(
             children: [
               _buildInfoBanner(),
-              _buildStatsBar(provider),
+              _buildStatsBar(state),
               _buildSearchAndFilter(),
-              Expanded(child: _buildAccountsList(provider)),
+              Expanded(child: _buildAccountsList(state)),
             ],
           );
         },
@@ -89,16 +95,16 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
     );
   }
 
-  Widget _buildStatsBar(ServiceAccountProvider provider) {
+  Widget _buildStatsBar(ServiceAccountState state) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          _buildStatChip('Total', provider.totalAccounts, Colors.grey),
+          _buildStatChip('Total', state.totalAccounts, Colors.grey),
           const SizedBox(width: 8),
-          _buildStatChip('Active', provider.activeAccountsCount, Colors.green),
+          _buildStatChip('Active', state.activeAccountsCount, Colors.green),
           const SizedBox(width: 8),
-          _buildStatChip('Inactive', provider.inactiveAccounts.length, Colors.red),
+          _buildStatChip('Inactive', state.inactiveAccounts.length, Colors.red),
         ],
       ),
     );
@@ -114,7 +120,10 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w500),
+          ),
           const SizedBox(width: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -142,7 +151,9 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
               decoration: InputDecoration(
                 hintText: 'Search by name or client ID...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
               onChanged: (value) => setState(() => _searchQuery = value),
@@ -156,22 +167,26 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
               DropdownMenuItem(value: 'active', child: Text('Active')),
               DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
             ],
-            onChanged: (value) => setState(() => _statusFilter = value ?? 'all'),
+            onChanged: (value) =>
+                setState(() => _statusFilter = value ?? 'all'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAccountsList(ServiceAccountProvider provider) {
-    var accounts = provider.accounts;
+  Widget _buildAccountsList(ServiceAccountState state) {
+    var accounts = state.accounts;
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      accounts = accounts.where((a) =>
-        a.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        a.clientId.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      accounts = accounts
+          .where(
+            (a) =>
+                a.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                a.clientId.toLowerCase().contains(_searchQuery.toLowerCase()),
+          )
+          .toList();
     }
 
     // Apply status filter
@@ -209,7 +224,7 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
 
   Widget _buildAccountCard(ServiceAccount account) {
     final isUsable = account.isUsable;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -221,7 +236,7 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: isUsable 
+                  backgroundColor: isUsable
                       ? AppTheme.primaryColor.withOpacity(0.2)
                       : Colors.grey.withOpacity(0.2),
                   child: Icon(
@@ -236,11 +251,17 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
                     children: [
                       Text(
                         account.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       Text(
                         'Client ID: ${account.clientId}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -250,36 +271,61 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
                 PopupMenuButton<String>(
                   onSelected: (action) => _handleAccountAction(action, account),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'rotate', child: Text('Rotate Secret')),
+                    const PopupMenuItem(
+                      value: 'rotate',
+                      child: Text('Rotate Secret'),
+                    ),
                     if (account.isActive)
                       const PopupMenuItem(
                         value: 'deactivate',
-                        child: Text('Deactivate', style: TextStyle(color: Colors.orange)),
+                        child: Text(
+                          'Deactivate',
+                          style: TextStyle(color: Colors.orange),
+                        ),
                       )
                     else
-                      const PopupMenuItem(value: 'activate', child: Text('Activate')),
+                      const PopupMenuItem(
+                        value: 'activate',
+                        child: Text('Activate'),
+                      ),
                     const PopupMenuItem(
                       value: 'delete',
-                      child: Text('Delete', style: TextStyle(color: Colors.red)),
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            if (account.description != null && account.description!.isNotEmpty) ...[
+            if (account.description != null &&
+                account.description!.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(account.description!, style: TextStyle(color: Colors.grey.shade600)),
+              Text(
+                account.description!,
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ],
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 4,
               children: [
-                _buildInfoChip('Rate: ${account.rateLimitPerMinute}/min', Icons.speed),
+                _buildInfoChip(
+                  'Rate: ${account.rateLimitPerMinute}/min',
+                  Icons.speed,
+                ),
                 if (account.allowedIps.isNotEmpty)
-                  _buildInfoChip('IPs: ${account.allowedIps.length}', Icons.security),
+                  _buildInfoChip(
+                    'IPs: ${account.allowedIps.length}',
+                    Icons.security,
+                  ),
                 if (account.allowedEndpoints.isNotEmpty)
-                  _buildInfoChip('Endpoints: ${account.allowedEndpoints.length}', Icons.link),
+                  _buildInfoChip(
+                    'Endpoints: ${account.allowedEndpoints.length}',
+                    Icons.link,
+                  ),
                 if (account.expiresAt != null)
                   _buildInfoChip(
                     'Expires: ${_formatDate(account.expiresAt!)}',
@@ -340,7 +386,13 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
         children: [
           Icon(icon, size: 12, color: color ?? Colors.grey.shade600),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: 11, color: color ?? Colors.grey.shade700)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: color ?? Colors.grey.shade700,
+            ),
+          ),
         ],
       ),
     );
@@ -384,8 +436,8 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              final provider = context.read<ServiceAccountProvider>();
-              final credentials = await provider.rotateSecret(account.id);
+              final cubit = context.read<ServiceAccountCubit>();
+              final credentials = await cubit.rotateSecret(account.id);
               if (credentials != null && mounted) {
                 _showCredentialsDialog(credentials);
               }
@@ -398,12 +450,12 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
   }
 
   Future<void> _activateAccount(ServiceAccount account) async {
-    final provider = context.read<ServiceAccountProvider>();
-    final success = await provider.reactivateAccount(account.id);
+    final cubit = context.read<ServiceAccountCubit>();
+    final success = await cubit.reactivateAccount(account.id);
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${account.name} activated')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${account.name} activated')));
     }
   }
 
@@ -424,8 +476,8 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final provider = context.read<ServiceAccountProvider>();
-              final success = await provider.deactivateAccount(account.id);
+              final cubit = context.read<ServiceAccountCubit>();
+              final success = await cubit.deactivateAccount(account.id);
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('${account.name} deactivated')),
@@ -456,8 +508,8 @@ class _ServiceAccountManagementScreenState extends State<ServiceAccountManagemen
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final provider = context.read<ServiceAccountProvider>();
-              final success = await provider.deleteAccount(account.id);
+              final cubit = context.read<ServiceAccountCubit>();
+              final success = await cubit.deleteAccount(account.id);
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('${account.name} deleted')),
@@ -493,10 +545,12 @@ class _CreateServiceAccountDialog extends StatefulWidget {
   const _CreateServiceAccountDialog();
 
   @override
-  State<_CreateServiceAccountDialog> createState() => _CreateServiceAccountDialogState();
+  State<_CreateServiceAccountDialog> createState() =>
+      _CreateServiceAccountDialogState();
 }
 
-class _CreateServiceAccountDialogState extends State<_CreateServiceAccountDialog> {
+class _CreateServiceAccountDialogState
+    extends State<_CreateServiceAccountDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -595,9 +649,11 @@ class _CreateServiceAccountDialogState extends State<_CreateServiceAccountDialog
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.event),
-                  title: Text(_expiresAt != null
-                      ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'
-                      : 'No expiration'),
+                  title: Text(
+                    _expiresAt != null
+                        ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'
+                        : 'No expiration',
+                  ),
                   trailing: TextButton(
                     onPressed: _selectExpirationDate,
                     child: Text(_expiresAt != null ? 'Change' : 'Set'),
@@ -616,7 +672,11 @@ class _CreateServiceAccountDialogState extends State<_CreateServiceAccountDialog
         ElevatedButton(
           onPressed: _isSubmitting ? null : _submitForm,
           child: _isSubmitting
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Create'),
         ),
       ],
@@ -641,19 +701,25 @@ class _CreateServiceAccountDialogState extends State<_CreateServiceAccountDialog
     setState(() => _isSubmitting = true);
 
     try {
-      final provider = context.read<ServiceAccountProvider>();
-      
+      final cubit = context.read<ServiceAccountCubit>();
+
       final allowedIps = _allowedIpsController.text.trim().isNotEmpty
           ? _allowedIpsController.text.split(',').map((e) => e.trim()).toList()
           : null;
-      
-      final allowedEndpoints = _allowedEndpointsController.text.trim().isNotEmpty
-          ? _allowedEndpointsController.text.split(',').map((e) => e.trim()).toList()
+
+      final allowedEndpoints =
+          _allowedEndpointsController.text.trim().isNotEmpty
+          ? _allowedEndpointsController.text
+                .split(',')
+                .map((e) => e.trim())
+                .toList()
           : null;
 
-      final credentials = await provider.createAccount(
+      final credentials = await cubit.createAccount(
         name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isNotEmpty ? _descriptionController.text.trim() : null,
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : null,
         allowedIps: allowedIps,
         allowedEndpoints: allowedEndpoints,
         rateLimitPerMinute: _rateLimitPerMinute,
@@ -666,11 +732,15 @@ class _CreateServiceAccountDialogState extends State<_CreateServiceAccountDialog
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => _CredentialsDisplayDialog(credentials: credentials),
+            builder: (context) =>
+                _CredentialsDisplayDialog(credentials: credentials),
           );
-        } else if (provider.errorMessage != null) {
+        } else if (cubit.state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(provider.errorMessage!), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(cubit.state.errorMessage!),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -729,7 +799,11 @@ class _CredentialsDisplayDialog extends StatelessWidget {
             const SizedBox(height: 8),
             _buildCredentialField(context, 'Client ID', credentials.clientId),
             const SizedBox(height: 8),
-            _buildCredentialField(context, 'Client Secret', credentials.clientSecret),
+            _buildCredentialField(
+              context,
+              'Client Secret',
+              credentials.clientSecret,
+            ),
           ],
         ),
       ),
@@ -742,7 +816,11 @@ class _CredentialsDisplayDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildCredentialField(BuildContext context, String label, String value) {
+  Widget _buildCredentialField(
+    BuildContext context,
+    String label,
+    String value,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

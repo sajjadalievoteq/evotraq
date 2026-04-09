@@ -27,6 +27,7 @@ import 'package:traqtrace_app/features/gs1/services/sgtin_service.dart';
 import 'package:traqtrace_app/features/gs1/services/sgtin_service_impl.dart';
 import 'package:traqtrace_app/features/gs1/services/sscc_service.dart';
 import 'package:traqtrace_app/features/gs1/services/sscc_service_impl.dart';
+import 'package:traqtrace_app/features/barcode/services/barcode_generation_service.dart';
 import 'package:traqtrace_app/features/user_management/services/user_service.dart';
 import 'package:traqtrace_app/features/user_management/services/user_service_impl.dart';
 import 'package:traqtrace_app/features/epcis/services/advanced_query_service.dart';
@@ -106,6 +107,14 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<EPCConversionService>(
     () => EPCConversionServiceImpl(
+      client: getIt<http.Client>(),
+      tokenManager: getIt<TokenManager>(),
+      appConfig: getIt<AppConfig>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<BarcodeGenerationService>(
+    () => BarcodeGenerationService(
       client: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),

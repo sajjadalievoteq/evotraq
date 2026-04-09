@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/features/barcode/services/barcode_generation_service.dart';
@@ -45,8 +45,7 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen> with 
   }
   
   // Access the service provided by the wrapper
-  BarcodeGenerationService get _barcodeService => 
-      Provider.of<BarcodeGenerationService>(context, listen: false);
+  BarcodeGenerationService get _barcodeService => getIt<BarcodeGenerationService>();
   
   void _resetBarcodeOnTabChange() {
     if (_tabController.indexIsChanging) {

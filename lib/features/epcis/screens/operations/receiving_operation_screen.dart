@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/receiving_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/receiving_operation_service.dart';
@@ -17,52 +17,51 @@ import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart'
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
 /// Scanning mode options for different input methods
-enum ScanningMode {
-  camera,
-  wired,
-  manual,
-}
+enum ScanningMode { camera, wired, manual }
 
 /// Multi-step receiving operations screen
 /// Step 1: Reference details
-/// Step 2: Scan items 
+/// Step 2: Scan items
 /// Step 3: Review and submit
 class ReceivingOperationScreen extends StatefulWidget {
   const ReceivingOperationScreen({Key? key}) : super(key: key);
 
   @override
-  State<ReceivingOperationScreen> createState() => _ReceivingOperationScreenState();
+  State<ReceivingOperationScreen> createState() =>
+      _ReceivingOperationScreenState();
 }
 
 class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  
+
   // Form controllers and data
   final _referenceController = TextEditingController();
   final _notesController = TextEditingController();
   final _manualEntryController = TextEditingController();
   final _wiredScannerController = TextEditingController();
   final FocusNode _wiredScannerFocusNode = FocusNode();
-  
+
   // Receiving specific fields
   final _purchaseOrderController = TextEditingController();
   final _invoiceController = TextEditingController();
   final _billOfLadingController = TextEditingController();
   final _carrierController = TextEditingController();
   final _trackingNumberController = TextEditingController();
-  
+
   GLN? _receivingGLN; // Destination - where items are received
-  GLN? _sourceGLN;    // Source - where items came from
+  GLN? _sourceGLN; // Source - where items came from
   String? _receivingGLNError;
   String? _sourceGLNError;
   String _receivingCondition = 'GOOD'; // GOOD, DAMAGED, PARTIAL
-  
+
   final List<String> _scannedEPCs = [];
   bool _isLoading = false;
-  
+
   // Scanning mode state
-  ScanningMode _scanningMode = kIsWeb ? ScanningMode.wired : ScanningMode.camera;
+  ScanningMode _scanningMode = kIsWeb
+      ? ScanningMode.wired
+      : ScanningMode.camera;
   bool _isWiredScannerActive = false;
 
   // Validation service
@@ -84,10 +83,10 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     super.didChangeDependencies();
     // Initialize validation service
     if (_validationService == null) {
-      _validationService = context.read<ReferenceDataValidationService>();
+      _validationService = getIt<ReferenceDataValidationService>();
     }
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -129,12 +128,12 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       _receivingGLNError = null;
       _sourceGLNError = null;
     });
-    
+
     switch (_currentStep) {
       case 0:
         // Step 1: Validate reference details
         bool isValid = true;
-        
+
         if (_referenceController.text.trim().isEmpty) {
           _showError('Reference is required');
           isValid = false;
@@ -151,7 +150,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           });
           isValid = false;
         }
-        if (_receivingGLN != null && _sourceGLN != null && 
+        if (_receivingGLN != null &&
+            _sourceGLN != null &&
             _receivingGLN!.glnCode == _sourceGLN!.glnCode) {
           _showError('Receiving and Source GLN cannot be the same');
           isValid = false;
@@ -210,52 +210,60 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final receivingService = context.read<ReceivingOperationService>();
-      
+      final receivingService = getIt<ReceivingOperationService>();
+
       // Convert all scanned barcodes to EPC URIs before sending
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEPCs);
+      final conversionResult = EPCURIConverter.convertBatchToEPCUri(
+        _scannedEPCs,
+      );
       final epcUris = conversionResult['successful'] ?? [];
       final failedConversions = conversionResult['failed'] ?? [];
-      
+
       if (failedConversions.isNotEmpty) {
-        _showError('Failed to convert ${failedConversions.length} barcode(s) to EPC format:\n${failedConversions.join('\n')}');
+        _showError(
+          'Failed to convert ${failedConversions.length} barcode(s) to EPC format:\n${failedConversions.join('\n')}',
+        );
         return;
       }
-      
+
       if (epcUris.isEmpty) {
         _showError('No valid EPCs to receive');
         return;
       }
-      
+
       final receivingRequest = ReceivingRequest(
         receivingReference: _referenceController.text.trim(),
         epcs: epcUris,
         receivingGLN: _receivingGLN!.glnCode,
         sourceGLN: _sourceGLN!.glnCode,
-        businessLocationGLN: _receivingGLN!.glnCode, // Use receiving location as business location
-        readPointGLN: _receivingGLN!.glnCode, // Use receiving location as read point
-        purchaseOrderNumber: _purchaseOrderController.text.trim().isNotEmpty 
-            ? _purchaseOrderController.text.trim() 
+        businessLocationGLN: _receivingGLN!
+            .glnCode, // Use receiving location as business location
+        readPointGLN:
+            _receivingGLN!.glnCode, // Use receiving location as read point
+        purchaseOrderNumber: _purchaseOrderController.text.trim().isNotEmpty
+            ? _purchaseOrderController.text.trim()
             : null,
-        invoiceNumber: _invoiceController.text.trim().isNotEmpty 
-            ? _invoiceController.text.trim() 
+        invoiceNumber: _invoiceController.text.trim().isNotEmpty
+            ? _invoiceController.text.trim()
             : null,
-        billOfLadingNumber: _billOfLadingController.text.trim().isNotEmpty 
-            ? _billOfLadingController.text.trim() 
+        billOfLadingNumber: _billOfLadingController.text.trim().isNotEmpty
+            ? _billOfLadingController.text.trim()
             : null,
-        carrier: _carrierController.text.trim().isNotEmpty 
-            ? _carrierController.text.trim() 
+        carrier: _carrierController.text.trim().isNotEmpty
+            ? _carrierController.text.trim()
             : null,
-        trackingNumber: _trackingNumberController.text.trim().isNotEmpty 
-            ? _trackingNumberController.text.trim() 
+        trackingNumber: _trackingNumberController.text.trim().isNotEmpty
+            ? _trackingNumberController.text.trim()
             : null,
         receivingCondition: _receivingCondition,
-        comments: _notesController.text.trim().isNotEmpty 
-            ? _notesController.text.trim() 
+        comments: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
             : null,
       );
 
-      final response = await receivingService.createReceivingOperation(receivingRequest);
+      final response = await receivingService.createReceivingOperation(
+        receivingRequest,
+      );
 
       if (response.isSuccess) {
         _showSuccess('Receiving operation created successfully');
@@ -264,8 +272,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           context.go('/operations/receiving');
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true 
-            ? response.messages!.first 
+        final errorMessage = response.messages?.isNotEmpty == true
+            ? response.messages!.first
             : 'Failed to create receiving operation';
         _showError(errorMessage);
       }
@@ -293,7 +301,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   }
 
   /// Validates an EPC against GS1 standards and database existence
-  Future<void> _validateAndAddEPC(String epc, {bool isManual = false, bool isWiredScanner = false}) async {
+  Future<void> _validateAndAddEPC(
+    String epc, {
+    bool isManual = false,
+    bool isWiredScanner = false,
+  }) async {
     // Check if already scanned
     if (_scannedEPCs.contains(epc)) {
       _showError('Item already scanned: $epc');
@@ -306,52 +318,61 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     try {
       // Use centralized GS1BarcodeParser to parse the barcode
       final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(epc);
-      
+
       String epcType = '';
       String? identifierToValidate;
-      
+
       // Check if parsing was successful
       if (parsedBarcode['valid'] == true) {
         // Determine the EPC type based on parsed data
         if (parsedBarcode['SSCC'] != null) {
           epcType = 'SSCC';
           identifierToValidate = parsedBarcode['SSCC'];
-        } else if (parsedBarcode['GTIN'] != null && parsedBarcode['SERIAL'] != null) {
+        } else if (parsedBarcode['GTIN'] != null &&
+            parsedBarcode['SERIAL'] != null) {
           epcType = 'SGTIN';
           // For SGTIN validation, we need the Serial Number (stored in SGTIN table)
           identifierToValidate = parsedBarcode['SERIAL'];
         } else if (parsedBarcode['GTIN'] != null) {
           // GTIN without serial - cannot validate as SGTIN, need serial number
-          _showError('Barcode missing serial number: $epc\n\nFor receiving, a complete SGTIN with serial number (AI 21) is required.');
+          _showError(
+            'Barcode missing serial number: $epc\n\nFor receiving, a complete SGTIN with serial number (AI 21) is required.',
+          );
           return;
         }
       }
-      
+
       // Also check for pure SSCC format (18 digits)
       if (epcType.isEmpty && GS1Validator.isValidSSCC(epc)) {
         epcType = 'SSCC';
         identifierToValidate = epc;
       }
-      
+
       if (epcType.isEmpty || identifierToValidate == null) {
-        _showError('Invalid barcode format: $epc\n\nSupported formats:\n- GS1 with AI syntax: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n- SSCC: 18 digits\n- SGTIN URI: urn:epc:id:sgtin:...');
+        _showError(
+          'Invalid barcode format: $epc\n\nSupported formats:\n- GS1 with AI syntax: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n- SSCC: 18 digits\n- SGTIN URI: urn:epc:id:sgtin:...',
+        );
         return;
       }
 
       // Validate against database
       EPCValidationResult validationResult;
       if (epcType == 'SSCC') {
-        validationResult = await _validationService!.validateSSCC(identifierToValidate);
+        validationResult = await _validationService!.validateSSCC(
+          identifierToValidate,
+        );
       } else {
         // For SGTIN, validate using the Serial Number (unique identifier in SGTIN table)
-        validationResult = await _validationService!.validateSGTIN(identifierToValidate);
+        validationResult = await _validationService!.validateSGTIN(
+          identifierToValidate,
+        );
       }
 
       if (validationResult.exists) {
         // Add to scanned list
         setState(() {
           _scannedEPCs.add(epc);
-          
+
           // Clear input fields if needed
           if (isManual) {
             _manualEntryController.clear();
@@ -372,11 +393,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         if (validationResult.errors.isNotEmpty) {
           errorMessage += '\n\nDetails: ${validationResult.errors.join(', ')}';
         }
-        errorMessage += '\n\nPlease ensure the $epcType is properly registered in the system before receiving.';
+        errorMessage +=
+            '\n\nPlease ensure the $epcType is properly registered in the system before receiving.';
         _showError(errorMessage);
       }
     } catch (e) {
-      _showError('Error validating EPC: $e\nPlease check your connection and try again.');
+      _showError(
+        'Error validating EPC: $e\nPlease check your connection and try again.',
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -387,7 +411,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   /// Helper method to determine EPC type using centralized parser
   String _getEPCType(String epc) {
     final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(epc);
-    
+
     if (parsedBarcode['SSCC'] != null || GS1Validator.isValidSSCC(epc)) {
       return 'SSCC';
     } else if (parsedBarcode['GTIN'] != null) {
@@ -457,10 +481,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                 const Spacer(),
                 Text(
                   'Allowed: SGTIN, SSCC',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
@@ -490,9 +511,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                 const Text('Wired Scanner Input'),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _isWiredScannerActive ? Colors.green[100] : Colors.grey[100],
+                    color: _isWiredScannerActive
+                        ? Colors.green[100]
+                        : Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -502,7 +528,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: _isWiredScannerActive ? Colors.green : Colors.grey,
+                          color: _isWiredScannerActive
+                              ? Colors.green
+                              : Colors.grey,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -511,7 +539,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                         _isWiredScannerActive ? 'Ready' : 'Inactive',
                         style: TextStyle(
                           fontSize: 12,
-                          color: _isWiredScannerActive ? Colors.green[800] : Colors.grey[600],
+                          color: _isWiredScannerActive
+                              ? Colors.green[800]
+                              : Colors.grey[600],
                         ),
                       ),
                     ],
@@ -535,8 +565,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               ),
               onChanged: (value) {
                 // Handle real-time input from wired scanner
-                if (value.isNotEmpty && (value.endsWith('\n') || value.endsWith('\r'))) {
-                  _handleWiredScannerInput(value.replaceAll(RegExp(r'[\n\r]'), ''));
+                if (value.isNotEmpty &&
+                    (value.endsWith('\n') || value.endsWith('\r'))) {
+                  _handleWiredScannerInput(
+                    value.replaceAll(RegExp(r'[\n\r]'), ''),
+                  );
                 }
               },
               onSubmitted: _handleWiredScannerInput,
@@ -639,7 +672,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               ),
             ),
             const Divider(),
-            
+
             // Page view for steps
             Expanded(
               child: PageView(
@@ -654,7 +687,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                 ],
               ),
             ),
-            
+
             // Navigation buttons
             Container(
               padding: const EdgeInsets.all(16),
@@ -670,7 +703,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                   if (_currentStep > 0) const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _currentStep == 2 ? _submitReceivingOperation : _nextStep,
+                      onPressed: _currentStep == 2
+                          ? _submitReceivingOperation
+                          : _nextStep,
                       child: Text(_currentStep == 2 ? 'Submit' : 'Next'),
                     ),
                   ),
@@ -686,7 +721,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   Widget _buildStepIndicator(int step, String label, IconData icon) {
     final isActive = _currentStep >= step;
     final isCompleted = _currentStep > step;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -695,11 +730,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isCompleted 
-                ? Colors.green 
-                : isActive 
-                    ? Theme.of(context).primaryColor 
-                    : Colors.grey[300],
+            color: isCompleted
+                ? Colors.green
+                : isActive
+                ? Theme.of(context).primaryColor
+                : Colors.grey[300],
           ),
           child: Icon(
             isCompleted ? Icons.check : icon,
@@ -744,7 +779,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
-          
+
           TextFormField(
             controller: _referenceController,
             decoration: const InputDecoration(
@@ -756,10 +791,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             textCapitalization: TextCapitalization.characters,
           ),
           const SizedBox(height: 24),
-          
+
           GLNSelector(
             label: 'Source GLN (From)',
-            hintText: 'Search and select source location (where items came from)',
+            hintText:
+                'Search and select source location (where items came from)',
             initialValue: _sourceGLN,
             isRequired: true,
             errorText: _sourceGLNError,
@@ -771,10 +807,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             },
           ),
           const SizedBox(height: 24),
-          
+
           GLNSelector(
             label: 'Receiving GLN (To)',
-            hintText: 'Search and select receiving location (where items are received)',
+            hintText:
+                'Search and select receiving location (where items are received)',
             initialValue: _receivingGLN,
             isRequired: true,
             errorText: _receivingGLNError,
@@ -786,7 +823,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             },
           ),
           const SizedBox(height: 24),
-          
+
           // Receiving Condition dropdown
           DropdownButtonFormField<String>(
             value: _receivingCondition,
@@ -796,9 +833,18 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               prefixIcon: Icon(Icons.check_circle_outline),
             ),
             items: const [
-              DropdownMenuItem(value: 'GOOD', child: Text('Good - All items in good condition')),
-              DropdownMenuItem(value: 'DAMAGED', child: Text('Damaged - Some items damaged')),
-              DropdownMenuItem(value: 'PARTIAL', child: Text('Partial - Not all items received')),
+              DropdownMenuItem(
+                value: 'GOOD',
+                child: Text('Good - All items in good condition'),
+              ),
+              DropdownMenuItem(
+                value: 'DAMAGED',
+                child: Text('Damaged - Some items damaged'),
+              ),
+              DropdownMenuItem(
+                value: 'PARTIAL',
+                child: Text('Partial - Not all items received'),
+              ),
             ],
             onChanged: (value) {
               setState(() {
@@ -807,14 +853,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             },
           ),
           const SizedBox(height: 24),
-          
+
           // Optional shipment details
           const Text(
             'Shipment Details (Optional)',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _purchaseOrderController,
             decoration: const InputDecoration(
@@ -825,7 +871,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _invoiceController,
             decoration: const InputDecoration(
@@ -836,7 +882,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _billOfLadingController,
             decoration: const InputDecoration(
@@ -847,7 +893,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -876,7 +922,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           TextFormField(
             controller: _notesController,
             decoration: const InputDecoration(
@@ -898,17 +944,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Scan Items',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Scan Items', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           const Text(
             'Scan SGTIN or SSCC codes for items being received.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
-          
+
           // Validation info box
           Container(
             padding: const EdgeInsets.all(12),
@@ -924,17 +967,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                 Expanded(
                   child: Text(
                     'Only SSCC and SGTIN codes that exist in the system database can be added. Each code will be validated before being accepted.',
-                    style: TextStyle(
-                      color: Colors.blue[800],
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: Colors.blue[800], fontSize: 13),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Scanning mode selector
           Card(
             child: Padding(
@@ -953,7 +993,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Mode selection buttons
                   Wrap(
                     spacing: 8,
@@ -966,11 +1006,13 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                           selected: _scanningMode == ScanningMode.camera,
                           onSelected: (selected) {
                             if (selected) {
-                              setState(() => _scanningMode = ScanningMode.camera);
+                              setState(
+                                () => _scanningMode = ScanningMode.camera,
+                              );
                             }
                           },
                         ),
-                      
+
                       // Wired scanner
                       ChoiceChip(
                         avatar: const Icon(Icons.keyboard, size: 16),
@@ -980,13 +1022,16 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                           if (selected) {
                             setState(() => _scanningMode = ScanningMode.wired);
                             // Focus the wired scanner field when selected
-                            Future.delayed(const Duration(milliseconds: 100), () {
-                              _wiredScannerFocusNode.requestFocus();
-                            });
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                _wiredScannerFocusNode.requestFocus();
+                              },
+                            );
                           }
                         },
                       ),
-                      
+
                       // Manual entry
                       ChoiceChip(
                         avatar: const Icon(Icons.edit, size: 16),
@@ -1004,14 +1049,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Scanner/Input component based on selected mode
           _buildScannerComponent(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Scanned items list
           Row(
             children: [
@@ -1031,7 +1076,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          
+
           if (_scannedEPCs.isEmpty)
             Container(
               width: double.infinity,
@@ -1080,9 +1125,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                       subtitle: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: epcType == 'SSCC' ? Colors.blue[100] : Colors.orange[100],
+                              color: epcType == 'SSCC'
+                                  ? Colors.blue[100]
+                                  : Colors.orange[100],
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -1090,14 +1140,23 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: epcType == 'SSCC' ? Colors.blue[800] : Colors.orange[800],
+                                color: epcType == 'SSCC'
+                                    ? Colors.blue[800]
+                                    : Colors.orange[800],
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                          const Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: Colors.green,
+                          ),
                           const SizedBox(width: 4),
-                          const Text('Validated', style: TextStyle(color: Colors.green, fontSize: 12)),
+                          const Text(
+                            'Validated',
+                            style: TextStyle(color: Colors.green, fontSize: 12),
+                          ),
                         ],
                       ),
                       trailing: IconButton(
@@ -1131,7 +1190,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
-          
+
           // Reference details card
           Card(
             child: Padding(
@@ -1155,24 +1214,33 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                   _buildGLNReviewField('Receiving GLN (To)', _receivingGLN),
                   _buildReviewField('Condition', _receivingCondition),
                   if (_purchaseOrderController.text.trim().isNotEmpty)
-                    _buildReviewField('Purchase Order', _purchaseOrderController.text),
+                    _buildReviewField(
+                      'Purchase Order',
+                      _purchaseOrderController.text,
+                    ),
                   if (_invoiceController.text.trim().isNotEmpty)
                     _buildReviewField('Invoice', _invoiceController.text),
                   if (_billOfLadingController.text.trim().isNotEmpty)
-                    _buildReviewField('Bill of Lading', _billOfLadingController.text),
+                    _buildReviewField(
+                      'Bill of Lading',
+                      _billOfLadingController.text,
+                    ),
                   if (_carrierController.text.trim().isNotEmpty)
                     _buildReviewField('Carrier', _carrierController.text),
                   if (_trackingNumberController.text.trim().isNotEmpty)
-                    _buildReviewField('Tracking Number', _trackingNumberController.text),
+                    _buildReviewField(
+                      'Tracking Number',
+                      _trackingNumberController.text,
+                    ),
                   if (_notesController.text.trim().isNotEmpty)
                     _buildReviewField('Notes', _notesController.text),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Items card
           Card(
             child: Padding(
@@ -1191,114 +1259,150 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
                     ],
                   ),
                   const Divider(),
-                  ...List.generate(
-                    _scannedEPCs.length,
-                    (index) {
-                      final barcode = _scannedEPCs[index];
-                      final epcUri = EPCURIConverter.convertToEPCUri(barcode);
-                      final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-                      
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      '${index + 1}',
-                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  if (parsed['GTIN'] != null)
-                                    Text(
-                                      'GTIN: ${parsed['GTIN']}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                ],
-                              ),
-                              if (parsed['SERIAL'] != null) ...[
-                                const SizedBox(height: 4),
-                                Text('Serial: ${parsed['SERIAL']}', style: const TextStyle(fontSize: 13)),
-                              ],
-                              if (parsed['BATCH'] != null) ...[
-                                const SizedBox(height: 2),
-                                Text('Batch: ${parsed['BATCH']}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                              ],
-                              if (parsed['EXPIRY_FORMATTED'] != null) ...[
-                                const SizedBox(height: 2),
-                                Text('Expiry: ${parsed['EXPIRY_FORMATTED']}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                              ],
-                              if (epcUri != null) ...[
-                                const SizedBox(height: 6),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green[50],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.check_circle, size: 14, color: Colors.green[700]),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          epcUri,
-                                          style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.green[800]),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ] else ...[
-                                const SizedBox(height: 6),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red[50],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.error, size: 14, color: Colors.red[700]),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          'Unable to convert to EPC URI',
-                                          style: TextStyle(fontSize: 11, color: Colors.red[800]),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                  ...List.generate(_scannedEPCs.length, (index) {
+                    final barcode = _scannedEPCs[index];
+                    final epcUri = EPCURIConverter.convertToEPCUri(barcode);
+                    final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
                         ),
-                      );
-                    },
-                  ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (parsed['GTIN'] != null)
+                                  Text(
+                                    'GTIN: ${parsed['GTIN']}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            if (parsed['SERIAL'] != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Serial: ${parsed['SERIAL']}',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ],
+                            if (parsed['BATCH'] != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Batch: ${parsed['BATCH']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                            if (parsed['EXPIRY_FORMATTED'] != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Expiry: ${parsed['EXPIRY_FORMATTED']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                            if (epcUri != null) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[50],
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      size: 14,
+                                      color: Colors.green[700],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        epcUri,
+                                        style: TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontSize: 11,
+                                          color: Colors.green[800],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ] else ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.error,
+                                      size: 14,
+                                      color: Colors.red[700],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        'Unable to convert to EPC URI',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.red[800],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Warning card
           Container(
             width: double.infinity,
@@ -1385,9 +1489,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
-          Expanded(
-            child: Text(value.isEmpty ? 'Not specified' : value),
-          ),
+          Expanded(child: Text(value.isEmpty ? 'Not specified' : value)),
         ],
       ),
     );

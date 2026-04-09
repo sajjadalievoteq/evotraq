@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/admin/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,10 +38,10 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
   }
 
   void _initializeService() {
-    final appConfig = Provider.of<AppConfig>(context, listen: false);
+    final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      client: http.Client(),
-      tokenManager: TokenManager(),
+      client: getIt<http.Client>(),
+      tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
   }

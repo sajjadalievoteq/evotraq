@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/shipping_models.dart';
@@ -76,7 +76,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     super.didChangeDependencies();
     // Initialize validation service
     if (_validationService == null) {
-      _validationService = context.read<ReferenceDataValidationService>();
+      _validationService = getIt<ReferenceDataValidationService>();
     }
   }
   

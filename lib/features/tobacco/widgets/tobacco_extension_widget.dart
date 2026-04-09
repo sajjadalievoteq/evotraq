@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/services/gtin_tobacco_extension_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 
 /// Widget that displays/edits tobacco extension data for a GTIN
@@ -157,7 +157,7 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
     }
 
     try {
-      final service = Provider.of<GTINTobaccoExtensionService>(context, listen: false);
+      final service = getIt<GTINTobaccoExtensionService>();
       
       GTINTobaccoExtension? ext;
       if (hasValidGtinCode) {

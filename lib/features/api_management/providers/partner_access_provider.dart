@@ -1,22 +1,86 @@
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import '../models/api_collection.dart';
 import '../services/partner_access_service.dart';
 
-/// Provider for Partner API Access management
-class PartnerAccessProvider extends ChangeNotifier {
+class PartnerAccessState extends Equatable {
+  final String? selectedPartnerId;
+  final PartnerAccessSummary? accessSummary;
+  final List<PartnerCollectionAccess> collectionAccess;
+  final List<PartnerApiAccess> apiAccess;
+  final bool isLoading;
+  final String? error;
+
+  const PartnerAccessState({
+    required this.selectedPartnerId,
+    required this.accessSummary,
+    required this.collectionAccess,
+    required this.apiAccess,
+    required this.isLoading,
+    required this.error,
+  });
+
+  const PartnerAccessState.initial()
+      : selectedPartnerId = null,
+        accessSummary = null,
+        collectionAccess = const [],
+        apiAccess = const [],
+        isLoading = false,
+        error = null;
+
+  PartnerAccessState copyWith({
+    String? selectedPartnerId,
+    PartnerAccessSummary? accessSummary,
+    List<PartnerCollectionAccess>? collectionAccess,
+    List<PartnerApiAccess>? apiAccess,
+    bool? isLoading,
+    String? error,
+  }) {
+    return PartnerAccessState(
+      selectedPartnerId: selectedPartnerId ?? this.selectedPartnerId,
+      accessSummary: accessSummary ?? this.accessSummary,
+      collectionAccess: collectionAccess ?? this.collectionAccess,
+      apiAccess: apiAccess ?? this.apiAccess,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+
+  int get collectionAccessCount => collectionAccess.length;
+  int get apiAccessCount => apiAccess.length;
+  int get totalAccessibleApis => accessSummary?.totalAccessibleApis ?? 0;
+
+  List<PartnerCollectionAccess> get activeCollectionAccess =>
+      collectionAccess.where((a) => a.isValid).toList();
+
+  List<PartnerApiAccess> get activeApiAccess =>
+      apiAccess.where((a) => a.isValid).toList();
+
+  List<PartnerCollectionAccess> get fullAccessCollections =>
+      collectionAccess.where((a) => a.accessLevel == AccessLevel.full).toList();
+
+  List<PartnerCollectionAccess> get selectiveAccessCollections => collectionAccess
+      .where((a) => a.accessLevel == AccessLevel.selective)
+      .toList();
+
+  @override
+  List<Object?> get props => [
+        selectedPartnerId,
+        accessSummary,
+        collectionAccess,
+        apiAccess,
+        isLoading,
+        error,
+      ];
+}
+
+class PartnerAccessCubit extends Cubit<PartnerAccessState> {
   final PartnerAccessApiService _service;
 
-  String? _selectedPartnerId;
-  PartnerAccessSummary? _accessSummary;
-  List<PartnerCollectionAccess> _collectionAccess = [];
-  List<PartnerApiAccess> _apiAccess = [];
-  bool _isLoading = false;
-  String? _error;
-
-  PartnerAccessProvider({
+  PartnerAccessCubit({
     required http.Client httpClient,
     required TokenManager tokenManager,
     required AppConfig appConfig,
@@ -25,75 +89,66 @@ class PartnerAccessProvider extends ChangeNotifier {
          httpClient: httpClient,
          tokenManager: tokenManager,
          appConfig: appConfig,
-       );
-
-  // Getters
-  String? get selectedPartnerId => _selectedPartnerId;
-  PartnerAccessSummary? get accessSummary => _accessSummary;
-  List<PartnerCollectionAccess> get collectionAccess => _collectionAccess;
-  List<PartnerApiAccess> get apiAccess => _apiAccess;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
-  // Statistics
-  int get collectionAccessCount => _collectionAccess.length;
-  int get apiAccessCount => _apiAccess.length;
-  int get totalAccessibleApis => _accessSummary?.totalAccessibleApis ?? 0;
+       ),
+       super(const PartnerAccessState.initial());
 
   // ==================== Load Operations ====================
 
   void selectPartner(String partnerId) {
-    _selectedPartnerId = partnerId;
+    emit(state.copyWith(selectedPartnerId: partnerId, error: null));
     loadAccessSummary(partnerId);
   }
 
   Future<void> loadAccessSummary(String partnerId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
-      _accessSummary = await _service.getAccessSummary(partnerId);
-      _collectionAccess = _accessSummary?.collectionAccess ?? [];
-      _apiAccess = _accessSummary?.apiAccess ?? [];
-      _error = null;
+      emit(state.copyWith(isLoading: true, error: null));
+      final accessSummary = await _service.getAccessSummary(partnerId);
+      emit(
+        state.copyWith(
+          selectedPartnerId: partnerId,
+          accessSummary: accessSummary,
+          collectionAccess: accessSummary.collectionAccess,
+          apiAccess: accessSummary.apiAccess,
+          isLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
 
   Future<void> loadCollectionAccess(String partnerId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
-      _collectionAccess = await _service.getCollectionAccess(partnerId);
-      _error = null;
+      emit(state.copyWith(isLoading: true, error: null));
+      final collectionAccess = await _service.getCollectionAccess(partnerId);
+      emit(
+        state.copyWith(
+          selectedPartnerId: partnerId,
+          collectionAccess: collectionAccess,
+          isLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
 
   Future<void> loadApiAccess(String partnerId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
-      _apiAccess = await _service.getApiAccess(partnerId);
-      _error = null;
+      emit(state.copyWith(isLoading: true, error: null));
+      final apiAccess = await _service.getApiAccess(partnerId);
+      emit(
+        state.copyWith(
+          selectedPartnerId: partnerId,
+          apiAccess: apiAccess,
+          isLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
 
@@ -107,11 +162,8 @@ class PartnerAccessProvider extends ChangeNotifier {
     DateTime? validFrom,
     DateTime? validUntil,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, error: null));
       final access = await _service.grantCollectionAccess(
         partnerId,
         collectionId,
@@ -123,33 +175,35 @@ class PartnerAccessProvider extends ChangeNotifier {
       
       // Refresh the access list
       await loadAccessSummary(partnerId);
-      
-      _error = null;
       return access;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return null;
-    } finally {
-      _isLoading = false;
     }
   }
 
   Future<bool> revokeCollectionAccess(String partnerId, String collectionId) async {
     try {
       await _service.revokeCollectionAccess(partnerId, collectionId);
-      _collectionAccess.removeWhere((a) => a.collectionId == collectionId);
+      final updatedCollectionAccess = List<PartnerCollectionAccess>.of(
+        state.collectionAccess,
+      )..removeWhere((a) => a.collectionId == collectionId);
+      emit(
+        state.copyWith(
+          selectedPartnerId: partnerId,
+          collectionAccess: updatedCollectionAccess,
+          error: null,
+        ),
+      );
       
       // Refresh summary
-      if (_accessSummary != null) {
+      if (state.accessSummary != null) {
         await loadAccessSummary(partnerId);
       }
       
-      notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(error: e.toString()));
       return false;
     }
   }
@@ -163,11 +217,8 @@ class PartnerAccessProvider extends ChangeNotifier {
     DateTime? validFrom,
     DateTime? validUntil,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, error: null));
       final access = await _service.grantApiAccess(
         partnerId,
         apiId,
@@ -178,15 +229,10 @@ class PartnerAccessProvider extends ChangeNotifier {
       
       // Refresh the access list
       await loadAccessSummary(partnerId);
-      
-      _error = null;
       return access;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return null;
-    } finally {
-      _isLoading = false;
     }
   }
 
@@ -197,11 +243,8 @@ class PartnerAccessProvider extends ChangeNotifier {
     DateTime? validFrom,
     DateTime? validUntil,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, error: null));
       final accessList = await _service.grantBulkApiAccess(
         partnerId,
         apiIds,
@@ -212,33 +255,34 @@ class PartnerAccessProvider extends ChangeNotifier {
       
       // Refresh the access list
       await loadAccessSummary(partnerId);
-      
-      _error = null;
       return accessList;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return [];
-    } finally {
-      _isLoading = false;
     }
   }
 
   Future<bool> revokeApiAccess(String partnerId, String apiId) async {
     try {
       await _service.revokeApiAccess(partnerId, apiId);
-      _apiAccess.removeWhere((a) => a.apiDefinitionId == apiId);
+      final updatedApiAccess = List<PartnerApiAccess>.of(state.apiAccess)
+        ..removeWhere((a) => a.apiDefinitionId == apiId);
+      emit(
+        state.copyWith(
+          selectedPartnerId: partnerId,
+          apiAccess: updatedApiAccess,
+          error: null,
+        ),
+      );
       
       // Refresh summary
-      if (_accessSummary != null) {
+      if (state.accessSummary != null) {
         await loadAccessSummary(partnerId);
       }
       
-      notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(error: e.toString()));
       return false;
     }
   }
@@ -249,8 +293,7 @@ class PartnerAccessProvider extends ChangeNotifier {
     try {
       return await _service.checkApiAccess(partnerId, apiId);
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(error: e.toString()));
       return false;
     }
   }
@@ -259,8 +302,7 @@ class PartnerAccessProvider extends ChangeNotifier {
     try {
       return await _service.checkPathAccess(partnerId, httpMethod, path);
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(error: e.toString()));
       return false;
     }
   }
@@ -268,29 +310,10 @@ class PartnerAccessProvider extends ChangeNotifier {
   // ==================== Utility ====================
 
   void clearSelection() {
-    _selectedPartnerId = null;
-    _accessSummary = null;
-    _collectionAccess = [];
-    _apiAccess = [];
-    _error = null;
-    notifyListeners();
+    emit(const PartnerAccessState.initial());
   }
 
   void clearError() {
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(error: null));
   }
-
-  // Filter methods
-  List<PartnerCollectionAccess> get activeCollectionAccess =>
-      _collectionAccess.where((a) => a.isValid).toList();
-
-  List<PartnerApiAccess> get activeApiAccess =>
-      _apiAccess.where((a) => a.isValid).toList();
-
-  List<PartnerCollectionAccess> get fullAccessCollections =>
-      _collectionAccess.where((a) => a.accessLevel == AccessLevel.full).toList();
-
-  List<PartnerCollectionAccess> get selectiveAccessCollections =>
-      _collectionAccess.where((a) => a.accessLevel == AccessLevel.selective).toList();
 }

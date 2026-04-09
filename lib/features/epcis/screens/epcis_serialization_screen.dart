@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/services/epcis_serialization_service.dart';
@@ -56,11 +56,11 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
     _tabController = TabController(length: 4, vsync: this);
     
     // Create the service with proper dependencies
-    final appConfig = Provider.of<AppConfig>(context, listen: false);
-    final tokenManager = Provider.of<TokenManager>(context, listen: false);
+    final appConfig = getIt<AppConfig>();
+    final tokenManager = getIt<TokenManager>();
     
     _serializationService = EPCISSerializationServiceImpl(
-      httpClient: http.Client(),
+      httpClient: getIt<http.Client>(),
       tokenManager: tokenManager,
       appConfig: appConfig,
     );

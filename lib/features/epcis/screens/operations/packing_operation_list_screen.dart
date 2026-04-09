@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
 import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
@@ -48,7 +48,7 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
     });
 
     try {
-      final packingService = context.read<PackingOperationService>();
+      final packingService = getIt<PackingOperationService>();
       final operations = await packingService.getAllPackingOperations();
       setState(() {
         _operations = operations;

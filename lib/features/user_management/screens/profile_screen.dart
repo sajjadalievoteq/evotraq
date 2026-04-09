@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -579,19 +578,16 @@ class _PreferencesTabState extends State<_PreferencesTab> {
   void _saveAppPreferences() {
     // The dark mode is already managed by the ThemeProvider
     // So we only need to save the language preference
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final themeCubit = context.read<ThemeCubit>();
 
     context.read<ProfileCubit>().updateAppPreferences(
-      darkMode: themeProvider.isDarkMode,
+      darkMode: themeCubit.isDarkMode,
       language: _language,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Access the theme provider
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
     return BlocConsumer<ProfileCubit, ProfileState>(
       listener: (context, state) {
         if (state.status == ProfileStatus.preferencesUpdated) {
@@ -600,7 +596,7 @@ class _PreferencesTabState extends State<_PreferencesTab> {
           );
 
           // Refresh theme provider from profile state when preferences are updated
-          themeProvider.refreshFromProfile();
+          context.read<ThemeCubit>().refreshFromProfile();
         } else if (state.status == ProfileStatus.error) {
           ScaffoldMessenger.of(
             context,
@@ -674,23 +670,24 @@ class _PreferencesTabState extends State<_PreferencesTab> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      Consumer<ThemeProvider>(
-                        builder: (context, themeProvider, child) {
+                      BlocBuilder<ThemeCubit, ThemeState>(
+                        buildWhen: (previous, current) =>
+                            previous.isDarkMode != current.isDarkMode,
+                        builder: (context, themeState) {
                           return SwitchListTile(
                             title: const Text('Dark Mode'),
                             subtitle: const Text('Use dark theme for the app'),
                             secondary: Icon(
-                              themeProvider.isDarkMode
+                              themeState.isDarkMode
                                   ? Icons.dark_mode
                                   : Icons.light_mode,
-                              color: themeProvider.isDarkMode
+                              color: themeState.isDarkMode
                                   ? AppTheme.accentColorDark
                                   : AppTheme.primaryColor,
                             ),
-                            value: themeProvider.isDarkMode,
+                            value: themeState.isDarkMode,
                             activeColor: AppTheme.primaryColorDark,
                             onChanged: (value) async {
-                              // Show loading indicator
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -712,8 +709,9 @@ class _PreferencesTabState extends State<_PreferencesTab> {
                                 ),
                               );
 
-                              // Apply theme change - this will use local storage even if API fails
-                              await themeProvider.setDarkMode(value);
+                              await context
+                                  .read<ThemeCubit>()
+                                  .setDarkMode(value);
                             },
                           );
                         },

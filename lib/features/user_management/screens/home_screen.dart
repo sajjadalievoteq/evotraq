@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -40,11 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeService() {
-    final appConfig = context.read<AppConfig>();
-    final tokenManager = context.read<TokenManager>();
+    final appConfig = getIt<AppConfig>();
+    final tokenManager = getIt<TokenManager>();
 
     _dashboardService = DashboardServiceImpl(
-      httpClient: http.Client(),
+      httpClient: getIt<http.Client>(),
       tokenManager: tokenManager,
       appConfig: appConfig,
     );

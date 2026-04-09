@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import '../models/gtin_pharmaceutical_extension_model.dart';
 import '../services/pharmaceutical_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GTIN
@@ -167,7 +167,7 @@ class PharmaceuticalExtensionWidgetState
     }
 
     try {
-      final service = Provider.of<PharmaceuticalService>(context, listen: false);
+      final service = getIt<PharmaceuticalService>();
 
       GTINPharmaceuticalExtension? ext;
       if (hasValidGtinCode) {

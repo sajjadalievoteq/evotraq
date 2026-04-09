@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:traqtrace_app/features/auth/screens/login_screen.dart';
 import 'package:traqtrace_app/features/auth/screens/register_screen.dart';
 import 'package:traqtrace_app/features/auth/screens/reset_password_screen.dart';
 import 'package:traqtrace_app/features/auth/screens/verify_email_screen.dart';
-import 'package:traqtrace_app/features/barcode/screens/barcode_generation_wrapper.dart';
+import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_test_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test_screen.dart';
@@ -1036,7 +1037,7 @@ class AppRouter {
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: EPCConversionScreen(
-            epcConversionService: context.read<EPCConversionService>(),
+            epcConversionService: getIt<EPCConversionService>(),
           ),
         ),
         redirect: (context, state) {
@@ -1171,9 +1172,7 @@ class AppRouter {
         path: '/epcis/serialization',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: EPCISSerializationScreen(
-            appConfig: Provider.of<AppConfig>(context, listen: false),
-          ),
+          child: EPCISSerializationScreen(appConfig: getIt<AppConfig>()),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1706,7 +1705,7 @@ class AppRouter {
         path: '/barcode/generate',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const BarcodeGenerationWrapper(),
+          child: const BarcodeGenerationScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;

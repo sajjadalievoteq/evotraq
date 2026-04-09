@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/admin/services/event_generation_test_service.dart';
@@ -49,7 +49,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _testService ??= EventGenerationTestService(
-      appConfig: Provider.of<AppConfig>(context, listen: false),
+      appConfig: getIt<AppConfig>(),
     );
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/admin/widgets/etl_management_panel.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -25,8 +25,8 @@ class ETLManagementScreen extends StatelessWidget {
           );
         }
 
-        final appConfig = Provider.of<AppConfig>(context, listen: false);
-        final tokenManager = Provider.of<TokenManager>(context, listen: false);
+        final appConfig = getIt<AppConfig>();
+        final tokenManager = getIt<TokenManager>();
         final baseUrl = appConfig.apiBaseUrl;
 
         return Scaffold(

@@ -1,70 +1,98 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 import 'package:traqtrace_app/features/api_management/services/service_account_service.dart';
 
-/// Provider for managing Service Accounts state
-class ServiceAccountProvider extends ChangeNotifier {
+class ServiceAccountState extends Equatable {
+  final List<ServiceAccount> accounts;
+  final ServiceAccount? selectedAccount;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const ServiceAccountState({
+    required this.accounts,
+    required this.selectedAccount,
+    required this.isLoading,
+    required this.errorMessage,
+  });
+
+  const ServiceAccountState.initial()
+      : accounts = const [],
+        selectedAccount = null,
+        isLoading = false,
+        errorMessage = null;
+
+  ServiceAccountState copyWith({
+    List<ServiceAccount>? accounts,
+    ServiceAccount? selectedAccount,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return ServiceAccountState(
+      accounts: accounts ?? this.accounts,
+      selectedAccount: selectedAccount ?? this.selectedAccount,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+    );
+  }
+
+  List<ServiceAccount> get activeAccounts =>
+      accounts.where((a) => a.isUsable).toList();
+
+  List<ServiceAccount> get inactiveAccounts =>
+      accounts.where((a) => !a.isUsable).toList();
+
+  int get totalAccounts => accounts.length;
+
+  int get activeAccountsCount => activeAccounts.length;
+
+  @override
+  List<Object?> get props => [accounts, selectedAccount, isLoading, errorMessage];
+}
+
+class ServiceAccountCubit extends Cubit<ServiceAccountState> {
   final ServiceAccountService _service;
 
-  ServiceAccountProvider({required ServiceAccountService service})
-      : _service = service;
-
-  // State
-  List<ServiceAccount> _accounts = [];
-  ServiceAccount? _selectedAccount;
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  // Getters
-  List<ServiceAccount> get accounts => _accounts;
-  ServiceAccount? get selectedAccount => _selectedAccount;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-
-  // Computed getters
-  List<ServiceAccount> get activeAccounts => _accounts.where((a) => a.isUsable).toList();
-  List<ServiceAccount> get inactiveAccounts => _accounts.where((a) => !a.isUsable).toList();
-  int get totalAccounts => _accounts.length;
-  int get activeAccountsCount => activeAccounts.length;
+  ServiceAccountCubit({required ServiceAccountService service})
+      : _service = service,
+        super(const ServiceAccountState.initial());
 
   /// Load all service accounts
   Future<void> loadAccounts() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
-      _accounts = await _service.listServiceAccounts();
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      final accounts = await _service.listServiceAccounts();
+      emit(state.copyWith(accounts: accounts, isLoading: false, errorMessage: null));
     } catch (e) {
-      _errorMessage = 'Failed to load service accounts: $e';
-      debugPrint(_errorMessage);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      final message = 'Failed to load service accounts: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
     }
   }
 
   /// Select a service account
   Future<void> selectAccount(String id) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
-      _selectedAccount = await _service.getServiceAccount(id);
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      final selectedAccount = await _service.getServiceAccount(id);
+      emit(
+        state.copyWith(
+          selectedAccount: selectedAccount,
+          isLoading: false,
+          errorMessage: null,
+        ),
+      );
     } catch (e) {
-      _errorMessage = 'Failed to load service account: $e';
-      debugPrint(_errorMessage);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      final message = 'Failed to load service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
     }
   }
 
   /// Clear selection
   void clearSelection() {
-    _selectedAccount = null;
-    notifyListeners();
+    emit(state.copyWith(selectedAccount: null, errorMessage: state.errorMessage));
   }
 
   /// Create a new service account
@@ -76,11 +104,8 @@ class ServiceAccountProvider extends ChangeNotifier {
     int? rateLimitPerMinute,
     DateTime? expiresAt,
   }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       final credentials = await _service.createServiceAccount(
         name: name,
         description: description,
@@ -92,12 +117,14 @@ class ServiceAccountProvider extends ChangeNotifier {
       await loadAccounts();
       return credentials;
     } catch (e) {
-      _errorMessage = 'Failed to create service account: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to create service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return null;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (state.isLoading) {
+        emit(state.copyWith(isLoading: false, errorMessage: state.errorMessage));
+      }
     }
   }
 
@@ -112,11 +139,8 @@ class ServiceAccountProvider extends ChangeNotifier {
     int? rateLimitPerMinute,
     DateTime? expiresAt,
   }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       final updated = await _service.updateServiceAccount(
         id,
         name: name,
@@ -128,99 +152,94 @@ class ServiceAccountProvider extends ChangeNotifier {
         expiresAt: expiresAt,
       );
       await loadAccounts();
-      if (_selectedAccount?.id == id) {
-        _selectedAccount = updated;
+      if (state.selectedAccount?.id == id) {
+        emit(state.copyWith(selectedAccount: updated, errorMessage: null));
       }
       return updated;
     } catch (e) {
-      _errorMessage = 'Failed to update service account: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to update service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return null;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (state.isLoading) {
+        emit(state.copyWith(isLoading: false, errorMessage: state.errorMessage));
+      }
     }
   }
 
   /// Rotate the secret for a service account
   Future<ServiceAccountCredentials?> rotateSecret(String id) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       final credentials = await _service.rotateSecret(id);
+      emit(state.copyWith(isLoading: false, errorMessage: null));
       return credentials;
     } catch (e) {
-      _errorMessage = 'Failed to rotate secret: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to rotate secret: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return null;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
   /// Deactivate a service account
   Future<bool> deactivateAccount(String id) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       await _service.deactivateServiceAccount(id);
       await loadAccounts();
       return true;
     } catch (e) {
-      _errorMessage = 'Failed to deactivate service account: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to deactivate service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return false;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (state.isLoading) {
+        emit(state.copyWith(isLoading: false, errorMessage: state.errorMessage));
+      }
     }
   }
 
   /// Reactivate a service account
   Future<bool> reactivateAccount(String id) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       await _service.reactivateServiceAccount(id);
       await loadAccounts();
       return true;
     } catch (e) {
-      _errorMessage = 'Failed to reactivate service account: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to reactivate service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return false;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (state.isLoading) {
+        emit(state.copyWith(isLoading: false, errorMessage: state.errorMessage));
+      }
     }
   }
 
   /// Delete a service account permanently
   Future<bool> deleteAccount(String id) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       await _service.deleteServiceAccount(id);
       await loadAccounts();
-      if (_selectedAccount?.id == id) {
-        _selectedAccount = null;
+      if (state.selectedAccount?.id == id) {
+        emit(state.copyWith(selectedAccount: null, errorMessage: null));
       }
       return true;
     } catch (e) {
-      _errorMessage = 'Failed to delete service account: $e';
-      debugPrint(_errorMessage);
+      final message = 'Failed to delete service account: $e';
+      debugPrint(message);
+      emit(state.copyWith(isLoading: false, errorMessage: message));
       return false;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (state.isLoading) {
+        emit(state.copyWith(isLoading: false, errorMessage: state.errorMessage));
+      }
     }
   }
 }

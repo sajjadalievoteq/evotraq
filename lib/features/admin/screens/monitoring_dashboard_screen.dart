@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/monitoring_models.dart';
 import '../services/monitoring_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/network/token_manager.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/widgets/app_drawer.dart';
-import 'package:provider/provider.dart';
 import '../widgets/performance_metrics_card.dart';
 import '../widgets/storage_statistics_card.dart';
 import '../widgets/integrity_statistics_card.dart';
@@ -59,8 +59,8 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   void _initializeMonitoring() async {
     try {
       // Get TokenManager and AppConfig from provider instead of creating new instances
-      final tokenManager = Provider.of<TokenManager>(context, listen: false);
-      final appConfig = Provider.of<AppConfig>(context, listen: false);
+      final tokenManager = getIt<TokenManager>();
+      final appConfig = getIt<AppConfig>();
       
       _monitoringService = MonitoringServiceProvider.getInstance(tokenManager, appConfig);
       

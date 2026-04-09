@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
 import 'package:traqtrace_app/features/dashboards/services/product_journey_service.dart';
@@ -21,7 +21,7 @@ class ProductJourneyScreen extends StatefulWidget {
 class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   ProductJourney? _journey;
   List<ProductSearchResult> _searchResults = [];
   bool _isLoading = false;
@@ -52,9 +52,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     });
 
     try {
-      final service = context.read<ProductJourneyService>();
+      final service = getIt<ProductJourneyService>();
       final journey = await service.getJourneyByEpc(identifier);
-      
+
       setState(() {
         _journey = journey;
         if (journey == null) {
@@ -79,7 +79,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     setState(() => _isSearching = true);
 
     try {
-      final service = context.read<ProductJourneyService>();
+      final service = getIt<ProductJourneyService>();
       final results = await service.searchProducts(query);
       setState(() => _searchResults = results);
     } catch (e) {
@@ -122,11 +122,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
         children: [
           // Search Section
           _buildSearchSection(),
-          
+
           // Content
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -180,7 +178,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
               }
             },
           ),
-          
+
           // Search Results Dropdown
           if (_searchResults.isNotEmpty)
             Container(
@@ -208,7 +206,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                       backgroundColor: _getTypeColor(result.type),
                       child: Text(
                         result.type[0],
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     title: Text(result.displayName),
@@ -218,7 +219,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                 },
               ),
             ),
-          
+
           if (_isSearching)
             const Padding(
               padding: EdgeInsets.only(top: 8),
@@ -321,11 +322,11 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
           // Product Info Card
           if (_journey!.productInfo != null) _buildProductInfoCard(),
           const SizedBox(height: 16),
-          
+
           // Journey Summary Card
           _buildJourneySummaryCard(),
           const SizedBox(height: 24),
-          
+
           // Timeline Header
           Row(
             children: [
@@ -347,7 +348,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Timeline
           _buildTimeline(),
         ],
@@ -372,7 +373,11 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     color: Colors.blue[50],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.inventory_2, color: Colors.blue, size: 32),
+                  child: const Icon(
+                    Icons.inventory_2,
+                    color: Colors.blue,
+                    size: 32,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -396,18 +401,37 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                 ),
               ],
             ),
-            if (info.batchLotNumber != null || info.manufacturingDate != null || info.expiryDate != null) ...[
+            if (info.batchLotNumber != null ||
+                info.manufacturingDate != null ||
+                info.expiryDate != null) ...[
               const Divider(height: 24),
               Wrap(
                 spacing: 16,
                 runSpacing: 8,
                 children: [
                   if (info.batchLotNumber != null)
-                    _buildInfoTag('Batch', info.batchLotNumber!, Icons.batch_prediction, Colors.purple),
+                    _buildInfoTag(
+                      'Batch',
+                      info.batchLotNumber!,
+                      Icons.batch_prediction,
+                      Colors.purple,
+                    ),
                   if (info.manufacturingDate != null)
-                    _buildInfoTag('Mfg Date', DateFormat('MMM dd, yyyy').format(info.manufacturingDate!), Icons.factory, Colors.green),
+                    _buildInfoTag(
+                      'Mfg Date',
+                      DateFormat(
+                        'MMM dd, yyyy',
+                      ).format(info.manufacturingDate!),
+                      Icons.factory,
+                      Colors.green,
+                    ),
                   if (info.expiryDate != null)
-                    _buildInfoTag('Expiry', DateFormat('MMM dd, yyyy').format(info.expiryDate!), Icons.event, Colors.red),
+                    _buildInfoTag(
+                      'Expiry',
+                      DateFormat('MMM dd, yyyy').format(info.expiryDate!),
+                      Icons.event,
+                      Colors.red,
+                    ),
                 ],
               ),
             ],
@@ -432,7 +456,11 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
           const SizedBox(width: 6),
           Text(
             '$label: $value',
-            style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 12),
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -478,7 +506,12 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     );
   }
 
-  Widget _buildSummaryItem(IconData icon, String value, String label, Color color) {
+  Widget _buildSummaryItem(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     return Column(
       children: [
         Icon(icon, color: color, size: 28),
@@ -491,10 +524,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
       ],
     );
   }
@@ -508,7 +538,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
         final step = _journey!.steps[index];
         final isFirst = index == 0;
         final isLast = index == _journey!.steps.length - 1;
-        
+
         return TimelineTile(
           alignment: TimelineAlign.manual,
           lineXY: 0.1,
@@ -530,8 +560,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
             ),
           ),
           beforeLineStyle: LineStyle(
-            color: index > 0 
-                ? _getStepColor(_journey!.steps[index - 1].businessStep).withOpacity(0.5)
+            color: index > 0
+                ? _getStepColor(
+                    _journey!.steps[index - 1].businessStep,
+                  ).withOpacity(0.5)
                 : Colors.grey.withOpacity(0.5),
             thickness: 3,
           ),
@@ -551,12 +583,12 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
   Widget _buildTimelineCard(JourneyStep step, int index) {
     final isFirst = index == 0;
     final isLast = index == _journey!.steps.length - 1;
-    
+
     return Card(
       elevation: isLast ? 4 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isLast 
+        side: isLast
             ? BorderSide(color: _getStepColor(step.businessStep), width: 2)
             : BorderSide.none,
       ),
@@ -572,7 +604,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStepColor(step.businessStep),
                       borderRadius: BorderRadius.circular(12),
@@ -589,7 +624,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                   const SizedBox(width: 8),
                   if (isFirst)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green[100],
                         borderRadius: BorderRadius.circular(8),
@@ -605,7 +643,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     ),
                   if (isLast)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue[100],
                         borderRadius: BorderRadius.circular(8),
@@ -627,7 +668,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Location Row
               if (step.locationName != null || step.locationGLN != null)
                 Row(
@@ -643,8 +684,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     ),
                   ],
                 ),
-              
-              if (step.locationAddress != null && step.locationAddress!.isNotEmpty)
+
+              if (step.locationAddress != null &&
+                  step.locationAddress!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: 20),
                   child: Text(
@@ -652,7 +694,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                 ),
-              
+
               // Disposition
               const SizedBox(height: 8),
               Row(
@@ -666,7 +708,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                   if (step.action != null) ...[
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(4),
@@ -722,7 +767,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _getStepColor(step.businessStep).withOpacity(0.1),
+                          color: _getStepColor(
+                            step.businessStep,
+                          ).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -754,17 +801,38 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                   ),
                   const SizedBox(height: 24),
                   _buildDetailRow('Event ID', step.eventId, copyable: true),
-                  _buildDetailRow('Event Time', DateFormat('MMM dd, yyyy HH:mm:ss').format(step.eventTime)),
+                  _buildDetailRow(
+                    'Event Time',
+                    DateFormat('MMM dd, yyyy HH:mm:ss').format(step.eventTime),
+                  ),
                   if (step.recordTime != null)
-                    _buildDetailRow('Record Time', DateFormat('MMM dd, yyyy HH:mm:ss').format(step.recordTime!)),
+                    _buildDetailRow(
+                      'Record Time',
+                      DateFormat(
+                        'MMM dd, yyyy HH:mm:ss',
+                      ).format(step.recordTime!),
+                    ),
                   _buildDetailRow('Business Step', step.businessStep),
                   _buildDetailRow('Disposition', step.disposition),
-                  if (step.action != null) _buildDetailRow('Action', step.action!),
-                  if (step.locationGLN != null) _buildDetailRow('Location GLN', step.locationGLN!, copyable: true),
-                  if (step.locationName != null) _buildDetailRow('Location Name', step.locationName!),
-                  if (step.locationAddress != null) _buildDetailRow('Address', step.locationAddress!),
-                  if (step.parentId != null) _buildDetailRow('Parent (SSCC)', step.parentId!, copyable: true),
-                  
+                  if (step.action != null)
+                    _buildDetailRow('Action', step.action!),
+                  if (step.locationGLN != null)
+                    _buildDetailRow(
+                      'Location GLN',
+                      step.locationGLN!,
+                      copyable: true,
+                    ),
+                  if (step.locationName != null)
+                    _buildDetailRow('Location Name', step.locationName!),
+                  if (step.locationAddress != null)
+                    _buildDetailRow('Address', step.locationAddress!),
+                  if (step.parentId != null)
+                    _buildDetailRow(
+                      'Parent (SSCC)',
+                      step.parentId!,
+                      copyable: true,
+                    ),
+
                   // View Event Button
                   const SizedBox(height: 24),
                   SizedBox(
@@ -773,7 +841,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                         // Navigate to the correct event detail page based on event type
-                        final route = _getEventDetailRoute(step.eventType, step.eventId);
+                        final route = _getEventDetailRoute(
+                          step.eventType,
+                          step.eventId,
+                        );
                         context.go(route);
                       },
                       icon: const Icon(Icons.open_in_new),
@@ -797,10 +868,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
           ),
           Expanded(
             child: Row(
@@ -817,7 +885,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: value));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Copied: $value'), duration: const Duration(seconds: 1)),
+                        SnackBar(
+                          content: Text('Copied: $value'),
+                          duration: const Duration(seconds: 1),
+                        ),
                       );
                     },
                     padding: EdgeInsets.zero,

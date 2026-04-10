@@ -11,6 +11,11 @@ class MockValidationService implements ValidationService {
   String? error;
 
   @override
+  Future<Map<String, dynamic>> validateEvent(Map<String, dynamic> eventData) async {
+    return _getMockResponse();
+  }
+
+  @override
   Future<Map<String, dynamic>> validateObjectEvent(Map<String, dynamic> eventData) async {
     return _getMockResponse();
   }
@@ -49,35 +54,26 @@ class MockValidationService implements ValidationService {
   Future<Map<String, dynamic>> validateTransformationEventModel(dynamic event) async {
     return _getMockResponse();
   }
-  
+
   @override
-  Future<Map<String, dynamic>> validateEvent(Map<String, dynamic> eventData) async {
-    return _getMockResponse();
+  Future<List<Map<String, dynamic>>> validateObjectEventBatch(List<ObjectEvent> events) async {
+    return List.generate(events.length, (_) => _getMockResponse());
   }
-  
+
   Map<String, dynamic> _getMockResponse() {
-    if (shouldSucceed) {
-      return {
-        'valid': true,
-        'validationErrors': []
-      };
-    } else if (error != null) {
-      return {
-        'valid': false,
-        'error': error
-      };
-    } else {
-      return {
-        'valid': false,
-        'validationErrors': validationErrors
-      };
+    if (error != null) {
+      throw Exception(error);
     }
+    return {
+      'valid': shouldSucceed,
+      'validationErrors': validationErrors,
+    };
   }
 }
 
 void main() {
   late MockValidationService mockValidationService;
-  late ValidationServiceProvider provider;
+  late ValidationCubit cubit;
   final appConfig = AppConfig(
     apiBaseUrl: 'https://api.test.com',
     appName: 'TraqTrace Test',
@@ -86,19 +82,19 @@ void main() {
   
   setUp(() {
     mockValidationService = MockValidationService();
-    provider = ValidationServiceProvider(
+    cubit = ValidationCubit(
       validationService: mockValidationService,
       appConfig: appConfig,
     );
   });
 
-  group('ValidationServiceProvider Tests', () {
+  group('ValidationCubit Tests', () {
     test('validateObjectEvent should return true for valid event', () async {
       // Arrange
       mockValidationService.shouldSucceed = true;
       
       // Act
-      final result = await provider.validateObjectEvent(
+      final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-1',
           recordTime: DateTime.now(),
@@ -112,20 +108,20 @@ void main() {
       
       // Assert
       expect(result, true);
-      expect(provider.isValid, true);
-      expect(provider.validationErrors, isEmpty);
+      expect(cubit.isValid, true);
+      expect(cubit.validationErrors, isEmpty);
     });
     
     test('validateObjectEvent should return false and set errors for invalid event', () async {
       // Arrange
       mockValidationService.shouldSucceed = false;
       mockValidationService.validationErrors = [
-        'Action is required',
-        'Business step is required'
+        {'field': 'action', 'message': 'Action is required'},
+        {'field': 'businessStep', 'message': 'Business step is required'}
       ];
       
       // Act
-      final result = await provider.validateObjectEvent(
+      final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-2',
           recordTime: DateTime.now(),
@@ -136,16 +132,15 @@ void main() {
       
       // Assert
       expect(result, false);
-      expect(provider.isValid, false);
-      expect(provider.validationErrors.length, 2);
-      expect(provider.validationErrors[0], 'Action is required');
+      expect(cubit.isValid, false);
+      expect(cubit.validationErrors.length, 2);
     });
     
     test('clearValidation should reset validation state', () async {
       // Arrange
       mockValidationService.shouldSucceed = false;
-      mockValidationService.validationErrors = ['Error 1'];
-      await provider.validateObjectEvent(
+      mockValidationService.validationErrors = [{'field': 'test', 'message': 'Error 1'}];
+      await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-3',
           recordTime: DateTime.now(),
@@ -155,12 +150,12 @@ void main() {
       );
       
       // Act
-      provider.clearValidation();
+      cubit.clearValidation();
       
       // Assert
-      expect(provider.isValid, false); // Default state is not valid
-      expect(provider.lastValidationResult, isNull);
-      expect(provider.validationErrors, isEmpty);
+      expect(cubit.isValid, false); // Default state is not valid
+      expect(cubit.state.lastValidationResult, isNull);
+      expect(cubit.validationErrors, isEmpty);
     });
     
     test('Error state should be handled properly', () async {
@@ -169,7 +164,7 @@ void main() {
       mockValidationService.error = 'Connection error';
       
       // Act
-      final result = await provider.validateObjectEvent(
+      final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-4',
           recordTime: DateTime.now(),
@@ -180,7 +175,7 @@ void main() {
       
       // Assert
       expect(result, false);
-      expect(provider.error, 'Connection error');
+      expect(cubit.state.error, contains('Connection error'));
     });
   });
 }

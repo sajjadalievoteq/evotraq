@@ -13,7 +13,6 @@ class MockTransactionDocumentService implements TransactionDocumentService {
   Map<String, Map<String, List<String>>> relatedDocsMap = {};
   Map<String, bool> documentLinkResults = {};
   Map<String, Map<String, String>?> originalDocuments = {};
-  String? lastErrorMessage;
 
   @override
   Future<List<TransactionEvent>> getTransactionEventsByDocument(String type, String id) async {
@@ -52,7 +51,7 @@ class MockTransactionDocumentService implements TransactionDocumentService {
 }
 
 void main() {
-  late TransactionDocumentProvider provider;
+  late TransactionDocumentCubit cubit;
   late MockTransactionDocumentService mockService;
   final appConfig = AppConfig(
     apiBaseUrl: 'https://api.test.com',
@@ -62,13 +61,13 @@ void main() {
 
   setUp(() {
     mockService = MockTransactionDocumentService();
-    provider = TransactionDocumentProvider(
+    cubit = TransactionDocumentCubit(
       service: mockService,
       appConfig: appConfig,
     );
   });
 
-  group('TransactionDocumentProvider Tests', () {
+  group('TransactionDocumentCubit Tests', () {
     test('getTransactionEventsForDocument should update events list', () async {
       // Arrange
       final dateTime1 = DateTime(2025, 7, 1, 10, 0, 0);
@@ -93,12 +92,12 @@ void main() {
       mockService.mockTransactionEvents = mockEvents;
 
       // Act
-      await provider.getTransactionEventsForDocument('invoice', '12345');
+      await cubit.getTransactionEventsForDocument('invoice', '12345');
 
       // Assert
-      expect(provider.events, equals(mockEvents));
-      expect(provider.isLoading, isFalse);
-      expect(provider.error, isNull);
+      expect(cubit.state.events, equals(mockEvents));
+      expect(cubit.state.isLoading, isFalse);
+      expect(cubit.state.error, isNull);
     });
     
     test('validateDocumentReference should return correct value', () async {
@@ -109,8 +108,8 @@ void main() {
       };
 
       // Act & Assert
-      expect(await provider.validateDocumentReference('invoice', '12345'), isTrue);
-      expect(await provider.validateDocumentReference('invoice', 'invalid'), isFalse);
+      expect(await cubit.validateDocumentReference('invoice', '12345'), isTrue);
+      expect(await cubit.validateDocumentReference('invoice', 'invalid'), isFalse);
     });
     
     test('getDocumentStatus should update status', () async {
@@ -124,12 +123,12 @@ void main() {
       mockService.documentStatusMap = {'urn:epcglobal:cbv:btt:inv:12345': mockStatus};
 
       // Act
-      await provider.getDocumentStatus('invoice', '12345');
+      await cubit.getDocumentStatus('invoice', '12345');
 
       // Assert
-      expect(provider.documentStatus, equals(mockStatus));
-      expect(provider.isLoading, isFalse);
-      expect(provider.error, isNull);
+      expect(cubit.state.documentStatus, equals(mockStatus));
+      expect(cubit.state.isLoading, isFalse);
+      expect(cubit.state.error, isNull);
     });
     
     test('getRelatedDocuments should update related documents', () async {
@@ -142,12 +141,12 @@ void main() {
       mockService.relatedDocsMap = {'urn:epcglobal:cbv:btt:inv:12345': mockRelatedDocs};
 
       // Act
-      await provider.getRelatedDocuments('invoice', '12345');
+      await cubit.getRelatedDocuments('invoice', '12345');
 
       // Assert
-      expect(provider.relatedDocuments, equals(mockRelatedDocs));
-      expect(provider.isLoading, isFalse);
-      expect(provider.error, isNull);
+      expect(cubit.state.relatedDocuments, equals(mockRelatedDocs));
+      expect(cubit.state.isLoading, isFalse);
+      expect(cubit.state.error, isNull);
     });
     
     test('createDocumentLink should return correct value', () async {
@@ -157,7 +156,7 @@ void main() {
       };
 
       // Act & Assert
-      expect(await provider.createDocumentLink(
+      expect(await cubit.createDocumentLink(
         'invoice', '12345', 'po', '67890', 'references'), isTrue);
     });
     
@@ -169,37 +168,34 @@ void main() {
       mockService.originalDocuments = {epc: mockDocument};
 
       // Act
-      final result = await provider.findOriginalDocumentForEPC(epc);
+      final result = await cubit.findOriginalDocumentForEPC(epc);
 
       // Assert
       expect(result, equals(mockDocument));
-      expect(provider.isLoading, isFalse);
-      expect(provider.error, isNull);
+      expect(cubit.state.isLoading, isFalse);
+      expect(cubit.state.error, isNull);
     });
     
     test('error handling should set error message', () async {
-      // No need to arrange anything as the mock is set up to throw
-      // for invoice 99999 in the MockTransactionDocumentService class
-
       // Act
-      await provider.getTransactionEventsForDocument('invoice', '99999');
+      await cubit.getTransactionEventsForDocument('invoice', '99999');
 
       // Assert
-      expect(provider.events, isEmpty);
-      expect(provider.isLoading, isFalse);
-      expect(provider.error, contains('Exception: Network error'));
+      expect(cubit.state.events, isEmpty);
+      expect(cubit.state.isLoading, isFalse);
+      expect(cubit.state.error, contains('Exception: Network error'));
     });
     
     test('clearError should clear error state', () async {
       // Act - cause an error
-      await provider.getTransactionEventsForDocument('invoice', '99999');
-      expect(provider.error, isNotNull);
+      await cubit.getTransactionEventsForDocument('invoice', '99999');
+      expect(cubit.state.error, isNotNull);
       
       // Clear the error
-      provider.clearError();
+      cubit.clearError();
 
       // Assert
-      expect(provider.error, isNull);
+      expect(cubit.state.error, isNull);
     });
   });
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
+import 'package:traqtrace_app/features/epcis/services/validation_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 
 // Test implementation of State to mix in the EventFormValidationMixin
@@ -22,8 +24,8 @@ class TestValidationFormStateState extends State<TestValidationFormState> with E
   }
   
   @override
-  ValidationServiceProvider get validationProvider {
-    return MockValidationProvider();
+  ValidationCubit get validationCubit {
+    return BlocProvider.of<ValidationCubit>(context);
   }
   
   @override
@@ -32,26 +34,50 @@ class TestValidationFormStateState extends State<TestValidationFormState> with E
   }
 }
 
-class MockValidationProvider extends ValidationServiceProvider {
-  MockValidationProvider() : super(
-    appConfig: AppConfig(
-      apiBaseUrl: 'https://api.test.com',
-      appName: 'TraqTrace Test',
-      appVersion: '1.0.0',
-    ),
-  );
+class MockValidationServiceSimple implements ValidationService {
+  @override
+  Future<Map<String, dynamic>> validateObjectEventModel(dynamic event) async => {};
+  @override
+  Future<Map<String, dynamic>> validateAggregationEventModel(dynamic event) async => {};
+  @override
+  Future<Map<String, dynamic>> validateTransactionEventModel(dynamic event) async => {};
+  @override
+  Future<Map<String, dynamic>> validateTransformationEventModel(dynamic event) async => {};
+  @override
+  Future<Map<String, dynamic>> validateObjectEvent(Map<String, dynamic> data) async => {};
+  @override
+  Future<Map<String, dynamic>> validateAggregationEvent(Map<String, dynamic> data) async => {};
+  @override
+  Future<Map<String, dynamic>> validateTransactionEvent(Map<String, dynamic> data) async => {};
+  @override
+  Future<Map<String, dynamic>> validateTransformationEvent(Map<String, dynamic> data) async => {};
+  @override
+  Future<Map<String, dynamic>> validateEvent(Map<String, dynamic> data) async => {};
+  @override
+  Future<List<Map<String, dynamic>>> validateObjectEventBatch(dynamic events) async => [];
 }
 
 void main() {
   group('EventFormValidationMixin Tests', () {
     testWidgets('Validation tests', (WidgetTester tester) async {
       late TestValidationFormStateState formState;
+      final mockCubit = ValidationCubit(
+        validationService: MockValidationServiceSimple(),
+        appConfig: AppConfig(
+          apiBaseUrl: 'https://api.test.com',
+          appName: 'TraqTrace Test',
+          appVersion: '1.0.0',
+        ),
+      );
       
       // Create a test widget and get its state
       final testWidget = MaterialApp(
-        home: TestValidationFormState(onStateCreated: (state) {
-          formState = state as TestValidationFormStateState;
-        }),
+        home: BlocProvider<ValidationCubit>.value(
+          value: mockCubit,
+          child: TestValidationFormState(onStateCreated: (state) {
+            formState = state as TestValidationFormStateState;
+          }),
+        ),
       );
       
       await tester.pumpWidget(testWidget);

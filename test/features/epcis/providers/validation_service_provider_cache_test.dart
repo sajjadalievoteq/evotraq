@@ -11,7 +11,7 @@ import 'validation_service_provider_cache_test.mocks.dart';
 // Generate mock classes
 @GenerateMocks([ValidationService])
 void main() {
-  late ValidationServiceProvider provider;
+  late ValidationCubit cubit;
   late MockValidationService mockValidationService;
   final appConfig = AppConfig(
     apiBaseUrl: 'https://api.test.com',
@@ -21,13 +21,13 @@ void main() {
   
   setUp(() {
     mockValidationService = MockValidationService();
-    provider = ValidationServiceProvider(
+    cubit = ValidationCubit(
       validationService: mockValidationService,
       appConfig: appConfig,
     );
   });
   
-  group('ValidationServiceProvider Cache Tests', () {
+  group('ValidationCubit Cache Tests', () {
     test('should return cached validation result on subsequent calls', () async {
       // Setup a test event
       final event = ObjectEvent(
@@ -42,24 +42,24 @@ void main() {
       
       // Define mock behavior - validation service will be called once
       final mockResult = {'valid': true, 'validationErrors': []};
-      when(mockValidationService.validateObjectEventModel(event))
+      when(mockValidationService.validateObjectEventModel(any))
           .thenAnswer((_) async => mockResult);
       
       // First validation call (should hit the service)
-      final result1 = await provider.validateObjectEvent(event);
+      final result1 = await cubit.validateObjectEvent(event);
       
       // Second validation call with same event (should use cache)
-      final result2 = await provider.validateObjectEvent(event);
+      final result2 = await cubit.validateObjectEvent(event);
       
       // Verify validation service was only called once
-      verify(mockValidationService.validateObjectEventModel(event)).called(1);
+      verify(mockValidationService.validateObjectEventModel(any)).called(1);
       
       // Both results should be true
       expect(result1, true);
       expect(result2, true);
       
-      // Cache hit rate should be positive (would be 0.5 if we could check directly)
-      expect(provider.cacheHitRate > 0, true);
+      // Cache hit rate should be positive
+      expect(cubit.cacheHitRate > 0, true);
     });
     
     test('should clear cache when requested', () async {
@@ -85,24 +85,24 @@ void main() {
           .thenAnswer((_) async => {'valid': true, 'validationErrors': []});
       
       // Call validation once for each event to populate cache
-      await provider.validateObjectEvent(event1);
-      await provider.validateObjectEvent(event2);
+      await cubit.validateObjectEvent(event1);
+      await cubit.validateObjectEvent(event2);
       
       // Clear the cache
-      provider.clearCache();
+      cubit.clearCache();
       
       // Call validation again - service should be called again
-      await provider.validateObjectEvent(event1);
+      await cubit.validateObjectEvent(event1);
       
       // Verify service was called twice for event1 (once before clearing cache, once after)
-      verify(mockValidationService.validateObjectEventModel(event1)).called(2);
+      verify(mockValidationService.validateObjectEventModel(any)).called(3); // 2 initially + 1 after clear
       
       // Cache hit rate should be reset to 0 after clearing
-      expect(provider.cacheHitRate < 1, true);
+      expect(cubit.cacheHitRate, 0);
     });
   });
   
-  group('ValidationServiceProvider Batch Validation Tests', () {
+  group('ValidationCubit Batch Validation Tests', () {
     test('should process events in batches', () async {
       // Create multiple events
       final events = List.generate(
@@ -122,16 +122,13 @@ void main() {
           .thenAnswer((_) async => {'valid': true, 'validationErrors': []});
       
       // Process batch
-      final results = await provider.validateObjectEventBatch(events);
+      final results = await cubit.validateObjectEventBatch(events);
       
       // Should have one result per event
       expect(results.length, 12);
       
       // All results should be valid
       expect(results.every((r) => r['valid'] == true), true);
-      
-      // Verify service was called for each event (or at least some of them if cached)
-      verify(mockValidationService.validateObjectEventModel(any)).called(anyNamed('times'));
     });
   });
 }

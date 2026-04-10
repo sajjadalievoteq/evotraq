@@ -12,7 +12,7 @@ import 'validation_rule_provider_test.mocks.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late ValidationRuleProvider provider;
+  late ValidationRuleCubit cubit;
   late MockValidationRuleService mockService;
   
   final appConfig = AppConfig(
@@ -38,18 +38,22 @@ void main() {
         )
       ]);
 
-      provider = ValidationRuleProvider(
+      cubit = ValidationRuleCubit(
         validationRuleService: mockService,
         appConfig: appConfig,
       );
     });
+
+    tearDown(() async {
+      await cubit.close();
+    });
     
     test('should load predefined rules on initialization', () async {
-      await provider.loadValidationRules();
+      await cubit.loadValidationRules();
       
       // Verify predefined rules are loaded
-      expect(provider.rules, isNotEmpty);
-      expect(provider.rules.any((r) => r.ruleId.contains('obj_action')), true);
+      expect(cubit.rules, isNotEmpty);
+      expect(cubit.rules.any((r) => r.ruleId.contains('obj_action')), true);
       verify(mockService.getAllRules()).called(greaterThanOrEqualTo(1));
     });
     
@@ -75,10 +79,10 @@ void main() {
         ),
       ]);
 
-      await provider.loadValidationRules();
+      await cubit.loadValidationRules();
       
       // Get rules for Object Events
-      final objectRules = provider.getRulesByEventType(EventType.ObjectEvent);
+      final objectRules = cubit.getRulesByEventType(EventType.ObjectEvent);
       
       // Verify rules are filtered correctly
       expect(objectRules, isNotEmpty);
@@ -99,10 +103,10 @@ void main() {
         ),
       ]);
 
-      await provider.loadValidationRules();
+      await cubit.loadValidationRules();
       
       // Get rules for specific category
-      final formatRules = provider.getRulesByCategory('format');
+      final formatRules = cubit.getRulesByCategory('format');
       
       // Verify rules are filtered correctly
       for (final rule in formatRules) {
@@ -125,10 +129,10 @@ void main() {
       when(mockService.createRule(any)).thenAnswer((_) async => testRule);
       when(mockService.updateRule(any, any)).thenAnswer((_) async => testRule.copyWith(severity: RuleSeverity.ERROR));
 
-      await provider.loadValidationRules();
+      await cubit.loadValidationRules();
       
       // Create the rule first
-      final createdRule = await provider.createValidationRule(testRule);
+      final createdRule = await cubit.createValidationRule(testRule);
       expect(createdRule, isNotNull);
       
       // Update the rule with different severity
@@ -138,7 +142,7 @@ void main() {
         );
         
         // Update the rule
-        final result = await provider.updateValidationRule(createdRule.id!, updatedRule);
+        final result = await cubit.updateValidationRule(createdRule.id!, updatedRule);
         expect(result, isNotNull);
         expect(result?.severity, RuleSeverity.ERROR);
       }

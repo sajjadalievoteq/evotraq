@@ -253,7 +253,7 @@ class GS1BarcodeParser {
   /// Parse GS1 element string into structured data
   static Map<String, String> _parseGS1Data(String gs1ElementString) {
     Map<String, String> result = {};
-    
+
     // Regular expression to find AI groups - either in parentheses or not
     RegExp aiPattern = RegExp(r'\((\d{2,4})\)|(\d{2,4})');
     int currentPosition = 0;

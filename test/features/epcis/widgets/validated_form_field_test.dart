@@ -101,7 +101,7 @@ void main() {
           ),
         ),
       );
-      
+
       // Should show valid indicator immediately
       expect(find.text('Valid'), findsOneWidget);
     });

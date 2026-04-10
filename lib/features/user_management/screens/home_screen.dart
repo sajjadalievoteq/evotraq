@@ -12,6 +12,35 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/dashboard/services/dashboard_service.dart';
 
+class _HomeDashboardCache {
+  static DashboardStats? stats;
+  static List<RecentEvent>? recentEvents;
+  static SystemHealthStatus? healthStatus;
+  static String? ownerEmail;
+
+  static bool get hasData =>
+      stats != null && recentEvents != null && healthStatus != null;
+
+  static void clear() {
+    stats = null;
+    recentEvents = null;
+    healthStatus = null;
+    ownerEmail = null;
+  }
+
+  static void setData({
+    required DashboardStats stats,
+    required List<RecentEvent> recentEvents,
+    required SystemHealthStatus healthStatus,
+    required String? ownerEmail,
+  }) {
+    _HomeDashboardCache.stats = stats;
+    _HomeDashboardCache.recentEvents = recentEvents;
+    _HomeDashboardCache.healthStatus = healthStatus;
+    _HomeDashboardCache.ownerEmail = ownerEmail;
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -30,12 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    final currentUser = context.read<AuthCubit>().state.user;
+    if (currentUser != null &&
+        _HomeDashboardCache.ownerEmail != null &&
+        _HomeDashboardCache.ownerEmail != currentUser.email) {
+      _HomeDashboardCache.clear();
+    }
     context.read<AuthCubit>().getCurrentUser();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     _initializeService();
   }
 
@@ -48,6 +78,15 @@ class _HomeScreenState extends State<HomeScreen> {
       tokenManager: tokenManager,
       appConfig: appConfig,
     );
+
+    if (_HomeDashboardCache.hasData) {
+      _stats = _HomeDashboardCache.stats;
+      _recentEvents = _HomeDashboardCache.recentEvents;
+      _healthStatus = _HomeDashboardCache.healthStatus;
+      _isLoading = false;
+      _error = null;
+      return;
+    }
 
     _loadDashboardData();
   }
@@ -65,13 +104,26 @@ class _HomeScreenState extends State<HomeScreen> {
         _dashboardService.getSystemHealth(),
       ]);
 
+      final stats = results[0] as DashboardStats;
+      final recentEvents = results[1] as List<RecentEvent>;
+      final healthStatus = results[2] as SystemHealthStatus;
+
+      _HomeDashboardCache.setData(
+        stats: stats,
+        recentEvents: recentEvents,
+        healthStatus: healthStatus,
+        ownerEmail: context.read<AuthCubit>().state.user?.email,
+      );
+
+      if (!mounted) return;
       setState(() {
-        _stats = results[0] as DashboardStats;
-        _recentEvents = results[1] as List<RecentEvent>;
-        _healthStatus = results[2] as SystemHealthStatus;
+        _stats = stats;
+        _recentEvents = recentEvents;
+        _healthStatus = healthStatus;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -103,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () {
+                  _HomeDashboardCache.clear();
                   context.read<AuthCubit>().logout();
                   context.go('/login');
                 },

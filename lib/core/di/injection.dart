@@ -197,6 +197,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<SystemSettingsService>(
     () => SystemSettingsService(
+      dio: getIt<Dio>(),
       baseUrl: getIt<AppConfig>().apiBaseUrl,
       tokenManager: getIt<TokenManager>(),
     ),

@@ -26,6 +26,23 @@ class AppDrawer extends StatelessWidget {
 
         // Check if user has admin role
         final bool isAdmin = user.role == 'ADMIN';
+        final router = GoRouter.of(context);
+
+        // void context.go(String location, {Object? extra}) {
+        //   final currentLocation = router.routerDelegate.currentConfiguration.uri
+        //       .toString();
+        //   Navigator.pop(context);
+        //   if (currentLocation == location) return;
+        //   router.push(location, extra: extra);
+        // }
+        //
+        // void safeGo(String location) {
+        //   final currentLocation = router.routerDelegate.currentConfiguration.uri
+        //       .toString();
+        //   Navigator.pop(context);
+        //   if (currentLocation == location) return;
+        //   router.go(location);
+        // }
 
         return Drawer(
           child: ListView(
@@ -119,14 +136,11 @@ class AppDrawer extends StatelessWidget {
                                     AppTheme.backgroundColorDark,
                                   ]
                                 : isTobaccoMode
-                                    ? [
-                                        Colors.brown.shade800,
-                                        Colors.brown.shade400,
-                                      ]
-                                    : [
-                                        const Color(0xFF121F17),
-                                        const Color(0xFF2D4A3E),
-                                      ],
+                                ? [Colors.brown.shade800, Colors.brown.shade400]
+                                : [
+                                    const Color(0xFF121F17),
+                                    const Color(0xFF2D4A3E),
+                                  ],
                           ),
                         ),
                         otherAccountsPictures: [
@@ -149,7 +163,6 @@ class AppDrawer extends StatelessWidget {
                 leading: const Icon(Icons.dashboard),
                 title: const Text('Dashboard'),
                 onTap: () {
-                  Navigator.pop(context);
                   context.go('/home');
                 },
               ),
@@ -157,7 +170,6 @@ class AppDrawer extends StatelessWidget {
                 leading: const Icon(Icons.person),
                 title: const Text('My Profile'),
                 onTap: () {
-                  Navigator.pop(context);
                   context.go('/profile');
                 },
               ),
@@ -180,7 +192,6 @@ class AppDrawer extends StatelessWidget {
                 title: const Text('Product Journey'),
                 subtitle: const Text('Track supply chain flow'),
                 onTap: () {
-                  Navigator.pop(context);
                   context.go('/dashboards/journey');
                 },
               ),
@@ -209,8 +220,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GTIN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
-                      context.push('/gs1/gtins');
+                      context.go('/gs1/gtins');
                     },
                   ),
                   ListTile(
@@ -218,7 +228,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GLN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/gs1/glns');
                     },
                   ),
@@ -235,8 +244,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('SSCC Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
-                      context.push('/gs1/ssccs');
+                      context.go('/gs1/ssccs');
                     },
                   ),
                   ListTile(
@@ -244,7 +252,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('SGTIN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/gs1/sgtins');
                     },
                   ),
@@ -261,7 +268,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Object Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/object-events');
                     },
                   ),
@@ -270,7 +276,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Aggregation Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/aggregation-events');
                     },
                   ),
@@ -279,7 +284,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transaction Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/transaction-events');
                     },
                   ),
@@ -288,7 +292,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transformation Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/transformation-events');
                     },
                   ),
@@ -305,7 +308,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('All Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/events');
                     },
                   ),
@@ -333,7 +335,6 @@ class AppDrawer extends StatelessWidget {
                             onSubmitted: (value) {
                               if (value.isNotEmpty) {
                                 Navigator.pop(dialogContext); // Close dialog
-                                Navigator.pop(context); // Close drawer
                                 context.go(
                                   '/epcis/aggregation-events/hierarchy/$value',
                                   extra: {'isParent': true},
@@ -351,7 +352,6 @@ class AppDrawer extends StatelessWidget {
                                 final value = controller.text;
                                 if (value.isNotEmpty) {
                                   Navigator.pop(dialogContext); // Close dialog
-                                  Navigator.pop(context); // Close drawer
                                   context.go(
                                     '/epcis/aggregation-events/hierarchy/$value',
                                     extra: {'isParent': true},
@@ -370,7 +370,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transaction Documents'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/transaction-documents');
                     },
                   ),
@@ -379,7 +378,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Advanced Query'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/advanced-query');
                     },
                   ),
@@ -388,7 +386,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Supply Chain Traversal'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/traversal-query');
                     },
                   ),
@@ -397,7 +394,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Event Serialization'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/epcis/serialization');
                     },
                   ),
@@ -426,7 +422,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Bulk Commission'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/commissioning/new');
                     },
                   ),
@@ -435,7 +430,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Commissioning'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/commissioning');
                     },
                   ),
@@ -450,7 +444,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Packing'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/packing/create');
                     },
                   ),
@@ -459,7 +452,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Packing'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/packing');
                     },
                   ),
@@ -474,7 +466,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Shipment'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/shipping/create');
                     },
                   ),
@@ -483,7 +474,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Shipments'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/shipping');
                     },
                   ),
@@ -498,7 +488,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Receiving'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/receiving/create');
                     },
                   ),
@@ -507,7 +496,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Receiving'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/operations/receiving');
                     },
                   ),
@@ -538,7 +526,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Generate Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/barcode/generate');
                     },
                   ),
@@ -547,7 +534,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Scan Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/barcode/scan');
                     },
                   ),
@@ -556,7 +542,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Verify Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/barcode/verify');
                     },
                   ),
@@ -573,7 +558,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GS1 Validation Demo'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/gs1/validation-demo');
                     },
                   ),
@@ -582,7 +566,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GS1 Validation Tests'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/admin/gs1-validation');
                     },
                   ),
@@ -591,7 +574,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Integration Validation'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/admin/integration-validation');
                     },
                   ),
@@ -600,7 +582,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Validation Rules'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/admin/validation-rules');
                     },
                   ),
@@ -617,7 +598,6 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('EPC Conversion'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      Navigator.pop(context);
                       context.go('/gs1/epc-conversion');
                     },
                   ),
@@ -649,7 +629,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('User Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/users');
                       },
                     ),
@@ -658,7 +637,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Pending Approvals'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/approvals');
                       },
                     ),
@@ -675,7 +653,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Notification Center'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/notifications');
                       },
                     ),
@@ -684,7 +661,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Manage Subscriptions'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/notifications/subscriptions');
                       },
                     ),
@@ -693,7 +669,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Webhook Configuration'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/notifications/webhooks');
                       },
                     ),
@@ -710,7 +685,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Job Queue Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/job-queue');
                       },
                     ),
@@ -719,7 +693,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('ETL Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/etl-management');
                       },
                     ),
@@ -728,7 +701,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Bulk Export'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/bulk-export');
                       },
                     ),
@@ -745,7 +717,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('API Collections'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/api-management/collections');
                       },
                     ),
@@ -754,7 +725,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Partner Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/api-management/partners');
                       },
                     ),
@@ -763,7 +733,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Service Accounts'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/api-management/service-accounts');
                       },
                     ),
@@ -780,7 +749,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('System Settings'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/settings');
                       },
                     ),
@@ -789,7 +757,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Cache Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/cache');
                       },
                     ),
@@ -798,7 +765,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Performance Tests'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/performance-tests');
                       },
                     ),
@@ -807,7 +773,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Performance Optimization'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/performance-optimization');
                       },
                     ),
@@ -816,7 +781,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('System Monitoring'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/monitoring');
                       },
                     ),
@@ -825,7 +789,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Database Partitioning'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/database-partitioning');
                       },
                     ),
@@ -834,7 +797,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Data Consistency & Integrity'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/data-consistency-integrity');
                       },
                     ),
@@ -851,7 +813,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Event Generation Tests'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/event-generation-test');
                       },
                     ),
@@ -860,7 +821,6 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Industry Test Data'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        Navigator.pop(context);
                         context.go('/admin/industry-test-data');
                       },
                     ),

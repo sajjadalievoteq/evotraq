@@ -12,40 +12,45 @@ class DatabasePartitioningDashboard extends StatefulWidget {
   const DatabasePartitioningDashboard({Key? key}) : super(key: key);
 
   @override
-  State<DatabasePartitioningDashboard> createState() => _DatabasePartitioningDashboardState();
+  State<DatabasePartitioningDashboard> createState() =>
+      _DatabasePartitioningDashboardState();
 }
 
-class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDashboard>
+class _DatabasePartitioningDashboardState
+    extends State<DatabasePartitioningDashboard>
     with TickerProviderStateMixin {
-  
   late final DatabasePartitioningService _partitioningService;
   late TabController _tabController;
-  
+
   PartitionStatistics? _statistics;
   Map<String, dynamic>? _healthStatus;
   List<PartitionMetadata>? _metadata;
   bool _isLoading = true;
   String? _error;
-  
+
   final List<String> _validTables = [
     'epcis_events',
-    'object_events', 
+    'object_events',
     'aggregation_events',
     'transaction_events',
-    'transformation_events'
+    'transformation_events',
   ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Initialize service with proper dependencies
-    final dio = Dio();
+    final dio = getIt<Dio>();
     final config = getIt<AppConfig>();
     final tokenManager = getIt<TokenManager>();
-    _partitioningService = DatabasePartitioningService(dio, config, tokenManager);
-    
+    _partitioningService = DatabasePartitioningService(
+      dio,
+      config,
+      tokenManager,
+    );
+
     _loadDashboardData();
   }
 
@@ -115,30 +120,30 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error, size: 64, color: Colors.red[400]),
-                      const SizedBox(height: 16),
-                      Text('Error: $_error'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadDashboardData,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error, size: 64, color: Colors.red[400]),
+                  const SizedBox(height: 16),
+                  Text('Error: $_error'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadDashboardData,
+                    child: const Text('Retry'),
                   ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildOverviewTab(),
-                    _buildPartitionsTab(),
-                    _buildArchiveTab(),
-                    _buildMaintenanceTab(),
-                  ],
-                ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOverviewTab(),
+                _buildPartitionsTab(),
+                _buildArchiveTab(),
+                _buildMaintenanceTab(),
+              ],
+            ),
     );
   }
 
@@ -153,7 +158,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          
+
           if (_statistics != null) ...[
             Row(
               children: [
@@ -199,10 +204,9 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // Health Status
-            if (_healthStatus != null)
-              _buildHealthStatusCard(),
+            if (_healthStatus != null) _buildHealthStatusCard(),
           ],
         ],
       ),
@@ -220,7 +224,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          
+
           // Partition Data Summary
           if (_statistics != null) ...[
             Card(
@@ -235,18 +239,26 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    Text('Total Records (in partitions): ${_statistics!.totalRecords}'),
+                    Text(
+                      'Total Records (in partitions): ${_statistics!.totalRecords}',
+                    ),
                     Text('Total Size Bytes: ${_statistics!.totalSizeBytes}'),
-                    Text('Total Size MB: ${_statistics!.totalSizeMb?.toStringAsFixed(2) ?? 'null'}'),
-                    Text('Total Size GB: ${_statistics!.totalSizeGb?.toStringAsFixed(6) ?? 'null'}'),
-                    Text('Average Partition Size: ${_statistics!.averagePartitionSizeMb?.toStringAsFixed(2) ?? 'N/A'} MB'),
+                    Text(
+                      'Total Size MB: ${_statistics!.totalSizeMb?.toStringAsFixed(2) ?? 'null'}',
+                    ),
+                    Text(
+                      'Total Size GB: ${_statistics!.totalSizeGb?.toStringAsFixed(6) ?? 'null'}',
+                    ),
+                    Text(
+                      'Average Partition Size: ${_statistics!.averagePartitionSizeMb?.toStringAsFixed(2) ?? 'N/A'} MB',
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
           ],
-          
+
           if (_metadata != null && _metadata!.isNotEmpty) ...[
             ListView.builder(
               shrinkWrap: true,
@@ -258,9 +270,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
               },
             ),
           ] else ...[
-            const Center(
-              child: Text('No partition data available'),
-            ),
+            const Center(child: Text('No partition data available')),
           ],
         ],
       ),
@@ -292,14 +302,19 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          
+
           _buildMaintenanceActions(),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -313,7 +328,10 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -332,7 +350,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
     final status = _healthStatus!['overall_status'] ?? 'UNKNOWN';
     Color statusColor;
     IconData statusIcon;
-    
+
     switch (status) {
       case 'HEALTHY':
         statusColor = Colors.green;
@@ -372,9 +390,12 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                 ),
               ],
             ),
-            if (_healthStatus!['issues'] != null && (_healthStatus!['issues'] as List).isNotEmpty) ...[
+            if (_healthStatus!['issues'] != null &&
+                (_healthStatus!['issues'] as List).isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('${(_healthStatus!['issues'] as List).length} issue(s) found'),
+              Text(
+                '${(_healthStatus!['issues'] as List).length} issue(s) found',
+              ),
             ],
           ],
         ),
@@ -387,7 +408,9 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(partition.partitionName),
-        subtitle: Text('Table: ${partition.tableName} | Type: ${partition.partitionType}'),
+        subtitle: Text(
+          'Table: ${partition.tableName} | Type: ${partition.partitionType}',
+        ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -489,34 +512,38 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
           break;
         case 'UPDATE_STATS':
           for (final table in _validTables) {
-            await _partitioningService.updatePartitionStatistics(tableName: table);
+            await _partitioningService.updatePartitionStatistics(
+              tableName: table,
+            );
           }
           break;
         case 'ARCHIVE_OLD':
           final cutoffDate = DateTime.now().subtract(const Duration(days: 365));
-          await _partitioningService.archiveOldPartitions(cutoffDate: cutoffDate);
+          await _partitioningService.archiveOldPartitions(
+            cutoffDate: cutoffDate,
+          );
           break;
         case 'HEALTH_CHECK':
-          final healthData = await _partitioningService.getPartitionHealthStatus();
+          final healthData = await _partitioningService
+              .getPartitionHealthStatus();
           Navigator.of(context).pop(); // Close loading dialog
           _showHealthCheckResults(healthData);
           return; // Don't show generic success message
-        }
+      }
 
       Navigator.of(context).pop(); // Close loading dialog
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Maintenance operation completed successfully'),
           backgroundColor: Colors.green,
         ),
       );
-      
+
       _loadDashboardData(); // Refresh data
-      
     } catch (e) {
       Navigator.of(context).pop(); // Close loading dialog
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Maintenance failed: $e'),
@@ -529,13 +556,15 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
   void _showHealthCheckResults(Map<String, dynamic> healthData) {
     final status = healthData['overall_status'] ?? 'UNKNOWN';
     final issues = healthData['issues'] as List<dynamic>? ?? [];
-    final recommendations = healthData['recommendations'] as List<dynamic>? ?? [];
-    final tableHealth = healthData['table_health'] as Map<String, dynamic>? ?? {};
+    final recommendations =
+        healthData['recommendations'] as List<dynamic>? ?? [];
+    final tableHealth =
+        healthData['table_health'] as Map<String, dynamic>? ?? {};
     final lastCheck = healthData['last_check'] ?? DateTime.now().toString();
 
     Color statusColor;
     IconData statusIcon;
-    
+
     switch (status) {
       case 'HEALTHY':
         statusColor = Colors.green;
@@ -561,10 +590,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
           children: [
             Icon(statusIcon, color: statusColor),
             const SizedBox(width: 8),
-            Text(
-              'Health Check Results',
-              style: TextStyle(color: statusColor),
-            ),
+            Text('Health Check Results', style: TextStyle(color: statusColor)),
           ],
         ),
         content: SizedBox(
@@ -597,12 +623,15 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Issues Section
                 if (issues.isNotEmpty) ...[
                   const Text(
                     'Issues Found:',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -614,27 +643,38 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: issues.map((issue) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.warning, size: 16, color: Colors.red),
-                            const SizedBox(width: 4),
-                            Expanded(child: Text(issue.toString())),
-                          ],
-                        ),
-                      )).toList(),
+                      children: issues
+                          .map(
+                            (issue) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.warning,
+                                    size: 16,
+                                    color: Colors.red,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(child: Text(issue.toString())),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Recommendations Section
                 if (recommendations.isNotEmpty) ...[
                   const Text(
                     'Recommendations:',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -646,22 +686,30 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: recommendations.map((rec) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.lightbulb, size: 16, color: Colors.blue),
-                            const SizedBox(width: 4),
-                            Expanded(child: Text(rec.toString())),
-                          ],
-                        ),
-                      )).toList(),
+                      children: recommendations
+                          .map(
+                            (rec) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.lightbulb,
+                                    size: 16,
+                                    color: Colors.blue,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(child: Text(rec.toString())),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Table Health Details
                 if (tableHealth.isNotEmpty) ...[
                   const Text(
@@ -681,13 +729,23 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                           children: [
                             Text(
                               tableName.toUpperCase(),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            Text('Partitions: ${stats['partition_count'] ?? 'N/A'}'),
-                            Text('Avg Size: ${(stats['avg_size_mb'] ?? 0).toStringAsFixed(1)} MB'),
-                            Text('Max Size: ${(stats['max_size_mb'] ?? 0).toStringAsFixed(1)} MB'),
-                            Text('Unmaintained: ${stats['unmaintained_partitions'] ?? 0}'),
+                            Text(
+                              'Partitions: ${stats['partition_count'] ?? 'N/A'}',
+                            ),
+                            Text(
+                              'Avg Size: ${(stats['avg_size_mb'] ?? 0).toStringAsFixed(1)} MB',
+                            ),
+                            Text(
+                              'Max Size: ${(stats['max_size_mb'] ?? 0).toStringAsFixed(1)} MB',
+                            ),
+                            Text(
+                              'Unmaintained: ${stats['unmaintained_partitions'] ?? 0}',
+                            ),
                           ],
                         ),
                       ),
@@ -695,7 +753,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                   }).toList(),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // No issues message
                 if (issues.isEmpty && recommendations.isEmpty) ...[
                   Container(
@@ -721,14 +779,11 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Timestamp
                 Text(
                   'Last checked: ${DateTime.tryParse(lastCheck)?.toLocal().toString() ?? lastCheck}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
@@ -776,66 +831,66 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
                   Colors.blue,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildHelpSection(
                   'Why Only EPCIS Events Are Partitioned?',
                   'Only the main epcis_events table is partitioned because:\n\n'
-                  '• Child tables (object_events, aggregation_events, transaction_events, transformation_events) inherit from epcis_events\n'
-                  '• JPA inheritance mapping requires the base table to handle partitioning\n'
-                  '• All event data flows through epcis_events, making it the optimal partition point\n'
-                  '• This reduces complexity while maximizing performance benefits',
+                      '• Child tables (object_events, aggregation_events, transaction_events, transformation_events) inherit from epcis_events\n'
+                      '• JPA inheritance mapping requires the base table to handle partitioning\n'
+                      '• All event data flows through epcis_events, making it the optimal partition point\n'
+                      '• This reduces complexity while maximizing performance benefits',
                   Icons.table_chart,
                   Colors.green,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildHelpSection(
                   'Event Data Storage',
                   'Event data is stored as follows:\n\n'
-                  '• Object Events: Data stored in epcis_events partitions, accessed via object_events view\n'
-                  '• Aggregation Events: Data stored in epcis_events partitions, accessed via aggregation_events view\n'
-                  '• Transaction Events: Data stored in epcis_events partitions, accessed via transaction_events view\n'
-                  '• Transformation Events: Data stored in epcis_events partitions, accessed via transformation_events view\n\n'
-                  'This inheritance-based approach ensures all event types benefit from partitioning automatically.',
+                      '• Object Events: Data stored in epcis_events partitions, accessed via object_events view\n'
+                      '• Aggregation Events: Data stored in epcis_events partitions, accessed via aggregation_events view\n'
+                      '• Transaction Events: Data stored in epcis_events partitions, accessed via transaction_events view\n'
+                      '• Transformation Events: Data stored in epcis_events partitions, accessed via transformation_events view\n\n'
+                      'This inheritance-based approach ensures all event types benefit from partitioning automatically.',
                   Icons.storage,
                   Colors.purple,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildHelpSection(
                   'Why GLN, GTIN, SSCC, SGTIN Are Not Partitioned?',
                   'Master data tables (GLN, GTIN, SSCC, SGTIN) are not partitioned because:\n\n'
-                  '• These are reference/lookup tables with relatively static data\n'
-                  '• They have smaller data volumes compared to event tables\n'
-                  '• Frequent joins require these tables to be readily accessible\n'
-                  '• Partitioning would add complexity without significant performance benefits\n'
-                  '• Master data changes infrequently, so time-based partitioning is unnecessary',
+                      '• These are reference/lookup tables with relatively static data\n'
+                      '• They have smaller data volumes compared to event tables\n'
+                      '• Frequent joins require these tables to be readily accessible\n'
+                      '• Partitioning would add complexity without significant performance benefits\n'
+                      '• Master data changes infrequently, so time-based partitioning is unnecessary',
                   Icons.category,
                   Colors.orange,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildHelpSection(
                   'Maintenance Tab Functionality',
                   'The Maintenance tab provides essential partition management tools:\n\n'
-                  '• Create Future Partitions: Pre-creates partitions for next 3 months to avoid runtime delays\n'
-                  '• Update Statistics: Refreshes partition metadata and size calculations\n'
-                  '• Archive Old Partitions: Moves partitions older than 12 months to archive status\n'
-                  '• Health Check: Performs comprehensive analysis of partition health and performance\n\n'
-                  'Regular maintenance ensures optimal database performance and prevents partition-related issues.',
+                      '• Create Future Partitions: Pre-creates partitions for next 3 months to avoid runtime delays\n'
+                      '• Update Statistics: Refreshes partition metadata and size calculations\n'
+                      '• Archive Old Partitions: Moves partitions older than 12 months to archive status\n'
+                      '• Health Check: Performs comprehensive analysis of partition health and performance\n\n'
+                      'Regular maintenance ensures optimal database performance and prevents partition-related issues.',
                   Icons.build,
                   Colors.red,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildHelpSection(
                   'Partition Naming Convention',
                   'Partitions follow a consistent naming pattern:\n\n'
-                  '• Format: table_name_yYYYY_mMM\n'
-                  '• Example: epcis_events_y2025_m07 (July 2025)\n'
-                  '• Each partition contains one month of data\n'
-                  '• Automatic routing based on event timestamp\n'
-                  '• Enables efficient query pruning and maintenance operations',
+                      '• Format: table_name_yYYYY_mMM\n'
+                      '• Example: epcis_events_y2025_m07 (July 2025)\n'
+                      '• Each partition contains one month of data\n'
+                      '• Automatic routing based on event timestamp\n'
+                      '• Enables efficient query pruning and maintenance operations',
                   Icons.label,
                   Colors.teal,
                 ),
@@ -853,7 +908,12 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
     );
   }
 
-  Widget _buildHelpSection(String title, String content, IconData icon, Color color) {
+  Widget _buildHelpSection(
+    String title,
+    String content,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -876,10 +936,7 @@ class _DatabasePartitioningDashboardState extends State<DatabasePartitioningDash
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              content,
-              style: const TextStyle(fontSize: 14, height: 1.4),
-            ),
+            Text(content, style: const TextStyle(fontSize: 14, height: 1.4)),
           ],
         ),
       ),

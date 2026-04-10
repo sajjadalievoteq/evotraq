@@ -117,7 +117,6 @@ class AppRouter {
     debugLogDiagnostics: true,
     initialLocation: '/',
     // Using modern GoRouter configuration
-    routerNeglect: true, // Helps with browser history for deep links
     routes: [
       GoRoute(
         path: '/',

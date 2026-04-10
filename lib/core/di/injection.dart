@@ -70,7 +70,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   // Services
   getIt.registerLazySingleton<AuthService>(
     () => AuthServiceImpl(
-      client: getIt<http.Client>(),
+      dio: getIt<Dio>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
@@ -7,51 +7,107 @@ import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 import 'package:traqtrace_app/features/auth/services/auth_service.dart';
 
 class AuthServiceImpl implements AuthService {
-  final http.Client _client;
+  final Dio _dio;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
 
   AuthServiceImpl({
-    required http.Client client,
+    required Dio dio,
     required TokenManager tokenManager,
     required AppConfig appConfig,
-  })  : _client = client,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+  }) : _dio = dio,
+       _tokenManager = tokenManager,
+       _appConfig = appConfig;
+
+  String? _parseErrorMessage(dynamic data) {
+    try {
+      if (data is String) {
+        final Map<String, dynamic> json = jsonDecode(data);
+        return json['message'] ?? json['error'];
+      }
+      if (data is Map<String, dynamic>) {
+        return data['message'] ?? data['error'];
+      }
+      if (data is Map) {
+        final map = Map<String, dynamic>.from(data);
+        return map['message'] ?? map['error'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _stringifyResponseData(dynamic data) {
+    if (data == null) return null;
+    if (data is String) return data;
+    try {
+      return jsonEncode(data);
+    } catch (_) {
+      return data.toString();
+    }
+  }
 
   @override
   Future<AuthResponse> login(LoginRequest request) async {
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(request.toJson()),
-    );
+    try {
+      final response = await _dio.post(
+        '${_appConfig.apiBaseUrl}/auth/login',
+        data: request.toJson(),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
-      // Store only the token part, not the "Bearer " prefix
-      await _tokenManager.saveToken(authResponse.token);
-      return authResponse;
-    } else {
+      if (response.statusCode == 200) {
+        final authResponse = AuthResponse.fromJson(
+          response.data is String ? jsonDecode(response.data) : response.data,
+        );
+        await _tokenManager.saveToken(authResponse.token);
+        return authResponse;
+      }
+
       throw ApiException(
-        statusCode: response.statusCode, 
-        message: _parseErrorMessage(response.body) ?? 'Login failed',
+        statusCode: response.statusCode,
+        message: _parseErrorMessage(response.data) ?? 'Login failed',
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message: _parseErrorMessage(e.response?.data) ?? 'Login failed',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
       );
     }
   }
 
   @override
   Future<void> register(RegisterRequest request) async {
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(request.toJson()),
-    );
+    try {
+      final response = await _dio.post(
+        '${_appConfig.apiBaseUrl}/auth/register',
+        data: request.toJson(),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
+      );
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: _parseErrorMessage(response.data) ?? 'Registration failed',
+          responseBody: _stringifyResponseData(response.data),
+        );
+      }
+    } on DioException catch (e) {
       throw ApiException(
-        statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Registration failed',
+        statusCode: e.response?.statusCode,
+        message: _parseErrorMessage(e.response?.data) ?? 'Registration failed',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
       );
     }
   }
@@ -63,20 +119,39 @@ class AuthServiceImpl implements AuthService {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/users/profile'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+    try {
+      final response = await _dio.get(
+        '${_appConfig.apiBaseUrl}/users/profile',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          validateStatus: (_) => true,
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
-    } else {
+      if (response.statusCode == 200) {
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        return User.fromJson(data);
+      }
+
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to get user details',
+        message:
+            _parseErrorMessage(response.data) ?? 'Failed to get user details',
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message:
+            _parseErrorMessage(e.response?.data) ??
+            'Failed to get user details',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
       );
     }
   }
@@ -89,10 +164,13 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<bool> requestPasswordReset(String email) async {
     try {
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/auth/password-reset-request'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
+      await _dio.post(
+        '${_appConfig.apiBaseUrl}/auth/password-reset-request',
+        data: {'email': email},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
       );
 
       // Always return true to prevent email enumeration
@@ -106,13 +184,19 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<bool> validatePasswordResetToken(String token) async {
     try {
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/auth/validate-reset-token?token=$token'),
-        headers: {'Content-Type': 'application/json'},
+      final response = await _dio.get(
+        '${_appConfig.apiBaseUrl}/auth/validate-reset-token',
+        queryParameters: {'token': token},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
+        final Map<String, dynamic> data = (response.data is String)
+            ? Map<String, dynamic>.from(jsonDecode(response.data))
+            : Map<String, dynamic>.from(response.data as Map);
         return data['valid'] ?? false;
       }
       return false;
@@ -122,16 +206,23 @@ class AuthServiceImpl implements AuthService {
   }
 
   @override
-  Future<bool> resetPassword(String token, String newPassword, String confirmPassword) async {
+  Future<bool> resetPassword(
+    String token,
+    String newPassword,
+    String confirmPassword,
+  ) async {
     try {
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/auth/reset-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await _dio.post(
+        '${_appConfig.apiBaseUrl}/auth/reset-password',
+        data: {
           'token': token,
           'newPassword': newPassword,
           'confirmPassword': confirmPassword,
-        }),
+        },
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
       );
 
       return response.statusCode == 200;
@@ -143,23 +234,18 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<bool> verifyEmail(String token) async {
     try {
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/api/verification/verify-email?token=$token'),
-        headers: {'Content-Type': 'application/json'},
+      final response = await _dio.get(
+        '${_appConfig.apiBaseUrl}/api/verification/verify-email',
+        queryParameters: {'token': token},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
       );
 
       return response.statusCode == 200;
     } catch (e) {
       return false;
-    }
-  }
-
-  String? _parseErrorMessage(String body) {
-    try {
-      final Map<String, dynamic> json = jsonDecode(body);
-      return json['message'] ?? json['error'];
-    } catch (_) {
-      return null;
     }
   }
 }

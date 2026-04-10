@@ -11,7 +11,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/dashboard/services/dashboard_service.dart';
-
+import 'package:traqtrace_app/features/user_management/screens/home_loading_screen.dart';
 class _HomeDashboardCache {
   static DashboardStats? stats;
   static List<RecentEvent>? recentEvents;
@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
           body: RefreshIndicator(
             onRefresh: _loadDashboardData,
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: DashboardLoader())
                 : _error != null
                 ? _buildErrorState()
                 : _buildDashboard(user),

@@ -80,6 +80,7 @@ dependencies:
   flutter_map: ^8.0.0
   latlong2: ^0.9.1
   get_it: ^9.2.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

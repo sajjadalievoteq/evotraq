@@ -74,12 +74,12 @@ class GLNServiceImpl implements GLNService {
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    
-    
+    }
+
     print('GLN Service: Fetching GLN with ID: $id');
     final url = '${_appConfig.apiBaseUrl}/master-data/glns/code/$id';
     print('GLN Service: Request URL: $url');
-    
+
     final response = await _client.get(
       Uri.parse(url),
       headers: {
@@ -87,9 +87,9 @@ class GLNServiceImpl implements GLNService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     print('GLN Service: Response status code: ${response.statusCode}');
-    
+
     if (response.statusCode == 200) {
       print('GLN Service: Raw API Response: ${response.body}');
       final jsonData = json.decode(response.body);

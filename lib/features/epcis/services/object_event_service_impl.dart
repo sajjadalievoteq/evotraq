@@ -25,7 +25,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
        _appConfig = appConfig {
     _baseUrl = '${_appConfig.apiBaseUrl}/events/object';
   }
-  
+
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenManager.getToken();
@@ -34,7 +34,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       'Authorization': 'Bearer $token',
     };
   }
-  
+
   @override
   Future<Map<String, dynamic>> getAllEventsPaginated(int page, int size) async {
     final headers = await _getHeaders();
@@ -42,7 +42,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl?page=$page&size=$size'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> content = data['content'];
@@ -68,7 +68,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -83,7 +83,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/event-id/$eventId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -111,7 +111,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
     EPCISVersion epcisVersion = EPCISVersion.v2_0,
   }) async {
     final headers = await _getHeaders();
-    
+
     final now = DateTime.now();
     final eventData = <String, dynamic>{
       'eventId': 'event_${now.millisecondsSinceEpoch}_${(now.microsecond % 1000).toString().padLeft(3, '0')}',  // Generate unique event ID
@@ -123,7 +123,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       'recordTime': now.toUtc().toIso8601String(),  // Required by schema
       'epcisVersion': epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3',
     };
-    
+
     // Add timezone offset in ISO format
     final offset = now.timeZoneOffset;
     final hours = offset.inHours.abs();
@@ -131,10 +131,10 @@ class ObjectEventServiceImpl implements ObjectEventService {
     final sign = offset.isNegative ? '-' : '+';
     final timezoneOffset = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
     eventData['eventTimeZoneOffset'] = timezoneOffset;
-    
+
     if (readPointGLN != null) eventData['readPoint'] = readPointGLN;
     if (businessLocationGLN != null) eventData['businessLocation'] = businessLocationGLN;
-    
+
     // Handle the schema's oneOf constraint: either epcList OR quantityList, not both
     if (epcs != null && epcs.isNotEmpty) {
       eventData['epcList'] = epcs;
@@ -149,7 +149,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       eventData['epcList'] = [];
       eventData['quantityList'] = [];
     }
-    
+
     if (ilmd != null) eventData['ilmd'] = ilmd;
     if (bizData != null) eventData['bizData'] = bizData;
     if (sources != null && sources.isNotEmpty) {
@@ -167,13 +167,13 @@ class ObjectEventServiceImpl implements ObjectEventService {
     if (persistentDisposition != null) eventData['persistentDisposition'] = persistentDisposition;
     if (sensorElements != null) eventData['sensorElementList'] = sensorElements;
     if (certificationInfo != null) eventData['certificationInfo'] = certificationInfo;
-    
+
     final response = await _httpClient.post(
       Uri.parse(_baseUrl),
       headers: headers,
       body: json.encode(eventData),
     );
-    
+
     if (response.statusCode == 201) {
       try {
         final responseData = json.decode(response.body);
@@ -195,9 +195,9 @@ class ObjectEventServiceImpl implements ObjectEventService {
         headers: headers,
         body: json.encode(event.toJson()),
       );
-      
+
       final responseData = json.decode(response.body) as Map<String, dynamic>;
-      
+
       return responseData;
     } catch (e) {
       return {
@@ -216,7 +216,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       headers: headers,
       body: json.encode(events.map((e) => e.toJson()).toList()),
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> eventsData = data['events'];
@@ -234,7 +234,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       headers: headers,
       body: json.encode(event.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -249,7 +249,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to delete object event: ${response.statusCode}');
     }
@@ -262,7 +262,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/action/$action'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -278,7 +278,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -295,7 +295,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/epcs?epcs=$epcsParam'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -311,7 +311,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/epc-class/$epcClass'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -327,7 +327,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/ilmd?property=$property&value=$value'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -343,7 +343,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/quantity?epcClass=$epcClass&min=$minQuantity&max=$maxQuantity'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -359,7 +359,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/business-step/$businessStep'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -375,7 +375,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/disposition/$disposition'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -391,7 +391,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/location/$locationGLN'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -409,7 +409,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/time-range?startTime=$startTimeStr&endTime=$endTimeStr'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -428,7 +428,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/location/$locationGLN/time-range?startTime=$startTimeStr&endTime=$endTimeStr'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -440,7 +440,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
   @override
   Future<Map<String, dynamic>> getEventStatistics({DateTime? startTime, DateTime? endTime}) async {
     final headers = await _getHeaders();
-    
+
     // Build query parameters
     final queryParams = <String, String>{};
     if (startTime != null) {
@@ -449,10 +449,10 @@ class ObjectEventServiceImpl implements ObjectEventService {
     if (endTime != null) {
       queryParams['endTime'] = endTime.toIso8601String();
     }
-    
+
     final uri = Uri.parse('$_baseUrl/statistics').replace(queryParameters: queryParams);
     final response = await _httpClient.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       
@@ -461,24 +461,24 @@ class ObjectEventServiceImpl implements ObjectEventService {
         'totalEvents': data['totalEvents'] ?? 0,
         'recentEvents': data['recentEvents'] ?? 0,
       };
-      
+
       // Transform eventsByAction to actionCounts
       if (data['eventsByAction'] != null) {
         transformedData['actionCounts'] = data['eventsByAction'];
       }
-      
-      // Transform topBusinessSteps to businessStepCounts  
+
+      // Transform topBusinessSteps to businessStepCounts
       if (data['topBusinessSteps'] != null) {
         transformedData['businessStepCounts'] = data['topBusinessSteps'];
       }
-      
+
       // Transform topDispositions to dispositionCounts
       if (data['topDispositions'] != null) {
         transformedData['dispositionCounts'] = data['topDispositions'];
       } else {
         transformedData['dispositionCounts'] = <String, int>{};
       }
-      
+
       return transformedData;
     } else {
       throw Exception('Failed to fetch event statistics: ${response.body}');
@@ -492,7 +492,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
@@ -515,7 +515,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
   Future<ObjectEvent> createAddEvent(String epc, String locationGLN, String businessStep,
       String disposition, Map<String, dynamic> ilmd, Map<String, String> bizData) async {
     final headers = await _getHeaders();
-    
+
     final eventData = {
       'action': 'ADD',
       'epcList': [epc],
@@ -526,13 +526,13 @@ class ObjectEventServiceImpl implements ObjectEventService {
       'bizData': bizData,
       'eventTime': DateTime.now().toUtc().toIso8601String(),
     };
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl/add'),
       headers: headers,
       body: json.encode(eventData),
     );
-    
+
     if (response.statusCode == 201) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -544,7 +544,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
   Future<ObjectEvent> createObserveEvent(String epc, String locationGLN, String businessStep,
       String disposition, Map<String, String> bizData) async {
     final headers = await _getHeaders();
-    
+
     final eventData = {
       'action': 'OBSERVE',
       'epcList': [epc],
@@ -554,13 +554,13 @@ class ObjectEventServiceImpl implements ObjectEventService {
       'bizData': bizData,
       'eventTime': DateTime.now().toUtc().toIso8601String(),
     };
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl/observe'),
       headers: headers,
       body: json.encode(eventData),
     );
-    
+
     if (response.statusCode == 201) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -572,7 +572,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
   Future<ObjectEvent> createDeleteEvent(String epc, String locationGLN, String businessStep,
       String disposition, Map<String, String> bizData) async {
     final headers = await _getHeaders();
-    
+
     final eventData = {
       'action': 'DELETE',
       'epcList': [epc],
@@ -582,13 +582,13 @@ class ObjectEventServiceImpl implements ObjectEventService {
       'bizData': bizData,
       'eventTime': DateTime.now().toUtc().toIso8601String(),
     };
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl/delete'),
       headers: headers,
       body: json.encode(eventData),
     );
-    
+
     if (response.statusCode == 201) {
       return ObjectEvent.fromJson(json.decode(response.body));
     } else {
@@ -604,7 +604,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl'), // Would filter events with sensor data
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> content = data['content'];
@@ -624,17 +624,17 @@ class ObjectEventServiceImpl implements ObjectEventService {
       r'^urn:epc:id:sgtin:(\d+)\.(\d+)\.(\w+)$',
       caseSensitive: false
     );
-    
+
     final RegExp sscc = RegExp(
       r'^urn:epc:id:sscc:(\d+)\.(\d+)$',
       caseSensitive: false
     );
-    
+
     final RegExp sgln = RegExp(
       r'^urn:epc:id:sgln:(\d+)\.(\d+)\.(\w*)$',
       caseSensitive: false
     );
-    
+
     return sgtin.hasMatch(epc) || sscc.hasMatch(epc) || sgln.hasMatch(epc);
   }
   
@@ -644,10 +644,10 @@ class ObjectEventServiceImpl implements ObjectEventService {
     if (gs1ElementString.startsWith('01') && gs1ElementString.contains('21')) {
       final gtin = gs1ElementString.substring(2, 16);
       final serial = gs1ElementString.substring(gs1ElementString.indexOf('21') + 2);
-      
+
       final companyPrefix = gtin.substring(1, 7);
       final itemReference = gtin.substring(7, 13);
-      
+
       return 'urn:epc:id:sgtin:$companyPrefix.$itemReference.$serial';
     }
     
@@ -655,7 +655,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       final sscc = gs1ElementString.substring(2, 20);
       final companyPrefix = sscc.substring(1, 8);
       final serialReference = sscc.substring(8, 18);
-      
+
       return 'urn:epc:id:sscc:$companyPrefix.$serialReference';
     }
     
@@ -669,7 +669,7 @@ class ObjectEventServiceImpl implements ObjectEventService {
       Uri.parse('$_baseUrl/business-step/$businessStep/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();

@@ -31,20 +31,20 @@ class DataRecoveryService {
     required String initiatedBy,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = {
       'recoveryType': recoveryType,
       'initiatedBy': initiatedBy,
     };
-    
+
     final uri = Uri.parse('$_baseUrl/initiate').replace(queryParameters: queryParams);
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(recoveryParameters),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -59,7 +59,7 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/backup');
-    
+
     final body = {
       'eventIds': eventIds,
       'backupOptions': backupOptions ?? {
@@ -69,13 +69,13 @@ class DataRecoveryService {
         'storage_location': 'LOCAL',
       },
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -89,22 +89,22 @@ class DataRecoveryService {
     Map<String, dynamic>? restoreOptions,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = {'backupId': backupId};
     final uri = Uri.parse('$_baseUrl/restore').replace(queryParameters: queryParams);
-    
+
     final body = restoreOptions ?? {
       'validate_before_restore': true,
       'create_backup_before_restore': true,
       'restore_mode': 'REPLACE',
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -118,9 +118,9 @@ class DataRecoveryService {
   Future<Map<String, dynamic>> getRecoveryOperationStatus(String operationId) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/operations/$operationId/status');
-    
+
     final response = await client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -135,7 +135,7 @@ class DataRecoveryService {
     Map<String, dynamic>? searchCriteria,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = <String, String>{};
     if (searchCriteria != null) {
       searchCriteria.forEach((key, value) {
@@ -148,11 +148,11 @@ class DataRecoveryService {
         }
       });
     }
-    
+
     final uri = Uri.parse('$_baseUrl/backups').replace(queryParameters: queryParams);
-    
+
     final response = await client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -167,19 +167,19 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/validate-backup/$backupId');
-    
+
     final body = validationOptions ?? {
       'check_checksums': true,
       'verify_structure': true,
       'validate_events': true,
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -195,13 +195,13 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/schedule-backup');
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(scheduleConfig),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -215,16 +215,16 @@ class DataRecoveryService {
     String? reason,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = <String, String>{};
     if (reason != null) {
       queryParams['reason'] = reason;
     }
-    
+
     final uri = Uri.parse('$_baseUrl/operations/$operationId').replace(queryParameters: queryParams);
-    
+
     final response = await client.delete(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -241,12 +241,12 @@ class DataRecoveryService {
     int days = 30,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = {'days': days.toString()};
     final uri = Uri.parse('$_baseUrl/statistics').replace(queryParameters: queryParams);
-    
+
     final response = await client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -261,24 +261,24 @@ class DataRecoveryService {
     Map<String, dynamic>? exportOptions,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = {
       'format': format,
     };
-    
+
     final uri = Uri.parse('$_baseUrl/backups/$backupId/export').replace(queryParameters: queryParams);
-    
+
     final body = exportOptions ?? {
       'include_metadata': true,
       'compress_output': false,
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -292,9 +292,9 @@ class DataRecoveryService {
   Future<Map<String, dynamic>> getBackupDetails(String backupId) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/backups/$backupId');
-    
+
     final response = await client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -310,16 +310,16 @@ class DataRecoveryService {
     String? reason,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = <String, String>{};
     if (reason != null) {
       queryParams['reason'] = reason;
     }
-    
+
     final uri = Uri.parse('$_baseUrl/backups/$backupId').replace(queryParameters: queryParams);
-    
+
     final response = await client.delete(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -336,19 +336,19 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/backups/$backupId/test-restore');
-    
+
     final body = testOptions ?? {
       'dry_run': true,
       'validate_events': true,
       'check_dependencies': true,
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -365,7 +365,7 @@ class DataRecoveryService {
     String? level,
   }) async {
     final headers = await _getHeaders();
-    
+
     final queryParams = <String, String>{};
     if (limit != null) {
       queryParams['limit'] = limit.toString();
@@ -373,11 +373,11 @@ class DataRecoveryService {
     if (level != null) {
       queryParams['level'] = level;
     }
-    
+
     final uri = Uri.parse('$_baseUrl/operations/$operationId/logs').replace(queryParameters: queryParams);
-    
+
     final response = await client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else if (response.statusCode == 404) {
@@ -393,12 +393,12 @@ class DataRecoveryService {
       try {
         final status = await getRecoveryOperationStatus(operationId);
         yield status;
-        
+
         final operationStatus = status['status'] as String?;
         if (operationStatus == 'COMPLETED' || operationStatus == 'FAILED' || operationStatus == 'CANCELLED') {
           break;
         }
-        
+
         await Future.delayed(const Duration(seconds: 5)); // Poll every 5 seconds
       } catch (e) {
         yield {'error': e.toString()};
@@ -414,18 +414,18 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$_baseUrl/estimate-recovery-time');
-    
+
     final body = {
       'recovery_type': recoveryType,
       'recovery_parameters': recoveryParameters,
     };
-    
+
     final response = await client.post(
       uri,
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

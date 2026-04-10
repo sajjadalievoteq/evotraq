@@ -32,7 +32,7 @@ class GTINServiceImpl implements GTINService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     print('GTIN get response status: ${response.statusCode}, body: ${response.body}');
 
     if (response.statusCode == 200) {
@@ -72,7 +72,7 @@ class GTINServiceImpl implements GTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -80,10 +80,10 @@ class GTINServiceImpl implements GTINService {
       if (manufacturer != null) 'manufacturer': manufacturer,
       if (status != null) 'status': status,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -91,9 +91,9 @@ class GTINServiceImpl implements GTINService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     print('GTIN list response status: ${response.statusCode}, body: ${response.body}');
-    
+
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.body);
@@ -148,7 +148,7 @@ class GTINServiceImpl implements GTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -163,13 +163,13 @@ class GTINServiceImpl implements GTINService {
       if (registrationDateFrom != null && registrationDateFrom.isNotEmpty) 'registrationDateFrom': registrationDateFrom,
       if (registrationDateTo != null && registrationDateTo.isNotEmpty) 'registrationDateTo': registrationDateTo,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/search')
         .replace(queryParameters: queryParams);
-    
+
     print('DEBUG: Constructed URI: $uri');
     print('DEBUG: Query parameters: $queryParams');
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -177,16 +177,16 @@ class GTINServiceImpl implements GTINService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     print('GTIN advanced search response status: ${response.statusCode}, body: ${response.body}');
-    
+
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.body);
         final gtins = (data['content'] as List?)
             ?.map((item) => GTIN.fromJson(item))
             .toList() ?? [];
-            
+
         return {
           'gtins': gtins,
           'totalElements': data['totalElements'] ?? 0,
@@ -226,11 +226,11 @@ class GTINServiceImpl implements GTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     // Log the request payload for debugging
     final jsonPayload = gtin.toJson();
     print('Creating GTIN with payload: $jsonPayload');
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins'),
       headers: {
@@ -324,7 +324,7 @@ class GTINServiceImpl implements GTINService {
       throw ApiException(message: 'No authentication token found');
     }    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/validate')
         .replace(queryParameters: {'gtinCode': gtinCode});
-    
+
     final response = await _client.get(
       uri,
       headers: {

@@ -41,7 +41,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse(_baseUrl),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -57,7 +57,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl?page=$page&size=$size'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> content = data['content'] ?? [];
@@ -81,7 +81,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to delete event: ${response.statusCode}');
     }
@@ -90,12 +90,12 @@ class EPCISEventServiceImpl implements EPCISEventService {
     final headers = await _getHeaders();
     final String startTimeStr = startTime.toUtc().toIso8601String();
     final String endTimeStr = endTime.toUtc().toIso8601String();
-    
+
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/time-range?startTime=$startTimeStr&endTime=$endTimeStr'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -112,7 +112,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       headers: headers,
       body: json.encode(epcisDocument.toJson()),
     );
-    
+
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
@@ -127,7 +127,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return EPCISEvent.fromJson(json.decode(response.body));
     } else {
@@ -142,7 +142,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -159,7 +159,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       headers: headers,
       body: json.encode(queryParams.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -175,7 +175,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/business-step/$businessStep'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -191,7 +191,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/disposition/$disposition'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -207,7 +207,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/location/$locationGLN'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -223,7 +223,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/track/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => EPCISEvent.fromJson(json)).toList();
@@ -239,7 +239,7 @@ class EPCISEventServiceImpl implements EPCISEventService {
       Uri.parse('$_baseUrl/status/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

@@ -188,7 +188,7 @@ class DashboardServiceImpl implements DashboardService {
       );
 
       List<RecentEvent> allEvents = [];
-      
+
       final eventTypes = ['ObjectEvent', 'AggregationEvent', 'TransactionEvent', 'TransformationEvent'];
       
       for (int i = 0; i < responses.length; i++) {

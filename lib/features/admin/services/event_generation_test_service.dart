@@ -20,7 +20,7 @@ class EventGenerationTestService {
     if (token == null) {
       throw Exception('Not authenticated');
     }
-    
+
     final response = await http.get(
       Uri.parse('${_appConfig.apiBaseUrl}$path'),
       headers: {
@@ -28,7 +28,7 @@ class EventGenerationTestService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
@@ -42,7 +42,7 @@ class EventGenerationTestService {
     if (token == null) {
       throw Exception('Not authenticated');
     }
-    
+
     final response = await http.post(
       Uri.parse('${_appConfig.apiBaseUrl}$path'),
       headers: {
@@ -51,7 +51,7 @@ class EventGenerationTestService {
       },
       body: jsonEncode(body),
     );
-    
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
@@ -65,7 +65,7 @@ class EventGenerationTestService {
     if (token == null) {
       throw Exception('Not authenticated');
     }
-    
+
     final response = await http.delete(
       Uri.parse('${_appConfig.apiBaseUrl}$path'),
       headers: {
@@ -73,7 +73,7 @@ class EventGenerationTestService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {

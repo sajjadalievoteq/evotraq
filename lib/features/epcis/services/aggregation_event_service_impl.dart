@@ -40,23 +40,23 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/event-id/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       // Debug: print the raw response to check GLN fields
       print('Raw API response for event ID $id: ${response.body}');
-      
+
       final jsonData = json.decode(response.body);
         // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
       print('API response contains businessLocation: ${jsonData['businessLocation']}');
       print('API response contains bizLocation: ${jsonData['bizLocation']}');
       print('API response contains locationGLN: ${jsonData['locationGLN']}');
-      
+
       // Check for source list and destination list
       print('API response contains sourceList: ${jsonData['sourceList']}');
       print('API response contains destinationList: ${jsonData['destinationList']}');
       print('API response contains bizData: ${jsonData['bizData']}');
-      
+
       return AggregationEvent.fromJson(jsonData);
     } else {
       throw Exception('Failed to get aggregation event: ${response.statusCode}');
@@ -69,20 +69,20 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/event-id/$eventId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       // Debug: print the raw response to check GLN fields
       print('Raw API response for event ID $eventId: ${response.body}');
-      
+
       final jsonData = json.decode(response.body);
-      
+
       // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
       print('API response contains businessLocation: ${jsonData['businessLocation']}');
       print('API response contains bizLocation: ${jsonData['bizLocation']}');
       print('API response contains locationGLN: ${jsonData['locationGLN']}');
       print('API response contains bizData: ${jsonData['bizData']}');
-      
+
       return AggregationEvent.fromJson(jsonData);
     } else {
       throw Exception('Failed to get aggregation event: ${response.statusCode}');
@@ -90,22 +90,22 @@ class AggregationEventServiceImpl implements AggregationEventService {
   }  @override
   Future<AggregationEvent> createAggregationEvent(AggregationEvent event) async {
     final headers = await _getHeaders();
-    
+
     // Format timezone offset in the ISO 8601 format to ensure consistency
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    
+
     // Format as +/-HH:MM
     final String eventTimeZone = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    
+
     // Get current date time in ISO format with timezone offset
     final eventTime = '${event.eventTime.toIso8601String().split('.')[0]}$eventTimeZone';
-    
+
     // Get the base JSON from the event
     Map<String, dynamic> jsonData = event.toJson();
-    
+
     // Add required fields for enhanced validation
     jsonData['eventType'] = 'AggregationEvent';  // Required by enhanced validation schema
     jsonData['eventId'] = event.eventId.isNotEmpty ? event.eventId : 'event-${DateTime.now().millisecondsSinceEpoch}'; // Ensure eventId is present
@@ -123,11 +123,11 @@ class AggregationEventServiceImpl implements AggregationEventService {
     if (event.readPoint != null) {
       jsonData['readPoint'] = event.readPoint!.glnCode; // Send just the GLN code as a string
     }
-    
+
     if (event.businessLocation != null) {
       jsonData['businessLocation'] = event.businessLocation!.glnCode; // Send just the GLN code as a string
     }
-    
+
     // Debug: Print the full JSON payload being sent
     final jsonPayload = jsonEncode(jsonData);
     print('Aggregation event payload: $jsonPayload');
@@ -136,7 +136,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       headers: headers,
       body: jsonPayload,
     );
-    
+
     if (response.statusCode == 201) {
       return AggregationEvent.fromJson(json.decode(response.body));
     } else {
@@ -145,24 +145,24 @@ class AggregationEventServiceImpl implements AggregationEventService {
   }  @override
   Future<AggregationEvent> updateAggregationEvent(String id, AggregationEvent event) async {
     final headers = await _getHeaders();
-    
+
     // Get the base JSON from the event
     Map<String, dynamic> jsonData = event.toJson();
       // Handle GLN fields explicitly to ensure they're properly sent to the backend
     if (event.readPoint != null) {
       jsonData['readPoint'] = event.readPoint!.glnCode; // Send just the GLN code as a string
     }
-    
+
     if (event.businessLocation != null) {
       jsonData['businessLocation'] = event.businessLocation!.glnCode; // Send just the GLN code as a string
     }
-    
+
     final response = await _httpClient.put(
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
       body: json.encode(jsonData),
     );
-    
+
     if (response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.body));
     } else {
@@ -176,7 +176,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to delete aggregation event: ${response.statusCode}');
     }
@@ -188,19 +188,19 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl?page=$page&size=$size'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       print('AggregationEvent API response: ${response.body}');
       final data = json.decode(response.body);
       if (data['content'] != null && data['content'] is List) {
         final List<dynamic> eventList = data['content'];
-        
+
         // Debug: Check for source and destination lists in the first event if available
         if (eventList.isNotEmpty) {
           print('First event sourceList: ${eventList[0]['sourceList']}');
           print('First event destinationList: ${eventList[0]['destinationList']}');
         }
-        
+
         return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
       } else {
         // If the response is an array directly (not wrapped in a PageResponse object)
@@ -221,7 +221,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/action/$action'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
@@ -236,7 +236,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/parent/$parentEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
@@ -251,7 +251,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       Uri.parse('$_baseUrl/child/$childEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
@@ -274,21 +274,21 @@ class AggregationEventServiceImpl implements AggregationEventService {
   @override
   Future<List<AggregationEvent>> findCurrentChildrenOfParent(String parentEPC) async {
     final headers = await _getHeaders();
-    
+
     try {
       final response = await _httpClient.get(
         Uri.parse('$_baseUrl/parent/$parentEPC/contents'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         // This endpoint returns a list of EPCs, not events
         final List<String> childEPCs = List<String>.from(json.decode(response.body));
-        
+
         // Since we need to return AggregationEvents, we need to find the most recent
         // ADD event for each child EPC with this parent
         List<AggregationEvent> events = await findAggregationEventsByParentEPCAndAction(parentEPC, 'ADD');
-        
+
         // Filter events to only include those with the childEPCs from the response
         return events.where((event) {
           return event.childEPCs.any((childEPC) => childEPCs.contains(childEPC));
@@ -305,17 +305,17 @@ class AggregationEventServiceImpl implements AggregationEventService {
   @override
   Future<AggregationEvent> findCurrentParentOfChild(String childEPC) async {
     final headers = await _getHeaders();
-    
+
     try {
       final response = await _httpClient.get(
         Uri.parse('$_baseUrl/child/$childEPC/container'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         // This endpoint returns the parent EPC as a string
         final String parentEPC = json.decode(response.body);
-        
+
         // Get the most recent ADD event for this child with this parent
         List<AggregationEvent> events = await findAggregationEventsByChildEPCAndAction(childEPC, 'ADD');
         return events.firstWhere(
@@ -350,7 +350,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
   Future<List<AggregationEvent>> findAggregationEventsByBusinessStepAndParentEPC(
       String businessStep, String parentEPC) async {
     final headers = await _getHeaders();
-    
+
     try {
       // The backend doesn't have a direct endpoint for this query,
       // so we'll get all events for the parent EPC and filter by business step
@@ -358,15 +358,15 @@ class AggregationEventServiceImpl implements AggregationEventService {
         Uri.parse('$_baseUrl/parent/$parentEPC'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        
+
         List<AggregationEvent> events = jsonData
             .map((data) => AggregationEvent.fromJson(data))
             .where((event) => event.businessStep == businessStep)
             .toList();
-        
+
         return events;
       } else {
         throw Exception(_getDetailedErrorMessage(response));
@@ -381,28 +381,28 @@ class AggregationEventServiceImpl implements AggregationEventService {
   Future<List<AggregationEvent>> findAggregationEventsByLocationAndTimeWindow(
       String locationGLN, DateTime startTime, DateTime endTime) async {
     final headers = await _getHeaders();
-    
+
     try {
       // Format dates as ISO8601 strings
       final String start = startTime.toIso8601String();
       final String end = endTime.toIso8601String();
-      
+
       final response = await _httpClient.get(
         Uri.parse('$_baseUrl/time-range?startTime=$start&endTime=$end'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        
+
         // Filter by location GLN
         List<AggregationEvent> events = jsonData
             .map((data) => AggregationEvent.fromJson(data))
-            .where((event) => 
+            .where((event) =>
                 (event.readPoint?.glnCode == locationGLN) ||
                 (event.businessLocation?.glnCode == locationGLN))
             .toList();
-        
+
         return events;
       } else {
         throw Exception(_getDetailedErrorMessage(response));
@@ -423,13 +423,13 @@ class AggregationEventServiceImpl implements AggregationEventService {
       {List<Map<String, dynamic>>? sourceList,
       List<Map<String, dynamic>>? destinationList}) async {
     final headers = await _getHeaders();
-    
+
     // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    
+
     // Format as +/-HH:MM
     final String eventTimeZone = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
     // Get current date time in ISO format with timezone offset
@@ -455,19 +455,19 @@ class AggregationEventServiceImpl implements AggregationEventService {
       'eventTimeZone': eventTimeZone,        // For frontend model consistency
       'eventTime': eventTime                 // Add explicit event time
     };
-    
+
     // Add source list if provided
     if (sourceList != null && sourceList.isNotEmpty) {
       requestData['sourceList'] = sourceList;
     }
-    
+
     // Add destination list if provided
     if (destinationList != null && destinationList.isNotEmpty) {
       requestData['destinationList'] = destinationList;
     }
-    
+
     final body = json.encode(requestData);
-    
+
     // Debug: Print the actual JSON payload being sent
     print('Pack event payload: $body');
       final response = await _httpClient.post(
@@ -475,7 +475,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       headers: headers,
       body: body,
     );
-    
+
     if (response.statusCode == 201) {
       return AggregationEvent.fromJson(json.decode(response.body));
     } else {
@@ -492,19 +492,19 @@ class AggregationEventServiceImpl implements AggregationEventService {
       {List<Map<String, dynamic>>? sourceList,
       List<Map<String, dynamic>>? destinationList}) async {
     final headers = await _getHeaders();
-    
+
     // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    
+
     // Format as +/-HH:MM
     final String eventTimeZone = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
       // Get current date time in ISO format with timezone offset
     final now = DateTime.now();
-    final eventTime = '${now.toIso8601String().split('.')[0]}$eventTimeZone';    
-    
+    final eventTime = '${now.toIso8601String().split('.')[0]}$eventTimeZone';
+
     final Map<String, dynamic> requestData = {
       'eventType': 'AggregationEvent',  // Required by enhanced validation schema
       'action': 'DELETE',               // Unpack events are DELETE actions
@@ -524,19 +524,19 @@ class AggregationEventServiceImpl implements AggregationEventService {
       'eventTimeZone': eventTimeZone,        // For frontend model consistency
       'eventTime': eventTime                 // Add explicit event time
     };
-    
+
     // Add source list if provided
     if (sourceList != null && sourceList.isNotEmpty) {
       requestData['sourceList'] = sourceList;
     }
-    
+
     // Add destination list if provided
     if (destinationList != null && destinationList.isNotEmpty) {
       requestData['destinationList'] = destinationList;
     }
-    
+
     final body = json.encode(requestData);
-    
+
     // Debug: Print the actual JSON payload being sent
     print('Unpack event payload: $body');
       final response = await _httpClient.post(
@@ -544,7 +544,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
       headers: headers,
       body: body,
     );
-    
+
     if (response.statusCode == 201) {
       return AggregationEvent.fromJson(json.decode(response.body));
     } else {
@@ -561,14 +561,14 @@ class AggregationEventServiceImpl implements AggregationEventService {
       // Check if this is a validation error with specific error messages
       if (errorData.containsKey('errors') && errorData['errors'] is List) {
         List<dynamic> errors = errorData['errors'];
-        
+
         // Format validation errors for better readability
         if (errors.isNotEmpty) {
           // Group errors by type
           List<String> parentErrors = [];
           List<String> childErrors = [];
           List<String> otherErrors = [];
-          
+
           for (String error in errors) {
             if (error.startsWith('Parent EPC not commissioned')) {
               parentErrors.add(error.substring('Parent EPC not commissioned: '.length));
@@ -578,30 +578,30 @@ class AggregationEventServiceImpl implements AggregationEventService {
               otherErrors.add(error);
             }
           }
-          
+
           // Build a user-friendly message
           StringBuffer friendlyMessage = StringBuffer('Validation Error:\n');
-          
+
           if (parentErrors.isNotEmpty) {
             friendlyMessage.write('\nParent container not found in the system. Please create or commission the following container first:\n');
             friendlyMessage.write('• ${parentErrors.join('\n• ')}\n');
           }
-          
+
           if (childErrors.isNotEmpty) {
             friendlyMessage.write('\nThe following items have not been commissioned in the system:\n');
             friendlyMessage.write('• ${childErrors.join('\n• ')}\n');
             friendlyMessage.write('\nPlease create a commissioning event for these items first.\n');
           }
-          
+
           if (otherErrors.isNotEmpty) {
             friendlyMessage.write('\nOther issues:\n');
             friendlyMessage.write('• ${otherErrors.join('\n• ')}\n');
           }
-          
+
           return friendlyMessage.toString();
         }
       }
-      
+
       // If not a validation error or no specific errors provided
       return 'Error: $message';
     } catch (e) {
@@ -615,13 +615,13 @@ class AggregationEventServiceImpl implements AggregationEventService {
   @override
   Future<List<String>> findContainerContents(String parentEPC) async {
     final headers = await _getHeaders();
-    
+
     try {
       final response = await _httpClient.get(
         Uri.parse('$_baseUrl/parent/$parentEPC/contents'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         // The endpoint returns a list of child EPCs as strings
         final List<dynamic> jsonData = json.decode(response.body);
@@ -638,14 +638,14 @@ class AggregationEventServiceImpl implements AggregationEventService {
   @override
   Future<bool> verifyHierarchy(String epc) async {
     final headers = await _getHeaders();
-    
+
     try {
       // Get container contents for the given parent EPC
       final response = await _httpClient.get(
         Uri.parse('$_baseUrl/parent/$epc/contents'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         // If we can get contents without error, the parent EPC is valid
         return true;
@@ -657,7 +657,7 @@ class AggregationEventServiceImpl implements AggregationEventService {
             Uri.parse('$_baseUrl/child/$epc/container'),
             headers: headers,
           );
-          
+
           return containerResponse.statusCode == 200;
         } catch (childError) {
           print('Error checking as child: $childError');

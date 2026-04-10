@@ -10,7 +10,7 @@ class MonitoringService {
   final AppConfig _appConfig;
   late final String _baseUrl;
   Timer? _realTimeTimer;
-  
+
   // Stream controllers for real-time updates
   final _performanceController = StreamController<PerformanceMetrics>.broadcast();
   final _storageController = StreamController<StorageStatistics>.broadcast();
@@ -318,12 +318,12 @@ class MonitoringService {
 // Monitoring service singleton
 class MonitoringServiceProvider {
   static MonitoringService? _instance;
-  
+
   static MonitoringService getInstance(TokenManager tokenManager, AppConfig appConfig) {
     _instance ??= MonitoringService(tokenManager, appConfig);
     return _instance!;
   }
-  
+
   static void dispose() {
     _instance?.dispose();
     _instance = null;

@@ -33,7 +33,7 @@ class WiredScannerService {
     if (appConfig != null && tokenManager != null) {
       initApiService(appConfig, tokenManager);
     }
-    
+
     // Use the simple factory constructor for GLN to handle locations
     final readPoint = GLN.fromCode(readPointStr);
     final bizLocation = GLN.fromCode(bizLocationStr);
@@ -48,7 +48,7 @@ class WiredScannerService {
             print('Barcode validation error, continuing with basic processing: $e');
             return {'isValid': false, 'message': e.toString()};
           });
-          
+
         if (verificationResult['isValid'] == true) {
           try {
             extractedData = await _barcodeApiService!.extractBarcodeData(barcodeValue);

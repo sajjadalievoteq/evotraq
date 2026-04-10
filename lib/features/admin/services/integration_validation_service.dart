@@ -46,7 +46,7 @@ class IntegrationValidationService {
     if (token == null) {
       throw Exception('Not authenticated');
     }
-    
+
     final response = await http.get(
       Uri.parse('$_baseUrl$path'),
       headers: {
@@ -54,14 +54,14 @@ class IntegrationValidationService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load data: ${response.statusCode}');
     }
   }
-  
+
   /// Run GS1 identifier generation validation test
   Future<ValidationResultDTO> validateGS1IdentifierGeneration() async {
     final json = await _getWithAuth('/admin/integration-validation/gs1-identifier-generation');
@@ -113,9 +113,9 @@ class IntegrationValidationService {
   /// Run all integration validation tests
   Future<Map<String, ValidationResultDTO>> runAllValidationTests() async {
     final json = await _getWithAuth('/admin/integration-validation/run-all');
-    
+
     return json.map((key, value) => MapEntry(
-      key, 
+      key,
       ValidationResultDTO.fromJson(value as Map<String, dynamic>)
     ));
   }

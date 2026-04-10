@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -55,6 +56,16 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<http.Client>(() => http.Client());
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
   getIt.registerLazySingleton<HttpService>(() => HttpService());
+  getIt.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        baseUrl: getIt<AppConfig>().apiBaseUrl,
+        connectTimeout: Duration(milliseconds: AppConfig.connectTimeout),
+        receiveTimeout: Duration(milliseconds: AppConfig.receiveTimeout),
+        contentType: 'application/json',
+      ),
+    ),
+  );
 
   // Services
   getIt.registerLazySingleton<AuthService>(
@@ -67,7 +78,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<UserService>(
     () => UserServiceImpl(
-      client: getIt<http.Client>(),
+      dio: getIt<Dio>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),

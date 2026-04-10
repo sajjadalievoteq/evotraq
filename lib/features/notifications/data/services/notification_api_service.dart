@@ -23,7 +23,7 @@ class NotificationApiService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

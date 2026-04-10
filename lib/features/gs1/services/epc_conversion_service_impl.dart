@@ -127,10 +127,10 @@ class EPCConversionServiceImpl implements EPCConversionService {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final Uri uri = extension != null 
+    final Uri uri = extension != null
         ? Uri.parse('${_appConfig.apiBaseUrl}/api/epc/gln/to-epc?gln=$gln&extension=$extension')
         : Uri.parse('${_appConfig.apiBaseUrl}/api/epc/gln/to-epc?gln=$gln');
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -382,7 +382,7 @@ class EPCConversionServiceImpl implements EPCConversionService {
       );
     }
   }
-  
+
   @override
   Future<List<Map<String, String>>> convertEPCListToSGTINs(List<String> epcList) async {
     final token = await _tokenManager.getToken();
@@ -404,7 +404,7 @@ class EPCConversionServiceImpl implements EPCConversionService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       final List<dynamic> items = responseData['items'];
-      
+
       return items.map<Map<String, String>>((dynamic item) {
         return {
           'gtin': item['gtin'] as String,

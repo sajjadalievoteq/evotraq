@@ -35,7 +35,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
   }  @override
   Future<TransactionEvent> getTransactionEventById(String id) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId;
     if (id.contains(':')) {
@@ -45,7 +45,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       cleanId = id;
       print('DEBUG: Using ID as is: $cleanId');
     }
-    
+
     try {
       print('DEBUG: Sending request to: $_baseUrl/$cleanId');
       final response = await _httpClient.get(
@@ -76,7 +76,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/event-id/$eventId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -92,7 +92,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       headers: headers,
       body: json.encode(event.toJson()),
     );
-    
+
     if (response.statusCode == 201) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -108,7 +108,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       headers: headers,
       body: json.encode(event.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -123,7 +123,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to delete transaction event: ${response.statusCode}');
     }
@@ -135,7 +135,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/action/$action'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -150,7 +150,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -165,7 +165,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/epcclass/$epcClass'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -180,7 +180,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/biz-transaction?type=$type&id=$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -195,7 +195,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/business-step/$businessStep'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -210,7 +210,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/business-step/$businessStep/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -225,7 +225,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/disposition/$disposition/epc/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -244,13 +244,13 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/time-range?startTime=$startTimeStr&endTime=$endTimeStr'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       final allEvents = eventList.map((json) => TransactionEvent.fromJson(json)).toList();
-      
+
       // Filter by location
-      return allEvents.where((event) => 
+      return allEvents.where((event) =>
         event.businessLocation != null && event.businessLocation!.glnCode == locationGLN
       ).toList();
     } else {
@@ -265,7 +265,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/active/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -281,7 +281,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Uri.parse('$_baseUrl/history/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransactionEvent.fromJson(json)).toList();
@@ -299,7 +299,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Map<String, String> bizData,
       DateTime eventTime) async {
     final headers = await _getHeaders();
-    
+
     // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId}
@@ -307,7 +307,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
     // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
-    
+
     // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
@@ -335,15 +335,15 @@ class TransactionEventServiceImpl implements TransactionEventService {
       requestData['businessLocation'] = locationGLN; // Use businessLocation instead of bizLocation as field name
       requestData['readPoint'] = locationGLN;
     }
-    
+
     final body = json.encode(requestData);
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl/add'),
       headers: headers,
       body: body,
     );
-    
+
     if (response.statusCode == 201) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -367,7 +367,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Map<String, String> bizData,
       DateTime eventTime) async {
     final headers = await _getHeaders();
-    
+
     // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId}
@@ -375,7 +375,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
         // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
-    
+
     // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
@@ -403,15 +403,15 @@ class TransactionEventServiceImpl implements TransactionEventService {
       requestData['businessLocation'] = locationGLN; // Use businessLocation instead of bizLocation as field name
       requestData['readPoint'] = locationGLN;
     }
-    
+
     final body = json.encode(requestData);
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl/delete'),
       headers: headers,
       body: body,
     );
-    
+
     if (response.statusCode == 201) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -435,7 +435,7 @@ class TransactionEventServiceImpl implements TransactionEventService {
       Map<String, String> bizData,
       DateTime eventTime) async {
     final headers = await _getHeaders();
-    
+
     // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId}
@@ -443,11 +443,11 @@ class TransactionEventServiceImpl implements TransactionEventService {
     // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
-    
+
     // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
-    
+
     // Ensure GLN codes are sent correctly for lookup on the backend
     final Map<String, dynamic> requestData = {
       'eventId': eventId,
@@ -472,16 +472,16 @@ class TransactionEventServiceImpl implements TransactionEventService {
       requestData['businessLocation'] = locationGLN; // Use businessLocation instead of bizLocation as field name
       requestData['readPoint'] = locationGLN;
     }
-    
+
     final body = json.encode(requestData);
-    
+
     // Since we might not have a dedicated endpoint for OBSERVE, we'll use the general create endpoint
     final response = await _httpClient.post(
       Uri.parse(_baseUrl),
       headers: headers,
       body: body,
     );
-    
+
     if (response.statusCode == 201) {
       return TransactionEvent.fromJson(json.decode(response.body));
     } else {
@@ -501,14 +501,14 @@ class TransactionEventServiceImpl implements TransactionEventService {
     // Ensure we're working with UTC time and add extra buffer for safety
     final utcDateTime = dateTime.toUtc().subtract(const Duration(seconds: 30));
     String isoString = utcDateTime.toIso8601String();
-    
+
     // Check if it already has timezone information
-    if (isoString.endsWith('Z') || 
-        isoString.contains('+') || 
+    if (isoString.endsWith('Z') ||
+        isoString.contains('+') ||
         isoString.contains('-', isoString.length - 6)) {
       return isoString;
     }
-    
+
     // Add timezone offset
     return '${isoString}Z';  // Use Z for UTC
   }

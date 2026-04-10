@@ -46,7 +46,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       Uri.parse(_baseUrl),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> coordinatesList = json.decode(response.body);
       return coordinatesList.map((json) => GeospatialCoordinates.fromJson(json)).toList();
@@ -62,7 +62,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       Uri.parse('$_baseUrl?page=$page&size=$size'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       final List<dynamic> content = responseData['content'];
@@ -79,18 +79,18 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
   @override
   Future<GeospatialCoordinates> getGeospatialCoordinatesById(String id) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return GeospatialCoordinates.fromJson(json.decode(response.body));
     } else {
@@ -106,7 +106,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       headers: headers,
       body: json.encode(coordinates.toJson()),
     );
-    
+
     if (response.statusCode == 201) {
       return GeospatialCoordinates.fromJson(json.decode(response.body));
     } else {
@@ -117,19 +117,19 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
   @override
   Future<GeospatialCoordinates> updateGeospatialCoordinates(String id, GeospatialCoordinates coordinates) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.put(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
       body: json.encode(coordinates.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return GeospatialCoordinates.fromJson(json.decode(response.body));
     } else {
@@ -140,18 +140,18 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
   @override
   Future<void> deleteGeospatialCoordinates(String id) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.delete(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Failed to delete geospatial coordinates: ${response.statusCode}');
     }
@@ -164,7 +164,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       Uri.parse('$_baseUrl/gln/$glnCode'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final dynamic data = json.decode(response.body);
       if (data != null) {
@@ -187,7 +187,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       headers: headers,
       body: json.encode(coordinates.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return GLN.fromJson(json.decode(response.body));
     } else {
@@ -202,7 +202,7 @@ class GeospatialCoordinatesServiceImpl implements GeospatialCoordinatesService {
       Uri.parse('$_baseUrl/locations/nearby?lat=$latitude&lon=$longitude&radius=$radiusKm'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> locationsList = json.decode(response.body);
       return locationsList.map((json) => GLN.fromJson(json)).toList();

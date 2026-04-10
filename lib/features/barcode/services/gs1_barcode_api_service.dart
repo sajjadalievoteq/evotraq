@@ -11,35 +11,35 @@ class GS1BarcodeApiService {
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
   late final String _baseUrl;
-  
+
   GS1BarcodeApiService({
     required http.Client client,
     required TokenManager tokenManager,
     required AppConfig appConfig,
-  }) : 
+  }) :
     _client = client,
     _tokenManager = tokenManager,
     _appConfig = appConfig {
     // Remove the '/api' suffix as it might be already included in the apiBaseUrl
-    _baseUrl = _appConfig.apiBaseUrl.endsWith('/api') 
-        ? _appConfig.apiBaseUrl 
+    _baseUrl = _appConfig.apiBaseUrl.endsWith('/api')
+        ? _appConfig.apiBaseUrl
         : '${_appConfig.apiBaseUrl}/api';
   }
-  
+
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     return {
       'Content-Type': 'application/json',
       'Accept': '*/*',
       'Authorization': 'Bearer $token',
     };
   }
-  
+
   /// Verify a GS1 barcode using the simplified API endpoint
   Future<Map<String, dynamic>> verifyGS1Barcode(String gs1ElementString) async {
     final headers = await _getHeaders();
@@ -49,17 +49,17 @@ class GS1BarcodeApiService {
         'data': gs1ElementString,
       },
     );
-    
+
     debugPrint('Calling GS1 barcode verification API: ${uri.toString()}');
-    
+
     try {
       final response = await _client.get(
         uri,
         headers: headers,
       );
-      
+
       debugPrint('GS1 barcode verification response status: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         debugPrint('GS1 barcode verification successful: ${result.toString()}');
@@ -73,7 +73,7 @@ class GS1BarcodeApiService {
       rethrow;
     }
   }
-  
+
   /// Try alternative verify endpoint if the first one fails
   Future<Map<String, dynamic>> _tryAlternativeEndpoint(String gs1ElementString, Map<String, String> headers) async {
     // Try the /api/barcodes/verify endpoint if gs1/verify fails
@@ -82,15 +82,15 @@ class GS1BarcodeApiService {
         'data': gs1ElementString,
       },
     );
-    
+
     debugPrint('Trying alternative GS1 verification endpoint: ${uri.toString()}');
-    
+
     final response = await _client.get(
       uri,
       headers: headers,
     );
       debugPrint('Alternative endpoint response status: ${response.statusCode}');
-    
+
     if (response.statusCode == 200) {
       final result = json.decode(response.body);
       // Ensure result has the expected format for our GS1 scanner
@@ -111,7 +111,7 @@ class GS1BarcodeApiService {
       );
     }
   }
-  
+
   /// Parse error message from response body
   String? _parseErrorMessage(String responseBody) {
     try {

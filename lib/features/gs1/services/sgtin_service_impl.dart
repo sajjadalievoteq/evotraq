@@ -77,15 +77,15 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -121,7 +121,7 @@ class SGTINServiceImpl implements SGTINService {
     print('Creating SGTIN with JSON: $jsonData');
     print('currentLocation in SGTIN object: ${sgtin.currentLocation}');
     print('currentLocation GLN code: ${sgtin.currentLocation?.glnCode}');
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins'),
       headers: {
@@ -139,9 +139,9 @@ class SGTINServiceImpl implements SGTINService {
       } catch (_) {
         // If we can't parse the response as JSON, use the default error handling
       }
-      
+
       // Check for specific error conditions
-      if (response.statusCode == 404 && errorBody != null && 
+      if (response.statusCode == 404 && errorBody != null &&
           errorBody['message']?.toString().contains('GTIN not found') == true) {
         throw ApiException(
           statusCode: response.statusCode,
@@ -248,14 +248,14 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'batchLotNumber': batchLotNumber,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/batch')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -282,14 +282,14 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'status': status.name,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/status')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -316,7 +316,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.get(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/location/$glnCode'),
       headers: {
@@ -343,7 +343,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.get(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/sscc/$ssccCode'),
       headers: {
@@ -370,16 +370,16 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    
+
     final queryParams = <String, String>{
       'date': dateStr,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/expiring')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -406,14 +406,14 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'market': regulatoryMarket,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/market')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -447,7 +447,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -456,10 +456,10 @@ class SGTINServiceImpl implements SGTINService {
       if (status != null) 'status': status.name,
       if (locationId != null) 'locationId': locationId.toString(),
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/search')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -500,7 +500,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -512,10 +512,10 @@ class SGTINServiceImpl implements SGTINService {
       if (status != null) 'status': status.name,
       if (locationName != null && locationName.isNotEmpty) 'locationName': locationName,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/search/advanced')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -551,7 +551,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.put(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/$serialNumber/status'),
       headers: {
@@ -577,7 +577,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.put(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/$serialNumber/location'),
       headers: {
@@ -603,7 +603,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.put(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/$serialNumber/pack'),
       headers: {
@@ -629,14 +629,14 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'randomized': randomized.toString(),
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/generate-serial/$gtinCode')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -662,7 +662,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/validate'),
       headers: {
@@ -692,14 +692,14 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'status': status.name,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/count/$gtinCode')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -731,9 +731,9 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final expiryDateStr = DateFormat('yyyy-MM-dd').format(expiryDate);
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/commission-multiple'),
       headers: {
@@ -767,7 +767,7 @@ class SGTINServiceImpl implements SGTINService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final response = await _client.put(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sgtins/$serialNumber/decommission'),
       headers: {

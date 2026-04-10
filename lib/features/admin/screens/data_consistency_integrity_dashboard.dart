@@ -87,13 +87,13 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   void _initializeServices() {
     final appConfig = getIt<AppConfig>();
     final tokenManager = getIt<TokenManager>();
-    
+
     _consistencyService = DataConsistencyService(
       client: getIt<http.Client>(),
       tokenManager: tokenManager,
       appConfig: appConfig,
     );
-    
+
     _correctionService = ErrorCorrectionService(
       client: getIt<http.Client>(),
       tokenManager: tokenManager,

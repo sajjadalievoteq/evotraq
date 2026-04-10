@@ -21,7 +21,7 @@ class BarcodeGenerationService {
        _appConfig = appConfig {
     _baseUrl = '${_appConfig.apiBaseUrl}/api/barcode/generate';
   }
-  
+
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenManager.getToken();
@@ -33,7 +33,7 @@ class BarcodeGenerationService {
       'Authorization': 'Bearer $token',
     };
   }
-  
+
   /// Generate a GS1 DataMatrix barcode
   Future<Uint8List> generateDataMatrix({
     required String gs1ElementString,
@@ -41,7 +41,7 @@ class BarcodeGenerationService {
     int height = 300,
   }) async {
     final headers = await _getHeaders();
-    
+
     final uri = Uri.parse('$_baseUrl/datamatrix').replace(
       queryParameters: {
         'gs1ElementString': gs1ElementString,
@@ -49,9 +49,9 @@ class BarcodeGenerationService {
         'height': height.toString(),
       },
     );
-    
+
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
@@ -69,7 +69,7 @@ class BarcodeGenerationService {
     int height = 150,
   }) async {
     final headers = await _getHeaders();
-    
+
     final uri = Uri.parse('$_baseUrl/gs1-128').replace(
       queryParameters: {
         'gs1ElementString': gs1ElementString,
@@ -77,9 +77,9 @@ class BarcodeGenerationService {
         'height': height.toString(),
       },
     );
-    
+
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
@@ -100,7 +100,7 @@ class BarcodeGenerationService {
     int height = 300,
   }) async {
     final headers = await _getHeaders();
-    
+
     // Build query parameters
     final queryParams = {
       'gtin': gtin,
@@ -108,22 +108,22 @@ class BarcodeGenerationService {
       'width': width.toString(),
       'height': height.toString(),
     };
-    
+
     // Add optional parameters if provided
     if (expiryDate != null) {
       queryParams['expiryDate'] = expiryDate;
     }
-    
+
     if (batchLot != null) {
       queryParams['batchLot'] = batchLot;
     }
-    
+
     final uri = Uri.parse('$_baseUrl/sgtin-datamatrix').replace(
       queryParameters: queryParams,
     );
-    
+
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
@@ -142,7 +142,7 @@ class BarcodeGenerationService {
     int height = 150,
   }) async {
     final headers = await _getHeaders();
-    
+
     final uri = Uri.parse('$_baseUrl/sscc').replace(
       queryParameters: {
         'sscc': sscc,
@@ -151,9 +151,9 @@ class BarcodeGenerationService {
         'height': height.toString(),
       },
     );
-    
+
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
@@ -172,7 +172,7 @@ class BarcodeGenerationService {
     int height = 150,
   }) async {
     final headers = await _getHeaders();
-    
+
     final uri = Uri.parse('$_baseUrl/generic').replace(
       queryParameters: {
         'data': data,
@@ -181,9 +181,9 @@ class BarcodeGenerationService {
         'height': height.toString(),
       },
     );
-    
+
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
@@ -193,7 +193,7 @@ class BarcodeGenerationService {
       );
     }
   }
-  
+
   /// Helper to parse error messages from API responses
   String? _parseErrorMessage(String responseBody) {
     try {

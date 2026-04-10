@@ -47,7 +47,7 @@ class ProductJourneyServiceImpl implements ProductJourneyService {
   Future<ProductJourney?> getJourneyByEpc(String epcUri) async {
     try {
       final headers = await _getHeaders();
-      
+
       // Fetch all events for this EPC
       final events = await _fetchEventsForEpc(epcUri, headers);
       
@@ -99,7 +99,7 @@ class ProductJourneyServiceImpl implements ProductJourneyService {
     // For now, search by serial and filter by GTIN
     try {
       final headers = await _getHeaders();
-      
+
       // First, try to find SGTIN by GTIN and serial
       final sgtinResponse = await _client.get(
         Uri.parse('$_baseUrl/identifiers/sgtins/search?gtin=$gtin&serialNumber=$serialNumber'),
@@ -189,7 +189,7 @@ class ProductJourneyServiceImpl implements ProductJourneyService {
   }
 
   Future<List<Map<String, dynamic>>> _fetchEventsForEpc(
-    String epcUri, 
+    String epcUri,
     Map<String, String> headers
   ) async {
     final allEvents = <Map<String, dynamic>>[];
@@ -292,7 +292,7 @@ class ProductJourneyServiceImpl implements ProductJourneyService {
   }
 
   Future<void> _enrichStepsWithLocationData(
-    List<JourneyStep> steps, 
+    List<JourneyStep> steps,
     Map<String, String> headers
   ) async {
     final locationCache = <String, Map<String, String>>{};

@@ -39,13 +39,13 @@ class ApiManagementService {
       'size': size.toString(),
       if (active != null) 'active': active.toString(),
     };
-    
+
     final uri = Uri.parse('$_integrationLayerUrl/admin/v1/partners')
         .replace(queryParameters: queryParams);
-    
+
     final headers = await _getHeaders();
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final partners = data['partners'] as List;
@@ -62,7 +62,7 @@ class ApiManagementService {
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return Partner.fromJson(json.decode(response.body));
     } else {
@@ -91,14 +91,14 @@ class ApiManagementService {
       if (contactEmail != null) 'contactEmail': contactEmail,
       if (contactPhone != null) 'contactPhone': contactPhone,
     };
-    
+
     final headers = await _getHeaders();
     final response = await _client.post(
       Uri.parse('$_integrationLayerUrl/admin/v1/partners'),
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 201) {
       return Partner.fromJson(json.decode(response.body));
     } else {
@@ -128,14 +128,14 @@ class ApiManagementService {
       if (contactPhone != null) 'contactPhone': contactPhone,
       if (active != null) 'active': active,
     };
-    
+
     final headers = await _getHeaders();
     final response = await _client.put(
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return Partner.fromJson(json.decode(response.body));
     } else {
@@ -151,7 +151,7 @@ class ApiManagementService {
       headers: headers,
       body: json.encode(data),
     );
-    
+
     if (response.statusCode == 200) {
       return Partner.fromJson(json.decode(response.body));
     } else {
@@ -167,7 +167,7 @@ class ApiManagementService {
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to delete partner: ${response.statusCode}');
     }
@@ -182,7 +182,7 @@ class ApiManagementService {
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final credentials = json.decode(response.body) as List;
       return credentials.map((c) => PartnerCredential.fromJson({
@@ -207,14 +207,14 @@ class ApiManagementService {
       if (scopes != null) 'scopes': scopes,
       if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
     };
-    
+
     final headers = await _getHeaders();
     final response = await _client.post(
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/api-key'),
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 201) {
       return ApiKeyCredentialResponse.fromJson(json.decode(response.body));
     } else {
@@ -235,14 +235,14 @@ class ApiManagementService {
       if (scopes != null) 'scopes': scopes,
       if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
     };
-    
+
     final headers = await _getHeaders();
     final response = await _client.post(
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/oauth2'),
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 201) {
       return OAuth2CredentialResponse.fromJson(json.decode(response.body));
     } else {
@@ -257,7 +257,7 @@ class ApiManagementService {
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to revoke credential: ${response.statusCode}');
     }
@@ -274,13 +274,13 @@ class ApiManagementService {
     final body = <String, dynamic>{};
     if (scopes != null) body['scopes'] = scopes;
     if (rateLimitPerMinute != null) body['rateLimitPerMinute'] = rateLimitPerMinute;
-    
+
     final response = await _client.patch(
       Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId'),
       headers: headers,
       body: json.encode(body),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -301,13 +301,13 @@ class ApiManagementService {
       if (from != null) 'from': from.toIso8601String(),
       if (to != null) 'to': to.toIso8601String(),
     };
-    
+
     final uri = Uri.parse('$_integrationLayerUrl/api/v1/audit/admin/$partnerId')
         .replace(queryParameters: queryParams);
-    
+
     final headers = await _getHeaders();
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       final logs = json.decode(response.body) as List;
       return logs.map((l) => ApiAuditLog.fromJson(l)).toList();
@@ -325,13 +325,13 @@ class ApiManagementService {
       if (from != null) 'from': from.toIso8601String(),
       if (to != null) 'to': to.toIso8601String(),
     };
-    
+
     final uri = Uri.parse('$_integrationLayerUrl/api/v1/audit/admin/$partnerId/stats')
         .replace(queryParameters: queryParams);
-    
+
     final headers = await _getHeaders();
     final response = await _client.get(uri, headers: headers);
-    
+
     if (response.statusCode == 200) {
       return ApiUsageStats.fromJson(json.decode(response.body));
     } else {
@@ -348,7 +348,7 @@ class ApiManagementService {
         Uri.parse('$_integrationLayerUrl/health/detailed'),
         headers: {'Content-Type': 'application/json'},
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {

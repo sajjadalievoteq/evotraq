@@ -21,7 +21,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
        _appConfig = appConfig {
     _baseUrl = '${_appConfig.apiBaseUrl}/transformation-events';
   }
-  
+
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenManager.getToken();
@@ -30,7 +30,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       'Authorization': 'Bearer $token',
     };
   }
-  
+
   @override
   Future<TransformationEvent> getTransformationEventById(String id) async {
     final headers = await _getHeaders();
@@ -38,7 +38,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return TransformationEvent.fromJson(json.decode(response.body));
     } else {
@@ -52,7 +52,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/event/$eventId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return TransformationEvent.fromJson(json.decode(response.body));
     } else {
@@ -68,7 +68,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       headers: headers,
       body: json.encode(event.toJson()),
     );
-    
+
     if (response.statusCode == 201) {
       return TransformationEvent.fromJson(json.decode(response.body));
     } else {
@@ -84,7 +84,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       headers: headers,
       body: json.encode(event.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return TransformationEvent.fromJson(json.decode(response.body));
     } else {
@@ -99,7 +99,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/$id'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw Exception('Failed to delete transformation event: ${response.statusCode}');
     }
@@ -111,7 +111,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/by-transformation/$transformationId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -126,7 +126,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/product/$inputEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -141,7 +141,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/product/$outputEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -156,7 +156,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/batch/$inputEPCClass'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -171,7 +171,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/batch/$outputEPCClass'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       return eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -188,7 +188,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/input-output?inputEPC=$inputEPC&outputEPC=$outputEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -205,7 +205,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       final allEvents = eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -227,7 +227,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/product/$outputEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> eventList = json.decode(response.body);
       final events = eventList.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -244,13 +244,13 @@ class TransformationEventServiceImpl implements TransformationEventService {
       String locationGLN, DateTime startTime, DateTime endTime) async {
     // While there's no direct endpoint for this combined query, we can use pagination and filters more efficiently
     final headers = await _getHeaders();
-    
+
     // Use the pagination endpoint with a larger page size
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl?page=0&size=100&sortBy=eventTime&direction=ASC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       
@@ -259,7 +259,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
         final allEvents = eventList.map((json) => TransformationEvent.fromJson(json)).toList();
         
         // Filter by location and time window
-        return allEvents.where((event) => 
+        return allEvents.where((event) =>
           event.readPoint != null && 
           event.readPoint!.toString().contains(locationGLN) &&
           event.eventTime.isAfter(startTime) && 
@@ -283,7 +283,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Map<String, String> parameters,
       Map<String, String> bizData) async {
     final headers = await _getHeaders();
-    
+
     // Build a transformation event DTO
     final transformationEventDto = {
       'transformationID': transformationId,
@@ -297,13 +297,13 @@ class TransformationEventServiceImpl implements TransformationEventService {
       'eventTime': DateTime.now().toIso8601String(),
       'eventTimeZoneOffset': DateTime.now().timeZoneOffset.toString(),
     };
-    
+
     final response = await _httpClient.post(
       Uri.parse('$_baseUrl'),
       headers: headers,
       body: json.encode(transformationEventDto),
     );
-    
+
     if (response.statusCode == 201) {
       return TransformationEvent.fromJson(json.decode(response.body));
     } else {
@@ -318,7 +318,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/track/$epc'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
@@ -334,7 +334,7 @@ class TransformationEventServiceImpl implements TransformationEventService {
       Uri.parse('$_baseUrl/input-output?inputEPC=$inputEPC&outputEPC=$outputEPC'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();

@@ -70,7 +70,7 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
         
         try {
           debugPrint('CommissioningService: Processing serial $serialNumber (${i + 1}/${request.serialNumbers.length})');
-          
+
           // Create SGTIN - the backend will automatically create the commissioning ObjectEvent
           final sgtinData = {
             'gtin': request.gtinCode,
@@ -78,15 +78,15 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
             'batchLotNumber': request.batchLotNumber,
             'currentLocationGLN': request.commissioningLocationGLN,
             'status': 'COMMISSIONED',
-            if (request.expiryDate != null) 
+            if (request.expiryDate != null)
               'expiryDate': request.expiryDate!.toUtc().toIso8601String(),
-            if (request.productionDate != null) 
+            if (request.productionDate != null)
               'productionDate': request.productionDate!.toUtc().toIso8601String(),
-            if (request.bestBeforeDate != null) 
+            if (request.bestBeforeDate != null)
               'bestBeforeDate': request.bestBeforeDate!.toUtc().toIso8601String(),
-            if (request.regulatoryMarket != null) 
+            if (request.regulatoryMarket != null)
               'regulatoryMarket': request.regulatoryMarket,
-            if (request.regulatoryStatus != null) 
+            if (request.regulatoryStatus != null)
               'regulatoryStatus': request.regulatoryStatus,
           };
 
@@ -100,17 +100,17 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
             final responseData = jsonDecode(response.body);
             final sgtinId = responseData['id']?.toString();
             final sgtinUri = responseData['sgtinUri'];
-            
+
             createdSgtinIds.add(sgtinId ?? serialNumber);
             successCount++;
-            
+
             itemResults.add(CommissioningItemResult(
               serialNumber: serialNumber,
               sgtinId: sgtinId,
               epcUri: sgtinUri,
               success: true,
             ));
-            
+
             debugPrint('CommissioningService: Successfully commissioned $serialNumber -> $sgtinUri');
           } else {
             failCount++;
@@ -121,14 +121,14 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
             } catch (_) {
               errorMsg = 'Failed to create SGTIN: ${response.reasonPhrase}';
             }
-            
+
             itemResults.add(CommissioningItemResult(
               serialNumber: serialNumber,
               success: false,
               errorMessage: errorMsg,
             ));
             messages.add('Failed to commission $serialNumber: $errorMsg');
-            
+
             debugPrint('CommissioningService: Failed to commission $serialNumber: $errorMsg');
           }
         } catch (e) {
@@ -144,7 +144,7 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
       }
 
       final processingTime = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       // Determine overall status
       CommissioningStatus status;
       if (failCount == 0) {
@@ -206,7 +206,7 @@ class CommissioningOperationServiceImpl implements CommissioningOperationService
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> content = data['content'] ?? data;
-        
+
         // Group events by commissioning reference if available
         // For now, return each event as a separate operation
         return content.map((event) => _parseObjectEventToCommissioningResponse(event)).toList();

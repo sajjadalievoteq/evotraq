@@ -26,26 +26,26 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     // After multiple attempts, we've determined the backend only needs the SSCC code itself
     // and not the individual components (extensionDigit, serialReference, checkDigit)
-    
+
     // Validate that the SSCC code is provided and is the correct length (18 digits)
     if (sscc.ssccCode.isEmpty) {
       throw ApiException(message: 'SSCC code is required');
     }
-    
+
     if (sscc.ssccCode.length != 18) {
       throw ApiException(message: 'SSCC code must be exactly 18 digits');
     }
-    
+
     // Create the JSON payload and log it for detailed debugging
     final Map<String, dynamic> jsonPayload = sscc.toJson();
     final String jsonBody = json.encode(jsonPayload);
     print('SSCC Create request payload: $jsonBody');
     print('SSCC Create request payload fields: ${jsonPayload.keys}');
     print('SSCC API endpoint: ${_appConfig.apiBaseUrl}/identifiers/sscc');
-    
+
     // Verify that we're sending ONLY the exact fields the backend accepts
     print('FINAL SSCC CREATE PAYLOAD VERIFICATION:');
     print('Total fields in payload: ${jsonPayload.length}');
@@ -53,12 +53,12 @@ class SSCCServiceImpl implements SSCCService {
     jsonPayload.forEach((key, value) {
       print(' - $key: $value');
     });
-    
+
     print('Verifying required fields are present:');
     print(' - Has "sscc" field: ${jsonPayload.containsKey('sscc')}');
     print(' - Has "containerType" field: ${jsonPayload.containsKey('containerType')}');
     print(' - Has "containerStatus" field: ${jsonPayload.containsKey('containerStatus')}');
-    
+
     print('Verifying problematic fields are NOT present:');
     print(' - No "companyPrefix" field: ${!jsonPayload.containsKey('companyPrefix')}');
     print(' - No "gs1CompanyPrefix" field: ${!jsonPayload.containsKey('gs1CompanyPrefix')}');
@@ -67,7 +67,7 @@ class SSCCServiceImpl implements SSCCService {
     print(' - No "checkDigit" field: ${!jsonPayload.containsKey('checkDigit')}');
     print(' - No "createdAt" field: ${!jsonPayload.containsKey('createdAt')}');
     print(' - No "updatedAt" field: ${!jsonPayload.containsKey('updatedAt')}');
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc'),
       headers: {
@@ -81,7 +81,7 @@ class SSCCServiceImpl implements SSCCService {
       final responseData = json.decode(response.body);
       print('SSCC Create success response: $responseData');
       print('Response type: ${responseData.runtimeType}');
-      
+
       // Handle case where backend returns just the SSCC code as a string
       if (responseData is String) {
         print('Backend returned SSCC code as string: $responseData');
@@ -96,11 +96,11 @@ class SSCCServiceImpl implements SSCCService {
           'updatedAt': DateTime.now().toIso8601String(),
         };
         return SSCC.fromJson(ssccJson);
-      } 
+      }
       // Handle normal case where backend returns full SSCC JSON object
       else if (responseData is Map<String, dynamic>) {
         return SSCC.fromJson(responseData);
-      } 
+      }
       // Unexpected response format
       else {
         throw ApiException(
@@ -110,7 +110,7 @@ class SSCCServiceImpl implements SSCCService {
       }
     } else {
       print('SSCC Create error: ${response.statusCode} - ${response.body}');
-      
+
       // Try to parse error details from response body
       String errorDetail = response.reasonPhrase ?? 'Unknown error';
       try {
@@ -121,7 +121,7 @@ class SSCCServiceImpl implements SSCCService {
       } catch (e) {
         // Failed to parse error JSON
       }
-      
+
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to create SSCC: $errorDetail',
@@ -132,15 +132,15 @@ class SSCCServiceImpl implements SSCCService {
 
   @override  Future<SSCC> getSSCCById(String id) async {
     print('Fetching SSCC with ID: $id');
-    
+
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$id');
     print('Request URI: $uri');
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -148,19 +148,19 @@ class SSCCServiceImpl implements SSCCService {
         'Authorization': 'Bearer $token',
       },
     );    print('SSCC by ID response status: ${response.statusCode}, body: ${response.body}');
-    
+
     if (response.statusCode == 200) {
       try {
         final responseData = json.decode(response.body);
         print('Response data: $responseData');
-        
+
         // Make sure to handle the same field mappings as in the list
         if (responseData is Map<String, dynamic>) {
           // Handle 'sscc' vs 'ssccCode' field name discrepancy
           if (responseData.containsKey('sscc') && !responseData.containsKey('ssccCode')) {
             responseData['ssccCode'] = responseData['sscc'];
           }
-          
+
           // Handle statusDate for createdAt/updatedAt
           if (!responseData.containsKey('createdAt') && responseData.containsKey('statusDate')) {
             responseData['createdAt'] = responseData['statusDate'];
@@ -169,7 +169,7 @@ class SSCCServiceImpl implements SSCCService {
             responseData['updatedAt'] = responseData['statusDate'];
           }
         }
-        
+
         return SSCC.fromJson(responseData);
       } catch (e) {
         print('Error parsing SSCC response: $e');
@@ -187,15 +187,15 @@ class SSCCServiceImpl implements SSCCService {
   @override
   Future<SSCC> getSSCCByCode(String ssccCode) async {
     print('Fetching SSCC with code: $ssccCode');
-    
+
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/code/$ssccCode');
     print('Request URI: $uri');
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -203,21 +203,21 @@ class SSCCServiceImpl implements SSCCService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     print('SSCC by code response status: ${response.statusCode}, body: ${response.body}');
-    
+
     if (response.statusCode == 200) {
       try {
         final responseData = json.decode(response.body);
         print('Response data: $responseData');
-        
+
         // Make sure to handle the same field mappings as in getSSCCById
         if (responseData is Map<String, dynamic>) {
           // Handle 'sscc' vs 'ssccCode' field name discrepancy
           if (responseData.containsKey('sscc') && !responseData.containsKey('ssccCode')) {
             responseData['ssccCode'] = responseData['sscc'];
           }
-          
+
           // Handle statusDate for createdAt/updatedAt
           if (!responseData.containsKey('createdAt') && responseData.containsKey('statusDate')) {
             responseData['createdAt'] = responseData['statusDate'];
@@ -226,7 +226,7 @@ class SSCCServiceImpl implements SSCCService {
             responseData['updatedAt'] = responseData['statusDate'];
           }
         }
-        
+
         return SSCC.fromJson(responseData);
       } catch (e) {
         print('Error parsing SSCC response: $e');
@@ -248,14 +248,14 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
     };
       final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -267,13 +267,13 @@ class SSCCServiceImpl implements SSCCService {
       try {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> content = data['content'] ?? [];
-        
+
         // Add debugging to check structure
         if (content.isNotEmpty) {
           print('First SSCC item structure: ${content[0]}');
           print('SSCC ID from response: ${content[0]['id']}');
         }
-        
+
         // Map each item in content to an SSCC object
         final results = content.map((item) {
           try {
@@ -282,12 +282,12 @@ class SSCCServiceImpl implements SSCCService {
               if (item.containsKey('sscc') && !item.containsKey('ssccCode')) {
                 item['ssccCode'] = item['sscc'];
               }
-              
+
               // Handle the statusDate field as a fallback for createdAt/updatedAt
               if (!item.containsKey('createdAt') && item.containsKey('statusDate')) {
                 item['createdAt'] = item['statusDate'];
               }
-              
+
               if (!item.containsKey('updatedAt') && item.containsKey('statusDate')) {
                 item['updatedAt'] = item['statusDate'];
               }
@@ -308,7 +308,7 @@ class SSCCServiceImpl implements SSCCService {
             );
           }
         }).toList();
-        
+
         return results;
       } catch (e) {
         print('Error parsing SSCC list: $e');
@@ -490,15 +490,15 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/packed-between')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -524,15 +524,15 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/shipped-between')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -589,7 +589,7 @@ class SSCCServiceImpl implements SSCCService {
     final queryParams = <String, String>{
       'companyPrefix': gs1CompanyPrefix,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/company')
         .replace(queryParameters: queryParams);
 
@@ -623,17 +623,17 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final queryParams = <String, String>{
       if (containerType != null) 'containerType': containerType.name,
       if (containerStatus != null) 'containerStatus': containerStatus.name,
       if (sourceLocationId != null) 'sourceLocationId': sourceLocationId,
       if (destinationLocationId != null) 'destinationLocationId': destinationLocationId,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/search')
         .replace(queryParameters: queryParams);
-    
+
     final response = await _client.get(
       uri,
       headers: {
@@ -688,7 +688,7 @@ class SSCCServiceImpl implements SSCCService {
     final queryParams = <String, String>{
       'ssccCode': ssccCode,
     };
-    
+
     final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/validate')
         .replace(queryParameters: queryParams);
 
@@ -714,18 +714,18 @@ class SSCCServiceImpl implements SSCCService {
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    
+
     final Map<String, String> requestBody = {
       'companyPrefix': gs1CompanyPrefix,
       'containerType': 'PALLET', // Default container type
     };
-    
+
     if (extensionDigit.isNotEmpty) {
       requestBody['extensionDigit'] = extensionDigit;
     }
-    
+
     print('Sending SSCC generate request with: $requestBody');
-    
+
     final response = await _client.post(
       Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/generate'),
       headers: {
@@ -738,16 +738,16 @@ class SSCCServiceImpl implements SSCCService {
     if (response.statusCode == 201 || response.statusCode == 200) {
       // Parse the response directly instead of using SSCC.fromJson
       final Map<String, dynamic> responseData = json.decode(response.body);
-      
+
       // Debug information
       print('SSCC Generation Response: $responseData');
-      
+
       String? ssccCode;
         // Check if the response contains the 'sscc' field directly (from backend standard)
       if (responseData.containsKey('sscc') && responseData['sscc'] != null) {
         ssccCode = responseData['sscc'].toString();
         print('Using sscc field from response: $ssccCode');
-      } 
+      }
       // Check for ssccCode field (frontend convention)
       else if (responseData.containsKey('ssccCode') && responseData['ssccCode'] != null) {
         ssccCode = responseData['ssccCode'].toString();
@@ -764,11 +764,11 @@ class SSCCServiceImpl implements SSCCService {
           // Fall through to error message below
         }
       }
-      
+
       if (ssccCode != null) {
         // Use the improved validation and fix function from GS1Utils
         final validatedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
-        
+
         if (validatedSSCC != null) {
           print('Validated SSCC: $validatedSSCC');
           return validatedSSCC;
@@ -787,7 +787,7 @@ class SSCCServiceImpl implements SSCCService {
           }
         }
       }
-      
+
       // If we couldn't extract the SSCC code from the response
       throw ApiException(
         message: 'Invalid response format: SSCC code not found in response: $responseData',
@@ -804,24 +804,24 @@ class SSCCServiceImpl implements SSCCService {
     if (glnInput.isEmpty) {
       throw ApiException(message: 'GLN input cannot be empty');
     }
-    
+
     print('Extracting company prefix from GLN input: $glnInput');
-    
+
     // First, check if the input is in a special format (GS1 barcode or URN)
     // and extract the actual GLN code
     String? glnCode;
-    
+
     // Check for URN format that contains company prefix directly
     final urnPrefixRegex = RegExp(r'urn:epc:id:sgln:(\d{7,10})\..*');
     final urnPrefixMatch = urnPrefixRegex.firstMatch(glnInput);
-    
+
     if (urnPrefixMatch != null && urnPrefixMatch.group(1) != null) {
       // In URN format, we can directly extract the company prefix
       final companyPrefix = urnPrefixMatch.group(1);
       print('Extracted company prefix directly from URN: $companyPrefix');
       return companyPrefix!;
     }
-    
+
     // Check if it's already a plain 13-digit GLN
     if (glnInput.length == 13 && RegExp(r'^\d{13}$').hasMatch(glnInput)) {
       glnCode = glnInput;
@@ -836,20 +836,20 @@ class SSCCServiceImpl implements SSCCService {
         throw ApiException(message: 'Failed to parse GLN from input: ${e.toString()}');
       }
     }
-    
+
     // If we couldn't extract a GLN code, throw an error
     if (glnCode == null || glnCode.isEmpty) {
       throw ApiException(message: 'Invalid GLN format. GLN must be in one of these formats: 13 digits, (414)nnnnnnnnnnnn, or urn:epc:id:sgln:prefix.reference.0');
     }
-    
+
     // Validate GLN format
     if (glnCode.length != 13 || !RegExp(r'^\d{13}$').hasMatch(glnCode)) {
       throw ApiException(message: 'Invalid GLN format. GLN must be 13 digits');
     }
-    
+
     // Extract the company prefix (typically first 7-10 digits)
     // For simplicity, we'll use a fixed 7 digits in this implementation
-    // In a production environment, this should be based on the organization's 
+    // In a production environment, this should be based on the organization's
     // registered GS1 Company Prefix length
     final companyPrefix = glnCode.substring(0, 7);
     print('Extracted company prefix: $companyPrefix');
@@ -866,29 +866,29 @@ class SSCCServiceImpl implements SSCCService {
       print('Error using GS1Utils.extractGLNCode: $e');
       // Continue to fallback methods below
     }
-    
+
     // Fallback to direct parsing
-    
+
     // Check for GS1 barcode format with AI (414) for GLN
     final barcodeRegex = RegExp(r'\(414\)(\d{13})');
     final barcodeMatch = barcodeRegex.firstMatch(input);
-    
+
     if (barcodeMatch != null && barcodeMatch.group(1) != null) {
       final result = barcodeMatch.group(1);
       if (result != null && result.isNotEmpty) {
         return result;
       }
     }
-    
+
     // Check for URN format for GLN
     final urnRegex = RegExp(r'urn:epc:id:sgln:(\d{7,10})\.(\d{1,5})\.(\d)');
     final urnMatch = urnRegex.firstMatch(input);
-    
+
     if (urnMatch != null) {
       // Combine the parts and calculate check digit
       final companyPrefix = urnMatch.group(1);
       final locationReference = urnMatch.group(2)?.padLeft(5, '0');
-      
+
       if (companyPrefix != null && locationReference != null) {
         final glnWithoutCheck = companyPrefix + locationReference;
         // Calculate check digit - we'll use the GS1 standard algorithm
@@ -896,25 +896,25 @@ class SSCCServiceImpl implements SSCCService {
         return glnWithoutCheck + checkDigit;
       }
     }
-    
+
     // If the input itself is already a 13-digit number, it might be a plain GLN
     if (input.length == 13 && RegExp(r'^\d{13}$').hasMatch(input)) {
       return input;
     }
-    
+
     return null;
   }
-  
+
   /// Calculate GS1 check digit (same as in GS1Utils class)
   String _calculateGS1CheckDigit(String digits) {
     int sum = 0;
-    
+
     // Apply the weighting factors (3 and 1)
     for (int i = 0; i < digits.length; i++) {
       final digit = int.parse(digits[digits.length - 1 - i]);
       sum += (i % 2 == 0) ? digit * 3 : digit;
     }
-    
+
     // Calculate the check digit
     final checkDigit = (10 - (sum % 10)) % 10;
     return checkDigit.toString();
@@ -939,14 +939,14 @@ class SSCCServiceImpl implements SSCCService {
     }
 
     final queryParams = <String, String>{};
-    
+
     if (ssccCode?.isNotEmpty == true) queryParams['ssccCode'] = ssccCode!;
     if (containerType?.isNotEmpty == true) queryParams['containerType'] = containerType!;
     if (containerStatus?.isNotEmpty == true) queryParams['containerStatus'] = containerStatus!;
     if (sourceLocationName?.isNotEmpty == true) queryParams['sourceLocationName'] = sourceLocationName!;
     if (destinationLocationName?.isNotEmpty == true) queryParams['destinationLocationName'] = destinationLocationName!;
     if (gs1CompanyPrefix?.isNotEmpty == true) queryParams['gs1CompanyPrefix'] = gs1CompanyPrefix!;
-    
+
     queryParams['page'] = page.toString();
     queryParams['size'] = size.toString();
     queryParams['sortBy'] = sortBy;
@@ -971,11 +971,11 @@ class SSCCServiceImpl implements SSCCService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        
+
         // Convert content items to SSCC models
         final List<dynamic> contentList = responseData['content'] ?? [];
         final List<SSCC> ssccs = contentList.map((item) => SSCC.fromJson(item)).toList();
-        
+
         return {
           'content': ssccs,
           'number': responseData['number'] ?? 0,

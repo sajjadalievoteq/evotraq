@@ -43,7 +43,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: xmlContent,
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
@@ -63,7 +63,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(jsonLdContent),
       );
-      
+
       if (response.statusCode == 200) {
         return response.body;
       } else {
@@ -83,7 +83,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(document.toJson()),
       );
-      
+
       if (response.statusCode == 200) {
         return response.body;
       } else {
@@ -103,7 +103,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(document.toJson()),
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
@@ -123,7 +123,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: xmlContent,
       );
-      
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
         return EPCISDocumentDTO.fromJson(jsonData);
@@ -144,7 +144,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(jsonLdContent),
       );
-      
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
         return EPCISDocumentDTO.fromJson(jsonData);
@@ -165,7 +165,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: xmlContent,
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
@@ -185,7 +185,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(jsonContent),
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
@@ -204,7 +204,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
           'includeHeaders': includeHeaders.toString(),
         },
       );
-      
+
       final headers = await _getHeaders();
       headers['Accept'] = 'text/csv';
       final response = await _httpClient.post(
@@ -212,7 +212,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(queryParams.toJson()),
       );
-      
+
       if (response.statusCode == 200) {
         return response.body;
       } else {
@@ -231,7 +231,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
           'templateName': templateName,
         },
       );
-      
+
       final headers = await _getHeaders();
       headers['Accept'] = 'application/pdf';
       final response = await _httpClient.post(
@@ -260,7 +260,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(queryParams.toJson()),
       );
-      
+
       if (response.statusCode == 200) {
         return response.body;
       } else {
@@ -300,7 +300,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         Uri.parse('$_baseUrl/formats'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
         return jsonData.cast<String, String>();
@@ -321,7 +321,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         Uri.parse('$_baseUrl/negotiate-format'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final format = response.body;
         return format;
@@ -342,7 +342,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
         headers: headers,
         body: json.encode(epcisDocument.toJson()),
       );
-      
+
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
@@ -378,7 +378,7 @@ class EPCISSerializationServiceImpl extends EPCISSerializationService {
       throw Exception('Error importing events from JSON-LD: $e');
     }
   }
-  
+
   /// Dispose of resources
   void dispose() {
     _httpClient.close();

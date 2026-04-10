@@ -57,13 +57,13 @@ class PerformanceTestService {
     required String baseUrl,
   }) : _tokenManager = tokenManager ?? TokenManager(),
        _baseUrl = baseUrl;
-  
+
   Future<Map<String, dynamic>> _getWithAuth(String path) async {
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw Exception('Not authenticated');
     }
-    
+
     final response = await http.get(
       Uri.parse('$_baseUrl$path'),
       headers: {
@@ -71,7 +71,7 @@ class PerformanceTestService {
         'Authorization': 'Bearer $token',
       },
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
@@ -106,9 +106,9 @@ class PerformanceTestService {
   /// Run all performance tests
   Future<Map<String, PerformanceTestResult>> runAllPerformanceTests() async {
     final json = await _getWithAuth('/admin/performance-tests/run-all');
-    
+
     return json.map((key, value) => MapEntry(
-      key, 
+      key,
       PerformanceTestResult.fromJson(value as Map<String, dynamic>)
     ));
   }
@@ -120,7 +120,7 @@ class PerformanceTestService {
     
     for (int i = 0; i < iterations; i++) {
       // Use the frontend GS1Validator
-      await Future.microtask(() => 
+      await Future.microtask(() =>
         GS1Validator.isValidGTIN('12345678901231'));
     }
     

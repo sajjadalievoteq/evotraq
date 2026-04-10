@@ -10,7 +10,7 @@ class SensorElementServiceImpl implements SensorElementService {
   final http.Client _httpClient;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
-  
+
   /// Base endpoint for sensor element API
   late final String _baseUrl;
   
@@ -24,7 +24,7 @@ class SensorElementServiceImpl implements SensorElementService {
        _appConfig = appConfig {
     _baseUrl = '${_appConfig.apiBaseUrl}/sensor-elements';
   }
-  
+
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenManager.getToken();
@@ -41,7 +41,7 @@ class SensorElementServiceImpl implements SensorElementService {
       Uri.parse(_baseUrl),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> sensorElementList = json.decode(response.body);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
@@ -57,14 +57,14 @@ class SensorElementServiceImpl implements SensorElementService {
       Uri.parse('$_baseUrl?page=$page&size=$size'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       final List<dynamic> content = responseData['content'];
-      
-      responseData['content'] = content.map((json) => 
+
+      responseData['content'] = content.map((json) =>
         SensorElement.fromJson(json)).toList();
-        
+
       return responseData;
     } else {
       throw Exception('Failed to get paginated sensor elements: ${response.statusCode}');
@@ -74,18 +74,18 @@ class SensorElementServiceImpl implements SensorElementService {
   @override
   Future<SensorElement> getSensorElementById(String id) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       return SensorElement.fromJson(json.decode(response.body));
     } else {
@@ -101,7 +101,7 @@ class SensorElementServiceImpl implements SensorElementService {
       headers: headers,
       body: json.encode(sensorElement.toJson()),
     );
-    
+
     if (response.statusCode == 201) {
       return SensorElement.fromJson(json.decode(response.body));
     } else {
@@ -112,19 +112,19 @@ class SensorElementServiceImpl implements SensorElementService {
   @override
   Future<SensorElement> updateSensorElement(String id, SensorElement sensorElement) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.put(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
       body: json.encode(sensorElement.toJson()),
     );
-    
+
     if (response.statusCode == 200) {
       return SensorElement.fromJson(json.decode(response.body));
     } else {
@@ -135,18 +135,18 @@ class SensorElementServiceImpl implements SensorElementService {
   @override
   Future<void> deleteSensorElement(String id) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
     }
-    
+
     final response = await _httpClient.delete(
       Uri.parse('$_baseUrl/$cleanId'),
       headers: headers,
     );
-    
+
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Failed to delete sensor element: ${response.statusCode}');
     }
@@ -155,18 +155,18 @@ class SensorElementServiceImpl implements SensorElementService {
   @override
   Future<List<SensorElement>> getSensorElementsByEventId(String eventId) async {
     final headers = await _getHeaders();
-    
+
     // Extract UUID if the ID is in URN format
     String cleanId = eventId;
     if (eventId.contains(':')) {
       cleanId = eventId.split(':').last;
     }
-    
+
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/event/$cleanId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> sensorElementList = json.decode(response.body);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
@@ -182,7 +182,7 @@ class SensorElementServiceImpl implements SensorElementService {
       Uri.parse('$_baseUrl/device/$deviceId'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> sensorElementList = json.decode(response.body);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
@@ -198,7 +198,7 @@ class SensorElementServiceImpl implements SensorElementService {
       Uri.parse('$_baseUrl/measurement-type/$type'),
       headers: headers,
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> sensorElementList = json.decode(response.body);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();

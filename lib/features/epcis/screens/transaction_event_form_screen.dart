@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
@@ -19,34 +19,40 @@ class TransactionEventFormScreen extends StatefulWidget {
   /// The ID of the transaction event to edit, null for new events
   final String? transactionEventId;
 
-  const TransactionEventFormScreen({Key? key, this.transactionEventId}) : super(key: key);
+  const TransactionEventFormScreen({Key? key, this.transactionEventId})
+    : super(key: key);
 
   @override
-  _TransactionEventFormScreenState createState() => _TransactionEventFormScreenState();
+  _TransactionEventFormScreenState createState() =>
+      _TransactionEventFormScreenState();
 }
 
-class _TransactionEventFormScreenState extends State<TransactionEventFormScreen> with EventFormValidationMixin<TransactionEventFormScreen> {
+class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
+    with EventFormValidationMixin<TransactionEventFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers for form fields
   final _bizTransactionTypeController = TextEditingController();
   final _bizTransactionIdController = TextEditingController();
   final _epcsController = TextEditingController();
   final _locationGLNController = TextEditingController();
-  
+
   // String variables for dropdown values
   String? _businessStep;
   String? _disposition;
   String? _bizTransactionType;
 
   // Business data key-value pairs
-  final List<MapEntry<TextEditingController, TextEditingController>> _bizDataControllers = [];
-    // Other form state
+  final List<MapEntry<TextEditingController, TextEditingController>>
+  _bizDataControllers = [];
+  // Other form state
   String _selectedAction = 'ADD';
   bool _isEdit = false;
-  DateTime _eventTime = DateTime.now().subtract(const Duration(seconds: 5)); // Set to 5 seconds ago to avoid future time error
+  DateTime _eventTime = DateTime.now().subtract(
+    const Duration(seconds: 5),
+  ); // Set to 5 seconds ago to avoid future time error
   String _eventTimeZoneOffset = '+00:00'; // ISO 8601 timezone format
-  
+
   // GS1 standard business steps
   final List<String> _standardBusinessSteps = [
     'urn:epcglobal:cbv:bizstep:commissioning',
@@ -70,7 +76,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     'urn:epcglobal:cbv:bizstep:holding',
     'urn:epcglobal:cbv:bizstep:encoding',
   ];
-  
+
   // GS1 standard dispositions
   final List<String> _standardDispositions = [
     'urn:epcglobal:cbv:disp:active',
@@ -97,34 +103,36 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     'urn:epcglobal:cbv:disp:stolen',
     'urn:epcglobal:cbv:disp:unknown',
   ];
-  
+
   // Standard business transaction types from GS1 CBV
   final List<String> _standardBizTransactionTypes = [
-    'urn:epcglobal:cbv:btt:po',           // Purchase Order
-    'urn:epcglobal:cbv:btt:desadv',       // Despatch Advice
-    'urn:epcglobal:cbv:btt:inv',          // Invoice
-    'urn:epcglobal:cbv:btt:pedigree',     // Pedigree
-    'urn:epcglobal:cbv:btt:receipt',      // Receipt Advice
-    'urn:epcglobal:cbv:btt:prodorder',    // Production Order
-    'urn:epcglobal:cbv:btt:transdoc',     // Transport Document
-    'urn:epcglobal:cbv:btt:cert',         // Certificate
-    'urn:epcglobal:cbv:btt:bol',          // Bill of Lading
-    'urn:epcglobal:cbv:btt:customs',      // Customs Declaration
-    'urn:epcglobal:cbv:btt:contract',     // Contract
-  ];  @override
+    'urn:epcglobal:cbv:btt:po', // Purchase Order
+    'urn:epcglobal:cbv:btt:desadv', // Despatch Advice
+    'urn:epcglobal:cbv:btt:inv', // Invoice
+    'urn:epcglobal:cbv:btt:pedigree', // Pedigree
+    'urn:epcglobal:cbv:btt:receipt', // Receipt Advice
+    'urn:epcglobal:cbv:btt:prodorder', // Production Order
+    'urn:epcglobal:cbv:btt:transdoc', // Transport Document
+    'urn:epcglobal:cbv:btt:cert', // Certificate
+    'urn:epcglobal:cbv:btt:bol', // Bill of Lading
+    'urn:epcglobal:cbv:btt:customs', // Customs Declaration
+    'urn:epcglobal:cbv:btt:contract', // Contract
+  ];
+  @override
   void initState() {
     super.initState();
     _isEdit = widget.transactionEventId != null;
-    
+
     // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    
+
     // Format as +/-HH:MM for standard ISO 8601 timezone format
-    _eventTimeZoneOffset = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    
+    _eventTimeZoneOffset =
+        '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+
     if (_isEdit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadTransactionEvent();
@@ -134,52 +142,50 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
       _addBizDataField();
     }
   }
+
   @override
   void dispose() {
     _bizTransactionTypeController.dispose();
     _bizTransactionIdController.dispose();
     _epcsController.dispose();
     _locationGLNController.dispose();
-    
+
     for (var entry in _bizDataControllers) {
       entry.key.dispose();
       entry.value.dispose();
     }
-    
+
     super.dispose();
   }
-  
+
   /// Show success snackbar
   void showSuccessSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
   }
-  
+
   /// Show error snackbar
   void showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
-  }  /// Load transaction event data for editing  
+  }
+
+  /// Load transaction event data for editing
   Future<void> _loadTransactionEvent() async {
     if (widget.transactionEventId == null) return;
-    
-    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
-    final event = await provider.getTransactionEventById(widget.transactionEventId!);
-    
+
+    final event = await context
+        .read<TransactionEventsCubit>()
+        .getTransactionEventById(widget.transactionEventId!);
+
     if (event != null) {
       setState(() {
         // Fill form fields with event data
         _selectedAction = event.action;
         _eventTime = event.eventTime;
-        
+
         // Get first business transaction if available
         if (event.bizTransactionList.isNotEmpty) {
           final entry = event.bizTransactionList.entries.first;
@@ -190,19 +196,19 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             _bizTransactionType = entry.key;
           }
         }
-        
+
         // Join EPCs with comma
         _epcsController.text = event.epcList?.join(', ') ?? '';
-        
+
         // Use businessLocation GLN code if available
         _locationGLNController.text = event.businessLocation?.glnCode ?? '';
-        
+
         // Business Step now uses businessStep property from EPCISEvent
         _businessStep = event.businessStep;
-        
+
         // Disposition from base class
         _disposition = event.disposition;
-        
+
         // Set business data
         _bizDataControllers.clear();
         if (event.bizData != null && event.bizData!.isNotEmpty) {
@@ -222,7 +228,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
   void _addBizDataField() {
     setState(() {
       _bizDataControllers.add(
-        MapEntry(TextEditingController(), TextEditingController())
+        MapEntry(TextEditingController(), TextEditingController()),
       );
     });
   }
@@ -235,25 +241,31 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
       entry.value.dispose();
     });
   }
+
   /// Save transaction event
   Future<void> _saveTransactionEvent() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    final cubit = context.read<TransactionEventsCubit>();
+
     // Collect form data
-    final bizTransactionType = _bizTransactionType ?? _bizTransactionTypeController.text.trim();
+    final bizTransactionType =
+        _bizTransactionType ?? _bizTransactionTypeController.text.trim();
     final bizTransactionId = _bizTransactionIdController.text.trim();
     final epcs = _epcsController.text
         .split(',')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
-        .map((e) => EPCFormatter.formatToEPCUri(e)) // Format to EPC URI if needed
+        .map(
+          (e) => EPCFormatter.formatToEPCUri(e),
+        ) // Format to EPC URI if needed
         .toList();
     final locationGLN = _locationGLNController.text.trim();
     final businessStep = _businessStep ?? '';
     final disposition = _disposition ?? '';
-    
+
     // Build business data
     final bizData = <String, String>{};
     for (var entry in _bizDataControllers) {
@@ -263,19 +275,21 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         bizData[key] = value;
       }
     }
-    
-    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
-    
-    try {      if (_isEdit) {
+
+    try {
+      if (_isEdit) {
+        // For editing, we'd need the full event object
         // For editing, we'd need the full event object
         // Use a time that's definitely in the past to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
-        
+
         final event = TransactionEvent(
           id: widget.transactionEventId,
           eventId: widget.transactionEventId ?? '',
           eventTime: eventTime,
-          recordTime: DateTime.now(),          eventTimeZoneOffset: _eventTimeZoneOffset, // Use our formatted timezone
+          recordTime: DateTime.now(),
+          eventTimeZoneOffset:
+              _eventTimeZoneOffset, // Use our formatted timezone
           epcisVersion: EPCISVersion.v2_0,
           action: _selectedAction,
           disposition: disposition.isEmpty ? null : disposition,
@@ -284,19 +298,20 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
           bizLocation: locationGLN.isEmpty ? null : GLN.fromCode(locationGLN),
           bizData: bizData.isEmpty ? null : bizData,
           epcList: epcs.isEmpty ? null : epcs,
-          bizTransactionList: bizTransactionType.isEmpty || bizTransactionId.isEmpty 
-              ? {} 
+          bizTransactionList:
+              bizTransactionType.isEmpty || bizTransactionId.isEmpty
+              ? {}
               : {bizTransactionType: bizTransactionId},
         );
-        
-        await provider.updateTransactionEvent(event);
+
+        await cubit.updateTransactionEvent(event);
       } else {
         // For creating a new event
         // Use a time that's definitely in the past (60 seconds ago) to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
-        
+
         if (_selectedAction == 'ADD') {
-          await provider.createAddTransactionEvent(
+          await cubit.createAddTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -307,7 +322,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             eventTime: eventTime,
           );
         } else if (_selectedAction == 'DELETE') {
-          await provider.createDeleteTransactionEvent(
+          await cubit.createDeleteTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -316,8 +331,10 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             disposition: disposition,
             bizData: bizData,
             eventTime: eventTime,
-          );        } else if (_selectedAction == 'OBSERVE') {          // Use the dedicated method for creating OBSERVE events
-          await provider.createObserveTransactionEvent(
+          );
+        } else if (_selectedAction == 'OBSERVE') {
+          // Use the dedicated method for creating OBSERVE events
+          await cubit.createObserveTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -329,10 +346,13 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
           );
         }
       }
-      
+
       if (!mounted) return;
-      
-      showSuccessSnackBar(context, _isEdit ? 'Transaction event updated' : 'Transaction event created');
+
+      showSuccessSnackBar(
+        context,
+        _isEdit ? 'Transaction event updated' : 'Transaction event created',
+      );
       Navigator.pop(context, true);
     } catch (e) {
       showErrorSnackBar(context, e.toString());
@@ -347,11 +367,14 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Transaction Event' : 'Create Transaction Event'),
+        title: Text(
+          _isEdit ? 'Edit Transaction Event' : 'Create Transaction Event',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
@@ -360,12 +383,12 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
           ),
         ],
       ),
-      body: Consumer<TransactionEventsProvider>(
-        builder: (context, provider, _) {
-          if (provider.loading && _isEdit) {
+      body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
+        builder: (context, state) {
+          if (state.loading && _isEdit) {
             return const Center(child: AppLoadingIndicator());
           }
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Form(
@@ -381,10 +404,12 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     ),
                     value: _selectedAction,
                     items: ['ADD', 'OBSERVE', 'DELETE']
-                        .map((action) => DropdownMenuItem(
-                              value: action,
-                              child: Text(action),
-                            ))
+                        .map(
+                          (action) => DropdownMenuItem(
+                            value: action,
+                            child: Text(action),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -398,7 +423,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),                    // Business Transaction Type
+                  const SizedBox(height: 16), // Business Transaction Type
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Business Transaction Type *',
@@ -406,10 +431,14 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     ),
                     value: _bizTransactionType,
                     items: _standardBizTransactionTypes
-                        .map((type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type.split(':').last.replaceAll('btt:', '')),
-                            ))
+                        .map(
+                          (type) => DropdownMenuItem(
+                            value: type,
+                            child: Text(
+                              type.split(':').last.replaceAll('btt:', ''),
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -441,7 +470,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),                  // EPCs
+                  const SizedBox(height: 16), // EPCs
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -459,23 +488,32 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter at least one EPC';
                                 }
-                                
+
                                 // Check if EPCs are in correct format
-                                final epcList = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                                final epcList = value
+                                    .split(',')
+                                    .map((e) => e.trim())
+                                    .where((e) => e.isNotEmpty)
+                                    .toList();
                                 for (final epc in epcList) {
-                                  if (!epc.startsWith('urn:epc:id:') && !RegExp(r'\(\d+\)').hasMatch(epc)) {
+                                  if (!epc.startsWith('urn:epc:id:') &&
+                                      !RegExp(r'\(\d+\)').hasMatch(epc)) {
                                     return 'Invalid EPC format: $epc';
                                   }
                                 }
-                                
+
                                 return null;
                               },
                             ),
                             const SizedBox(height: 4),
-                            const Text('Formats accepted:\n'
+                            const Text(
+                              'Formats accepted:\n'
                               '• URI: urn:epc:id:sgtin:CompanyPrefix.ItemReference.SerialNumber\n'
                               '• GS1: (01)05415062325810(21)70005188444899',
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -486,13 +524,18 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                           ElevatedButton(
                             onPressed: () {
                               // Generate a random SGTIN
-                              final sgtin = GS1Generator.generateRandomSGTIN('0614141', '112345');
+                              final sgtin = GS1Generator.generateRandomSGTIN(
+                                '0614141',
+                                '112345',
+                              );
                               setState(() {
-                                final existingEpcs = _epcsController.text.trim();
+                                final existingEpcs = _epcsController.text
+                                    .trim();
                                 if (existingEpcs.isEmpty) {
                                   _epcsController.text = sgtin;
                                 } else {
-                                  _epcsController.text = '$existingEpcs, $sgtin';
+                                  _epcsController.text =
+                                      '$existingEpcs, $sgtin';
                                 }
                               });
                             },
@@ -502,13 +545,19 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                           ElevatedButton(
                             onPressed: () {
                               // Generate batch of SGTINs
-                              final batch = GS1Generator.generateBatchSGTINs('0614141', '112345', 5);
+                              final batch = GS1Generator.generateBatchSGTINs(
+                                '0614141',
+                                '112345',
+                                5,
+                              );
                               setState(() {
-                                final existingEpcs = _epcsController.text.trim();
+                                final existingEpcs = _epcsController.text
+                                    .trim();
                                 if (existingEpcs.isEmpty) {
                                   _epcsController.text = batch.join(', ');
                                 } else {
-                                  _epcsController.text = '$existingEpcs, ${batch.join(', ')}';
+                                  _epcsController.text =
+                                      '$existingEpcs, ${batch.join(', ')}';
                                 }
                               });
                             },
@@ -518,7 +567,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),                  // Location GLN
+                  const SizedBox(height: 16), // Location GLN
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -545,7 +594,10 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       ElevatedButton(
                         onPressed: () {
                           // Generate a GLN
-                          final gln = GS1Generator.generateGLN('0614141', '00001');
+                          final gln = GS1Generator.generateGLN(
+                            '0614141',
+                            '00001',
+                          );
                           setState(() {
                             _locationGLNController.text = gln;
                           });
@@ -555,17 +607,22 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     ],
                   ),
                   const SizedBox(height: 16),
-                    // Business Step
+                  // Business Step
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Business Step *',
                       border: OutlineInputBorder(),
                     ),
                     value: _businessStep,
-                    items: _standardBusinessSteps                        .map((step) => DropdownMenuItem(
-                              value: step,
-                              child: Text(step.split(':').last.replaceAll('bizstep:', '')),
-                            ))
+                    items: _standardBusinessSteps
+                        .map(
+                          (step) => DropdownMenuItem(
+                            value: step,
+                            child: Text(
+                              step.split(':').last.replaceAll('bizstep:', ''),
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -580,17 +637,22 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     },
                   ),
                   const SizedBox(height: 16),
-                    // Disposition
+                  // Disposition
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Disposition *',
                       border: OutlineInputBorder(),
                     ),
                     value: _disposition,
-                    items: _standardDispositions                        .map((disp) => DropdownMenuItem(
-                              value: disp,
-                              child: Text(disp.split(':').last.replaceAll('disp:', '')),
-                            ))
+                    items: _standardDispositions
+                        .map(
+                          (disp) => DropdownMenuItem(
+                            value: disp,
+                            child: Text(
+                              disp.split(':').last.replaceAll('disp:', ''),
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -647,26 +709,30 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   ..._buildBizDataFields(),
-                  
+
                   TextButton.icon(
                     onPressed: _addBizDataField,
                     icon: const Icon(Icons.add),
                     label: const Text('Add Business Data Field'),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Save Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: provider.loading ? null : _saveTransactionEvent,
+                      onPressed: state.loading
+                          ? null
+                          : _saveTransactionEvent,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          _isEdit ? 'Update Transaction Event' : 'Create Transaction Event', 
-                          style: const TextStyle(fontSize: 16)
+                          _isEdit
+                              ? 'Update Transaction Event'
+                              : 'Create Transaction Event',
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                     ),

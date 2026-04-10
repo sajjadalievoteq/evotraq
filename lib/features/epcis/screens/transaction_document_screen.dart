@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
@@ -67,7 +67,8 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
   
   @override
   Widget build(BuildContext context) {
-    final documentProvider = Provider.of<TransactionDocumentProvider>(context);
+    final documentCubit = context.read<TransactionDocumentCubit>();
+    final documentState = context.watch<TransactionDocumentCubit>().state;
     
     return Scaffold(
       drawer: const AppDrawer(),
@@ -83,14 +84,14 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
           ),
         ],
       ),
-      body: documentProvider.isLoading 
+      body: documentState.isLoading 
         ? const Center(child: AppLoadingIndicator()) 
         : SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (documentProvider.error != null)
+                if (documentState.error != null)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(8),
@@ -99,10 +100,10 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                       children: [
                         const Icon(Icons.error, color: Colors.red),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(documentProvider.error!)),
+                        Expanded(child: Text(documentState.error!)),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => documentProvider.clearError(),
+                          onPressed: () => documentCubit.clearError(),
                         ),
                       ],
                     ),
@@ -126,12 +127,12 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           return;
                         }
                         
-                        documentProvider.getTransactionEventsForDocument(type, id);
+                        documentCubit.getTransactionEventsForDocument(type, id);
                       },
                       child: const Text('Find Events'),
                     ),
-                    if (documentProvider.events.isNotEmpty)
-                      _buildEventsList(documentProvider.events)
+                    if (documentState.events.isNotEmpty)
+                      _buildEventsList(documentState.events)
                   ],
                 ),
                 
@@ -154,7 +155,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         }
                         
                         try {
-                          final isValid = await documentProvider.validateDocumentReference(type, id);
+                          final isValid = await documentCubit.validateDocumentReference(type, id);
                           if (!mounted) return;
                           
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -194,12 +195,12 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           return;
                         }
                         
-                        documentProvider.getDocumentStatus(type, id);
+                        documentCubit.getDocumentStatus(type, id);
                       },
                       child: const Text('Get Status'),
                     ),
-                    if (documentProvider.documentStatus.isNotEmpty)
-                      _buildStatusCard(documentProvider.documentStatus)
+                    if (documentState.documentStatus.isNotEmpty)
+                      _buildStatusCard(documentState.documentStatus)
                   ],
                 ),
                 
@@ -221,12 +222,12 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           return;
                         }
                         
-                        documentProvider.getRelatedDocuments(type, id);
+                        documentCubit.getRelatedDocuments(type, id);
                       },
                       child: const Text('Get Related Documents'),
                     ),
-                    if (documentProvider.relatedDocuments.isNotEmpty)
-                      _buildRelatedDocumentsCard(documentProvider.relatedDocuments)
+                    if (documentState.relatedDocuments.isNotEmpty)
+                      _buildRelatedDocumentsCard(documentState.relatedDocuments)
                   ],
                 ),
                 
@@ -257,7 +258,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         }
                         
                         try {
-                          final success = await documentProvider.createDocumentLink(
+                          final success = await documentCubit.createDocumentLink(
                             sourceType,
                             sourceId,
                             targetType,
@@ -306,7 +307,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         }
                         
                         try {
-                          final document = await documentProvider.findOriginalDocumentForEPC(epc, type: type);
+                          final document = await documentCubit.findOriginalDocumentForEPC(epc, type: type);
                           if (!mounted) return;
                           
                           if (document != null) {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';

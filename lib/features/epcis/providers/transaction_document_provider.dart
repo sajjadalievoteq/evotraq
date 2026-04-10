@@ -1,186 +1,240 @@
-import 'package:flutter/material.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/services/transaction_document_service.dart';
 import 'package:traqtrace_app/features/epcis/services/transaction_document_service_impl.dart';
 
-/// Provider for transaction document operations
-class TransactionDocumentProvider extends ChangeNotifier {
-  final TransactionDocumentService _service;
-  
-  bool _isLoading = false;
-  String? _error;
-  List<TransactionEvent> _events = [];
-  Map<String, dynamic> _documentStatus = {};
-  Map<String, List<String>> _relatedDocuments = {};
-  
-  /// Constructor
-  TransactionDocumentProvider({
-    TransactionDocumentService? service,
-    http.Client? httpClient,
-    TokenManager? tokenManager,
-    required AppConfig appConfig,
-  }) : _service = service ?? TransactionDocumentServiceImpl(
-            httpClient: httpClient ?? http.Client(),
-            tokenManager: tokenManager ?? TokenManager(),
-            appConfig: appConfig,
-          );
+class TransactionDocumentState extends Equatable {
+  final bool isLoading;
+  final String? error;
+  final List<TransactionEvent> events;
+  final Map<String, dynamic> documentStatus;
+  final Map<String, List<String>> relatedDocuments;
 
-  /// Is loading state
-  bool get isLoading => _isLoading;
-  
-  /// Error message if any
-  String? get error => _error;
-  
-  /// Transaction events for a document
-  List<TransactionEvent> get events => _events;
-  
-  /// Document status
-  Map<String, dynamic> get documentStatus => _documentStatus;
-  
-  /// Related documents
-  Map<String, List<String>> get relatedDocuments => _relatedDocuments;
-  
+  const TransactionDocumentState({
+    required this.isLoading,
+    required this.error,
+    required this.events,
+    required this.documentStatus,
+    required this.relatedDocuments,
+  });
+
+  factory TransactionDocumentState.initial() => const TransactionDocumentState(
+    isLoading: false,
+    error: null,
+    events: [],
+    documentStatus: {},
+    relatedDocuments: {},
+  );
+
+  TransactionDocumentState copyWith({
+    bool? isLoading,
+    String? error,
+    List<TransactionEvent>? events,
+    Map<String, dynamic>? documentStatus,
+    Map<String, List<String>>? relatedDocuments,
+    bool clearError = false,
+  }) {
+    return TransactionDocumentState(
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
+      events: events ?? this.events,
+      documentStatus: documentStatus ?? this.documentStatus,
+      relatedDocuments: relatedDocuments ?? this.relatedDocuments,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    isLoading,
+    error,
+    events,
+    documentStatus,
+    relatedDocuments,
+  ];
+}
+
+class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
+  final TransactionDocumentService _service;
+
+  TransactionDocumentCubit({
+    TransactionDocumentService? service,
+    required AppConfig appConfig,
+  }) : _service =
+           service ??
+           TransactionDocumentServiceImpl(
+             httpClient: getIt<http.Client>(),
+             tokenManager: getIt<TokenManager>(),
+             appConfig: appConfig,
+           ),
+       super(TransactionDocumentState.initial());
+
   /// Get transaction events for a document
   Future<void> getTransactionEventsForDocument(String type, String id) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true, events: const []));
       // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
-      
+
       // Log for debugging purposes
       logDocumentTypeDebug(type, standardType);
       print('Searching for document: Type="$standardType", ID="$id"');
-      print('API URL: ${_service.toString()}/transaction-documents/$standardType/$id/events');
-      
-      _events = await _service.getTransactionEventsByDocument(standardType, id);
-      print('Found ${_events.length} events');
-      
-      if (_events.isEmpty) {
+      print(
+        'API URL: ${_service.toString()}/transaction-documents/$standardType/$id/events',
+      );
+
+      var events = await _service.getTransactionEventsByDocument(
+        standardType,
+        id,
+      );
+      print('Found ${events.length} events');
+
+      if (events.isEmpty) {
         // Try with just the short type as a fallback (for legacy data)
         final shortType = type.toLowerCase();
         print('No events found, trying fallback with short type: "$shortType"');
-        
+
         try {
-          final fallbackEvents = await _service.getTransactionEventsByDocument(shortType, id);
+          final fallbackEvents = await _service.getTransactionEventsByDocument(
+            shortType,
+            id,
+          );
           if (fallbackEvents.isNotEmpty) {
             print('Found ${fallbackEvents.length} events using fallback type');
-            _events = fallbackEvents;
+            events = fallbackEvents;
           }
         } catch (fallbackError) {
           print('Fallback search failed: $fallbackError');
           // Ignore fallback errors, we'll go with the original result
         }
       }
-      
-      _error = null;
+
+      emit(state.copyWith(isLoading: false, events: events));
     } catch (e) {
-      _error = 'Error searching for document: ${e.toString()}';
-      print(_error);
-    } finally {
-      _setLoading(false);
+      final message = 'Error searching for document: ${e.toString()}';
+      print(message);
+      emit(state.copyWith(isLoading: false, error: message));
     }
   }
-  
+
   /// Check if a document reference is valid
   Future<bool> validateDocumentReference(String type, String id) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
       final isValid = await _service.isDocumentReferenceValid(standardType, id);
-      _error = null;
+      emit(state.copyWith(isLoading: false));
       return isValid;
     } catch (e) {
-      _error = e.toString();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
-  
+
   /// Get document status
   Future<void> getDocumentStatus(String type, String id) async {
-    _setLoading(true);
     try {
+      emit(
+        state.copyWith(
+          isLoading: true,
+          clearError: true,
+          documentStatus: const {},
+        ),
+      );
       // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
-      _documentStatus = await _service.getDocumentStatus(standardType, id);
-      _error = null;
+      final status = await _service.getDocumentStatus(standardType, id);
+      emit(state.copyWith(isLoading: false, documentStatus: status));
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
-  
+
   /// Get related documents
   Future<void> getRelatedDocuments(String type, String id) async {
-    _setLoading(true);
     try {
+      emit(
+        state.copyWith(
+          isLoading: true,
+          clearError: true,
+          relatedDocuments: const {},
+        ),
+      );
       // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
-      _relatedDocuments = await _service.getRelatedDocuments(standardType, id);
-      _error = null;
+      final related = await _service.getRelatedDocuments(standardType, id);
+      emit(state.copyWith(isLoading: false, relatedDocuments: related));
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
-  
+
   /// Create a link between documents
-  Future<bool> createDocumentLink(String sourceType, String sourceId, 
-                               String targetType, String targetId,
-                               String relationshipType) async {
-    _setLoading(true);
+  Future<bool> createDocumentLink(
+    String sourceType,
+    String sourceId,
+    String targetType,
+    String targetId,
+    String relationshipType,
+  ) async {
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       // Standardize both document types to ensure proper URN format
       final standardSourceType = standardizeDocumentType(sourceType);
       final standardTargetType = standardizeDocumentType(targetType);
-      
+
       final result = await _service.createDocumentLink(
-        standardSourceType, sourceId, standardTargetType, targetId, relationshipType);
-      _error = null;
+        standardSourceType,
+        sourceId,
+        standardTargetType,
+        targetId,
+        relationshipType,
+      );
+      emit(state.copyWith(isLoading: false));
       return result;
     } catch (e) {
-      _error = e.toString();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
-  
+
   /// Find original document for an EPC
-  Future<Map<String, String>?> findOriginalDocumentForEPC(String epc, {String? type}) async {
-    _setLoading(true);
+  Future<Map<String, String>?> findOriginalDocumentForEPC(
+    String epc, {
+    String? type,
+  }) async {
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       // Standardize document type if provided
       String? standardType;
       if (type != null && type.isNotEmpty) {
         standardType = standardizeDocumentType(type);
       }
-      
-      final result = await _service.getOriginalDocumentForEPC(epc, type: standardType);
-      _error = null;
+
+      final result = await _service.getOriginalDocumentForEPC(
+        epc,
+        type: standardType,
+      );
+      emit(state.copyWith(isLoading: false));
       return result;
     } catch (e) {
-      _error = e.toString();
+      emit(state.copyWith(isLoading: false, error: e.toString()));
       return null;
-    } finally {
-      _setLoading(false);
     }
   }
-  
+
   /// Map document type to standard URN format
   String standardizeDocumentType(String type) {
     // If already in URN format, return as is
     if (type.startsWith('urn:epcglobal:cbv:btt:')) {
       return type;
     }
-    
+
     // Map common abbreviations and names to their URN format
     final Map<String, String> typeMap = {
       'inv': 'urn:epcglobal:cbv:btt:inv',
@@ -207,29 +261,23 @@ class TransactionDocumentProvider extends ChangeNotifier {
       'customs declaration': 'urn:epcglobal:cbv:btt:customs',
       'contract': 'urn:epcglobal:cbv:btt:contract',
     };
-    
+
     // Try to map the input type to a standard URN (case insensitive)
     final lowerType = type.toLowerCase();
-    final standardizedType = typeMap[lowerType] ?? 'urn:epcglobal:cbv:btt:$type';
-    
+    final standardizedType =
+        typeMap[lowerType] ?? 'urn:epcglobal:cbv:btt:$type';
+
     // Debug logging for document type mapping
     logDocumentTypeDebug(type, standardizedType);
-    
+
     return standardizedType;
   }
-  
+
   /// Clear any error message
   void clearError() {
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(clearError: true));
   }
-  
-  /// Set loading state and notify listeners
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-  
+
   /// Debug function to log document details to console for troubleshooting
   void logDocumentTypeDebug(String input, String standardized) {
     print('Document Type Debug:');

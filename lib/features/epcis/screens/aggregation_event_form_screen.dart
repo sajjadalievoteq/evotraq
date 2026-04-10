@@ -9,7 +9,14 @@ import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
-import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
+import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
+import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
+import 'package:traqtrace_app/features/epcis/models/sensor_element.dart' as models;
+import 'package:traqtrace_app/features/epcis/models/epcis_event.dart' as epcis_models;
+
+import '../mixins/event_form_validation_mixin.dart';
 
 /// Screen for creating or editing an aggregation event
 class AggregationEventFormScreen extends StatefulWidget {
@@ -27,6 +34,7 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _errorMessage;
+  List<dynamic> _validationErrors = [];
   bool _isEdit = false;
   
   // Form fields
@@ -302,16 +310,18 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _validationErrors = [];
     });
     
     try {
       // Get provider for event creation
       final cubit = context.read<AggregationEventsCubit>();
+      final validationProvider = context.read<ValidationCubit>();
 
       // Parse parent EPC
-      final String parentEPC = _convertBarcodeToURN(_parentEPCController.text.trim());
+      final String parentEPC = EPCFormatter.formatToEPCUri(_parentEPCController.text.trim());
       
-      // Each child can be in URN format or GS1 barcode format (e.g., (01)12345678901234(21)123456)
+      // Each child can be in URN format or GS1 barcode format
       final List<String> rawChildEPCs = _childEPCsController.text
           .split(',')
           .map((e) => e.trim())
@@ -319,7 +329,7 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
           .toList();
           
       // Convert any barcode format child EPCs to URN format
-      final List<String> childEPCs = rawChildEPCs.map(_convertBarcodeToURN).toList();
+      final List<String> childEPCs = rawChildEPCs.map((epc) => EPCFormatter.formatToEPCUri(epc)).toList();
       
       // Parse business data
       final Map<String, String> bizData = {};
@@ -340,36 +350,50 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
       final String disposition = _disposition ?? '';
       final String locationGLN = _locationGLNController.text.trim();
 
-      // Note: Backend validation will be performed by the backend service
-      // Frontend validation is handled by individual field validators
-      print('Proceeding with event creation...');
+      // Create an aggregation event model for validation
+      final eventToValidate = AggregationEvent(
+        eventId: _isEdit ? widget.aggregationEventId! : 'event_${DateTime.now().millisecondsSinceEpoch}',
+        eventTime: _eventTime,
+        recordTime: DateTime.now(),
+        eventTimeZone: _eventTimeZoneOffset,
+        epcisVersion: epcis_models.EPCISVersion.v2_0,
+        action: _selectedAction,
+        businessStep: businessStep,
+        disposition: disposition,
+        readPoint: locationGLN.isNotEmpty ? GLN.fromCode(locationGLN) : null,
+        businessLocation: locationGLN.isNotEmpty ? GLN.fromCode(locationGLN) : null,
+        bizData: bizData.isNotEmpty ? bizData : null,
+        parentID: parentEPC,
+        childEPCs: childEPCs,
+        sourceList: sourceList.isNotEmpty ? sourceList : null,
+        destinationList: destinationList.isNotEmpty ? destinationList : null,
+      );
+
+      // Perform frontend validation via Cubit
+      final isValid = await validationProvider.validateAggregationEvent(eventToValidate);
+
+      if (!isValid) {
+        setState(() {
+          _isLoading = false;
+          _validationErrors = validationProvider.state.lastValidationResult?['validationErrors'] ?? [];
+          if (_validationErrors.isEmpty && validationProvider.state.error != null) {
+            _errorMessage = validationProvider.state.error;
+          }
+        });
+        
+        if (_validationErrors.isNotEmpty) {
+          showValidationErrors(context, _validationErrors);
+        }
+        return;
+      }
+
+      print('Proceeding with event creation/update...');
 
       if (_isEdit) {
-        // Update existing event - adapt to the existing model parameters
-        final event = AggregationEvent(
-          id: widget.aggregationEventId,
-          eventId: widget.aggregationEventId!,
-          eventTime: _eventTime,
-          recordTime: DateTime.now(),
-          eventTimeZone: _eventTimeZoneOffset,
-          epcisVersion: EPCISVersion.v2_0,
-          action: _selectedAction,
-          businessStep: businessStep,
-          disposition: disposition,
-          readPoint: locationGLN.isNotEmpty ? GLN.fromCode(locationGLN) : null,
-          businessLocation: locationGLN.isNotEmpty ? GLN.fromCode(locationGLN) : null,
-          bizData: bizData,
-          parentID: parentEPC,
-          childEPCs: childEPCs,
-          sourceList: sourceList.isNotEmpty ? sourceList : null,
-          destinationList: destinationList.isNotEmpty ? destinationList : null,
-        );
-        
-        await cubit.updateAggregationEvent(event);
+        await cubit.updateAggregationEvent(eventToValidate);
       } else {
         // Create new event based on action type
         if (_selectedAction == 'ADD') {
-          // Create a PACK event - we need to use the provider parameters
           await cubit.createPackEvent(
             parentEPC: parentEPC,
             childEPCs: childEPCs,
@@ -381,7 +405,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
             destinationList: destinationList.isNotEmpty ? destinationList : null,
           );
         } else if (_selectedAction == 'DELETE') {
-          // Create an UNPACK event - we need to use the provider parameters
           await cubit.createUnpackEvent(
             parentEPC: parentEPC,
             childEPCs: childEPCs,
@@ -392,24 +415,8 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
             sourceList: sourceList.isNotEmpty ? sourceList : null,
             destinationList: destinationList.isNotEmpty ? destinationList : null,
           );
-        } else {          // Create a standard aggregation event - adapt parameters to the correct model
-          final event = AggregationEvent(
-            eventId: 'new-event-${DateTime.now().millisecondsSinceEpoch}',
-            eventTime: _eventTime,
-            recordTime: DateTime.now(),
-            eventTimeZone: _eventTimeZoneOffset,
-            epcisVersion: EPCISVersion.v2_0,
-            action: _selectedAction,
-            businessStep: businessStep,
-            disposition: disposition,
-            readPoint: GLN.fromCode(locationGLN),
-            businessLocation: GLN.fromCode(locationGLN),
-            bizData: bizData,
-            parentID: parentEPC,
-            childEPCs: childEPCs,
-          );
-          
-          await cubit.createAggregationEvent(event);
+        } else {
+          await cubit.createAggregationEvent(eventToValidate);
         }
       }      
       if (!mounted) return;
@@ -1227,6 +1234,12 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_validationErrors.isNotEmpty)
+                      ValidationErrorWidget(
+                        validationErrors: _validationErrors,
+                        onDismiss: () => setState(() => _validationErrors = []),
+                      ),
+
                     // Information about GS1 barcode support
                     Container(
                       padding: const EdgeInsets.all(8.0),

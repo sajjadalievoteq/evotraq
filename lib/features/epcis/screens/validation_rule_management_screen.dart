@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
@@ -283,24 +283,25 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
   }
   
   Widget _buildRuleList() {
-    return Consumer<ValidationRuleProvider>(
-      builder: (context, provider, child) {
-        if (provider.loading) {
+    return BlocBuilder<ValidationRuleCubit, ValidationRuleState>(
+      builder: (context, state) {
+        final cubit = context.read<ValidationRuleCubit>();
+        if (state.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
         
-        if (provider.error != null) {
+        if (state.error != null) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Error loading rules: ${provider.error}',
+                  'Error loading rules: ${state.error}',
                   style: const TextStyle(color: Colors.red),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => provider.reloadRules(),
+                  onPressed: () => cubit.reloadRules(),
                   child: const Text('Retry'),
                 ),
               ],
@@ -309,11 +310,12 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
         }
         
         // Apply filters
-        List<ValidationRule> filteredRules = provider.rules;
+        List<ValidationRule> filteredRules = state.validationRules;
         
         // Custom rules filter
         if (_showOnlyCustomRules) {
-          final predefinedRuleIds = provider.getPredefinedRules().map((r) => r.id).toSet();
+          final predefinedRuleIds =
+              cubit.getPredefinedRules().map((r) => r.id).toSet();
           filteredRules = filteredRules.where((r) => !predefinedRuleIds.contains(r.id)).toList();
         }
         
@@ -351,7 +353,8 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
           itemCount: filteredRules.length,
           itemBuilder: (context, index) {
             final rule = filteredRules[index];
-            final isPredefined = provider.getPredefinedRules().any((r) => r.id == rule.id);
+            final isPredefined =
+                cubit.getPredefinedRules().any((r) => r.id == rule.id);
             
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -418,7 +421,7 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                   value: rule.enabled,
                   onChanged: (value) {
                     final updatedRule = rule.copyWith(enabled: value);
-                    provider.updateRule(updatedRule);
+                    cubit.updateRule(updatedRule);
                   },
                 ),
                 onTap: () => _editRule(rule, isPredefined),
@@ -477,7 +480,7 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Provider.of<ValidationRuleProvider>(context, listen: false).resetToDefaults();
+              context.read<ValidationRuleCubit>().resetToDefaults();
             },
             child: const Text('Reset', style: TextStyle(color: Colors.red)),
           ),

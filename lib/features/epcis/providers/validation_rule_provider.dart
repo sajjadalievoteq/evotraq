@@ -1,48 +1,78 @@
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/services/validation_rule_service.dart';
 
+class ValidationRuleState extends Equatable {
+  final List<ValidationRule> validationRules;
+  final bool isLoading;
+  final String? error;
+
+  const ValidationRuleState({
+    required this.validationRules,
+    required this.isLoading,
+    required this.error,
+  });
+
+  factory ValidationRuleState.initial() => const ValidationRuleState(
+    validationRules: [],
+    isLoading: false,
+    error: null,
+  );
+
+  @override
+  List<Object?> get props => [validationRules, isLoading, error];
+}
+
 /// Provider for validation rule state management
 /// Phase 3: Event Validation Service - Database-backed validation rule management
-class ValidationRuleProvider extends ChangeNotifier {
+class ValidationRuleCubit extends Cubit<ValidationRuleState> {
   final ValidationRuleService _validationRuleService;
-  
+
   List<ValidationRule> _validationRules = [];
   bool _isLoading = false;
   String? _error;
 
-  ValidationRuleProvider({
+  ValidationRuleCubit({
     ValidationRuleService? validationRuleService,
     required AppConfig appConfig,
-  }) : _validationRuleService = validationRuleService ?? 
-          ValidationRuleServiceImpl(
-            httpClient: http.Client(),
-            tokenManager: TokenManager(),
-            appConfig: appConfig,
-          ) {
+  }) : _validationRuleService =
+           validationRuleService ??
+           ValidationRuleServiceImpl(
+             httpClient: getIt<http.Client>(),
+             tokenManager: getIt<TokenManager>(),
+             appConfig: appConfig,
+           ),
+       super(ValidationRuleState.initial()) {
     // Load rules on initialization
     loadValidationRules();
   }
 
   // Getters
-  List<ValidationRule> get validationRules => List.unmodifiable(_validationRules);
+  List<ValidationRule> get validationRules =>
+      List.unmodifiable(_validationRules);
   List<ValidationRule> get rules => List.unmodifiable(_validationRules);
   bool get isLoading => _isLoading;
   bool get loading => _isLoading;
   String? get error => _error;
 
   /// Get enabled validation rules
-  List<ValidationRule> get enabledRules => 
+  List<ValidationRule> get enabledRules =>
       _validationRules.where((rule) => rule.enabled).toList();
 
   /// Get validation rules by event type
   List<ValidationRule> getRulesByEventType(EventType eventType) {
-    return _validationRules.where((rule) => 
-        rule.eventType == eventType || rule.eventType == EventType.ALL
-    ).toList();
+    return _validationRules
+        .where(
+          (rule) =>
+              rule.eventType == eventType || rule.eventType == EventType.ALL,
+        )
+        .toList();
   }
 
   /// Get validation rules by category
@@ -76,9 +106,9 @@ class ValidationRuleProvider extends ChangeNotifier {
     try {
       // Simulate API delay
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       _validationRules = getSampleAdvancedRules();
-      notifyListeners();
+      _emitState();
     } catch (e) {
       _setError('Failed to load sample rules: $e');
       if (kDebugMode) {
@@ -96,7 +126,7 @@ class ValidationRuleProvider extends ChangeNotifier {
 
     try {
       _validationRules = await _validationRuleService.getAllRules();
-      notifyListeners();
+      _emitState();
     } catch (e) {
       // Fallback to sample rules if API is not available
       _setError('API not available. Loading sample rules for demonstration.');
@@ -116,13 +146,16 @@ class ValidationRuleProvider extends ChangeNotifier {
     _setError(null);
 
     try {
-      final updatedRule = await _validationRuleService.toggleRuleStatus(ruleId, enabled);
-      
+      final updatedRule = await _validationRuleService.toggleRuleStatus(
+        ruleId,
+        enabled,
+      );
+
       if (updatedRule != null) {
         final index = _validationRules.indexWhere((rule) => rule.id == ruleId);
         if (index != -1) {
           _validationRules[index] = updatedRule;
-          notifyListeners();
+          _emitState();
           return true;
         }
       }
@@ -146,7 +179,7 @@ class ValidationRuleProvider extends ChangeNotifier {
     try {
       final newRule = await _validationRuleService.createRule(rule);
       _validationRules.add(newRule);
-      notifyListeners();
+      _emitState();
       return newRule;
     } catch (e) {
       _setError('Failed to create validation rule: $e');
@@ -160,18 +193,21 @@ class ValidationRuleProvider extends ChangeNotifier {
   }
 
   /// Update an existing validation rule
-  Future<ValidationRule?> updateValidationRule(int ruleId, ValidationRule rule) async {
+  Future<ValidationRule?> updateValidationRule(
+    int ruleId,
+    ValidationRule rule,
+  ) async {
     _setLoading(true);
     _setError(null);
 
     try {
       final updatedRule = await _validationRuleService.updateRule(ruleId, rule);
-      
+
       if (updatedRule != null) {
         final index = _validationRules.indexWhere((r) => r.id == ruleId);
         if (index != -1) {
           _validationRules[index] = updatedRule;
-          notifyListeners();
+          _emitState();
           return updatedRule;
         }
       }
@@ -194,10 +230,10 @@ class ValidationRuleProvider extends ChangeNotifier {
 
     try {
       final success = await _validationRuleService.deleteRule(ruleId);
-      
+
       if (success) {
         _validationRules.removeWhere((rule) => rule.id == ruleId);
-        notifyListeners();
+        _emitState();
         return true;
       }
       return false;
@@ -224,7 +260,7 @@ class ValidationRuleProvider extends ChangeNotifier {
 
     try {
       _validationRules = await _validationRuleService.searchRules(searchTerm);
-      notifyListeners();
+      _emitState();
     } catch (e) {
       _setError('Failed to search validation rules: $e');
       if (kDebugMode) {
@@ -287,7 +323,8 @@ class ValidationRuleProvider extends ChangeNotifier {
   Future<void> reloadRules() => loadValidationRules();
 
   /// Add a new rule (alias for createValidationRule)
-  Future<ValidationRule?> addRule(ValidationRule rule) => createValidationRule(rule);
+  Future<ValidationRule?> addRule(ValidationRule rule) =>
+      createValidationRule(rule);
 
   /// Update a rule (alias for updateValidationRule)
   Future<ValidationRule?> updateRule(ValidationRule rule) {
@@ -341,7 +378,8 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['GS1', 'CBV', 'business-step'],
         priority: 20,
         field: 'businessStep',
-        ruleExpression: 'businessStep != null && businessStep.startsWith("urn:epcglobal:cbv:bizstep:")',
+        ruleExpression:
+            'businessStep != null && businessStep.startsWith("urn:epcglobal:cbv:bizstep:")',
         errorMessage: 'Business step must be a valid GS1 CBV URI',
         enabled: true,
         isCustom: false,
@@ -351,7 +389,8 @@ class ValidationRuleProvider extends ChangeNotifier {
       ValidationRule(
         ruleId: 'REF_001',
         name: 'Valid GLN References',
-        description: 'Read points and business locations must reference valid GLNs',
+        description:
+            'Read points and business locations must reference valid GLNs',
         eventType: null,
         severity: RuleSeverity.ERROR,
         category: 'REFERENTIAL',
@@ -375,7 +414,8 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['SGTIN', 'serial-number', 'format'],
         priority: 50,
         field: 'epcList[*]',
-        ruleExpression: 'epcList.every(epc => epc.startsWith("urn:epc:id:sgtin:") ? isValidSGTINSerial(epc) : true)',
+        ruleExpression:
+            'epcList.every(epc => epc.startsWith("urn:epc:id:sgtin:") ? isValidSGTINSerial(epc) : true)',
         errorMessage: 'SGTIN serial numbers must follow GS1 format guidelines',
         enabled: true,
         isCustom: false,
@@ -392,8 +432,10 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['pharmaceutical', 'lot', 'batch', 'FDA'],
         priority: 15,
         field: 'ilmd',
-        ruleExpression: 'isPharmaceuticalProduct(epcList) ? hasLotInformation(ilmd) : true',
-        errorMessage: 'Pharmaceutical products must include lot/batch information in ILMD',
+        ruleExpression:
+            'isPharmaceuticalProduct(epcList) ? hasLotInformation(ilmd) : true',
+        errorMessage:
+            'Pharmaceutical products must include lot/batch information in ILMD',
         enabled: true,
         isCustom: false,
       ),
@@ -402,15 +444,18 @@ class ValidationRuleProvider extends ChangeNotifier {
       ValidationRule(
         ruleId: 'AGG_001',
         name: 'Parent-Child Aggregation',
-        description: 'Aggregation events must have valid parent-child relationships',
+        description:
+            'Aggregation events must have valid parent-child relationships',
         eventType: EventType.AggregationEvent,
         severity: RuleSeverity.ERROR,
         category: 'BUSINESS',
         tags: ['aggregation', 'hierarchy', 'parent-child'],
         priority: 25,
         field: 'parentID',
-        ruleExpression: 'action == "ADD" ? (parentID != null && childEPCs.length > 0) : true',
-        errorMessage: 'ADD aggregation events must have a parent ID and child EPCs',
+        ruleExpression:
+            'action == "ADD" ? (parentID != null && childEPCs.length > 0) : true',
+        errorMessage:
+            'ADD aggregation events must have a parent ID and child EPCs',
         enabled: true,
         isCustom: false,
       ),
@@ -426,7 +471,8 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['transaction', 'partner', 'GLN'],
         priority: 20,
         field: 'bizTransactionList[*].value',
-        ruleExpression: 'bizTransactionList.every(txn => txn.type == "po" ? isValidGLN(txn.value) : true)',
+        ruleExpression:
+            'bizTransactionList.every(txn => txn.type == "po" ? isValidGLN(txn.value) : true)',
         errorMessage: 'Purchase order transactions must reference valid GLN',
         enabled: true,
         isCustom: false,
@@ -443,8 +489,10 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['commissioning', 'security', 'anti-counterfeiting'],
         priority: 40,
         field: 'action',
-        ruleExpression: 'action == "ADD" && businessStep.includes("commissioning") ? hasSecurityFeatures(ilmd) : true',
-        errorMessage: 'Commissioning events should include security features in ILMD',
+        ruleExpression:
+            'action == "ADD" && businessStep.includes("commissioning") ? hasSecurityFeatures(ilmd) : true',
+        errorMessage:
+            'Commissioning events should include security features in ILMD',
         enabled: true,
         isCustom: false,
       ),
@@ -460,8 +508,10 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['temperature', 'cold-chain', 'monitoring'],
         priority: 60,
         field: 'sensorElementList[*]',
-        ruleExpression: 'isColdChainProduct(epcList) ? hasSensorData(sensorElementList, "temperature") : true',
-        errorMessage: 'Cold chain products should include temperature sensor data',
+        ruleExpression:
+            'isColdChainProduct(epcList) ? hasSensorData(sensorElementList, "temperature") : true',
+        errorMessage:
+            'Cold chain products should include temperature sensor data',
         enabled: false, // Disabled by default as it's informational
         isCustom: false,
       ),
@@ -477,7 +527,8 @@ class ValidationRuleProvider extends ChangeNotifier {
         tags: ['manufacturing', 'certification', 'facility'],
         priority: 35,
         field: 'readPoint.id',
-        ruleExpression: 'businessStep.includes("manufacturing") ? isCertifiedFacility(readPoint.id) : true',
+        ruleExpression:
+            'businessStep.includes("manufacturing") ? isCertifiedFacility(readPoint.id) : true',
         errorMessage: 'Manufacturing must occur at certified facilities only',
         enabled: true,
         isCustom: true, // This shows as a custom rule
@@ -489,19 +540,24 @@ class ValidationRuleProvider extends ChangeNotifier {
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;
-      notifyListeners();
+      _emitState();
     }
   }
 
   void _setError(String? error) {
     if (_error != error) {
       _error = error;
-      notifyListeners();
+      _emitState();
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _emitState() {
+    emit(
+      ValidationRuleState(
+        validationRules: List.unmodifiable(_validationRules),
+        isLoading: _isLoading,
+        error: _error,
+      ),
+    );
   }
 }

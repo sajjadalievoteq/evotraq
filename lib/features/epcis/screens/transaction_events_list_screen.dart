@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
@@ -14,59 +14,61 @@ class TransactionEventsListScreen extends StatefulWidget {
   const TransactionEventsListScreen({Key? key}) : super(key: key);
 
   @override
-  State<TransactionEventsListScreen> createState() => _TransactionEventsListScreenState();
+  State<TransactionEventsListScreen> createState() =>
+      _TransactionEventsListScreenState();
 }
 
-class _TransactionEventsListScreenState extends State<TransactionEventsListScreen> {
+class _TransactionEventsListScreenState
+    extends State<TransactionEventsListScreen> {
   int _currentPage = 0;
   final int _pageSize = 10;
-  
+
   String? _filterBizStep;
   String? _filterDisposition;
   String? _filterLocationGLN;
   DateTimeRange? _filterDateRange;
-  
+
   final ScrollController _scrollController = ScrollController();
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Load initial data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTransactionEvents();
     });
-    
+
     // Add scroll listener for pagination
     _scrollController.addListener(_scrollListener);
   }
-  
+
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _scrollListener() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
-      
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final cubit = context.read<TransactionEventsCubit>();
+      final currentState = cubit.state;
+
       // Check if we can load more pages
-      if (_currentPage < provider.totalPages - 1 && !provider.loading) {
+      if (_currentPage < currentState.totalPages - 1 && !currentState.loading) {
         _currentPage++;
         _loadTransactionEvents(isLoadMore: true);
       }
     }
   }
-  
+
   Future<void> _loadTransactionEvents({bool isLoadMore = false}) async {
     if (!isLoadMore) {
       _currentPage = 0;
     }
-    
-    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
-    
-    await provider.loadTransactionEvents(
+
+    await context.read<TransactionEventsCubit>().loadTransactionEvents(
       page: _currentPage,
       size: _pageSize,
       bizStep: _filterBizStep,
@@ -74,13 +76,14 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
       locationGLN: _filterLocationGLN,
       startTime: _filterDateRange?.start,
       endTime: _filterDateRange?.end,
+      loadMore: isLoadMore,
     );
   }
-  
+
   Future<void> _refreshData() async {
     await _loadTransactionEvents();
   }
-  
+
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -89,7 +92,7 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
         String? disposition = _filterDisposition;
         String? locationGLN = _filterLocationGLN;
         DateTimeRange? dateRange = _filterDateRange;
-        
+
         return AlertDialog(
           title: const Text('Filter Transaction Events'),
           content: SingleChildScrollView(
@@ -131,7 +134,7 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
                   children: [
                     Expanded(
                       child: Text(
-                        dateRange != null 
+                        dateRange != null
                             ? '${DateFormat.yMd().format(dateRange.start)} - ${DateFormat.yMd().format(dateRange.end)}'
                             : 'Select Date Range',
                       ),
@@ -143,10 +146,14 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
                           context: context,
                           firstDate: DateTime(2020),
                           lastDate: DateTime.now(),
-                          initialDateRange: dateRange ?? DateTimeRange(
-                            start: DateTime.now().subtract(const Duration(days: 30)),
-                            end: DateTime.now(),
-                          ),
+                          initialDateRange:
+                              dateRange ??
+                              DateTimeRange(
+                                start: DateTime.now().subtract(
+                                  const Duration(days: 30),
+                                ),
+                                end: DateTime.now(),
+                              ),
                         );
                         if (result != null) {
                           dateRange = result;
@@ -202,16 +209,18 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
         );
       },
     );
-  }    void _navigateToEventDetails(TransactionEvent event) {
+  }
+
+  void _navigateToEventDetails(TransactionEvent event) {
     // Extract just the UUID part from the eventId
     // The eventId is typically in format 'urn:epcglobal:cbv:epcis:event:UUID'
-    
+
     print('DEBUG: Event database id: ${event.id}');
     print('DEBUG: Event unique identifier (eventId): ${event.eventId}');
-    
+
     // Determine which ID to use - preferring the database ID if available, otherwise extract UUID from eventId
     String idToUse;
-    
+
     if (event.id != null && event.id!.isNotEmpty) {
       // If we have a database ID, use it as it's most reliable
       idToUse = event.id!;
@@ -225,14 +234,17 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
       idToUse = event.eventId;
       print('DEBUG: Using eventId as is: $idToUse');
     }
-    
-    context.push('/epcis/transaction-events/$idToUse', extra: event).then((result) {
+
+    context.push('/epcis/transaction-events/$idToUse', extra: event).then((
+      result,
+    ) {
       if (result == true) {
         _refreshData();
       }
     });
   }
-    void _navigateToCreateEvent() {
+
+  void _navigateToCreateEvent() {
     // Use GoRouter for consistent navigation across the app
     context.push('/epcis/transaction-events/new').then((result) {
       if (result == true) {
@@ -249,9 +261,11 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
       ),
     );
   }
-    
-    @override
-  Widget build(BuildContext context) {    return Scaffold(      appBar: AppBar(
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Transaction Events'),
         actions: [
           IconButton(
@@ -272,13 +286,13 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
         child: const Icon(Icons.add),
       ),
       drawer: const AppDrawer(),
-      body: Consumer<TransactionEventsProvider>(
-        builder: (context, provider, child) {
-          if (provider.loading && provider.transactionEvents.isEmpty) {
+      body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
+        builder: (context, state) {
+          if (state.loading && state.transactionEvents.isEmpty) {
             return const Center(child: AppLoadingIndicator());
           }
-          
-          if (provider.error != null && provider.transactionEvents.isEmpty) {
+
+          if (state.error != null && state.transactionEvents.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -295,7 +309,7 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    provider.error!,
+                    state.error!,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -308,24 +322,23 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
               ),
             );
           }
-          
-          if (provider.transactionEvents.isEmpty) {
+
+          if (state.transactionEvents.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.event_note,
-                    size: 48.0,
-                    color: Colors.grey[400],
-                  ),
+                  Icon(Icons.event_note, size: 48.0, color: Colors.grey[400]),
                   const SizedBox(height: 16.0),
                   Text(
                     'No Transaction Events Found',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8.0),
-                  if (_filterBizStep != null || _filterDisposition != null || _filterLocationGLN != null || _filterDateRange != null)
+                  if (_filterBizStep != null ||
+                      _filterDisposition != null ||
+                      _filterLocationGLN != null ||
+                      _filterDateRange != null)
                     Text(
                       'Try adjusting your filters',
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -339,29 +352,31 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
               ),
             );
           }
-          
+
           return RefreshIndicator(
             onRefresh: _refreshData,
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: provider.transactionEvents.length + (provider.loading ? 1 : 0),
+              itemCount:
+                  state.transactionEvents.length + (state.loading ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index >= provider.transactionEvents.length) {
+                if (index >= state.transactionEvents.length) {
                   return const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Center(child: AppLoadingIndicator()),
                   );
                 }
-                
-                final event = provider.transactionEvents[index];
-                  return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+
+                final event = state.transactionEvents[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: ListTile(
                     title: Text(
                       'Transaction: ${event.action}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,9 +384,13 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
                         const SizedBox(height: 4.0),
                         Text('Business Step: ${event.businessStep}'),
                         Text('Disposition: ${event.disposition}'),
-                        Text('Time: ${DateFormat.yMd().add_Hms().format(event.eventTime)}'),
+                        Text(
+                          'Time: ${DateFormat.yMd().add_Hms().format(event.eventTime)}',
+                        ),
                         if (event.bizTransactionList.isNotEmpty)
-                          Text('Transactions: ${event.bizTransactionList.entries.map((e) => "${e.key}: ${e.value}").join(", ")}'),
+                          Text(
+                            'Transactions: ${event.bizTransactionList.entries.map((e) => "${e.key}: ${e.value}").join(", ")}',
+                          ),
                         if (event.epcList != null && event.epcList!.isNotEmpty)
                           Text('EPCs: ${event.epcList!.length}'),
                       ],

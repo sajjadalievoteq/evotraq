@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_types.dart' as types;
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
@@ -1197,17 +1196,71 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     }
 
     // Get the validation provider and validate the event created above
-    final validationProvider = Provider.of<ValidationServiceProvider>(
-      context,
-      listen: false,
-    );
+    final validationProvider = context.read<ValidationCubit>();
 
     try {
+      if (_action == null || _action!.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Action is required.';
+        });
+        return;
+      }
+
+      if (_businessStep == null || _businessStep!.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Business step is required.';
+        });
+        return;
+      }
+
+      if (_disposition == null || _disposition!.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Disposition is required.';
+        });
+        return;
+      }
+
+      if (_readPointGLN == null || _readPointGLN!.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Read point GLN is required.';
+        });
+        return;
+      }
+
+      GLN readPoint;
+      try {
+        readPoint = GLN.fromCode(_readPointGLN!);
+      } catch (_) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Read point GLN is invalid.';
+        });
+        return;
+      }
+
       // Check whether to use epcList or quantityList based on schema oneOf constraint
       // The schema requires one or the other, not both
       final bool useEpcList = _epcList.isNotEmpty;
       // If both are populated, we need to choose one based on schema requirements
       final bool hasQuantity = _quantityList.isNotEmpty;
+
+      if (!useEpcList && !hasQuantity) {
+        setState(() {
+          _isLoading = false;
+          _validating = false;
+          _errorMessage = 'Provide either EPC List or Quantity List.';
+        });
+        return;
+      }
 
       // Log decision for debugging
       print(
@@ -1230,22 +1283,19 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
         action: _action,
         disposition: _disposition,
         businessStep: _businessStep,
-        // Always provide a readPoint string (even empty) to avoid null
-        readPoint: _readPointGLN != null
-            ? GLN.fromCode(_readPointGLN!)
-            : GLN.fromCode('0000000000000'),
+        readPoint: readPoint,
         businessLocation: _businessLocationGLN != null
             ? GLN.fromCode(_businessLocationGLN!)
             : null,
-        bizData: _bizData.isNotEmpty ? Map<String, String>.from(_bizData) : {},
+        bizData: _bizData.isNotEmpty
+            ? Map<String, String>.from(_bizData)
+            : null,
         // For the schema's oneOf constraint, only include either epcList or quantityList
         epcList: useEpcList ? List<String>.from(_epcList) : null,
         epcClassList: _epcClassList.isNotEmpty
             ? List<String>.from(_epcClassList)
             : null,
-        // Always include quantityList if there are quantities, regardless of epcList
-        // EPCIS allows both epcList and quantityList to coexist
-        quantityList: _quantityList.isNotEmpty
+        quantityList: (!useEpcList && _quantityList.isNotEmpty)
             ? List<types.QuantityElement>.from(_quantityList)
             : null,
         ilmd: _ilmd.isNotEmpty ? Map<String, dynamic>.from(_ilmd) : null,
@@ -1281,26 +1331,26 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
         // Print the full validation response
         print('\n======== VALIDATION RESPONSE ========');
         print(
-          'Validation response: ${validationProvider.lastValidationResult}',
+          'Validation response: ${validationProvider.state.lastValidationResult}',
         );
-        print('Validation error: ${validationProvider.error}');
+        print('Validation error: ${validationProvider.state.error}');
         print('======================================\n');
 
         // Extract error messages from the response
         final errors = _extractErrorMessages(
-          validationProvider.lastValidationResult,
+          validationProvider.state.lastValidationResult,
         );
         _validationErrors = errors;
 
         // If no specific errors but we have a general error, add it
-        if (errors.isEmpty && validationProvider.error != null) {
-          _validationErrors = [validationProvider.error!];
+        if (errors.isEmpty && validationProvider.state.error != null) {
+          _validationErrors = [validationProvider.state.error!];
         }
 
         // If still no errors, add a generic message with the response details
         if (_validationErrors.isEmpty) {
           final responseJson =
-              validationProvider.lastValidationResult?.toString() ??
+              validationProvider.state.lastValidationResult?.toString() ??
               'No response data';
           _validationErrors = [
             'Validation failed with status 409: Enhanced validation failed',
@@ -1381,9 +1431,9 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
               ],
             ),
           );
-        } else if (validationProvider.error != null) {
+        } else if (validationProvider.state.error != null) {
           setState(() {
-            _errorMessage = validationProvider.error;
+            _errorMessage = validationProvider.state.error;
           });
         }
         return;
@@ -3455,22 +3505,19 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     });
 
     try {
-      final validationProvider = Provider.of<ValidationServiceProvider>(
-        context,
-        listen: false,
-      );
+      final validationProvider = context.read<ValidationCubit>();
 
       // Test with minimal event to identify core schema requirements
       final minimalEvent = ObjectEvent(
         eventId: 'test_${DateTime.now().millisecondsSinceEpoch}',
         recordTime: DateTime.now(),
-        eventTime: DateTime.now(),
+        eventTime: DateTime.now().subtract(const Duration(seconds: 5)),
         eventTimeZone: '+00:00',
         epcisVersion: EPCISVersion.v2_0,
         action: 'OBSERVE',
         // Using the oneOf constraint - include only epcList
         epcList: ['urn:epc:id:sgtin:0614141.107346.1000'],
-        readPoint: GLN.fromCode('0000000000000'),
+        readPoint: GLN.fromCode('1234567890128'),
         // Always include a certification info object
         // Always send as array of certification info objects
         certificationInfo: [
@@ -3492,9 +3539,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       // If minimal test failed, try with required fields only
       if (!minimalResult) {
         print("\n======== VALIDATION ERRORS ========");
-        print(
-          'Validation response: ${validationProvider.lastValidationResult}',
-        );
       }
 
       // Show results in UI
@@ -3520,7 +3564,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: Text(
-                      'Errors: ${validationProvider.validationErrors.join("\n")}',
+                      'Errors: ${validationProvider.state.error ?? "Unknown error"}',
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),

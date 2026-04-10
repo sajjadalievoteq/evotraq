@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import '../providers/traversal_query_provider.dart';
 import '../widgets/traversal_query_widget.dart';
@@ -32,12 +32,14 @@ class _TraversalQueryScreenContent extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          Consumer<TraversalQueryProvider>(
-            builder: (context, provider, child) {
+          BlocBuilder<TraversalQueryCubit, TraversalQueryState>(
+            builder: (context, state) {
               return IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: provider.isLoading ? null : () {
-                  provider.refreshData();
+                onPressed: state.isLoading
+                    ? null
+                    : () {
+                        context.read<TraversalQueryCubit>().refreshData();
                 },
                 tooltip: 'Refresh Data',
               );
@@ -121,8 +123,8 @@ class _MainContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TraversalQueryProvider>(
-      builder: (context, provider, child) {
+    return BlocBuilder<TraversalQueryCubit, TraversalQueryState>(
+      builder: (context, state) {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -157,9 +159,11 @@ class _MainContent extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: TraversalQueryWidget(
                           onQueryExecuted: (queryType, parameters) {
-                            provider.executeQuery(queryType, parameters);
+                            context
+                                .read<TraversalQueryCubit>()
+                                .executeQuery(queryType, parameters);
                           },
-                          isLoading: provider.isLoading,
+                          isLoading: state.isLoading,
                         ),
                       ),
                     ),
@@ -205,11 +209,11 @@ class _MainContent extends StatelessWidget {
                     ),
                     Expanded(
                       child: SupplyChainVisualizationWidget(
-                        traversalResult: provider.traversalResult,
-                        itemHistory: provider.itemHistory,
-                        aggregationHierarchy: provider.aggregationHierarchy,
-                        isLoading: provider.isLoading,
-                        error: provider.error,
+                        traversalResult: state.traversalResult,
+                        itemHistory: state.itemHistory,
+                        aggregationHierarchy: state.aggregationHierarchy,
+                        isLoading: state.isLoading,
+                        error: state.error,
                       ),
                     ),
                   ],

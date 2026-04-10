@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
@@ -48,7 +48,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   String? _lastKnownGLNCode;
   
   bool _isLoading = false;
-  String? _errorMessage;
   bool _isEdit = false;
   bool _hasTriedToSubmit = false; // Track if user has tried to submit the form
   Timer? _validationTimer; // Debounce timer for validation
@@ -152,8 +151,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     setState(() => _isLoading = true);
     
     try {
-      final provider = Provider.of<TransformationEventsProvider>(context, listen: false);
-      final event = await provider.getTransformationEventById(widget.transformationEventId!);
+      final event = await context
+          .read<TransformationEventsCubit>()
+          .getTransformationEventById(widget.transformationEventId!);
       
       // Debug logging to see what values we're receiving
       print('==== Event Data Received ====');
@@ -178,8 +178,12 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     } catch (error) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Error loading event: ${error.toString()}';
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading event: ${error.toString()}')),
+        );
+      }
     }
   }
     void _initializeWithEvent(TransformationEvent event) {
@@ -296,11 +300,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     }
     
     // Clear general error message when user starts typing
-    if (_errorMessage != null) {
-      setState(() {
-        _errorMessage = null;
-      });
-    }
+    context.read<ValidationCubit>().clearValidation();
   }
   
   @override
@@ -351,11 +351,11 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
     
     try {
-      final provider = Provider.of<TransformationEventsProvider>(context, listen: false);
+      final cubit = context.read<TransformationEventsCubit>();
+      final validationCubit = context.read<ValidationCubit>();
       
       // Parse comma-separated EPCs and convert any GS1 barcode format to EPC URI format
       final inputEpcs = _inputEpcsController.text
@@ -370,7 +370,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
           .map((e) => EPCFormatter.formatToEPCUri(e)) // Format to EPC URI if needed
-          .toList();      // Initialize bizData map with the existing data
+          .toList();
+
+      // Initialize bizData map with the existing data
       final Map<String, String> bizData = Map.from(_bizData);
       
       // Include GLN code in bizData for reference
@@ -378,14 +380,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       if (locationGLN.isNotEmpty) {
         bizData['locationGLNCode'] = locationGLN;
         
-        // Debug logging
-        print('Adding GLN code to bizData: $locationGLN');
-        
         // ALSO store location as a GLN object that the backend might use
         bizData['businessLocationGLN'] = locationGLN;
         bizData['bizLocationGLN'] = locationGLN;
-      } else {
-        print('No GLN code provided in form');
       }
       
       // Format transformationID into proper URN format if needed
@@ -399,20 +396,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       
       // Use business step and disposition as plain values without URN prefixes
       // The backend expects plain values like "transforming" not URN format
-      String? bizStep = null;
-      if (_bizStepController.text.isNotEmpty) {
-        // We're using simple values in the dropdown, so we can use directly
-        bizStep = _bizStepController.text;
-      }
-      
-      String? disposition = null;
-      if (_dispositionController.text.isNotEmpty) {
-        // We're using simple values in the dropdown, so we can use directly
-        disposition = _dispositionController.text;
-      }
-      
-      // Store the current GLN code for future reference
-      _lastKnownGLNCode = locationGLN.isNotEmpty ? locationGLN : null;
+      String? bizStep = _bizStepController.text.isNotEmpty ? _bizStepController.text : null;
+      String? disposition = _dispositionController.text.isNotEmpty ? _dispositionController.text : null;
       
       // Create GLN object from string if provided
       GLN? businessLocationGLN;
@@ -457,10 +442,20 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         certificationInfo: certificationInfo,
       );
       
+      // Perform validation before saving
+      final isValid = await validationCubit.validateTransformationEvent(event);
+      
+      if (!isValid && mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      
       if (_isEdit && widget.event != null) {
-        await provider.updateTransformationEvent(event);
+        await cubit.updateTransformationEvent(event);
       } else {
-        await provider.createTransformationEvent(event);
+        await cubit.createTransformationEvent(event);
       }
       
       // Return to the previous screen
@@ -476,10 +471,15 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       
     } catch (error) {
       setState(() {
-        _errorMessage = 'Error: ${error.toString()}';
         _isLoading = false;
       });
-    }  }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${error.toString()}')),
+        );
+      }
+    }
+  }
   
   void _generateSampleInputEPC() {
     final sgtin = GS1Generator.generateRandomSGTIN('0614141', '107346');
@@ -576,17 +576,28 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   }
   
   Widget _buildMainContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInfoCard(),
-          const SizedBox(height: 16),
-          if (_errorMessage != null) _buildErrorMessage(),
-          _buildForm(),
-        ],
-      ),
+    return BlocBuilder<ValidationCubit, ValidationState>(
+      builder: (context, validationState) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoCard(),
+              const SizedBox(height: 16),
+              if (validationState.error != null)
+                _buildErrorMessage(validationState.error!),
+              if (validationState.lastValidationResult != null &&
+                  !(validationState.lastValidationResult!['valid'] as bool? ?? true))
+                ValidationErrorWidget(
+                  validationErrors: context.read<ValidationCubit>().validationErrors,
+                  onDismiss: () => context.read<ValidationCubit>().clearValidation(),
+                ),
+              _buildForm(),
+            ],
+          ),
+        );
+      },
     );
   }
   
@@ -623,7 +634,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     );
   }
   
-  Widget _buildErrorMessage() {
+  Widget _buildErrorMessage(String message) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Card(
@@ -634,7 +645,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
             children: [
               const Icon(Icons.error_outline, color: Colors.red),
               const SizedBox(width: 16),
-              Expanded(child: Text(_errorMessage ?? '', style: const TextStyle(color: Colors.red))),
+              Expanded(child: Text(message, style: const TextStyle(color: Colors.red))),
             ],
           ),
         ),

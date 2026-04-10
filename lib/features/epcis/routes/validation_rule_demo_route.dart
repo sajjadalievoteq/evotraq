@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 // Import for ValidationSeverity enum
@@ -393,12 +389,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
   /// Create the route for navigation
   static Route<dynamic> route() {
     return MaterialPageRoute(
-      builder: (context) => ChangeNotifierProvider(
-        create: (context) => ValidationRuleProvider(
-          appConfig: getIt<AppConfig>(),
-        ),
-        child: const ValidationRuleDemoRoute(),
-      ),
+      builder: (context) => const ValidationRuleDemoRoute(),
     );
   }
   

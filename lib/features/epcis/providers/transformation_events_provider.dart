@@ -1,37 +1,80 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/services/transformation_event_service.dart';
 
-/// Provider for managing transformation events state
-class TransformationEventsProvider with ChangeNotifier {
+class TransformationEventsState extends Equatable {
+  final List<TransformationEvent> transformationEvents;
+  final bool isLoading;
+  final String? errorMessage;
+  final TransformationEvent? selectedEvent;
+
+  const TransformationEventsState({
+    required this.transformationEvents,
+    required this.isLoading,
+    required this.errorMessage,
+    required this.selectedEvent,
+  });
+
+  factory TransformationEventsState.initial() => const TransformationEventsState(
+        transformationEvents: [],
+        isLoading: false,
+        errorMessage: null,
+        selectedEvent: null,
+      );
+
+  TransformationEventsState copyWith({
+    List<TransformationEvent>? transformationEvents,
+    bool? isLoading,
+    String? errorMessage,
+    TransformationEvent? selectedEvent,
+    bool clearError = false,
+    bool clearSelectedEvent = false,
+  }) {
+    return TransformationEventsState(
+      transformationEvents: transformationEvents ?? this.transformationEvents,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      selectedEvent:
+          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        transformationEvents,
+        isLoading,
+        errorMessage,
+        selectedEvent,
+      ];
+}
+
+class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   final TransformationEventService _service;
   final http.Client _httpClient;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
-  
-  List<TransformationEvent> _transformationEvents = [];
-  bool _isLoading = false;
-  String? _errorMessage;
-  
-  /// Constructor
-  TransformationEventsProvider(this._service, this._httpClient, this._tokenManager, this._appConfig);
-  
-  /// Get all transformation events
-  List<TransformationEvent> get transformationEvents => _transformationEvents;
-  
-  /// Loading state
-  bool get isLoading => _isLoading;
-  
-  /// Error message
-  String? get errorMessage => _errorMessage;
-  /// Load all transformation events
+
+  TransformationEventsCubit({
+    TransformationEventService? service,
+    http.Client? httpClient,
+    TokenManager? tokenManager,
+    required AppConfig appConfig,
+  })  : _service = service ?? getIt<TransformationEventService>(),
+        _httpClient = httpClient ?? getIt<http.Client>(),
+        _tokenManager = tokenManager ?? getIt<TokenManager>(),
+        _appConfig = appConfig,
+        super(TransformationEventsState.initial());
+
   Future<void> loadTransformationEvents() async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
+
       // Use the direct API call to match the backend's paginated response
       final response = await _httpClient.get(
         Uri.parse('${_appConfig.apiBaseUrl}/transformation-events'),
@@ -41,20 +84,29 @@ class TransformationEventsProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['content'] != null && data['content'] is List) {
-          _transformationEvents = (data['content'] as List)
+          final events = (data['content'] as List)
               .map((json) => TransformationEvent.fromJson(json))
-              .toList();
+              .toList(growable: false);
+
+          emit(
+            state.copyWith(
+              transformationEvents: events,
+              isLoading: false,
+            ),
+          );
         } else {
           throw Exception('Invalid response format');
         }
-        _clearError();
       } else {
         throw Exception('Failed to load transformation events: ${response.statusCode}');
       }
     } catch (e) {
-      _setError('Failed to load transformation events: ${e.toString()}');
-    } finally {
-      _setLoading(false);
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to load transformation events: ${e.toString()}',
+        ),
+      );
     }
   }
     /// Create a transformation process
@@ -67,8 +119,8 @@ class TransformationEventsProvider with ChangeNotifier {
       required String disposition,
       required Map<String, String> parameters,
       required Map<String, String> bizData}) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final newEvent = await _service.createTransformationProcess(
         transformationId,
         inputEPCs,
@@ -80,225 +132,265 @@ class TransformationEventsProvider with ChangeNotifier {
         bizData,
       );
       
-      _transformationEvents = [newEvent, ..._transformationEvents];
-      _clearError();
-      notifyListeners();
+      emit(
+        state.copyWith(
+          transformationEvents: [newEvent, ...state.transformationEvents],
+          isLoading: false,
+        ),
+      );
       return newEvent;
     } catch (e) {
-      _setError('Failed to create transformation process: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to create transformation process: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Create a transformation event
   Future<TransformationEvent> createTransformationEvent(TransformationEvent event) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final newEvent = await _service.createTransformationEvent(event);
       
-      _transformationEvents = [newEvent, ..._transformationEvents];
-      _clearError();
-      notifyListeners();
+      emit(
+        state.copyWith(
+          transformationEvents: [newEvent, ...state.transformationEvents],
+          isLoading: false,
+        ),
+      );
       return newEvent;
     } catch (e) {
-      _setError('Failed to create transformation event: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to create transformation event: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation events by transformation ID
   Future<List<TransformationEvent>> findByTransformationId(String transformationId) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationEventsByTransformationId(transformationId);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation events: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation events: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation events by input EPC
   Future<List<TransformationEvent>> findByInputEPC(String inputEPC) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationEventsByInputEPC(inputEPC);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation events: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation events: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation events by output EPC
   Future<List<TransformationEvent>> findByOutputEPC(String outputEPC) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationEventsByOutputEPC(outputEPC);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation events: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation events: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation events by input EPC class
   Future<List<TransformationEvent>> findByInputEPCClass(String inputEPCClass) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationEventsByInputEPCClass(inputEPCClass);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation events: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation events: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation events by output EPC class
   Future<List<TransformationEvent>> findByOutputEPCClass(String outputEPCClass) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationEventsByOutputEPCClass(outputEPCClass);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation events: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation events: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformation history for an output EPC
   Future<List<TransformationEvent>> findTransformationHistory(String outputEPC) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final events = await _service.findTransformationHistoryForOutput(outputEPC);
-      _clearError();
+      emit(state.copyWith(transformationEvents: events, isLoading: false));
       return events;
     } catch (e) {
-      _setError('Failed to find transformation history: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to find transformation history: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Get a transformation event by ID
   Future<TransformationEvent> getTransformationEventById(String eventId) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       final event = await _service.getTransformationEventByEventId(eventId);
-      _clearError();
+      emit(state.copyWith(selectedEvent: event, isLoading: false));
       return event;
     } catch (e) {
-      _setError('Failed to get transformation event: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to get transformation event: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
     /// Update a transformation event
   Future<void> updateTransformationEvent(TransformationEvent event) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       if (event.id == null) {
         throw Exception('Cannot update transformation event without an ID');
       }
       
       final updatedEvent = await _service.updateTransformationEvent(event.id!, event);
       
-      _transformationEvents = _transformationEvents.map((e) {
-        return e.id == updatedEvent.id ? updatedEvent : e;
-      }).toList();
+      final updatedEvents = state.transformationEvents
+          .map((e) => e.id == updatedEvent.id ? updatedEvent : e)
+          .toList(growable: false);
+
+      final selectedEvent = state.selectedEvent?.id == updatedEvent.id
+          ? updatedEvent
+          : state.selectedEvent;
       
-      _clearError();
-      notifyListeners();
+      emit(
+        state.copyWith(
+          transformationEvents: updatedEvents,
+          selectedEvent: selectedEvent,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
-      _setError('Failed to update transformation event: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to update transformation event: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Delete a transformation event
   Future<void> deleteTransformationEvent(String id) async {
-    _setLoading(true);
     try {
+      emit(state.copyWith(isLoading: true, clearError: true));
       await _service.deleteTransformationEvent(id);
       
-      _transformationEvents = _transformationEvents.where((e) => e.id != id).toList();
-      
-      _clearError();
-      notifyListeners();
+      final updatedEvents = state.transformationEvents
+          .where((e) => e.id != id)
+          .toList(growable: false);
+
+      emit(
+        state.copyWith(
+          transformationEvents: updatedEvents,
+          clearSelectedEvent: state.selectedEvent?.id == id,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
-      _setError('Failed to delete transformation event: ${e.toString()}');
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to delete transformation event: ${e.toString()}',
+        ),
+      );
       rethrow;
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Track transformations for a specific EPC
   Future<List<TransformationEvent>> trackTransformationsByEPC(String epc) async {
-    _setLoading(true);
     try {
       final events = await _service.findTransformationsByEPC(epc);
-      _clearError();
       return events;
     } catch (e) {
-      _setError('Failed to track EPC transformations: ${e.toString()}');
       return [];
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Find transformations by input and output relationship
   Future<List<TransformationEvent>> findTransformationsByInputOutput(
       String inputEPC, String outputEPC) async {
-    _setLoading(true);
     try {
       final events = await _service.findTransformationsByInputAndOutputEPC(inputEPC, outputEPC);
-      _clearError();
       return events;
     } catch (e) {
-      _setError('Failed to find input-output transformations: ${e.toString()}');
       return [];
-    } finally {
-      _setLoading(false);
     }
   }
   
   /// Get transformation events by transformation ID
   Future<List<TransformationEvent>> getTransformationsByTransformationId(String transformationId) async {
-    _setLoading(true);
     try {
       final events = await _service.findTransformationEventsByTransformationId(transformationId);
-      _clearError();
       return events;
     } catch (e) {
-      _setError('Failed to get transformations by ID: ${e.toString()}');
       return [];
-    } finally {
-      _setLoading(false);
     }
   }
   
@@ -310,18 +402,8 @@ class TransformationEventsProvider with ChangeNotifier {
       'Authorization': 'Bearer $token',
     };
   }
-  
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-  
-  void _setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-  
-  void _clearError() {
-    _errorMessage = null;
+
+  void clearError() {
+    emit(state.copyWith(clearError: true));
   }
 }

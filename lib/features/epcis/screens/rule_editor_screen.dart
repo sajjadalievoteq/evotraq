@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 
@@ -7,13 +7,13 @@ import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.
 class RuleEditorScreen extends StatefulWidget {
   /// The rule to edit
   final ValidationRule rule;
-  
+
   /// Whether this is a predefined rule
   final bool isPredefined;
-  
+
   /// Whether this is a new rule
   final bool isNew;
-  
+
   /// Constructor
   const RuleEditorScreen({
     Key? key,
@@ -38,25 +38,37 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
   late String? _eventType;
   late RuleSeverity _severity;
   late bool _enabled;
-  
+
   final _formKey = GlobalKey<FormState>();
   bool _hasChanges = false;
-  
+
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.rule.name);
-    _descriptionController = TextEditingController(text: widget.rule.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.rule.description ?? '',
+    );
     _fieldController = TextEditingController(text: widget.rule.field ?? '');
-    _ruleExpressionController = TextEditingController(text: widget.rule.ruleExpression ?? '');
-    _errorMessageController = TextEditingController(text: widget.rule.errorMessage ?? '');
-    _categoryController = TextEditingController(text: widget.rule.category ?? '');
-    _tagsController = TextEditingController(text: widget.rule.tags?.join(', ') ?? '');
-    _priorityController = TextEditingController(text: widget.rule.priority?.toString() ?? '100');
+    _ruleExpressionController = TextEditingController(
+      text: widget.rule.ruleExpression ?? '',
+    );
+    _errorMessageController = TextEditingController(
+      text: widget.rule.errorMessage ?? '',
+    );
+    _categoryController = TextEditingController(
+      text: widget.rule.category ?? '',
+    );
+    _tagsController = TextEditingController(
+      text: widget.rule.tags?.join(', ') ?? '',
+    );
+    _priorityController = TextEditingController(
+      text: widget.rule.priority?.toString() ?? '100',
+    );
     _eventType = _mapBackendEventTypeToDropdownValue(widget.rule.eventType);
     _severity = widget.rule.severity;
     _enabled = widget.rule.enabled;
-    
+
     // Add listeners to detect changes
     _nameController.addListener(_markAsChanged);
     _descriptionController.addListener(_markAsChanged);
@@ -67,7 +79,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
     _tagsController.addListener(_markAsChanged);
     _priorityController.addListener(_markAsChanged);
   }
-  
+
   void _markAsChanged() {
     if (!_hasChanges) {
       setState(() {
@@ -75,7 +87,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
       });
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -91,15 +103,15 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenTitle = widget.isNew 
-      ? 'Add New Rule' 
-      : (widget.isPredefined ? 'Edit Predefined Rule' : 'Edit Custom Rule');
-      
+    final screenTitle = widget.isNew
+        ? 'Add New Rule'
+        : (widget.isPredefined ? 'Edit Predefined Rule' : 'Edit Custom Rule');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(screenTitle),
         actions: [
-          if (!widget.isNew && !widget.isPredefined) 
+          if (!widget.isNew && !widget.isPredefined)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () => _confirmDeleteRule(),
@@ -115,7 +127,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.isPredefined) 
+                if (widget.isPredefined)
                   const Padding(
                     padding: EdgeInsets.only(bottom: 16.0),
                     child: Card(
@@ -130,7 +142,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                       ),
                     ),
                   ),
-                  
+
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -146,7 +158,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(
@@ -163,22 +175,23 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildEventTypeDropdown(),
                 const SizedBox(height: 16),
-                
+
                 TextFormField(
                   controller: _fieldController,
                   decoration: const InputDecoration(
                     labelText: 'Field Path',
-                    hintText: r'e.g., $.eventTime, $.businessStep, $.epcList[*]',
+                    hintText:
+                        r'e.g., $.eventTime, $.businessStep, $.epcList[*]',
                     border: OutlineInputBorder(),
                     helperText: 'JSONPath expression for the field to validate',
                   ),
                   enabled: !widget.isPredefined,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Rule Expression - Advanced validation logic
                 TextFormField(
                   controller: _ruleExpressionController,
@@ -186,13 +199,14 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                     labelText: 'Rule Expression',
                     hintText: 'e.g., eventTime != null && eventTime <= now()',
                     border: OutlineInputBorder(),
-                    helperText: 'Complex validation logic using JavaScript-like expressions',
+                    helperText:
+                        'Complex validation logic using JavaScript-like expressions',
                   ),
                   maxLines: 3,
                   enabled: !widget.isPredefined,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Error Message - Custom error message when validation fails
                 TextFormField(
                   controller: _errorMessageController,
@@ -205,20 +219,21 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   enabled: !widget.isPredefined,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Category - Business categorization
                 TextFormField(
                   controller: _categoryController,
                   decoration: const InputDecoration(
                     labelText: 'Category',
-                    hintText: 'e.g., REQUIRED, BUSINESS, REFERENTIAL, DATA_QUALITY',
+                    hintText:
+                        'e.g., REQUIRED, BUSINESS, REFERENTIAL, DATA_QUALITY',
                     border: OutlineInputBorder(),
                     helperText: 'Business category for organizing rules',
                   ),
                   enabled: !widget.isPredefined,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Tags - For organization and filtering
                 TextFormField(
                   controller: _tagsController,
@@ -231,7 +246,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   enabled: !widget.isPredefined,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Priority - Execution order
                 TextFormField(
                   controller: _priorityController,
@@ -254,10 +269,10 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildSeveritySelector(),
                 const SizedBox(height: 24),
-                
+
                 SwitchListTile(
                   title: const Text('Enable Rule'),
                   subtitle: const Text('Turn this rule on or off'),
@@ -270,7 +285,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   },
                 ),
                 const SizedBox(height: 32),
-                
+
                 Center(
                   child: ElevatedButton(
                     onPressed: _hasChanges ? _saveChanges : null,
@@ -287,7 +302,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
       ),
     );
   }
-  
+
   Widget _buildEventTypeDropdown() {
     const eventTypes = [
       {'label': 'All Event Types', 'value': null},
@@ -296,7 +311,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
       {'label': 'Transaction Event', 'value': 'TransactionEvent'},
       {'label': 'Transformation Event', 'value': 'TransformationEvent'},
     ];
-    
+
     return DropdownButtonFormField<String?>(
       decoration: const InputDecoration(
         labelText: 'Event Type',
@@ -309,27 +324,24 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
           child: Text(type['label'] as String),
         );
       }).toList(),
-      onChanged: widget.isPredefined 
-        ? null 
-        : (value) {
-            setState(() {
-              _eventType = value;
-              _hasChanges = true;
-            });
-          },
+      onChanged: widget.isPredefined
+          ? null
+          : (value) {
+              setState(() {
+                _eventType = value;
+                _hasChanges = true;
+              });
+            },
     );
   }
-  
+
   Widget _buildSeveritySelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Rule Severity',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -342,9 +354,9 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   Icon(
                     severity.icon,
                     size: 18,
-                    color: _severity == severity 
-                      ? Colors.white 
-                      : severity.color,
+                    color: _severity == severity
+                        ? Colors.white
+                        : severity.color,
                   ),
                   const SizedBox(width: 8),
                   Text(severity.displayName),
@@ -354,7 +366,9 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
               selectedColor: severity.color,
               labelStyle: TextStyle(
                 color: _severity == severity ? Colors.white : null,
-                fontWeight: _severity == severity ? FontWeight.bold : FontWeight.normal,
+                fontWeight: _severity == severity
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
               onSelected: (selected) {
                 if (selected) {
@@ -370,36 +384,50 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
       ],
     );
   }
-  
+
   void _saveChanges() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     final updatedRule = widget.rule.copyWith(
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
-      field: _fieldController.text.trim().isEmpty ? null : _fieldController.text.trim(),
-      ruleExpression: _ruleExpressionController.text.trim().isEmpty ? null : _ruleExpressionController.text.trim(),
-      errorMessage: _errorMessageController.text.trim().isEmpty ? null : _errorMessageController.text.trim(),
-      category: _categoryController.text.trim().isEmpty ? null : _categoryController.text.trim(),
-      tags: _tagsController.text.trim().isEmpty 
-          ? null 
-          : _tagsController.text.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList(),
-      priority: _priorityController.text.trim().isEmpty ? 100 : int.tryParse(_priorityController.text.trim()),
+      field: _fieldController.text.trim().isEmpty
+          ? null
+          : _fieldController.text.trim(),
+      ruleExpression: _ruleExpressionController.text.trim().isEmpty
+          ? null
+          : _ruleExpressionController.text.trim(),
+      errorMessage: _errorMessageController.text.trim().isEmpty
+          ? null
+          : _errorMessageController.text.trim(),
+      category: _categoryController.text.trim().isEmpty
+          ? null
+          : _categoryController.text.trim(),
+      tags: _tagsController.text.trim().isEmpty
+          ? null
+          : _tagsController.text
+                .split(',')
+                .map((tag) => tag.trim())
+                .where((tag) => tag.isNotEmpty)
+                .toList(),
+      priority: _priorityController.text.trim().isEmpty
+          ? 100
+          : int.tryParse(_priorityController.text.trim()),
       eventType: _eventType != null ? _parseEventType(_eventType!) : null,
       severity: _severity,
       enabled: _enabled,
     );
-    
-    final provider = Provider.of<ValidationRuleProvider>(context, listen: false);
-    
+
+    final cubit = context.read<ValidationRuleCubit>();
+
     if (widget.isNew) {
-      provider.addRule(updatedRule).then((_) {
+      cubit.addRule(updatedRule).then((_) {
         Navigator.of(context).pop();
       });
     } else {
-      provider.updateRule(updatedRule).then((_) {
+      cubit.updateRule(updatedRule).then((_) {
         Navigator.of(context).pop();
       });
     }
@@ -426,7 +454,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
   /// Maps backend EventType values to dropdown values
   String? _mapBackendEventTypeToDropdownValue(EventType? eventType) {
     if (eventType == null) return null;
-    
+
     switch (eventType) {
       case EventType.ALL:
         return null; // "All Event Types" option in dropdown
@@ -440,7 +468,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
         return 'TransformationEvent';
     }
   }
-  
+
   void _confirmDeleteRule() {
     showDialog(
       context: context,
@@ -457,11 +485,11 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Provider.of<ValidationRuleProvider>(context, listen: false)
-                .deleteRule(widget.rule)
-                .then((_) {
-                  Navigator.of(context).pop();
-                });
+              context.read<ValidationRuleCubit>().deleteRule(widget.rule).then((
+                _,
+              ) {
+                Navigator.of(context).pop();
+              });
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -135,152 +134,138 @@ class TraqTraceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider<TransactionEventsProvider>(
+        BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+        BlocProvider<TransactionEventsCubit>(
           create: (context) =>
-              TransactionEventsProvider(appConfig: getIt<AppConfig>()),
+              TransactionEventsCubit(appConfig: getIt<AppConfig>()),
         ),
-        ChangeNotifierProvider<TransformationEventsProvider>(
-          create: (context) => TransformationEventsProvider(
-            getIt<TransformationEventService>(),
-            getIt<http.Client>(),
-            getIt<TokenManager>(),
-            getIt<AppConfig>(),
-          ),
-        ),
-        ChangeNotifierProvider<ValidationServiceProvider>(
+        BlocProvider<TransformationEventsCubit>(
           create: (context) =>
-              ValidationServiceProvider(appConfig: getIt<AppConfig>()),
+              TransformationEventsCubit(appConfig: getIt<AppConfig>()),
         ),
-        ChangeNotifierProvider<TransactionDocumentProvider>(
-          create: (context) => TransactionDocumentProvider(
-            service: getIt<TransactionDocumentService>(),
+        BlocProvider<ValidationCubit>(
+          create: (context) => ValidationCubit(appConfig: getIt<AppConfig>()),
+        ),
+        BlocProvider<TransactionDocumentCubit>(
+          create: (context) =>
+              TransactionDocumentCubit(appConfig: getIt<AppConfig>()),
+        ),
+        BlocProvider<ValidationRuleCubit>(
+          create: (context) =>
+              ValidationRuleCubit(appConfig: getIt<AppConfig>()),
+        ),
+        BlocProvider<TraversalQueryCubit>(
+          create: (context) =>
+              TraversalQueryCubit(getIt<AdvancedQueryService>()),
+        ),
+        BlocProvider<AggregationEventsCubit>(
+          create: (context) =>
+              AggregationEventsCubit(appConfig: getIt<AppConfig>()),
+        ),
+        BlocProvider<ProfileCubit>(
+          create: (context) => ProfileCubit(userService: getIt<UserService>()),
+        ),
+        BlocProvider<ThemeCubit>(
+          create: (context) =>
+              ThemeCubit(profileCubit: context.read<ProfileCubit>()),
+        ),
+        BlocProvider<AdminCubit>(
+          create: (context) => AdminCubit(adminService: getIt<AdminService>()),
+        ),
+        // Add GTIN Cubit
+        BlocProvider<GTINCubit>(
+          create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+        ),
+        // Add GLN Cubit
+        BlocProvider<GLNCubit>(
+          create: (context) => GLNCubit(glnService: getIt<GLNService>()),
+        ),
+        BlocProvider<SSCCCubit>(
+          create: (context) => SSCCCubit(ssccService: getIt<SSCCService>()),
+        ),
+        // Add SGTIN Cubit
+        BlocProvider<SGTINCubit>(
+          create: (context) => SGTINCubit(sgtinService: getIt<SGTINService>()),
+        ),
+        BlocProvider<ApiCollectionCubit>(
+          create: (context) => ApiCollectionCubit(
+            httpClient: getIt<http.Client>(),
+            tokenManager: getIt<TokenManager>(),
             appConfig: getIt<AppConfig>(),
           ),
         ),
-        ChangeNotifierProvider<ValidationRuleProvider>(
-          create: (context) =>
-              ValidationRuleProvider(appConfig: getIt<AppConfig>()),
+        BlocProvider<ApiManagementCubit>(
+          create: (context) => ApiManagementCubit(
+            httpClient: getIt<http.Client>(),
+            tokenManager: getIt<TokenManager>(),
+            appConfig: getIt<AppConfig>(),
+          ),
         ),
-        ChangeNotifierProvider<TraversalQueryProvider>(
+        BlocProvider<PartnerAccessCubit>(
+          create: (context) => PartnerAccessCubit(
+            httpClient: getIt<http.Client>(),
+            tokenManager: getIt<TokenManager>(),
+            appConfig: getIt<AppConfig>(),
+          ),
+        ),
+        BlocProvider<ServiceAccountCubit>(
           create: (context) =>
-              TraversalQueryProvider(getIt<AdvancedQueryService>()),
+              ServiceAccountCubit(service: getIt<ServiceAccountService>()),
+        ),
+        BlocProvider<ObjectEventsCubit>(
+          create: (context) => ObjectEventsCubit(
+            httpClient: getIt<http.Client>(),
+            tokenManager: getIt<TokenManager>(),
+            appConfig: getIt<AppConfig>(),
+          ),
+        ),
+        BlocProvider<EPCISEventsCubit>(
+          create: (context) => EPCISEventsCubit(getIt<EPCISEventService>()),
+        ),
+        BlocProvider<AdvancedQueryCubit>(
+          create: (context) =>
+              AdvancedQueryCubit(getIt<AdvancedQueryService>()),
+        ),
+        BlocProvider<ShippingOperationCubit>(
+          create: (context) =>
+              ShippingOperationCubit(getIt<ShippingOperationService>()),
+        ),
+        BlocProvider<SystemSettingsCubit>(
+          create: (context) =>
+              SystemSettingsCubit(getIt<SystemSettingsService>()),
+        ),
+        // Add Notification Cubit
+        BlocProvider<NotificationCubit>(
+          create: (context) => NotificationCubit(
+            apiService: getIt<NotificationApiService>(),
+            webSocketService: getIt<WebSocketService>(),
+          ),
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
-          BlocProvider<AggregationEventsCubit>(
-            create: (context) =>
-                AggregationEventsCubit(appConfig: getIt<AppConfig>()),
-          ),
-          BlocProvider<ProfileCubit>(
-            create: (context) =>
-                ProfileCubit(userService: getIt<UserService>()),
-          ),
-          BlocProvider<ThemeCubit>(
-            create: (context) =>
-                ThemeCubit(profileCubit: context.read<ProfileCubit>()),
-          ),
-          BlocProvider<AdminCubit>(
-            create: (context) =>
-                AdminCubit(adminService: getIt<AdminService>()),
-          ),
-          // Add GTIN Cubit
-          BlocProvider<GTINCubit>(
-            create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
-          ),
-          // Add GLN Cubit
-          BlocProvider<GLNCubit>(
-            create: (context) => GLNCubit(glnService: getIt<GLNService>()),
-          ),
-          BlocProvider<SSCCCubit>(
-            create: (context) => SSCCCubit(ssccService: getIt<SSCCService>()),
-          ),
-          // Add SGTIN Cubit
-          BlocProvider<SGTINCubit>(
-            create: (context) =>
-                SGTINCubit(sgtinService: getIt<SGTINService>()),
-          ),
-          BlocProvider<ApiCollectionCubit>(
-            create: (context) => ApiCollectionCubit(
-              httpClient: getIt<http.Client>(),
-              tokenManager: getIt<TokenManager>(),
-              appConfig: getIt<AppConfig>(),
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        buildWhen: (previous, current) =>
+            previous.isDarkMode != current.isDarkMode,
+        builder: (context, themeState) {
+          return BlocListener<AuthCubit, AuthState>(
+            listener: (context, state) {
+              if (state.isAuthenticated && state.user != null) {
+                context.read<SystemSettingsCubit>().initialize();
+              } else if (!state.isAuthenticated) {
+                context.read<SystemSettingsCubit>().reset();
+              }
+            },
+            child: MaterialApp.router(
+              title: getIt<AppConfig>().appName,
+              theme: AppTheme.lightTheme(),
+              debugShowCheckedModeBanner: false,
+              darkTheme: AppTheme.darkTheme(),
+              themeMode: themeState.themeMode,
+              routerConfig: getIt<AppRouter>().router,
             ),
-          ),
-          BlocProvider<ApiManagementCubit>(
-            create: (context) => ApiManagementCubit(
-              httpClient: getIt<http.Client>(),
-              tokenManager: getIt<TokenManager>(),
-              appConfig: getIt<AppConfig>(),
-            ),
-          ),
-          BlocProvider<PartnerAccessCubit>(
-            create: (context) => PartnerAccessCubit(
-              httpClient: getIt<http.Client>(),
-              tokenManager: getIt<TokenManager>(),
-              appConfig: getIt<AppConfig>(),
-            ),
-          ),
-          BlocProvider<ServiceAccountCubit>(
-            create: (context) =>
-                ServiceAccountCubit(service: getIt<ServiceAccountService>()),
-          ),
-          BlocProvider<ObjectEventsCubit>(
-            create: (context) => ObjectEventsCubit(
-              httpClient: getIt<http.Client>(),
-              tokenManager: getIt<TokenManager>(),
-              appConfig: getIt<AppConfig>(),
-            ),
-          ),
-          BlocProvider<EPCISEventsCubit>(
-            create: (context) => EPCISEventsCubit(getIt<EPCISEventService>()),
-          ),
-          BlocProvider<AdvancedQueryCubit>(
-            create: (context) =>
-                AdvancedQueryCubit(getIt<AdvancedQueryService>()),
-          ),
-          BlocProvider<ShippingOperationCubit>(
-            create: (context) =>
-                ShippingOperationCubit(getIt<ShippingOperationService>()),
-          ),
-          BlocProvider<SystemSettingsCubit>(
-            create: (context) =>
-                SystemSettingsCubit(getIt<SystemSettingsService>()),
-          ),
-          // Add Notification Cubit
-          BlocProvider<NotificationCubit>(
-            create: (context) => NotificationCubit(
-              apiService: getIt<NotificationApiService>(),
-              webSocketService: getIt<WebSocketService>(),
-            ),
-          ),
-        ],
-        child: BlocBuilder<ThemeCubit, ThemeState>(
-          buildWhen: (previous, current) =>
-              previous.isDarkMode != current.isDarkMode,
-          builder: (context, themeState) {
-            return BlocListener<AuthCubit, AuthState>(
-              listener: (context, state) {
-                if (state.isAuthenticated && state.user != null) {
-                  context.read<SystemSettingsCubit>().initialize();
-                } else if (!state.isAuthenticated) {
-                  context.read<SystemSettingsCubit>().reset();
-                }
-              },
-              child: MaterialApp.router(
-                title: getIt<AppConfig>().appName,
-                theme: AppTheme.lightTheme(),
-                debugShowCheckedModeBanner: false,
-                darkTheme: AppTheme.darkTheme(),
-                themeMode: themeState.themeMode,
-                routerConfig: getIt<AppRouter>().router,
-              ),
-            );
-          },
-        ),
+          );
+        },
       ),
     );
   }

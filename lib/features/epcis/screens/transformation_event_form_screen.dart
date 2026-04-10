@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
@@ -152,9 +152,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     setState(() => _isLoading = true);
     
     try {
-      final event = await context
-          .read<TransformationEventsCubit>()
-          .getTransformationEventById(widget.transformationEventId!);
+      final provider = Provider.of<TransformationEventsProvider>(context, listen: false);
+      final event = await provider.getTransformationEventById(widget.transformationEventId!);
       
       // Debug logging to see what values we're receiving
       print('==== Event Data Received ====');
@@ -356,7 +355,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     });
     
     try {
-      final cubit = context.read<TransformationEventsCubit>();
+      final provider = Provider.of<TransformationEventsProvider>(context, listen: false);
       
       // Parse comma-separated EPCs and convert any GS1 barcode format to EPC URI format
       final inputEpcs = _inputEpcsController.text
@@ -459,9 +458,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       );
       
       if (_isEdit && widget.event != null) {
-        await cubit.updateTransformationEvent(event);
+        await provider.updateTransformationEvent(event);
       } else {
-        await cubit.createTransformationEvent(event);
+        await provider.createTransformationEvent(event);
       }
       
       // Return to the previous screen

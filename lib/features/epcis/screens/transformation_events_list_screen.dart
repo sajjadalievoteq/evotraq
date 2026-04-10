@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
@@ -45,16 +45,18 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
   }
   
   Future<void> _loadTransformationEvents() async {
-    final cubit = context.read<TransformationEventsCubit>();
-
+    final provider = Provider.of<TransformationEventsProvider>(context, listen: false);
+    
+    // Apply filters if any are set
     if (_filterTransformationId != null) {
-      await cubit.findByTransformationId(_filterTransformationId!);
+      await provider.findByTransformationId(_filterTransformationId!);
     } else if (_filterInputEPC != null) {
-      await cubit.findByInputEPC(_filterInputEPC!);
+      await provider.findByInputEPC(_filterInputEPC!);
     } else if (_filterOutputEPC != null) {
-      await cubit.findByOutputEPC(_filterOutputEPC!);
+      await provider.findByOutputEPC(_filterOutputEPC!);
     } else {
-      await cubit.loadTransformationEvents();
+      // Otherwise load all transformation events
+      await provider.loadTransformationEvents();
     }
   }
   
@@ -256,9 +258,13 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
                     });
                     
                     try {
-                      final events = await context
-                          .read<TransformationEventsCubit>()
-                          .trackTransformationsByEPC(
+                      final provider = Provider.of<TransformationEventsProvider>(
+                        context, 
+                        listen: false
+                      );
+                      
+                      // Use the track API endpoint
+                      final events = await provider.trackTransformationsByEPC(
                         epcController.text.trim()
                       );
                       
@@ -369,9 +375,13 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
                     });
                     
                     try {
-                      final events = await context
-                          .read<TransformationEventsCubit>()
-                          .findTransformationsByInputOutput(
+                      final provider = Provider.of<TransformationEventsProvider>(
+                        context, 
+                        listen: false
+                      );
+                      
+                      // Use the input-output API endpoint directly
+                      final events = await provider.findTransformationsByInputOutput(
                         inputEpcController.text.trim(),
                         outputEpcController.text.trim()
                       );
@@ -524,20 +534,20 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
   }
 
   Widget _buildEventsList() {
-    return BlocBuilder<TransformationEventsCubit, TransformationEventsState>(
-      builder: (context, state) {
-        if (state.isLoading && state.transformationEvents.isEmpty) {
+    return Consumer<TransformationEventsProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading && provider.transformationEvents.isEmpty) {
           return const Center(child: AppLoadingIndicator());
         }
         
-        if (state.errorMessage != null && state.transformationEvents.isEmpty) {
+        if (provider.errorMessage != null && provider.transformationEvents.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
                 const SizedBox(height: 16),
-                Text('Error: ${state.errorMessage}'),
+                Text('Error: ${provider.errorMessage}'),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _refreshData,
@@ -548,7 +558,7 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
           );
         }
         
-        if (state.transformationEvents.isEmpty) {
+        if (provider.transformationEvents.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -570,18 +580,17 @@ class _TransformationEventsListScreenState extends State<TransformationEventsLis
           onRefresh: _refreshData,
           child: ListView.separated(
             controller: _scrollController,
-            itemCount:
-                state.transformationEvents.length + (state.isLoading ? 1 : 0),
+            itemCount: provider.transformationEvents.length + (provider.isLoading ? 1 : 0),
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
-              if (index == state.transformationEvents.length) {
+              if (index == provider.transformationEvents.length) {
                 return const Center(child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: AppLoadingIndicator(),
                 ));
               }
               
-              final event = state.transformationEvents[index];
+              final event = provider.transformationEvents[index];
               return _buildEventItem(event);
             },
           ),

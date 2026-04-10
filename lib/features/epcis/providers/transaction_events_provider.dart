@@ -1,87 +1,49 @@
-import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/services/transaction_event_service.dart';
 import 'package:traqtrace_app/features/epcis/services/transaction_event_service_impl.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
-class TransactionEventsState extends Equatable {
-  final List<TransactionEvent> transactionEvents;
-  final bool loading;
-  final String? error;
-  final int totalPages;
-  final int totalElements;
-  final TransactionEvent? selectedEvent;
-
-  const TransactionEventsState({
-    required this.transactionEvents,
-    required this.loading,
-    required this.error,
-    required this.totalPages,
-    required this.totalElements,
-    required this.selectedEvent,
-  });
-
-  factory TransactionEventsState.initial() => const TransactionEventsState(
-    transactionEvents: [],
-    loading: false,
-    error: null,
-    totalPages: 0,
-    totalElements: 0,
-    selectedEvent: null,
-  );
-
-  TransactionEventsState copyWith({
-    List<TransactionEvent>? transactionEvents,
-    bool? loading,
-    String? error,
-    int? totalPages,
-    int? totalElements,
-    TransactionEvent? selectedEvent,
-    bool clearError = false,
-    bool clearSelectedEvent = false,
-  }) {
-    return TransactionEventsState(
-      transactionEvents: transactionEvents ?? this.transactionEvents,
-      loading: loading ?? this.loading,
-      error: clearError ? null : (error ?? this.error),
-      totalPages: totalPages ?? this.totalPages,
-      totalElements: totalElements ?? this.totalElements,
-      selectedEvent: clearSelectedEvent
-          ? null
-          : (selectedEvent ?? this.selectedEvent),
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    transactionEvents,
-    loading,
-    error,
-    totalPages,
-    totalElements,
-    selectedEvent,
-  ];
-}
-
-class TransactionEventsCubit extends Cubit<TransactionEventsState> {
+/// Provider for managing Transaction Events state and operations
+class TransactionEventsProvider with ChangeNotifier {
   final TransactionEventService _service;
-
-  TransactionEventsCubit({
-    TransactionEventService? service,
-    required AppConfig appConfig,
-  }) : _service =
-           service ??
-           TransactionEventServiceImpl(
-             httpClient: getIt<http.Client>(),
-             tokenManager: getIt<TokenManager>(),
-             appConfig: appConfig,
-           ),
-       super(TransactionEventsState.initial());
-
+  
+  List<TransactionEvent> _transactionEvents = [];
+  bool _loading = false;
+  String? _error;
+  int _totalPages = 0;
+  int _totalElements = 0;
+  TransactionEvent? _selectedEvent;
+  
+  /// Constructor with optional service dependency injection for testing
+  TransactionEventsProvider({TransactionEventService? service, required AppConfig appConfig}) 
+      : _service = service ?? TransactionEventServiceImpl(
+          httpClient: http.Client(),
+          tokenManager: TokenManager(),
+          appConfig: appConfig,
+        );
+  
+  /// Current list of transaction events
+  List<TransactionEvent> get transactionEvents => _transactionEvents;
+  
+  /// Whether data is currently loading
+  bool get loading => _loading;
+  
+  /// Any error message
+  String? get error => _error;
+  
+  /// Total number of pages
+  int get totalPages => _totalPages;
+  
+  /// Total number of elements
+  int get totalElements => _totalElements;
+  
+  /// Currently selected event
+  TransactionEvent? get selectedEvent => _selectedEvent;
+  
+  /// Load Transaction Events with pagination and optional filters
   Future<void> loadTransactionEvents({
     int page = 0,
     int size = 20,
@@ -92,98 +54,89 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
     DateTime? endTime,
     bool loadMore = false,
   }) async {
+    _loading = true;
+    _error = null;
+    if (!loadMore) {
+      // If not loading more, clear the existing events
+      _transactionEvents = [];
+    }
+    notifyListeners();
+    
     try {
-      emit(
-        state.copyWith(
-          loading: true,
-          clearError: true,
-          transactionEvents: loadMore ? state.transactionEvents : [],
-        ),
-      );
-
       List<TransactionEvent> events = [];
-
-      if (bizStep != null &&
-          locationGLN != null &&
-          startTime != null &&
-          endTime != null) {
+      
+      // Apply filters if provided
+      if (bizStep != null && locationGLN != null && startTime != null && endTime != null) {
         events = await _service.findTransactionEventsByLocationAndTimeWindow(
-          locationGLN,
-          startTime,
-          endTime,
-        );
+          locationGLN, startTime, endTime);
       } else if (bizStep != null) {
         events = await _service.findTransactionEventsByBusinessStep(bizStep);
       } else if (disposition != null) {
-        events = await _service.findTransactionEventsByDispositionAndEPC(
-          disposition,
-          "",
-        );
-      } else {
-        List<TransactionEvent> addEvents = await _service
-            .findTransactionEventsByAction("ADD");
-        List<TransactionEvent> observeEvents = await _service
-            .findTransactionEventsByAction("OBSERVE");
-        List<TransactionEvent> deleteEvents = await _service
-            .findTransactionEventsByAction("DELETE");
-
+        // Using a placeholder EPC since the API requires an EPC
+        events = await _service.findTransactionEventsByDispositionAndEPC(disposition, "");      } else {
+        // No filters applied, get all events by fetching each action type and combining them
+        List<TransactionEvent> addEvents = await _service.findTransactionEventsByAction("ADD");
+        List<TransactionEvent> observeEvents = await _service.findTransactionEventsByAction("OBSERVE");
+        List<TransactionEvent> deleteEvents = await _service.findTransactionEventsByAction("DELETE");
+        
         events = [...addEvents, ...observeEvents, ...deleteEvents];
+        // Sort by eventTime descending to show newest first
         events.sort((a, b) => b.eventTime.compareTo(a.eventTime));
       }
-
-      final totalElements = events.length;
-      final totalPages = size <= 0 ? 1 : ((totalElements + size - 1) ~/ size);
-      final startIndex = page * size;
-      final pageItems = startIndex >= totalElements
-          ? <TransactionEvent>[]
-          : events.skip(startIndex).take(size).toList(growable: false);
-      final updated = loadMore
-          ? [...state.transactionEvents, ...pageItems]
-          : pageItems;
-
-      emit(
-        state.copyWith(
-          transactionEvents: updated,
-          totalElements: totalElements,
-          totalPages: totalPages,
-          loading: false,
-        ),
-      );
+      
+      if (loadMore) {
+        _transactionEvents.addAll(events);
+      } else {
+        _transactionEvents = events;
+      }
+      
+      _totalElements = events.length;
+      _totalPages = 1; // Basic pagination handling
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
     }
   }
-
+    /// Get a Transaction Event by ID (UUID) or Event ID (string like event_xxx)
   Future<TransactionEvent?> getTransactionEventById(String id) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-
+      // Clean up the ID by extracting just the UUID part if it's in a URN format
       String cleanId;
       if (id.contains(':')) {
         cleanId = id.split(':').last;
       } else {
         cleanId = id;
       }
-
-      final isUuid = RegExp(
-        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-      ).hasMatch(cleanId);
-
-      TransactionEvent selected;
+      
+      // Check if this is a UUID or an event ID string
+      // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+      // Event ID format: event_xxxxxxxxxx_xxx
+      final isUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$').hasMatch(cleanId);
+      
       if (isUuid) {
-        selected = await _service.getTransactionEventById(cleanId);
+        _selectedEvent = await _service.getTransactionEventById(cleanId);
       } else {
-        selected = await _service.getTransactionEventByEventId(cleanId);
+        _selectedEvent = await _service.getTransactionEventByEventId(cleanId);
       }
-
-      emit(state.copyWith(loading: false, selectedEvent: selected));
-      return selected;
+      _loading = false;
+      notifyListeners();
+      return _selectedEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
       return null;
     }
   }
-
+  
+  /// Create an ADD Transaction Event
   Future<TransactionEvent> createAddTransactionEvent({
     required String bizTransactionType,
     required String bizTransactionId,
@@ -194,8 +147,11 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
     required Map<String, String> bizData,
     required DateTime eventTime,
   }) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
       final newEvent = await _service.createAddTransactionEvent(
         bizTransactionType,
         bizTransactionId,
@@ -206,21 +162,20 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
         bizData,
         eventTime,
       );
-
-      emit(
-        state.copyWith(
-          transactionEvents: [newEvent, ...state.transactionEvents],
-          totalElements: state.totalElements + 1,
-          loading: false,
-        ),
-      );
+      
+      _transactionEvents.insert(0, newEvent);
+      _loading = false;
+      notifyListeners();
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
+      throw e;
     }
   }
-
+  
+  /// Create a DELETE Transaction Event
   Future<TransactionEvent> createDeleteTransactionEvent({
     required String bizTransactionType,
     required String bizTransactionId,
@@ -231,8 +186,11 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
     required Map<String, String> bizData,
     required DateTime eventTime,
   }) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
       final newEvent = await _service.createDeleteTransactionEvent(
         bizTransactionType,
         bizTransactionId,
@@ -243,21 +201,20 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
         bizData,
         eventTime,
       );
-
-      emit(
-        state.copyWith(
-          transactionEvents: [newEvent, ...state.transactionEvents],
-          totalElements: state.totalElements + 1,
-          loading: false,
-        ),
-      );
+      
+      _transactionEvents.insert(0, newEvent);
+      _loading = false;
+      notifyListeners();
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
+      throw e;
     }
   }
-
+  
+  /// Create an OBSERVE Transaction Event
   Future<TransactionEvent> createObserveTransactionEvent({
     required String bizTransactionType,
     required String bizTransactionId,
@@ -268,8 +225,11 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
     required Map<String, String> bizData,
     required DateTime eventTime,
   }) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
       final newEvent = await _service.createObserveTransactionEvent(
         bizTransactionType,
         bizTransactionId,
@@ -280,149 +240,155 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
         bizData,
         eventTime,
       );
-
-      emit(
-        state.copyWith(
-          transactionEvents: [newEvent, ...state.transactionEvents],
-          totalElements: state.totalElements + 1,
-          loading: false,
-        ),
-      );
+      
+      _transactionEvents.insert(0, newEvent);
+      _loading = false;
+      notifyListeners();
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
+      throw e;
     }
   }
-
+  
+  /// Update an existing Transaction Event
   Future<void> updateTransactionEvent(TransactionEvent event) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-      final updatedEvent = await _service.updateTransactionEvent(
-        event.id!,
-        event,
-      );
-
-      final index = state.transactionEvents.indexWhere((e) => e.id == event.id);
-      final updatedEvents = [...state.transactionEvents];
+      final updatedEvent = await _service.updateTransactionEvent(event.id!, event);
+      
+      // Update in list if present
+      final index = _transactionEvents.indexWhere((e) => e.id == event.id);
       if (index != -1) {
-        updatedEvents[index] = updatedEvent;
+        _transactionEvents[index] = updatedEvent;
       }
-
-      final selectedEvent = state.selectedEvent?.id == event.id
-          ? updatedEvent
-          : state.selectedEvent;
-
-      emit(
-        state.copyWith(
-          transactionEvents: updatedEvents,
-          selectedEvent: selectedEvent,
-          loading: false,
-        ),
-      );
+      
+      // Update selected event if it's the same one
+      if (_selectedEvent != null && _selectedEvent!.id == event.id) {
+        _selectedEvent = updatedEvent;
+      }
+      
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
+      throw e;
     }
   }
-
+  
+  /// Delete a Transaction Event
   Future<void> deleteTransactionEvent(String id) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
       await _service.deleteTransactionEvent(id);
-
-      final updated = state.transactionEvents
-          .where((e) => e.id != id)
-          .toList(growable: false);
-      emit(
-        state.copyWith(
-          transactionEvents: updated,
-          totalElements: updated.length,
-          clearSelectedEvent: state.selectedEvent?.id == id,
-          loading: false,
-        ),
-      );
+      
+      // Remove from list
+      _transactionEvents.removeWhere((event) => event.id == id);
+      
+      // Clear selected event if it's the same one
+      if (_selectedEvent != null && _selectedEvent!.id == id) {
+        _selectedEvent = null;
+      }
+      
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
+      throw e;
     }
   }
-
+  
+  /// Find Transaction Events by EPC
   Future<void> findEventsByEPC(String epc) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-      final events = await _service.findTransactionEventsByEPC(epc);
-      emit(
-        state.copyWith(
-          transactionEvents: events,
-          totalElements: events.length,
-          totalPages: 1,
-          loading: false,
-        ),
-      );
+      _transactionEvents = await _service.findTransactionEventsByEPC(epc);
+      _totalElements = _transactionEvents.length;
+      _totalPages = 1; // Simplified pagination for search results
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
     }
   }
-
-  Future<void> findEventsByBusinessStepAndEPC(
-    String businessStep,
-    String epc,
-  ) async {
+  
+  /// Find Transaction Events by business step and EPC
+  Future<void> findEventsByBusinessStepAndEPC(String businessStep, String epc) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-      final events = await _service.findTransactionEventsByBusinessStepAndEPC(
-        businessStep,
-        epc,
-      );
-      emit(
-        state.copyWith(
-          transactionEvents: events,
-          totalElements: events.length,
-          totalPages: 1,
-          loading: false,
-        ),
-      );
+      _transactionEvents = await _service.findTransactionEventsByBusinessStepAndEPC(businessStep, epc);
+      _totalElements = _transactionEvents.length;
+      _totalPages = 1; // Simplified pagination for search results
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
     }
   }
-
+  
+  /// Find active transactions for an EPC
   Future<void> findActiveTransactionsForEPC(String epc) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-      final events = await _service.findActiveTransactionsForEPC(epc);
-      emit(
-        state.copyWith(
-          transactionEvents: events,
-          totalElements: events.length,
-          totalPages: 1,
-          loading: false,
-        ),
-      );
+      _transactionEvents = await _service.findActiveTransactionsForEPC(epc);
+      _totalElements = _transactionEvents.length;
+      _totalPages = 1;
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
     }
   }
-
+  
+  /// Find transaction history for an EPC
   Future<void> findTransactionHistoryForEPC(String epc) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    
     try {
-      emit(state.copyWith(loading: true, clearError: true));
-      final events = await _service.findTransactionHistoryForEPC(epc);
-      emit(
-        state.copyWith(
-          transactionEvents: events,
-          totalElements: events.length,
-          totalPages: 1,
-          loading: false,
-        ),
-      );
+      _transactionEvents = await _service.findTransactionHistoryForEPC(epc);
+      _totalElements = _transactionEvents.length;
+      _totalPages = 1;
+      _loading = false;
+      notifyListeners();
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      _loading = false;
+      _error = e.toString();
+      notifyListeners();
     }
   }
-
+  
+  /// Clear any errors
   void clearError() {
-    emit(state.copyWith(clearError: true));
+    _error = null;
+    notifyListeners();
   }
 }

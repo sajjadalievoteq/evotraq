@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
@@ -171,9 +171,8 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
   Future<void> _loadTransactionEvent() async {
     if (widget.transactionEventId == null) return;
     
-    final event = await context
-        .read<TransactionEventsCubit>()
-        .getTransactionEventById(widget.transactionEventId!);
+    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
+    final event = await provider.getTransactionEventById(widget.transactionEventId!);
     
     if (event != null) {
       setState(() {
@@ -264,10 +263,10 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         bizData[key] = value;
       }
     }
-
-    try {
-      final cubit = context.read<TransactionEventsCubit>();
-      if (_isEdit) {
+    
+    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
+    
+    try {      if (_isEdit) {
         // For editing, we'd need the full event object
         // Use a time that's definitely in the past to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
@@ -290,14 +289,14 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
               : {bizTransactionType: bizTransactionId},
         );
         
-        await cubit.updateTransactionEvent(event);
+        await provider.updateTransactionEvent(event);
       } else {
         // For creating a new event
         // Use a time that's definitely in the past (60 seconds ago) to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
         
         if (_selectedAction == 'ADD') {
-          await cubit.createAddTransactionEvent(
+          await provider.createAddTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -308,7 +307,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             eventTime: eventTime,
           );
         } else if (_selectedAction == 'DELETE') {
-          await cubit.createDeleteTransactionEvent(
+          await provider.createDeleteTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -317,9 +316,8 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             disposition: disposition,
             bizData: bizData,
             eventTime: eventTime,
-          );
-        } else if (_selectedAction == 'OBSERVE') {
-          await cubit.createObserveTransactionEvent(
+          );        } else if (_selectedAction == 'OBSERVE') {          // Use the dedicated method for creating OBSERVE events
+          await provider.createObserveTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
             epcs: epcs,
@@ -362,9 +360,9 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
           ),
         ],
       ),
-      body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
-        builder: (context, state) {
-          if (state.loading && _isEdit) {
+      body: Consumer<TransactionEventsProvider>(
+        builder: (context, provider, _) {
+          if (provider.loading && _isEdit) {
             return const Center(child: AppLoadingIndicator());
           }
           

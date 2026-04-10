@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
@@ -49,11 +49,10 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
   
   void _scrollListener() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      final cubit = context.read<TransactionEventsCubit>();
-      final state = cubit.state;
+      final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
       
       // Check if we can load more pages
-      if (_currentPage < state.totalPages - 1 && !state.loading) {
+      if (_currentPage < provider.totalPages - 1 && !provider.loading) {
         _currentPage++;
         _loadTransactionEvents(isLoadMore: true);
       }
@@ -65,7 +64,9 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
       _currentPage = 0;
     }
     
-    await context.read<TransactionEventsCubit>().loadTransactionEvents(
+    final provider = Provider.of<TransactionEventsProvider>(context, listen: false);
+    
+    await provider.loadTransactionEvents(
       page: _currentPage,
       size: _pageSize,
       bizStep: _filterBizStep,
@@ -73,7 +74,6 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
       locationGLN: _filterLocationGLN,
       startTime: _filterDateRange?.start,
       endTime: _filterDateRange?.end,
-      loadMore: isLoadMore,
     );
   }
   
@@ -272,13 +272,13 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
         child: const Icon(Icons.add),
       ),
       drawer: const AppDrawer(),
-      body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
-        builder: (context, state) {
-          if (state.loading && state.transactionEvents.isEmpty) {
+      body: Consumer<TransactionEventsProvider>(
+        builder: (context, provider, child) {
+          if (provider.loading && provider.transactionEvents.isEmpty) {
             return const Center(child: AppLoadingIndicator());
           }
           
-          if (state.error != null && state.transactionEvents.isEmpty) {
+          if (provider.error != null && provider.transactionEvents.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -295,7 +295,7 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    state.error!,
+                    provider.error!,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -309,7 +309,7 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
             );
           }
           
-          if (state.transactionEvents.isEmpty) {
+          if (provider.transactionEvents.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -344,16 +344,16 @@ class _TransactionEventsListScreenState extends State<TransactionEventsListScree
             onRefresh: _refreshData,
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: state.transactionEvents.length + (state.loading ? 1 : 0),
+              itemCount: provider.transactionEvents.length + (provider.loading ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index >= state.transactionEvents.length) {
+                if (index >= provider.transactionEvents.length) {
                   return const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Center(child: AppLoadingIndicator()),
                   );
                 }
                 
-                final event = state.transactionEvents[index];
+                final event = provider.transactionEvents[index];
                   return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: ListTile(

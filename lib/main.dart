@@ -137,6 +137,10 @@ class TraqTraceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<TransactionEventsProvider>(
+          create: (context) =>
+              TransactionEventsProvider(appConfig: getIt<AppConfig>()),
+        ),
         ChangeNotifierProvider<TransformationEventsProvider>(
           create: (context) => TransformationEventsProvider(
             getIt<TransformationEventService>(),
@@ -167,10 +171,6 @@ class TraqTraceApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
-          BlocProvider<TransactionEventsCubit>(
-            create: (context) =>
-                TransactionEventsCubit(appConfig: getIt<AppConfig>()),
-          ),
           BlocProvider<AggregationEventsCubit>(
             create: (context) =>
                 AggregationEventsCubit(appConfig: getIt<AppConfig>()),

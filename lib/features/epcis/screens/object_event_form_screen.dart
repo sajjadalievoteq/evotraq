@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_types.dart' as types;
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
@@ -1197,10 +1196,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     }
 
     // Get the validation provider and validate the event created above
-    final validationProvider = Provider.of<ValidationServiceProvider>(
-      context,
-      listen: false,
-    );
+    final validationProvider = context.read<ValidationCubit>();
 
     try {
       // Check whether to use epcList or quantityList based on schema oneOf constraint
@@ -3455,10 +3451,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     });
 
     try {
-      final validationProvider = Provider.of<ValidationServiceProvider>(
-        context,
-        listen: false,
-      );
+      final validationProvider = context.read<ValidationCubit>();
 
       // Test with minimal event to identify core schema requirements
       final minimalEvent = ObjectEvent(

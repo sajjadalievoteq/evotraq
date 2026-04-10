@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
@@ -24,8 +24,7 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
   final Map<String, String?> _fieldValidationErrors = {};
   
   /// Get the validation provider from context
-  ValidationServiceProvider get validationProvider => 
-    Provider.of<ValidationServiceProvider>(context, listen: false);
+  ValidationCubit get validationProvider => context.read<ValidationCubit>();
   
   /// Get field error by name
   String? getFieldError(String fieldName) => _fieldValidationErrors[fieldName];

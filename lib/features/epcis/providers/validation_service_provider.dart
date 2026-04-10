@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart' hide ObjectEvent;
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/services/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:http/http.dart' as http;
@@ -21,13 +23,61 @@ class _CachedValidationResult {
   });
 }
 
-/// Provider for managing validation state and operations
-class ValidationServiceProvider with ChangeNotifier {
+class ValidationState extends Equatable {
+  final bool loading;
+  final Map<String, dynamic>? lastValidationResult;
+  final String? error;
+  final int cacheHits;
+  final int cacheMisses;
+
+  const ValidationState({
+    required this.loading,
+    required this.lastValidationResult,
+    required this.error,
+    required this.cacheHits,
+    required this.cacheMisses,
+  });
+
+  factory ValidationState.initial() => const ValidationState(
+        loading: false,
+        lastValidationResult: null,
+        error: null,
+        cacheHits: 0,
+        cacheMisses: 0,
+      );
+
+  ValidationState copyWith({
+    bool? loading,
+    Map<String, dynamic>? lastValidationResult,
+    String? error,
+    int? cacheHits,
+    int? cacheMisses,
+    bool clearError = false,
+    bool clearValidation = false,
+  }) {
+    return ValidationState(
+      loading: loading ?? this.loading,
+      lastValidationResult: clearValidation
+          ? null
+          : (lastValidationResult ?? this.lastValidationResult),
+      error: clearError ? null : (error ?? this.error),
+      cacheHits: cacheHits ?? this.cacheHits,
+      cacheMisses: cacheMisses ?? this.cacheMisses,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        loading,
+        lastValidationResult,
+        error,
+        cacheHits,
+        cacheMisses,
+      ];
+}
+
+class ValidationCubit extends Cubit<ValidationState> {
   final ValidationService _validationService;
-  
-  bool _loading = false;
-  Map<String, dynamic>? _lastValidationResult;
-  String? _error;
   
   // Cache for validation results to avoid redundant API calls
   final Map<String, _CachedValidationResult> _validationCache = {};
@@ -38,82 +88,58 @@ class ValidationServiceProvider with ChangeNotifier {
   /// Cache validity duration in milliseconds (5 minutes)
   final int _cacheDuration = 300000;
   
-  /// Whether validation is in progress
-  bool get loading => _loading;
-  
-  /// The result of the last validation
-  Map<String, dynamic>? get lastValidationResult => _lastValidationResult;
-  
-  /// Whether the last validation was successful
-  bool get isValid => _lastValidationResult != null && (_lastValidationResult!['valid'] as bool? ?? false);
-  
-  /// Any validation errors from the last validation
-  List<dynamic> get validationErrors {
-    if (_lastValidationResult == null) return [];
-    
-    // Handle the new nested error structure
-    if (_lastValidationResult!.containsKey('errors')) {
-      final errorsMap = _lastValidationResult!['errors'] as Map<String, dynamic>;
-      final allErrors = <String>[];
-      
-      // Process all error categories
-      errorsMap.forEach((category, errors) {
-        if (errors is List) {
-          for (final error in errors) {
-            if (error is String) {
-              allErrors.add(error);
-            }
-          }
-        }
-      });
-      
-      return allErrors;
-    }
-    
-    // Fallback to old format for backward compatibility
-    return _lastValidationResult!.containsKey('validationErrors') 
-      ? (_lastValidationResult!['validationErrors'] as List<dynamic>? ?? []) 
-      : [];
-  }
-  
-  /// Any error message
-  String? get error => _error;
-  
   /// Cache hit rate for monitoring
   double get cacheHitRate {
-    if (_cacheHits + _cacheMisses == 0) return 0;
-    return _cacheHits / (_cacheHits + _cacheMisses);
+    if (state.cacheHits + state.cacheMisses == 0) return 0;
+    return state.cacheHits / (state.cacheHits + state.cacheMisses);
   }
-  
-  // Cache statistics for monitoring
-  int _cacheHits = 0;
-  int _cacheMisses = 0;
-  
-  ValidationServiceProvider({ValidationService? validationService, required AppConfig appConfig})
-      : _validationService = validationService ?? ValidationServiceImpl(
-            tokenManager: TokenManager(),
-            httpClient: http.Client(),
-            appConfig: appConfig,
-          );
+
+  bool get isValid =>
+      state.lastValidationResult != null &&
+      (state.lastValidationResult!['valid'] as bool? ?? false);
+
+  List<dynamic> get validationErrors =>
+      _validationErrorsFromResult(state.lastValidationResult);
+
+  ValidationCubit({ValidationService? validationService, required AppConfig appConfig})
+      : _validationService = validationService ??
+            ValidationServiceImpl(
+              tokenManager: getIt<TokenManager>(),
+              httpClient: getIt<http.Client>(),
+              appConfig: appConfig,
+            ),
+        super(ValidationState.initial());
   
   /// Validate an object event
   Future<bool> validateObjectEvent(ObjectEvent event) async {
-    return _validateEvent(() => _validationService.validateObjectEventModel(event));
+    return _validateEvent(
+      () => _validationService.validateObjectEventModel(event),
+      cacheKey: _generateEventCacheKey(event.toJson(), 'ObjectEvent'),
+    );
   }
   
   /// Validate an aggregation event
   Future<bool> validateAggregationEvent(AggregationEvent event) async {
-    return _validateEvent(() => _validationService.validateAggregationEventModel(event));
+    return _validateEvent(
+      () => _validationService.validateAggregationEventModel(event),
+      cacheKey: _generateEventCacheKey(event.toJson(), 'AggregationEvent'),
+    );
   }
   
   /// Validate a transaction event
   Future<bool> validateTransactionEvent(TransactionEvent event) async {
-    return _validateEvent(() => _validationService.validateTransactionEventModel(event));
+    return _validateEvent(
+      () => _validationService.validateTransactionEventModel(event),
+      cacheKey: _generateEventCacheKey(event.toJson(), 'TransactionEvent'),
+    );
   }
   
   /// Validate a transformation event
   Future<bool> validateTransformationEvent(TransformationEvent event) async {
-    return _validateEvent(() => _validationService.validateTransformationEventModel(event));
+    return _validateEvent(
+      () => _validationService.validateTransformationEventModel(event),
+      cacheKey: _generateEventCacheKey(event.toJson(), 'TransformationEvent'),
+    );
   }
   
   /// Validate a batch of object events
@@ -137,38 +163,50 @@ class ValidationServiceProvider with ChangeNotifier {
   }
   
   /// Helper method to handle validation process
-  Future<bool> _validateEvent(Future<Map<String, dynamic>> Function() validationFunction) async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
-    
+  Future<bool> _validateEvent(
+    Future<Map<String, dynamic>> Function() validationFunction, {
+    required String cacheKey,
+  }) async {
     try {
-      final cacheKey = _generateCacheKey(validationFunction);
       final cachedResult = _getCachedResult(cacheKey);
       
       if (cachedResult != null) {
-        _lastValidationResult = cachedResult;
-        _loading = false;
-        notifyListeners();
+        emit(
+          state.copyWith(
+            loading: false,
+            clearError: true,
+            lastValidationResult: Map<String, dynamic>.from(cachedResult),
+            cacheHits: state.cacheHits + 1,
+          ),
+        );
         return isValid;
       }
       
-      _lastValidationResult = await validationFunction();
-      
-      _cacheValidationResult(cacheKey, _lastValidationResult!);
-      
-      _loading = false;
-      notifyListeners();
+      emit(state.copyWith(loading: true, clearError: true));
+
+      final result = await validationFunction();
+      _cacheValidationResult(cacheKey, result);
+
+      emit(
+        state.copyWith(
+          loading: false,
+          lastValidationResult: Map<String, dynamic>.from(result),
+          cacheMisses: state.cacheMisses + 1,
+        ),
+      );
       return isValid;
     } catch (e) {
-      _loading = false;
-      _error = e.toString();
-      _lastValidationResult = {
+      emit(
+        state.copyWith(
+          loading: false,
+          error: e.toString(),
+          lastValidationResult: {
         'valid': false,
         'error': e.toString(),
         'validationErrors': [],
-      };
-      notifyListeners();
+          },
+        ),
+      );
       return false;
     }
   }
@@ -179,8 +217,7 @@ class ValidationServiceProvider with ChangeNotifier {
     Future<Map<String, dynamic>> Function(T event) validateFunction,
     {int concurrencyLimit = 5}
   ) async {
-    _loading = true;
-    notifyListeners();
+    emit(state.copyWith(loading: true, clearError: true));
     
     final results = <Map<String, dynamic>>[];
     
@@ -201,12 +238,14 @@ class ValidationServiceProvider with ChangeNotifier {
               // Check cache
               final cachedResult = _getCachedResult(cacheKey);
               if (cachedResult != null) {
+                emit(state.copyWith(cacheHits: state.cacheHits + 1));
                 return cachedResult;
               }
               
               // Perform validation and cache the result
               final result = await validateFunction(event);
               _cacheValidationResult(cacheKey, result);
+              emit(state.copyWith(cacheMisses: state.cacheMisses + 1));
               return result;
             } catch (e) {
               return {
@@ -222,7 +261,7 @@ class ValidationServiceProvider with ChangeNotifier {
       }
       
       // Set the last validation result to the summary of all results
-      _lastValidationResult = {
+      final lastValidationResult = {
         'valid': results.every((r) => r['valid'] == true),
         'validationErrors': results
             .expand((r) => r.containsKey('validationErrors') ? (r['validationErrors'] as List? ?? []) : [])
@@ -230,13 +269,15 @@ class ValidationServiceProvider with ChangeNotifier {
         'batchResults': results,
       };
       
-      _loading = false;
-      notifyListeners();
+      emit(
+        state.copyWith(
+          loading: false,
+          lastValidationResult: lastValidationResult,
+        ),
+      );
       return results;
     } catch (e) {
-      _loading = false;
-      _error = e.toString();
-      notifyListeners();
+      emit(state.copyWith(loading: false, error: e.toString()));
       return List.filled(events.length, {
         'valid': false,
         'error': e.toString(),
@@ -247,21 +288,9 @@ class ValidationServiceProvider with ChangeNotifier {
   
   /// Clear validation state
   void clearValidation() {
-    _lastValidationResult = null;
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(clearValidation: true, clearError: true));
   }
-  
-  /// Generate a unique cache key for the validation function
-  String _generateCacheKey(Future<Map<String, dynamic>> Function() validationFunction) {
-    final functionString = validationFunction.toString();
-    final bytes = utf8.encode(functionString);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-  
 
-  
   /// Get cached validation result if available
   Map<String, dynamic>? _getCachedResult(String cacheKey) {
     final cachedResult = _validationCache[cacheKey];
@@ -269,15 +298,12 @@ class ValidationServiceProvider with ChangeNotifier {
       // Check if result is still valid
       final now = DateTime.now().millisecondsSinceEpoch;
       if (now - cachedResult.timestamp <= _cacheDuration) {
-        _cacheHits++;
         return cachedResult.result;
       } else {
         // Cached result has expired
         _validationCache.remove(cacheKey);
       }
     }
-    
-    _cacheMisses++;
     return null;
   }
   
@@ -300,8 +326,7 @@ class ValidationServiceProvider with ChangeNotifier {
   /// Clear the validation cache
   void clearCache() {
     _validationCache.clear();
-    _cacheHits = 0;
-    _cacheMisses = 0;
+    emit(state.copyWith(cacheHits: 0, cacheMisses: 0));
   }
   
   /// Generate a cache key for a specific event
@@ -311,5 +336,30 @@ class ValidationServiceProvider with ChangeNotifier {
     final bytes = utf8.encode(jsonStr);
     final digest = md5.convert(bytes);
     return '$eventType:${digest.toString()}';
+  }
+
+  List<dynamic> _validationErrorsFromResult(Map<String, dynamic>? result) {
+    if (result == null) return [];
+
+    if (result.containsKey('errors') && result['errors'] is Map<String, dynamic>) {
+      final errorsMap = result['errors'] as Map<String, dynamic>;
+      final allErrors = <String>[];
+      errorsMap.forEach((_, errors) {
+        if (errors is List) {
+          for (final error in errors) {
+            if (error is String) {
+              allErrors.add(error);
+            }
+          }
+        }
+      });
+      return allErrors;
+    }
+
+    if (result.containsKey('validationErrors')) {
+      return result['validationErrors'] as List<dynamic>? ?? [];
+    }
+
+    return [];
   }
 }

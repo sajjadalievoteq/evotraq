@@ -106,7 +106,9 @@ class IndustryTestDataService {
         body: jsonEncode({
           'glnCode': location['glnCode'],
           'locationName': location['locationName'],
-          'locationType': location['locationType'],
+          'locationType': _mapTobaccoLocationTypeToBackend(
+            location['locationType'] as String,
+          ),
           'addressLine1': location['address'],
           'city': location['city'],
           'postalCode': location['postalCode'] ?? '00000',
@@ -123,9 +125,11 @@ class IndustryTestDataService {
           body: jsonEncode({
             'locationName': location['locationName'],
             // Location type flags
-            'isManufacturingFacility': location['locationType'] == 'MANUFACTURER',
-            'isRetailLocation': location['locationType'] == 'RETAILER' ||
-                                location['locationType'] == 'CONVENIENCE_STORE',
+            'isManufacturingFacility':
+                location['locationType'] == 'MANUFACTURER',
+            'isRetailLocation':
+                location['locationType'] == 'RETAILER' ||
+                location['locationType'] == 'CONVENIENCE_STORE',
 
             // ===== UAE Federal Tax Authority (FTA) Registration =====
             // UAE requires all tobacco businesses to register with FTA for excise tax
@@ -147,47 +151,68 @@ class IndustryTestDataService {
 
             // UAE-specific tobacco license
             'stateTobaccoLicenseNumber': location['tobaccoLicenseNumber'],
-            'stateTobaccoLicenseType': _getLicenseType(location['locationType'] as String),
+            'stateTobaccoLicenseType': _getLicenseType(
+              location['locationType'] as String,
+            ),
 
             // Customs & Import/Export (for manufacturers and distributors)
-            'customsRegistrationNumber': location['locationType'] == 'MANUFACTURER' ||
-                                          location['locationType'] == 'DISTRIBUTION_CENTER'
+            'customsRegistrationNumber':
+                location['locationType'] == 'MANUFACTURER' ||
+                    location['locationType'] == 'DISTRIBUTION_CENTER'
                 ? location['customsRegistrationNumber']
                 : null,
-            'authorizedEconomicOperator': location['locationType'] == 'MANUFACTURER' ||
-                                           location['locationType'] == 'DISTRIBUTION_CENTER',
+            'authorizedEconomicOperator':
+                location['locationType'] == 'MANUFACTURER' ||
+                location['locationType'] == 'DISTRIBUTION_CENTER',
 
             // Wholesale license for distributors/wholesalers
-            'tobaccoWholesaleLicenseNumber': location['locationType'] == 'WHOLESALER' ||
-                                              location['locationType'] == 'DISTRIBUTION_CENTER'
+            'tobaccoWholesaleLicenseNumber':
+                location['locationType'] == 'WHOLESALER' ||
+                    location['locationType'] == 'DISTRIBUTION_CENTER'
                 ? location['wholesaleLicenseNumber']
                 : null,
             // Retail permit
-            'tobaccoSalesPermitNumber': location['locationType'] == 'RETAILER' ||
-                                         location['locationType'] == 'CONVENIENCE_STORE'
+            'tobaccoSalesPermitNumber':
+                location['locationType'] == 'RETAILER' ||
+                    location['locationType'] == 'CONVENIENCE_STORE'
                 ? location['salesPermitNumber']
                 : null,
             // Security features
             'hasSecurityFeatures': true,
             'videoSurveillance': true,
-            'accessControlSystem': location['locationType'] == 'MANUFACTURER' ||
-                                   location['locationType'] == 'DISTRIBUTION_CENTER',
+            'accessControlSystem':
+                location['locationType'] == 'MANUFACTURER' ||
+                location['locationType'] == 'DISTRIBUTION_CENTER',
             'inventoryTrackingSystem': 'TraqTrace',
             // Storage capabilities
-            'hasClimateControl': location['locationType'] == 'MANUFACTURER' ||
-                                  location['locationType'] == 'DISTRIBUTION_CENTER' ||
-                                  location['locationType'] == 'WHOLESALER',
+            'hasClimateControl':
+                location['locationType'] == 'MANUFACTURER' ||
+                location['locationType'] == 'DISTRIBUTION_CENTER' ||
+                location['locationType'] == 'WHOLESALER',
             'storageCapacityPallets': location['storageCapacity'],
             // Age verification for retail
-            'ageVerificationSystem': location['locationType'] == 'RETAILER' ||
-                                      location['locationType'] == 'CONVENIENCE_STORE'
+            'ageVerificationSystem':
+                location['locationType'] == 'RETAILER' ||
+                    location['locationType'] == 'CONVENIENCE_STORE'
                 ? 'Emirates ID Scanner'
                 : null,
             // Authorized brands (all major brands for this demo)
             'authorizedBrands': [
-              'Marlboro', 'Dunhill', 'Kent', 'Winston', 'Davidoff',
-              'Parliament', 'Camel', 'L&M', 'Rothmans', 'Pall Mall',
-              'Lucky Strike', 'Benson & Hedges', 'Vogue', 'Esse', 'Mevius'
+              'Marlboro',
+              'Dunhill',
+              'Kent',
+              'Winston',
+              'Davidoff',
+              'Parliament',
+              'Camel',
+              'L&M',
+              'Rothmans',
+              'Pall Mall',
+              'Lucky Strike',
+              'Benson & Hedges',
+              'Vogue',
+              'Esse',
+              'Mevius',
             ],
           }),
         );
@@ -232,13 +257,23 @@ class IndustryTestDataService {
     }
 
     // Filter to get manufacturer GLNs
-    final manufacturerGlns = glns.where((g) =>
-      g['locationType'] == 'MANUFACTURER' ||
-      g['locationName']?.toString().contains('Manufacturer') == true ||
-      g['locationName']?.toString().contains('Philip Morris') == true ||
-      g['locationName']?.toString().contains('BAT') == true ||
-      g['locationName']?.toString().contains('JTI') == true
-    ).toList();
+    final manufacturerGlns = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'MANUFACTURER' ||
+              g['locationType'] == 'MANUFACTURING_SITE' ||
+              g['locationName']?.toString().contains('Manufacturer') == true ||
+              g['locationName']?.toString().contains('Philip Morris') == true ||
+              g['locationName']?.toString().contains('BAT') == true ||
+              g['locationName']?.toString().contains('JTI') == true,
+        )
+        .toList();
+
+    if (manufacturerGlns.isEmpty) {
+      throw Exception(
+        'No manufacturer GLNs found. Please generate GLNs first.',
+      );
+    }
 
     final total = gtins.length * 10; // 10 SGTINs per GTIN
     int current = 0;
@@ -251,7 +286,7 @@ class IndustryTestDataService {
       final gtin = gtins[gtinIndex];
       final gtinCode = gtin['gtin'] ?? gtin['gtinCode'];
       final productName = gtin['productName'] ?? 'Product';
-      
+
       // Generate batch number for this GTIN
       final batchNumber = TobaccoProductData.generateBatchNumber(
         gtinIndex % 5 + 1, // Manufacturer 1-5
@@ -259,17 +294,16 @@ class IndustryTestDataService {
         DateTime.now().month,
         gtinIndex + 1,
       );
-      
+
       // Pick a manufacturer location
-      final manufacturerGln = manufacturerGlns.isNotEmpty
-          ? manufacturerGlns[gtinIndex % manufacturerGlns.length]['glnCode']
-          : null;
-      
+      final manufacturerGln =
+          manufacturerGlns[gtinIndex % manufacturerGlns.length]['glnCode'];
+
       for (int i = 0; i < 10; i++) {
         current++;
         final serialNumber = _generateSerialNumber();
         onProgress(current, total, '$productName (S/N: $serialNumber)');
-        
+
         // Create SGTIN
         final sgtinResponse = await _httpClient.post(
           Uri.parse('$_baseUrl/identifiers/sgtins'),
@@ -278,19 +312,20 @@ class IndustryTestDataService {
             'gtin': gtinCode,
             'serialNumber': serialNumber,
             'batchLotNumber': batchNumber,
-            'productionDate': productionDate.toIso8601String().split('T')[0],
-            'expiryDate': expiryDate.toIso8601String().split('T')[0],
-            'status': 'ACTIVE',
+            'productionDate': productionDate.toUtc().toIso8601String(),
+            'expiryDate': expiryDate.toUtc().toIso8601String(),
+            'status': 'COMMISSIONED',
             'regulatoryMarket': 'ARE',
-            if (manufacturerGln != null) 'currentLocationGLN': manufacturerGln,
+            'currentLocationGLN': manufacturerGln,
           }),
         );
-        
-        if (sgtinResponse.statusCode != 200 && sgtinResponse.statusCode != 201) {
+
+        if (sgtinResponse.statusCode != 200 &&
+            sgtinResponse.statusCode != 201) {
           // Log error but continue
           print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.body}');
         }
-        
+
         await Future.delayed(const Duration(milliseconds: 50));
       }
     }
@@ -313,17 +348,25 @@ class IndustryTestDataService {
       glns = glnsData['content'] ?? [];
     }
 
-    final manufacturers = glns.where((g) =>
-      g['locationType'] == 'MANUFACTURER'
-    ).toList();
+    final manufacturers = glns
+        .where((g) => g['locationType'] == 'MANUFACTURER')
+        .toList();
 
-    final distributors = glns.where((g) =>
-      g['locationType'] == 'DISTRIBUTION_CENTER' || g['locationType'] == 'WHOLESALER'
-    ).toList();
+    final distributors = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'DISTRIBUTION_CENTER' ||
+              g['locationType'] == 'WHOLESALER',
+        )
+        .toList();
 
-    final retailers = glns.where((g) =>
-      g['locationType'] == 'RETAILER' || g['locationType'] == 'CONVENIENCE_STORE'
-    ).toList();
+    final retailers = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'RETAILER' ||
+              g['locationType'] == 'CONVENIENCE_STORE',
+        )
+        .toList();
 
     final prefixes = TobaccoProductData.getManufacturerPrefixes();
 
@@ -341,7 +384,11 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (100000 + i).toString().padLeft(9, '0');
-      final ssccCode = TobaccoProductData.generateSSCC('0', prefix['prefix']!, serialRef);
+      final ssccCode = TobaccoProductData.generateSSCC(
+        '0',
+        prefix['prefix']!,
+        serialRef,
+      );
 
       onProgress(current, total, 'Pallet $ssccCode');
 
@@ -358,7 +405,12 @@ class IndustryTestDataService {
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: destGln?['glnCode'],
-        batchNumber: TobaccoProductData.generateBatchNumber(i % 5 + 1, 2024, 12, i + 1),
+        batchNumber: TobaccoProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          i + 1,
+        ),
         stampCount: 1000, // 1000 packs per pallet
       );
 
@@ -371,27 +423,38 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (200000 + i).toString().padLeft(9, '0');
-      final ssccCode = TobaccoProductData.generateSSCC('1', prefix['prefix']!, serialRef);
-      
+      final ssccCode = TobaccoProductData.generateSSCC(
+        '1',
+        prefix['prefix']!,
+        serialRef,
+      );
+
       onProgress(current, total, 'Case $ssccCode');
-      
+
       final sourceGln = distributors.isNotEmpty
           ? distributors[i % distributors.length]
-          : (manufacturers.isNotEmpty ? manufacturers[i % manufacturers.length] : null);
+          : (manufacturers.isNotEmpty
+                ? manufacturers[i % manufacturers.length]
+                : null);
       final destGln = retailers.isNotEmpty
           ? retailers[i % retailers.length]
           : null;
-      
+
       await _createSSCCWithExtension(
         ssccCode: ssccCode,
         containerType: 'CASE',
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: destGln?['glnCode'],
-        batchNumber: TobaccoProductData.generateBatchNumber(i % 5 + 1, 2024, 12, 100 + i),
+        batchNumber: TobaccoProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          100 + i,
+        ),
         stampCount: 50, // 50 packs per case
       );
-      
+
       createdSsccs[ssccCode] = {'type': 'CASE', 'index': i};
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -401,24 +464,35 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (300000 + i).toString().padLeft(9, '0');
-      final ssccCode = TobaccoProductData.generateSSCC('2', prefix['prefix']!, serialRef);
-      
+      final ssccCode = TobaccoProductData.generateSSCC(
+        '2',
+        prefix['prefix']!,
+        serialRef,
+      );
+
       onProgress(current, total, 'Carton $ssccCode');
-      
+
       final sourceGln = retailers.isNotEmpty
           ? retailers[i % retailers.length]
-          : (distributors.isNotEmpty ? distributors[i % distributors.length] : null);
-      
+          : (distributors.isNotEmpty
+                ? distributors[i % distributors.length]
+                : null);
+
       await _createSSCCWithExtension(
         ssccCode: ssccCode,
         containerType: 'CARTON',
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: null, // Cartons at retail don't have dest
-        batchNumber: TobaccoProductData.generateBatchNumber(i % 5 + 1, 2024, 12, 200 + i),
+        batchNumber: TobaccoProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          200 + i,
+        ),
         stampCount: 10, // 10 packs per carton
       );
-      
+
       createdSsccs[ssccCode] = {'type': 'CARTON', 'index': i};
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -517,13 +591,23 @@ class IndustryTestDataService {
       glns = glnsData['content'] ?? [];
     }
 
-    final manufacturers = glns.where((g) => g['locationType'] == 'MANUFACTURER').toList();
-    final distributors = glns.where((g) =>
-      g['locationType'] == 'DISTRIBUTION_CENTER' || g['locationType'] == 'WHOLESALER'
-    ).toList();
-    final retailers = glns.where((g) =>
-      g['locationType'] == 'RETAILER' || g['locationType'] == 'CONVENIENCE_STORE'
-    ).toList();
+    final manufacturers = glns
+        .where((g) => g['locationType'] == 'MANUFACTURER')
+        .toList();
+    final distributors = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'DISTRIBUTION_CENTER' ||
+              g['locationType'] == 'WHOLESALER',
+        )
+        .toList();
+    final retailers = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'RETAILER' ||
+              g['locationType'] == 'CONVENIENCE_STORE',
+        )
+        .toList();
 
     // Calculate total events:
     // - SGTIN Commissioning: 1 per SGTIN (min 100)
@@ -535,7 +619,11 @@ class IndustryTestDataService {
     final numSsccs = ssccs.length > 30 ? 30 : ssccs.length;
     final numShipments = 20; // 10 mfg→dist + 10 dist→retail
 
-    final total = numSgtins + (numSsccs * 2) + (numShipments * 2); // sgtin commission + sscc commission + pack + ship + receive
+    final total =
+        numSgtins +
+        (numSsccs * 2) +
+        (numShipments *
+            2); // sgtin commission + sscc commission + pack + ship + receive
     int current = 0;
 
     // 1. Commissioning Events (ObjectEvent with ADD)
@@ -544,24 +632,31 @@ class IndustryTestDataService {
       final sgtin = sgtins[i];
       final gtinCode = sgtin['gtin'] ?? sgtin['gtinCode'];
       final serialNumber = sgtin['serialNumber'];
-      final batchLot = sgtin['batchLotNumber'] ?? 'BATCH-${DateTime.now().year}';
-      final expiryDate = sgtin['expiryDate'] ?? DateTime.now().add(const Duration(days: 365)).toIso8601String();
-      final epcUri = 'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber';
+      final batchLot =
+          sgtin['batchLotNumber'] ?? 'BATCH-${DateTime.now().year}';
+      final expiryDate =
+          sgtin['expiryDate'] ??
+          DateTime.now().add(const Duration(days: 365)).toIso8601String();
+      final epcUri =
+          'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber';
 
       onProgress(current, total, 'Commissioning SGTIN $serialNumber');
-      
+
       final mfgGln = manufacturers.isNotEmpty
           ? manufacturers[i % manufacturers.length]['glnCode']
           : '6291000000013';
-      
+
       // ILMD (Instance/Lot Master Data) required for commissioning
       final ilmd = <String, dynamic>{
         'lotNumber': batchLot,
         'itemExpirationDate': expiryDate,
         'countryOfOrigin': 'AE',
-        'productionDate': DateTime.now().subtract(Duration(days: 30 - (i ~/ 10))).toIso8601String().split('T')[0],
+        'productionDate': DateTime.now()
+            .subtract(Duration(days: 30 - (i ~/ 10)))
+            .toIso8601String()
+            .split('T')[0],
       };
-      
+
       await _captureEvent(
         eventType: 'ObjectEvent',
         action: 'ADD',
@@ -573,7 +668,7 @@ class IndustryTestDataService {
         eventTime: DateTime.now().subtract(Duration(days: 30 - (i ~/ 10))),
         ilmd: ilmd,
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 30));
     }
 
@@ -583,14 +678,16 @@ class IndustryTestDataService {
       final sscc = ssccs[i];
       final ssccCode = sscc['sscc'] ?? sscc['ssccCode'];
       // Use the ssccUri from the API if available, otherwise construct it
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
-      
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
+
       onProgress(current, total, 'Commissioning SSCC $ssccCode');
-      
+
       final packLocation = manufacturers.isNotEmpty
           ? manufacturers[i % manufacturers.length]['glnCode']
           : '6291000000013';
-      
+
       // Commission the SSCC first - required before it can be used as parent in AggregationEvent
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -605,7 +702,10 @@ class IndustryTestDataService {
         ilmd: {
           'containerType': sscc['containerType'] ?? 'CASE',
           'countryOfOrigin': 'AE',
-          'productionDate': DateTime.now().subtract(Duration(days: 25 + (i ~/ 5))).toIso8601String().split('T')[0],
+          'productionDate': DateTime.now()
+              .subtract(Duration(days: 25 + (i ~/ 5)))
+              .toIso8601String()
+              .split('T')[0],
         },
       );
 
@@ -618,10 +718,12 @@ class IndustryTestDataService {
       final sscc = ssccs[i];
       final ssccCode = sscc['sscc'] ?? sscc['ssccCode'];
       // Use the ssccUri from the API if available, otherwise construct it
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
-      
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
+
       onProgress(current, total, 'Packing into SSCC $ssccCode');
-      
+
       // Get some SGTINs to pack into this SSCC
       final childEpcs = <String>[];
       final startIdx = (i * 3) % sgtins.length;
@@ -634,16 +736,21 @@ class IndustryTestDataService {
         } else {
           final gtinCode = childSgtin['gtin'] ?? childSgtin['gtinCode'];
           final serialNumber = childSgtin['serialNumber'];
-          childEpcs.add('urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber');
+          childEpcs.add(
+            'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber',
+          );
         }
       }
 
       final packLocation = distributors.isNotEmpty
           ? distributors[i % distributors.length]['glnCode']
-          : (manufacturers.isNotEmpty ? manufacturers[i % manufacturers.length]['glnCode'] : '6291000000013');
+          : (manufacturers.isNotEmpty
+                ? manufacturers[i % manufacturers.length]['glnCode']
+                : '6291000000013');
 
       // Generate packing operation identifiers
-      final packingOpId = 'pack_${DateTime.now().millisecondsSinceEpoch}_${i.toString().padLeft(3, '0')}';
+      final packingOpId =
+          'pack_${DateTime.now().millisecondsSinceEpoch}_${i.toString().padLeft(3, '0')}';
       final packingRef = 'PACK-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
@@ -673,7 +780,9 @@ class IndustryTestDataService {
       if (sscc == null) continue;
 
       // Use ssccUri from API if available
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${(sscc['sscc'] ?? sscc['ssccCode']).substring(1, 8)}.${(sscc['sscc'] ?? sscc['ssccCode']).substring(8, 17)}';
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${(sscc['sscc'] ?? sscc['ssccCode']).substring(1, 8)}.${(sscc['sscc'] ?? sscc['ssccCode']).substring(8, 17)}';
 
       final sourceGln = manufacturers.isNotEmpty
           ? manufacturers[i % manufacturers.length]['glnCode']
@@ -684,8 +793,10 @@ class IndustryTestDataService {
 
       onProgress(current, total, 'Shipping from manufacturer → distributor');
 
-      final shippingOpId1 = 'ship_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final shippingRef1 = 'SHIP-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
+      final shippingOpId1 =
+          'ship_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final shippingRef1 =
+          'SHIP-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -696,11 +807,20 @@ class IndustryTestDataService {
         readPoint: sourceGln,
         bizLocation: sourceGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
-          {'sourceType': 'urn:epcglobal:cbv:sdt:owning_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 15 + i)),
         bizData: {
@@ -715,8 +835,10 @@ class IndustryTestDataService {
       current++;
       onProgress(current, total, 'Receiving at distributor');
 
-      final receivingOpId1 = 'recv_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final receivingRef1 = 'RECV-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
+      final receivingOpId1 =
+          'recv_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final receivingRef1 =
+          'RECV-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -727,11 +849,20 @@ class IndustryTestDataService {
         readPoint: destGln,
         bizLocation: destGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
-          {'destinationType': 'urn:epcglobal:cbv:sdt:owning_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 14 + i)),
         bizData: {
@@ -746,9 +877,12 @@ class IndustryTestDataService {
     // 5. Distributor → Retailer shipments
     for (int i = 0; i < numShipments ~/ 2; i++) {
       current++;
-      final ssccIdx = (i + numShipments ~/ 2) % (ssccs.isNotEmpty ? ssccs.length : 1);
+      final ssccIdx =
+          (i + numShipments ~/ 2) % (ssccs.isNotEmpty ? ssccs.length : 1);
       final sscc = ssccs.isNotEmpty ? ssccs[ssccIdx] : null;
-      final ssccCode = sscc != null ? (sscc['sscc'] ?? sscc['ssccCode']) : '000629100020000000$i';
+      final ssccCode = sscc != null
+          ? (sscc['sscc'] ?? sscc['ssccCode'])
+          : '000629100020000000$i';
       // Use ssccUri from API if available (matches what was commissioned)
       final ssccUri = sscc != null && sscc['ssccUri'] != null
           ? sscc['ssccUri']
@@ -763,8 +897,10 @@ class IndustryTestDataService {
 
       onProgress(current, total, 'Shipping from distributor → retailer');
 
-      final shippingOpId2 = 'ship_dist_ret_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final shippingRef2 = 'SHIP-DIST-RET-${(i + 1).toString().padLeft(3, '0')}';
+      final shippingOpId2 =
+          'ship_dist_ret_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final shippingRef2 =
+          'SHIP-DIST-RET-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -775,11 +911,20 @@ class IndustryTestDataService {
         readPoint: sourceGln,
         bizLocation: sourceGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
-          {'sourceType': 'urn:epcglobal:cbv:sdt:owning_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 10 + i)),
         bizData: {
@@ -794,8 +939,10 @@ class IndustryTestDataService {
       current++;
       onProgress(current, total, 'Receiving at retailer');
 
-      final receivingOpId2 = 'recv_dist_ret_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final receivingRef2 = 'RECV-DIST-RET-${(i + 1).toString().padLeft(3, '0')}';
+      final receivingOpId2 =
+          'recv_dist_ret_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final receivingRef2 =
+          'RECV-DIST-RET-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -806,11 +953,20 @@ class IndustryTestDataService {
         readPoint: destGln,
         bizLocation: destGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
-          {'destinationType': 'urn:epcglobal:cbv:sdt:owning_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 9 + i)),
         bizData: {
@@ -818,7 +974,7 @@ class IndustryTestDataService {
           'receiving_reference': receivingRef2,
         },
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 30));
     }
   }
@@ -840,15 +996,17 @@ class IndustryTestDataService {
     Map<String, dynamic>? ilmd,
     Map<String, String>? bizData,
   }) async {
-    final eventId = 'event_${eventTime.millisecondsSinceEpoch}_${DateTime.now().microsecond.toString().padLeft(3, '0')}';
-    
+    final eventId =
+        'event_${eventTime.millisecondsSinceEpoch}_${DateTime.now().microsecond.toString().padLeft(3, '0')}';
+
     // Calculate timezone offset
     final offset = eventTime.timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
-    final timezoneOffset = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    
+    final timezoneOffset =
+        '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+
     final event = <String, dynamic>{
       'eventId': eventId,
       'eventType': eventType,
@@ -867,7 +1025,7 @@ class IndustryTestDataService {
       'sourceList': sourceDestList ?? <Map<String, String>>[],
       'destinationList': destinationList ?? <Map<String, String>>[],
     };
-    
+
     // ObjectEvent uses epcList, AggregationEvent uses parentID/childEPCs
     if (eventType == 'ObjectEvent') {
       if (epcList != null && epcList.isNotEmpty) {
@@ -895,31 +1053,36 @@ class IndustryTestDataService {
     if (ilmd != null) {
       event['ilmd'] = ilmd;
     }
-    
+
     // Use the correct endpoint based on event type (same as working screens)
     final endpoint = eventType == 'ObjectEvent'
         ? '$_baseUrl/events/object'
         : '$_baseUrl/events/aggregation';
-    
+
     final response = await _httpClient.post(
       Uri.parse(endpoint),
       headers: await _headers,
       body: jsonEncode(event),
     );
-    
+
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw Exception('Failed to create $eventType: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to create $eventType: ${response.statusCode} - ${response.body}',
+      );
     }
   }
 
   /// Generate a random 12-character alphanumeric serial number
   String _generateSerialNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(12, (_) => chars[_random.nextInt(chars.length)]).join();
+    return List.generate(
+      12,
+      (_) => chars[_random.nextInt(chars.length)],
+    ).join();
   }
 
   // ==================== PHARMACEUTICAL METHODS ====================
-  
+
   /// Generate pharmaceutical GTINs with extensions
   Future<void> generatePharmaGTINs({
     required Function(int current, int total, String productName) onProgress,
@@ -948,7 +1111,9 @@ class IndustryTestDataService {
       if (gtinResponse.statusCode == 200 || gtinResponse.statusCode == 201) {
         // Create pharmaceutical extension
         await _httpClient.post(
-          Uri.parse('$_baseUrl/pharmaceutical/gtin/code/${product['gtinCode']}'),
+          Uri.parse(
+            '$_baseUrl/pharmaceutical/gtin/code/${product['gtinCode']}',
+          ),
           headers: await _headers,
           body: jsonEncode({
             // Product identification
@@ -964,7 +1129,9 @@ class IndustryTestDataService {
             'requiresPrescription': product['requiresPrescription'],
 
             // Storage & Handling
-            'storageConditions': product['temperatureControlled'] ? '2-8°C' : 'Room Temperature',
+            'storageConditions': product['temperatureControlled']
+                ? '2-8°C'
+                : 'Room Temperature',
             'requiresRefrigeration': product['temperatureControlled'],
 
             // Controlled Substance
@@ -995,7 +1162,9 @@ class IndustryTestDataService {
         body: jsonEncode({
           'glnCode': location['glnCode'],
           'locationName': location['locationName'],
-          'locationType': _mapLocationTypeToBackend(location['locationType'] as String),
+          'locationType': _mapLocationTypeToBackend(
+            location['locationType'] as String,
+          ),
           'addressLine1': location['address'],
           'city': location['city'],
           'postalCode': location['postalCode'] ?? '00000',
@@ -1011,23 +1180,31 @@ class IndustryTestDataService {
           headers: await _headers,
           body: jsonEncode({
             // Cold Chain & Storage Capabilities
-            'hasColdChainCapability': location['hasRefrigeratedStorage'] ?? false,
+            'hasColdChainCapability':
+                location['hasRefrigeratedStorage'] ?? false,
             'hasFreezerCapability': location['hasFreezerStorage'] ?? false,
             'hasControlledRoomTemp': true,
             'gdpCertified': location['gdpCertificateNumber'] != null,
 
             // Clinical Trial Site
-            'isClinicalTrialSite': location['locationType'] == 'HOSPITAL_PHARMACY',
+            'isClinicalTrialSite':
+                location['locationType'] == 'HOSPITAL_PHARMACY',
 
             // Serialization & DSCSA Compliance
-            'hasSerializationCapability': location['serializedProductHandling'] ?? false,
-            'hasAggregationCapability': location['serializedProductHandling'] ?? false,
+            'hasSerializationCapability':
+                location['serializedProductHandling'] ?? false,
+            'hasAggregationCapability':
+                location['serializedProductHandling'] ?? false,
 
             // Healthcare Facility Type
-            'healthcareFacilityType': _getHealthcareFacilityType(location['locationType'] as String),
+            'healthcareFacilityType': _getHealthcareFacilityType(
+              location['locationType'] as String,
+            ),
 
             // Certifications
-            'isIsoCertified': location['gdpCertificateNumber'] != null || location['gmpCertificateNumber'] != null,
+            'isIsoCertified':
+                location['gdpCertificateNumber'] != null ||
+                location['gmpCertificateNumber'] != null,
 
             // Contact Information
             'pharmacistInCharge': location['pharmacistLicenseNumber'] != null
@@ -1036,9 +1213,15 @@ class IndustryTestDataService {
             'picLicenseNumber': location['pharmacistLicenseNumber'],
 
             // Operational Details
-            'receivingHours': _getOperatingHours(location['locationType'] as String),
-            'hasLoadingDock': location['locationType'] == 'MANUFACTURER' || location['locationType'] == 'DISTRIBUTION_CENTER',
-            'hasForkliftCapability': location['locationType'] == 'MANUFACTURER' || location['locationType'] == 'DISTRIBUTION_CENTER',
+            'receivingHours': _getOperatingHours(
+              location['locationType'] as String,
+            ),
+            'hasLoadingDock':
+                location['locationType'] == 'MANUFACTURER' ||
+                location['locationType'] == 'DISTRIBUTION_CENTER',
+            'hasForkliftCapability':
+                location['locationType'] == 'MANUFACTURER' ||
+                location['locationType'] == 'DISTRIBUTION_CENTER',
           }),
         );
       }
@@ -1081,15 +1264,58 @@ class IndustryTestDataService {
     }
 
     // Filter to get manufacturer GLNs
-    final manufacturerGlns = glns.where((g) =>
-      g['locationType'] == 'MANUFACTURER' ||
-      g['locationName']?.toString().contains('Pharma') == true ||
-      g['locationName']?.toString().contains('Julphar') == true ||
-      g['locationName']?.toString().contains('Neopharma') == true
-    ).toList();
+    final manufacturerGlns = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'MANUFACTURER' ||
+              g['locationType'] == 'MANUFACTURING_SITE' ||
+              g['locationName']?.toString().contains('Pharma') == true ||
+              g['locationName']?.toString().contains('Julphar') == true ||
+              g['locationName']?.toString().contains('Neopharma') == true,
+        )
+        .toList();
 
     if (manufacturerGlns.isEmpty) {
-      throw Exception('No manufacturer GLNs found. Please generate GLNs first.');
+      if (glns.isNotEmpty) {
+        manufacturerGlns.addAll(glns);
+      } else {
+        await generatePharmaGLNs(
+          onProgress: (current, total, locationName) {
+            onProgress(current, total, 'Generating GLN: $locationName');
+          },
+        );
+
+        final retryGlnsResponse = await _httpClient.get(
+          Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+          headers: await _headers,
+        );
+
+        if (retryGlnsResponse.statusCode == 200) {
+          final retryGlnsData = jsonDecode(retryGlnsResponse.body);
+          glns = retryGlnsData['content'] ?? [];
+        }
+
+        final retryManufacturerGlns = glns
+            .where(
+              (g) =>
+                  g['locationType'] == 'MANUFACTURER' ||
+                  g['locationType'] == 'MANUFACTURING_SITE' ||
+                  g['locationName']?.toString().contains('Pharma') == true ||
+                  g['locationName']?.toString().contains('Julphar') == true ||
+                  g['locationName']?.toString().contains('Neopharma') == true,
+            )
+            .toList();
+
+        if (retryManufacturerGlns.isEmpty && glns.isEmpty) {
+          throw Exception('No GLNs found. Please generate GLNs first.');
+        }
+
+        manufacturerGlns
+          ..clear()
+          ..addAll(
+            retryManufacturerGlns.isNotEmpty ? retryManufacturerGlns : glns,
+          );
+      }
     }
 
     final total = gtins.length * 10; // 10 SGTINs per GTIN
@@ -1103,7 +1329,7 @@ class IndustryTestDataService {
       final gtin = gtins[gtinIndex];
       final gtinCode = gtin['gtin'] ?? gtin['gtinCode'];
       final productName = gtin['productName'] ?? 'Product';
-      
+
       // Generate batch number for this GTIN
       final batchNumber = PharmaceuticalProductData.generateBatchNumber(
         gtinIndex % 5 + 1,
@@ -1111,15 +1337,16 @@ class IndustryTestDataService {
         DateTime.now().month,
         gtinIndex + 1,
       );
-      
+
       // Pick a manufacturer location (always required for commissioning event)
-      final manufacturerGln = manufacturerGlns[gtinIndex % manufacturerGlns.length]['glnCode'];
-      
+      final manufacturerGln =
+          manufacturerGlns[gtinIndex % manufacturerGlns.length]['glnCode'];
+
       for (int i = 0; i < 10; i++) {
         current++;
         final serialNumber = _generateSerialNumber();
         onProgress(current, total, '$productName (S/N: $serialNumber)');
-        
+
         // Create SGTIN
         final sgtinResponse = await _httpClient.post(
           Uri.parse('$_baseUrl/identifiers/sgtins'),
@@ -1128,18 +1355,19 @@ class IndustryTestDataService {
             'gtin': gtinCode,
             'serialNumber': serialNumber,
             'batchLotNumber': batchNumber,
-            'productionDate': productionDate.toIso8601String().split('T')[0],
-            'expiryDate': expiryDate.toIso8601String().split('T')[0],
+            'productionDate': productionDate.toUtc().toIso8601String(),
+            'expiryDate': expiryDate.toUtc().toIso8601String(),
             'status': 'COMMISSIONED',
             'regulatoryMarket': 'ARE',
             'currentLocationGLN': manufacturerGln,
           }),
         );
-        
-        if (sgtinResponse.statusCode != 200 && sgtinResponse.statusCode != 201) {
+
+        if (sgtinResponse.statusCode != 200 &&
+            sgtinResponse.statusCode != 201) {
           print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.body}');
         }
-        
+
         await Future.delayed(const Duration(milliseconds: 50));
       }
     }
@@ -1161,17 +1389,21 @@ class IndustryTestDataService {
       glns = glnsData['content'] ?? [];
     }
 
-    final manufacturers = glns.where((g) =>
-      g['locationType'] == 'MANUFACTURER'
-    ).toList();
+    final manufacturers = glns
+        .where((g) => g['locationType'] == 'MANUFACTURER')
+        .toList();
 
-    final distributors = glns.where((g) =>
-      g['locationType'] == 'DISTRIBUTION_CENTER'
-    ).toList();
+    final distributors = glns
+        .where((g) => g['locationType'] == 'DISTRIBUTION_CENTER')
+        .toList();
 
-    final pharmacies = glns.where((g) =>
-      g['locationType'] == 'RETAIL_PHARMACY' || g['locationType'] == 'HOSPITAL_PHARMACY'
-    ).toList();
+    final pharmacies = glns
+        .where(
+          (g) =>
+              g['locationType'] == 'RETAIL_PHARMACY' ||
+              g['locationType'] == 'HOSPITAL_PHARMACY',
+        )
+        .toList();
 
     final prefixes = PharmaceuticalProductData.getManufacturerPrefixes();
 
@@ -1187,7 +1419,11 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (100000 + i).toString().padLeft(9, '0');
-      final ssccCode = PharmaceuticalProductData.generateSSCC('0', prefix['prefix']!, serialRef);
+      final ssccCode = PharmaceuticalProductData.generateSSCC(
+        '0',
+        prefix['prefix']!,
+        serialRef,
+      );
 
       onProgress(current, total, 'Pallet $ssccCode');
 
@@ -1204,9 +1440,15 @@ class IndustryTestDataService {
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: destGln?['glnCode'],
-        batchNumber: PharmaceuticalProductData.generateBatchNumber(i % 5 + 1, 2024, 12, i + 1),
+        batchNumber: PharmaceuticalProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          i + 1,
+        ),
         unitCount: 1000,
-        temperatureControlled: i % 3 == 0, // Every 3rd pallet is temp-controlled
+        temperatureControlled:
+            i % 3 == 0, // Every 3rd pallet is temp-controlled
       );
 
       await Future.delayed(const Duration(milliseconds: 100));
@@ -1217,28 +1459,39 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (200000 + i).toString().padLeft(9, '0');
-      final ssccCode = PharmaceuticalProductData.generateSSCC('1', prefix['prefix']!, serialRef);
+      final ssccCode = PharmaceuticalProductData.generateSSCC(
+        '1',
+        prefix['prefix']!,
+        serialRef,
+      );
 
       onProgress(current, total, 'Case $ssccCode');
 
       final sourceGln = distributors.isNotEmpty
           ? distributors[i % distributors.length]
-          : (manufacturers.isNotEmpty ? manufacturers[i % manufacturers.length] : null);
+          : (manufacturers.isNotEmpty
+                ? manufacturers[i % manufacturers.length]
+                : null);
       final destGln = pharmacies.isNotEmpty
           ? pharmacies[i % pharmacies.length]
           : null;
-      
+
       await _createPharmaSSCCWithExtension(
         ssccCode: ssccCode,
         containerType: 'CASE',
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: destGln?['glnCode'],
-        batchNumber: PharmaceuticalProductData.generateBatchNumber(i % 5 + 1, 2024, 12, 100 + i),
+        batchNumber: PharmaceuticalProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          100 + i,
+        ),
         unitCount: 50,
         temperatureControlled: i % 4 == 0,
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
@@ -1247,25 +1500,36 @@ class IndustryTestDataService {
       current++;
       final prefix = prefixes[i % prefixes.length];
       final serialRef = (300000 + i).toString().padLeft(9, '0');
-      final ssccCode = PharmaceuticalProductData.generateSSCC('2', prefix['prefix']!, serialRef);
-      
+      final ssccCode = PharmaceuticalProductData.generateSSCC(
+        '2',
+        prefix['prefix']!,
+        serialRef,
+      );
+
       onProgress(current, total, 'Carton $ssccCode');
-      
+
       final sourceGln = pharmacies.isNotEmpty
           ? pharmacies[i % pharmacies.length]
-          : (distributors.isNotEmpty ? distributors[i % distributors.length] : null);
-      
+          : (distributors.isNotEmpty
+                ? distributors[i % distributors.length]
+                : null);
+
       await _createPharmaSSCCWithExtension(
         ssccCode: ssccCode,
         containerType: 'CARTON',
         issuingGln: sourceGln?['glnCode'],
         sourceGln: sourceGln?['glnCode'],
         destGln: null,
-        batchNumber: PharmaceuticalProductData.generateBatchNumber(i % 5 + 1, 2024, 12, 200 + i),
+        batchNumber: PharmaceuticalProductData.generateBatchNumber(
+          i % 5 + 1,
+          2024,
+          12,
+          200 + i,
+        ),
         unitCount: 10,
         temperatureControlled: false,
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 100));
     }
   }
@@ -1320,7 +1584,8 @@ class IndustryTestDataService {
           // Chain of Custody
           'chainOfCustodyRequired': temperatureControlled,
           'requiresSignatureOnReceipt': true,
-          'requiresPharmacistVerification': containerType == 'PALLET' || containerType == 'CASE',
+          'requiresPharmacistVerification':
+              containerType == 'PALLET' || containerType == 'CASE',
 
           // Special Handling
           'fragile': false,
@@ -1376,19 +1641,31 @@ class IndustryTestDataService {
       glns = glnsData['content'] ?? [];
     }
 
-    final manufacturers = glns.where((g) => g['locationType'] == 'MANUFACTURING_SITE').toList();
-    final distributors = glns.where((g) => g['locationType'] == 'DISTRIBUTION_CENTER').toList();
-    final pharmacies = glns.where((g) => g['locationType'] == 'PHARMACY').toList();
+    final manufacturers = glns
+        .where((g) => g['locationType'] == 'MANUFACTURING_SITE')
+        .toList();
+    final distributors = glns
+        .where((g) => g['locationType'] == 'DISTRIBUTION_CENTER')
+        .toList();
+    final pharmacies = glns
+        .where((g) => g['locationType'] == 'PHARMACY')
+        .toList();
 
     // Validate that GLNs exist before generating events
     if (manufacturers.isEmpty) {
-      throw Exception('No manufacturer GLNs found. Please generate pharmaceutical GLNs first.');
+      throw Exception(
+        'No manufacturer GLNs found. Please generate pharmaceutical GLNs first.',
+      );
     }
     if (distributors.isEmpty) {
-      throw Exception('No distributor GLNs found. Please generate pharmaceutical GLNs first.');
+      throw Exception(
+        'No distributor GLNs found. Please generate pharmaceutical GLNs first.',
+      );
     }
     if (pharmacies.isEmpty) {
-      throw Exception('No pharmacy GLNs found. Please generate pharmaceutical GLNs first.');
+      throw Exception(
+        'No pharmacy GLNs found. Please generate pharmaceutical GLNs first.',
+      );
     }
 
     final numSgtins = sgtins.length > 100 ? 100 : sgtins.length;
@@ -1404,21 +1681,28 @@ class IndustryTestDataService {
       final sgtin = sgtins[i];
       final gtinCode = sgtin['gtin'] ?? sgtin['gtinCode'];
       final serialNumber = sgtin['serialNumber'];
-      final batchLot = sgtin['batchLotNumber'] ?? 'LOT-24-12-${DateTime.now().year}';
-      final expiryDate = sgtin['expiryDate'] ?? DateTime.now().add(const Duration(days: 730)).toIso8601String();
-      final epcUri = 'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber';
+      final batchLot =
+          sgtin['batchLotNumber'] ?? 'LOT-24-12-${DateTime.now().year}';
+      final expiryDate =
+          sgtin['expiryDate'] ??
+          DateTime.now().add(const Duration(days: 730)).toIso8601String();
+      final epcUri =
+          'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber';
 
       onProgress(current, total, 'Commissioning SGTIN $serialNumber');
-      
+
       final mfgGln = manufacturers[i % manufacturers.length]['glnCode'];
-      
+
       final ilmd = <String, dynamic>{
         'lotNumber': batchLot,
         'itemExpirationDate': expiryDate,
         'countryOfOrigin': 'AE',
-        'productionDate': DateTime.now().subtract(Duration(days: 60 - (i ~/ 10))).toIso8601String().split('T')[0],
+        'productionDate': DateTime.now()
+            .subtract(Duration(days: 60 - (i ~/ 10)))
+            .toIso8601String()
+            .split('T')[0],
       };
-      
+
       await _captureEvent(
         eventType: 'ObjectEvent',
         action: 'ADD',
@@ -1430,7 +1714,7 @@ class IndustryTestDataService {
         eventTime: DateTime.now().subtract(Duration(days: 60 - (i ~/ 10))),
         ilmd: ilmd,
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 30));
     }
 
@@ -1439,12 +1723,14 @@ class IndustryTestDataService {
       current++;
       final sscc = ssccs[i];
       final ssccCode = sscc['sscc'] ?? sscc['ssccCode'];
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
-      
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
+
       onProgress(current, total, 'Commissioning SSCC $ssccCode');
-      
+
       final packLocation = manufacturers[i % manufacturers.length]['glnCode'];
-      
+
       await _captureEvent(
         eventType: 'ObjectEvent',
         action: 'ADD',
@@ -1457,10 +1743,13 @@ class IndustryTestDataService {
         ilmd: {
           'containerType': sscc['containerType'] ?? 'CASE',
           'countryOfOrigin': 'AE',
-          'productionDate': DateTime.now().subtract(Duration(days: 55 + (i ~/ 5))).toIso8601String().split('T')[0],
+          'productionDate': DateTime.now()
+              .subtract(Duration(days: 55 + (i ~/ 5)))
+              .toIso8601String()
+              .split('T')[0],
         },
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 30));
     }
 
@@ -1469,10 +1758,12 @@ class IndustryTestDataService {
       current++;
       final sscc = ssccs[i];
       final ssccCode = sscc['sscc'] ?? sscc['ssccCode'];
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
-      
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
+
       onProgress(current, total, 'Packing into SSCC $ssccCode');
-      
+
       final childEpcs = <String>[];
       final startIdx = (i * 3) % sgtins.length;
       for (int j = 0; j < 3 && (startIdx + j) < sgtins.length; j++) {
@@ -1483,7 +1774,9 @@ class IndustryTestDataService {
         } else {
           final gtinCode = childSgtin['gtin'] ?? childSgtin['gtinCode'];
           final serialNumber = childSgtin['serialNumber'];
-          childEpcs.add('urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber');
+          childEpcs.add(
+            'urn:epc:id:sgtin:${gtinCode.substring(1, 8)}.${gtinCode.substring(8, 13)}.$serialNumber',
+          );
         }
       }
 
@@ -1511,15 +1804,19 @@ class IndustryTestDataService {
       final sscc = ssccs.isNotEmpty ? ssccs[ssccIdx] : null;
       if (sscc == null) continue;
 
-      final ssccUri = sscc['ssccUri'] ?? 'urn:epc:id:sscc:${(sscc['sscc'] ?? sscc['ssccCode']).substring(1, 8)}.${(sscc['sscc'] ?? sscc['ssccCode']).substring(8, 17)}';
+      final ssccUri =
+          sscc['ssccUri'] ??
+          'urn:epc:id:sscc:${(sscc['sscc'] ?? sscc['ssccCode']).substring(1, 8)}.${(sscc['sscc'] ?? sscc['ssccCode']).substring(8, 17)}';
 
       final sourceGln = manufacturers[i % manufacturers.length]['glnCode'];
       final destGln = distributors[i % distributors.length]['glnCode'];
 
       onProgress(current, total, 'Shipping from manufacturer → distributor');
 
-      final shippingOpId1 = 'ship_pharma_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final shippingRef1 = 'PHARMA-SHIP-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
+      final shippingOpId1 =
+          'ship_pharma_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final shippingRef1 =
+          'PHARMA-SHIP-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -1530,11 +1827,20 @@ class IndustryTestDataService {
         readPoint: sourceGln,
         bizLocation: sourceGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
-          {'sourceType': 'urn:epcglobal:cbv:sdt:owning_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 45 + i)),
         bizData: {
@@ -1549,8 +1855,10 @@ class IndustryTestDataService {
       current++;
       onProgress(current, total, 'Receiving at distributor');
 
-      final receivingOpId1 = 'recv_pharma_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final receivingRef1 = 'PHARMA-RECV-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
+      final receivingOpId1 =
+          'recv_pharma_mfg_dist_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final receivingRef1 =
+          'PHARMA-RECV-MFG-DIST-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -1561,11 +1869,20 @@ class IndustryTestDataService {
         readPoint: destGln,
         bizLocation: destGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
-          {'destinationType': 'urn:epcglobal:cbv:sdt:owning_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 44 + i)),
         bizData: {
@@ -1580,9 +1897,12 @@ class IndustryTestDataService {
     // 5. Distributor → Pharmacy shipments
     for (int i = 0; i < numShipments ~/ 2; i++) {
       current++;
-      final ssccIdx = (i + numShipments ~/ 2) % (ssccs.isNotEmpty ? ssccs.length : 1);
+      final ssccIdx =
+          (i + numShipments ~/ 2) % (ssccs.isNotEmpty ? ssccs.length : 1);
       final sscc = ssccs.isNotEmpty ? ssccs[ssccIdx] : null;
-      final ssccCode = sscc != null ? (sscc['sscc'] ?? sscc['ssccCode']) : '000629200020000000$i';
+      final ssccCode = sscc != null
+          ? (sscc['sscc'] ?? sscc['ssccCode'])
+          : '000629200020000000$i';
       final ssccUri = sscc != null && sscc['ssccUri'] != null
           ? sscc['ssccUri']
           : 'urn:epc:id:sscc:${ssccCode.substring(1, 8)}.${ssccCode.substring(8, 17)}';
@@ -1592,8 +1912,10 @@ class IndustryTestDataService {
 
       onProgress(current, total, 'Shipping from distributor → pharmacy');
 
-      final shippingOpId2 = 'ship_pharma_dist_pharm_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final shippingRef2 = 'PHARMA-SHIP-DIST-PHARM-${(i + 1).toString().padLeft(3, '0')}';
+      final shippingOpId2 =
+          'ship_pharma_dist_pharm_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final shippingRef2 =
+          'PHARMA-SHIP-DIST-PHARM-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -1604,11 +1926,20 @@ class IndustryTestDataService {
         readPoint: sourceGln,
         bizLocation: sourceGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
-          {'sourceType': 'urn:epcglobal:cbv:sdt:owning_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 40 + i)),
         bizData: {
@@ -1623,8 +1954,10 @@ class IndustryTestDataService {
       current++;
       onProgress(current, total, 'Receiving at pharmacy');
 
-      final receivingOpId2 = 'recv_pharma_dist_pharm_${DateTime.now().millisecondsSinceEpoch}_$i';
-      final receivingRef2 = 'PHARMA-RECV-DIST-PHARM-${(i + 1).toString().padLeft(3, '0')}';
+      final receivingOpId2 =
+          'recv_pharma_dist_pharm_${DateTime.now().millisecondsSinceEpoch}_$i';
+      final receivingRef2 =
+          'PHARMA-RECV-DIST-PHARM-${(i + 1).toString().padLeft(3, '0')}';
 
       await _captureEvent(
         eventType: 'ObjectEvent',
@@ -1635,11 +1968,20 @@ class IndustryTestDataService {
         readPoint: destGln,
         bizLocation: destGln,
         sourceDestList: [
-          {'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party', 'sourceID': sourceGln},
+          {
+            'sourceType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'sourceID': sourceGln,
+          },
         ],
         destinationList: [
-          {'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party', 'destinationID': destGln},
-          {'destinationType': 'urn:epcglobal:cbv:sdt:owning_party', 'destinationID': destGln},
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:possessing_party',
+            'destinationID': destGln,
+          },
+          {
+            'destinationType': 'urn:epcglobal:cbv:sdt:owning_party',
+            'destinationID': destGln,
+          },
         ],
         eventTime: DateTime.now().subtract(Duration(days: 39 + i)),
         bizData: {
@@ -1647,7 +1989,7 @@ class IndustryTestDataService {
           'receiving_reference': receivingRef2,
         },
       );
-      
+
       await Future.delayed(const Duration(milliseconds: 30));
     }
   }
@@ -1727,6 +2069,19 @@ class IndustryTestDataService {
       case 'HOSPITAL_PHARMACY':
       case 'RETAIL_PHARMACY':
         return 'PHARMACY';
+      default:
+        return 'OTHER';
+    }
+  }
+
+  String _mapTobaccoLocationTypeToBackend(String locationType) {
+    switch (locationType) {
+      case 'MANUFACTURER':
+        return 'MANUFACTURING_SITE';
+      case 'DISTRIBUTION_CENTER':
+        return 'DISTRIBUTION_CENTER';
+      case 'WHOLESALER':
+        return 'WHOLESALER';
       default:
         return 'OTHER';
     }

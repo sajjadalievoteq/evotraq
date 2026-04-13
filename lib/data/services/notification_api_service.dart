@@ -1,26 +1,19 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/features/notifications/domain/models/notification_subscription.dart'
     as domain;
 
 class NotificationApiService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
   NotificationApiService({
-    required http.Client client,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _client = client,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+    required HttpService httpService,
+  }) : _httpService = httpService;
 
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -38,13 +31,15 @@ class NotificationApiService {
   }) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions'),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/notifications/subscriptions',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(response.data);
         // Backend returns a direct list, not a paginated response
         if (responseData is List) {
           return responseData
@@ -68,14 +63,16 @@ class NotificationApiService {
       domain.CreateSubscriptionRequest request) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/subscriptions',
         headers: headers,
-        body: json.encode(request.toJson()),
+        data: json.encode(request.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.body));
+        return domain.NotificationSubscription.fromJson(json.decode(response.data));
       } else {
         throw ApiException(
           message: 'Failed to create subscription',
@@ -91,13 +88,15 @@ class NotificationApiService {
   Future<domain.NotificationSubscription> getSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id'),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.body));
+        return domain.NotificationSubscription.fromJson(json.decode(response.data));
       } else {
         throw ApiException(
           message: 'Failed to fetch subscription',
@@ -116,14 +115,16 @@ class NotificationApiService {
   ) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.put(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id'),
+      final response = await _httpService.put(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
-        body: json.encode(request.toJson()),
+        data: json.encode(request.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return domain.NotificationSubscription.fromJson(json.decode(response.body));
+        return domain.NotificationSubscription.fromJson(json.decode(response.data));
       } else {
         throw ApiException(
           message: 'Failed to update subscription',
@@ -139,9 +140,11 @@ class NotificationApiService {
   Future<void> deleteSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.delete(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id'),
+      final response = await _httpService.delete(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -159,9 +162,11 @@ class NotificationApiService {
   Future<void> pauseSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id/pause'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id/pause',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -179,9 +184,11 @@ class NotificationApiService {
   Future<void> resumeSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id/resume'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id/resume',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -204,13 +211,15 @@ class NotificationApiService {
   }) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$subscriptionId/webhooks?limit=$size'),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/notifications/subscriptions/$subscriptionId/webhooks?limit=$size',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(response.data);
         // Backend returns a direct list, not a paginated response
         if (responseData is List) {
           return responseData
@@ -233,14 +242,16 @@ class NotificationApiService {
   Future<Map<String, dynamic>> testWebhook(String webhookUrl) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/webhooks/test'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/webhooks/test',
         headers: headers,
-        body: json.encode({'webhookUrl': webhookUrl}),
+        data: json.encode({'webhookUrl': webhookUrl}),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return json.decode(response.data);
       } else {
         throw ApiException(
           message: 'Failed to test webhook',
@@ -256,16 +267,18 @@ class NotificationApiService {
   Future<Map<String, dynamic>> testEmail(String emailAddress) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/emails/test'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/emails/test',
         headers: headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'emailAddress': emailAddress,
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return jsonDecode(response.data);
       } else {
         throw ApiException(
           message: 'Failed to test email: ${response.statusCode}',
@@ -281,9 +294,11 @@ class NotificationApiService {
   Future<void> retryWebhook(String notificationId) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/webhooks/$notificationId/retry'),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/notifications/webhooks/$notificationId/retry',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -337,13 +352,15 @@ class NotificationApiService {
   Future<domain.NotificationStats> getSubscriptionStats(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$id/stats'),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/notifications/subscriptions/$id/stats',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return domain.NotificationStats.fromJson(json.decode(response.body));
+        return domain.NotificationStats.fromJson(json.decode(response.data));
       } else {
         throw ApiException(
           message: 'Failed to fetch subscription stats',
@@ -359,13 +376,15 @@ class NotificationApiService {
   Future<Map<String, dynamic>> getSystemStats() async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/stats'),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/notifications/stats',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return json.decode(response.data);
       } else {
         throw ApiException(
           message: 'Failed to fetch system stats',

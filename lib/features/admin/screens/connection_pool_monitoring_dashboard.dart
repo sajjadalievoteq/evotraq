@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../data/services/advanced_performance_service.dart';
 
@@ -11,10 +11,12 @@ class ConnectionPoolMonitoringDashboard extends StatefulWidget {
   const ConnectionPoolMonitoringDashboard({Key? key}) : super(key: key);
 
   @override
-  _ConnectionPoolMonitoringDashboardState createState() => _ConnectionPoolMonitoringDashboardState();
+  _ConnectionPoolMonitoringDashboardState createState() =>
+      _ConnectionPoolMonitoringDashboardState();
 }
 
-class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonitoringDashboard> {
+class _ConnectionPoolMonitoringDashboardState
+    extends State<ConnectionPoolMonitoringDashboard> {
   late AdvancedPerformanceService _performanceService;
   Map<String, dynamic>? _poolStatus;
   Map<String, dynamic>? _leakDetection;
@@ -41,7 +43,7 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
   void _initializeService() {
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      client: getIt<http.Client>(),
+      httpService: getIt<HttpService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
@@ -132,7 +134,8 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
 
   Future<void> _loadRecommendations() async {
     try {
-      final recommendations = await _performanceService.getConnectionPoolRecommendations();
+      final recommendations = await _performanceService
+          .getConnectionPoolRecommendations();
       if (mounted) {
         setState(() {
           _recommendations = recommendations;
@@ -163,32 +166,35 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
         ],
       ),
       body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : DefaultTabController(
-            length: 4,
-            child: Column(
-              children: [
-                const TabBar(
-                  tabs: [
-                    Tab(icon: Icon(Icons.pool), text: 'Pool Status'),
-                    Tab(icon: Icon(Icons.leak_add), text: 'Leak Detection'),
-                    Tab(icon: Icon(Icons.health_and_safety), text: 'Health Check'),
-                    Tab(icon: Icon(Icons.lightbulb), text: 'Recommendations'),
-                  ],
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _buildPoolStatusTab(),
-                      _buildLeakDetectionTab(),
-                      _buildHealthCheckTab(),
-                      _buildRecommendationsTab(),
+          ? const Center(child: CircularProgressIndicator())
+          : DefaultTabController(
+              length: 4,
+              child: Column(
+                children: [
+                  const TabBar(
+                    tabs: [
+                      Tab(icon: Icon(Icons.pool), text: 'Pool Status'),
+                      Tab(icon: Icon(Icons.leak_add), text: 'Leak Detection'),
+                      Tab(
+                        icon: Icon(Icons.health_and_safety),
+                        text: 'Health Check',
+                      ),
+                      Tab(icon: Icon(Icons.lightbulb), text: 'Recommendations'),
                     ],
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildPoolStatusTab(),
+                        _buildLeakDetectionTab(),
+                        _buildHealthCheckTab(),
+                        _buildRecommendationsTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
     );
   }
 
@@ -270,11 +276,21 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard('Active', activeConnections.toString(), Icons.play_arrow, Colors.green),
+              child: _buildMetricCard(
+                'Active',
+                activeConnections.toString(),
+                Icons.play_arrow,
+                Colors.green,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildMetricCard('Idle', idleConnections.toString(), Icons.pause, Colors.blue),
+              child: _buildMetricCard(
+                'Idle',
+                idleConnections.toString(),
+                Icons.pause,
+                Colors.blue,
+              ),
             ),
           ],
         ),
@@ -282,11 +298,21 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard('Total', totalConnections.toString(), Icons.storage, Colors.purple),
+              child: _buildMetricCard(
+                'Total',
+                totalConnections.toString(),
+                Icons.storage,
+                Colors.purple,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildMetricCard('Awaiting', awaitingConnections.toString(), Icons.schedule, Colors.orange),
+              child: _buildMetricCard(
+                'Awaiting',
+                awaitingConnections.toString(),
+                Icons.schedule,
+                Colors.orange,
+              ),
             ),
           ],
         ),
@@ -417,7 +443,12 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -441,10 +472,7 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ],
@@ -476,10 +504,7 @@ class _ConnectionPoolMonitoringDashboardState extends State<ConnectionPoolMonito
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadAllData,
-            child: const Text('Retry'),
-          ),
+          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
         ],
       ),
     );

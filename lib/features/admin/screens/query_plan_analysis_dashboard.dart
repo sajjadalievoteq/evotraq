@@ -3,17 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
 
 class QueryPlanAnalysisDashboard extends StatefulWidget {
   const QueryPlanAnalysisDashboard({Key? key}) : super(key: key);
 
   @override
-  _QueryPlanAnalysisDashboardState createState() => _QueryPlanAnalysisDashboardState();
+  _QueryPlanAnalysisDashboardState createState() =>
+      _QueryPlanAnalysisDashboardState();
 }
 
-class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard> {
+class _QueryPlanAnalysisDashboardState
+    extends State<QueryPlanAnalysisDashboard> {
   late AdvancedPerformanceService _performanceService;
   final TextEditingController _queryController = TextEditingController();
   Map<String, dynamic>? _analysisResult;
@@ -32,7 +34,7 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
   void _initializeService() {
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      client: getIt<http.Client>(),
+      httpService: getIt<HttpService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
@@ -73,10 +75,13 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
 
     try {
       // Analyze the query
-      final analysis = await _performanceService.analyzeQuery(_queryController.text);
-      
+      final analysis = await _performanceService.analyzeQuery(
+        _queryController.text,
+      );
+
       // Get recommendations
-      final recommendations = await _performanceService.getOptimizationRecommendations();
+      final recommendations = await _performanceService
+          .getOptimizationRecommendations();
 
       setState(() {
         _analysisResult = analysis;
@@ -138,10 +143,11 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                   children: [
                     Text(
                       'SQL Query Analysis',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -149,9 +155,11 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                       maxLines: 4,
                       decoration: const InputDecoration(
                         labelText: 'Enter SQL Query',
-                        hintText: 'SELECT * FROM products WHERE category = \'pharmaceutical\';',
+                        hintText:
+                            'SELECT * FROM products WHERE category = \'pharmaceutical\';',
                         border: OutlineInputBorder(),
-                        helperText: 'Enter a SQL query to analyze its execution plan',
+                        helperText:
+                            'Enter a SQL query to analyze its execution plan',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -159,14 +167,18 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                       children: [
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : _analyzeQuery,
-                          icon: _isLoading 
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.analytics),
-                          label: Text(_isLoading ? 'Analyzing...' : 'Analyze Query'),
+                          icon: _isLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.analytics),
+                          label: Text(
+                            _isLoading ? 'Analyzing...' : 'Analyze Query',
+                          ),
                         ),
                         const SizedBox(width: 16),
                         TextButton.icon(
@@ -219,9 +231,18 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                   children: [
                     const TabBar(
                       tabs: [
-                        Tab(icon: Icon(Icons.analytics), text: 'Analysis Results'),
-                        Tab(icon: Icon(Icons.lightbulb), text: 'Recommendations'),
-                        Tab(icon: Icon(Icons.warning), text: 'Problematic Queries'),
+                        Tab(
+                          icon: Icon(Icons.analytics),
+                          text: 'Analysis Results',
+                        ),
+                        Tab(
+                          icon: Icon(Icons.lightbulb),
+                          text: 'Recommendations',
+                        ),
+                        Tab(
+                          icon: Icon(Icons.warning),
+                          text: 'Problematic Queries',
+                        ),
                       ],
                     ),
                     Expanded(
@@ -229,10 +250,10 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                         children: [
                           // Analysis Results Tab
                           _buildAnalysisResultsTab(),
-                          
+
                           // Recommendations Tab
                           _buildRecommendationsTab(),
-                          
+
                           // Problematic Queries Tab
                           _buildProblematicQueriesTab(),
                         ],
@@ -329,9 +350,15 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _analysisResult.toString()));
+                          Clipboard.setData(
+                            ClipboardData(text: _analysisResult.toString()),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Analysis results copied to clipboard')),
+                            const SnackBar(
+                              content: Text(
+                                'Analysis results copied to clipboard',
+                              ),
+                            ),
                           );
                         },
                         icon: const Icon(Icons.copy),
@@ -358,25 +385,50 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
     return Row(
       children: [
         Expanded(
-          child: _buildMetricCard('Execution Time', executionTime.toString(), Icons.timer, Colors.blue),
+          child: _buildMetricCard(
+            'Execution Time',
+            executionTime.toString(),
+            Icons.timer,
+            Colors.blue,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _buildMetricCard('Complexity', complexity.toString(), Icons.trending_up, Colors.orange),
+          child: _buildMetricCard(
+            'Complexity',
+            complexity.toString(),
+            Icons.trending_up,
+            Colors.orange,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _buildMetricCard('Node Count', nodeCount.toString(), Icons.account_tree, Colors.green),
+          child: _buildMetricCard(
+            'Node Count',
+            nodeCount.toString(),
+            Icons.account_tree,
+            Colors.green,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _buildMetricCard('Total Cost', cost.toString(), Icons.monetization_on, Colors.purple),
+          child: _buildMetricCard(
+            'Total Cost',
+            cost.toString(),
+            Icons.monetization_on,
+            Colors.purple,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -400,10 +452,7 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ],
@@ -525,9 +574,7 @@ class _QueryPlanAnalysisDashboardState extends State<QueryPlanAnalysisDashboard>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Query Details'),
-          content: SingleChildScrollView(
-            child: Text(query.toString()),
-          ),
+          content: SingleChildScrollView(child: Text(query.toString())),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

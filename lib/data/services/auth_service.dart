@@ -1,22 +1,13 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 
 class AuthService {
-  final Dio _dio;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
-  AuthService({
-    required Dio dio,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _dio = dio,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig;
+  AuthService({required HttpService httpService}) : _httpService = httpService;
 
   String? _parseErrorMessage(dynamic data) {
     try {
@@ -49,20 +40,20 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
-      final response = await _dio.post(
-        '${_appConfig.apiBaseUrl}/auth/login',
-        data: request.toJson(),
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/auth/login',
+        data: jsonEncode(request.toJson()),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final authResponse = AuthResponse.fromJson(
-          response.data is String ? jsonDecode(response.data) : response.data,
-        );
-        await _tokenManager.saveToken(authResponse.token);
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        final authResponse = AuthResponse.fromJson(data);
+        await _httpService.saveAuthToken(authResponse.token);
         return authResponse;
       }
 
@@ -83,13 +74,12 @@ class AuthService {
 
   Future<void> register(RegisterRequest request) async {
     try {
-      final response = await _dio.post(
-        '${_appConfig.apiBaseUrl}/auth/register',
-        data: request.toJson(),
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/auth/register',
+        data: jsonEncode(request.toJson()),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -110,28 +100,27 @@ class AuthService {
   }
 
   Future<User> getCurrentUser() async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     try {
-      final response = await _dio.get(
-        '${_appConfig.apiBaseUrl}/users/profile',
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          validateStatus: (_) => true,
-        ),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/users/profile',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
         final data = response.data is String
             ? jsonDecode(response.data)
             : response.data;
-        return User.fromJson(data);
+        return User.fromJson(data as Map<String, dynamic>);
       }
 
       throw ApiException(
@@ -153,18 +142,17 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _tokenManager.deleteToken();
+    await _httpService.removeAuthToken();
   }
 
   Future<bool> requestPasswordReset(String email) async {
     try {
-      await _dio.post(
-        '${_appConfig.apiBaseUrl}/auth/password-reset-request',
-        data: {'email': email},
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+      await _httpService.post(
+        '${_httpService.baseUrl}/auth/password-reset-request',
+        data: jsonEncode({'email': email}),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       // Always return true to prevent email enumeration
@@ -177,13 +165,12 @@ class AuthService {
 
   Future<bool> validatePasswordResetToken(String token) async {
     try {
-      final response = await _dio.get(
-        '${_appConfig.apiBaseUrl}/auth/validate-reset-token',
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/auth/validate-reset-token',
         queryParameters: {'token': token},
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
@@ -204,17 +191,16 @@ class AuthService {
     String confirmPassword,
   ) async {
     try {
-      final response = await _dio.post(
-        '${_appConfig.apiBaseUrl}/auth/reset-password',
-        data: {
+      final response = await _httpService.post(
+        '${_httpService.baseUrl}/auth/reset-password',
+        data: jsonEncode({
           'token': token,
           'newPassword': newPassword,
           'confirmPassword': confirmPassword,
-        },
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+        }),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       return response.statusCode == 200;
@@ -225,13 +211,12 @@ class AuthService {
 
   Future<bool> verifyEmail(String token) async {
     try {
-      final response = await _dio.get(
-        '${_appConfig.apiBaseUrl}/api/verification/verify-email',
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/verification/verify-email',
         queryParameters: {'token': token},
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (_) => true,
-        ),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       return response.statusCode == 200;

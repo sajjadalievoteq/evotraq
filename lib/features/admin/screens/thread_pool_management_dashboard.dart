@@ -3,17 +3,19 @@ import 'dart:async';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
 
 class ThreadPoolManagementDashboard extends StatefulWidget {
   const ThreadPoolManagementDashboard({Key? key}) : super(key: key);
 
   @override
-  _ThreadPoolManagementDashboardState createState() => _ThreadPoolManagementDashboardState();
+  _ThreadPoolManagementDashboardState createState() =>
+      _ThreadPoolManagementDashboardState();
 }
 
-class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDashboard> {
+class _ThreadPoolManagementDashboardState
+    extends State<ThreadPoolManagementDashboard> {
   late AdvancedPerformanceService _performanceService;
   Map<String, dynamic>? _threadPoolMetrics;
   Map<String, dynamic>? _contentionAnalysis;
@@ -26,7 +28,7 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
     'CALLER_RUNS',
     'ABORT',
     'DISCARD',
-    'DISCARD_OLDEST'
+    'DISCARD_OLDEST',
   ];
 
   @override
@@ -46,7 +48,7 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
   void _initializeService() {
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      client: getIt<http.Client>(),
+      httpService: getIt<HttpService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
@@ -67,10 +69,7 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
     });
 
     try {
-      await Future.wait([
-        _loadMetrics(),
-        _loadContentionAnalysis(),
-      ]);
+      await Future.wait([_loadMetrics(), _loadContentionAnalysis()]);
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to load thread pool data: $e';
@@ -122,9 +121,14 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
         _isLoading = true;
       });
 
-      final config = {'rejectedExecutionHandler': _selectedBackpressureStrategy};
-      await _performanceService.configureBackpressure(_selectedBackpressureStrategy, config);
-      
+      final config = {
+        'rejectedExecutionHandler': _selectedBackpressureStrategy,
+      };
+      await _performanceService.configureBackpressure(
+        _selectedBackpressureStrategy,
+        config,
+      );
+
       _showSuccessDialog('Backpressure strategy configured successfully');
       await _loadMetrics();
     } catch (e) {
@@ -142,13 +146,10 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
         _isLoading = true;
       });
 
-      final settings = {
-        'enableOptimization': true,
-        'strategy': 'AUTO'
-      };
-      
+      final settings = {'enableOptimization': true, 'strategy': 'AUTO'};
+
       await _performanceService.optimizeThreadPools(settings);
-      
+
       _showSuccessDialog('Thread pools optimized successfully');
       await _loadAllData();
     } catch (e) {
@@ -212,32 +213,32 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
         ],
       ),
       body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : DefaultTabController(
-            length: 4,
-            child: Column(
-              children: [
-                const TabBar(
-                  tabs: [
-                    Tab(icon: Icon(Icons.dashboard), text: 'Metrics'),
-                    Tab(icon: Icon(Icons.warning), text: 'Contention'),
-                    Tab(icon: Icon(Icons.settings), text: 'Backpressure'),
-                    Tab(icon: Icon(Icons.tune), text: 'Optimization'),
-                  ],
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _buildMetricsTab(),
-                      _buildContentionTab(),
-                      _buildBackpressureTab(),
-                      _buildOptimizationTab(),
+          ? const Center(child: CircularProgressIndicator())
+          : DefaultTabController(
+              length: 4,
+              child: Column(
+                children: [
+                  const TabBar(
+                    tabs: [
+                      Tab(icon: Icon(Icons.dashboard), text: 'Metrics'),
+                      Tab(icon: Icon(Icons.warning), text: 'Contention'),
+                      Tab(icon: Icon(Icons.settings), text: 'Backpressure'),
+                      Tab(icon: Icon(Icons.tune), text: 'Optimization'),
                     ],
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildMetricsTab(),
+                        _buildContentionTab(),
+                        _buildBackpressureTab(),
+                        _buildOptimizationTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
     );
   }
 
@@ -319,11 +320,21 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard('Active Threads', activeThreads.toString(), Icons.play_arrow, Colors.green),
+              child: _buildMetricCard(
+                'Active Threads',
+                activeThreads.toString(),
+                Icons.play_arrow,
+                Colors.green,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildMetricCard('Core Pool Size', corePoolSize.toString(), Icons.settings, Colors.blue),
+              child: _buildMetricCard(
+                'Core Pool Size',
+                corePoolSize.toString(),
+                Icons.settings,
+                Colors.blue,
+              ),
             ),
           ],
         ),
@@ -331,11 +342,21 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard('Max Pool Size', maximumPoolSize.toString(), Icons.storage, Colors.purple),
+              child: _buildMetricCard(
+                'Max Pool Size',
+                maximumPoolSize.toString(),
+                Icons.storage,
+                Colors.purple,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildMetricCard('Queue Size', queueSize.toString(), Icons.queue, Colors.orange),
+              child: _buildMetricCard(
+                'Queue Size',
+                queueSize.toString(),
+                Icons.queue,
+                Colors.orange,
+              ),
             ),
           ],
         ),
@@ -430,14 +451,18 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _configureBackpressure,
-                      icon: _isLoading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.settings),
-                      label: Text(_isLoading ? 'Configuring...' : 'Configure Backpressure'),
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.settings),
+                      label: Text(
+                        _isLoading
+                            ? 'Configuring...'
+                            : 'Configure Backpressure',
+                      ),
                     ),
                   ),
                 ],
@@ -458,10 +483,26 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildStrategyDescription('CALLER_RUNS', 'Executes the task in the caller thread', Colors.green),
-                  _buildStrategyDescription('ABORT', 'Throws RejectedExecutionException', Colors.red),
-                  _buildStrategyDescription('DISCARD', 'Silently discards the task', Colors.orange),
-                  _buildStrategyDescription('DISCARD_OLDEST', 'Discards the oldest unhandled task', Colors.blue),
+                  _buildStrategyDescription(
+                    'CALLER_RUNS',
+                    'Executes the task in the caller thread',
+                    Colors.green,
+                  ),
+                  _buildStrategyDescription(
+                    'ABORT',
+                    'Throws RejectedExecutionException',
+                    Colors.red,
+                  ),
+                  _buildStrategyDescription(
+                    'DISCARD',
+                    'Silently discards the task',
+                    Colors.orange,
+                  ),
+                  _buildStrategyDescription(
+                    'DISCARD_OLDEST',
+                    'Discards the oldest unhandled task',
+                    Colors.blue,
+                  ),
                 ],
               ),
             ),
@@ -471,16 +512,17 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
     );
   }
 
-  Widget _buildStrategyDescription(String strategy, String description, Color color) {
+  Widget _buildStrategyDescription(
+    String strategy,
+    String description,
+    Color color,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 4,
-            backgroundColor: color,
-          ),
+          CircleAvatar(radius: 4, backgroundColor: color),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -529,14 +571,16 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _optimizeThreadPool,
-                      icon: _isLoading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.tune),
-                      label: Text(_isLoading ? 'Optimizing...' : 'Optimize Thread Pools'),
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.tune),
+                      label: Text(
+                        _isLoading ? 'Optimizing...' : 'Optimize Thread Pools',
+                      ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -551,7 +595,12 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -575,10 +624,7 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ],
@@ -610,10 +656,7 @@ class _ThreadPoolManagementDashboardState extends State<ThreadPoolManagementDash
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadAllData,
-            child: const Text('Retry'),
-          ),
+          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
         ],
       ),
     );

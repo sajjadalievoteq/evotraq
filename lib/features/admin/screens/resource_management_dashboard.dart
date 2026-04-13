@@ -3,17 +3,19 @@ import 'dart:async';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
 
 class ResourceManagementDashboard extends StatefulWidget {
   const ResourceManagementDashboard({Key? key}) : super(key: key);
 
   @override
-  _ResourceManagementDashboardState createState() => _ResourceManagementDashboardState();
+  _ResourceManagementDashboardState createState() =>
+      _ResourceManagementDashboardState();
 }
 
-class _ResourceManagementDashboardState extends State<ResourceManagementDashboard> {
+class _ResourceManagementDashboardState
+    extends State<ResourceManagementDashboard> {
   late AdvancedPerformanceService _performanceService;
   Map<String, dynamic>? _systemMetrics;
   List<dynamic>? _recommendations;
@@ -39,7 +41,7 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
   void _initializeService() {
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      client: getIt<http.Client>(),
+      httpService: getIt<HttpService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
@@ -60,10 +62,7 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
     });
 
     try {
-      await Future.wait([
-        _loadSystemMetrics(),
-        _loadRecommendations(),
-      ]);
+      await Future.wait([_loadSystemMetrics(), _loadRecommendations()]);
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to load resource data: $e';
@@ -94,7 +93,8 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
 
   Future<void> _loadRecommendations() async {
     try {
-      final recommendations = await _performanceService.getResourceRecommendations();
+      final recommendations = await _performanceService
+          .getResourceRecommendations();
       if (mounted) {
         setState(() {
           _recommendations = recommendations;
@@ -116,11 +116,11 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
       });
 
       await _performanceService.optimizeMemoryUsage();
-      
+
       setState(() {
         _lastOptimizationResult = 'Memory usage optimized successfully';
       });
-      
+
       _showSuccessDialog('Memory optimization completed successfully');
       await _loadSystemMetrics();
     } catch (e) {
@@ -139,11 +139,11 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
       });
 
       await _performanceService.optimizeCpuUsage();
-      
+
       setState(() {
         _lastOptimizationResult = 'CPU usage optimized successfully';
       });
-      
+
       _showSuccessDialog('CPU optimization completed successfully');
       await _loadSystemMetrics();
     } catch (e) {
@@ -162,11 +162,11 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
       });
 
       await _performanceService.optimizeIoPerformance();
-      
+
       setState(() {
         _lastOptimizationResult = 'I/O performance optimized successfully';
       });
-      
+
       _showSuccessDialog('I/O optimization completed successfully');
       await _loadSystemMetrics();
     } catch (e) {
@@ -339,7 +339,10 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
                       ),
                       child: Text(
                         _systemMetrics.toString(),
-                        style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -369,19 +372,19 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
           children: [
             Expanded(
               child: _buildMetricCard(
-                'Memory Usage', 
-                '${memoryUsage.toStringAsFixed(1)}%', 
-                Icons.memory, 
-                _getUsageColor(memoryUsage.toDouble())
+                'Memory Usage',
+                '${memoryUsage.toStringAsFixed(1)}%',
+                Icons.memory,
+                _getUsageColor(memoryUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: _buildMetricCard(
-                'CPU Usage', 
-                '${cpuUsage.toStringAsFixed(1)}%', 
-                Icons.speed, 
-                _getUsageColor(cpuUsage.toDouble())
+                'CPU Usage',
+                '${cpuUsage.toStringAsFixed(1)}%',
+                Icons.speed,
+                _getUsageColor(cpuUsage.toDouble()),
               ),
             ),
           ],
@@ -391,19 +394,19 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
           children: [
             Expanded(
               child: _buildMetricCard(
-                'Disk Usage', 
-                '${diskUsage.toStringAsFixed(1)}%', 
-                Icons.storage, 
-                _getUsageColor(diskUsage.toDouble())
+                'Disk Usage',
+                '${diskUsage.toStringAsFixed(1)}%',
+                Icons.storage,
+                _getUsageColor(diskUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: _buildMetricCard(
-                'Network Load', 
-                '${networkLoad.toStringAsFixed(1)}%', 
-                Icons.network_check, 
-                _getUsageColor(networkLoad.toDouble())
+                'Network Load',
+                '${networkLoad.toStringAsFixed(1)}%',
+                Icons.network_check,
+                _getUsageColor(networkLoad.toDouble()),
               ),
             ),
           ],
@@ -445,14 +448,16 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _optimizeMemoryUsage,
-                      icon: _isLoading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.memory),
-                      label: Text(_isLoading ? 'Optimizing...' : 'Optimize Memory'),
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.memory),
+                      label: Text(
+                        _isLoading ? 'Optimizing...' : 'Optimize Memory',
+                      ),
                     ),
                   ),
                 ],
@@ -482,14 +487,16 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _optimizeCpuUsage,
-                      icon: _isLoading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.speed),
-                      label: Text(_isLoading ? 'Optimizing...' : 'Optimize CPU'),
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.speed),
+                      label: Text(
+                        _isLoading ? 'Optimizing...' : 'Optimize CPU',
+                      ),
                     ),
                   ),
                 ],
@@ -519,14 +526,16 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _optimizeIoPerformance,
-                      icon: _isLoading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.storage),
-                      label: Text(_isLoading ? 'Optimizing...' : 'Optimize I/O'),
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.storage),
+                      label: Text(
+                        _isLoading ? 'Optimizing...' : 'Optimize I/O',
+                      ),
                     ),
                   ),
                 ],
@@ -606,7 +615,12 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -630,10 +644,7 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ],
@@ -665,10 +676,7 @@ class _ResourceManagementDashboardState extends State<ResourceManagementDashboar
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadAllData,
-            child: const Text('Retry'),
-          ),
+          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
         ],
       ),
     );

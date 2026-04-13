@@ -1,21 +1,22 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/admin/models/admin_models.dart';
 
 class AdminService {
-  final http.Client _client;
+  final HttpService _httpService;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
 
   AdminService({
-    required http.Client client,
+    required HttpService httpService,
     required TokenManager tokenManager,
     required AppConfig appConfig,
-  })  : _client = client,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+  }) : _httpService = httpService,
+       _tokenManager = tokenManager,
+       _appConfig = appConfig;
 
   // Get all users with pagination and filtering
   Future<UserListResponse> getUsers({
@@ -39,7 +40,7 @@ class AdminService {
       'sort': sort,
       'direction': direction,
     };
-    
+
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
     }
@@ -50,20 +51,19 @@ class AdminService {
       queryParams['status'] = status;
     }
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/api/admin/users').replace(
+    final response = await _httpService.get(
+      '${_appConfig.apiBaseUrl}/api/admin/users',
       queryParameters: queryParams,
-    );
-
-    final response = await _client.get(
-      uri,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserListResponse.fromJson(json.decode(response.body));
+      return UserListResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to load users: ${response.statusCode}');
     }
@@ -76,19 +76,23 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/approvals'),
+    final response = await _httpService.get(
+      '${_appConfig.apiBaseUrl}/api/admin/approvals',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => UserResponse.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load pending approvals: ${response.statusCode}');
+      throw Exception(
+        'Failed to load pending approvals: ${response.statusCode}',
+      );
     }
   }
 
@@ -99,16 +103,18 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/approve'),
+    final response = await _httpService.put(
+      '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/approve',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to approve user: ${response.statusCode}');
     }
@@ -121,16 +127,18 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/reject'),
+    final response = await _httpService.put(
+      '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/reject',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to reject user: ${response.statusCode}');
     }
@@ -143,16 +151,19 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/users/$userId/status?enabled=$enabled'),
+    final response = await _httpService.put(
+      '${_appConfig.apiBaseUrl}/api/admin/users/$userId/status',
+      queryParameters: {'enabled': enabled},
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to change user status: ${response.statusCode}');
     }
@@ -165,39 +176,47 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/users/$userId/roles?role=$role'),
+    final response = await _httpService.put(
+      '${_appConfig.apiBaseUrl}/api/admin/users/$userId/roles',
+      queryParameters: {'role': role},
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to change user role: ${response.statusCode}');
     }
   }
 
   // Update user details
-  Future<UserResponse> updateUser(int userId, UpdateUserRequest updateRequest) async {
+  Future<UserResponse> updateUser(
+    int userId,
+    UpdateUserRequest updateRequest,
+  ) async {
     final token = await _tokenManager.getToken();
     if (token == null) {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/users/$userId'),
+    final response = await _httpService.put(
+      '${_appConfig.apiBaseUrl}/api/admin/users/$userId',
+      data: jsonEncode(updateRequest.toJson()),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(updateRequest.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to update user: ${response.statusCode}');
     }
@@ -210,17 +229,19 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/admin/users'),
+    final response = await _httpService.post(
+      '${_appConfig.apiBaseUrl}/api/admin/users',
+      data: jsonEncode(createRequest.toJson()),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(createRequest.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return UserResponse.fromJson(json.decode(response.body));
+      return UserResponse.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to create user: ${response.statusCode}');
     }

@@ -1,43 +1,41 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 
 /// Implementation of GLNService interface for managing GLNs (Global Location Numbers)
 class GLNService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
   /// Creates a new GLNServiceImpl instance
   GLNService({
-    required http.Client client,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _client = client,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+    required HttpService httpService,
+  }) : _httpService = httpService;
 
   Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    String url = '${_appConfig.apiBaseUrl}/master-data/glns';
+    }
+
+    String url = '${_httpService.baseUrl}/master-data/glns';
     if (page != null && size != null) {
       url += '?page=$page&size=$size';
     }
 
-    final response = await _client.get(
-      Uri.parse(url),
+    final response = await _httpService.get(
+      url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    print('GLN list response status: ${response.statusCode}, body: ${response.body}');
-      if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    print('GLN list response status: ${response.statusCode}, body: ${response.data}');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.data);
       if (responseData.containsKey('content') && responseData['content'] is List) {
         final List<dynamic> data = responseData['content'];
         return data.map((json) => GLN.fromJson(json)).toList();
@@ -48,7 +46,7 @@ class GLNService {
         } else {
           throw ApiException(
             message: 'Unexpected response format: GLN data not found in response',
-            responseBody: response.body,
+            responseBody: response.data,
           );
         }
       }
@@ -57,131 +55,149 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Authentication failed: Please log in again',
-        responseBody: response.body,
+        responseBody: response.data,
       );
     } else {
-      print('GLN list error: ${response.statusCode} - ${response.reasonPhrase}');
+      print('GLN list error: ${response.statusCode} - ${response.statusMessage}');
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to load GLNs: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to load GLNs: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
 
   Future<GLN> getGLNById(String id) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     print('GLN Service: Fetching GLN with ID: $id');
-    final url = '${_appConfig.apiBaseUrl}/master-data/glns/code/$id';
+    final url = '${_httpService.baseUrl}/master-data/glns/code/$id';
     print('GLN Service: Request URL: $url');
 
-    final response = await _client.get(
-      Uri.parse(url),
+    final response = await _httpService.get(
+      url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     print('GLN Service: Response status code: ${response.statusCode}');
 
     if (response.statusCode == 200) {
-      print('GLN Service: Raw API Response: ${response.body}');
-      final jsonData = json.decode(response.body);
+      print('GLN Service: Raw API Response: ${response.data}');
+      final jsonData = json.decode(response.data);
       print('GLN Service: Decoded API Response: $jsonData');
       final gln = GLN.fromJson(jsonData);
       print('GLN Service: Converted to GLN object: ${gln.glnCode}, ${gln.locationName}');
       return gln;
     } else {
-      print('GLN Service: Error response: ${response.body}');
+      print('GLN Service: Error response: ${response.data}');
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get GLN: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to get GLN: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
 
   Future<GLN> getGLNByCode(String glnCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/code/$glnCode'),
+    }
+
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/code/$glnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return GLN.fromJson(json.decode(response.body));
+      return GLN.fromJson(json.decode(response.data));
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get GLN by code: ${response.reasonPhrase}',
+        message: 'Failed to get GLN by code: ${response.statusMessage}',
       );
     }
   }
 
   Future<GLN> createGLN(GLN gln) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns'),
+    }
+
+    final response = await _httpService.post(
+      '${_httpService.baseUrl}/master-data/glns',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(gln.toJson()),
+      data: json.encode(gln.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return GLN.fromJson(json.decode(response.body));
+      return GLN.fromJson(json.decode(response.data));
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to create GLN: ${response.reasonPhrase}',
+        message: 'Failed to create GLN: ${response.statusMessage}',
       );
     }
   }
   Future<GLN> updateGLN(String id, GLN gln) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/code/$id'), // Changed to use the /code endpoint since id parameter is now glnCode
+    }
+
+    final response = await _httpService.put(
+      '${_httpService.baseUrl}/master-data/glns/code/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(gln.toJson()),
+      data: json.encode(gln.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return GLN.fromJson(json.decode(response.body));
+      return GLN.fromJson(json.decode(response.data));
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to update GLN: ${response.reasonPhrase}',
+        message: 'Failed to update GLN: ${response.statusMessage}',
       );
     }
   }
   Future<bool> deleteGLN(String id) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.delete(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/code/$id'), // Changed to use the /code endpoint since id parameter is now glnCode
+    }
+
+    final response = await _httpService.delete(
+      '${_httpService.baseUrl}/master-data/glns/code/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     return response.statusCode == 204;
@@ -194,7 +210,7 @@ class GLNService {
     int? page,
     int? size,
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -214,17 +230,20 @@ class GLNService {
     }
     if (size != null) {
       queryParams['size'] = size.toString();
-    }    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/search')
-        .replace(queryParameters: queryParams);
+    }
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/search',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.data);
       if (responseData.containsKey('content') && responseData['content'] is List) {
         final List<dynamic> data = responseData['content'];
         return data.map((json) => GLN.fromJson(json)).toList();
@@ -235,14 +254,14 @@ class GLNService {
         } else {
           throw ApiException(
             message: 'Unexpected response format: GLN data not found in search response',
-            responseBody: response.body,
+            responseBody: response.data,
           );
         }
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to search GLNs: ${response.reasonPhrase}',
+        message: 'Failed to search GLNs: ${response.statusMessage}',
       );
     }
   }
@@ -262,7 +281,7 @@ class GLNService {
     String sortBy = 'name',
     String direction = 'ASC',
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -302,39 +321,43 @@ class GLNService {
       queryParams['locationType'] = locationType;
     }
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/search/advanced')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/search/advanced',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(response.data);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to search GLNs: ${response.reasonPhrase}',
+        message: 'Failed to search GLNs: ${response.statusMessage}',
       );
     }
   }
 
   Future<List<GLN>> getExpiredLicenseGLNs() async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/expired-licenses'),
+    }
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/expired-licenses',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic> && responseData.containsKey('content') && responseData['content'] is List) {
         final List<dynamic> data = responseData['content'];
         return data.map((json) => GLN.fromJson(json)).toList();
@@ -343,29 +366,33 @@ class GLNService {
       } else {
         throw ApiException(
           message: 'Unexpected response format: GLN data not found in expired licenses response',
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get GLNs with expired licenses: ${response.reasonPhrase}',
+        message: 'Failed to get GLNs with expired licenses: ${response.statusMessage}',
       );
     }
   }
 
   Future<List<GLN>> getChildGLNs(String parentGlnCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/parent/$parentGlnCode/children'),
+    }
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/parent/$parentGlnCode/children',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.data);
       if (responseData is Map<String, dynamic> && responseData.containsKey('content') && responseData['content'] is List) {
         final List<dynamic> data = responseData['content'];
         return data.map((json) => GLN.fromJson(json)).toList();
@@ -374,36 +401,39 @@ class GLNService {
       } else {
         throw ApiException(
           message: 'Unexpected response format: GLN data not found in child GLNs response',
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get child GLNs: ${response.reasonPhrase}',
+        message: 'Failed to get child GLNs: ${response.statusMessage}',
       );
     }
   }
 
   Future<bool> validateGLNCode(String glnCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/glns/validate/$glnCode'),
+    }
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/glns/validate/$glnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+      final Map<String, dynamic> data = json.decode(response.data);
       return data['valid'] as bool;
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to validate GLN code: ${response.reasonPhrase}',
+        message: 'Failed to validate GLN code: ${response.statusMessage}',
       );
     }
   }

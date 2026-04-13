@@ -1,25 +1,16 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 
 class UserService {
-  final Dio _dio;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
-  UserService({
-    required Dio dio,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _dio = dio,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig;
+  UserService({required HttpService httpService}) : _httpService = httpService;
 
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -30,15 +21,9 @@ class UserService {
   }
 
   Map<String, dynamic> _decodeJsonMap(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      return data;
-    }
     if (data is String) {
       final decoded = json.decode(data);
       return Map<String, dynamic>.from(decoded as Map);
-    }
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
     }
     throw ApiException(message: 'Unexpected response format');
   }
@@ -56,9 +41,11 @@ class UserService {
   Future<User> getCurrentUser() async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _dio.get(
-        '${_appConfig.apiBaseUrl}/users/profile',
-        options: Options(headers: headers, validateStatus: (_) => true),
+      final response = await _httpService.get(
+        '${_httpService.baseUrl}/users/profile',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
@@ -88,10 +75,16 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _dio.put(
-        '${_appConfig.apiBaseUrl}/users/profile',
-        data: {'firstName': firstName, 'lastName': lastName, 'email': email},
-        options: Options(headers: headers, validateStatus: (_) => true),
+      final response = await _httpService.put(
+        '${_httpService.baseUrl}/users/profile',
+        data: jsonEncode({
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': email,
+        }),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
@@ -120,10 +113,15 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _dio.put(
-        '${_appConfig.apiBaseUrl}/users/password',
-        data: {'currentPassword': currentPassword, 'newPassword': newPassword},
-        options: Options(headers: headers, validateStatus: (_) => true),
+      final response = await _httpService.put(
+        '${_httpService.baseUrl}/users/password',
+        data: jsonEncode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        }),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200) {
@@ -151,13 +149,15 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _dio.put(
-        '${_appConfig.apiBaseUrl}/users/preferences/notifications',
-        data: {
+      final response = await _httpService.put(
+        '${_httpService.baseUrl}/users/preferences/notifications',
+        data: jsonEncode({
           'emailNotifications': emailNotifications,
           'appNotifications': appNotifications,
-        },
-        options: Options(headers: headers, validateStatus: (_) => true),
+        }),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200) {
@@ -185,10 +185,12 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _dio.put(
-        _appConfig.appPreferencesEndpoint,
-        data: {'darkMode': darkMode, 'language': language},
-        options: Options(headers: headers, validateStatus: (_) => true),
+      final response = await _httpService.put(
+        '${_httpService.baseUrl}/users/preferences/app',
+        data: jsonEncode({'darkMode': darkMode, 'language': language}),
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200) {

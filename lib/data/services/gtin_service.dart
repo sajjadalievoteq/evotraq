@@ -1,44 +1,39 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
 
 /// Implementation of GTINService interface for managing GTINs (Global Trade Item Numbers)
 class GTINService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
   /// Creates a new GTINServiceImpl instance
   GTINService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _client = httpClient,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+    required HttpService httpService,
+  }) : _httpService = httpService;
 
   Future<GTIN> getGTIN(String gtinCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/code/$gtinCode'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/gtins/code/$gtinCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
-    print('GTIN get response status: ${response.statusCode}, body: ${response.body}');
+    print('GTIN get response status: ${response.statusCode}, body: ${response.data}');
 
     if (response.statusCode == 200) {
       try {
-        final jsonData = json.decode(response.body);
+        final jsonData = json.decode(response.data);
         print('Parsed GTIN JSON: $jsonData');
         final gtin = GTIN.fromJson(jsonData);
         print('Created GTIN object: $gtin with expirationDate: ${gtin.expirationDate}');
@@ -49,14 +44,14 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to load GTIN: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to load GTIN: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
@@ -68,35 +63,35 @@ class GTINService {
     int page = 0,
     int size = 20,
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
       if (search != null) 'search': search,
       if (manufacturer != null) 'manufacturer': manufacturer,
       if (status != null) 'status': status,
     };
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/gtins',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
-    print('GTIN list response status: ${response.statusCode}, body: ${response.body}');
+    print('GTIN list response status: ${response.statusCode}, body: ${response.data}');
 
     if (response.statusCode == 200) {
       try {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         if (data['content'] != null) {
           return (data['content'] as List)
               .map((item) => GTIN.fromJson(item))
@@ -109,7 +104,7 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else if (response.statusCode == 403) {
@@ -117,14 +112,14 @@ class GTINService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Authentication failed: Please log in again',
-        responseBody: response.body,
+        responseBody: response.data,
       );
     } else {
-      print('GTIN list error: ${response.statusCode} - ${response.reasonPhrase}');
+      print('GTIN list error: ${response.statusCode} - ${response.statusMessage}');
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to load GTINs: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to load GTINs: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
@@ -143,14 +138,14 @@ class GTINService {
     String sortBy = 'productName',
     String direction = 'ASC',
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
       'sortBy': sortBy,
       'direction': direction,
       if (search != null && search.isNotEmpty) 'search': search,
@@ -163,25 +158,28 @@ class GTINService {
       if (registrationDateTo != null && registrationDateTo.isNotEmpty) 'registrationDateTo': registrationDateTo,
     };
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/search')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse('${_httpService.baseUrl}/master-data/gtins/search')
+        .replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
     print('DEBUG: Constructed URI: $uri');
     print('DEBUG: Query parameters: $queryParams');
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/gtins/search',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
-    print('GTIN advanced search response status: ${response.statusCode}, body: ${response.body}');
+    print('GTIN advanced search response status: ${response.statusCode}, body: ${response.data}');
 
     if (response.statusCode == 200) {
       try {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         final gtins = (data['content'] as List?)
             ?.map((item) => GTIN.fromJson(item))
             .toList() ?? [];
@@ -200,7 +198,7 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else if (response.statusCode == 403) {
@@ -208,19 +206,19 @@ class GTINService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Authentication failed: Please log in again',
-        responseBody: response.body,
+        responseBody: response.data,
       );
     } else {
-      print('GTIN advanced search error: ${response.statusCode} - ${response.reasonPhrase}');
+      print('GTIN advanced search error: ${response.statusCode} - ${response.statusMessage}');
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to search GTINs: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to search GTINs: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
   Future<GTIN> createGTIN(GTIN gtin) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -229,106 +227,120 @@ class GTINService {
     final jsonPayload = gtin.toJson();
     print('Creating GTIN with payload: $jsonPayload');
 
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins'),
+    final response = await _httpService.post(
+      '${_httpService.baseUrl}/master-data/gtins',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(jsonPayload),
+      data: json.encode(jsonPayload),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
       try {
-        return GTIN.fromJson(json.decode(response.body));
+        return GTIN.fromJson(json.decode(response.data));
       } catch (e) {
         print('Error parsing GTIN response: $e');
         throw ApiException(
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to create GTIN: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to create GTIN: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
   Future<GTIN> updateGTIN(GTIN gtin) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/${gtin.gtinCode}'),
+    }
+
+    final response = await _httpService.put(
+      '${_httpService.baseUrl}/master-data/gtins/${gtin.gtinCode}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(gtin.toJson()),
+      data: json.encode(gtin.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
       try {
-        return GTIN.fromJson(json.decode(response.body));
+        return GTIN.fromJson(json.decode(response.data));
       } catch (e) {
         print('Error parsing GTIN response: $e');
         throw ApiException(
           statusCode: response.statusCode,
           message: 'Error processing server response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to update GTIN: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to update GTIN: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
   Future<void> updateGTINStatus(String gtinCode, String status) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/$gtinCode/status'),
+    }
+
+    final response = await _httpService.put(
+      '${_httpService.baseUrl}/master-data/gtins/$gtinCode/status',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode({'status': status}),
+      data: json.encode({'status': status}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to update GTIN status: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to update GTIN status: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
 
   Future<bool> validateGTIN(String gtinCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
-    }    final uri = Uri.parse('${_appConfig.apiBaseUrl}/master-data/gtins/validate')
-        .replace(queryParameters: {'gtinCode': gtinCode});
+    }
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/master-data/gtins/validate',
+      queryParameters: {'gtinCode': gtinCode},
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    if (response.statusCode == 200) {
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
       try {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         return data['isValid'] ?? false;
       } catch (e) {
         print('Error parsing validation response: $e');
@@ -336,14 +348,14 @@ class GTINService {
           statusCode: response.statusCode,
           message: 'Error processing validation response: $e',
           originalException: e,
-          responseBody: response.body,
+          responseBody: response.data,
         );
       }
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to validate GTIN: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to validate GTIN: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }

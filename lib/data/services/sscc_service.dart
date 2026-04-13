@@ -1,28 +1,19 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/http_service.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
 /// Implementation of the SSCCService interface that interacts with the backend API
 class SSCCService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final HttpService _httpService;
 
   /// Creates a new SSCCServiceImpl instance
-  SSCCService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _client = httpClient,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+  SSCCService({required HttpService httpService}) : _httpService = httpService;
 
   Future<SSCC> createSSCC(SSCC sscc) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -44,7 +35,7 @@ class SSCCService {
     final String jsonBody = json.encode(jsonPayload);
     print('SSCC Create request payload: $jsonBody');
     print('SSCC Create request payload fields: ${jsonPayload.keys}');
-    print('SSCC API endpoint: ${_appConfig.apiBaseUrl}/identifiers/sscc');
+    print('SSCC API endpoint: ${_httpService.baseUrl}/identifiers/sscc');
 
     // Verify that we're sending ONLY the exact fields the backend accepts
     print('FINAL SSCC CREATE PAYLOAD VERIFICATION:');
@@ -56,29 +47,45 @@ class SSCCService {
 
     print('Verifying required fields are present:');
     print(' - Has "sscc" field: ${jsonPayload.containsKey('sscc')}');
-    print(' - Has "containerType" field: ${jsonPayload.containsKey('containerType')}');
-    print(' - Has "containerStatus" field: ${jsonPayload.containsKey('containerStatus')}');
+    print(
+      ' - Has "containerType" field: ${jsonPayload.containsKey('containerType')}',
+    );
+    print(
+      ' - Has "containerStatus" field: ${jsonPayload.containsKey('containerStatus')}',
+    );
 
     print('Verifying problematic fields are NOT present:');
-    print(' - No "companyPrefix" field: ${!jsonPayload.containsKey('companyPrefix')}');
-    print(' - No "gs1CompanyPrefix" field: ${!jsonPayload.containsKey('gs1CompanyPrefix')}');
-    print(' - No "extensionDigit" field: ${!jsonPayload.containsKey('extensionDigit')}');
-    print(' - No "serialReference" field: ${!jsonPayload.containsKey('serialReference')}');
-    print(' - No "checkDigit" field: ${!jsonPayload.containsKey('checkDigit')}');
+    print(
+      ' - No "companyPrefix" field: ${!jsonPayload.containsKey('companyPrefix')}',
+    );
+    print(
+      ' - No "gs1CompanyPrefix" field: ${!jsonPayload.containsKey('gs1CompanyPrefix')}',
+    );
+    print(
+      ' - No "extensionDigit" field: ${!jsonPayload.containsKey('extensionDigit')}',
+    );
+    print(
+      ' - No "serialReference" field: ${!jsonPayload.containsKey('serialReference')}',
+    );
+    print(
+      ' - No "checkDigit" field: ${!jsonPayload.containsKey('checkDigit')}',
+    );
     print(' - No "createdAt" field: ${!jsonPayload.containsKey('createdAt')}');
     print(' - No "updatedAt" field: ${!jsonPayload.containsKey('updatedAt')}');
 
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc'),
+    final response = await _httpService.post(
+      '${_httpService.baseUrl}/identifiers/sscc',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonBody,
+      data: jsonBody,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      final responseData = json.decode(response.body);
+      final responseData = json.decode(response.data);
       print('SSCC Create success response: $responseData');
       print('Response type: ${responseData.runtimeType}');
 
@@ -105,16 +112,17 @@ class SSCCService {
       else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Unexpected response format from server: ${responseData.runtimeType}',
+          message:
+              'Unexpected response format from server: ${responseData.runtimeType}',
         );
       }
     } else {
-      print('SSCC Create error: ${response.statusCode} - ${response.body}');
+      print('SSCC Create error: ${response.statusCode} - ${response.data}');
 
       // Try to parse error details from response body
-      String errorDetail = response.reasonPhrase ?? 'Unknown error';
+      String errorDetail = response.statusMessage ?? 'Unknown error';
       try {
-        final errorJson = json.decode(response.body);
+        final errorJson = json.decode(response.data);
         if (errorJson['message'] != null) {
           errorDetail = errorJson['message'];
         }
@@ -125,7 +133,7 @@ class SSCCService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to create SSCC: $errorDetail',
-        responseBody: response.body,
+        responseBody: response.data,
       );
     }
   }
@@ -133,39 +141,47 @@ class SSCCService {
   Future<SSCC> getSSCCById(String id) async {
     print('Fetching SSCC with ID: $id');
 
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$id');
+    final uri = Uri.parse('${_httpService.baseUrl}/identifiers/sscc/$id');
     print('Request URI: $uri');
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      uri.toString(),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    print('SSCC by ID response status: ${response.statusCode}, body: ${response.body}');
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    print(
+      'SSCC by ID response status: ${response.statusCode}, body: ${response.data}',
+    );
 
     if (response.statusCode == 200) {
       try {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(response.data);
         print('Response data: $responseData');
 
         // Make sure to handle the same field mappings as in the list
         if (responseData is Map<String, dynamic>) {
           // Handle 'sscc' vs 'ssccCode' field name discrepancy
-          if (responseData.containsKey('sscc') && !responseData.containsKey('ssccCode')) {
+          if (responseData.containsKey('sscc') &&
+              !responseData.containsKey('ssccCode')) {
             responseData['ssccCode'] = responseData['sscc'];
           }
 
           // Handle statusDate for createdAt/updatedAt
-          if (!responseData.containsKey('createdAt') && responseData.containsKey('statusDate')) {
+          if (!responseData.containsKey('createdAt') &&
+              responseData.containsKey('statusDate')) {
             responseData['createdAt'] = responseData['statusDate'];
           }
-          if (!responseData.containsKey('updatedAt') && responseData.containsKey('statusDate')) {
+          if (!responseData.containsKey('updatedAt') &&
+              responseData.containsKey('statusDate')) {
             responseData['updatedAt'] = responseData['statusDate'];
           }
         }
@@ -176,52 +192,64 @@ class SSCCService {
         throw ApiException(message: 'Failed to parse SSCC from response: $e');
       }
     } else {
-      print('Failed to get SSCC by ID: ${response.statusCode} - ${response.reasonPhrase}');
+      print(
+        'Failed to get SSCC by ID: ${response.statusCode} - ${response.statusMessage}',
+      );
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get SSCC by ID: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to get SSCC by ID: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
+
   Future<SSCC> getSSCCByCode(String ssccCode) async {
     print('Fetching SSCC with code: $ssccCode');
 
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/code/$ssccCode');
+    final uri = Uri.parse(
+      '${_httpService.baseUrl}/identifiers/sscc/code/$ssccCode',
+    );
     print('Request URI: $uri');
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      uri.toString(),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
-    print('SSCC by code response status: ${response.statusCode}, body: ${response.body}');
+    print(
+      'SSCC by code response status: ${response.statusCode}, body: ${response.data}',
+    );
 
     if (response.statusCode == 200) {
       try {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(response.data);
         print('Response data: $responseData');
 
         // Make sure to handle the same field mappings as in getSSCCById
         if (responseData is Map<String, dynamic>) {
           // Handle 'sscc' vs 'ssccCode' field name discrepancy
-          if (responseData.containsKey('sscc') && !responseData.containsKey('ssccCode')) {
+          if (responseData.containsKey('sscc') &&
+              !responseData.containsKey('ssccCode')) {
             responseData['ssccCode'] = responseData['sscc'];
           }
 
           // Handle statusDate for createdAt/updatedAt
-          if (!responseData.containsKey('createdAt') && responseData.containsKey('statusDate')) {
+          if (!responseData.containsKey('createdAt') &&
+              responseData.containsKey('statusDate')) {
             responseData['createdAt'] = responseData['statusDate'];
           }
-          if (!responseData.containsKey('updatedAt') && responseData.containsKey('statusDate')) {
+          if (!responseData.containsKey('updatedAt') &&
+              responseData.containsKey('statusDate')) {
             responseData['updatedAt'] = responseData['statusDate'];
           }
         }
@@ -232,38 +260,43 @@ class SSCCService {
         throw ApiException(message: 'Failed to parse SSCC from response: $e');
       }
     } else {
-      print('Failed to get SSCC by code: ${response.statusCode} - ${response.reasonPhrase}');
+      print(
+        'Failed to get SSCC by code: ${response.statusCode} - ${response.statusMessage}',
+      );
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get SSCC by code: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to get SSCC by code: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
 
   Future<List<SSCC>> getAllSSCCs({int page = 0, int size = 20}) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
-    };
-      final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc')
-        .replace(queryParameters: queryParams);
+    final queryParams = <String, dynamic>{'page': page, 'size': size};
+    final uri = Uri.parse(
+      '${_httpService.baseUrl}/identifiers/sscc',
+    ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      uri.toString(),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-    );    print('SSCC list response status: ${response.statusCode}, body: ${response.body}');
-      if (response.statusCode == 200) {
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+    print(
+      'SSCC list response status: ${response.statusCode}, body: ${response.data}',
+    );
+    if (response.statusCode == 200) {
       try {
-        final Map<String, dynamic> data = json.decode(response.body);
+        final Map<String, dynamic> data = json.decode(response.data);
         final List<dynamic> content = data['content'] ?? [];
 
         // Add debugging to check structure
@@ -282,11 +315,13 @@ class SSCCService {
               }
 
               // Handle the statusDate field as a fallback for createdAt/updatedAt
-              if (!item.containsKey('createdAt') && item.containsKey('statusDate')) {
+              if (!item.containsKey('createdAt') &&
+                  item.containsKey('statusDate')) {
                 item['createdAt'] = item['statusDate'];
               }
 
-              if (!item.containsKey('updatedAt') && item.containsKey('statusDate')) {
+              if (!item.containsKey('updatedAt') &&
+                  item.containsKey('statusDate')) {
                 item['updatedAt'] = item['statusDate'];
               }
 
@@ -298,7 +333,9 @@ class SSCCService {
             print('Error parsing SSCC item: $e for item: $item');
             // Use a default date for invalid items
             return SSCC(
-              ssccCode: item is Map ? (item['sscc'] ?? 'Unknown SSCC') : 'Unknown SSCC',
+              ssccCode: item is Map
+                  ? (item['sscc'] ?? 'Unknown SSCC')
+                  : 'Unknown SSCC',
               containerType: ContainerType.OTHER,
               containerStatus: ContainerStatus.CREATED,
               createdAt: DateTime.now(),
@@ -317,285 +354,320 @@ class SSCCService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Authentication failed: Please log in again',
-        responseBody: response.body,
+        responseBody: response.data,
       );
     } else {
-      print('SSCC list error: ${response.statusCode} - ${response.reasonPhrase}');
+      print(
+        'SSCC list error: ${response.statusCode} - ${response.statusMessage}',
+      );
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to get all SSCCs: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to get all SSCCs: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
 
   Future<SSCC> updateSSCC(String id, SSCC ssccDetails) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.put(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$id'),
+    final response = await _httpService.put(
+      '${_httpService.baseUrl}/identifiers/sscc/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(ssccDetails.toJson()),
+      data: json.encode(ssccDetails.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SSCC.fromJson(json.decode(response.body));
+      return SSCC.fromJson(json.decode(response.data));
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to update SSCC: ${response.reasonPhrase}',
+        message: 'Failed to update SSCC: ${response.statusMessage}',
       );
     }
   }
 
   Future<void> deleteSSCC(String id) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.delete(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$id'),
+    final response = await _httpService.delete(
+      '${_httpService.baseUrl}/identifiers/sscc/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to delete SSCC: ${response.reasonPhrase}',
+        message: 'Failed to delete SSCC: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsByContainerType(ContainerType containerType) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsByContainerType(
+    ContainerType containerType,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/container-type/${containerType.name}'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/container-type/${containerType.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by container type: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs by container type: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsByContainerStatus(ContainerStatus containerStatus) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsByContainerStatus(
+    ContainerStatus containerStatus,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/status/${containerStatus.name}'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/status/${containerStatus.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by container status: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs by container status: ${response.statusMessage}',
       );
     }
   }
 
   Future<List<SSCC>> findSSCCsBySourceLocation(String sourceGlnCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/source-location/$sourceGlnCode'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/source-location/$sourceGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by source location: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs by source location: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsByDestinationLocation(String destinationGlnCode) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsByDestinationLocation(
+    String destinationGlnCode,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/destination-location/$destinationGlnCode'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/destination-location/$destinationGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by destination location: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs by destination location: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsPackedBetween(DateTime startDate, DateTime endDate) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsPackedBetween(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
+    final queryParams = <String, dynamic>{
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
     };
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/packed-between')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/packed-between',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs packed between dates: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs packed between dates: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsShippedBetween(DateTime startDate, DateTime endDate) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsShippedBetween(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
+    final queryParams = <String, dynamic>{
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
     };
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/shipped-between')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/shipped-between',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs shipped between dates: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs shipped between dates: ${response.statusMessage}',
       );
     }
   }
 
   Future<List<SSCC>> findChildSSCCs(String parentSsccCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$parentSsccCode/hierarchy'),
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/$parentSsccCode/hierarchy',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+      final Map<String, dynamic> data = json.decode(response.data);
       final List<dynamic> children = data['children'] ?? [];
       return children.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find child SSCCs: ${response.reasonPhrase}',
+        message: 'Failed to find child SSCCs: ${response.statusMessage}',
       );
     }
   }
 
-  Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(String gs1CompanyPrefix) async {
-    final token = await _tokenManager.getToken();
+  Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(
+    String gs1CompanyPrefix,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
-      'companyPrefix': gs1CompanyPrefix,
-    };
+    final queryParams = <String, dynamic>{'companyPrefix': gs1CompanyPrefix};
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/company')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/company',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to find SSCCs by GS1 company prefix: ${response.reasonPhrase}',
+        message:
+            'Failed to find SSCCs by GS1 company prefix: ${response.statusMessage}',
       );
     }
   }
@@ -606,98 +678,102 @@ class SSCCService {
     String? sourceLocationId,
     String? destinationLocationId,
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
+    final queryParams = <String, dynamic>{
       if (containerType != null) 'containerType': containerType.name,
       if (containerStatus != null) 'containerStatus': containerStatus.name,
       if (sourceLocationId != null) 'sourceLocationId': sourceLocationId,
-      if (destinationLocationId != null) 'destinationLocationId': destinationLocationId,
+      if (destinationLocationId != null)
+        'destinationLocationId': destinationLocationId,
     };
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/search')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/search',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((item) => SSCC.fromJson(item)).toList();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to search SSCCs: ${response.reasonPhrase}',
+        message: 'Failed to search SSCCs: ${response.statusMessage}',
       );
     }
   }
 
   Future<SSCC> updateSSCCStatus(String id, ContainerStatus newStatus) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _client.patch(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/$id/status?status=${newStatus.name}'),
+    final response = await _httpService.patch(
+      '${_httpService.baseUrl}/identifiers/sscc/$id/status?status=${newStatus.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SSCC.fromJson(json.decode(response.body));
+      return SSCC.fromJson(json.decode(response.data));
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to update SSCC status: ${response.reasonPhrase}',
+        message: 'Failed to update SSCC status: ${response.statusMessage}',
       );
     }
   }
 
   Future<bool> validateSSCCCode(String ssccCode) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{
-      'ssccCode': ssccCode,
-    };
+    final queryParams = <String, dynamic>{'ssccCode': ssccCode};
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/validate')
-        .replace(queryParameters: queryParams);
-
-    final response = await _client.get(
-      uri,
+    final response = await _httpService.get(
+      '${_httpService.baseUrl}/identifiers/sscc/validate',
+      queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+      final Map<String, dynamic> data = json.decode(response.data);
       return data['isValid'] as bool;
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to validate SSCC code: ${response.reasonPhrase}',
+        message: 'Failed to validate SSCC code: ${response.statusMessage}',
       );
     }
   }
 
-  Future<String> generateSSCCCode(String gs1CompanyPrefix, String extensionDigit) async {
-    final token = await _tokenManager.getToken();
+  Future<String> generateSSCCCode(
+    String gs1CompanyPrefix,
+    String extensionDigit,
+  ) async {
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -713,30 +789,33 @@ class SSCCService {
 
     print('Sending SSCC generate request with: $requestBody');
 
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/generate'),
+    final response = await _httpService.post(
+      '${_httpService.baseUrl}/identifiers/sscc/generate',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: json.encode(requestBody),
+      data: json.encode(requestBody),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       // Parse the response directly instead of using SSCC.fromJson
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Map<String, dynamic> responseData = json.decode(response.data);
 
       // Debug information
       print('SSCC Generation Response: $responseData');
 
       String? ssccCode;
-        // Check if the response contains the 'sscc' field directly (from backend standard)
+      // Check if the response contains the 'sscc' field directly (from backend standard)
       if (responseData.containsKey('sscc') && responseData['sscc'] != null) {
         ssccCode = responseData['sscc'].toString();
         print('Using sscc field from response: $ssccCode');
       }
       // Check for ssccCode field (frontend convention)
-      else if (responseData.containsKey('ssccCode') && responseData['ssccCode'] != null) {
+      else if (responseData.containsKey('ssccCode') &&
+          responseData['ssccCode'] != null) {
         ssccCode = responseData['ssccCode'].toString();
         print('Using ssccCode field from response: $ssccCode');
       }
@@ -763,13 +842,17 @@ class SSCCService {
           // If we can't validate or fix the SSCC, try to generate one locally
           try {
             print('Generating SSCC locally as a fallback');
-            final localSSCC = GS1Utils.generateSSCC(gs1CompanyPrefix, extensionDigit);
+            final localSSCC = GS1Utils.generateSSCC(
+              gs1CompanyPrefix,
+              extensionDigit,
+            );
             print('Generated local SSCC: $localSSCC');
             return localSSCC;
           } catch (e) {
             print('Failed to generate SSCC locally: $e');
             throw ApiException(
-              message: 'Invalid SSCC format from API and local generation failed: $e',
+              message:
+                  'Invalid SSCC format from API and local generation failed: $e',
             );
           }
         }
@@ -777,16 +860,18 @@ class SSCCService {
 
       // If we couldn't extract the SSCC code from the response
       throw ApiException(
-        message: 'Invalid response format: SSCC code not found in response: $responseData',
+        message:
+            'Invalid response format: SSCC code not found in response: $responseData',
       );
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: 'Failed to generate SSCC code: ${response.reasonPhrase}',
-        responseBody: response.body,
+        message: 'Failed to generate SSCC code: ${response.statusMessage}',
+        responseBody: response.data,
       );
     }
   }
+
   Future<String> extractCompanyPrefixFromGLN(String glnInput) async {
     if (glnInput.isEmpty) {
       throw ApiException(message: 'GLN input cannot be empty');
@@ -820,13 +905,18 @@ class SSCCService {
         print('Parsed GLN from format: $glnCode');
       } catch (e) {
         print('Error parsing GLN from input: ${e.toString()}');
-        throw ApiException(message: 'Failed to parse GLN from input: ${e.toString()}');
+        throw ApiException(
+          message: 'Failed to parse GLN from input: ${e.toString()}',
+        );
       }
     }
 
     // If we couldn't extract a GLN code, throw an error
     if (glnCode == null || glnCode.isEmpty) {
-      throw ApiException(message: 'Invalid GLN format. GLN must be in one of these formats: 13 digits, (414)nnnnnnnnnnnn, or urn:epc:id:sgln:prefix.reference.0');
+      throw ApiException(
+        message:
+            'Invalid GLN format. GLN must be in one of these formats: 13 digits, (414)nnnnnnnnnnnn, or urn:epc:id:sgln:prefix.reference.0',
+      );
     }
 
     // Validate GLN format
@@ -841,7 +931,9 @@ class SSCCService {
     final companyPrefix = glnCode.substring(0, 7);
     print('Extracted company prefix: $companyPrefix');
     return companyPrefix;
-  }  /// Helper method to parse GLN from different formats
+  }
+
+  /// Helper method to parse GLN from different formats
   Future<String?> _parseGLNFromFormat(String input) async {
     // First try using the utility class
     try {
@@ -919,48 +1011,58 @@ class SSCCService {
     String sortBy = 'ssccCode',
     String direction = 'ASC',
   }) async {
-    final token = await _tokenManager.getToken();
+    final token = await _httpService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, String>{};
+    final queryParams = <String, dynamic>{};
 
     if (ssccCode?.isNotEmpty == true) queryParams['ssccCode'] = ssccCode!;
-    if (containerType?.isNotEmpty == true) queryParams['containerType'] = containerType!;
-    if (containerStatus?.isNotEmpty == true) queryParams['containerStatus'] = containerStatus!;
-    if (sourceLocationName?.isNotEmpty == true) queryParams['sourceLocationName'] = sourceLocationName!;
-    if (destinationLocationName?.isNotEmpty == true) queryParams['destinationLocationName'] = destinationLocationName!;
-    if (gs1CompanyPrefix?.isNotEmpty == true) queryParams['gs1CompanyPrefix'] = gs1CompanyPrefix!;
+    if (containerType?.isNotEmpty == true)
+      queryParams['containerType'] = containerType!;
+    if (containerStatus?.isNotEmpty == true)
+      queryParams['containerStatus'] = containerStatus!;
+    if (sourceLocationName?.isNotEmpty == true)
+      queryParams['sourceLocationName'] = sourceLocationName!;
+    if (destinationLocationName?.isNotEmpty == true)
+      queryParams['destinationLocationName'] = destinationLocationName!;
+    if (gs1CompanyPrefix?.isNotEmpty == true)
+      queryParams['gs1CompanyPrefix'] = gs1CompanyPrefix!;
 
     queryParams['page'] = page.toString();
     queryParams['size'] = size.toString();
     queryParams['sortBy'] = sortBy;
     queryParams['direction'] = direction;
 
-    final uri = Uri.parse('${_appConfig.apiBaseUrl}/identifiers/sscc/search/advanced')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '${_httpService.baseUrl}/identifiers/sscc/search/advanced',
+    ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
     print('SSCC Advanced Search request: $uri');
 
     try {
-      final response = await _client.get(
-        uri,
+      final response = await _httpService.get(
+        uri.toString(),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       print('SSCC Advanced Search response status: ${response.statusCode}');
-      print('SSCC Advanced Search response body: ${response.body}');
+      print('SSCC Advanced Search response body: ${response.data}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
+        final Map<String, dynamic> responseData = json.decode(response.data);
 
         // Convert content items to SSCC models
         final List<dynamic> contentList = responseData['content'] ?? [];
-        final List<SSCC> ssccs = contentList.map((item) => SSCC.fromJson(item)).toList();
+        final List<SSCC> ssccs = contentList
+            .map((item) => SSCC.fromJson(item))
+            .toList();
 
         return {
           'content': ssccs,
@@ -972,7 +1074,7 @@ class SSCCService {
           'last': responseData['last'] ?? true,
         };
       } else {
-        final error = json.decode(response.body);
+        final error = json.decode(response.data);
         throw ApiException(
           message: error['message'] ?? 'Failed to search SSCCs',
           statusCode: response.statusCode,

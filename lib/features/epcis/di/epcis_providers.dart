@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_event_service_impl.dart';
+import 'package:traqtrace_app/data/services/epcis_event_service.dart';
 
 /// Factory for creating EPCIS-related providers
 class EPCISProviders {
@@ -15,7 +15,7 @@ class EPCISProviders {
     return [
       BlocProvider<EPCISEventsCubit>(
         create: (context) => EPCISEventsCubit(
-          EPCISEventServiceImpl(
+          EPCISEventService(
             httpClient: getIt<http.Client>(),
             tokenManager: getIt<TokenManager>(),
             appConfig: getIt<AppConfig>(),

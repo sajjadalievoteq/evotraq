@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
+import '../../../data/services/partner_access_service.dart';
 import '../models/api_collection.dart';
-import '../services/partner_access_service.dart';
 
 class PartnerAccessState extends Equatable {
   final String? selectedPartnerId;

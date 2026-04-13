@@ -6,7 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
-import 'package:traqtrace_app/features/dashboards/services/product_journey_service.dart';
+
+import '../../../data/services/product_journey_service.dart';
 
 /// Dashboard screen showing the complete journey of a product through the supply chain
 class ProductJourneyScreen extends StatefulWidget {

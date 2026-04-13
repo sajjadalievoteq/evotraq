@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
 import 'package:intl/intl.dart';
 
 /// Screen to list all commissioning operations with search and filter capabilities
@@ -11,10 +11,12 @@ class CommissioningOperationListScreen extends StatefulWidget {
   const CommissioningOperationListScreen({Key? key}) : super(key: key);
 
   @override
-  State<CommissioningOperationListScreen> createState() => _CommissioningOperationListScreenState();
+  State<CommissioningOperationListScreen> createState() =>
+      _CommissioningOperationListScreenState();
 }
 
-class _CommissioningOperationListScreenState extends State<CommissioningOperationListScreen> {
+class _CommissioningOperationListScreenState
+    extends State<CommissioningOperationListScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<CommissioningResponse> _operations = [];
   List<CommissioningResponse> _filteredOperations = [];
@@ -66,11 +68,21 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredOperations = _operations.where((operation) {
-        return (operation.commissioningReference?.toLowerCase().contains(query) ?? false) ||
+        return (operation.commissioningReference?.toLowerCase().contains(
+                  query,
+                ) ??
+                false) ||
             (operation.gtinCode?.toLowerCase().contains(query) ?? false) ||
-            (operation.batchLotNumber?.toLowerCase().contains(query) ?? false) ||
-            (operation.commissioningLocationGLN?.toLowerCase().contains(query) ?? false) ||
-            (operation.commissioningOperationId?.toLowerCase().contains(query) ?? false) ||
+            (operation.batchLotNumber?.toLowerCase().contains(query) ??
+                false) ||
+            (operation.commissioningLocationGLN?.toLowerCase().contains(
+                  query,
+                ) ??
+                false) ||
+            (operation.commissioningOperationId?.toLowerCase().contains(
+                  query,
+                ) ??
+                false) ||
             (operation.itemDescription?.toLowerCase().contains(query) ?? false);
       }).toList();
     });
@@ -78,7 +90,9 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
 
   void _navigateToDetail(CommissioningResponse operation) {
     if (operation.commissioningOperationId != null) {
-      context.go('/operations/commissioning/${operation.commissioningOperationId}');
+      context.go(
+        '/operations/commissioning/${operation.commissioningOperationId}',
+      );
     }
   }
 
@@ -123,9 +137,7 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
             ),
           ),
           // Content
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -220,7 +232,10 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(operation.status),
                       borderRadius: BorderRadius.circular(12),
@@ -237,7 +252,10 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
                   const Spacer(),
                   if (operation.commissionedCount != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green[50],
                         borderRadius: BorderRadius.circular(12),
@@ -258,9 +276,11 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
 
               // Reference / Title - prefer item description if available
               Text(
-                operation.itemDescription ?? 
-                    operation.commissioningReference ?? 
-                    (operation.gtinCode != null ? 'GTIN: ${operation.gtinCode}' : 'Commissioning Operation'),
+                operation.itemDescription ??
+                    operation.commissioningReference ??
+                    (operation.gtinCode != null
+                        ? 'GTIN: ${operation.gtinCode}'
+                        : 'Commissioning Operation'),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -272,7 +292,11 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
               if (operation.gtinCode != null)
                 Row(
                   children: [
-                    const Icon(Icons.inventory_2, size: 16, color: Colors.orange),
+                    const Icon(
+                      Icons.inventory_2,
+                      size: 16,
+                      color: Colors.orange,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -288,7 +312,11 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
               if (operation.batchLotNumber != null)
                 Row(
                   children: [
-                    const Icon(Icons.batch_prediction, size: 16, color: Colors.purple),
+                    const Icon(
+                      Icons.batch_prediction,
+                      size: 16,
+                      color: Colors.purple,
+                    ),
                     const SizedBox(width: 4),
                     Text('Batch: ${operation.batchLotNumber}'),
                   ],
@@ -317,26 +345,36 @@ class _CommissioningOperationListScreenState extends State<CommissioningOperatio
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.check_circle, size: 14, color: Colors.green[600]),
+                      Icon(
+                        Icons.check_circle,
+                        size: 14,
+                        color: Colors.green[600],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${operation.commissionedCount ?? 0} commissioned',
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
-                      if (operation.failedCount != null && operation.failedCount! > 0) ...[
+                      if (operation.failedCount != null &&
+                          operation.failedCount! > 0) ...[
                         const SizedBox(width: 12),
                         Icon(Icons.error, size: 14, color: Colors.red[600]),
                         const SizedBox(width: 4),
                         Text(
                           '${operation.failedCount} failed',
-                          style: TextStyle(color: Colors.red[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.red[600],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
                   ),
                   if (operation.processedAt != null)
                     Text(
-                      DateFormat('MMM dd, yyyy HH:mm').format(operation.processedAt!),
+                      DateFormat(
+                        'MMM dd, yyyy HH:mm',
+                      ).format(operation.processedAt!),
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                 ],

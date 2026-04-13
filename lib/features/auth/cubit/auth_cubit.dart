@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/services/auth_service.dart';
+import 'package:traqtrace_app/data/services/auth_service.dart';
 import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 
 class AuthCubit extends Cubit<AuthState> {

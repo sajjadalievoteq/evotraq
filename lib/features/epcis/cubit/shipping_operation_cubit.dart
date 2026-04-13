@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/shipping_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
 
 class ShippingOperationState extends Equatable {
   final List<ShippingResponse> operations;

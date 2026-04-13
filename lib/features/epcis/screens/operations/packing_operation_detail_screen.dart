@@ -4,19 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
+import 'package:traqtrace_app/data/services/packing_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
 import 'package:intl/intl.dart';
 
 /// Screen to display packing operation details
 class PackingOperationDetailScreen extends StatefulWidget {
   final String operationId;
 
-  const PackingOperationDetailScreen({
-    Key? key,
-    required this.operationId,
-  }) : super(key: key);
+  const PackingOperationDetailScreen({Key? key, required this.operationId})
+    : super(key: key);
 
   @override
   State<PackingOperationDetailScreen> createState() =>
@@ -44,8 +42,9 @@ class _PackingOperationDetailScreenState
 
     try {
       final packingService = getIt<PackingOperationService>();
-      final operation =
-          await packingService.getPackingOperation(widget.operationId);
+      final operation = await packingService.getPackingOperation(
+        widget.operationId,
+      );
       setState(() {
         _operation = operation;
       });
@@ -69,8 +68,9 @@ class _PackingOperationDetailScreenState
 
       if (_operation!.packingLocationGLN != null) {
         try {
-          final locationGLN =
-              await glnService.getGLNByCode(_operation!.packingLocationGLN!);
+          final locationGLN = await glnService.getGLNByCode(
+            _operation!.packingLocationGLN!,
+          );
           setState(() => _locationGLNDetails = locationGLN);
         } catch (_) {
           // GLN not found in master data
@@ -141,9 +141,7 @@ class _PackingOperationDetailScreenState
     }
 
     if (_operation == null) {
-      return const Center(
-        child: Text('No packing operation found'),
-      );
+      return const Center(child: Text('No packing operation found'));
     }
 
     return SingleChildScrollView(
@@ -171,18 +169,17 @@ class _PackingOperationDetailScreenState
           if (_operation!.workOrderNumber != null ||
               _operation!.batchNumber != null ||
               _operation!.productionOrder != null ||
-              _operation!.packingLine != null)
-            ...[
-              _buildProductionCard(),
-              const SizedBox(height: 16),
-            ],
+              _operation!.packingLine != null) ...[
+            _buildProductionCard(),
+            const SizedBox(height: 16),
+          ],
 
           // Comments Card
-          if (_operation!.comments != null && _operation!.comments!.isNotEmpty)
-            ...[
-              _buildCommentsCard(),
-              const SizedBox(height: 16),
-            ],
+          if (_operation!.comments != null &&
+              _operation!.comments!.isNotEmpty) ...[
+            _buildCommentsCard(),
+            const SizedBox(height: 16),
+          ],
 
           // Packed Items Card
           _buildPackedItemsCard(),
@@ -204,7 +201,9 @@ class _PackingOperationDetailScreenState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _getStatusColor(_operation!.status ?? PackingStatus.failed),
+                color: _getStatusColor(
+                  _operation!.status ?? PackingStatus.failed,
+                ),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -229,10 +228,7 @@ class _PackingOperationDetailScreenState
             const Spacer(),
             Text(
               'ID: ${_operation!.packingOperationId ?? 'N/A'}',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
@@ -253,19 +249,21 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Reference Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const Divider(),
-            _buildDetailRow('Packing Reference', _operation!.packingReference ?? 'N/A'),
+            _buildDetailRow(
+              'Packing Reference',
+              _operation!.packingReference ?? 'N/A',
+            ),
             if (_operation!.processedAt != null)
               _buildDetailRow(
                 'Processed At',
-                DateFormat('MMM dd, yyyy HH:mm:ss').format(_operation!.processedAt!),
+                DateFormat(
+                  'MMM dd, yyyy HH:mm:ss',
+                ).format(_operation!.processedAt!),
               ),
           ],
         ),
@@ -286,10 +284,7 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Container Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -321,10 +316,7 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Location Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -353,10 +345,7 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Production Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -390,10 +379,7 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Comments / Notes',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -410,7 +396,7 @@ class _PackingOperationDetailScreenState
 
   Widget _buildPackedItemsCard() {
     final items = _operation!.childEpcList ?? [];
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -496,10 +482,7 @@ class _PackingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Processing Information',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -509,12 +492,11 @@ class _PackingOperationDetailScreenState
                 'Processing Time',
                 '${_operation!.processingTimeMs} ms',
               ),
-            if (_operation!.eventIds != null && _operation!.eventIds!.isNotEmpty)
-              _buildDetailRow(
-                'Event IDs',
-                _operation!.eventIds!.join(', '),
-              ),
-            if (_operation!.messages != null && _operation!.messages!.isNotEmpty)
+            if (_operation!.eventIds != null &&
+                _operation!.eventIds!.isNotEmpty)
+              _buildDetailRow('Event IDs', _operation!.eventIds!.join(', ')),
+            if (_operation!.messages != null &&
+                _operation!.messages!.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -524,10 +506,12 @@ class _PackingOperationDetailScreenState
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
-                  ..._operation!.messages!.map((msg) => Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 4),
-                    child: Text('• $msg'),
-                  )),
+                  ..._operation!.messages!.map(
+                    (msg) => Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 4),
+                      child: Text('• $msg'),
+                    ),
+                  ),
                 ],
               ),
           ],
@@ -648,17 +632,11 @@ class _PackingOperationDetailScreenState
                       const SizedBox(height: 4),
                       Text(
                         glnDetails.locationName,
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 13),
                       ),
                       Text(
                         '${glnDetails.addressLine1}, ${glnDetails.city}',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
                       ),
                     ],
                   ],

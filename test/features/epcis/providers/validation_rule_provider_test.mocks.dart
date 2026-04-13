@@ -6,10 +6,10 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:traqtrace_app/data/services/validation_rule_service.dart' as _i3;
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart'
     as _i2;
-import 'package:traqtrace_app/features/epcis/services/validation_rule_service.dart'
-    as _i3;
+
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values

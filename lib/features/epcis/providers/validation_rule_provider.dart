@@ -1,12 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
-import 'package:traqtrace_app/features/epcis/services/validation_rule_service.dart';
+
+
+import '../../../data/services/validation_rule_service.dart';
 
 class ValidationRuleState extends Equatable {
   final List<ValidationRule> validationRules;
@@ -40,14 +39,8 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
 
   ValidationRuleCubit({
     ValidationRuleService? validationRuleService,
-    required AppConfig appConfig,
   }) : _validationRuleService =
-           validationRuleService ??
-           ValidationRuleServiceImpl(
-             httpClient: getIt<http.Client>(),
-             tokenManager: getIt<TokenManager>(),
-             appConfig: appConfig,
-           ),
+           validationRuleService ?? getIt<ValidationRuleService>(),
        super(ValidationRuleState.initial()) {
     // Load rules on initialization
     loadValidationRules();

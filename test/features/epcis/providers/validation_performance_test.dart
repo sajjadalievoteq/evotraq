@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/data/services/validation_rule_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
-import 'package:traqtrace_app/features/epcis/services/validation_rule_service.dart';
+
 
 class _InMemoryValidationRuleService implements ValidationRuleService {
   final List<ValidationRule> _initialRules;
@@ -143,7 +144,6 @@ void main() {
 
       final cubit = ValidationRuleCubit(
         validationRuleService: service,
-        appConfig: appConfig,
       );
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
@@ -196,7 +196,6 @@ void main() {
 
       final cubit = ValidationRuleCubit(
         validationRuleService: service,
-        appConfig: appConfig,
       );
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
@@ -230,7 +229,6 @@ void main() {
 
       final cubit = ValidationRuleCubit(
         validationRuleService: service,
-        appConfig: appConfig,
       );
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
@@ -287,7 +285,6 @@ void main() {
 
       final cubit = ValidationRuleCubit(
         validationRuleService: service,
-        appConfig: appConfig,
       );
       addTearDown(cubit.close);
       await cubit.loadValidationRules();

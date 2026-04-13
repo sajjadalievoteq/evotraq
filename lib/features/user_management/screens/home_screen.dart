@@ -10,8 +10,9 @@ import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/dashboard/services/dashboard_service.dart';
+import 'package:traqtrace_app/data/services/dashboard_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_loading_screen.dart';
+
 class _HomeDashboardCache {
   static DashboardStats? stats;
   static List<RecentEvent>? recentEvents;
@@ -73,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final appConfig = getIt<AppConfig>();
     final tokenManager = getIt<TokenManager>();
 
-    _dashboardService = DashboardServiceImpl(
+    _dashboardService = DashboardService(
       httpClient: getIt<http.Client>(),
       tokenManager: tokenManager,
       appConfig: appConfig,

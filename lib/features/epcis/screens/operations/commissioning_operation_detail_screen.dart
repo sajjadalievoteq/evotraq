@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
 import 'package:intl/intl.dart';
+
+import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
 
 /// Screen to display commissioning operation details
 class CommissioningOperationDetailScreen extends StatefulWidget {
@@ -44,8 +45,9 @@ class _CommissioningOperationDetailScreenState
 
     try {
       final commissioningService = getIt<CommissioningOperationService>();
-      final operation =
-          await commissioningService.getCommissioningOperation(widget.operationId);
+      final operation = await commissioningService.getCommissioningOperation(
+        widget.operationId,
+      );
       setState(() {
         _operation = operation;
       });
@@ -69,8 +71,9 @@ class _CommissioningOperationDetailScreenState
 
       if (_operation!.commissioningLocationGLN != null) {
         try {
-          final locationGLN =
-              await glnService.getGLNByCode(_operation!.commissioningLocationGLN!);
+          final locationGLN = await glnService.getGLNByCode(
+            _operation!.commissioningLocationGLN!,
+          );
           setState(() => _locationGLNDetails = locationGLN);
         } catch (_) {
           // GLN not found in master data
@@ -141,9 +144,7 @@ class _CommissioningOperationDetailScreenState
     }
 
     if (_operation == null) {
-      return const Center(
-        child: Text('No commissioning operation found'),
-      );
+      return const Center(child: Text('No commissioning operation found'));
     }
 
     return SingleChildScrollView(
@@ -229,13 +230,11 @@ class _CommissioningOperationDetailScreenState
                     color: Colors.green,
                   ),
                 ),
-                if (_operation!.failedCount != null && _operation!.failedCount! > 0)
+                if (_operation!.failedCount != null &&
+                    _operation!.failedCount! > 0)
                   Text(
                     '${_operation!.failedCount} Failed',
-                    style: TextStyle(
-                      color: Colors.red[700],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.red[700], fontSize: 12),
                   ),
               ],
             ),
@@ -258,10 +257,7 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Reference Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -275,12 +271,16 @@ class _CommissioningOperationDetailScreenState
             if (_operation!.eventTime != null)
               _buildDetailRow(
                 'Event Time',
-                DateFormat('MMM dd, yyyy HH:mm:ss').format(_operation!.eventTime!),
+                DateFormat(
+                  'MMM dd, yyyy HH:mm:ss',
+                ).format(_operation!.eventTime!),
               ),
             if (_operation!.processedAt != null)
               _buildDetailRow(
                 'Record Time',
-                DateFormat('MMM dd, yyyy HH:mm:ss').format(_operation!.processedAt!),
+                DateFormat(
+                  'MMM dd, yyyy HH:mm:ss',
+                ).format(_operation!.processedAt!),
               ),
           ],
         ),
@@ -301,10 +301,7 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Product Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -316,9 +313,15 @@ class _CommissioningOperationDetailScreenState
             if (_operation!.batchLotNumber != null)
               _buildDetailRow('Batch/Lot Number', _operation!.batchLotNumber!),
             if (_operation!.businessStep != null)
-              _buildDetailRow('Business Step', _formatBusinessStep(_operation!.businessStep!)),
+              _buildDetailRow(
+                'Business Step',
+                _formatBusinessStep(_operation!.businessStep!),
+              ),
             if (_operation!.disposition != null)
-              _buildDetailRow('Disposition', _formatDisposition(_operation!.disposition!)),
+              _buildDetailRow(
+                'Disposition',
+                _formatDisposition(_operation!.disposition!),
+              ),
             if (_operation!.action != null)
               _buildDetailRow('Action', _operation!.action!),
           ],
@@ -340,10 +343,7 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Location Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -372,10 +372,7 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Processing Information',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -385,16 +382,14 @@ class _CommissioningOperationDetailScreenState
               '${_operation!.commissionedCount ?? 0}',
             ),
             if (_operation!.failedCount != null && _operation!.failedCount! > 0)
-              _buildDetailRow(
-                'Items Failed',
-                '${_operation!.failedCount}',
-              ),
+              _buildDetailRow('Items Failed', '${_operation!.failedCount}'),
             if (_operation!.processingTimeMs != null)
               _buildDetailRow(
                 'Processing Time',
                 '${_operation!.processingTimeMs} ms',
               ),
-            if (_operation!.eventIds != null && _operation!.eventIds!.isNotEmpty)
+            if (_operation!.eventIds != null &&
+                _operation!.eventIds!.isNotEmpty)
               _buildDetailRow(
                 'Events Generated',
                 '${_operation!.eventIds!.length}',
@@ -406,9 +401,11 @@ class _CommissioningOperationDetailScreenState
   }
 
   Widget _buildCommissionedItemsCard() {
-    final itemCount = _operation!.itemResults?.length ?? 
-                      _operation!.epcList?.length ?? 
-                      _operation!.createdSgtinIds?.length ?? 0;
+    final itemCount =
+        _operation!.itemResults?.length ??
+        _operation!.epcList?.length ??
+        _operation!.createdSgtinIds?.length ??
+        0;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -429,27 +426,36 @@ class _CommissioningOperationDetailScreenState
               ],
             ),
             const Divider(),
-            if (_operation!.itemResults != null && _operation!.itemResults!.isNotEmpty)
-              ..._operation!.itemResults!.map((item) => _buildItemResultTile(item))
-            else if (_operation!.epcList != null && _operation!.epcList!.isNotEmpty)
-              ..._operation!.epcList!.asMap().entries.map((entry) => _buildEpcListTile(entry.key, entry.value))
-            else if (_operation!.createdSgtinIds != null && _operation!.createdSgtinIds!.isNotEmpty)
-              ..._operation!.createdSgtinIds!.asMap().entries.map((entry) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.green,
-                      radius: 16,
-                      child: Text(
-                        '${entry.key + 1}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
+            if (_operation!.itemResults != null &&
+                _operation!.itemResults!.isNotEmpty)
+              ..._operation!.itemResults!.map(
+                (item) => _buildItemResultTile(item),
+              )
+            else if (_operation!.epcList != null &&
+                _operation!.epcList!.isNotEmpty)
+              ..._operation!.epcList!.asMap().entries.map(
+                (entry) => _buildEpcListTile(entry.key, entry.value),
+              )
+            else if (_operation!.createdSgtinIds != null &&
+                _operation!.createdSgtinIds!.isNotEmpty)
+              ..._operation!.createdSgtinIds!.asMap().entries.map(
+                (entry) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.green,
+                    radius: 16,
+                    child: Text(
+                      '${entry.key + 1}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
-                    title: Text(entry.value),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.copy, size: 18),
-                      onPressed: () => _copyToClipboard(entry.value),
-                    ),
-                  ))
+                  ),
+                  title: Text(entry.value),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.copy, size: 18),
+                    onPressed: () => _copyToClipboard(entry.value),
+                  ),
+                ),
+              )
             else
               const Center(
                 child: Padding(
@@ -472,7 +478,7 @@ class _CommissioningOperationDetailScreenState
         displaySerial = parts.last;
       }
     }
-    
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
@@ -510,12 +516,18 @@ class _CommissioningOperationDetailScreenState
       ),
       title: Text(item.serialNumber),
       subtitle: item.success
-          ? (item.epcUri != null ? Text(item.epcUri!, style: const TextStyle(fontSize: 12)) : null)
-          : Text(item.errorMessage ?? 'Unknown error', style: TextStyle(color: Colors.red[700], fontSize: 12)),
+          ? (item.epcUri != null
+                ? Text(item.epcUri!, style: const TextStyle(fontSize: 12))
+                : null)
+          : Text(
+              item.errorMessage ?? 'Unknown error',
+              style: TextStyle(color: Colors.red[700], fontSize: 12),
+            ),
       trailing: item.success
           ? IconButton(
               icon: const Icon(Icons.copy, size: 18),
-              onPressed: () => _copyToClipboard(item.epcUri ?? item.serialNumber),
+              onPressed: () =>
+                  _copyToClipboard(item.epcUri ?? item.serialNumber),
             )
           : null,
     );
@@ -534,25 +546,28 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Messages',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const Divider(),
-            ..._operation!.messages!.map((message) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.info_outline, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(message)),
-                    ],
-                  ),
-                )),
+            ..._operation!.messages!.map(
+              (message) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(message)),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -561,8 +576,8 @@ class _CommissioningOperationDetailScreenState
 
   bool _hasDates() {
     return _operation!.productionDate != null ||
-           _operation!.expiryDate != null ||
-           _operation!.bestBeforeDate != null;
+        _operation!.expiryDate != null ||
+        _operation!.bestBeforeDate != null;
   }
 
   Widget _buildDatesCard() {
@@ -578,10 +593,7 @@ class _CommissioningOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Dates',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -635,10 +647,7 @@ class _CommissioningOperationDetailScreenState
         children: [
           SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
           ),
           Expanded(
             child: Text(
@@ -659,10 +668,7 @@ class _CommissioningOperationDetailScreenState
         children: [
           SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
           ),
           Expanded(
             child: Row(
@@ -693,10 +699,7 @@ class _CommissioningOperationDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey[600]),
-          ),
+          Text(label, style: TextStyle(color: Colors.grey[600])),
           const SizedBox(height: 4),
           if (glnCode != null) ...[
             Row(

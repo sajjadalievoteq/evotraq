@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
 
 enum GLNStatus { initial, loading, success, error }
 

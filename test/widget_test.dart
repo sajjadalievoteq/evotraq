@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/notifications/data/services/websocket_service.dart';
+import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/main.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 

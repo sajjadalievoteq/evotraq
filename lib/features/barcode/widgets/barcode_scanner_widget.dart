@@ -1,7 +1,10 @@
+// ignore_for_file: dead_code
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
-import '../services/barcode_scanner_service.dart';
+
+import '../../../data/services/barcode_scanner_service.dart';
 
 class BarcodeScannerWidget extends StatefulWidget {
   final Function(List<Barcode> barcodes) onBarcodeDetected;

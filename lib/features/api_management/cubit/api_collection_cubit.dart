@@ -4,8 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:universal_html/html.dart' as html;
+
+import '../../../data/services/api_collection_service.dart';
 import '../models/api_collection.dart';
-import '../services/api_collection_service.dart';
+
 import 'api_collection_state.dart';
 
 class ApiCollectionCubit extends Cubit<ApiCollectionState> {

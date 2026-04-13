@@ -8,10 +8,12 @@ import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart
 import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
-import 'package:traqtrace_app/features/tobacco/services/gtin_tobacco_extension_service.dart';
+
 import 'package:traqtrace_app/features/pharmaceutical/widgets/pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/pharmaceutical_service.dart';
+import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+
+import '../../../../data/services/gtin_tobacco_extension_service.dart';
 
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;

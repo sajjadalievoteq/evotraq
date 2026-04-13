@@ -6,8 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
-import 'package:traqtrace_app/features/epcis/services/aggregation_event_service.dart';
-import 'package:traqtrace_app/features/epcis/services/aggregation_event_service_impl.dart';
+import 'package:traqtrace_app/data/services/aggregation_event_service.dart';
 
 class AggregationEventsState extends Equatable {
   final List<AggregationEvent> aggregationEvents;
@@ -95,7 +94,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
 
   AggregationEventsCubit({AggregationEventService? service, required AppConfig appConfig})
       : _service = service ??
-            AggregationEventServiceImpl(
+            AggregationEventService(
               httpClient: http.Client(),
               tokenManager: TokenManager(),
               appConfig: appConfig,

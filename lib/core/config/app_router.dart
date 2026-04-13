@@ -34,7 +34,7 @@ import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_list_screen_advan
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
-import 'package:traqtrace_app/features/gs1/services/epc_conversion_service.dart';
+import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_screen.dart';
 import 'package:traqtrace_app/features/user_management/screens/profile_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/user_management_screen.dart';

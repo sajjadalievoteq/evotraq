@@ -6,8 +6,7 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_serialization_service.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_serialization_service_impl.dart';
+import 'package:traqtrace_app/data/services/epcis_serialization_service.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters_dto.dart';
 
 class EPCISSerializationScreen extends StatefulWidget {
@@ -59,7 +58,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
     final appConfig = getIt<AppConfig>();
     final tokenManager = getIt<TokenManager>();
     
-    _serializationService = EPCISSerializationServiceImpl(
+    _serializationService = EPCISSerializationService(
       httpClient: getIt<http.Client>(),
       tokenManager: tokenManager,
       appConfig: appConfig,

@@ -4,8 +4,9 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/data/services/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
-import 'package:traqtrace_app/features/epcis/services/validation_service.dart';
+
 import 'dart:convert';
 import 'validation_service_test.mocks.dart';
 
@@ -13,7 +14,7 @@ import 'validation_service_test.mocks.dart';
 void main() {
   late MockClient mockClient;
   late MockTokenManager mockTokenManager;
-  late ValidationServiceImpl validationService;
+  late ValidationService validationService;
   late AppConfig appConfig;
 
   setUp(() {
@@ -24,7 +25,7 @@ void main() {
       appName: 'TraqTrace Test',
       appVersion: '1.0.0'
     );
-    validationService = ValidationServiceImpl(
+    validationService = ValidationService(
       httpClient: mockClient,
       tokenManager: mockTokenManager,
       appConfig: appConfig,

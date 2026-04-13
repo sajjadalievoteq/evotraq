@@ -6,7 +6,9 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
-import 'package:traqtrace_app/features/epcis/services/transformation_event_service.dart';
+
+
+import '../../../data/services/transformation_event_service.dart';
 
 class TransformationEventsState extends Equatable {
   final List<TransformationEvent> transformationEvents;

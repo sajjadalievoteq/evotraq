@@ -18,8 +18,8 @@ import 'package:traqtrace_app/features/gs1/widgets/validated_form_builder_text_f
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/features/tobacco/services/gln_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/gln_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/data/services/gln_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/features/tobacco/models/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/pharmaceutical/models/gln_pharmaceutical_extension_model.dart';
 

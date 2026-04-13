@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
-import 'package:traqtrace_app/core/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/system_settings_service.dart';
 
 class SystemSettingsState extends Equatable {
   final SystemSettings settings;

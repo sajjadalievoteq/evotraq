@@ -4,21 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gtin_service.dart';
+import 'package:traqtrace_app/data/services/gtin_service.dart';
 import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
 import 'package:traqtrace_app/shared/models/scan_result.dart';
 
 /// Scanning mode options for different input methods
-enum ScanningMode {
-  camera,
-  wired,
-  manual,
-}
+enum ScanningMode { camera, wired, manual }
 
 /// Multi-step commissioning operations screen for bulk serial number commissioning
 /// Step 1: Reference details (GTIN, batch/lot, location, dates)
@@ -28,13 +24,15 @@ class CommissioningOperationScreen extends StatefulWidget {
   const CommissioningOperationScreen({Key? key}) : super(key: key);
 
   @override
-  State<CommissioningOperationScreen> createState() => _CommissioningOperationScreenState();
+  State<CommissioningOperationScreen> createState() =>
+      _CommissioningOperationScreenState();
 }
 
-class _CommissioningOperationScreenState extends State<CommissioningOperationScreen> {
+class _CommissioningOperationScreenState
+    extends State<CommissioningOperationScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  
+
   // Form controllers and data
   final _referenceController = TextEditingController();
   final _gtinController = TextEditingController();
@@ -44,28 +42,30 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
   final _manualSerialController = TextEditingController();
   final _wiredScannerController = TextEditingController();
   final FocusNode _wiredScannerFocusNode = FocusNode();
-  
+
   // GTIN selection
   List<GTIN> _availableGTINs = [];
   GTIN? _selectedGTIN;
   bool _isLoadingGTINs = false;
   String? _gtinError;
-  
+
   // Location selection
   GLN? _commissioningLocationGLN;
   String? _locationError;
-  
+
   // Dates
   DateTime? _expiryDate;
   DateTime? _productionDate;
   DateTime? _bestBeforeDate;
-  
+
   // Serial numbers
   final List<String> _serialNumbers = [];
   bool _isLoading = false;
-  
+
   // Scanning mode state
-  ScanningMode _scanningMode = kIsWeb ? ScanningMode.wired : ScanningMode.camera;
+  ScanningMode _scanningMode = kIsWeb
+      ? ScanningMode.wired
+      : ScanningMode.camera;
   bool _isWiredScannerActive = false;
 
   @override
@@ -94,7 +94,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
       setState(() => _isLoadingGTINs = false);
     }
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -134,12 +134,12 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
       _gtinError = null;
       _locationError = null;
     });
-    
+
     switch (_currentStep) {
       case 0:
         // Step 1: Validate reference details
         bool isValid = true;
-        
+
         if (_selectedGTIN == null && _gtinController.text.trim().isEmpty) {
           setState(() {
             _gtinError = 'GTIN is required';
@@ -211,11 +211,13 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
 
     try {
       final commissioningService = getIt<CommissioningOperationService>();
-      
+
       final gtinCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
-      
-      debugPrint('Commissioning: Submitting ${_serialNumbers.length} serial numbers for GTIN $gtinCode');
-      
+
+      debugPrint(
+        'Commissioning: Submitting ${_serialNumbers.length} serial numbers for GTIN $gtinCode',
+      );
+
       final request = CommissioningRequest(
         gtinCode: gtinCode,
         serialNumbers: _serialNumbers,
@@ -224,29 +226,33 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
         expiryDate: _expiryDate,
         productionDate: _productionDate,
         bestBeforeDate: _bestBeforeDate,
-        commissioningReference: _referenceController.text.trim().isNotEmpty 
-            ? _referenceController.text.trim() 
+        commissioningReference: _referenceController.text.trim().isNotEmpty
+            ? _referenceController.text.trim()
             : null,
-        operatorId: _operatorIdController.text.trim().isNotEmpty 
-            ? _operatorIdController.text.trim() 
+        operatorId: _operatorIdController.text.trim().isNotEmpty
+            ? _operatorIdController.text.trim()
             : null,
-        comments: _notesController.text.trim().isNotEmpty 
-            ? _notesController.text.trim() 
+        comments: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
             : null,
       );
 
-      final response = await commissioningService.createCommissioningOperation(request);
+      final response = await commissioningService.createCommissioningOperation(
+        request,
+      );
 
       if (response.status == CommissioningStatus.success) {
-        _showSuccess('Successfully commissioned ${response.commissionedCount} items');
+        _showSuccess(
+          'Successfully commissioned ${response.commissionedCount} items',
+        );
         if (mounted) {
           context.go('/operations/commissioning');
         }
       } else if (response.status == CommissioningStatus.partialSuccess) {
         _showPartialSuccessDialog(response);
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true 
-            ? response.messages!.first 
+        final errorMessage = response.messages?.isNotEmpty == true
+            ? response.messages!.first
             : 'Failed to create commissioning operation';
         _showError(errorMessage);
       }
@@ -280,7 +286,10 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
               Text('Failed: ${response.failedCount}'),
               const SizedBox(height: 16),
               if (response.itemResults != null) ...[
-                const Text('Failed Items:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Failed Items:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 200),
@@ -288,12 +297,18 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     shrinkWrap: true,
                     children: response.itemResults!
                         .where((r) => !r.success)
-                        .map((r) => ListTile(
-                              dense: true,
-                              leading: const Icon(Icons.error, color: Colors.red, size: 20),
-                              title: Text(r.serialNumber),
-                              subtitle: Text(r.errorMessage ?? 'Unknown error'),
-                            ))
+                        .map(
+                          (r) => ListTile(
+                            dense: true,
+                            leading: const Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            title: Text(r.serialNumber),
+                            subtitle: Text(r.errorMessage ?? 'Unknown error'),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -326,18 +341,18 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
       _showError('Please enter a serial number');
       return;
     }
-    
+
     // Check for duplicates
     if (_serialNumbers.contains(trimmedSerial)) {
       _showError('Serial number already added: $trimmedSerial');
       return;
     }
-    
+
     setState(() {
       _serialNumbers.add(trimmedSerial);
     });
     //_showSuccess('Serial added: $trimmedSerial');
-    
+
     // Clear the input field
     _manualSerialController.clear();
     _wiredScannerController.clear();
@@ -354,7 +369,9 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear All Serials?'),
-        content: Text('This will remove all ${_serialNumbers.length} serial numbers.'),
+        content: Text(
+          'This will remove all ${_serialNumbers.length} serial numbers.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -376,25 +393,28 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
 
   Future<void> _selectDate(String dateType) async {
     final now = DateTime.now();
-    final initialDate = dateType == 'production' 
+    final initialDate = dateType == 'production'
         ? (_productionDate ?? now)
         : dateType == 'expiry'
-            ? (_expiryDate ?? now.add(const Duration(days: 365)))
-            : (_bestBeforeDate ?? now.add(const Duration(days: 180)));
-    
-    final firstDate = dateType == 'production' 
-        ? DateTime(now.year - 2)
-        : now;
+        ? (_expiryDate ?? now.add(const Duration(days: 365)))
+        : (_bestBeforeDate ?? now.add(const Duration(days: 180)));
+
+    final firstDate = dateType == 'production' ? DateTime(now.year - 2) : now;
     final lastDate = DateTime(now.year + 10);
-    
+
     final selected = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
-      helpText: 'Select ${dateType == 'production' ? 'Production' : dateType == 'expiry' ? 'Expiry' : 'Best Before'} Date',
+      helpText:
+          'Select ${dateType == 'production'
+              ? 'Production'
+              : dateType == 'expiry'
+              ? 'Expiry'
+              : 'Best Before'} Date',
     );
-    
+
     if (selected != null) {
       setState(() {
         switch (dateType) {
@@ -487,7 +507,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
   Widget _buildStepCircle(int step, String label, IconData icon) {
     final isActive = _currentStep >= step;
     final isCurrent = _currentStep == step;
-    
+
     return Expanded(
       child: Column(
         children: [
@@ -495,9 +515,11 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isActive ? Theme.of(context).primaryColor : Colors.grey[300],
+              color: isActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[300],
               shape: BoxShape.circle,
-              border: isCurrent 
+              border: isCurrent
                   ? Border.all(color: Theme.of(context).primaryColor, width: 3)
                   : null,
             ),
@@ -513,7 +535,9 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             style: TextStyle(
               fontSize: 12,
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-              color: isActive ? Theme.of(context).primaryColor : Colors.grey[600],
+              color: isActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey[600],
             ),
           ),
         ],
@@ -547,9 +571,12 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // GTIN Selector/Input
-                  const Text('GTIN *', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const Text(
+                    'GTIN *',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   if (_isLoadingGTINs)
                     const Center(child: CircularProgressIndicator())
@@ -564,7 +591,9 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                       items: _availableGTINs.map((gtin) {
                         return DropdownMenuItem(
                           value: gtin,
-                          child: Text('${gtin.gtinCode} - ${gtin.productName ?? 'Unknown'}'),
+                          child: Text(
+                            '${gtin.gtinCode} - ${gtin.productName ?? 'Unknown'}',
+                          ),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -587,7 +616,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     ),
                   ],
                   const SizedBox(height: 16),
-                  
+
                   // Batch/Lot Number
                   TextField(
                     controller: _batchLotController,
@@ -598,7 +627,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Commissioning Reference (optional)
                   TextField(
                     controller: _referenceController,
@@ -613,7 +642,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Location Card
           Card(
             child: Padding(
@@ -643,7 +672,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Dates Card
           Card(
             child: Padding(
@@ -656,14 +685,14 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Production Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.calendar_today),
                     title: const Text('Production Date'),
                     subtitle: Text(
-                      _productionDate != null 
+                      _productionDate != null
                           ? '${_productionDate!.day}/${_productionDate!.month}/${_productionDate!.year}'
                           : 'Not set',
                     ),
@@ -677,20 +706,21 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                         if (_productionDate != null)
                           IconButton(
                             icon: const Icon(Icons.clear),
-                            onPressed: () => setState(() => _productionDate = null),
+                            onPressed: () =>
+                                setState(() => _productionDate = null),
                           ),
                       ],
                     ),
                   ),
                   const Divider(),
-                  
+
                   // Expiry Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.event),
                     title: const Text('Expiry Date'),
                     subtitle: Text(
-                      _expiryDate != null 
+                      _expiryDate != null
                           ? '${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year}'
                           : 'Not set',
                     ),
@@ -710,14 +740,14 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     ),
                   ),
                   const Divider(),
-                  
+
                   // Best Before Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.schedule),
                     title: const Text('Best Before Date'),
                     subtitle: Text(
-                      _bestBeforeDate != null 
+                      _bestBeforeDate != null
                           ? '${_bestBeforeDate!.day}/${_bestBeforeDate!.month}/${_bestBeforeDate!.year}'
                           : 'Not set',
                     ),
@@ -731,7 +761,8 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                         if (_bestBeforeDate != null)
                           IconButton(
                             icon: const Icon(Icons.clear),
-                            onPressed: () => setState(() => _bestBeforeDate = null),
+                            onPressed: () =>
+                                setState(() => _bestBeforeDate = null),
                           ),
                       ],
                     ),
@@ -741,7 +772,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Additional Info Card (collapsed by default)
           ExpansionTile(
             title: const Text('Additional Information'),
@@ -810,7 +841,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Scanning mode selector
           Card(
             child: Padding(
@@ -850,7 +881,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Input based on mode
                   if (_scanningMode == ScanningMode.camera && !kIsWeb)
                     SizedBox(
@@ -871,7 +902,9 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                             border: const OutlineInputBorder(),
                             prefixIcon: Icon(
                               Icons.keyboard,
-                              color: _isWiredScannerActive ? Colors.green : null,
+                              color: _isWiredScannerActive
+                                  ? Colors.green
+                                  : null,
                             ),
                             suffixIcon: _isWiredScannerActive
                                 ? const Icon(Icons.sensors, color: Colors.green)
@@ -885,12 +918,14 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _isWiredScannerActive 
+                          _isWiredScannerActive
                               ? '✓ Scanner active - scan barcode'
                               : 'Click the field to activate scanner input',
                           style: TextStyle(
                             fontSize: 12,
-                            color: _isWiredScannerActive ? Colors.green : Colors.grey,
+                            color: _isWiredScannerActive
+                                ? Colors.green
+                                : Colors.grey,
                           ),
                         ),
                       ],
@@ -914,7 +949,8 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          onPressed: () => _addSerial(_manualSerialController.text),
+                          onPressed: () =>
+                              _addSerial(_manualSerialController.text),
                           child: const Text('Add'),
                         ),
                       ],
@@ -924,14 +960,17 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Serial numbers list header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Serial Numbers (${_serialNumbers.length})',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               if (_serialNumbers.isNotEmpty)
                 TextButton.icon(
@@ -943,7 +982,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ],
           ),
           const SizedBox(height: 8),
-          
+
           // Serial numbers list
           Expanded(
             child: _serialNumbers.isEmpty
@@ -951,7 +990,11 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.qr_code_2, size: 64, color: Colors.grey[400]),
+                        Icon(
+                          Icons.qr_code_2,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No serial numbers added yet',
@@ -960,7 +1003,10 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                         const SizedBox(height: 8),
                         Text(
                           'Scan or enter serial numbers to commission',
-                          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -977,7 +1023,10 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                             backgroundColor: Theme.of(context).primaryColor,
                             child: Text(
                               '${index + 1}',
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           title: Text(_serialNumbers[index]),
@@ -996,10 +1045,10 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
   }
 
   Widget _buildStep3Review() {
-    final gtinDisplay = _selectedGTIN != null 
+    final gtinDisplay = _selectedGTIN != null
         ? '${_selectedGTIN!.gtinCode} - ${_selectedGTIN!.productName ?? 'Unknown'}'
         : _gtinController.text;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1010,7 +1059,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          
+
           // Summary Card
           Card(
             child: Padding(
@@ -1022,32 +1071,43 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                   const Divider(),
                   _buildReviewRow('Batch/Lot', _batchLotController.text),
                   const Divider(),
-                  _buildReviewRow('Location', _commissioningLocationGLN?.locationName ?? _commissioningLocationGLN?.glnCode ?? '-'),
+                  _buildReviewRow(
+                    'Location',
+                    _commissioningLocationGLN?.locationName ??
+                        _commissioningLocationGLN?.glnCode ??
+                        '-',
+                  ),
                   if (_referenceController.text.isNotEmpty) ...[
                     const Divider(),
                     _buildReviewRow('Reference', _referenceController.text),
                   ],
                   if (_productionDate != null) ...[
                     const Divider(),
-                    _buildReviewRow('Production Date', 
-                        '${_productionDate!.day}/${_productionDate!.month}/${_productionDate!.year}'),
+                    _buildReviewRow(
+                      'Production Date',
+                      '${_productionDate!.day}/${_productionDate!.month}/${_productionDate!.year}',
+                    ),
                   ],
                   if (_expiryDate != null) ...[
                     const Divider(),
-                    _buildReviewRow('Expiry Date', 
-                        '${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year}'),
+                    _buildReviewRow(
+                      'Expiry Date',
+                      '${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year}',
+                    ),
                   ],
                   if (_bestBeforeDate != null) ...[
                     const Divider(),
-                    _buildReviewRow('Best Before', 
-                        '${_bestBeforeDate!.day}/${_bestBeforeDate!.month}/${_bestBeforeDate!.year}'),
+                    _buildReviewRow(
+                      'Best Before',
+                      '${_bestBeforeDate!.day}/${_bestBeforeDate!.month}/${_bestBeforeDate!.year}',
+                    ),
                   ],
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Serial numbers summary
           Card(
             child: Padding(
@@ -1061,7 +1121,10 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                       const SizedBox(width: 8),
                       Text(
                         'Serial Numbers (${_serialNumbers.length})',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -1076,7 +1139,12 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Row(
                             children: [
-                              Text('${index + 1}. ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                '${index + 1}. ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               Expanded(child: Text(_serialNumbers[index])),
                             ],
                           ),
@@ -1089,7 +1157,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Info message
           Card(
             color: Colors.blue[50],
@@ -1122,10 +1190,7 @@ class _CommissioningOperationScreenState extends State<CommissioningOperationScr
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.grey),
-            ),
+            child: Text(label, style: const TextStyle(color: Colors.grey)),
           ),
           Expanded(
             child: Text(

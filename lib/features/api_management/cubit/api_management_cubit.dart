@@ -7,7 +7,9 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
-import 'package:traqtrace_app/features/api_management/services/api_management_service.dart';
+
+import '../../../data/services/api_management_service.dart';
+
 
 class ApiManagementState extends Equatable {
   final List<Partner> partners;

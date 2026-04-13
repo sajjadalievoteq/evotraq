@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gtin_service.dart';
+import 'package:traqtrace_app/data/services/gtin_service.dart';
 
 enum GTINStatus { initial, loading, success, error }
 

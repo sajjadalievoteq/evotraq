@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../data/services/packing_operation_service.dart';
 
 /// Screen to list all packing operations with search and filter capabilities
 class PackingOperationListScreen extends StatefulWidget {

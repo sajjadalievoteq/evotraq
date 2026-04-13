@@ -3,48 +3,44 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
-import 'package:traqtrace_app/features/admin/services/admin_service.dart';
-import 'package:traqtrace_app/features/auth/services/auth_service.dart';
-import 'package:traqtrace_app/features/auth/services/auth_service_impl.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_event_service.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_event_service_impl.dart';
-import 'package:traqtrace_app/features/epcis/services/transformation_event_service.dart';
-import 'package:traqtrace_app/features/epcis/services/transformation_event_service_impl.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/shipping_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/receiving_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/transaction_document_service.dart';
-import 'package:traqtrace_app/features/epcis/services/transaction_document_service_impl.dart';
-import 'package:traqtrace_app/features/epcis/services/reference_data_validation_service.dart';
-import 'package:traqtrace_app/features/gs1/services/epc_conversion_service.dart';
-import 'package:traqtrace_app/features/gs1/services/epc_conversion_service_impl.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service_impl.dart';
-import 'package:traqtrace_app/features/gs1/services/gtin_service.dart';
-import 'package:traqtrace_app/features/gs1/services/gtin_service_impl.dart';
-import 'package:traqtrace_app/features/gs1/services/sgtin_service.dart';
-import 'package:traqtrace_app/features/gs1/services/sgtin_service_impl.dart';
-import 'package:traqtrace_app/features/gs1/services/sscc_service.dart';
-import 'package:traqtrace_app/features/gs1/services/sscc_service_impl.dart';
-import 'package:traqtrace_app/features/barcode/services/barcode_generation_service.dart';
-import 'package:traqtrace_app/features/user_management/services/user_service.dart';
-import 'package:traqtrace_app/features/user_management/services/user_service_impl.dart';
-import 'package:traqtrace_app/features/epcis/services/advanced_query_service.dart';
-import 'package:traqtrace_app/features/notifications/data/services/notification_api_service.dart';
-import 'package:traqtrace_app/features/notifications/data/services/websocket_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/pharmaceutical_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/gln_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/features/tobacco/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/tobacco/services/gln_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/tobacco/services/sscc_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/sscc_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/core/services/system_settings_service.dart';
-import 'package:traqtrace_app/features/dashboards/services/product_journey_service.dart';
-import 'package:traqtrace_app/features/api_management/services/service_account_service.dart';
+
+import 'package:traqtrace_app/data/services/advanced_query_service.dart';
+import 'package:traqtrace_app/data/services/auth_service.dart';
+
+import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
+
+import 'package:traqtrace_app/data/services/notification_api_service.dart';
+
+import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
+
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
+
+import '../../data/services/admin_service.dart';
+import '../../data/services/barcode_generation_service.dart';
+import '../../data/services/commissioning_operation_service.dart';
+import '../../data/services/epc_conversion_service.dart';
+import '../../data/services/epcis_event_service.dart';
+import '../../data/services/gln_tobacco_extension_service.dart';
+import '../../data/services/gtin_service.dart';
+import '../../data/services/gtin_tobacco_extension_service.dart';
+import '../../data/services/packing_operation_service.dart';
+import '../../data/services/product_journey_service.dart';
+import '../../data/services/receiving_operation_service.dart';
+import '../../data/services/reference_data_validation_service.dart';
+import '../../data/services/service_account_service.dart';
+import '../../data/services/sgtin_service.dart';
+import '../../data/services/shipping_operation_service.dart';
+import '../../data/services/sscc_pharmaceutical_extension_service.dart';
+import '../../data/services/sscc_service.dart';
+import '../../data/services/sscc_tobacco_extension_service.dart';
+import '../../data/services/system_settings_service.dart';
+import '../../data/services/transaction_document_service.dart';
+import '../../data/services/transformation_event_service.dart';
+import '../../data/services/user_service.dart';
+import '../../data/services/websocket_service.dart';
+import '../network/http_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -69,7 +65,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   // Services
   getIt.registerLazySingleton<AuthService>(
-    () => AuthServiceImpl(
+    () => AuthService(
       dio: getIt<Dio>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -77,7 +73,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<UserService>(
-    () => UserServiceImpl(
+    () => UserService(
       dio: getIt<Dio>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -93,7 +89,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<GTINService>(
-    () => GTINServiceImpl(
+    () => GTINService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -101,7 +97,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<SGTINService>(
-    () => SGTINServiceImpl(
+    () => SGTINService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -109,7 +105,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<GLNService>(
-    () => GLNServiceImpl(
+    () => GLNService(
       client: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -117,7 +113,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<EPCConversionService>(
-    () => EPCConversionServiceImpl(
+    () => EPCConversionService(
       client: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -133,7 +129,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<SSCCService>(
-    () => SSCCServiceImpl(
+    () => SSCCService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -151,28 +147,28 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
 
   getIt.registerLazySingleton<ShippingOperationService>(
-    () => ShippingOperationServiceImpl(
+    () => ShippingOperationService(
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),
   );
 
   getIt.registerLazySingleton<ReceivingOperationService>(
-    () => ReceivingOperationServiceImpl(
+    () => ReceivingOperationService(
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),
   );
 
   getIt.registerLazySingleton<PackingOperationService>(
-    () => PackingOperationServiceImpl(
+    () => PackingOperationService(
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),
   );
 
   getIt.registerLazySingleton<CommissioningOperationService>(
-    () => CommissioningOperationServiceImpl(
+    () => CommissioningOperationService(
       client: getIt<http.Client>(),
       appConfig: getIt<AppConfig>(),
       tokenManager: getIt<TokenManager>(),
@@ -180,7 +176,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<TransactionDocumentService>(
-    () => TransactionDocumentServiceImpl(
+    () => TransactionDocumentService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -188,7 +184,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<ReferenceDataValidationService>(
-    () => ReferenceDataValidationServiceImpl(
+    () => ReferenceDataValidationService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -256,7 +252,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<ProductJourneyService>(
-    () => ProductJourneyServiceImpl(
+    () => ProductJourneyService(
       client: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -272,7 +268,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<EPCISEventService>(
-    () => EPCISEventServiceImpl(
+    () => EPCISEventService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
@@ -280,7 +276,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<TransformationEventService>(
-    () => TransformationEventServiceImpl(
+    () => TransformationEventService(
       httpClient: getIt<http.Client>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),

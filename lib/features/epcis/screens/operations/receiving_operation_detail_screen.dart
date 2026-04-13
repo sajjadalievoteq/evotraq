@@ -4,19 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/receiving_models.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/receiving_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../data/services/receiving_operation_service.dart';
 
 /// Screen to display receiving operation details
 class ReceivingOperationDetailScreen extends StatefulWidget {
   final String operationId;
 
-  const ReceivingOperationDetailScreen({
-    Key? key,
-    required this.operationId,
-  }) : super(key: key);
+  const ReceivingOperationDetailScreen({Key? key, required this.operationId})
+    : super(key: key);
 
   @override
   State<ReceivingOperationDetailScreen> createState() =>
@@ -45,8 +44,9 @@ class _ReceivingOperationDetailScreenState
 
     try {
       final receivingService = getIt<ReceivingOperationService>();
-      final operation =
-          await receivingService.getReceivingOperation(widget.operationId);
+      final operation = await receivingService.getReceivingOperation(
+        widget.operationId,
+      );
       setState(() {
         _operation = operation;
       });
@@ -70,8 +70,9 @@ class _ReceivingOperationDetailScreenState
 
       if (_operation!.receivingGLN != null) {
         try {
-          final receivingGLN =
-              await glnService.getGLNByCode(_operation!.receivingGLN!);
+          final receivingGLN = await glnService.getGLNByCode(
+            _operation!.receivingGLN!,
+          );
           setState(() => _receivingGLNDetails = receivingGLN);
         } catch (_) {
           // GLN not found in master data
@@ -80,8 +81,9 @@ class _ReceivingOperationDetailScreenState
 
       if (_operation!.sourceGLN != null) {
         try {
-          final sourceGLN =
-              await glnService.getGLNByCode(_operation!.sourceGLN!);
+          final sourceGLN = await glnService.getGLNByCode(
+            _operation!.sourceGLN!,
+          );
           setState(() => _sourceGLNDetails = sourceGLN);
         } catch (_) {
           // GLN not found in master data
@@ -152,9 +154,7 @@ class _ReceivingOperationDetailScreenState
     }
 
     if (_operation == null) {
-      return const Center(
-        child: Text('Receiving operation not found'),
-      );
+      return const Center(child: Text('Receiving operation not found'));
     }
 
     return SingleChildScrollView(
@@ -198,11 +198,7 @@ class _ReceivingOperationDetailScreenState
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    _getStatusIcon(status),
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  Icon(_getStatusIcon(status), color: Colors.white, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     status.name.toUpperCase(),
@@ -222,17 +218,13 @@ class _ReceivingOperationDetailScreenState
                 children: [
                   Text(
                     'Processed',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                   Text(
-                    DateFormat('MMM dd, yyyy HH:mm')
-                        .format(_operation!.processedAt!),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    DateFormat(
+                      'MMM dd, yyyy HH:mm',
+                    ).format(_operation!.processedAt!),
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -255,10 +247,7 @@ class _ReceivingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Receiving Reference',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -298,10 +287,7 @@ class _ReceivingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Locations',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -332,10 +318,7 @@ class _ReceivingOperationDetailScreenState
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _buildGLNInfo(
-                    _operation!.sourceGLN,
-                    _sourceGLNDetails,
-                  ),
+                  _buildGLNInfo(_operation!.sourceGLN, _sourceGLNDetails),
                 ],
               ),
             ),
@@ -382,10 +365,7 @@ class _ReceivingOperationDetailScreenState
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _buildGLNInfo(
-                    _operation!.receivingGLN,
-                    _receivingGLNDetails,
-                  ),
+                  _buildGLNInfo(_operation!.receivingGLN, _receivingGLNDetails),
                 ],
               ),
             ),
@@ -435,17 +415,11 @@ class _ReceivingOperationDetailScreenState
         ),
         if (glnDetails != null) ...[
           const SizedBox(height: 4),
-          Text(
-            glnDetails.locationName,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(glnDetails.locationName, style: const TextStyle(fontSize: 14)),
           if (glnDetails.city.isNotEmpty)
             Text(
               '${glnDetails.city}, ${glnDetails.stateProvince}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
         ],
       ],
@@ -454,7 +428,8 @@ class _ReceivingOperationDetailScreenState
 
   Widget _buildShipmentDetailsSection() {
     // Check if any shipment details are available
-    final hasShipmentDetails = _operation!.purchaseOrderNumber != null ||
+    final hasShipmentDetails =
+        _operation!.purchaseOrderNumber != null ||
         _operation!.invoiceNumber != null ||
         _operation!.billOfLadingNumber != null ||
         _operation!.carrier != null ||
@@ -477,10 +452,7 @@ class _ReceivingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Shipment Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -504,10 +476,7 @@ class _ReceivingOperationDetailScreenState
                 copyable: true,
               ),
             if (_operation!.carrier != null)
-              _buildInfoRow(
-                'Carrier',
-                _operation!.carrier!,
-              ),
+              _buildInfoRow('Carrier', _operation!.carrier!),
             if (_operation!.trackingNumber != null)
               _buildInfoRow(
                 'Tracking Number',
@@ -631,7 +600,11 @@ class _ReceivingOperationDetailScreenState
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.copy, size: 18, color: Colors.grey[600]),
+                          icon: Icon(
+                            Icons.copy,
+                            size: 18,
+                            color: Colors.grey[600],
+                          ),
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: epc));
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -667,25 +640,24 @@ class _ReceivingOperationDetailScreenState
                 const SizedBox(width: 8),
                 const Text(
                   'Messages',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const Divider(),
-            ...(_operation!.messages ?? []).map((message) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(message)),
-                    ],
-                  ),
-                )),
+            ...(_operation!.messages ?? []).map(
+              (message) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(message)),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../data/services/admin_service.dart';
 import 'admin_state.dart';
-import '../services/admin_service.dart';
 import '../models/admin_models.dart';
 
 class AdminCubit extends Cubit<AdminState> {

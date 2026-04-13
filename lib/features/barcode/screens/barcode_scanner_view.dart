@@ -10,11 +10,14 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/features/barcode/services/barcode_scanner_service.dart';
+
 import 'package:traqtrace_app/features/barcode/services/barcode_epcis_mapper.dart';
-import 'package:traqtrace_app/features/barcode/services/wired_scanner_service.dart';
+
 import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
+
+import '../../../data/services/barcode_scanner_service.dart';
+import '../../../data/services/wired_scanner_service.dart';
 
 class BarcodeScannerView extends StatefulWidget {
   final String bizStep;

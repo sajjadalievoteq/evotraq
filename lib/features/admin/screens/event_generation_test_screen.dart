@@ -4,8 +4,8 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/features/admin/services/event_generation_test_service.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+
+import '../../../data/services/event_generation_test_service.dart';
 
 class EventGenerationTestScreen extends StatefulWidget {
   const EventGenerationTestScreen({Key? key}) : super(key: key);

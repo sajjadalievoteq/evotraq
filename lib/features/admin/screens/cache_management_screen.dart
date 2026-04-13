@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../cache/services/cache_service.dart';
+import '../../../data/services/cache_service.dart';
 import '../../cache/models/cache_statistics.dart';
 import '../../cache/models/cache_health.dart';
 import '../../../shared/widgets/loading_overlay.dart';

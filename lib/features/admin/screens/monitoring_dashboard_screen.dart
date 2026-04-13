@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../../data/services/monitoring_service.dart';
 import '../models/monitoring_models.dart';
-import '../services/monitoring_service.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/network/token_manager.dart';
 import '../../../core/config/app_config.dart';

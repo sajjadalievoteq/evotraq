@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../../core/services/database_partitioning_service.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/network/token_manager.dart';
 import '../../../../shared/models/partition_models.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../data/services/database_partitioning_service.dart';
+
 
 /// Database Partitioning Dashboard Screen for Phase 3.1 implementation
 class DatabasePartitioningDashboard extends StatefulWidget {

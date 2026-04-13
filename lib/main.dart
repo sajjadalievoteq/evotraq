@@ -9,66 +9,62 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_provider.dart';
 import 'package:traqtrace_app/features/admin/cubit/admin_cubit.dart';
-import 'package:traqtrace_app/features/admin/services/admin_service.dart';
+
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_event_service.dart';
+
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
-import 'package:traqtrace_app/features/epcis/services/transformation_event_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/shipping_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/receiving_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/packing_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/operations/commissioning_operation_service.dart';
-import 'package:traqtrace_app/features/epcis/services/transaction_document_service.dart';
-import 'package:traqtrace_app/features/epcis/services/reference_data_validation_service.dart';
+
 import 'package:traqtrace_app/features/gs1/bloc/gln/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
-import 'package:traqtrace_app/features/gs1/services/epc_conversion_service.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
-import 'package:traqtrace_app/features/gs1/services/gtin_service.dart';
-import 'package:traqtrace_app/features/gs1/services/sgtin_service.dart';
-import 'package:traqtrace_app/features/gs1/services/sscc_service.dart';
+
 import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
-import 'package:traqtrace_app/features/user_management/services/user_service.dart';
+
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/cubit/advanced_query_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/traversal_query_provider.dart';
-import 'package:traqtrace_app/features/epcis/services/advanced_query_service.dart';
+import 'package:traqtrace_app/data/services/advanced_query_service.dart';
 // Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_cubit.dart';
-import 'package:traqtrace_app/features/notifications/data/services/notification_api_service.dart';
-import 'package:traqtrace_app/features/notifications/data/services/websocket_service.dart';
-// Pharmaceutical imports
-import 'package:traqtrace_app/features/pharmaceutical/services/pharmaceutical_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/services/gln_pharmaceutical_extension_service.dart';
-// Tobacco Extension imports
-import 'package:traqtrace_app/features/tobacco/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/tobacco/services/gln_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/tobacco/services/sscc_tobacco_extension_service.dart';
-// Pharmaceutical Extension imports
-import 'package:traqtrace_app/features/pharmaceutical/services/sscc_pharmaceutical_extension_service.dart';
-// System Settings imports
-import 'package:traqtrace_app/core/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/notification_api_service.dart';
+
+
+
+
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 // Dashboard imports
-import 'package:traqtrace_app/features/dashboards/services/product_journey_service.dart';
+
 // API Management imports
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
 import 'package:traqtrace_app/features/api_management/providers/partner_access_provider.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
-import 'package:traqtrace_app/features/api_management/services/service_account_service.dart';
+
 
 import 'package:traqtrace_app/core/di/injection.dart';
+
+import 'package:traqtrace_app/data/services/admin_service.dart';
+import 'package:traqtrace_app/data/services/epcis_event_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gtin_service.dart';
+import 'package:traqtrace_app/data/services/service_account_service.dart';
+import 'package:traqtrace_app/data/services/sgtin_service.dart';
+import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/sscc_service.dart';
+import 'package:traqtrace_app/data/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/user_service.dart';
+import 'package:traqtrace_app/data/services/websocket_service.dart';
+import 'package:traqtrace_app/data/services/transformation_event_service.dart';
+import 'package:traqtrace_app/data/services/receiving_operation_service.dart';
 
 void main() async {
   try {
@@ -154,7 +150,7 @@ class TraqTraceApp extends StatelessWidget {
         ),
         BlocProvider<ValidationRuleCubit>(
           create: (context) =>
-              ValidationRuleCubit(appConfig: getIt<AppConfig>()),
+              ValidationRuleCubit(),
         ),
         BlocProvider<TraversalQueryCubit>(
           create: (context) =>

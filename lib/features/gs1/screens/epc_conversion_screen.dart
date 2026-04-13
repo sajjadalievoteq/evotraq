@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/features/gs1/services/epc_conversion_service.dart';
+
+import '../../../data/services/epc_conversion_service.dart';
 
 class EPCConversionScreen extends StatefulWidget {
   final EPCConversionService epcConversionService;

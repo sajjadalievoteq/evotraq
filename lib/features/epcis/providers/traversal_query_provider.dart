@@ -1,4 +1,4 @@
-import '../services/advanced_query_service.dart';
+import '../../../data/services/advanced_query_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

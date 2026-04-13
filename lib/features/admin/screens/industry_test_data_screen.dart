@@ -4,7 +4,8 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/features/admin/services/industry_test_data_service.dart';
+
+import '../../../data/services/industry_test_data_service.dart';
 
 /// Screen for generating industry-specific test data (Tobacco and Pharmaceutical)
 /// This creates real product data with accurate specifications for the UAE market

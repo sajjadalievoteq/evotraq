@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../data/services/user_service.dart';
 import 'profile_state.dart';
-import '../services/user_service.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final UserService _userService;

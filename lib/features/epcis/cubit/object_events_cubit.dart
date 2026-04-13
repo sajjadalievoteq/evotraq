@@ -5,8 +5,7 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_types.dart';
-import 'package:traqtrace_app/features/epcis/services/object_event_service.dart';
-import 'package:traqtrace_app/features/epcis/services/object_event_service_impl.dart';
+import 'package:traqtrace_app/data/services/object_event_service.dart';
 
 class ObjectEventsState extends Equatable {
   final List<ObjectEvent> events;
@@ -64,7 +63,7 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     required AppConfig appConfig,
   }) : _service =
            service ??
-           ObjectEventServiceImpl(
+           ObjectEventService(
              httpClient: httpClient,
              tokenManager: tokenManager,
              appConfig: appConfig,

@@ -1,7 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
-import 'package:traqtrace_app/features/barcode/services/barcode_scanner_service.dart';
+
+import '../../../data/services/barcode_scanner_service.dart';
 
 class BarcodeScannerView extends StatefulWidget {
   final ScanMode scanMode;

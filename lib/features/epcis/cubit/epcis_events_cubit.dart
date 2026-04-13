@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters_dto.dart';
-import 'package:traqtrace_app/features/epcis/services/epcis_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis_event_service.dart';
 import 'package:traqtrace_app/features/epcis/utils/epcis_query_factory.dart';
 
 class EPCISEventsState extends Equatable {

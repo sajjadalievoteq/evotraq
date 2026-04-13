@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../data/services/gln_pharmaceutical_extension_service.dart';
 import '../models/gln_pharmaceutical_extension_model.dart';
-import '../services/gln_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)

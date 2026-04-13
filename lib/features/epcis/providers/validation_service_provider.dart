@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/epcis/services/validation_service.dart';
+import 'package:traqtrace_app/data/services/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
@@ -102,7 +102,7 @@ class ValidationCubit extends Cubit<ValidationState> {
     required AppConfig appConfig,
   }) : _validationService =
            validationService ??
-           ValidationServiceImpl(
+           ValidationService(
              tokenManager: getIt<TokenManager>(),
              httpClient: getIt<http.Client>(),
              appConfig: appConfig,

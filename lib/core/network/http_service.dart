@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../config/app_config.dart';
+import 'package:traqtrace_app/core/config/app_config.dart';
 
 class HttpService {
   late Dio _dio;
@@ -72,9 +72,9 @@ class HttpService {
   }
   
   // POST request
-  Future<Response> post(String path, {dynamic data}) async {
+  Future<Response> post(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      final response = await _dio.post(path, data: data);
+      final response = await _dio.post(path, data: data, queryParameters: queryParameters);
       return response;
     } catch (e) {
       rethrow;
@@ -82,9 +82,9 @@ class HttpService {
   }
   
   // PUT request
-  Future<Response> put(String path, {dynamic data}) async {
+  Future<Response> put(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      final response = await _dio.put(path, data: data);
+      final response = await _dio.put(path, data: data, queryParameters: queryParameters);
       return response;
     } catch (e) {
       rethrow;
@@ -92,9 +92,9 @@ class HttpService {
   }
   
   // DELETE request
-  Future<Response> delete(String path, {dynamic data}) async {
+  Future<Response> delete(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      final response = await _dio.delete(path, data: data);
+      final response = await _dio.delete(path, data: data, queryParameters: queryParameters);
       return response;
     } catch (e) {
       rethrow;

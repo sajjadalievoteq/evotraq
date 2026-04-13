@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/data/services/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:traqtrace_app/features/epcis/services/validation_service.dart';
 
 import 'validation_service_provider_cache_test.mocks.dart';
 

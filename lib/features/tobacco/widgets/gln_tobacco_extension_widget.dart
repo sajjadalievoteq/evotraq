@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../data/services/gln_tobacco_extension_service.dart';
 import '../models/gln_tobacco_extension_model.dart';
-import '../services/gln_tobacco_extension_service.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 

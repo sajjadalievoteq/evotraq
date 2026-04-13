@@ -5,9 +5,11 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/network/token_manager.dart';
 import '../../../core/widgets/app_drawer.dart';
-import '../services/data_consistency_service.dart';
-import '../services/error_correction_service.dart';
-import '../services/data_consistency_persistence_service.dart';
+import '../../../data/services/data_consistency_persistence_service.dart';
+import '../../../data/services/data_consistency_service.dart';
+import '../../../data/services/error_correction_service.dart';
+
+
 
 class DataConsistencyIntegrityDashboard extends StatefulWidget {
   const DataConsistencyIntegrityDashboard({Key? key}) : super(key: key);

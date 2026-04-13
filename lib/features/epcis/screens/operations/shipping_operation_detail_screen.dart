@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_non_null_assertion
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +9,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/shipping_models.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gln_service.dart';
 import 'package:intl/intl.dart';
 
 /// Screen to display shipping operation details

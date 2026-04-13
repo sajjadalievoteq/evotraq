@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/app_drawer.dart';
-import '../services/performance_optimization_service.dart';
+import '../../../data/services/performance_optimization_service.dart';
+
 
 class PerformanceOptimizationDashboard extends StatefulWidget {
   const PerformanceOptimizationDashboard({super.key});

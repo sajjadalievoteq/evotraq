@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
 /// Implementation of the SSCCService interface that interacts with the backend API
 class SSCCService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
   /// Creates a new SSCCServiceImpl instance
-  SSCCService({required HttpService httpService}) : _httpService = httpService;
+  SSCCService({required DioService dioService}) : _dioService = dioService;
 
   Future<SSCC> createSSCC(SSCC sscc) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -35,7 +35,7 @@ class SSCCService {
     final String jsonBody = json.encode(jsonPayload);
     print('SSCC Create request payload: $jsonBody');
     print('SSCC Create request payload fields: ${jsonPayload.keys}');
-    print('SSCC API endpoint: ${_httpService.baseUrl}/identifiers/sscc');
+    print('SSCC API endpoint: ${_dioService.baseUrl}/identifiers/sscc');
 
     // Verify that we're sending ONLY the exact fields the backend accepts
     print('FINAL SSCC CREATE PAYLOAD VERIFICATION:');
@@ -73,8 +73,8 @@ class SSCCService {
     print(' - No "createdAt" field: ${!jsonPayload.containsKey('createdAt')}');
     print(' - No "updatedAt" field: ${!jsonPayload.containsKey('updatedAt')}');
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/identifiers/sscc',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/identifiers/sscc',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -141,15 +141,15 @@ class SSCCService {
   Future<SSCC> getSSCCById(String id) async {
     print('Fetching SSCC with ID: $id');
 
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final uri = Uri.parse('${_httpService.baseUrl}/identifiers/sscc/$id');
+    final uri = Uri.parse('${_dioService.baseUrl}/identifiers/sscc/$id');
     print('Request URI: $uri');
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       uri.toString(),
       headers: {
         'Content-Type': 'application/json',
@@ -206,17 +206,17 @@ class SSCCService {
   Future<SSCC> getSSCCByCode(String ssccCode) async {
     print('Fetching SSCC with code: $ssccCode');
 
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final uri = Uri.parse(
-      '${_httpService.baseUrl}/identifiers/sscc/code/$ssccCode',
+      '${_dioService.baseUrl}/identifiers/sscc/code/$ssccCode',
     );
     print('Request URI: $uri');
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       uri.toString(),
       headers: {
         'Content-Type': 'application/json',
@@ -272,17 +272,17 @@ class SSCCService {
   }
 
   Future<List<SSCC>> getAllSSCCs({int page = 0, int size = 20}) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'page': page, 'size': size};
     final uri = Uri.parse(
-      '${_httpService.baseUrl}/identifiers/sscc',
+      '${_dioService.baseUrl}/identifiers/sscc',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       uri.toString(),
       headers: {
         'Content-Type': 'application/json',
@@ -369,13 +369,13 @@ class SSCCService {
   }
 
   Future<SSCC> updateSSCC(String id, SSCC ssccDetails) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sscc/$id',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sscc/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -396,13 +396,13 @@ class SSCCService {
   }
 
   Future<void> deleteSSCC(String id) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.delete(
-      '${_httpService.baseUrl}/identifiers/sscc/$id',
+    final response = await _dioService.delete(
+      '${_dioService.baseUrl}/identifiers/sscc/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -422,13 +422,13 @@ class SSCCService {
   Future<List<SSCC>> findSSCCsByContainerType(
     ContainerType containerType,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/container-type/${containerType.name}',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/container-type/${containerType.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -452,13 +452,13 @@ class SSCCService {
   Future<List<SSCC>> findSSCCsByContainerStatus(
     ContainerStatus containerStatus,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/status/${containerStatus.name}',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/status/${containerStatus.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -480,13 +480,13 @@ class SSCCService {
   }
 
   Future<List<SSCC>> findSSCCsBySourceLocation(String sourceGlnCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/source-location/$sourceGlnCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/source-location/$sourceGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -510,13 +510,13 @@ class SSCCService {
   Future<List<SSCC>> findSSCCsByDestinationLocation(
     String destinationGlnCode,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/destination-location/$destinationGlnCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/destination-location/$destinationGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -541,7 +541,7 @@ class SSCCService {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -551,8 +551,8 @@ class SSCCService {
       'endDate': endDate.toIso8601String(),
     };
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/packed-between',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/packed-between',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -578,7 +578,7 @@ class SSCCService {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -588,8 +588,8 @@ class SSCCService {
       'endDate': endDate.toIso8601String(),
     };
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/shipped-between',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/shipped-between',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -612,13 +612,13 @@ class SSCCService {
   }
 
   Future<List<SSCC>> findChildSSCCs(String parentSsccCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/$parentSsccCode/hierarchy',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/$parentSsccCode/hierarchy',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -642,15 +642,15 @@ class SSCCService {
   Future<List<SSCC>> findSSCCsByGs1CompanyPrefix(
     String gs1CompanyPrefix,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'companyPrefix': gs1CompanyPrefix};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/company',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/company',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -678,7 +678,7 @@ class SSCCService {
     String? sourceLocationId,
     String? destinationLocationId,
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -691,8 +691,8 @@ class SSCCService {
         'destinationLocationId': destinationLocationId,
     };
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/search',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/search',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -714,13 +714,13 @@ class SSCCService {
   }
 
   Future<SSCC> updateSSCCStatus(String id, ContainerStatus newStatus) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.patch(
-      '${_httpService.baseUrl}/identifiers/sscc/$id/status?status=${newStatus.name}',
+    final response = await _dioService.patch(
+      '${_dioService.baseUrl}/identifiers/sscc/$id/status?status=${newStatus.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -740,15 +740,15 @@ class SSCCService {
   }
 
   Future<bool> validateSSCCCode(String ssccCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'ssccCode': ssccCode};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sscc/validate',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sscc/validate',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -773,7 +773,7 @@ class SSCCService {
     String gs1CompanyPrefix,
     String extensionDigit,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -789,8 +789,8 @@ class SSCCService {
 
     print('Sending SSCC generate request with: $requestBody');
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/identifiers/sscc/generate',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/identifiers/sscc/generate',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -1011,7 +1011,7 @@ class SSCCService {
     String sortBy = 'ssccCode',
     String direction = 'ASC',
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -1036,13 +1036,13 @@ class SSCCService {
     queryParams['direction'] = direction;
 
     final uri = Uri.parse(
-      '${_httpService.baseUrl}/identifiers/sscc/search/advanced',
+      '${_dioService.baseUrl}/identifiers/sscc/search/advanced',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
     print('SSCC Advanced Search request: $uri');
 
     try {
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         uri.toString(),
         headers: {
           'Authorization': 'Bearer $token',

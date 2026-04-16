@@ -1,29 +1,22 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/shipping_models.dart';
 
 class ShippingOperationService {
-  final TokenManager _tokenManager;
-  final http.Client _httpClient;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   ShippingOperationService({
-    required TokenManager tokenManager,
-    http.Client? httpClient,
-    required AppConfig appConfig,
-  }) : _tokenManager = tokenManager,
-       _httpClient = httpClient ?? http.Client(),
-       _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
-  String get _baseUrl => '${_appConfig.apiBaseUrl}/operations/shipping';
+  String get _baseUrl => '${_dioService.baseUrl}/operations/shipping';
 
   Future<Map<String, String>> get _headers async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -32,17 +25,19 @@ class ShippingOperationService {
   ) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.post(
-        Uri.parse(_baseUrl),
+      final response = await _dioService.post(
+        _baseUrl,
         headers: headers,
-        body: jsonEncode(shippingRequest.toJson()),
+        data: jsonEncode(shippingRequest.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         return ShippingResponse.fromJson(responseData);
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to create shipping operation: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -57,16 +52,18 @@ class ShippingOperationService {
   Future<ShippingResponse> getShippingOperation(String operationId) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/$operationId'),
+      final response = await _dioService.get(
+        '$_baseUrl/$operationId',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         return ShippingResponse.fromJson(responseData);
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operation: ${errorData['message'] ?? 'Not found'}',
           statusCode: response.statusCode,
@@ -84,17 +81,20 @@ class ShippingOperationService {
   }) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl?page=$page&size=$size'),
+      final response = await _dioService.get(
+        _baseUrl,
+        queryParameters: {'page': page.toString(), 'size': size.toString()},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         final operations = responseData['operations'] as List;
         return operations.map((op) => ShippingResponse.fromJson(op)).toList();
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operations: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -111,16 +111,18 @@ class ShippingOperationService {
   ) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/reference/${Uri.encodeComponent(reference)}'),
+      final response = await _dioService.get(
+        '$_baseUrl/reference/${Uri.encodeComponent(reference)}',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as List;
+        final responseData = jsonDecode(response.data) as List;
         return responseData.map((op) => ShippingResponse.fromJson(op)).toList();
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operations by reference: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -137,18 +139,18 @@ class ShippingOperationService {
   ) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse(
-          '$_baseUrl/destination/${Uri.encodeComponent(destinationGLN)}',
-        ),
+      final response = await _dioService.get(
+        '$_baseUrl/destination/${Uri.encodeComponent(destinationGLN)}',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as List;
+        final responseData = jsonDecode(response.data) as List;
         return responseData.map((op) => ShippingResponse.fromJson(op)).toList();
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operations by destination: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -165,16 +167,18 @@ class ShippingOperationService {
   ) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/source/${Uri.encodeComponent(sourceGLN)}'),
+      final response = await _dioService.get(
+        '$_baseUrl/source/${Uri.encodeComponent(sourceGLN)}',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as List;
+        final responseData = jsonDecode(response.data) as List;
         return responseData.map((op) => ShippingResponse.fromJson(op)).toList();
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operations by source: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -189,16 +193,18 @@ class ShippingOperationService {
   Future<List<ShippingResponse>> getShippingOperationsForEPC(String epc) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/epc/${Uri.encodeComponent(epc)}'),
+      final response = await _dioService.get(
+        '$_baseUrl/epc/${Uri.encodeComponent(epc)}',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as List;
+        final responseData = jsonDecode(response.data) as List;
         return responseData.map((op) => ShippingResponse.fromJson(op)).toList();
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to get shipping operations for EPC: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,
@@ -215,17 +221,19 @@ class ShippingOperationService {
   ) async {
     try {
       final headers = await _headers;
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/validate'),
+      final response = await _dioService.post(
+        '$_baseUrl/validate',
         headers: headers,
-        body: jsonEncode(shippingRequest.toJson()),
+        data: jsonEncode(shippingRequest.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200 || response.statusCode == 400) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         return ShippingResponse.fromJson(responseData);
       } else {
-        final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.data);
         throw ShippingOperationException(
           'Failed to validate shipping request: ${errorData['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode,

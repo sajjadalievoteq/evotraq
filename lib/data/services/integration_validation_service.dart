@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class ValidationResultDTO {
   final String testName;
@@ -32,31 +32,30 @@ class ValidationResultDTO {
 }
 
 class IntegrationValidationService {
-  final TokenManager _tokenManager;
-  final String _baseUrl;
+  final DioService _dioService;
   
   IntegrationValidationService({
-    TokenManager? tokenManager,
-    required String baseUrl,
-  }) : _tokenManager = tokenManager ?? TokenManager(),
-       _baseUrl = baseUrl;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
   Future<Map<String, dynamic>> _getWithAuth(String path) async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw Exception('Not authenticated');
     }
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl$path'),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}$path',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load data: ${response.statusCode}');
     }

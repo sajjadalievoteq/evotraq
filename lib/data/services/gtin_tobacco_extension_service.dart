@@ -1,28 +1,21 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 
 /// Service for GTIN tobacco extension operations
 /// Provides CRUD operations for tobacco-specific product attributes
 class GTINTobaccoExtensionService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   GTINTobaccoExtensionService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _httpClient = httpClient,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
-  String get _baseUrl => '${_appConfig.apiBaseUrl}/tobacco/products';
+  String get _baseUrl => '${_dioService.baseUrl}/tobacco/products';
 
   Future<Map<String, String>> get _headers async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -34,14 +27,16 @@ class GTINTobaccoExtensionService {
     String gtinCode,
     GTINTobaccoExtension extension,
   ) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl/gtin/$gtinCode'),
+    final response = await _dioService.post(
+      '$_baseUrl/gtin/$gtinCode',
       headers: await _headers,
-      body: jsonEncode(extension.toJson()),
+      data: jsonEncode(extension.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return GTINTobaccoExtension.fromJson(jsonDecode(response.body));
+      return GTINTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to create GTIN tobacco extension: ${response.statusCode}');
     }
@@ -52,17 +47,19 @@ class GTINTobaccoExtensionService {
     int gtinId,
     GTINTobaccoExtension extension,
   ) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl'),
+    final response = await _dioService.post(
+      '$_baseUrl',
       headers: await _headers,
-      body: jsonEncode({
+      data: jsonEncode({
         ...extension.toJson(),
         'gtinId': gtinId,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return GTINTobaccoExtension.fromJson(jsonDecode(response.body));
+      return GTINTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to save GTIN tobacco extension: ${response.statusCode}');
     }
@@ -70,13 +67,15 @@ class GTINTobaccoExtensionService {
 
   /// Get tobacco extension by GTIN ID
   Future<GTINTobaccoExtension?> getByGtinId(int gtinId) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$gtinId'),
+    final response = await _dioService.get(
+      '$_baseUrl/$gtinId',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return GTINTobaccoExtension.fromJson(jsonDecode(response.body));
+      return GTINTobaccoExtension.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       return null;
     } else {
@@ -86,13 +85,15 @@ class GTINTobaccoExtensionService {
 
   /// Get tobacco extension by GTIN code
   Future<GTINTobaccoExtension?> getByGtinCode(String gtinCode) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/gtin/$gtinCode'),
+    final response = await _dioService.get(
+      '$_baseUrl/gtin/$gtinCode',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return GTINTobaccoExtension.fromJson(jsonDecode(response.body));
+      return GTINTobaccoExtension.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       return null;
     } else {
@@ -105,14 +106,16 @@ class GTINTobaccoExtensionService {
     int extensionId,
     GTINTobaccoExtension extension,
   ) async {
-    final response = await _httpClient.put(
-      Uri.parse('$_baseUrl/$extensionId'),
+    final response = await _dioService.put(
+      '$_baseUrl/$extensionId',
       headers: await _headers,
-      body: jsonEncode(extension.toJson()),
+      data: jsonEncode(extension.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return GTINTobaccoExtension.fromJson(jsonDecode(response.body));
+      return GTINTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to update GTIN tobacco extension: ${response.statusCode}');
     }
@@ -120,9 +123,11 @@ class GTINTobaccoExtensionService {
 
   /// Delete tobacco extension
   Future<void> delete(int extensionId) async {
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$extensionId'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$extensionId',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {

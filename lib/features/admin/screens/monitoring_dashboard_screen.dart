@@ -3,8 +3,7 @@ import 'dart:async';
 import '../../../data/services/monitoring_service.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../core/network/token_manager.dart';
-import '../../../core/config/app_config.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../widgets/performance_metrics_card.dart';
 import '../widgets/storage_statistics_card.dart';
@@ -58,11 +57,8 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
 
   void _initializeMonitoring() async {
     try {
-      // Get TokenManager and AppConfig from provider instead of creating new instances
-      final tokenManager = getIt<TokenManager>();
-      final appConfig = getIt<AppConfig>();
-      
-      _monitoringService = MonitoringServiceProvider.getInstance(tokenManager, appConfig);
+      final dioService = getIt<DioService>();
+      _monitoringService = MonitoringServiceProvider.getInstance(dioService);
       
       // Subscribe to streams
       _performanceSubscription = _monitoringService.performanceStream.listen(

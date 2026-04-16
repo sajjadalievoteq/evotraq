@@ -1,18 +1,18 @@
-import '../../core/network/http_service.dart';
+import '../../core/network/dio_service.dart';
 
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters.dart';
 import 'package:traqtrace_app/features/epcis/models/advanced_query_result.dart';
 
 class AdvancedQueryService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  AdvancedQueryService(this._httpService);
+  AdvancedQueryService(this._dioService);
 
   Future<AdvancedQueryResult> executeAdvancedQuery(EPCISQueryParameters parameters) async {
     try {
       final queryData = parameters.toJson();
       
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/advanced',
         data: queryData,
       );
@@ -33,7 +33,7 @@ class AdvancedQueryService {
   ) async {
     try {
       final queryParams = {'facetFields': facetFields.join(',')};
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/faceted?${Uri(queryParameters: queryParams).query}',
         data: parameters.toJson(),
       );
@@ -50,7 +50,7 @@ class AdvancedQueryService {
 
   Future<Map<String, List<String>>> getAvailableFacets() async {
     try {
-      final response = await _httpService.get('/events/query/facets/available');
+      final response = await _dioService.get('/events/query/facets/available');
 
       if (response.statusCode == 200) {
         Map<String, dynamic> data = response.data;
@@ -84,7 +84,7 @@ class AdvancedQueryService {
         queryParams['eventTypes'] = eventTypes.join(',');
       }
 
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '/events/query/fulltext',
         queryParameters: queryParams,
       );
@@ -113,7 +113,7 @@ class AdvancedQueryService {
       };
 
       // For GET with body, we'll use POST instead as Dio doesn't support GET with body well
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/geospatial?${Uri(queryParameters: queryParams).query}',
         data: additionalParams?.toJson() ?? {},
       );
@@ -142,7 +142,7 @@ class AdvancedQueryService {
         queryParams['description'] = description;
       }
 
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/stored?${Uri(queryParameters: queryParams).query}',
         data: parameters.toJson(),
       );
@@ -159,7 +159,7 @@ class AdvancedQueryService {
 
   Future<List<Map<String, dynamic>>> getStoredQueries() async {
     try {
-      final response = await _httpService.get('/events/query/stored');
+      final response = await _dioService.get('/events/query/stored');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -177,7 +177,7 @@ class AdvancedQueryService {
     Map<String, dynamic>? runtimeParams,
   ) async {
     try {
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/stored/$queryName/execute',
         data: runtimeParams ?? {},
       );
@@ -194,7 +194,7 @@ class AdvancedQueryService {
 
   Future<void> deleteStoredQuery(String queryName) async {
     try {
-      final response = await _httpService.delete('/events/query/stored/$queryName');
+      final response = await _dioService.delete('/events/query/stored/$queryName');
 
       if (response.statusCode != 204) {
         throw Exception('Failed to delete stored query: ${response.statusCode}');
@@ -218,7 +218,7 @@ class AdvancedQueryService {
         queryParams['webhookUrl'] = webhookUrl;
       }
 
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/subscriptions?${Uri(queryParameters: queryParams).query}',
         data: parameters.toJson(),
       );
@@ -235,7 +235,7 @@ class AdvancedQueryService {
 
   Future<List<Map<String, dynamic>>> getActiveSubscriptions() async {
     try {
-      final response = await _httpService.get('/events/query/subscriptions');
+      final response = await _dioService.get('/events/query/subscriptions');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -250,7 +250,7 @@ class AdvancedQueryService {
 
   Future<void> deleteSubscription(String subscriptionId) async {
     try {
-      final response = await _httpService.delete('/events/query/subscriptions/$subscriptionId');
+      final response = await _dioService.delete('/events/query/subscriptions/$subscriptionId');
 
       if (response.statusCode != 204) {
         throw Exception('Failed to delete subscription: ${response.statusCode}');
@@ -266,7 +266,7 @@ class AdvancedQueryService {
           ? '/events/export/xml'
           : '/events/export/json';
 
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         endpoint,
         data: parameters.toJson(),
       );
@@ -285,7 +285,7 @@ class AdvancedQueryService {
 
   Future<Map<String, dynamic>> getQueryExecutionPlan(EPCISQueryParameters parameters) async {
     try {
-      final response = await _httpService.post(
+      final response = await _dioService.post(
         '/events/query/execution-plan',
         data: parameters.toJson(),
       );
@@ -310,7 +310,7 @@ class AdvancedQueryService {
       if (startTime != null) queryParams['startTime'] = startTime;
       if (endTime != null) queryParams['endTime'] = endTime;
 
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '/events/query/performance-statistics',
         queryParameters: queryParams,
       );
@@ -346,7 +346,7 @@ class AdvancedQueryService {
         queryParams['endTime'] = endTime.toIso8601String();
       }
 
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '/events/query/traversal/supply-chain/$epc',
         queryParameters: queryParams,
       );
@@ -381,7 +381,7 @@ class AdvancedQueryService {
         queryParams['endTime'] = endTime.toIso8601String();
       }
 
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '/events/query/traversal/history/$epc',
         queryParameters: queryParams,
       );
@@ -410,7 +410,7 @@ class AdvancedQueryService {
         queryParams['timestamp'] = timestamp.toIso8601String();
       }
 
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '/events/query/traversal/hierarchy/$parentEpc',
         queryParameters: queryParams,
       );

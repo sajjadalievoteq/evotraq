@@ -1,35 +1,30 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class DataConsistencyService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   DataConsistencyService({
-    required http.Client client,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _client = client,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
   /// Perform consistency validation for a list of events
   Future<Map<String, dynamic>> performConsistencyValidation(List<String> eventIds) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/events'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/validate/events',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(eventIds),
+      data: jsonEncode(eventIds),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to perform consistency validation: ${response.statusCode}');
     }
@@ -41,20 +36,22 @@ class DataConsistencyService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/supply-chain/$epc')
-          .replace(queryParameters: {
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/api/data/consistency/validate/supply-chain/$epc',
+      queryParameters: {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to validate supply chain consistency: ${response.statusCode}');
     }
@@ -62,18 +59,20 @@ class DataConsistencyService {
 
   /// Run data integrity verification job
   Future<Map<String, dynamic>> runDataIntegrityVerificationJob(Map<String, dynamic> jobParams) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/integrity/verify'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/integrity/verify',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(jobParams),
+      data: jsonEncode(jobParams),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to run integrity verification job: ${response.statusCode}');
     }
@@ -81,16 +80,18 @@ class DataConsistencyService {
 
   /// Get data integrity verification job status
   Future<Map<String, dynamic>> getIntegrityJobStatus(String jobId) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/integrity/verify/$jobId'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/api/data/consistency/integrity/verify/$jobId',
       headers: {
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to get job status: ${response.statusCode}');
     }
@@ -111,24 +112,26 @@ class DataConsistencyService {
     Map<String, DateTime> timeRange,
     List<String> eventTypes,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/anomalies/detect'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/anomalies/detect',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'time_range': {
           'start': timeRange['start']?.toIso8601String(),
           'end': timeRange['end']?.toIso8601String(),
         },
         'event_types': eventTypes,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List;
+      return jsonDecode(response.data) as List;
     } else {
       throw Exception('Failed to detect anomalies: ${response.statusCode}');
     }
@@ -140,21 +143,23 @@ class DataConsistencyService {
     DateTime endTime,
     List<String> eventTypes,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/reports/generate')
-          .replace(queryParameters: {
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/reports/generate',
+      queryParameters: {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
         'eventTypes': eventTypes,
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to generate consistency report: ${response.statusCode}');
     }
@@ -162,18 +167,20 @@ class DataConsistencyService {
 
   /// Validate business logic consistency
   Future<Map<String, dynamic>> validateBusinessLogicConsistency(List<Map<String, dynamic>> events) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/business-logic'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/validate/business-logic',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(events),
+      data: jsonEncode(events),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to validate business logic consistency: ${response.statusCode}');
     }
@@ -184,19 +191,21 @@ class DataConsistencyService {
     String epc,
     List<String> expectedSequence,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/missing-events/$epc')
-          .replace(queryParameters: {
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/api/data/consistency/validate/missing-events/$epc',
+      queryParameters: {
         'expectedSequence': expectedSequence,
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to check missing events: ${response.statusCode}');
     }
@@ -204,18 +213,20 @@ class DataConsistencyService {
 
   /// Validate event timing consistency
   Future<Map<String, dynamic>> validateEventTimingConsistency(List<Map<String, dynamic>> events) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/timing'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/validate/timing',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(events),
+      data: jsonEncode(events),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to validate timing consistency: ${response.statusCode}');
     }
@@ -226,21 +237,23 @@ class DataConsistencyService {
     List<Map<String, dynamic>> events,
     List<String> externalSources,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/api/data/consistency/validate/cross-validation'),
+    final token = await _dioService.getAuthToken();
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/api/data/consistency/validate/cross-validation',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'events': events,
         'external_sources': externalSources,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to cross-validate: ${response.statusCode}');
     }

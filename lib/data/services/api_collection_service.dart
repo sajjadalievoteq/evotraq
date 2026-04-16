@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/api_collection.dart';
 import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 
@@ -9,20 +8,15 @@ import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 /// Communicates with the Integration Layer admin API
 class ApiCollectionService {
   final String baseUrl;
-  final http.Client _client;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
-  ApiCollectionService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : baseUrl = ApiConfig.fromCoreUrl(appConfig.apiBaseUrl),
-        _client = httpClient,
-        _tokenManager = tokenManager;
+  ApiCollectionService({required DioService dioService})
+    : baseUrl = ApiConfig.fromCoreUrl(dioService.baseUrl),
+      _dioService = dioService;
 
   /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -33,13 +27,16 @@ class ApiCollectionService {
   // ==================== Collection Operations ====================
 
   Future<List<ApiCollection>> getCollections({bool activeOnly = false}) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections?activeOnly=$activeOnly'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections',
+      queryParameters: {'activeOnly': activeOnly.toString()},
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => ApiCollection.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load collections: ${response.statusCode}');
@@ -47,27 +44,33 @@ class ApiCollectionService {
   }
 
   Future<List<ApiCollection>> getPublicCollections() async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/public'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/public',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => ApiCollection.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load public collections: ${response.statusCode}');
+      throw Exception(
+        'Failed to load public collections: ${response.statusCode}',
+      );
     }
   }
 
   Future<ApiCollection> getCollectionById(String id) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$id'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$id',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiCollection.fromJson(json.decode(response.body));
+      return ApiCollection.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('Collection not found');
     } else {
@@ -76,28 +79,34 @@ class ApiCollectionService {
   }
 
   Future<ApiCollection> getCollectionWithApis(String id) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$id/with-apis'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$id/with-apis',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiCollection.fromJson(json.decode(response.body));
+      return ApiCollection.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('Collection not found');
     } else {
-      throw Exception('Failed to load collection with APIs: ${response.statusCode}');
+      throw Exception(
+        'Failed to load collection with APIs: ${response.statusCode}',
+      );
     }
   }
 
   Future<ApiCollection> getCollectionByCode(String code) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/code/$code'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/code/$code',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiCollection.fromJson(json.decode(response.body));
+      return ApiCollection.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('Collection not found');
     } else {
@@ -106,16 +115,20 @@ class ApiCollectionService {
   }
 
   Future<List<ApiCollection>> getCollectionsByCategory(String category) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/category/$category'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/category/$category',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => ApiCollection.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load collections by category: ${response.statusCode}');
+      throw Exception(
+        'Failed to load collections by category: ${response.statusCode}',
+      );
     }
   }
 
@@ -140,14 +153,16 @@ class ApiCollectionService {
       'rateLimitPerMinute': rateLimitPerMinute,
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return ApiCollection.fromJson(json.decode(response.body));
+      return ApiCollection.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 400) {
       throw Exception('Invalid collection data or code already exists');
     } else {
@@ -155,7 +170,8 @@ class ApiCollectionService {
     }
   }
 
-  Future<ApiCollection> updateCollection(String id, {
+  Future<ApiCollection> updateCollection(
+    String id, {
     String? name,
     String? description,
     String? version,
@@ -171,16 +187,19 @@ class ApiCollectionService {
     if (category != null) body['category'] = category;
     if (icon != null) body['icon'] = icon;
     if (isPublic != null) body['isPublic'] = isPublic;
-    if (rateLimitPerMinute != null) body['rateLimitPerMinute'] = rateLimitPerMinute;
+    if (rateLimitPerMinute != null)
+      body['rateLimitPerMinute'] = rateLimitPerMinute;
 
-    final response = await _client.put(
-      Uri.parse('$baseUrl/admin/v1/collections/$id'),
+    final response = await _dioService.put(
+      '$baseUrl/admin/v1/collections/$id',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiCollection.fromJson(json.decode(response.body));
+      return ApiCollection.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('Collection not found');
     } else {
@@ -189,9 +208,11 @@ class ApiCollectionService {
   }
 
   Future<void> activateCollection(String id) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections/$id/activate'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections/$id/activate',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {
@@ -200,20 +221,26 @@ class ApiCollectionService {
   }
 
   Future<void> deactivateCollection(String id) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections/$id/deactivate'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections/$id/deactivate',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to deactivate collection: ${response.statusCode}');
+      throw Exception(
+        'Failed to deactivate collection: ${response.statusCode}',
+      );
     }
   }
 
   Future<void> deleteCollection(String id) async {
-    final response = await _client.delete(
-      Uri.parse('$baseUrl/admin/v1/collections/$id'),
+    final response = await _dioService.delete(
+      '$baseUrl/admin/v1/collections/$id',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 409) {
@@ -226,13 +253,15 @@ class ApiCollectionService {
   // ==================== API Definition Operations ====================
 
   Future<List<ApiDefinition>> getApisInCollection(String collectionId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$collectionId/apis',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => ApiDefinition.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load APIs: ${response.statusCode}');
@@ -240,13 +269,15 @@ class ApiCollectionService {
   }
 
   Future<ApiDefinition> getApiById(String collectionId, String apiId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/$apiId'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/$apiId',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiDefinition.fromJson(json.decode(response.body));
+      return ApiDefinition.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('API not found');
     } else {
@@ -254,7 +285,8 @@ class ApiCollectionService {
     }
   }
 
-  Future<ApiDefinition> createApi(String collectionId, {
+  Future<ApiDefinition> createApi(
+    String collectionId, {
     required String code,
     required String name,
     String? description,
@@ -281,14 +313,16 @@ class ApiCollectionService {
       'tags': tags,
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections/$collectionId/apis',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return ApiDefinition.fromJson(json.decode(response.body));
+      return ApiDefinition.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 400) {
       throw Exception('Invalid API data or code already exists');
     } else {
@@ -296,7 +330,9 @@ class ApiCollectionService {
     }
   }
 
-  Future<ApiDefinition> updateApi(String collectionId, String apiId, {
+  Future<ApiDefinition> updateApi(
+    String collectionId,
+    String apiId, {
     String? name,
     String? description,
     String? httpMethod,
@@ -313,17 +349,20 @@ class ApiCollectionService {
     if (pathPattern != null) body['pathPattern'] = pathPattern;
     if (timeoutSeconds != null) body['timeoutSeconds'] = timeoutSeconds;
     if (cacheTtlSeconds != null) body['cacheTtlSeconds'] = cacheTtlSeconds;
-    if (rateLimitPerMinute != null) body['rateLimitPerMinute'] = rateLimitPerMinute;
+    if (rateLimitPerMinute != null)
+      body['rateLimitPerMinute'] = rateLimitPerMinute;
     if (tags != null) body['tags'] = tags;
 
-    final response = await _client.put(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/$apiId'),
+    final response = await _dioService.put(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/$apiId',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return ApiDefinition.fromJson(json.decode(response.body));
+      return ApiDefinition.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('API not found');
     } else {
@@ -332,9 +371,11 @@ class ApiCollectionService {
   }
 
   Future<void> activateApi(String collectionId, String apiId) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/$apiId/activate'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/$apiId/activate',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {
@@ -343,9 +384,11 @@ class ApiCollectionService {
   }
 
   Future<void> deactivateApi(String collectionId, String apiId) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/$apiId/deactivate'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/$apiId/deactivate',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {
@@ -354,9 +397,11 @@ class ApiCollectionService {
   }
 
   Future<void> deleteApi(String collectionId, String apiId) async {
-    final response = await _client.delete(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/$apiId'),
+    final response = await _dioService.delete(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/$apiId',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -365,26 +410,30 @@ class ApiCollectionService {
   }
 
   Future<int> getApiCount(String collectionId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/apis/count'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$collectionId/apis/count',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return int.parse(response.body);
+      return int.parse(response.data.toString());
     } else {
       throw Exception('Failed to get API count: ${response.statusCode}');
     }
   }
 
   Future<List<ApiDefinition>> findApisByTag(String tag) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/apis/tag/$tag'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/apis/tag/$tag',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => ApiDefinition.fromJson(e)).toList();
     } else {
       throw Exception('Failed to find APIs by tag: ${response.statusCode}');
@@ -395,17 +444,21 @@ class ApiCollectionService {
 
   /// Export a collection as a Postman collection JSON
   Future<String> exportPostmanCollection(String collectionId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/collections/$collectionId/export/postman'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/collections/$collectionId/export/postman',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      return response.data.toString();
     } else if (response.statusCode == 404) {
       throw Exception('Collection not found');
     } else {
-      throw Exception('Failed to export Postman collection: ${response.statusCode}');
+      throw Exception(
+        'Failed to export Postman collection: ${response.statusCode}',
+      );
     }
   }
 }

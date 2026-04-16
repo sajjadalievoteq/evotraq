@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
@@ -10,20 +9,16 @@ import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 /// Service for managing B2B API partners and credentials
 class ApiManagementService {
   final String _integrationLayerUrl;
-  final http.Client _client;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
   ApiManagementService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _integrationLayerUrl = ApiConfig.fromCoreUrl(appConfig.apiBaseUrl),
-        _client = httpClient,
-        _tokenManager = tokenManager;
+    required DioService dioService,
+  })  : _integrationLayerUrl = ApiConfig.fromCoreUrl(dioService.baseUrl),
+        _dioService = dioService;
 
   /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -34,20 +29,23 @@ class ApiManagementService {
 
   /// List all partners
   Future<List<Partner>> listPartners({bool? active, int page = 0, int size = 20}) async {
-    final queryParams = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
       if (active != null) 'active': active.toString(),
     };
 
-    final uri = Uri.parse('$_integrationLayerUrl/admin/v1/partners')
-        .replace(queryParameters: queryParams);
-
     final headers = await _getHeaders();
-    final response = await _client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_integrationLayerUrl/admin/v1/partners',
+      queryParameters: queryParams,
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = jsonDecode(response.data);
       final partners = data['partners'] as List;
       return partners.map((p) => Partner.fromJson(p)).toList();
     } else {
@@ -58,13 +56,15 @@ class ApiManagementService {
   /// Get a partner by ID
   Future<Partner> getPartner(String partnerId) async {
     final headers = await _getHeaders();
-    final response = await _client.get(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
+    final response = await _dioService.get(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return Partner.fromJson(json.decode(response.body));
+      return Partner.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to load partner: ${response.statusCode}');
     }
@@ -93,16 +93,20 @@ class ApiManagementService {
     };
 
     final headers = await _getHeaders();
-    final response = await _client.post(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners'),
+    final response = await _dioService.post(
+      '$_integrationLayerUrl/admin/v1/partners',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return Partner.fromJson(json.decode(response.body));
+      return Partner.fromJson(jsonDecode(response.data));
     } else {
-      final error = json.decode(response.body);
+      final error = response.data.toString().isNotEmpty
+          ? jsonDecode(response.data)
+          : <String, dynamic>{};
       throw Exception(error['message'] ?? 'Failed to create partner');
     }
   }
@@ -130,14 +134,16 @@ class ApiManagementService {
     };
 
     final headers = await _getHeaders();
-    final response = await _client.put(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
+    final response = await _dioService.put(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return Partner.fromJson(json.decode(response.body));
+      return Partner.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to update partner: ${response.statusCode}');
     }
@@ -146,16 +152,20 @@ class ApiManagementService {
   /// Update a partner with full data map
   Future<Partner> updatePartnerFull(String partnerId, Map<String, dynamic> data) async {
     final headers = await _getHeaders();
-    final response = await _client.put(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
+    final response = await _dioService.put(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId',
       headers: headers,
-      body: json.encode(data),
+      data: jsonEncode(data),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return Partner.fromJson(json.decode(response.body));
+      return Partner.fromJson(jsonDecode(response.data));
     } else {
-      final error = response.body.isNotEmpty ? json.decode(response.body) : {};
+      final error = response.data.toString().isNotEmpty
+          ? jsonDecode(response.data)
+          : <String, dynamic>{};
       throw Exception(error['message'] ?? 'Failed to update partner: ${response.statusCode}');
     }
   }
@@ -163,9 +173,11 @@ class ApiManagementService {
   /// Delete a partner
   Future<void> deletePartner(String partnerId) async {
     final headers = await _getHeaders();
-    final response = await _client.delete(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId'),
+    final response = await _dioService.delete(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -178,13 +190,15 @@ class ApiManagementService {
   /// List credentials for a partner
   Future<List<PartnerCredential>> listCredentials(String partnerId) async {
     final headers = await _getHeaders();
-    final response = await _client.get(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials'),
+    final response = await _dioService.get(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final credentials = json.decode(response.body) as List;
+      final credentials = jsonDecode(response.data) as List;
       return credentials.map((c) => PartnerCredential.fromJson({
         ...c,
         'partnerId': partnerId,
@@ -209,14 +223,16 @@ class ApiManagementService {
     };
 
     final headers = await _getHeaders();
-    final response = await _client.post(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/api-key'),
+    final response = await _dioService.post(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/api-key',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return ApiKeyCredentialResponse.fromJson(json.decode(response.body));
+      return ApiKeyCredentialResponse.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to create API key: ${response.statusCode}');
     }
@@ -237,14 +253,16 @@ class ApiManagementService {
     };
 
     final headers = await _getHeaders();
-    final response = await _client.post(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/oauth2'),
+    final response = await _dioService.post(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/oauth2',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return OAuth2CredentialResponse.fromJson(json.decode(response.body));
+      return OAuth2CredentialResponse.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to create OAuth2 credentials: ${response.statusCode}');
     }
@@ -253,9 +271,11 @@ class ApiManagementService {
   /// Revoke a credential
   Future<void> revokeCredential(String partnerId, String credentialId) async {
     final headers = await _getHeaders();
-    final response = await _client.delete(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId'),
+    final response = await _dioService.delete(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -275,14 +295,16 @@ class ApiManagementService {
     if (scopes != null) body['scopes'] = scopes;
     if (rateLimitPerMinute != null) body['rateLimitPerMinute'] = rateLimitPerMinute;
 
-    final response = await _client.patch(
-      Uri.parse('$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId'),
+    final response = await _dioService.patch(
+      '$_integrationLayerUrl/admin/v1/partners/$partnerId/credentials/$credentialId',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to update credential: ${response.statusCode}');
     }
@@ -296,20 +318,23 @@ class ApiManagementService {
     DateTime? to,
     int limit = 100,
   }) async {
-    final queryParams = <String, String>{
-      'limit': limit.toString(),
+    final queryParams = <String, dynamic>{
+      'limit': limit,
       if (from != null) 'from': from.toIso8601String(),
       if (to != null) 'to': to.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_integrationLayerUrl/api/v1/audit/admin/$partnerId')
-        .replace(queryParameters: queryParams);
-
     final headers = await _getHeaders();
-    final response = await _client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_integrationLayerUrl/api/v1/audit/admin/$partnerId',
+      queryParameters: queryParams,
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      final logs = json.decode(response.body) as List;
+      final logs = jsonDecode(response.data) as List;
       return logs.map((l) => ApiAuditLog.fromJson(l)).toList();
     } else {
       throw Exception('Failed to load audit logs: ${response.statusCode}');
@@ -321,19 +346,22 @@ class ApiManagementService {
     DateTime? from,
     DateTime? to,
   }) async {
-    final queryParams = <String, String>{
+    final queryParams = <String, dynamic>{
       if (from != null) 'from': from.toIso8601String(),
       if (to != null) 'to': to.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_integrationLayerUrl/api/v1/audit/admin/$partnerId/stats')
-        .replace(queryParameters: queryParams);
-
     final headers = await _getHeaders();
-    final response = await _client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_integrationLayerUrl/api/v1/audit/admin/$partnerId/stats',
+      queryParameters: queryParams,
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return ApiUsageStats.fromJson(json.decode(response.body));
+      return ApiUsageStats.fromJson(jsonDecode(response.data));
     } else {
       throw Exception('Failed to load stats: ${response.statusCode}');
     }
@@ -344,13 +372,15 @@ class ApiManagementService {
   /// Check Integration Layer health
   Future<Map<String, dynamic>> checkHealth() async {
     try {
-      final response = await _client.get(
-        Uri.parse('$_integrationLayerUrl/health/detailed'),
+      final response = await _dioService.get(
+        '$_integrationLayerUrl/health/detailed',
         headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return jsonDecode(response.data);
       } else {
         return {'status': 'DOWN', 'error': 'HTTP ${response.statusCode}'};
       }

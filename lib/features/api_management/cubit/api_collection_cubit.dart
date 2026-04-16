@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../../data/services/api_collection_service.dart';
@@ -14,15 +13,11 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
   final ApiCollectionService _service;
 
   ApiCollectionCubit({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
+    required DioService dioService,
     ApiCollectionService? service,
   })  : _service = service ??
             ApiCollectionService(
-              httpClient: httpClient,
-              tokenManager: tokenManager,
-              appConfig: appConfig,
+              dioService: dioService,
             ),
         super(const ApiCollectionState());
 

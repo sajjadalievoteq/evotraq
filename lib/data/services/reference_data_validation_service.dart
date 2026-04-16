@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 
 /// Model for EPC validation result
@@ -55,40 +54,37 @@ class BatchEPCValidationResult {
 }
 
 class ReferenceDataValidationService {
-  final http.Client httpClient;
-  final TokenManager tokenManager;
-  final AppConfig appConfig;
+  final DioService _dioService;
 
-  ReferenceDataValidationService({
-    required this.httpClient,
-    required this.tokenManager,
-    required this.appConfig,
-  });
+  ReferenceDataValidationService({required DioService dioService})
+    : _dioService = dioService;
 
-  String get _baseUrl => '${appConfig.apiBaseUrl}/validate';
+  String get _baseUrl => '${_dioService.baseUrl}/validate';
 
   Future<Map<String, String>> get _headers async {
-    final token = await tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
   Future<EPCValidationResult> validateSSCC(String ssccCode) async {
     try {
-      final response = await httpClient.get(
-        Uri.parse('$_baseUrl/sscc/$ssccCode'),
+      final response = await _dioService.get(
+        '$_baseUrl/sscc/$ssccCode',
         headers: await _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
+        final json = jsonDecode(response.data);
         return EPCValidationResult.fromJson(json);
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Failed to validate SSCC: ${response.reasonPhrase}',
+          message: 'Failed to validate SSCC: ${response.statusMessage}',
         );
       }
     } catch (e) {
@@ -101,18 +97,20 @@ class ReferenceDataValidationService {
 
   Future<EPCValidationResult> validateSGTIN(String sgtinCode) async {
     try {
-      final response = await httpClient.get(
-        Uri.parse('$_baseUrl/sgtin/$sgtinCode'),
+      final response = await _dioService.get(
+        '$_baseUrl/sgtin/$sgtinCode',
         headers: await _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
+        final json = jsonDecode(response.data);
         return EPCValidationResult.fromJson(json);
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Failed to validate SGTIN: ${response.reasonPhrase}',
+          message: 'Failed to validate SGTIN: ${response.statusMessage}',
         );
       }
     } catch (e) {
@@ -127,19 +125,21 @@ class ReferenceDataValidationService {
     try {
       final requestBody = {'epcs': epcs};
 
-      final response = await httpClient.post(
-        Uri.parse('$_baseUrl/epcs'),
+      final response = await _dioService.post(
+        '$_baseUrl/epcs',
         headers: await _headers,
-        body: jsonEncode(requestBody),
+        data: jsonEncode(requestBody),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
+        final json = jsonDecode(response.data);
         return BatchEPCValidationResult.fromJson(json);
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Failed to validate EPCs: ${response.reasonPhrase}',
+          message: 'Failed to validate EPCs: ${response.statusMessage}',
         );
       }
     } catch (e) {

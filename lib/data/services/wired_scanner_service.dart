@@ -1,4 +1,6 @@
 // A service for handling wired scanner input
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
@@ -15,9 +17,7 @@ class WiredScannerService {
   // Initialize API service if needed
   void initApiService(AppConfig appConfig, TokenManager tokenManager) {
     _barcodeApiService ??= BarcodeApiService(
-      client: http.Client(),
-      tokenManager: tokenManager,
-      appConfig: appConfig,
+     dioService: getIt<DioService>(),
     );
   }
     // Process raw barcode data from a wired scanner

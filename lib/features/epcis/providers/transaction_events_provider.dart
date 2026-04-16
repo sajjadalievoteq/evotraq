@@ -1,10 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/transaction_event_service.dart';
 
@@ -69,15 +66,8 @@ class TransactionEventsState extends Equatable {
 class TransactionEventsCubit extends Cubit<TransactionEventsState> {
   final TransactionEventService _service;
 
-  TransactionEventsCubit({
-    TransactionEventService? service,
-    required AppConfig appConfig,
-  })  : _service = service ??
-            TransactionEventService(
-              httpClient: getIt<http.Client>(),
-              tokenManager: getIt<TokenManager>(),
-              appConfig: appConfig,
-            ),
+  TransactionEventsCubit({TransactionEventService? service})
+      : _service = service ?? getIt<TransactionEventService>(),
         super(TransactionEventsState.initial());
 
   Future<void> loadTransactionEvents({

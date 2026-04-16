@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/api_collection.dart';
 import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 
@@ -9,20 +8,16 @@ import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 /// Supports both collection-level and individual API access control
 class PartnerAccessApiService {
   final String baseUrl;
-  final http.Client _client;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
   PartnerAccessApiService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : baseUrl = ApiConfig.fromCoreUrl(appConfig.apiBaseUrl),
-        _client = httpClient,
-        _tokenManager = tokenManager;
+    required DioService dioService,
+  })  : baseUrl = ApiConfig.fromCoreUrl(dioService.baseUrl),
+        _dioService = dioService;
 
   /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -33,13 +28,15 @@ class PartnerAccessApiService {
   // ==================== Access Summary ====================
 
   Future<PartnerAccessSummary> getAccessSummary(String partnerId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/summary'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/partners/$partnerId/access/summary',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return PartnerAccessSummary.fromJson(json.decode(response.body));
+      return PartnerAccessSummary.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       throw Exception('Partner not found');
     } else {
@@ -50,13 +47,15 @@ class PartnerAccessApiService {
   // ==================== Collection Access Operations ====================
 
   Future<List<PartnerCollectionAccess>> getCollectionAccess(String partnerId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/collections'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/partners/$partnerId/access/collections',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => PartnerCollectionAccess.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load collection access: ${response.statusCode}');
@@ -78,14 +77,16 @@ class PartnerAccessApiService {
       'validUntil': validUntil?.toIso8601String(),
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/collections/$collectionId'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/partners/$partnerId/access/collections/$collectionId',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return PartnerCollectionAccess.fromJson(json.decode(response.body));
+      return PartnerCollectionAccess.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 400) {
       throw Exception('Invalid access data');
     } else {
@@ -94,9 +95,11 @@ class PartnerAccessApiService {
   }
 
   Future<void> revokeCollectionAccess(String partnerId, String collectionId) async {
-    final response = await _client.delete(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/collections/$collectionId'),
+    final response = await _dioService.delete(
+      '$baseUrl/admin/v1/partners/$partnerId/access/collections/$collectionId',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -107,13 +110,15 @@ class PartnerAccessApiService {
   // ==================== Individual API Access Operations ====================
 
   Future<List<PartnerApiAccess>> getApiAccess(String partnerId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/apis'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/partners/$partnerId/access/apis',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => PartnerApiAccess.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load API access: ${response.statusCode}');
@@ -133,14 +138,16 @@ class PartnerAccessApiService {
       'validUntil': validUntil?.toIso8601String(),
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/apis/$apiId'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/partners/$partnerId/access/apis/$apiId',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return PartnerApiAccess.fromJson(json.decode(response.body));
+      return PartnerApiAccess.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 400) {
       throw Exception('Invalid access data');
     } else {
@@ -162,14 +169,16 @@ class PartnerAccessApiService {
       'validUntil': validUntil?.toIso8601String(),
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/apis/bulk'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/partners/$partnerId/access/apis/bulk',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.map((e) => PartnerApiAccess.fromJson(e)).toList();
     } else if (response.statusCode == 400) {
       throw Exception('Invalid access data');
@@ -179,9 +188,11 @@ class PartnerAccessApiService {
   }
 
   Future<void> revokeApiAccess(String partnerId, String apiId) async {
-    final response = await _client.delete(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/apis/$apiId'),
+    final response = await _dioService.delete(
+      '$baseUrl/admin/v1/partners/$partnerId/access/apis/$apiId',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -192,13 +203,15 @@ class PartnerAccessApiService {
   // ==================== Access Validation ====================
 
   Future<bool> checkApiAccess(String partnerId, String apiId) async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/check/api/$apiId'),
+    final response = await _dioService.get(
+      '$baseUrl/admin/v1/partners/$partnerId/access/check/api/$apiId',
       headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = jsonDecode(response.data);
       return data['hasAccess'] as bool;
     } else {
       throw Exception('Failed to check API access: ${response.statusCode}');
@@ -211,14 +224,16 @@ class PartnerAccessApiService {
       'path': path,
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl/admin/v1/partners/$partnerId/access/check/path'),
+    final response = await _dioService.post(
+      '$baseUrl/admin/v1/partners/$partnerId/access/check/path',
       headers: await _getHeaders(),
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = jsonDecode(response.data);
       return data['hasAccess'] as bool;
     } else {
       throw Exception('Failed to check path access: ${response.statusCode}');

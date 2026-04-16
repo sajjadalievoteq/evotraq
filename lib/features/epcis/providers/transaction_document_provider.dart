@@ -7,6 +7,8 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/data/services/transaction_document_service.dart';
 
+import '../../../core/network/dio_service.dart';
+
 class TransactionDocumentState extends Equatable {
   final bool isLoading;
   final String? error;
@@ -66,9 +68,7 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
   }) : _service =
            service ??
            TransactionDocumentService(
-             httpClient: getIt<http.Client>(),
-             tokenManager: getIt<TokenManager>(),
-             appConfig: appConfig,
+           dioService: getIt<DioService>(),
            ),
        super(TransactionDocumentState.initial());
 

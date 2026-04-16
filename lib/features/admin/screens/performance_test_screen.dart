@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
@@ -24,9 +24,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // It's safe to use context.read<AuthCubit>() here
-    _testService ??= PerformanceTestService(
-      baseUrl: getIt<AppConfig>().apiBaseUrl,
-    );
+    _testService ??= PerformanceTestService(dioService: getIt<DioService>());
   }
 
   Future<void> _runAllTests() async {

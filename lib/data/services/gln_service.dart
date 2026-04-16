@@ -1,30 +1,30 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 
 /// Implementation of GLNService interface for managing GLNs (Global Location Numbers)
 class GLNService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
   /// Creates a new GLNServiceImpl instance
   GLNService({
-    required HttpService httpService,
-  }) : _httpService = httpService;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
   Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    String url = '${_httpService.baseUrl}/master-data/glns';
+    String url = '${_dioService.baseUrl}/master-data/glns';
     if (page != null && size != null) {
       url += '?page=$page&size=$size';
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       url,
       headers: {
         'Content-Type': 'application/json',
@@ -68,16 +68,16 @@ class GLNService {
   }
 
   Future<GLN> getGLNById(String id) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     print('GLN Service: Fetching GLN with ID: $id');
-    final url = '${_httpService.baseUrl}/master-data/glns/code/$id';
+    final url = '${_dioService.baseUrl}/master-data/glns/code/$id';
     print('GLN Service: Request URL: $url');
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       url,
       headers: {
         'Content-Type': 'application/json',
@@ -107,13 +107,13 @@ class GLNService {
   }
 
   Future<GLN> getGLNByCode(String glnCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/code/$glnCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/code/$glnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -133,13 +133,13 @@ class GLNService {
   }
 
   Future<GLN> createGLN(GLN gln) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/master-data/glns',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/master-data/glns',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -159,13 +159,13 @@ class GLNService {
     }
   }
   Future<GLN> updateGLN(String id, GLN gln) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/master-data/glns/code/$id',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/master-data/glns/code/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -185,13 +185,13 @@ class GLNService {
     }
   }
   Future<bool> deleteGLN(String id) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.delete(
-      '${_httpService.baseUrl}/master-data/glns/code/$id',
+    final response = await _dioService.delete(
+      '${_dioService.baseUrl}/master-data/glns/code/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -210,7 +210,7 @@ class GLNService {
     int? page,
     int? size,
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -232,8 +232,8 @@ class GLNService {
       queryParams['size'] = size.toString();
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/search',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/search',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -281,7 +281,7 @@ class GLNService {
     String sortBy = 'name',
     String direction = 'ASC',
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -321,8 +321,8 @@ class GLNService {
       queryParams['locationType'] = locationType;
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/search/advanced',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/search/advanced',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -343,12 +343,12 @@ class GLNService {
   }
 
   Future<List<GLN>> getExpiredLicenseGLNs() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/expired-licenses',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/expired-licenses',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -378,12 +378,12 @@ class GLNService {
   }
 
   Future<List<GLN>> getChildGLNs(String parentGlnCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/parent/$parentGlnCode/children',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/parent/$parentGlnCode/children',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -413,12 +413,12 @@ class GLNService {
   }
 
   Future<bool> validateGLNCode(String glnCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/master-data/glns/validate/$glnCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/master-data/glns/validate/$glnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

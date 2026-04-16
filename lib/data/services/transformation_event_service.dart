@@ -1,45 +1,40 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 
 /// Implementation of the TransformationEventService interface
 class TransformationEventService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   /// Base endpoint for transformation event API
   late final String _baseUrl;
   TransformationEventService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _httpClient = httpClient,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
-    _baseUrl = '${_appConfig.apiBaseUrl}/transformation-events';
+    required DioService dioService,
+  }) : _dioService = dioService {
+    _baseUrl = '${_dioService.baseUrl}/transformation-events';
   }
 
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
   Future<TransformationEvent> getTransformationEventById(String id) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$id'),
+    final response = await _dioService.get(
+      '$_baseUrl/$id',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return TransformationEvent.fromJson(json.decode(response.body));
+      return TransformationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to get transformation event: ${response.statusCode}',
@@ -52,13 +47,15 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     // Call the specific endpoint for getting event by eventId
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/event/$eventId'),
+    final response = await _dioService.get(
+      '$_baseUrl/event/$eventId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return TransformationEvent.fromJson(json.decode(response.body));
+      return TransformationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to get transformation event: ${response.statusCode}',
@@ -70,14 +67,16 @@ class TransformationEventService {
     TransformationEvent event,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.post(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.post(
+      _baseUrl,
       headers: headers,
-      body: json.encode(event.toJson()),
+      data: json.encode(event.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return TransformationEvent.fromJson(json.decode(response.body));
+      return TransformationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to create transformation event: ${response.statusCode}',
@@ -90,14 +89,16 @@ class TransformationEventService {
     TransformationEvent event,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.put(
-      Uri.parse('$_baseUrl/$id'),
+    final response = await _dioService.put(
+      '$_baseUrl/$id',
       headers: headers,
-      body: json.encode(event.toJson()),
+      data: json.encode(event.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return TransformationEvent.fromJson(json.decode(response.body));
+      return TransformationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to update transformation event: ${response.statusCode}',
@@ -107,9 +108,11 @@ class TransformationEventService {
 
   Future<void> deleteTransformationEvent(String id) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$id'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$id',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -123,13 +126,15 @@ class TransformationEventService {
     String transformationId,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/by-transformation/$transformationId'),
+    final response = await _dioService.get(
+      '$_baseUrl/by-transformation/$transformationId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -142,13 +147,15 @@ class TransformationEventService {
     String inputEPC,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/product/$inputEPC'),
+    final response = await _dioService.get(
+      '$_baseUrl/product/$inputEPC',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -163,13 +170,15 @@ class TransformationEventService {
     String outputEPC,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/product/$outputEPC'),
+    final response = await _dioService.get(
+      '$_baseUrl/product/$outputEPC',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -184,13 +193,15 @@ class TransformationEventService {
     String inputEPCClass,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/batch/$inputEPCClass'),
+    final response = await _dioService.get(
+      '$_baseUrl/batch/$inputEPCClass',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -205,13 +216,15 @@ class TransformationEventService {
     String outputEPCClass,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/batch/$outputEPCClass'),
+    final response = await _dioService.get(
+      '$_baseUrl/batch/$outputEPCClass',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -228,15 +241,16 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     // Use the new input-output endpoint with query parameters
-    final response = await _httpClient.get(
-      Uri.parse(
-        '$_baseUrl/input-output?inputEPC=$inputEPC&outputEPC=$outputEPC',
-      ),
+    final response = await _dioService.get(
+      '$_baseUrl/input-output',
+      queryParameters: {'inputEPC': inputEPC, 'outputEPC': outputEPC},
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -251,13 +265,15 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     // There's no direct endpoint for parameter search, so we'll get all events and filter client-side
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl'),
+    final response = await _dioService.get(
+      _baseUrl,
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       final allEvents = eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -279,13 +295,15 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     // Use the product endpoint since there's no specific history endpoint
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/product/$outputEPC'),
+    final response = await _dioService.get(
+      '$_baseUrl/product/$outputEPC',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       final events = eventList
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
@@ -310,13 +328,21 @@ class TransformationEventService {
     final headers = await _getHeaders();
 
     // Use the pagination endpoint with a larger page size
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl?page=0&size=100&sortBy=eventTime&direction=ASC'),
+    final response = await _dioService.get(
+      _baseUrl,
+      queryParameters: {
+        'page': '0',
+        'size': '100',
+        'sortBy': 'eventTime',
+        'direction': 'ASC',
+      },
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Map<String, dynamic> responseData = json.decode(response.data);
 
       if (responseData['content'] != null && responseData['content'] is List) {
         final List<dynamic> eventList = responseData['content'];
@@ -370,14 +396,16 @@ class TransformationEventService {
       'eventTimeZoneOffset': DateTime.now().timeZoneOffset.toString(),
     };
 
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl'),
+    final response = await _dioService.post(
+      _baseUrl,
       headers: headers,
-      body: json.encode(transformationEventDto),
+      data: json.encode(transformationEventDto),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return TransformationEvent.fromJson(json.decode(response.body));
+      return TransformationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to create transformation process: ${response.statusCode}',
@@ -387,13 +415,15 @@ class TransformationEventService {
 
   Future<List<TransformationEvent>> findTransformationsByEPC(String epc) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/track/$epc'),
+    final response = await _dioService.get(
+      '$_baseUrl/track/$epc',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -407,15 +437,16 @@ class TransformationEventService {
     String outputEPC,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse(
-        '$_baseUrl/input-output?inputEPC=$inputEPC&outputEPC=$outputEPC',
-      ),
+    final response = await _dioService.get(
+      '$_baseUrl/input-output',
+      queryParameters: {'inputEPC': inputEPC, 'outputEPC': outputEPC},
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((json) => TransformationEvent.fromJson(json)).toList();
     } else {
       throw Exception(

@@ -1,29 +1,21 @@
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 
 class CommissioningOperationService {
-  final http.Client _client;
-  final AppConfig _appConfig;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
-  CommissioningOperationService({
-    required http.Client client,
-    required AppConfig appConfig,
-    required TokenManager tokenManager,
-  }) : _client = client,
-       _appConfig = appConfig,
-       _tokenManager = tokenManager;
+  CommissioningOperationService({required DioService dioService})
+    : _dioService = dioService;
 
-  String get _baseUrl => _appConfig.apiBaseUrl;
+  String get _baseUrl => _dioService.baseUrl;
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -82,14 +74,16 @@ class CommissioningOperationService {
               'regulatoryStatus': request.regulatoryStatus,
           };
 
-          final response = await _client.post(
-            Uri.parse('$_baseUrl/identifiers/sgtins'),
+          final response = await _dioService.post(
+            '$_baseUrl/identifiers/sgtins',
             headers: headers,
-            body: jsonEncode(sgtinData),
+            data: jsonEncode(sgtinData),
+            responseType: ResponseType.plain,
+            acceptAllStatusCodes: true,
           );
 
           if (response.statusCode == 201) {
-            final responseData = jsonDecode(response.body);
+            final responseData = jsonDecode(response.data);
             final sgtinId = responseData['id']?.toString();
             final sgtinUri = responseData['sgtinUri'];
 
@@ -112,10 +106,10 @@ class CommissioningOperationService {
             failCount++;
             String errorMsg;
             try {
-              final errorData = jsonDecode(response.body);
+              final errorData = jsonDecode(response.data);
               errorMsg = errorData['message'] ?? 'Failed to create SGTIN';
             } catch (_) {
-              errorMsg = 'Failed to create SGTIN: ${response.reasonPhrase}';
+              errorMsg = 'Failed to create SGTIN: ${response.statusMessage}';
             }
 
             itemResults.add(
@@ -207,13 +201,16 @@ class CommissioningOperationService {
     // In the future, this could be enhanced with a dedicated endpoint
     try {
       final headers = await _getHeaders();
-      final response = await _client.get(
-        Uri.parse('$_baseUrl/events/object?bizStep=commissioning&size=50'),
+      final response = await _dioService.get(
+        '$_baseUrl/events/object',
+        queryParameters: {'bizStep': 'commissioning', 'size': '50'},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.data);
         final List<dynamic> content = data['content'] ?? data;
 
         // Group events by commissioning reference if available
@@ -234,13 +231,15 @@ class CommissioningOperationService {
   ) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.get(
-        Uri.parse('$_baseUrl/events/object/$operationId'),
+      final response = await _dioService.get(
+        '$_baseUrl/events/object/$operationId',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final event = jsonDecode(response.body);
+        final event = jsonDecode(response.data);
         return _parseObjectEventToCommissioningResponse(event);
       }
       return null;

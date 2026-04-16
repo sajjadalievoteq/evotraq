@@ -1,49 +1,45 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_document_dto.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters_dto.dart';
 
 /// Implementation of EPCIS Serialization Service
 class EPCISSerializationService {
   
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
   late final String _baseUrl;
   
   EPCISSerializationService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _httpClient = httpClient,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
-    _baseUrl = '${_appConfig.apiBaseUrl}/events/serialization';
+    required DioService dioService,
+  }) : _dioService = dioService {
+    _baseUrl = '${_dioService.baseUrl}/events/serialization';
   }
   
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders({String contentType = 'application/json'}) async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': contentType,
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
   
   Future<Map<String, dynamic>> convertXmlToJsonLd(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/convert/xml-to-jsonld'),
+      final response = await _dioService.post(
+        '$_baseUrl/convert/xml-to-jsonld',
         headers: headers,
-        body: xmlContent,
+        data: xmlContent,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to convert XML to JSON-LD: ${response.statusCode}');
       }
@@ -55,14 +51,16 @@ class EPCISSerializationService {
   Future<String> convertJsonLdToXml(Map<String, dynamic> jsonLdContent) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/convert/jsonld-to-xml'),
+      final response = await _dioService.post(
+        '$_baseUrl/convert/jsonld-to-xml',
         headers: headers,
-        body: json.encode(jsonLdContent),
+        data: json.encode(jsonLdContent),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return response.body;
+        return response.data;
       } else {
         throw Exception('Failed to convert JSON-LD to XML: ${response.statusCode}');
       }
@@ -74,14 +72,16 @@ class EPCISSerializationService {
   Future<String> serializeToXml(EPCISDocumentDTO document) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/xml'),
+      final response = await _dioService.post(
+        '$_baseUrl/xml',
         headers: headers,
-        body: json.encode(document.toJson()),
+        data: json.encode(document.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return response.body;
+        return response.data;
       } else {
         throw Exception('Failed to serialize to XML: ${response.statusCode}');
       }
@@ -93,14 +93,16 @@ class EPCISSerializationService {
   Future<Map<String, dynamic>> serializeToJsonLd(EPCISDocumentDTO document) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/jsonld'),
+      final response = await _dioService.post(
+        '$_baseUrl/jsonld',
         headers: headers,
-        body: json.encode(document.toJson()),
+        data: json.encode(document.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to serialize to JSON-LD: ${response.statusCode}');
       }
@@ -112,14 +114,16 @@ class EPCISSerializationService {
   Future<EPCISDocumentDTO> deserializeXml(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/deserialize/xml'),
+      final response = await _dioService.post(
+        '$_baseUrl/deserialize/xml',
         headers: headers,
-        body: xmlContent,
+        data: xmlContent,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        final jsonData = json.decode(response.data) as Map<String, dynamic>;
         return EPCISDocumentDTO.fromJson(jsonData);
       } else {
         throw Exception('Failed to deserialize XML: ${response.statusCode}');
@@ -132,14 +136,16 @@ class EPCISSerializationService {
   Future<EPCISDocumentDTO> deserializeJsonLd(Map<String, dynamic> jsonLdContent) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/deserialize/jsonld'),
+      final response = await _dioService.post(
+        '$_baseUrl/deserialize/jsonld',
         headers: headers,
-        body: json.encode(jsonLdContent),
+        data: json.encode(jsonLdContent),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        final jsonData = json.decode(response.data) as Map<String, dynamic>;
         return EPCISDocumentDTO.fromJson(jsonData);
       } else {
         throw Exception('Failed to deserialize JSON-LD: ${response.statusCode}');
@@ -152,14 +158,16 @@ class EPCISSerializationService {
   Future<Map<String, dynamic>> validateXmlSchema(String xmlContent) async {
     try {
       final headers = await _getHeaders(contentType: 'application/xml');
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/validate/xml'),
+      final response = await _dioService.post(
+        '$_baseUrl/validate/xml',
         headers: headers,
-        body: xmlContent,
+        data: xmlContent,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to validate XML schema: ${response.statusCode}');
       }
@@ -171,14 +179,16 @@ class EPCISSerializationService {
   Future<Map<String, dynamic>> validateJsonSchema(Map<String, dynamic> jsonContent) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/validate/json'),
+      final response = await _dioService.post(
+        '$_baseUrl/validate/json',
         headers: headers,
-        body: json.encode(jsonContent),
+        data: json.encode(jsonContent),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to validate JSON schema: ${response.statusCode}');
       }
@@ -189,22 +199,19 @@ class EPCISSerializationService {
   
   Future<String> exportToCsv(EPCISQueryParametersDTO queryParams, {bool includeHeaders = true}) async {
     try {
-      final uri = Uri.parse('$_baseUrl/export/csv').replace(
-        queryParameters: {
-          'includeHeaders': includeHeaders.toString(),
-        },
-      );
-
       final headers = await _getHeaders();
       headers['Accept'] = 'text/csv';
-      final response = await _httpClient.post(
-        uri,
+      final response = await _dioService.post(
+        '$_baseUrl/export/csv',
+        queryParameters: {'includeHeaders': includeHeaders.toString()},
         headers: headers,
-        body: json.encode(queryParams.toJson()),
+        data: json.encode(queryParams.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return response.body;
+        return response.data;
       } else {
         throw Exception('Failed to export to CSV: ${response.statusCode}');
       }
@@ -215,22 +222,19 @@ class EPCISSerializationService {
   
   Future<List<int>> exportToPdf(EPCISQueryParametersDTO queryParams, {String templateName = 'default'}) async {
     try {
-      final uri = Uri.parse('$_baseUrl/export/pdf').replace(
-        queryParameters: {
-          'templateName': templateName,
-        },
-      );
-
       final headers = await _getHeaders();
       headers['Accept'] = 'application/pdf';
-      final response = await _httpClient.post(
-        uri,
+      final response = await _dioService.post(
+        '$_baseUrl/export/pdf',
+        queryParameters: {'templateName': templateName},
         headers: headers,
-        body: json.encode(queryParams.toJson()),
+        data: json.encode(queryParams.toJson()),
+        responseType: ResponseType.bytes,
+        acceptAllStatusCodes: true,
       );
       
       if (response.statusCode == 200) {
-        return response.bodyBytes;
+        return List<int>.from(response.data as List);
       } else {
         throw Exception('Failed to export to PDF: ${response.statusCode}');
       }
@@ -243,14 +247,16 @@ class EPCISSerializationService {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = 'text/html';
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/export/html'),
+      final response = await _dioService.post(
+        '$_baseUrl/export/html',
         headers: headers,
-        body: json.encode(queryParams.toJson()),
+        data: json.encode(queryParams.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return response.body;
+        return response.data;
       } else {
         throw Exception('Failed to export to HTML: ${response.statusCode}');
       }
@@ -263,14 +269,16 @@ class EPCISSerializationService {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/export/excel'),
+      final response = await _dioService.post(
+        '$_baseUrl/export/excel',
         headers: headers,
-        body: json.encode(queryParams.toJson()),
+        data: json.encode(queryParams.toJson()),
+        responseType: ResponseType.bytes,
+        acceptAllStatusCodes: true,
       );
       
       if (response.statusCode == 200) {
-        return response.bodyBytes;
+        return List<int>.from(response.data as List);
       } else {
         throw Exception('Failed to export to Excel: ${response.statusCode}');
       }
@@ -282,13 +290,15 @@ class EPCISSerializationService {
   Future<Map<String, String>> getSupportedFormats() async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/formats'),
+      final response = await _dioService.get(
+        '$_baseUrl/formats',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        final jsonData = json.decode(response.data) as Map<String, dynamic>;
         return jsonData.cast<String, String>();
       } else {
         throw Exception('Failed to get supported formats: ${response.statusCode}');
@@ -302,13 +312,15 @@ class EPCISSerializationService {
     try {
       final headers = await _getHeaders();
       headers['Accept'] = acceptHeader;
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/negotiate-format'),
+      final response = await _dioService.get(
+        '$_baseUrl/negotiate-format',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final format = response.body;
+        final format = response.data;
         return format;
       } else {
         throw Exception('Failed to negotiate format: ${response.statusCode}');
@@ -321,16 +333,18 @@ class EPCISSerializationService {
   Future<Map<String, dynamic>> importEvents(EPCISDocumentDTO epcisDocument) async {
     try {
       final headers = await _getHeaders();
-      final response = await _httpClient.post(
-        Uri.parse('${_appConfig.apiBaseUrl}/events/persistence/bulk/import'),
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/events/persistence/bulk/import',
         headers: headers,
-        body: json.encode(epcisDocument.toJson()),
+        data: json.encode(epcisDocument.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to import events: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to import events: ${response.statusCode} - ${response.data}');
       }
     } catch (e) {
       throw Exception('Error importing events: $e');
@@ -359,10 +373,5 @@ class EPCISSerializationService {
     } catch (e) {
       throw Exception('Error importing events from JSON-LD: $e');
     }
-  }
-
-  /// Dispose of resources
-  void dispose() {
-    _httpClient.close();
   }
 }

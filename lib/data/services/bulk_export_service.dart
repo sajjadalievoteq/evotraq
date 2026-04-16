@@ -1,10 +1,10 @@
-import '../../core/network/http_service.dart';
+import '../../core/network/dio_service.dart';
 
 
 class BulkExportService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  BulkExportService(this._httpService);
+  BulkExportService(this._dioService);
 
   Future<List<Map<String, dynamic>>> getExportJobs({String? format, String? status}) async {
     final Map<String, dynamic> queryParameters = {};
@@ -15,55 +15,55 @@ class BulkExportService {
       queryParameters['status'] = status;
     }
 
-    final response = await _httpService.get('/bulk-export/jobs', queryParameters: queryParameters);
+    final response = await _dioService.get('/bulk-export/jobs', queryParameters: queryParameters);
     return List<Map<String, dynamic>>.from(response.data as List);
   }
 
   Future<List<Map<String, dynamic>>> getExportTemplates() async {
-    final response = await _httpService.get('/bulk-export/templates');
+    final response = await _dioService.get('/bulk-export/templates');
     return List<Map<String, dynamic>>.from(response.data as List);
   }
 
   Future<List<Map<String, dynamic>>> getExportHistory({int limit = 100}) async {
-    final response = await _httpService.get('/bulk-export/history', queryParameters: {'limit': limit});
+    final response = await _dioService.get('/bulk-export/history', queryParameters: {'limit': limit});
     return List<Map<String, dynamic>>.from(response.data as List);
   }
 
   Future<Map<String, dynamic>> getExportStatistics() async {
-    final response = await _httpService.get('/bulk-export/statistics');
+    final response = await _dioService.get('/bulk-export/statistics');
     return response.data as Map<String, dynamic>;
   }
 
   Future<void> cancelExport(String jobId) async {
-    await _httpService.delete('/bulk-export/jobs/$jobId');
+    await _dioService.delete('/bulk-export/jobs/$jobId');
   }
 
   Future<void> retryExport(String jobId) async {
-    await _httpService.post('/bulk-export/jobs/$jobId/retry');
+    await _dioService.post('/bulk-export/jobs/$jobId/retry');
   }
 
   Future<void> executeExportJob(String jobId) async {
-    await _httpService.post('/bulk-export/jobs/$jobId/execute');
+    await _dioService.post('/bulk-export/jobs/$jobId/execute');
   }
 
   Future<void> deleteExport(String jobId) async {
-    await _httpService.delete('/bulk-export/jobs/$jobId/delete');
+    await _dioService.delete('/bulk-export/jobs/$jobId/delete');
   }
 
   Future<void> duplicateTemplate(String templateId) async {
-    await _httpService.post('/bulk-export/templates/$templateId/duplicate');
+    await _dioService.post('/bulk-export/templates/$templateId/duplicate');
   }
 
   Future<void> exportTemplateConfig(String templateId) async {
-    await _httpService.get('/bulk-export/templates/$templateId/export');
+    await _dioService.get('/bulk-export/templates/$templateId/export');
   }
 
   Future<void> deleteTemplate(String templateId) async {
-    await _httpService.delete('/bulk-export/templates/$templateId');
+    await _dioService.delete('/bulk-export/templates/$templateId');
   }
 
   Future<Map<String, dynamic>> applyTemplate(String templateId, Map<String, dynamic> params) async {
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '/bulk-export/templates/$templateId/apply',
       data: params,
     );
@@ -71,7 +71,7 @@ class BulkExportService {
   }
 
   Future<Map<String, dynamic>> createExportJob(Map<String, dynamic> data) async {
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '/bulk-export/jobs',
       data: data,
     );
@@ -79,7 +79,7 @@ class BulkExportService {
   }
 
   Future<Map<String, dynamic>> createStreamingExport(Map<String, dynamic> data) async {
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '/bulk-export/streaming',
       data: data,
     );
@@ -87,7 +87,7 @@ class BulkExportService {
   }
 
   Future<Map<String, dynamic>> createPaginatedExport(Map<String, dynamic> data) async {
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '/bulk-export/paginated',
       data: data,
     );
@@ -95,6 +95,6 @@ class BulkExportService {
   }
 
   Future<void> downloadExport(String downloadUrl) async {
-    await _httpService.get(downloadUrl);
+    await _dioService.get(downloadUrl);
   }
 }

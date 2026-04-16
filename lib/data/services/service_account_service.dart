@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 
 /// Service for managing Service Accounts in the Core System
@@ -10,26 +9,17 @@ import 'package:traqtrace_app/features/api_management/models/service_account.dar
 /// Service accounts are used for internal M2M authentication between
 /// the Integration Layer and Core System.
 class ServiceAccountService {
-  final String baseUrl;
-  final http.Client _client;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
   ServiceAccountService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : baseUrl = appConfig.apiBaseUrl,
-        _client = httpClient,
-        _tokenManager = tokenManager {
-    debugPrint('ServiceAccountService created with baseUrl: $baseUrl');
-    debugPrint('TokenManager is null: ${tokenManager == null}');
-  }
+    required DioService dioService,
+  }) : _dioService = dioService;
+
+  String get baseUrl => _dioService.baseUrl;
 
   /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
-    debugPrint('_getHeaders called, _tokenManager is null: ${_tokenManager == null}');
-    final token = await _tokenManager.getToken();
-    debugPrint('Got token: ${token != null ? "yes" : "no"}');
+    final token = await _dioService.getAuthToken();
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -44,13 +34,15 @@ class ServiceAccountService {
   Future<List<ServiceAccount>> listServiceAccounts() async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.get(
-        Uri.parse('$baseUrl/service-accounts'),
+      final response = await _dioService.get(
+        '$baseUrl/service-accounts',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = json.decode(response.body);
+        final List<dynamic> jsonList = json.decode(response.data);
         return jsonList.map((json) => ServiceAccount.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load service accounts: ${response.statusCode}');
@@ -65,13 +57,15 @@ class ServiceAccountService {
   Future<ServiceAccount> getServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.get(
-        Uri.parse('$baseUrl/service-accounts/$id'),
+      final response = await _dioService.get(
+        '$baseUrl/service-accounts/$id',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return ServiceAccount.fromJson(json.decode(response.body));
+        return ServiceAccount.fromJson(json.decode(response.data));
       } else {
         throw Exception('Failed to load service account: ${response.statusCode}');
       }
@@ -102,14 +96,16 @@ class ServiceAccountService {
       };
 
       final headers = await _getHeaders();
-      final response = await _client.post(
-        Uri.parse('$baseUrl/service-accounts'),
+      final response = await _dioService.post(
+        '$baseUrl/service-accounts',
         headers: headers,
-        body: json.encode(body),
+        data: json.encode(body),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        return ServiceAccountCredentials.fromJson(json.decode(response.body));
+        return ServiceAccountCredentials.fromJson(json.decode(response.data));
       } else {
         throw Exception('Failed to create service account: ${response.statusCode}');
       }
@@ -141,14 +137,16 @@ class ServiceAccountService {
       if (expiresAt != null) body['expiresAt'] = expiresAt.toIso8601String();
 
       final headers = await _getHeaders();
-      final response = await _client.put(
-        Uri.parse('$baseUrl/service-accounts/$id'),
+      final response = await _dioService.put(
+        '$baseUrl/service-accounts/$id',
         headers: headers,
-        body: json.encode(body),
+        data: json.encode(body),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return ServiceAccount.fromJson(json.decode(response.body));
+        return ServiceAccount.fromJson(json.decode(response.data));
       } else {
         throw Exception('Failed to update service account: ${response.statusCode}');
       }
@@ -163,13 +161,15 @@ class ServiceAccountService {
   Future<ServiceAccountCredentials> rotateSecret(String id) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.post(
-        Uri.parse('$baseUrl/service-accounts/$id/rotate-secret'),
+      final response = await _dioService.post(
+        '$baseUrl/service-accounts/$id/rotate-secret',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        return ServiceAccountCredentials.fromJson(json.decode(response.body));
+        return ServiceAccountCredentials.fromJson(json.decode(response.data));
       } else {
         throw Exception('Failed to rotate secret: ${response.statusCode}');
       }
@@ -183,9 +183,11 @@ class ServiceAccountService {
   Future<void> deactivateServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.post(
-        Uri.parse('$baseUrl/service-accounts/$id/deactivate'),
+      final response = await _dioService.post(
+        '$baseUrl/service-accounts/$id/deactivate',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -201,9 +203,11 @@ class ServiceAccountService {
   Future<void> reactivateServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.post(
-        Uri.parse('$baseUrl/service-accounts/$id/activate'),
+      final response = await _dioService.post(
+        '$baseUrl/service-accounts/$id/activate',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -219,9 +223,11 @@ class ServiceAccountService {
   Future<void> deleteServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
-      final response = await _client.delete(
-        Uri.parse('$baseUrl/service-accounts/$id'),
+      final response = await _dioService.delete(
+        '$baseUrl/service-accounts/$id',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {

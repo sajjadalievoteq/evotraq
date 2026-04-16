@@ -2,9 +2,7 @@ import 'dart:math' as math;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 import 'package:traqtrace_app/data/services/aggregation_event_service.dart';
 
@@ -92,13 +90,8 @@ class AggregationEventsState extends Equatable {
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   final AggregationEventService _service;
 
-  AggregationEventsCubit({AggregationEventService? service, required AppConfig appConfig})
-      : _service = service ??
-            AggregationEventService(
-              httpClient: http.Client(),
-              tokenManager: TokenManager(),
-              appConfig: appConfig,
-            ),
+  AggregationEventsCubit({AggregationEventService? service})
+      : _service = service ?? getIt<AggregationEventService>(),
         super(const AggregationEventsState());
 
   Future<void> loadAggregationEvents({

@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/admin/models/admin_models.dart';
 
 class AdminService {
-  final HttpService _httpService;
+  final DioService _dioService;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
 
   AdminService({
-    required HttpService httpService,
+    required DioService dioService,
     required TokenManager tokenManager,
     required AppConfig appConfig,
-  }) : _httpService = httpService,
+  }) : _dioService = dioService,
        _tokenManager = tokenManager,
        _appConfig = appConfig;
 
@@ -51,7 +51,7 @@ class AdminService {
       queryParams['status'] = status;
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/users',
       queryParameters: queryParams,
       headers: {
@@ -76,7 +76,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/approvals',
       headers: {
         'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.put(
+    final response = await _dioService.put(
       '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/approve',
       headers: {
         'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.put(
+    final response = await _dioService.put(
       '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/reject',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.put(
+    final response = await _dioService.put(
       '${_appConfig.apiBaseUrl}/api/admin/users/$userId/status',
       queryParameters: {'enabled': enabled},
       headers: {
@@ -176,7 +176,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.put(
+    final response = await _dioService.put(
       '${_appConfig.apiBaseUrl}/api/admin/users/$userId/roles',
       queryParameters: {'role': role},
       headers: {
@@ -204,7 +204,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.put(
+    final response = await _dioService.put(
       '${_appConfig.apiBaseUrl}/api/admin/users/$userId',
       data: jsonEncode(updateRequest.toJson()),
       headers: {
@@ -229,7 +229,7 @@ class AdminService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/users',
       data: jsonEncode(createRequest.toJson()),
       headers: {

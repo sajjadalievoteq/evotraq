@@ -1,25 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/barcode_api_service.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:http/http.dart' as http;
 
 /// Service that integrates barcode detection with backend verification and EPCIS mapping
 class BarcodeScanProcessingService {
   final BarcodeApiService _barcodeApiService;
   
   BarcodeScanProcessingService({
-    required AppConfig appConfig,
-    required TokenManager tokenManager,
-  }) : _barcodeApiService = BarcodeApiService(
-         client: http.Client(),
-         tokenManager: tokenManager,
-         appConfig: appConfig,
-       );
+    required DioService dioService,
+  }) : _barcodeApiService = BarcodeApiService(dioService: dioService);
   
   /// Process a detected barcode, verify it, and create an EPCIS event
   Future<Map<String, dynamic>> processBarcodeScan({

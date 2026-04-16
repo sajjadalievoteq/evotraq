@@ -37,9 +37,6 @@ import 'package:traqtrace_app/data/services/advanced_query_service.dart';
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
-
-
-
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 // Dashboard imports
 
@@ -48,7 +45,6 @@ import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
 import 'package:traqtrace_app/features/api_management/providers/partner_access_provider.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
-
 
 import 'package:traqtrace_app/core/di/injection.dart';
 
@@ -66,6 +62,8 @@ import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/data/services/transformation_event_service.dart';
 import 'package:traqtrace_app/data/services/receiving_operation_service.dart';
 
+import 'core/network/dio_service.dart';
+
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
@@ -77,7 +75,7 @@ void main() async {
     final appConfig = AppConfig(
       apiBaseUrl: const String.fromEnvironment(
         'API_BASE_URL',
-        defaultValue: 'http://localhost:8080/api',
+        defaultValue: 'http://localhost:8081/api',
       ),
       appName: 'evotraq.io',
       appVersion: '1.0.0',
@@ -135,11 +133,11 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
         BlocProvider<TransactionEventsCubit>(
           create: (context) =>
-              TransactionEventsCubit(appConfig: getIt<AppConfig>()),
+              TransactionEventsCubit(),
         ),
         BlocProvider<TransformationEventsCubit>(
           create: (context) =>
-              TransformationEventsCubit(appConfig: getIt<AppConfig>()),
+              TransformationEventsCubit(),
         ),
         BlocProvider<ValidationCubit>(
           create: (context) => ValidationCubit(appConfig: getIt<AppConfig>()),
@@ -149,8 +147,7 @@ class TraqTraceApp extends StatelessWidget {
               TransactionDocumentCubit(appConfig: getIt<AppConfig>()),
         ),
         BlocProvider<ValidationRuleCubit>(
-          create: (context) =>
-              ValidationRuleCubit(),
+          create: (context) => ValidationRuleCubit(),
         ),
         BlocProvider<TraversalQueryCubit>(
           create: (context) =>
@@ -158,7 +155,7 @@ class TraqTraceApp extends StatelessWidget {
         ),
         BlocProvider<AggregationEventsCubit>(
           create: (context) =>
-              AggregationEventsCubit(appConfig: getIt<AppConfig>()),
+              AggregationEventsCubit(),
         ),
         BlocProvider<ProfileCubit>(
           create: (context) => ProfileCubit(userService: getIt<UserService>()),
@@ -186,36 +183,23 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) => SGTINCubit(sgtinService: getIt<SGTINService>()),
         ),
         BlocProvider<ApiCollectionCubit>(
-          create: (context) => ApiCollectionCubit(
-            httpClient: getIt<http.Client>(),
-            tokenManager: getIt<TokenManager>(),
-            appConfig: getIt<AppConfig>(),
-          ),
+          create: (context) =>
+              ApiCollectionCubit(dioService: getIt<DioService>()),
         ),
         BlocProvider<ApiManagementCubit>(
-          create: (context) => ApiManagementCubit(
-            httpClient: getIt<http.Client>(),
-            tokenManager: getIt<TokenManager>(),
-            appConfig: getIt<AppConfig>(),
-          ),
+          create: (context) =>
+              ApiManagementCubit(dioService: getIt<DioService>()),
         ),
         BlocProvider<PartnerAccessCubit>(
-          create: (context) => PartnerAccessCubit(
-            httpClient: getIt<http.Client>(),
-            tokenManager: getIt<TokenManager>(),
-            appConfig: getIt<AppConfig>(),
-          ),
+          create: (context) =>
+              PartnerAccessCubit(dioService: getIt<DioService>()),
         ),
         BlocProvider<ServiceAccountCubit>(
           create: (context) =>
               ServiceAccountCubit(service: getIt<ServiceAccountService>()),
         ),
         BlocProvider<ObjectEventsCubit>(
-          create: (context) => ObjectEventsCubit(
-            httpClient: getIt<http.Client>(),
-            tokenManager: getIt<TokenManager>(),
-            appConfig: getIt<AppConfig>(),
-          ),
+          create: (context) => ObjectEventsCubit(),
         ),
         BlocProvider<EPCISEventsCubit>(
           create: (context) => EPCISEventsCubit(getIt<EPCISEventService>()),

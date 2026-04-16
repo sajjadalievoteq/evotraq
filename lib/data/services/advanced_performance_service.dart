@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 class AdvancedPerformanceService {
-  final HttpService _httpService;
+  final DioService _dioService;
   final TokenManager _tokenManager;
   final AppConfig _appConfig;
 
   AdvancedPerformanceService({
-    required HttpService httpService,
+    required DioService dioService,
     required TokenManager tokenManager,
     required AppConfig appConfig,
-  }) : _httpService = httpService,
+  }) : _dioService = dioService,
        _tokenManager = tokenManager,
        _appConfig = appConfig;
 
@@ -24,7 +24,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/analyze',
       headers: {
         'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/patterns',
       headers: {
         'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/recommendations',
       headers: {
         'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/problematic',
       headers: {
         'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/status',
       headers: {
         'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/leak-detection',
       headers: {
         'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/health',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/recommendations',
       headers: {
         'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/metrics',
       headers: {
         'Content-Type': 'application/json',
@@ -246,7 +246,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/contention',
       headers: {
         'Content-Type': 'application/json',
@@ -272,7 +272,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/backpressure',
       headers: {
         'Content-Type': 'application/json',
@@ -300,7 +300,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/optimize',
       headers: {
         'Content-Type': 'application/json',
@@ -327,7 +327,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/resources/metrics',
       headers: {
         'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/resources/memory/optimize',
       headers: {
         'Content-Type': 'application/json',
@@ -377,7 +377,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/resources/cpu/optimize',
       headers: {
         'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/resources/io/optimize',
       headers: {
         'Content-Type': 'application/json',
@@ -425,7 +425,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/resources/recommendations',
       headers: {
         'Content-Type': 'application/json',
@@ -451,7 +451,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.get(
+    final response = await _dioService.get(
       '${_appConfig.apiBaseUrl}/api/admin/performance/comprehensive/analysis',
       headers: {
         'Content-Type': 'application/json',
@@ -476,7 +476,7 @@ class AdvancedPerformanceService {
       throw Exception('Authentication token not found');
     }
 
-    final response = await _httpService.post(
+    final response = await _dioService.post(
       '${_appConfig.apiBaseUrl}/api/admin/performance/comprehensive/optimize',
       headers: {
         'Content-Type': 'application/json',

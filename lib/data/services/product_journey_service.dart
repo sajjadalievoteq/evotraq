@@ -1,27 +1,20 @@
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
 
 class ProductJourneyService {
-  final http.Client _client;
-  final AppConfig _appConfig;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
 
   ProductJourneyService({
-    required http.Client client,
-    required AppConfig appConfig,
-    required TokenManager tokenManager,
-  })  : _client = client,
-        _appConfig = appConfig,
-        _tokenManager = tokenManager;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
-  String get _baseUrl => _appConfig.apiBaseUrl;
+  String get _baseUrl => _dioService.baseUrl;
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -84,13 +77,16 @@ class ProductJourneyService {
       final headers = await _getHeaders();
 
       // First, try to find SGTIN by GTIN and serial
-      final sgtinResponse = await _client.get(
-        Uri.parse('$_baseUrl/identifiers/sgtins/search?gtin=$gtin&serialNumber=$serialNumber'),
+      final sgtinResponse = await _dioService.get(
+        '$_baseUrl/identifiers/sgtins/search',
+        queryParameters: {'gtin': gtin, 'serialNumber': serialNumber},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (sgtinResponse.statusCode == 200) {
-        final sgtinData = jsonDecode(sgtinResponse.body);
+        final sgtinData = jsonDecode(sgtinResponse.data);
         final List<dynamic> sgtins = sgtinData is List ? sgtinData : (sgtinData['content'] ?? []);
         
         if (sgtins.isNotEmpty) {
@@ -121,13 +117,16 @@ class ProductJourneyService {
       final results = <ProductSearchResult>[];
 
       // Search SGTINs
-      final sgtinResponse = await _client.get(
-        Uri.parse('$_baseUrl/identifiers/sgtins?search=$query&size=10'),
+      final sgtinResponse = await _dioService.get(
+        '$_baseUrl/identifiers/sgtins',
+        queryParameters: {'search': query, 'size': '10'},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (sgtinResponse.statusCode == 200) {
-        final data = jsonDecode(sgtinResponse.body);
+        final data = jsonDecode(sgtinResponse.data);
         final List<dynamic> sgtins = data is List ? data : (data['content'] ?? []);
         
         for (final sgtin in sgtins) {
@@ -143,13 +142,16 @@ class ProductJourneyService {
       }
 
       // Search SSCCs
-      final ssccResponse = await _client.get(
-        Uri.parse('$_baseUrl/identifiers/sscc?search=$query&size=5'),
+      final ssccResponse = await _dioService.get(
+        '$_baseUrl/identifiers/sscc',
+        queryParameters: {'search': query, 'size': '5'},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (ssccResponse.statusCode == 200) {
-        final data = jsonDecode(ssccResponse.body);
+        final data = jsonDecode(ssccResponse.data);
         final List<dynamic> ssccs = data is List ? data : (data['content'] ?? []);
         
         for (final sscc in ssccs) {
@@ -180,13 +182,15 @@ class ProductJourneyService {
 
     // Fetch ObjectEvents by EPC - uses path parameter /events/object/epc/{epc}
     try {
-      final objectResponse = await _client.get(
-        Uri.parse('$_baseUrl/events/object/epc/$encodedEpc'),
+      final objectResponse = await _dioService.get(
+        '$_baseUrl/events/object/epc/$encodedEpc',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (objectResponse.statusCode == 200) {
-        final data = jsonDecode(objectResponse.body);
+        final data = jsonDecode(objectResponse.data);
         final List<dynamic> events = data is List ? data : (data['content'] ?? [data]);
         for (final event in events) {
           if (event is Map) {
@@ -202,13 +206,15 @@ class ProductJourneyService {
 
     // Fetch AggregationEvents (where this EPC is a child) - uses path parameter /events/aggregation/child/{childEPC}
     try {
-      final aggResponse = await _client.get(
-        Uri.parse('$_baseUrl/events/aggregation/child/$encodedEpc'),
+      final aggResponse = await _dioService.get(
+        '$_baseUrl/events/aggregation/child/$encodedEpc',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (aggResponse.statusCode == 200) {
-        final data = jsonDecode(aggResponse.body);
+        final data = jsonDecode(aggResponse.data);
         final List<dynamic> events = data is List ? data : (data['content'] ?? [data]);
         for (final event in events) {
           if (event is Map) {
@@ -226,13 +232,15 @@ class ProductJourneyService {
     // Fetch AggregationEvents (where this EPC is the parent/container) - for SSCC journey tracking
     // Uses path parameter /events/aggregation/parent/{parentEPC}
     try {
-      final aggParentResponse = await _client.get(
-        Uri.parse('$_baseUrl/events/aggregation/parent/$encodedEpc'),
+      final aggParentResponse = await _dioService.get(
+        '$_baseUrl/events/aggregation/parent/$encodedEpc',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (aggParentResponse.statusCode == 200) {
-        final data = jsonDecode(aggParentResponse.body);
+        final data = jsonDecode(aggParentResponse.data);
         final List<dynamic> events = data is List ? data : (data['content'] ?? [data]);
         for (final event in events) {
           if (event is Map) {
@@ -249,13 +257,15 @@ class ProductJourneyService {
 
     // Fetch TransactionEvents by EPC - uses path parameter /events/transaction/epc/{epc}
     try {
-      final txnResponse = await _client.get(
-        Uri.parse('$_baseUrl/events/transaction/epc/$encodedEpc'),
+      final txnResponse = await _dioService.get(
+        '$_baseUrl/events/transaction/epc/$encodedEpc',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (txnResponse.statusCode == 200) {
-        final data = jsonDecode(txnResponse.body);
+        final data = jsonDecode(txnResponse.data);
         final List<dynamic> events = data is List ? data : (data['content'] ?? [data]);
         for (final event in events) {
           if (event is Map) {
@@ -283,13 +293,15 @@ class ProductJourneyService {
       if (step.locationGLN != null && step.locationName == null) {
         if (!locationCache.containsKey(step.locationGLN)) {
           try {
-            final response = await _client.get(
-              Uri.parse('$_baseUrl/master-data/glns/code/${step.locationGLN}'),
+            final response = await _dioService.get(
+              '$_baseUrl/master-data/glns/code/${step.locationGLN}',
               headers: headers,
+              responseType: ResponseType.plain,
+              acceptAllStatusCodes: true,
             );
 
             if (response.statusCode == 200) {
-              final glnData = jsonDecode(response.body);
+              final glnData = jsonDecode(response.data);
               locationCache[step.locationGLN!] = {
                 'name': glnData['locationName'] ?? glnData['companyName'] ?? step.locationGLN!,
                 'address': '${glnData['addressLine1'] ?? ''}, ${glnData['city'] ?? ''}'.trim(),

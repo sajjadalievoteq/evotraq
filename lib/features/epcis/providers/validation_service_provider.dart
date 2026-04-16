@@ -10,7 +10,6 @@ import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:http/http.dart' as http;
 
 /// Cache validation result storage class
 class _CachedValidationResult {
@@ -104,7 +103,6 @@ class ValidationCubit extends Cubit<ValidationState> {
            validationService ??
            ValidationService(
              tokenManager: getIt<TokenManager>(),
-             httpClient: getIt<http.Client>(),
              appConfig: appConfig,
            ),
        super(ValidationState.initial());

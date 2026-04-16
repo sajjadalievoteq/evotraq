@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_types.dart';
 import 'package:traqtrace_app/data/services/object_event_service.dart';
@@ -58,16 +56,7 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
 
   ObjectEventsCubit({
     ObjectEventService? service,
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _service =
-           service ??
-           ObjectEventService(
-             httpClient: httpClient,
-             tokenManager: tokenManager,
-             appConfig: appConfig,
-           ),
+  }) : _service = service ?? getIt<ObjectEventService>(),
        super(const ObjectEventsState());
 
   void clearError() {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Dashboard statistics model
 class DashboardStats {
@@ -73,10 +73,10 @@ class SystemHealthStatus {
 }
 
 class DashboardService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  DashboardService({required HttpService httpService})
-    : _httpService = httpService;
+  DashboardService({required DioService dioService})
+    : _dioService = dioService;
 
   Map<String, String> _buildHeaders(String? token) {
     return {
@@ -86,7 +86,7 @@ class DashboardService {
   }
 
   String _backendRootUrl() {
-    final base = _httpService.baseUrl;
+    final base = _dioService.baseUrl;
 
     try {
       final uri = Uri.parse(base);
@@ -111,19 +111,19 @@ class DashboardService {
   }
 
   Future<DashboardStats> getDashboardStats() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     final headers = _buildHeaders(token);
 
     // Fetch counts from different endpoints in parallel
     final results = await Future.wait([
-      _fetchCount('${_httpService.baseUrl}/master-data/gtins', headers),
-      _fetchCount('${_httpService.baseUrl}/master-data/glns', headers),
+      _fetchCount('${_dioService.baseUrl}/master-data/gtins', headers),
+      _fetchCount('${_dioService.baseUrl}/master-data/glns', headers),
       _fetchCount(
-        '${_httpService.baseUrl}/identifiers/sgtins',
+        '${_dioService.baseUrl}/identifiers/sgtins',
         headers,
       ), // Corrected endpoint
       _fetchCount(
-        '${_httpService.baseUrl}/identifiers/sscc',
+        '${_dioService.baseUrl}/identifiers/sscc',
         headers,
       ), // Corrected endpoint
       _fetchEventCounts(headers),
@@ -144,7 +144,7 @@ class DashboardService {
 
   Future<int> _fetchCount(String url, Map<String, String> headers) async {
     try {
-      final response = await _httpService.get(
+      final response = await _dioService.get(
         '$url?page=0&size=1',
         headers: headers,
         responseType: ResponseType.plain,
@@ -172,11 +172,11 @@ class DashboardService {
     Map<String, String> headers,
   ) async {
     final eventTypes = {
-      'Object': '${_httpService.baseUrl}/events/object',
-      'Aggregation': '${_httpService.baseUrl}/events/aggregation',
-      'Transaction': '${_httpService.baseUrl}/events/transaction',
+      'Object': '${_dioService.baseUrl}/events/object',
+      'Aggregation': '${_dioService.baseUrl}/events/aggregation',
+      'Transaction': '${_dioService.baseUrl}/events/transaction',
       'Transformation':
-          '${_httpService.baseUrl}/transformation-events', // Corrected endpoint
+          '${_dioService.baseUrl}/transformation-events', // Corrected endpoint
     };
 
     final counts = <String, int>{};
@@ -191,22 +191,22 @@ class DashboardService {
   }
 
   Future<List<RecentEvent>> getRecentEvents({int limit = 5}) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     final headers = _buildHeaders(token);
 
     try {
       // Fetch recent events from multiple event types in parallel
       final eventEndpoints = [
-        '${_httpService.baseUrl}/events/object?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_httpService.baseUrl}/events/aggregation?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_httpService.baseUrl}/events/transaction?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_httpService.baseUrl}/transformation-events?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        '${_dioService.baseUrl}/events/object?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        '${_dioService.baseUrl}/events/aggregation?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        '${_dioService.baseUrl}/events/transaction?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        '${_dioService.baseUrl}/transformation-events?page=0&size=$limit&sortBy=eventTime&direction=DESC',
       ];
 
       final responses = await Future.wait(
         eventEndpoints.map((url) async {
           try {
-            return await _httpService.get(
+            return await _dioService.get(
               url,
               headers: headers,
               responseType: ResponseType.plain,
@@ -263,9 +263,9 @@ class DashboardService {
   }
 
   Future<SystemHealthStatus> getSystemHealth() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     final headers = _buildHeaders(token);
-    final actuatorBaseUrl = '${_httpService.baseUrl}/internal/actuator';
+    final actuatorBaseUrl = '${_dioService.baseUrl}/internal/actuator';
 
     bool backendHealthy = false;
     bool databaseHealthy = false;
@@ -274,7 +274,7 @@ class DashboardService {
 
     try {
       // Check backend health
-      final healthResponse = await _httpService
+      final healthResponse = await _dioService
           .get(
             '$actuatorBaseUrl/health',
             headers: headers,
@@ -307,7 +307,7 @@ class DashboardService {
 
     try {
       // Get version info
-      final infoResponse = await _httpService
+      final infoResponse = await _dioService
           .get(
             '$actuatorBaseUrl/info',
             headers: headers,

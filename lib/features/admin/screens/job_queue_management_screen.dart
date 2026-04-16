@@ -129,9 +129,7 @@ class JobQueueManagementScreen extends StatelessWidget {
                     
                     // Main Content
                     Expanded(
-                      child: JobQueuePanel(
-                        baseUrl: baseUrl,
-                        tokenManager: tokenManager,
+                      child: JobQueuePanel(baseUrl: getIt<AppConfig>().apiBaseUrl, tokenManager: getIt<TokenManager>(),
                       ),
                     ),
                   ],

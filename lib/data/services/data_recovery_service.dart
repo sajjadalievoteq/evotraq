@@ -1,26 +1,19 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class DataRecoveryService {
-  final http.Client client;
-  final TokenManager tokenManager;
-  final AppConfig appConfig;
+  final DioService _dioService;
 
-  DataRecoveryService({
-    required this.client,
-    required this.tokenManager,
-    required this.appConfig,
-  });
+  DataRecoveryService({required DioService dioService}) : _dioService = dioService;
 
-  String get _baseUrl => '${appConfig.apiBaseUrl}/api/v1/data-recovery';
+  String get _baseUrl => '${_dioService.baseUrl}/v1/data-recovery';
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -32,23 +25,26 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'recoveryType': recoveryType,
       'initiatedBy': initiatedBy,
     };
 
-    final uri = Uri.parse('$_baseUrl/initiate').replace(queryParameters: queryParams);
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/initiate',
       headers: headers,
-      body: json.encode(recoveryParameters),
+      queryParameters: queryParams,
+      data: jsonEncode(recoveryParameters),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to initiate data recovery: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to initiate data recovery: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -58,7 +54,6 @@ class DataRecoveryService {
     Map<String, dynamic>? backupOptions,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/backup');
 
     final body = {
       'eventIds': eventIds,
@@ -70,16 +65,20 @@ class DataRecoveryService {
       },
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/backup',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to perform data backup: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to perform data backup: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -90,8 +89,7 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {'backupId': backupId};
-    final uri = Uri.parse('$_baseUrl/restore').replace(queryParameters: queryParams);
+    final queryParams = <String, dynamic>{'backupId': backupId};
 
     final body = restoreOptions ?? {
       'validate_before_restore': true,
@@ -99,34 +97,45 @@ class DataRecoveryService {
       'restore_mode': 'REPLACE',
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/restore',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to restore data from backup: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to restore data from backup: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Get recovery operation status
   Future<Map<String, dynamic>> getRecoveryOperationStatus(String operationId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/operations/$operationId/status');
 
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/operations/$operationId/status',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Recovery operation not found: $operationId');
     } else {
-      throw Exception('Failed to get recovery operation status: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get recovery operation status: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -136,7 +145,7 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = <String, String>{};
+    final queryParams = <String, dynamic>{};
     if (searchCriteria != null) {
       searchCriteria.forEach((key, value) {
         if (value != null) {
@@ -149,14 +158,20 @@ class DataRecoveryService {
       });
     }
 
-    final uri = Uri.parse('$_baseUrl/backups').replace(queryParameters: queryParams);
-
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/backups',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to list available backups: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to list available backups: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -166,7 +181,6 @@ class DataRecoveryService {
     Map<String, dynamic>? validationOptions,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/validate-backup/$backupId');
 
     final body = validationOptions ?? {
       'check_checksums': true,
@@ -174,18 +188,22 @@ class DataRecoveryService {
       'validate_events': true,
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/validate-backup/$backupId',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to validate backup: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to validate backup: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -194,18 +212,21 @@ class DataRecoveryService {
     required Map<String, dynamic> scheduleConfig,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/schedule-backup');
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/schedule-backup',
       headers: headers,
-      body: json.encode(scheduleConfig),
+      data: jsonEncode(scheduleConfig),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to schedule automatic backup: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to schedule automatic backup: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -216,23 +237,29 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = <String, String>{};
+    final queryParams = <String, dynamic>{};
     if (reason != null) {
       queryParams['reason'] = reason;
     }
 
-    final uri = Uri.parse('$_baseUrl/operations/$operationId').replace(queryParameters: queryParams);
-
-    final response = await client.delete(uri, headers: headers);
+    final response = await _dioService.delete(
+      '$_baseUrl/operations/$operationId',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Recovery operation not found: $operationId');
     } else if (response.statusCode == 400) {
-      throw Exception('Cannot cancel recovery operation: ${response.body}');
+      throw Exception('Cannot cancel recovery operation: ${response.data}');
     } else {
-      throw Exception('Failed to cancel recovery operation: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to cancel recovery operation: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -242,15 +269,21 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {'days': days.toString()};
-    final uri = Uri.parse('$_baseUrl/statistics').replace(queryParameters: queryParams);
-
-    final response = await client.get(uri, headers: headers);
+    final queryParams = <String, dynamic>{'days': days.toString()};
+    final response = await _dioService.get(
+      '$_baseUrl/statistics',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to get recovery statistics: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get recovery statistics: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -262,45 +295,54 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'format': format,
     };
-
-    final uri = Uri.parse('$_baseUrl/backups/$backupId/export').replace(queryParameters: queryParams);
 
     final body = exportOptions ?? {
       'include_metadata': true,
       'compress_output': false,
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/backups/$backupId/export',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to export backup data: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to export backup data: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Get backup details
   Future<Map<String, dynamic>> getBackupDetails(String backupId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/backups/$backupId');
 
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/backups/$backupId',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to get backup details: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get backup details: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -311,21 +353,27 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = <String, String>{};
+    final queryParams = <String, dynamic>{};
     if (reason != null) {
       queryParams['reason'] = reason;
     }
 
-    final uri = Uri.parse('$_baseUrl/backups/$backupId').replace(queryParameters: queryParams);
-
-    final response = await client.delete(uri, headers: headers);
+    final response = await _dioService.delete(
+      '$_baseUrl/backups/$backupId',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to delete backup: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to delete backup: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -335,7 +383,6 @@ class DataRecoveryService {
     Map<String, dynamic>? testOptions,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/backups/$backupId/test-restore');
 
     final body = testOptions ?? {
       'dry_run': true,
@@ -343,18 +390,22 @@ class DataRecoveryService {
       'check_dependencies': true,
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/backups/$backupId/test-restore',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Backup not found: $backupId');
     } else {
-      throw Exception('Failed to test backup restore: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to test backup restore: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -366,7 +417,7 @@ class DataRecoveryService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = <String, String>{};
+    final queryParams = <String, dynamic>{};
     if (limit != null) {
       queryParams['limit'] = limit.toString();
     }
@@ -374,16 +425,22 @@ class DataRecoveryService {
       queryParams['level'] = level;
     }
 
-    final uri = Uri.parse('$_baseUrl/operations/$operationId/logs').replace(queryParameters: queryParams);
-
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/operations/$operationId/logs',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Recovery operation not found: $operationId');
     } else {
-      throw Exception('Failed to get recovery operation logs: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get recovery operation logs: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -413,23 +470,26 @@ class DataRecoveryService {
     required Map<String, dynamic> recoveryParameters,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/estimate-recovery-time');
 
     final body = {
       'recovery_type': recoveryType,
       'recovery_parameters': recoveryParameters,
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/estimate-recovery-time',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to estimate recovery time: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to estimate recovery time: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 }

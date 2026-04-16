@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/notifications/domain/models/notification_subscription.dart'
     as domain;
 
 class NotificationApiService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
   NotificationApiService({
-    required HttpService httpService,
-  }) : _httpService = httpService;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -31,8 +31,8 @@ class NotificationApiService {
   }) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/notifications/subscriptions',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/subscriptions',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -63,8 +63,8 @@ class NotificationApiService {
       domain.CreateSubscriptionRequest request) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/subscriptions',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/subscriptions',
         headers: headers,
         data: json.encode(request.toJson()),
         responseType: ResponseType.plain,
@@ -88,8 +88,8 @@ class NotificationApiService {
   Future<domain.NotificationSubscription> getSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -115,8 +115,8 @@ class NotificationApiService {
   ) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.put(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id',
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
         data: json.encode(request.toJson()),
         responseType: ResponseType.plain,
@@ -140,8 +140,8 @@ class NotificationApiService {
   Future<void> deleteSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.delete(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id',
+      final response = await _dioService.delete(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -162,8 +162,8 @@ class NotificationApiService {
   Future<void> pauseSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id/pause',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id/pause',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -184,8 +184,8 @@ class NotificationApiService {
   Future<void> resumeSubscription(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id/resume',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id/resume',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -211,8 +211,8 @@ class NotificationApiService {
   }) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/notifications/subscriptions/$subscriptionId/webhooks?limit=$size',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/subscriptions/$subscriptionId/webhooks?limit=$size',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -242,8 +242,8 @@ class NotificationApiService {
   Future<Map<String, dynamic>> testWebhook(String webhookUrl) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/webhooks/test',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/webhooks/test',
         headers: headers,
         data: json.encode({'webhookUrl': webhookUrl}),
         responseType: ResponseType.plain,
@@ -267,8 +267,8 @@ class NotificationApiService {
   Future<Map<String, dynamic>> testEmail(String emailAddress) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/emails/test',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/emails/test',
         headers: headers,
         data: jsonEncode({
           'emailAddress': emailAddress,
@@ -294,8 +294,8 @@ class NotificationApiService {
   Future<void> retryWebhook(String notificationId) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/notifications/webhooks/$notificationId/retry',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/notifications/webhooks/$notificationId/retry',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -352,8 +352,8 @@ class NotificationApiService {
   Future<domain.NotificationStats> getSubscriptionStats(String id) async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/notifications/subscriptions/$id/stats',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/subscriptions/$id/stats',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -376,8 +376,8 @@ class NotificationApiService {
   Future<Map<String, dynamic>> getSystemStats() async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/notifications/stats',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/notifications/stats',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,

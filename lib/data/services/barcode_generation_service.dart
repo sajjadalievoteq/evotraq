@@ -2,17 +2,17 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Service for generating barcodes using the backend API
 class BarcodeGenerationService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  BarcodeGenerationService({required HttpService httpService})
-    : _httpService = httpService;
+  BarcodeGenerationService({required DioService dioService})
+    : _dioService = dioService;
 
   String get _baseUrl {
-    final base = _httpService.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final base = _dioService.baseUrl.replaceAll(RegExp(r'/$'), '');
     if (base.endsWith('/api')) {
       return '$base/barcode/generate';
     }
@@ -20,7 +20,7 @@ class BarcodeGenerationService {
   }
 
   String get _fallbackBaseUrl {
-    final base = _httpService.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final base = _dioService.baseUrl.replaceAll(RegExp(r'/$'), '');
     if (base.endsWith('/api')) {
       return '$base/api/barcode/generate';
     }
@@ -32,7 +32,7 @@ class BarcodeGenerationService {
     Uri fallbackUri,
     Map<String, String> headers,
   ) async {
-    final primaryResponse = await _httpService.get(
+    final primaryResponse = await _dioService.get(
       primaryUri.toString(),
       headers: headers,
       responseType: ResponseType.bytes,
@@ -41,7 +41,7 @@ class BarcodeGenerationService {
     if (primaryResponse.statusCode != 404) {
       return primaryResponse;
     }
-    return await _httpService.get(
+    return await _dioService.get(
       fallbackUri.toString(),
       headers: headers,
       responseType: ResponseType.bytes,
@@ -51,7 +51,7 @@ class BarcodeGenerationService {
 
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }

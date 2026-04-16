@@ -1,26 +1,20 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class DataQualityMetricsService {
-  final http.Client client;
-  final TokenManager tokenManager;
-  final AppConfig appConfig;
+  final DioService _dioService;
 
-  DataQualityMetricsService({
-    required this.client,
-    required this.tokenManager,
-    required this.appConfig,
-  });
+  DataQualityMetricsService({required DioService dioService})
+    : _dioService = dioService;
 
-  String get _baseUrl => '${appConfig.apiBaseUrl}/api/v1/quality-metrics';
+  String get _baseUrl => '${_dioService.baseUrl}/v1/quality-metrics';
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -32,7 +26,7 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
     };
@@ -43,14 +37,20 @@ class DataQualityMetricsService {
       }
     }
 
-    final uri = Uri.parse('$_baseUrl/calculate').replace(queryParameters: queryParams);
-
-    final response = await client.post(uri, headers: headers);
+    final response = await _dioService.post(
+      '$_baseUrl/calculate',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to calculate quality metrics: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to calculate quality metrics: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -62,29 +62,39 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_baseUrl/report').replace(queryParameters: queryParams);
+    final body =
+        reportOptions ??
+        {
+          'format': 'detailed',
+          'include_charts': false,
+          'event_types': [
+            'ObjectEvent',
+            'AggregationEvent',
+            'TransactionEvent',
+            'TransformationEvent',
+          ],
+        };
 
-    final body = reportOptions ?? {
-      'format': 'detailed',
-      'include_charts': false,
-      'event_types': ['ObjectEvent', 'AggregationEvent', 'TransactionEvent', 'TransformationEvent'],
-    };
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/report',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to generate quality report: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to generate quality report: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -96,45 +106,61 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_baseUrl/issues').replace(queryParameters: queryParams);
+    final body =
+        issueFilters ??
+        {
+          'severity_levels': ['HIGH', 'MEDIUM', 'LOW'],
+          'issue_types': [
+            'COMPLETENESS',
+            'ACCURACY',
+            'CONSISTENCY',
+            'TIMELINESS',
+          ],
+          'include_recommendations': true,
+        };
 
-    final body = issueFilters ?? {
-      'severity_levels': ['HIGH', 'MEDIUM', 'LOW'],
-      'issue_types': ['COMPLETENESS', 'ACCURACY', 'CONSISTENCY', 'TIMELINESS'],
-      'include_recommendations': true,
-    };
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/issues',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to identify quality issues: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to identify quality issues: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Get quality metrics by ID
   Future<Map<String, dynamic>> getQualityMetricsById(String metricsId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/metrics/$metricsId');
 
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/metrics/$metricsId',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else if (response.statusCode == 404) {
       throw Exception('Quality metrics not found: $metricsId');
     } else {
-      throw Exception('Failed to get quality metrics: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get quality metrics: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -146,61 +172,77 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'currentPeriodStart': currentPeriodStart.toIso8601String(),
       'currentPeriodEnd': currentPeriodEnd.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_baseUrl/benchmark').replace(queryParameters: queryParams);
+    final body =
+        benchmarkOptions ??
+        {
+          'comparison_period_days': 30,
+          'benchmark_type': 'HISTORICAL',
+          'include_trend_analysis': true,
+        };
 
-    final body = benchmarkOptions ?? {
-      'comparison_period_days': 30,
-      'benchmark_type': 'HISTORICAL',
-      'include_trend_analysis': true,
-    };
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/benchmark',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to benchmark quality: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to benchmark quality: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Set quality thresholds for alerting
-  Future<Map<String, dynamic>> setQualityThresholds(Map<String, dynamic> thresholds) async {
+  Future<Map<String, dynamic>> setQualityThresholds(
+    Map<String, dynamic> thresholds,
+  ) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/thresholds');
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/thresholds',
       headers: headers,
-      body: json.encode(thresholds),
+      data: jsonEncode(thresholds),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to set quality thresholds: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to set quality thresholds: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Get current quality thresholds
   Future<Map<String, dynamic>> getQualityThresholds() async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/thresholds');
 
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/thresholds',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to get quality thresholds: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get quality thresholds: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -213,7 +255,7 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'granularity': granularity,
@@ -225,14 +267,20 @@ class DataQualityMetricsService {
       }
     }
 
-    final uri = Uri.parse('$_baseUrl/history').replace(queryParameters: queryParams);
-
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/history',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to get quality metrics history: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get quality metrics history: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -244,29 +292,34 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
     };
 
-    final uri = Uri.parse('$_baseUrl/recommendations').replace(queryParameters: queryParams);
+    final body =
+        analysisOptions ??
+        {
+          'include_root_cause_analysis': true,
+          'prioritize_by_impact': true,
+          'include_cost_benefit': false,
+        };
 
-    final body = analysisOptions ?? {
-      'include_root_cause_analysis': true,
-      'prioritize_by_impact': true,
-      'include_cost_benefit': false,
-    };
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/recommendations',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to generate improvement recommendations: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to generate improvement recommendations: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -279,44 +332,55 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'format': format,
     };
 
-    final uri = Uri.parse('$_baseUrl/export').replace(queryParameters: queryParams);
+    final body =
+        exportOptions ??
+        {
+          'include_charts': true,
+          'include_recommendations': true,
+          'compress_output': false,
+        };
 
-    final body = exportOptions ?? {
-      'include_charts': true,
-      'include_recommendations': true,
-      'compress_output': false,
-    };
-
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/export',
       headers: headers,
-      body: json.encode(body),
+      queryParameters: queryParams,
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to export quality metrics: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to export quality metrics: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
   /// Get real-time quality statistics
   Future<Map<String, dynamic>> getRealtimeQualityStatistics() async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/realtime/statistics');
 
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/realtime/statistics',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to get realtime quality statistics: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get realtime quality statistics: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -326,23 +390,26 @@ class DataQualityMetricsService {
     required Map<String, dynamic> subscriptionConfig,
   }) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl/alerts/subscribe');
 
     final body = {
       'alert_types': alertTypes,
       'subscription_config': subscriptionConfig,
     };
 
-    final response = await client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/alerts/subscribe',
       headers: headers,
-      body: json.encode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to subscribe to quality alerts: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to subscribe to quality alerts: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 
@@ -355,7 +422,7 @@ class DataQualityMetricsService {
   }) async {
     final headers = await _getHeaders();
 
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
     };
@@ -372,14 +439,20 @@ class DataQualityMetricsService {
       }
     }
 
-    final uri = Uri.parse('$_baseUrl/alerts/history').replace(queryParameters: queryParams);
-
-    final response = await client.get(uri, headers: headers);
+    final response = await _dioService.get(
+      '$_baseUrl/alerts/history',
+      headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
-      throw Exception('Failed to get quality alert history: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to get quality alert history: ${response.statusCode} - ${response.data}',
+      );
     }
   }
 }

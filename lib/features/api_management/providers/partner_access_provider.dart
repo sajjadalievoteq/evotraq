@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../data/services/partner_access_service.dart';
 import '../models/api_collection.dart';
 
@@ -81,15 +79,9 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
   final PartnerAccessApiService _service;
 
   PartnerAccessCubit({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
+    required DioService dioService,
     PartnerAccessApiService? service,
-  }) : _service = service ?? PartnerAccessApiService(
-         httpClient: httpClient,
-         tokenManager: tokenManager,
-         appConfig: appConfig,
-       ),
+  }) : _service = service ?? PartnerAccessApiService(dioService: dioService),
        super(const PartnerAccessState.initial());
 
   // ==================== Load Operations ====================

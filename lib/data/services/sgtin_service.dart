@@ -2,24 +2,24 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 
 /// Implementation of SGTINService interface for managing SGTINs
 class SGTINService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
   /// Creates a new SGTINServiceImpl instance
-  SGTINService({required HttpService httpService}) : _httpService = httpService;
+  SGTINService({required DioService dioService}) : _dioService = dioService;
 
   Future<SGTIN> getSGTINById(String id) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/$id',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -39,13 +39,13 @@ class SGTINService {
   }
 
   Future<SGTIN> getSGTINBySerialNumber(String serialNumber) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/serial/$serialNumber',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/serial/$serialNumber',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -66,15 +66,15 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> getAllSGTINs({int page = 0, int size = 20}) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'page': page, 'size': size};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ class SGTINService {
   }
 
   Future<SGTIN> createSGTIN(SGTIN sgtin) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -111,8 +111,8 @@ class SGTINService {
     print('currentLocation in SGTIN object: ${sgtin.currentLocation}');
     print('currentLocation GLN code: ${sgtin.currentLocation?.glnCode}');
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/identifiers/sgtins',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/identifiers/sgtins',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -166,13 +166,13 @@ class SGTINService {
   }
 
   Future<SGTIN> updateSGTIN(String id, SGTIN sgtin) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sgtins/$id',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sgtins/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -193,13 +193,13 @@ class SGTINService {
   }
 
   Future<void> deleteSGTIN(String id) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.delete(
-      '${_httpService.baseUrl}/identifiers/sgtins/$id',
+    final response = await _dioService.delete(
+      '${_dioService.baseUrl}/identifiers/sgtins/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -217,13 +217,13 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByGTIN(String gtinCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/gtin/$gtinCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/gtin/$gtinCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -245,15 +245,15 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByBatchLotNumber(String batchLotNumber) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'batchLotNumber': batchLotNumber};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/batch',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/batch',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -277,15 +277,15 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByStatus(ItemStatus status) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'status': status.name};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/status',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/status',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -308,13 +308,13 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsByLocation(String glnCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/location/$glnCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/location/$glnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -336,13 +336,13 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsBySSCC(String ssccCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/sscc/$ssccCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/sscc/$ssccCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -364,7 +364,7 @@ class SGTINService {
   }
 
   Future<List<SGTIN>> findSGTINsExpiringBefore(DateTime date) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -373,8 +373,8 @@ class SGTINService {
 
     final queryParams = <String, dynamic>{'date': dateStr};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/expiring',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/expiring',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -399,15 +399,15 @@ class SGTINService {
   Future<List<SGTIN>> findSGTINsByRegulatoryMarket(
     String regulatoryMarket,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'market': regulatoryMarket};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/market',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/market',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -437,7 +437,7 @@ class SGTINService {
     int page = 0,
     int size = 20,
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -451,8 +451,8 @@ class SGTINService {
       if (locationId != null) 'locationId': locationId,
     };
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/search',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/search',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -489,7 +489,7 @@ class SGTINService {
     String sortBy = 'createdAt',
     String sortDirection = 'DESC',
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -509,8 +509,8 @@ class SGTINService {
         'locationName': locationName,
     };
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/search/advanced',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/search/advanced',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -547,13 +547,13 @@ class SGTINService {
     String serialNumber,
     ItemStatus newStatus,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sgtins/$serialNumber/status',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sgtins/$serialNumber/status',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -577,13 +577,13 @@ class SGTINService {
     String serialNumber,
     String glnCode,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sgtins/$serialNumber/location',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sgtins/$serialNumber/location',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -605,13 +605,13 @@ class SGTINService {
   }
 
   Future<SGTIN> packSGTINIntoSSCC(String serialNumber, String ssccCode) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sgtins/$serialNumber/pack',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sgtins/$serialNumber/pack',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -635,15 +635,15 @@ class SGTINService {
     String gtinCode, {
     bool randomized = true,
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'randomized': randomized.toString()};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/generate-serial/$gtinCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/generate-serial/$gtinCode',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -665,13 +665,13 @@ class SGTINService {
   }
 
   Future<bool> validateSGTIN(String gtinCode, String serialNumber) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/identifiers/sgtins/validate',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/identifiers/sgtins/validate',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -696,15 +696,15 @@ class SGTINService {
     String gtinCode,
     ItemStatus status,
   ) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final queryParams = <String, dynamic>{'status': status.name};
 
-    final response = await _httpService.get(
-      '${_httpService.baseUrl}/identifiers/sgtins/count/$gtinCode',
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/identifiers/sgtins/count/$gtinCode',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -732,15 +732,15 @@ class SGTINService {
     required DateTime expiryDate,
     String? currentLocation,
   }) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final expiryDateStr = DateFormat('yyyy-MM-dd').format(expiryDate);
 
-    final response = await _httpService.post(
-      '${_httpService.baseUrl}/identifiers/sgtins/commission-multiple',
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/identifiers/sgtins/commission-multiple',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -769,13 +769,13 @@ class SGTINService {
   }
 
   Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final response = await _httpService.put(
-      '${_httpService.baseUrl}/identifiers/sgtins/$serialNumber/decommission',
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/identifiers/sgtins/$serialNumber/decommission',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

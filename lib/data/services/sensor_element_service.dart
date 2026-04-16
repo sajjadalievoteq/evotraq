@@ -1,47 +1,42 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/sensor_element.dart';
 
 /// Implementation of the SensorElementService interface
 class SensorElementService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   /// Base endpoint for sensor element API
   late final String _baseUrl;
   
   /// Constructor
   SensorElementService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _httpClient = httpClient,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
-    _baseUrl = '${_appConfig.apiBaseUrl}/sensor-elements';
+    required DioService dioService,
+  }) : _dioService = dioService {
+    _baseUrl = '${_dioService.baseUrl}/sensor-elements';
   }
 
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
   Future<List<SensorElement>> getAllSensorElements() async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.get(
+      _baseUrl,
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> sensorElementList = json.decode(response.body);
+      final List<dynamic> sensorElementList = json.decode(response.data);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
     } else {
       throw Exception('Failed to get sensor elements: ${response.statusCode}');
@@ -50,13 +45,16 @@ class SensorElementService {
   
   Future<Map<String, dynamic>> getAllSensorElementsPaginated(int page, int size) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl?page=$page&size=$size'),
+    final response = await _dioService.get(
+      _baseUrl,
+      queryParameters: {'page': page.toString(), 'size': size.toString()},
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Map<String, dynamic> responseData = json.decode(response.data);
       final List<dynamic> content = responseData['content'];
 
       responseData['content'] = content.map((json) =>
@@ -77,13 +75,15 @@ class SensorElementService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.get(
+      '$_baseUrl/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SensorElement.fromJson(json.decode(response.body));
+      return SensorElement.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to get sensor element: ${response.statusCode}');
     }
@@ -91,14 +91,16 @@ class SensorElementService {
   
   Future<SensorElement> createSensorElement(SensorElement sensorElement) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.post(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.post(
+      _baseUrl,
       headers: headers,
-      body: json.encode(sensorElement.toJson()),
+      data: json.encode(sensorElement.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return SensorElement.fromJson(json.decode(response.body));
+      return SensorElement.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to create sensor element: ${response.statusCode}');
     }
@@ -113,14 +115,16 @@ class SensorElementService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.put(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.put(
+      '$_baseUrl/$cleanId',
       headers: headers,
-      body: json.encode(sensorElement.toJson()),
+      data: json.encode(sensorElement.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SensorElement.fromJson(json.decode(response.body));
+      return SensorElement.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to update sensor element: ${response.statusCode}');
     }
@@ -135,9 +139,11 @@ class SensorElementService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
@@ -154,13 +160,15 @@ class SensorElementService {
       cleanId = eventId.split(':').last;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/event/$cleanId'),
+    final response = await _dioService.get(
+      '$_baseUrl/event/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> sensorElementList = json.decode(response.body);
+      final List<dynamic> sensorElementList = json.decode(response.data);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
     } else {
       throw Exception('Failed to get sensor elements by event: ${response.statusCode}');
@@ -169,13 +177,15 @@ class SensorElementService {
   
   Future<List<SensorElement>> getSensorElementsByDeviceId(String deviceId) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/device/$deviceId'),
+    final response = await _dioService.get(
+      '$_baseUrl/device/$deviceId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> sensorElementList = json.decode(response.body);
+      final List<dynamic> sensorElementList = json.decode(response.data);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
     } else {
       throw Exception('Failed to get sensor elements by device: ${response.statusCode}');
@@ -184,13 +194,15 @@ class SensorElementService {
   
   Future<List<SensorElement>> getSensorElementsByMeasurementType(String type) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/measurement-type/$type'),
+    final response = await _dioService.get(
+      '$_baseUrl/measurement-type/$type',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> sensorElementList = json.decode(response.body);
+      final List<dynamic> sensorElementList = json.decode(response.data);
       return sensorElementList.map((json) => SensorElement.fromJson(json)).toList();
     } else {
       throw Exception('Failed to get sensor elements by measurement type: ${response.statusCode}');

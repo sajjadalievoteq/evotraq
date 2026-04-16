@@ -23,7 +23,7 @@ class BulkExportPanel extends StatefulWidget {
 class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderStateMixin {
   late TabController _tabController;
   late Timer _refreshTimer;
-  
+
   List<Map<String, dynamic>> _exportJobs = [];
   List<Map<String, dynamic>> _exportTemplates = [];
   List<Map<String, dynamic>> _exportHistory = [];
@@ -104,14 +104,14 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     try {
       String url = '${widget.baseUrl}/bulk-export/jobs';
       List<String> params = [];
-      
+
       if (_selectedFormat != 'ALL') {
         params.add('format=$_selectedFormat');
       }
       if (_selectedStatus != 'ALL') {
         params.add('status=$_selectedStatus');
       }
-      
+
       if (params.isNotEmpty) {
         url += '?${params.join('&')}';
       }
@@ -1062,10 +1062,10 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         final jobs = List<Map<String, dynamic>>.from(json.decode(jobResponse.body));
         final job = jobs.firstWhere((j) => j['job_id'] == jobId, orElse: () => {});
         
-        if (job.isNotEmpty && 
+        if (job.isNotEmpty &&
             job['execution_result']?['export_result']?['file_id'] != null) {
           final fileId = job['execution_result']['export_result']['file_id'];
-          
+
           // Use the file download endpoint from the API response
           final downloadUrl = job['execution_result']['export_result']['download_url'];
           final response = await http.get(
@@ -1801,7 +1801,7 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
 
       if (response.statusCode == 201) {
         final exportData = json.decode(response.body);
-        
+
         if (mounted) {
           Navigator.of(context).pop();
           widget.onExportCreated();

@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 
-class HttpService {
+class DioService {
   late Dio _dio;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final AppConfig _appConfig;
 
   // Singleton pattern
-  static final HttpService _instance = HttpService._internal();
-  factory HttpService() => _instance;
+  static final DioService _instance = DioService._internal();
+  factory DioService() => _instance;
 
-  HttpService._internal()
+  DioService._internal()
     : _appConfig = AppConfig(
         apiBaseUrl: const String.fromEnvironment(
           'API_BASE_URL',

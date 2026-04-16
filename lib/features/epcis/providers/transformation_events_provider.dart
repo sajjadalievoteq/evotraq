@@ -1,12 +1,10 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
-
 
 import '../../../data/services/transformation_event_service.dart';
 
@@ -58,33 +56,32 @@ class TransformationEventsState extends Equatable {
 
 class TransformationEventsCubit extends Cubit<TransformationEventsState> {
   final TransformationEventService _service;
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   TransformationEventsCubit({
     TransformationEventService? service,
-    http.Client? httpClient,
-    TokenManager? tokenManager,
-    required AppConfig appConfig,
+    DioService? dioService,
   })  : _service = service ?? getIt<TransformationEventService>(),
-        _httpClient = httpClient ?? getIt<http.Client>(),
-        _tokenManager = tokenManager ?? getIt<TokenManager>(),
-        _appConfig = appConfig,
+        _dioService = dioService ?? getIt<DioService>(),
         super(TransformationEventsState.initial());
 
   Future<void> loadTransformationEvents() async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
 
-      // Use the direct API call to match the backend's paginated response
-      final response = await _httpClient.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/transformation-events'),
-        headers: await _getHeaders(),
+      final token = await _dioService.getAuthToken();
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/transformation-events',
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
       
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         if (data['content'] != null && data['content'] is List) {
           final events = (data['content'] as List)
               .map((json) => TransformationEvent.fromJson(json))
@@ -394,15 +391,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     } catch (e) {
       return [];
     }
-  }
-  
-  /// Get authorization headers for API requests
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
   }
 
   void clearError() {

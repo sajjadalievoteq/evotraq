@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../core/config/app_config.dart';
-import '../../../core/network/token_manager.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../data/services/data_consistency_persistence_service.dart';
 import '../../../data/services/data_consistency_service.dart';
@@ -87,20 +84,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _initializeServices() {
-    final appConfig = getIt<AppConfig>();
-    final tokenManager = getIt<TokenManager>();
-
-    _consistencyService = DataConsistencyService(
-      client: getIt<http.Client>(),
-      tokenManager: tokenManager,
-      appConfig: appConfig,
-    );
-
-    _correctionService = ErrorCorrectionService(
-      client: getIt<http.Client>(),
-      tokenManager: tokenManager,
-      appConfig: appConfig,
-    );
+    _consistencyService = getIt<DataConsistencyService>();
+    _correctionService = getIt<ErrorCorrectionService>();
   }
 
   void _startAutoRefresh() {

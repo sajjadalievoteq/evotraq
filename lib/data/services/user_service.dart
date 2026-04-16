@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 
 class UserService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  UserService({required HttpService httpService}) : _httpService = httpService;
+  UserService({required DioService dioService}) : _dioService = dioService;
 
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -41,8 +41,8 @@ class UserService {
   Future<User> getCurrentUser() async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/users/profile',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/users/profile',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -75,8 +75,8 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _httpService.put(
-        '${_httpService.baseUrl}/users/profile',
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}/users/profile',
         data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
@@ -113,8 +113,8 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _httpService.put(
-        '${_httpService.baseUrl}/users/password',
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}/users/password',
         data: jsonEncode({
           'currentPassword': currentPassword,
           'newPassword': newPassword,
@@ -149,8 +149,8 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _httpService.put(
-        '${_httpService.baseUrl}/users/preferences/notifications',
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}/users/preferences/notifications',
         data: jsonEncode({
           'emailNotifications': emailNotifications,
           'appNotifications': appNotifications,
@@ -185,8 +185,8 @@ class UserService {
   }) async {
     final headers = await _getAuthHeaders();
     try {
-      final response = await _httpService.put(
-        '${_httpService.baseUrl}/users/preferences/app',
+      final response = await _dioService.put(
+        '${_dioService.baseUrl}/users/preferences/app',
         data: jsonEncode({'darkMode': darkMode, 'language': language}),
         headers: headers,
         responseType: ResponseType.plain,

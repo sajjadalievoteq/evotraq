@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:traqtrace_app/core/web/web_download_stub.dart'
@@ -2370,7 +2371,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         }
 
         // Create blob and download link (web-specific)
-        final bytes = response.bodyBytes;
+        final bytes = response.bodyBytes ;
         web_download.downloadBytes(bytes: bytes, filename: filename);
 
         _showSuccessSnackBar('File downloaded successfully: $filename');

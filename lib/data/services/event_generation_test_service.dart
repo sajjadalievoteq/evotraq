@@ -1,36 +1,35 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Service for event generation test functionality
 /// Provides API access to test event generation, simulation, and data management
 class EventGenerationTestService {
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   EventGenerationTestService({
-    required AppConfig appConfig,
-  }) : _tokenManager = TokenManager(),
-        _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
   /// Make authenticated GET request
   Future<Map<String, dynamic>> _getWithAuth(String path) async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw Exception('Not authenticated');
     }
 
-    final response = await http.get(
-      Uri.parse('${_appConfig.apiBaseUrl}$path'),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}$path',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load data: ${response.statusCode}');
     }
@@ -38,22 +37,24 @@ class EventGenerationTestService {
 
   /// Make authenticated POST request
   Future<Map<String, dynamic>> _postWithAuth(String path, Map<String, dynamic> body) async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw Exception('Not authenticated');
     }
 
-    final response = await http.post(
-      Uri.parse('${_appConfig.apiBaseUrl}$path'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}$path',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(body),
+      data: jsonEncode(body),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to send data: ${response.statusCode}');
     }
@@ -61,21 +62,23 @@ class EventGenerationTestService {
 
   /// Make authenticated DELETE request
   Future<Map<String, dynamic>> _deleteWithAuth(String path) async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw Exception('Not authenticated');
     }
 
-    final response = await http.delete(
-      Uri.parse('${_appConfig.apiBaseUrl}$path'),
+    final response = await _dioService.delete(
+      '${_dioService.baseUrl}$path',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to delete: ${response.statusCode}');
     }

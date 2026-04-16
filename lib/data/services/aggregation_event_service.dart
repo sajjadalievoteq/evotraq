@@ -1,35 +1,27 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 
 /// Implementation of the AggregationEventService interface
 class AggregationEventService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   /// Base endpoint for aggregation event API
   late final String _baseUrl;
-  AggregationEventService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _httpClient = httpClient,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
+  AggregationEventService({required DioService dioService})
+    : _dioService = dioService {
     // Use the base URL and append the endpoint for aggregation events
     // Make sure the backend's context path (/api) is correctly handled
-    _baseUrl = '${_appConfig.apiBaseUrl}/events/aggregation';
+    _baseUrl = '${_dioService.baseUrl}/events/aggregation';
   }
 
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -37,16 +29,18 @@ class AggregationEventService {
     final headers = await _getHeaders();
     // Use the event-id endpoint instead of the ID endpoint
     // This matches how the backend is currently implementing the lookup
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/event-id/$id'),
+    final response = await _dioService.get(
+      '$_baseUrl/event-id/$id',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
       // Debug: print the raw response to check GLN fields
-      print('Raw API response for event ID $id: ${response.body}');
+      print('Raw API response for event ID $id: ${response.data}');
 
-      final jsonData = json.decode(response.body);
+      final jsonData = json.decode(response.data);
       // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
       print(
@@ -72,16 +66,18 @@ class AggregationEventService {
 
   Future<AggregationEvent> getAggregationEventByEventId(String eventId) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/event-id/$eventId'),
+    final response = await _dioService.get(
+      '$_baseUrl/event-id/$eventId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
       // Debug: print the raw response to check GLN fields
-      print('Raw API response for event ID $eventId: ${response.body}');
+      print('Raw API response for event ID $eventId: ${response.data}');
 
-      final jsonData = json.decode(response.body);
+      final jsonData = json.decode(response.data);
 
       // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
@@ -155,14 +151,16 @@ class AggregationEventService {
     // Debug: Print the full JSON payload being sent
     final jsonPayload = jsonEncode(jsonData);
     print('Aggregation event payload: $jsonPayload');
-    final response = await _httpClient.post(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.post(
+      _baseUrl,
       headers: headers,
-      body: jsonPayload,
+      data: jsonPayload,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return AggregationEvent.fromJson(json.decode(response.body));
+      return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
     }
@@ -187,14 +185,16 @@ class AggregationEventService {
           event.businessLocation!.glnCode; // Send just the GLN code as a string
     }
 
-    final response = await _httpClient.put(
-      Uri.parse('$_baseUrl/$id'),
+    final response = await _dioService.put(
+      '$_baseUrl/$id',
       headers: headers,
-      body: json.encode(jsonData),
+      data: json.encode(jsonData),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return AggregationEvent.fromJson(json.decode(response.body));
+      return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(
         'Failed to update aggregation event: ${response.statusCode}',
@@ -204,9 +204,11 @@ class AggregationEventService {
 
   Future<void> deleteAggregationEvent(String id) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$id'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$id',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204) {
@@ -221,14 +223,17 @@ class AggregationEventService {
     int size,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl?page=$page&size=$size'),
+    final response = await _dioService.get(
+      _baseUrl,
+      queryParameters: {'page': page.toString(), 'size': size.toString()},
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      print('AggregationEvent API response: ${response.body}');
-      final data = json.decode(response.body);
+      print('AggregationEvent API response: ${response.data}');
+      final data = json.decode(response.data);
       if (data['content'] != null && data['content'] is List) {
         final List<dynamic> eventList = data['content'];
 
@@ -254,7 +259,7 @@ class AggregationEventService {
       }
     } else {
       throw Exception(
-        'Failed to get all aggregation events: ${response.statusCode} - ${response.body}',
+        'Failed to get all aggregation events: ${response.statusCode} - ${response.data}',
       );
     }
   }
@@ -263,13 +268,15 @@ class AggregationEventService {
     String action,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/action/$action'),
+    final response = await _dioService.get(
+      '$_baseUrl/action/$action',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -282,13 +289,15 @@ class AggregationEventService {
     String parentEPC,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/parent/$parentEPC'),
+    final response = await _dioService.get(
+      '$_baseUrl/parent/$parentEPC',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -301,13 +310,15 @@ class AggregationEventService {
     String childEPC,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/child/$childEPC'),
+    final response = await _dioService.get(
+      '$_baseUrl/child/$childEPC',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = json.decode(response.data);
       return eventList.map((json) => AggregationEvent.fromJson(json)).toList();
     } else {
       throw Exception(
@@ -340,15 +351,17 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/parent/$parentEPC/contents'),
+      final response = await _dioService.get(
+        '$_baseUrl/parent/$parentEPC/contents',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
         // This endpoint returns a list of EPCs, not events
         final List<String> childEPCs = List<String>.from(
-          json.decode(response.body),
+          json.decode(response.data),
         );
 
         // Since we need to return AggregationEvents, we need to find the most recent
@@ -375,14 +388,16 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/child/$childEPC/container'),
+      final response = await _dioService.get(
+        '$_baseUrl/child/$childEPC/container',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
         // This endpoint returns the parent EPC as a string
-        final String parentEPC = json.decode(response.body);
+        final String parentEPC = json.decode(response.data);
 
         // Get the most recent ADD event for this child with this parent
         List<AggregationEvent> events =
@@ -425,13 +440,15 @@ class AggregationEventService {
     try {
       // The backend doesn't have a direct endpoint for this query,
       // so we'll get all events for the parent EPC and filter by business step
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/parent/$parentEPC'),
+      final response = await _dioService.get(
+        '$_baseUrl/parent/$parentEPC',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
+        final List<dynamic> jsonData = json.decode(response.data);
 
         List<AggregationEvent> events = jsonData
             .map((data) => AggregationEvent.fromJson(data))
@@ -460,13 +477,16 @@ class AggregationEventService {
       final String start = startTime.toIso8601String();
       final String end = endTime.toIso8601String();
 
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/time-range?startTime=$start&endTime=$end'),
+      final response = await _dioService.get(
+        '$_baseUrl/time-range',
+        queryParameters: {'startTime': start, 'endTime': end},
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
+        final List<dynamic> jsonData = json.decode(response.data);
 
         // Filter by location GLN
         List<AggregationEvent> events = jsonData
@@ -549,14 +569,16 @@ class AggregationEventService {
 
     // Debug: Print the actual JSON payload being sent
     print('Pack event payload: $body');
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl/pack'),
+    final response = await _dioService.post(
+      '$_baseUrl/pack',
       headers: headers,
-      body: body,
+      data: body,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return AggregationEvent.fromJson(json.decode(response.body));
+      return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
     }
@@ -623,23 +645,25 @@ class AggregationEventService {
 
     // Debug: Print the actual JSON payload being sent
     print('Unpack event payload: $body');
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl/unpack'),
+    final response = await _dioService.post(
+      '$_baseUrl/unpack',
       headers: headers,
-      body: body,
+      data: body,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return AggregationEvent.fromJson(json.decode(response.body));
+      return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
     }
   }
 
   // Helper method to handle API errors and provide more detailed error messages
-  String _getDetailedErrorMessage(http.Response response) {
+  String _getDetailedErrorMessage(Response response) {
     try {
-      final Map<String, dynamic> errorData = json.decode(response.body);
+      final Map<String, dynamic> errorData = json.decode(response.data);
       final String message = errorData['message'] ?? 'Unknown error';
 
       // Check if this is a validation error with specific error messages
@@ -701,7 +725,7 @@ class AggregationEventService {
     } catch (e) {
       // If we can't parse the error JSON, return a more user-friendly message
       print('Error parsing error response: $e');
-      print('Raw response: ${response.body}');
+      print('Raw response: ${response.data}');
       return 'Error: Unable to process the request. Please check your input and try again.';
     }
   }
@@ -710,14 +734,16 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/parent/$parentEPC/contents'),
+      final response = await _dioService.get(
+        '$_baseUrl/parent/$parentEPC/contents',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
         // The endpoint returns a list of child EPCs as strings
-        final List<dynamic> jsonData = json.decode(response.body);
+        final List<dynamic> jsonData = json.decode(response.data);
         return List<String>.from(jsonData);
       } else {
         throw Exception(_getDetailedErrorMessage(response));
@@ -733,9 +759,11 @@ class AggregationEventService {
 
     try {
       // Get container contents for the given parent EPC
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/parent/$epc/contents'),
+      final response = await _dioService.get(
+        '$_baseUrl/parent/$epc/contents',
         headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200) {
@@ -745,9 +773,11 @@ class AggregationEventService {
         // No contents found, but that doesn't necessarily mean an invalid hierarchy
         // Let's check if it's a child EPC in another container
         try {
-          final containerResponse = await _httpClient.get(
-            Uri.parse('$_baseUrl/child/$epc/container'),
+          final containerResponse = await _dioService.get(
+            '$_baseUrl/child/$epc/container',
             headers: headers,
+            responseType: ResponseType.plain,
+            acceptAllStatusCodes: true,
           );
 
           return containerResponse.statusCode == 200;

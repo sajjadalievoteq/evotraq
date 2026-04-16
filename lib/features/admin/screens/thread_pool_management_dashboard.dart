@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 class ThreadPoolManagementDashboard extends StatefulWidget {
@@ -48,7 +48,7 @@ class _ThreadPoolManagementDashboardState
   void _initializeService() {
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
-      httpService: getIt<HttpService>(),
+      dioService: getIt<DioService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );

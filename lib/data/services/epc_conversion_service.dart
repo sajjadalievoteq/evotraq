@@ -1,21 +1,21 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class EPCConversionService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  EPCConversionService({required HttpService httpService})
-    : _httpService = httpService;
+  EPCConversionService({required DioService dioService})
+    : _dioService = dioService;
 
   String get _primaryBaseUrl {
-    final base = _httpService.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final base = _dioService.baseUrl.replaceAll(RegExp(r'/$'), '');
     return '$base/epc';
   }
 
   String get _fallbackBaseUrl {
-    final base = _httpService.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final base = _dioService.baseUrl.replaceAll(RegExp(r'/$'), '');
     return '$base/api/epc';
   }
 
@@ -24,7 +24,7 @@ class EPCConversionService {
     Map<String, dynamic>? queryParameters,
     required Map<String, String> headers,
   }) async {
-    final primaryResponse = await _httpService.get(
+    final primaryResponse = await _dioService.get(
       '$_primaryBaseUrl$endpoint',
       queryParameters: queryParameters,
       headers: headers,
@@ -36,7 +36,7 @@ class EPCConversionService {
       return primaryResponse;
     }
 
-    return await _httpService.get(
+    return await _dioService.get(
       '$_fallbackBaseUrl$endpoint',
       queryParameters: queryParameters,
       headers: headers,
@@ -51,7 +51,7 @@ class EPCConversionService {
     required Map<String, String> headers,
     required String data,
   }) async {
-    final primaryResponse = await _httpService.post(
+    final primaryResponse = await _dioService.post(
       '$_primaryBaseUrl$endpoint',
       queryParameters: queryParameters,
       headers: headers,
@@ -64,7 +64,7 @@ class EPCConversionService {
       return primaryResponse;
     }
 
-    return await _httpService.post(
+    return await _dioService.post(
       '$_fallbackBaseUrl$endpoint',
       queryParameters: queryParameters,
       headers: headers,
@@ -75,7 +75,7 @@ class EPCConversionService {
   }
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }

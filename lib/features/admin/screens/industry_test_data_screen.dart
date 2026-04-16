@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
+import '../../../core/network/dio_service.dart';
 import '../../../data/services/industry_test_data_service.dart';
 
 /// Screen for generating industry-specific test data (Tobacco and Pharmaceutical)
@@ -45,9 +46,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testDataService ??= IndustryTestDataService(
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
+    _testDataService ??= IndustryTestDataService( tokenManager: getIt<TokenManager>(), appConfig: getIt<AppConfig>()
+ 
     );
   }
 

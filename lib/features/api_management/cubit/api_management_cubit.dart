@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
@@ -77,16 +75,12 @@ class ApiManagementCubit extends Cubit<ApiManagementState> {
   final ApiManagementService _service;
 
   ApiManagementCubit({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
+    required DioService dioService,
     ApiManagementService? service,
   }) : _service =
            service ??
            ApiManagementService(
-             httpClient: httpClient,
-             tokenManager: tokenManager,
-             appConfig: appConfig,
+             dioService: dioService,
            ),
        super(const ApiManagementState());
 

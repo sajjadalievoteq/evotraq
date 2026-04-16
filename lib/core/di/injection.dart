@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import 'package:traqtrace_app/data/services/advanced_query_service.dart';
@@ -19,6 +18,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 
 import '../../data/services/admin_service.dart';
+import '../../data/services/advanced_performance_service.dart';
+import '../../data/services/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
 import '../../data/services/commissioning_operation_service.dart';
 import '../../data/services/dashboard_service.dart';
@@ -27,6 +28,7 @@ import '../../data/services/epcis_event_service.dart';
 import '../../data/services/gln_tobacco_extension_service.dart';
 import '../../data/services/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
+import '../../data/services/industry_test_data_service.dart';
 import '../../data/services/packing_operation_service.dart';
 import '../../data/services/product_journey_service.dart';
 import '../../data/services/receiving_operation_service.dart';
@@ -40,7 +42,18 @@ import '../../data/services/sscc_tobacco_extension_service.dart';
 import '../../data/services/system_settings_service.dart';
 import '../../data/services/transaction_document_service.dart';
 import '../../data/services/transformation_event_service.dart';
+import '../../data/services/transaction_event_service.dart';
+import '../../data/services/sensor_element_service.dart';
+import '../../data/services/certification_info_service.dart';
+import '../../data/services/data_consistency_service.dart';
+import '../../data/services/epcis_serialization_service.dart';
+import '../../data/services/error_correction_service.dart';
+import '../../data/services/gs1_barcode_api_service.dart';
+import '../../data/services/job_service.dart';
+import '../../data/services/bulk_export_service.dart';
+import '../../data/services/etl_service.dart';
 import '../../data/services/user_service.dart';
+import '../../data/services/validation_service.dart';
 import '../../data/services/websocket_service.dart';
 
 final getIt = GetIt.instance;
@@ -54,9 +67,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerSingleton<AppConfig>(appConfig);
 
   // Core
-  getIt.registerLazySingleton<http.Client>(() => http.Client());
-  final httpService = HttpService()..setBaseUrl(appConfig.apiBaseUrl);
-  getIt.registerLazySingleton<HttpService>(() => httpService);
+  final dioService = DioService()..setBaseUrl(appConfig.apiBaseUrl);
+  getIt.registerLazySingleton<DioService>(() => dioService);
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
   getIt.registerLazySingleton<Dio>(
     () => Dio(
@@ -71,98 +83,77 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   // Services
   getIt.registerLazySingleton<AuthService>(
-    () => AuthService(httpService: getIt<HttpService>()),
+    () => AuthService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<UserService>(
-    () => UserService(httpService: getIt<HttpService>()),
+    () => UserService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<AdminService>(
     () => AdminService(
-      httpService: getIt<HttpService>(),
+      dioService: getIt<DioService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),
   );
 
   getIt.registerLazySingleton<GTINService>(
-    () => GTINService(httpService: getIt<HttpService>()),
+    () => GTINService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<DashboardService>(
-    () => DashboardService(httpService: getIt<HttpService>()),
+    () => DashboardService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SGTINService>(
-    () => SGTINService(httpService: getIt<HttpService>()),
+    () => SGTINService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GLNService>(
-    () => GLNService(httpService: getIt<HttpService>()),
+    () => GLNService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<EPCConversionService>(
-    () => EPCConversionService(httpService: getIt<HttpService>()),
+    () => EPCConversionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<BarcodeGenerationService>(
-    () => BarcodeGenerationService(httpService: getIt<HttpService>()),
+    () => BarcodeGenerationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SSCCService>(
-    () => SSCCService(httpService: getIt<HttpService>()),
+    () => SSCCService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<NotificationApiService>(
-    () => NotificationApiService(httpService: getIt<HttpService>()),
+    () => NotificationApiService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
 
   getIt.registerLazySingleton<ShippingOperationService>(
-    () => ShippingOperationService(
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => ShippingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ReceivingOperationService>(
-    () => ReceivingOperationService(
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => ReceivingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<PackingOperationService>(
-    () => PackingOperationService(
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => PackingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<CommissioningOperationService>(
-    () => CommissioningOperationService(
-      client: getIt<http.Client>(),
-      appConfig: getIt<AppConfig>(),
-      tokenManager: getIt<TokenManager>(),
-    ),
+    () => CommissioningOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<TransactionDocumentService>(
-    () => TransactionDocumentService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => TransactionDocumentService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ReferenceDataValidationService>(
-    () => ReferenceDataValidationService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => ReferenceDataValidationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SystemSettingsService>(
@@ -174,87 +165,105 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<AdvancedQueryService>(
-    () => AdvancedQueryService(getIt<HttpService>()),
+    () => AdvancedQueryService(getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<PharmaceuticalService>(
-    () => PharmaceuticalService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => PharmaceuticalService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GLNPharmaceuticalExtensionService>(
-    () => GLNPharmaceuticalExtensionService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => GLNPharmaceuticalExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GTINTobaccoExtensionService>(
-    () => GTINTobaccoExtensionService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => GTINTobaccoExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GLNTobaccoExtensionService>(
-    () => GLNTobaccoExtensionService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => GLNTobaccoExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SSCCTobaccoExtensionService>(
-    () => SSCCTobaccoExtensionService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => SSCCTobaccoExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SSCCPharmaceuticalExtensionService>(
-    () => SSCCPharmaceuticalExtensionService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => SSCCPharmaceuticalExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ProductJourneyService>(
-    () => ProductJourneyService(
-      client: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => ProductJourneyService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ServiceAccountService>(
-    () => ServiceAccountService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+    () => ServiceAccountService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<EPCISEventService>(
-    () => EPCISEventService(
-      httpClient: getIt<http.Client>(),
+    () => EPCISEventService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<TransformationEventService>(
+    () => TransformationEventService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<TransactionEventService>(
+    () => TransactionEventService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<SensorElementService>(
+    () => SensorElementService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<CertificationInfoService>(
+    () => CertificationInfoService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<AdvancedPerformanceService>(
+    () => AdvancedPerformanceService(
+      dioService: getIt<DioService>(),
       tokenManager: getIt<TokenManager>(),
       appConfig: getIt<AppConfig>(),
     ),
   );
 
-  getIt.registerLazySingleton<TransformationEventService>(
-    () => TransformationEventService(
-      httpClient: getIt<http.Client>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+  getIt.registerLazySingleton<IndustryTestDataService>(
+    () => IndustryTestDataService( tokenManager: getIt<TokenManager>(),
+      appConfig: getIt<AppConfig>(),),
+  );
+
+  getIt.registerLazySingleton<AggregationEventService>(
+    () => AggregationEventService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<EPCISSerializationService>(
+    () => EPCISSerializationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ValidationService>(
+    () => ValidationService(tokenManager: getIt<TokenManager>(),
+      appConfig: getIt<AppConfig>(),),
+  );
+
+  getIt.registerLazySingleton<DataConsistencyService>(
+    () => DataConsistencyService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ErrorCorrectionService>(
+    () => ErrorCorrectionService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<GS1BarcodeApiService>(
+    () => GS1BarcodeApiService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<BulkExportService>(
+    () => BulkExportService(getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ETLService>(
+    () => ETLService(getIt<DioService>()),
   );
 
   // Cubits & Routers

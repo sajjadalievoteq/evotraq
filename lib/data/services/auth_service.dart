@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/http_service.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/auth/models/auth_models.dart';
 
 class AuthService {
-  final HttpService _httpService;
+  final DioService _dioService;
 
-  AuthService({required HttpService httpService}) : _httpService = httpService;
+  AuthService({required DioService dioService}) : _dioService = dioService;
 
   String? _parseErrorMessage(dynamic data) {
     try {
@@ -40,8 +40,8 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/auth/login',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/auth/login',
         data: jsonEncode(request.toJson()),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -53,7 +53,7 @@ class AuthService {
             ? jsonDecode(response.data)
             : response.data;
         final authResponse = AuthResponse.fromJson(data);
-        await _httpService.saveAuthToken(authResponse.token);
+        await _dioService.saveAuthToken(authResponse.token);
         return authResponse;
       }
 
@@ -74,8 +74,8 @@ class AuthService {
 
   Future<void> register(RegisterRequest request) async {
     try {
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/auth/register',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/auth/register',
         data: jsonEncode(request.toJson()),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -100,14 +100,14 @@ class AuthService {
   }
 
   Future<User> getCurrentUser() async {
-    final token = await _httpService.getAuthToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     try {
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/users/profile',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/users/profile',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -142,13 +142,13 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _httpService.removeAuthToken();
+    await _dioService.removeAuthToken();
   }
 
   Future<bool> requestPasswordReset(String email) async {
     try {
-      await _httpService.post(
-        '${_httpService.baseUrl}/auth/password-reset-request',
+      await _dioService.post(
+        '${_dioService.baseUrl}/auth/password-reset-request',
         data: jsonEncode({'email': email}),
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -165,8 +165,8 @@ class AuthService {
 
   Future<bool> validatePasswordResetToken(String token) async {
     try {
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/auth/validate-reset-token',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/auth/validate-reset-token',
         queryParameters: {'token': token},
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,
@@ -191,8 +191,8 @@ class AuthService {
     String confirmPassword,
   ) async {
     try {
-      final response = await _httpService.post(
-        '${_httpService.baseUrl}/auth/reset-password',
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/auth/reset-password',
         data: jsonEncode({
           'token': token,
           'newPassword': newPassword,
@@ -211,8 +211,8 @@ class AuthService {
 
   Future<bool> verifyEmail(String token) async {
     try {
-      final response = await _httpService.get(
-        '${_httpService.baseUrl}/verification/verify-email',
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/verification/verify-email',
         queryParameters: {'token': token},
         headers: {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,

@@ -1,47 +1,42 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/certification_info.dart';
 
 /// Implementation of the CertificationInfoService interface
 class CertificationInfoService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   /// Base endpoint for certification info API
   late final String _baseUrl;
 
   /// Constructor
   CertificationInfoService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _httpClient = httpClient,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
-    _baseUrl = '${_appConfig.apiBaseUrl}/certifications';
+    required DioService dioService,
+  }) : _dioService = dioService {
+    _baseUrl = '${_dioService.baseUrl}/certifications';
   }
 
   /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
   Future<List<CertificationInfo>> getAllCertifications() async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.get(
+      _baseUrl,
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> certificationList = json.decode(response.body);
+      final List<dynamic> certificationList = json.decode(response.data);
       return certificationList
           .map((json) => CertificationInfo.fromJson(json))
           .toList();
@@ -55,13 +50,16 @@ class CertificationInfoService {
     int size,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl?page=$page&size=$size'),
+    final response = await _dioService.get(
+      _baseUrl,
+      queryParameters: {'page': page.toString(), 'size': size.toString()},
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Map<String, dynamic> responseData = json.decode(response.data);
       final List<dynamic> content = responseData['content'];
 
       responseData['content'] = content
@@ -85,13 +83,15 @@ class CertificationInfoService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.get(
+      '$_baseUrl/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return CertificationInfo.fromJson(json.decode(response.body));
+      return CertificationInfo.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to get certification: ${response.statusCode}');
     }
@@ -101,14 +101,16 @@ class CertificationInfoService {
     CertificationInfo certificationInfo,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.post(
-      Uri.parse(_baseUrl),
+    final response = await _dioService.post(
+      _baseUrl,
       headers: headers,
-      body: json.encode(certificationInfo.toJson()),
+      data: json.encode(certificationInfo.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 201) {
-      return CertificationInfo.fromJson(json.decode(response.body));
+      return CertificationInfo.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to create certification: ${response.statusCode}');
     }
@@ -126,14 +128,16 @@ class CertificationInfoService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.put(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.put(
+      '$_baseUrl/$cleanId',
       headers: headers,
-      body: json.encode(certificationInfo.toJson()),
+      data: json.encode(certificationInfo.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return CertificationInfo.fromJson(json.decode(response.body));
+      return CertificationInfo.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to update certification: ${response.statusCode}');
     }
@@ -148,9 +152,11 @@ class CertificationInfoService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$cleanId'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
@@ -169,13 +175,15 @@ class CertificationInfoService {
       cleanId = eventId.split(':').last;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/event/$cleanId'),
+    final response = await _dioService.get(
+      '$_baseUrl/event/$cleanId',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> certificationList = json.decode(response.body);
+      final List<dynamic> certificationList = json.decode(response.data);
       return certificationList
           .map((json) => CertificationInfo.fromJson(json))
           .toList();
@@ -188,13 +196,15 @@ class CertificationInfoService {
 
   Future<List<CertificationInfo>> getCertificationsByType(String type) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/type/$type'),
+    final response = await _dioService.get(
+      '$_baseUrl/type/$type',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> certificationList = json.decode(response.body);
+      final List<dynamic> certificationList = json.decode(response.data);
       return certificationList
           .map((json) => CertificationInfo.fromJson(json))
           .toList();
@@ -209,13 +219,15 @@ class CertificationInfoService {
     String agency,
   ) async {
     final headers = await _getHeaders();
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/agency/$agency'),
+    final response = await _dioService.get(
+      '$_baseUrl/agency/$agency',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> certificationList = json.decode(response.body);
+      final List<dynamic> certificationList = json.decode(response.data);
       return certificationList
           .map((json) => CertificationInfo.fromJson(json))
           .toList();
@@ -235,13 +247,15 @@ class CertificationInfoService {
       cleanId = id.split(':').last;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$cleanId/verify'),
+    final response = await _dioService.get(
+      '$_baseUrl/$cleanId/verify',
       headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(response.data);
     } else {
       throw Exception('Failed to verify certification: ${response.statusCode}');
     }

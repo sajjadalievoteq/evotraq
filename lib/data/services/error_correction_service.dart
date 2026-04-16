@@ -1,20 +1,20 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class ErrorCorrectionService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   ErrorCorrectionService({
-    required http.Client client,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _client = client,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
+
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await _dioService.getAuthToken();
+    return {
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
 
   /// Identify correctable errors in specified time range
   Future<List<dynamic>> identifyCorrectableErrors(
@@ -22,21 +22,20 @@ class ErrorCorrectionService {
     DateTime endTime,
     List<String> errorTypes,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/errors/identify')
-          .replace(queryParameters: {
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/data/correction/errors/identify',
+      queryParameters: {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
         'errorTypes': errorTypes,
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List;
+      return (jsonDecode(response.data) as List).cast<dynamic>();
     } else {
       throw Exception('Failed to identify correctable errors: ${response.statusCode}');
     }
@@ -49,23 +48,24 @@ class ErrorCorrectionService {
     Map<String, dynamic> proposedCorrection,
     String userId,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/workflows/initiate')
-          .replace(queryParameters: {
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/workflows/initiate',
+      queryParameters: {
         'errorId': errorId,
         'correctionType': correctionType,
         'userId': userId,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(proposedCorrection),
+      headers: {
+        ...await _getHeaders(),
+        'Content-Type': 'application/json',
+      },
+      data: jsonEncode(proposedCorrection),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to initiate correction workflow: ${response.statusCode}');
     }
@@ -76,18 +76,19 @@ class ErrorCorrectionService {
     String errorId,
     Map<String, dynamic> correctionRules,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/automatic/$errorId'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/automatic/$errorId',
       headers: {
+        ...await _getHeaders(),
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(correctionRules),
+      data: jsonEncode(correctionRules),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to apply automatic correction: ${response.statusCode}');
     }
@@ -100,22 +101,23 @@ class ErrorCorrectionService {
     String justification,
     String submitterId,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/workflows/$workflowId/submit-for-approval'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/workflows/$workflowId/submit-for-approval',
       headers: {
+        ...await _getHeaders(),
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'correction_data': correctionData,
         'justification': justification,
         'submitter_id': submitterId,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to submit for approval: ${response.statusCode}');
     }
@@ -128,21 +130,20 @@ class ErrorCorrectionService {
     String reviewComments,
     String reviewerId,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/approvals/$approvalRequestId/review')
-          .replace(queryParameters: {
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/approvals/$approvalRequestId/review',
+      queryParameters: {
         'approved': approved.toString(),
         'reviewComments': reviewComments,
         'reviewerId': reviewerId,
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to review correction: ${response.statusCode}');
     }
@@ -150,16 +151,15 @@ class ErrorCorrectionService {
 
   /// Execute approved error correction
   Future<Map<String, dynamic>> executeApprovedCorrection(String approvalRequestId) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/approvals/$approvalRequestId/execute'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/approvals/$approvalRequestId/execute',
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to execute correction: ${response.statusCode}');
     }
@@ -167,16 +167,15 @@ class ErrorCorrectionService {
 
   /// Get correction workflow status
   Future<Map<String, dynamic>> getCorrectionWorkflowStatus(String workflowId) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/workflows/$workflowId/status'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/data/correction/workflows/$workflowId/status',
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to get workflow status: ${response.statusCode}');
     }
@@ -184,16 +183,15 @@ class ErrorCorrectionService {
 
   /// Get correction audit trail for an event
   Future<List<dynamic>> getCorrectionAuditTrail(String eventId) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/audit-trail/$eventId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/data/correction/audit-trail/$eventId',
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List;
+      return (jsonDecode(response.data) as List).cast<dynamic>();
     } else {
       throw Exception('Failed to get audit trail: ${response.statusCode}');
     }
@@ -205,22 +203,23 @@ class ErrorCorrectionService {
     String notificationType,
     List<String> recipients,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/notifications/send')
-          .replace(queryParameters: {
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/notifications/send',
+      queryParameters: {
         'correctionId': correctionId,
         'notificationType': notificationType,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(recipients),
+      headers: {
+        ...await _getHeaders(),
+        'Content-Type': 'application/json',
+      },
+      data: jsonEncode(recipients),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to send notification: ${response.statusCode}');
     }
@@ -232,20 +231,19 @@ class ErrorCorrectionService {
     String rollbackReason,
     String userId,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/rollback/$correctionId')
-          .replace(queryParameters: {
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/rollback/$correctionId',
+      queryParameters: {
         'rollbackReason': rollbackReason,
         'userId': userId,
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to rollback correction: ${response.statusCode}');
     }
@@ -256,20 +254,19 @@ class ErrorCorrectionService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/statistics')
-          .replace(queryParameters: {
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/data/correction/statistics',
+      queryParameters: {
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
-      }),
-      headers: {
-        'Authorization': 'Bearer $token',
       },
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to get statistics: ${response.statusCode}');
     }
@@ -284,14 +281,13 @@ class ErrorCorrectionService {
     String userId,
     String justification,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/audit-trail/create'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/audit-trail/create',
       headers: {
+        ...await _getHeaders(),
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'event_id': eventId,
         'correction_type': correctionType,
         'original_data': originalData,
@@ -299,10 +295,12 @@ class ErrorCorrectionService {
         'user_id': userId,
         'justification': justification,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to create audit trail: ${response.statusCode}');
     }
@@ -314,22 +312,23 @@ class ErrorCorrectionService {
     List<Map<String, Object>> violations,
     double integrityScore,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/integrity-violations/register'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/integrity-violations/register',
       headers: {
+        ...await _getHeaders(),
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'job_id': jobId,
         'violations': violations,
         'integrity_score': integrityScore,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw Exception('Failed to register integrity violations: ${response.statusCode}');
     }
@@ -337,16 +336,15 @@ class ErrorCorrectionService {
 
   /// Get all correction workflows
   Future<List<Map<String, dynamic>>> getAllCorrectionWorkflows() async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.get(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/workflows'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/data/correction/workflows',
+      headers: await _getHeaders(),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data.cast<Map<String, dynamic>>();
     } else {
       throw Exception('Failed to get correction workflows: ${response.statusCode}');
@@ -361,24 +359,25 @@ class ErrorCorrectionService {
     String severity,
     Map<String, dynamic> proposedCorrection,
   ) async {
-    final token = await _tokenManager.getToken();
-    final response = await _client.post(
-      Uri.parse('${_appConfig.apiBaseUrl}/data/correction/real-error/register'),
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/data/correction/real-error/register',
       headers: {
+        ...await _getHeaders(),
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
+      data: jsonEncode({
         'error_type': errorType,
         'description': description,
         'affected_events': affectedEvents,
         'severity': severity,
         'proposed_correction': proposedCorrection,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(response.data);
       return data['error_id'];
     } else {
       throw Exception('Failed to register real error: ${response.statusCode}');

@@ -1,31 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Service for interacting with barcode verification and EPCIS mapping APIs
 class BarcodeApiService {
-  final http.Client _client;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
   late final String _baseUrl;
-    BarcodeApiService({
-    required http.Client client,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _client = client,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig {
-    // Remove the '/api' suffix as it might be already included in the apiBaseUrl
-    _baseUrl = _appConfig.apiBaseUrl.endsWith('/api')
-        ? _appConfig.apiBaseUrl
-        : '${_appConfig.apiBaseUrl}/api';
+
+  BarcodeApiService({required DioService dioService}) : _dioService = dioService {
+    _baseUrl = _dioService.baseUrl;
   }
-    /// Get authorization headers for API requests
+
+  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
@@ -36,32 +26,33 @@ class BarcodeApiService {
       'Accept': '*/*',
       'Authorization': 'Bearer $token',
     };
-  }  /// Verify a barcode's syntax and structure
+  }
+
+  /// Verify a barcode's syntax and structure
   Future<Map<String, dynamic>> verifyBarcode(String barcodeData) async {
     final headers = await _getHeaders();
 
-    // Build the URI with proper query parameters
-    // The correct endpoint is /api/barcodes/validate per BarcodeController
-    final uri = Uri.parse('$_baseUrl/barcodes/validate').replace(
-      queryParameters: {
-        'data': barcodeData,
-        'type': 'DATAMATRIX',
-      },
-    );
+    final queryParameters = {
+      'data': barcodeData,
+      'type': 'DATAMATRIX',
+    };
 
-    debugPrint('Calling barcode validation API: ${uri.toString()}');
+    debugPrint('Calling barcode validation API: $_baseUrl/barcodes/validate');
 
     try {
-      final response = await _client.get(
-        uri,
+      final response = await _dioService.get(
+        '$_baseUrl/barcodes/validate',
         headers: headers,
+        queryParameters: queryParameters,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       debugPrint('Barcode validation response status: ${response.statusCode}');
-      debugPrint('Barcode validation response body: ${response.body}');
+      debugPrint('Barcode validation response body: ${response.data}');
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return jsonDecode(response.data);
       } else if (response.statusCode == 404) {
         // Try the alternative endpoint from BarcodeVerificationController if first one fails
         debugPrint('First endpoint not found, trying alternative GS1 validation endpoint');
@@ -69,7 +60,9 @@ class BarcodeApiService {
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: _parseErrorMessage(response.body) ?? 'Failed to verify barcode: ${response.statusCode}',
+          message:
+              _parseErrorMessage(response.data.toString()) ??
+              'Failed to verify barcode: ${response.statusCode}',
         );
       }
     } catch (e) {
@@ -81,35 +74,36 @@ class BarcodeApiService {
   /// Try alternative GS1 validation endpoint if primary endpoint fails
   Future<Map<String, dynamic>> _tryAlternativeGS1Validation(String barcodeData, Map<String, String> headers) async {
     // Try the /api/barcode/verify/gs1-element-string endpoint from BarcodeVerificationController
-    final uri = Uri.parse('$_baseUrl/barcode/verify/gs1-element-string').replace(
-      queryParameters: {
-        'gs1ElementString': barcodeData,
-      },
+    debugPrint(
+      'Trying alternative validation API: $_baseUrl/barcode/verify/gs1-element-string',
     );
 
-    debugPrint('Trying alternative validation API: ${uri.toString()}');
-
-    final response = await _client.get(
-      uri,
+    final response = await _dioService.get(
+      '$_baseUrl/barcode/verify/gs1-element-string',
       headers: headers,
+      queryParameters: {'gs1ElementString': barcodeData},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     debugPrint('Alternative validation response status: ${response.statusCode}');
-    debugPrint('Alternative validation response body: ${response.body}');
+    debugPrint('Alternative validation response body: ${response.data}');
 
     if (response.statusCode == 200) {
-      final result = json.decode(response.body);
+      final result = jsonDecode(response.data);
       // Convert to expected format
       return {
         'isValid': result['valid'] ?? false,
         'message': result['valid'] == true ? 'Valid GS1 barcode' : 'Invalid GS1 barcode format',
         'data': barcodeData,
-        'validationResults': result['validationResults']
+        'validationResults': result['validationResults'],
       };
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to verify barcode: ${response.statusCode}',
+        message:
+            _parseErrorMessage(response.data.toString()) ??
+            'Failed to verify barcode: ${response.statusCode}',
       );
     }
   }
@@ -120,53 +114,55 @@ class BarcodeApiService {
     // Remove Content-Type from headers for multipart request
     headers.remove('Content-Type');
 
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$_baseUrl/barcodes/quality'),
+    final formData = FormData.fromMap({
+      'image': MultipartFile.fromBytes(
+        barcodeImage,
+        filename: 'barcode.png',
+      ),
+    });
+
+    final response = await _dioService.post(
+      '$_baseUrl/barcodes/quality',
+      headers: headers,
+      data: formData,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
-    request.headers.addAll(headers);
-    request.files.add(http.MultipartFile.fromBytes(
-      'image',
-      barcodeImage,
-      filename: 'barcode.png',
-    ));
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to check barcode quality',
+        message:
+            _parseErrorMessage(response.data.toString()) ??
+            'Failed to check barcode quality',
       );
     }
-  }  /// Extract data content from a barcode
+  }
+
+  /// Extract data content from a barcode
   Future<Map<String, dynamic>> extractBarcodeData(String barcodeData) async {
     final headers = await _getHeaders();
 
-    // Build the URI with proper query parameters
-    final uri = Uri.parse('$_baseUrl/barcodes/parse-gs1').replace(
-      queryParameters: {
-        'elementString': barcodeData,
-      },
-    );
+    final queryParameters = {'elementString': barcodeData};
 
-    debugPrint('Calling parse-gs1 API: ${uri.toString()}');
+    debugPrint('Calling parse-gs1 API: $_baseUrl/barcodes/parse-gs1');
 
     try {
-      final response = await _client.get(
-        uri,
+      final response = await _dioService.get(
+        '$_baseUrl/barcodes/parse-gs1',
         headers: headers,
+        queryParameters: queryParameters,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       debugPrint('Parse-gs1 response status: ${response.statusCode}');
-      debugPrint('Parse-gs1 response body: ${response.body}');
+      debugPrint('Parse-gs1 response body: ${response.data}');
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+        final result = jsonDecode(response.data);
         // Add barcodeType to standardize output format
         if (!result.containsKey('barcodeType')) {
           result['barcodeType'] = 'GS1';
@@ -180,7 +176,9 @@ class BarcodeApiService {
       } else {
         throw ApiException(
           statusCode: response.statusCode,
-          message: _parseErrorMessage(response.body) ?? 'Failed to extract barcode data: ${response.statusCode}',
+          message:
+              _parseErrorMessage(response.data.toString()) ??
+              'Failed to extract barcode data: ${response.statusCode}',
         );
       }
     } catch (e) {
@@ -258,21 +256,22 @@ class BarcodeApiService {
       'disposition': disposition,
     };
 
-    final uri = Uri.parse('$_baseUrl/barcode-epcis/object-event').replace(
-      queryParameters: params,
-    );
-
-    final response = await _client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/barcode-epcis/object-event',
       headers: headers,
+      queryParameters: params,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to create object event',
+        message:
+            _parseErrorMessage(response.data.toString()) ??
+            'Failed to create object event',
       );
     }
   }
@@ -288,8 +287,7 @@ class BarcodeApiService {
   }) async {
     final headers = await _getHeaders();
 
-    // Construct query parameters
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'parentBarcode': parentBarcode,
       'locationGLN': locationGLN,
       'businessStep': businessStep,
@@ -297,26 +295,26 @@ class BarcodeApiService {
       'action': action,
     };
 
-    // Add child barcodes as repeated query parameters
-    for (final childBarcode in childBarcodes) {
-      queryParams['childBarcodes'] = childBarcode;
+    for (int i = 0; i < childBarcodes.length; i++) {
+      queryParams['childBarcodes[$i]'] = childBarcodes[i];
     }
 
-    final uri = Uri.parse('$_baseUrl/barcode-epcis/aggregation-event').replace(
-      queryParameters: queryParams,
-    );
-
-    final response = await _client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/barcode-epcis/aggregation-event',
       headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.data);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to create aggregation event',
+        message:
+            _parseErrorMessage(response.data.toString()) ??
+            'Failed to create aggregation event',
       );
     }
   }
@@ -333,8 +331,7 @@ class BarcodeApiService {
   }) async {
     final headers = await _getHeaders();
 
-    // Construct query parameters
-    final queryParams = {
+    final queryParams = <String, dynamic>{
       'bizTransactionType': bizTransactionType,
       'bizTransactionId': bizTransactionId,
       'locationGLN': locationGLN,
@@ -343,27 +340,27 @@ class BarcodeApiService {
       'action': action,
     };
 
-    // Add GS1 element strings as repeated query parameters
-    for (final gs1String in gs1ElementStrings) {
-      queryParams['gs1ElementStrings'] = gs1String;
+    for (int i = 0; i < gs1ElementStrings.length; i++) {
+      queryParams['gs1ElementStrings[$i]'] = gs1ElementStrings[i];
     }
 
-    final uri = Uri.parse('$_baseUrl/barcode-epcis/transaction-event').replace(
-      queryParameters: queryParams,
-    );
-
-    final response = await _client.post(
-      uri,
+    final response = await _dioService.post(
+      '$_baseUrl/barcode-epcis/transaction-event',
       headers: headers,
+      queryParameters: queryParams,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> eventList = json.decode(response.body);
+      final List<dynamic> eventList = jsonDecode(response.data);
       return eventList.cast<Map<String, dynamic>>();
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: _parseErrorMessage(response.body) ?? 'Failed to create transaction event',
+        message:
+            _parseErrorMessage(response.data.toString()) ??
+            'Failed to create transaction event',
       );
     }
   }

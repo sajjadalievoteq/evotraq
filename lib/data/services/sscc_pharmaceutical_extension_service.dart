@@ -1,27 +1,20 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/pharmaceutical/models/sscc_pharmaceutical_extension_model.dart';
 
 /// Service for SSCC pharmaceutical extension operations
 class SSCCPharmaceuticalExtensionService {
-  final http.Client _httpClient;
-  final TokenManager _tokenManager;
-  final AppConfig _appConfig;
+  final DioService _dioService;
 
   SSCCPharmaceuticalExtensionService({
-    required http.Client httpClient,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  })  : _httpClient = httpClient,
-        _tokenManager = tokenManager,
-        _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
 
-  String get _baseUrl => '${_appConfig.apiBaseUrl}/pharmaceutical/sscc';
+  String get _baseUrl => '${_dioService.baseUrl}/pharmaceutical/sscc';
 
   Future<Map<String, String>> get _headers async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -33,17 +26,20 @@ class SSCCPharmaceuticalExtensionService {
     String ssccCode,
     SSCCPharmaceuticalExtension extension,
   ) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl/code/$ssccCode'),
+    final response = await _dioService.post(
+      '$_baseUrl/code/$ssccCode',
       headers: await _headers,
-      body: jsonEncode(extension.toJson()),
+      data: jsonEncode(extension.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.body));
+      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception(
-          'Failed to create SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to create SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
@@ -52,79 +48,94 @@ class SSCCPharmaceuticalExtensionService {
     int ssccId,
     SSCCPharmaceuticalExtension extension,
   ) async {
-    final response = await _httpClient.post(
-      Uri.parse('$_baseUrl/$ssccId'),
+    final response = await _dioService.post(
+      '$_baseUrl/$ssccId',
       headers: await _headers,
-      body: jsonEncode(extension.toJson()),
+      data: jsonEncode(extension.toJson()),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.body));
+      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception(
-          'Failed to save SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to save SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
   /// Get pharmaceutical extension by SSCC ID
   Future<SSCCPharmaceuticalExtension?> getBySsccId(int ssccId) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$ssccId'),
+    final response = await _dioService.get(
+      '$_baseUrl/$ssccId',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.body));
+      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       return null;
     } else {
       throw Exception(
-          'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
   /// Get pharmaceutical extension by SSCC code
   Future<SSCCPharmaceuticalExtension?> getBySsccCode(String ssccCode) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/code/$ssccCode'),
+    final response = await _dioService.get(
+      '$_baseUrl/code/$ssccCode',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.body));
+      return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else if (response.statusCode == 404) {
       return null;
     } else {
       throw Exception(
-          'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
   /// Delete pharmaceutical extension for an SSCC
   Future<void> delete(int ssccId) async {
-    final response = await _httpClient.delete(
-      Uri.parse('$_baseUrl/$ssccId'),
+    final response = await _dioService.delete(
+      '$_baseUrl/$ssccId',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception(
-          'Failed to delete SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to delete SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
   /// Check if an SSCC has pharmaceutical extension
   Future<bool> hasPharmaceuticalExtension(int ssccId) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$ssccId/exists'),
+    final response = await _dioService.get(
+      '$_baseUrl/$ssccId/exists',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as bool;
+      return jsonDecode(response.data) as bool;
     } else {
       throw Exception(
-          'Failed to check SSCC pharmaceutical extension: ${response.statusCode}');
+        'Failed to check SSCC pharmaceutical extension: ${response.statusCode}',
+      );
     }
   }
 
@@ -132,38 +143,44 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find all cold chain required shipments
   Future<List<SSCCPharmaceuticalExtension>> findColdChainShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/cold-chain'),
+    final response = await _dioService.get(
+      '$_baseUrl/cold-chain',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch cold chain shipments: ${response.statusCode}');
+        'Failed to fetch cold chain shipments: ${response.statusCode}',
+      );
     }
   }
 
   /// Find shipments requiring temperature monitoring
   Future<List<SSCCPharmaceuticalExtension>>
       findTemperatureMonitoredShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/temperature-monitored'),
+    final response = await _dioService.get(
+      '$_baseUrl/temperature-monitored',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch temperature monitored shipments: ${response.statusCode}');
+        'Failed to fetch temperature monitored shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -171,19 +188,22 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find GDP compliant shipments
   Future<List<SSCCPharmaceuticalExtension>> findGdpCompliantShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/gdp-compliant'),
+    final response = await _dioService.get(
+      '$_baseUrl/gdp-compliant',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch GDP compliant shipments: ${response.statusCode}');
+        'Failed to fetch GDP compliant shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -192,38 +212,44 @@ class SSCCPharmaceuticalExtensionService {
   /// Find controlled substance shipments
   Future<List<SSCCPharmaceuticalExtension>>
       findControlledSubstanceShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/controlled-substance'),
+    final response = await _dioService.get(
+      '$_baseUrl/controlled-substance',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch controlled substance shipments: ${response.statusCode}');
+        'Failed to fetch controlled substance shipments: ${response.statusCode}',
+      );
     }
   }
 
   /// Find by DEA schedule
   Future<List<SSCCPharmaceuticalExtension>> findByDeaSchedule(
       String deaSchedule) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/dea-schedule/$deaSchedule'),
+    final response = await _dioService.get(
+      '$_baseUrl/dea-schedule/$deaSchedule',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch DEA schedule shipments: ${response.statusCode}');
+        'Failed to fetch DEA schedule shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -231,19 +257,22 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find all hazmat shipments
   Future<List<SSCCPharmaceuticalExtension>> findHazmatShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/hazmat'),
+    final response = await _dioService.get(
+      '$_baseUrl/hazmat',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch hazmat shipments: ${response.statusCode}');
+        'Failed to fetch hazmat shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -251,38 +280,44 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find shipments requiring chain of custody
   Future<List<SSCCPharmaceuticalExtension>> findChainOfCustodyShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/chain-of-custody'),
+    final response = await _dioService.get(
+      '$_baseUrl/chain-of-custody',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch chain of custody shipments: ${response.statusCode}');
+        'Failed to fetch chain of custody shipments: ${response.statusCode}',
+      );
     }
   }
 
   /// Find shipments requiring signature on receipt
   Future<List<SSCCPharmaceuticalExtension>>
       findSignatureRequiredShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/signature-required'),
+    final response = await _dioService.get(
+      '$_baseUrl/signature-required',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch signature required shipments: ${response.statusCode}');
+        'Failed to fetch signature required shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -290,19 +325,22 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find clinical trial shipments
   Future<List<SSCCPharmaceuticalExtension>> findClinicalTrialShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/clinical-trial'),
+    final response = await _dioService.get(
+      '$_baseUrl/clinical-trial',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch clinical trial shipments: ${response.statusCode}');
+        'Failed to fetch clinical trial shipments: ${response.statusCode}',
+      );
     }
   }
 
@@ -310,37 +348,43 @@ class SSCCPharmaceuticalExtensionService {
 
   /// Find fragile shipments
   Future<List<SSCCPharmaceuticalExtension>> findFragileShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/fragile'),
+    final response = await _dioService.get(
+      '$_baseUrl/fragile',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch fragile shipments: ${response.statusCode}');
+        'Failed to fetch fragile shipments: ${response.statusCode}',
+      );
     }
   }
 
   /// Find do-not-stack shipments
   Future<List<SSCCPharmaceuticalExtension>> findDoNotStackShipments() async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/do-not-stack'),
+    final response = await _dioService.get(
+      '$_baseUrl/do-not-stack',
       headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.data);
       return data
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          'Failed to fetch do-not-stack shipments: ${response.statusCode}');
+        'Failed to fetch do-not-stack shipments: ${response.statusCode}',
+      );
     }
   }
 }

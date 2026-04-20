@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:traqtrace_app/features/auth/models/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 
 enum ProfileStatus {
   initial,

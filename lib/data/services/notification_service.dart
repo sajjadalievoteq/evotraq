@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 /// Simple notification service using SnackBar for messages
 class NotificationService {
@@ -15,66 +16,47 @@ class NotificationService {
 
   /// Show success message
   void showSuccess(String message) {
-    _showSnackBar(
-      message,
-      backgroundColor: Colors.green,
-      icon: Icons.check_circle,
-    );
+    _showCustom(message, variant: CustomSnackBarVariant.success);
   }
 
   /// Show error message
   void showError(String message) {
-    _showSnackBar(
-      message,
-      backgroundColor: Colors.red,
-      icon: Icons.error,
-    );
+    _showCustom(message, variant: CustomSnackBarVariant.error);
   }
 
   /// Show info message
   void showInfo(String message) {
-    _showSnackBar(
-      message,
-      backgroundColor: Colors.blue,
-      icon: Icons.info,
-    );
+    _showCustom(message, variant: CustomSnackBarVariant.info);
   }
 
   /// Show warning message
   void showWarning(String message) {
-    _showSnackBar(
-      message,
-      backgroundColor: Colors.orange,
-      icon: Icons.warning,
-    );
+    _showCustom(message, variant: CustomSnackBarVariant.warning);
   }
 
-  void _showSnackBar(String message, {
-    required Color backgroundColor,
-    required IconData icon,
+  void _showCustom(
+    String message, {
+    required CustomSnackBarVariant variant,
+    String? title,
+    Duration duration = const Duration(seconds: 3),
   }) {
     if (_scaffoldMessengerKey?.currentState != null) {
-      _scaffoldMessengerKey!.currentState!.showSnackBar(
+      final messenger = _scaffoldMessengerKey!.currentState!;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              Icon(icon, color: Colors.white),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
+          content: CustomSnackBarWidget(
+            variant: variant,
+            title: title,
+            message: message,
+            onClose: messenger.hideCurrentSnackBar,
           ),
-          backgroundColor: backgroundColor,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          duration: const Duration(seconds: 3),
+          padding: EdgeInsets.zero,
+          duration: duration,
         ),
       );
     }

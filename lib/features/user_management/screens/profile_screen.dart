@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
-import 'package:traqtrace_app/core/theme/theme_provider.dart';
+import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user_management/cubit/profile_state.dart';
+
+import '../../../core/config/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -528,7 +530,7 @@ class _SecurityTabState extends State<_SecurityTab> {
                 trailing: TextButton(
                   onPressed: () {
                     context.read<AuthCubit>().logout();
-                    context.go('/login');
+                    context.go(Constants.loginRoute);
                   },
                   child: const Text('Log Out'),
                 ),

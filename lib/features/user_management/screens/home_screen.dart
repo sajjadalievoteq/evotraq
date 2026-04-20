@@ -11,6 +11,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/dashboard_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_loading_screen.dart';
 
+import '../../../core/config/constants.dart';
+
 class _HomeDashboardCache {
   static DashboardStats? stats;
   static List<RecentEvent>? recentEvents;
@@ -149,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   _HomeDashboardCache.clear();
                   context.read<AuthCubit>().logout();
-                  context.go('/login');
+                  context.go(Constants.loginRoute);
                 },
                 tooltip: 'Logout',
               ),
@@ -159,7 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
           body: RefreshIndicator(
             onRefresh: _loadDashboardData,
             child: _isLoading
-                ? const Center(child: DashboardLoader())
+                ?
+
+            DashboardLoader()
                 : _error != null
                 ? _buildErrorState()
                 : _buildDashboard(user),

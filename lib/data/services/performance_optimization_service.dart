@@ -4,7 +4,10 @@ import '../../core/network/dio_service.dart';
 
 /// Service for Performance Optimization API calls
 class PerformanceOptimizationService {
-  final DioService _dioService = DioService();
+  final DioService _dioService;
+
+  PerformanceOptimizationService({required DioService dioService})
+      : _dioService = dioService;
 
   // Query Optimization Methods
   Future<Map<String, dynamic>> analyzeQueryExecutionPlan(String query) async {

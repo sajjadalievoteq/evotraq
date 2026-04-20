@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/features/auth/presentation/widgets/build_success_message_widget.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+
+import '../../../../core/config/constants.dart';
+import '../widgets/auth_action_button.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String token;
@@ -22,6 +28,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _isValidToken = true;
   bool _isLoading = true;
   bool _isSuccess = false;
+  bool _hasRequiredInput = false;
 
   @override
   void initState() {
@@ -39,21 +46,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Future<void> _validateToken() async {
     // Call the cubit to validate the token
     context.read<AuthCubit>().validatePasswordResetToken(widget.token);
-
-    // Setting this temporarily to true for UI development
-    // In a real implementation, you would listen to the cubit state to determine token validity
-    setState(() {
-      _isValidToken = true;
-      _isLoading = false;
-    });
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
       context.read<AuthCubit>().completePasswordReset(
             widget.token,
             _passwordController.text,
@@ -62,42 +58,48 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     }
   }
 
+  void _updateButtonState() {
+    final hasRequiredInput =
+        _passwordController.text.isNotEmpty &&
+        _confirmPasswordController.text.isNotEmpty;
+    if (hasRequiredInput != _hasRequiredInput) {
+      setState(() {
+        _hasRequiredInput = hasRequiredInput;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.background(context),
       appBar: AppBar(
         title: const Text('Reset Password'),
       ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error ?? 'An error occurred'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            setState(() {
-              _isLoading = false;
-            });
-          } else if (state.status == AuthStatus.passwordReset) {
-            setState(() {
-              _isSuccess = true;
-              _isLoading = false;
-            });
+            context.showError(state.error ?? 'An error occurred');
           }
         },
         builder: (context, state) {
-          if (_isLoading) {
+          if (state.status == AuthStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!_isValidToken) {
+          if (state.status == AuthStatus.passwordResetTokenInvalid) {
             return _buildInvalidTokenMessage();
           }
 
-          if (_isSuccess) {
-            return _buildSuccessMessage();
+          if (state.status == AuthStatus.passwordReset) {
+            return BuildSuccessMessage(
+              title: 'Password Reset Successfully',
+              message: 'Your password has been reset successfully. You can now log in with your new password.',
+              buttonLabel: 'GO TO LOGIN',
+              onButtonPressed: () {
+                context.go(Constants.loginRoute);
+              },
+            );
           }
 
           return _buildResetForm();
@@ -107,32 +109,36 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Widget _buildResetForm() {
+    final primary = ColorManager.primary(context);
+    final textSecondary = ColorManager.textSecondary(context);
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
+          onChanged: _updateButtonState,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
 
               // Icon
-              const Icon(
+              Icon(
                 Icons.lock_reset,
                 size: 80,
-                color: AppTheme.primaryColor,
+                color: primary,
               ),
 
               const SizedBox(height: 24),
 
               // Title
-              const Text(
+              Text(
                 'Create New Password',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
+                  color: primary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -140,11 +146,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const SizedBox(height: 16),
 
               // Description
-              const Text(
+              Text(
                 'Your password must be at least 8 characters long and include a mix of letters, numbers, and symbols.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: AppTheme.textSecondaryLight,
+                  color: textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -214,12 +220,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const SizedBox(height: 32),
 
               // Submit Button
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('RESET PASSWORD', style: TextStyle(fontSize: 16)),
-                ),
+              AuthActionButton(
+                label: 'RESET PASSWORD',
+                isEnabled: _hasRequiredInput,
+                onPressed: _submitForm,
               ),
             ],
           ),
@@ -229,41 +233,44 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Widget _buildInvalidTokenMessage() {
+    final textPrimary = ColorManager.textPrimary(context);
+    final textSecondary = ColorManager.textSecondary(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red,
+              color: ColorManager.error(context),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Invalid or Expired Link',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'The password reset link you used is invalid or has expired. Please request a new password reset link.',
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
+              child: AuthActionButton(
+                label: 'REQUEST NEW LINK',
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/forgot-password');
+                  context.go(Constants.forgotPasswordRoute);
                 },
-                child: const Text('REQUEST NEW LINK'),
               ),
             ),
           ],
@@ -272,47 +279,5 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
   }
 
-  Widget _buildSuccessMessage() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.check_circle,
-              size: 80,
-              color: AppTheme.successColor,
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Password Reset Successfully',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Your password has been reset successfully. You can now log in with your new password.',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
-                child: const Text('GO TO LOGIN'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 }

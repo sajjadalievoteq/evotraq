@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' hide ObjectEvent;
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
@@ -10,17 +9,11 @@ import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 
 class ValidationService {
-  final TokenManager _tokenManager;
-  final http.Client _httpClient;
-  final AppConfig _appConfig;
+  final DioService _dioService;
   
   ValidationService({
-    required TokenManager tokenManager,
-    http.Client? httpClient,
-    required AppConfig appConfig,
-  })  : _tokenManager = tokenManager,
-        _httpClient = httpClient ?? http.Client(),
-        _appConfig = appConfig;
+    required DioService dioService,
+  }) : _dioService = dioService;
   
   Future<Map<String, dynamic>> validateObjectEvent(Map<String, dynamic> eventData) async {
     return _validateEventRequest('/validate/object-event', eventData);
@@ -61,26 +54,30 @@ class ValidationService {
   /// Helper method to make the validation request
   Future<Map<String, dynamic>> _validateEventRequest(String endpoint, Map<String, dynamic> eventData) async {
     try {
-      final token = await _tokenManager.getToken();
-      final response = await _httpClient.post(
-        Uri.parse('${_appConfig.apiBaseUrl}$endpoint'),
+      final token = await _dioService.getAuthToken();
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}$endpoint',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(eventData),
+        data: jsonEncode(eventData),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
       
       if (response.statusCode == 200) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
+        return jsonDecode(response.data) as Map<String, dynamic>;
       } else {
         if (kDebugMode) {
-          print('Validation failed with status: ${response.statusCode}, body: ${response.body}');
+          print(
+            'Validation failed with status: ${response.statusCode}, body: ${response.data}',
+          );
         }
         
         // Try to parse error response
         try {
-          return jsonDecode(response.body) as Map<String, dynamic>;
+          return jsonDecode(response.data) as Map<String, dynamic>;
         } catch (_) {
           return {
             'valid': false,

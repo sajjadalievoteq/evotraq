@@ -63,11 +63,6 @@ void main() {
       late TestValidationFormStateState formState;
       final mockCubit = ValidationCubit(
         validationService: MockValidationServiceSimple(),
-        appConfig: AppConfig(
-          apiBaseUrl: 'https://api.test.com',
-          appName: 'TraqTrace Test',
-          appVersion: '1.0.0',
-        ),
       );
       
       // Create a test widget and get its state

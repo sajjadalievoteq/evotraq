@@ -1,38 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 
 import 'dart:convert';
 import 'validation_service_test.mocks.dart';
 
-@GenerateMocks([http.Client, TokenManager])
+@GenerateMocks([DioService])
 void main() {
-  late MockClient mockClient;
-  late MockTokenManager mockTokenManager;
+  late MockDioService mockDioService;
   late ValidationService validationService;
-  late AppConfig appConfig;
 
   setUp(() {
-    mockClient = MockClient();
-    mockTokenManager = MockTokenManager();
-    appConfig = AppConfig(
-      apiBaseUrl: 'http://test-api.com/api',
-      appName: 'TraqTrace Test',
-      appVersion: '1.0.0'
-    );
+    mockDioService = MockDioService();
     validationService = ValidationService(
-      httpClient: mockClient,
-      tokenManager: mockTokenManager,
-      appConfig: appConfig,
+      dioService: mockDioService,
     );
 
     // Set up mock token response
-    when(mockTokenManager.getToken()).thenAnswer((_) async => 'test-token');
+    when(mockDioService.getAuthToken()).thenAnswer((_) async => 'test-token');
+    when(mockDioService.baseUrl).thenReturn('http://test-api.com/api');
   });
 
   group('ValidationService Tests', () {
@@ -50,11 +40,17 @@ void main() {
         'validationErrors': []
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/object-event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/object-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonEncode(mockResponse),
+        statusCode: 200,
+      ));
       
       // Act
       final result = await validationService.validateObjectEvent(testEventData);
@@ -64,10 +60,12 @@ void main() {
       expect(result['validationErrors'], isEmpty);
       
       // Verify the correct endpoint was called
-      verify(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/object-event'),
+      verify(mockDioService.post(
+        argThat(contains('/validate/object-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
       )).called(1);
     });
 
@@ -89,11 +87,17 @@ void main() {
         'validationErrors': []
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/object-event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/object-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonEncode(mockResponse),
+        statusCode: 200,
+      ));
       
       // Act
       final result = await validationService.validateObjectEventModel(testEvent);
@@ -118,11 +122,17 @@ void main() {
         'validationErrors': []
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/aggregation-event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/aggregation-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonEncode(mockResponse),
+        statusCode: 200,
+      ));
       
       // Act
       final result = await validationService.validateAggregationEvent(testEventData);
@@ -132,10 +142,12 @@ void main() {
       expect(result['validationErrors'], isEmpty);
       
       // Verify the correct endpoint was called
-      verify(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/aggregation-event'),
+      verify(mockDioService.post(
+        argThat(contains('/validate/aggregation-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
       )).called(1);
     });
 
@@ -156,11 +168,17 @@ void main() {
         'validationErrors': []
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/transaction-event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/transaction-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonEncode(mockResponse),
+        statusCode: 200,
+      ));
       
       // Act
       final result = await validationService.validateTransactionEvent(testEventData);
@@ -170,10 +188,12 @@ void main() {
       expect(result['validationErrors'], isEmpty);
       
       // Verify the correct endpoint was called
-      verify(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/transaction-event'),
+      verify(mockDioService.post(
+        argThat(contains('/validate/transaction-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
       )).called(1);
     });
 
@@ -191,11 +211,17 @@ void main() {
         'validationErrors': []
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/transformation-event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/transformation-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonEncode(mockResponse),
+        statusCode: 200,
+      ));
       
       // Act
       final result = await validationService.validateTransformationEvent(testEventData);
@@ -205,10 +231,12 @@ void main() {
       expect(result['validationErrors'], isEmpty);
       
       // Verify the correct endpoint was called
-      verify(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/transformation-event'),
+      verify(mockDioService.post(
+        argThat(contains('/validate/transformation-event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
       )).called(1);
     });
     
@@ -219,11 +247,17 @@ void main() {
         'businessStep': 'urn:epcglobal:cbv:bizstep:commissioning',
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async => http.Response('Server error', 500));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenAnswer((_) async => Response(
+        requestOptions: RequestOptions(path: ''),
+        data: 'Server error',
+        statusCode: 500,
+      ));
       
       // Act
       final result = await validationService.validateEvent(testEventData);
@@ -240,11 +274,13 @@ void main() {
         'businessStep': 'urn:epcglobal:cbv:bizstep:commissioning',
       };
       
-      when(mockClient.post(
-        Uri.parse('${appConfig.apiBaseUrl}/validate/event'),
+      when(mockDioService.post(
+        argThat(contains('/validate/event')),
+        data: anyNamed('data'),
         headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenThrow(Exception('Network error'));
+        responseType: anyNamed('responseType'),
+        acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
+      )).thenThrow(DioException(requestOptions: RequestOptions(path: ''), message: 'Network error'));
       
       // Act
       final result = await validationService.validateEvent(testEventData);
@@ -256,3 +292,4 @@ void main() {
     });
   });
 }
+

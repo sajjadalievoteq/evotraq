@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../core/network/token_manager.dart';
 
 /// ETL Management Panel for Phase 3.3 Batch Processing Capabilities
@@ -21,6 +22,13 @@ class ETLManagementPanel extends StatefulWidget {
 }
 
 class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProviderStateMixin {
+  DioService get _dio => getIt<DioService>();
+
+  dynamic _decodeBody(dynamic data) {
+    if (data is String) return json.decode(data);
+    return data;
+  }
+
   late TabController _tabController;
   late Timer _refreshTimer;
   
@@ -106,19 +114,19 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadPipelines() async {
     try {
-      String url = '${widget.baseUrl}/etl/pipelines';
-      if (_selectedPipelineFilter != 'ALL') {
-        url += '?status=$_selectedPipelineFilter';
-      }
+      final qp = _selectedPipelineFilter != 'ALL'
+          ? <String, dynamic>{'status': _selectedPipelineFilter}
+          : null;
 
-      final response = await http.get(
-        Uri.parse(url),
+      final response = await _dio.get(
+        '/etl/pipelines',
+        queryParameters: qp,
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _pipelines = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _pipelines = List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -128,19 +136,20 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadTransformations() async {
     try {
-      String url = '${widget.baseUrl}/etl/transformations';
-      if (_selectedTransformationFilter != 'ALL') {
-        url += '?type=$_selectedTransformationFilter';
-      }
+      final qp = _selectedTransformationFilter != 'ALL'
+          ? <String, dynamic>{'type': _selectedTransformationFilter}
+          : null;
 
-      final response = await http.get(
-        Uri.parse(url),
+      final response = await _dio.get(
+        '/etl/transformations',
+        queryParameters: qp,
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _transformations = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _transformations =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -150,14 +159,16 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadExecutionHistory() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/etl/executions?limit=50'),
+      final response = await _dio.get(
+        '/etl/executions',
+        queryParameters: {'limit': 50},
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _executionHistory = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _executionHistory =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -167,14 +178,14 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadQualityMetrics() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/etl/quality-metrics'),
+      final response = await _dio.get(
+        '/etl/quality-metrics',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _qualityMetrics = json.decode(response.body);
+          _qualityMetrics = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -184,14 +195,14 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadPerformanceData() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/etl/performance'),
+      final response = await _dio.get(
+        '/etl/performance',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _performanceData = json.decode(response.body);
+          _performanceData = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -971,10 +982,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _toggleTransformation(String transformationId, bool enabled) async {
     try {
-      final response = await http.put(
-        Uri.parse('${widget.baseUrl}/etl/transformations/$transformationId/toggle'),
+      final response = await _dio.put(
+        '/etl/transformations/$transformationId/toggle',
         headers: await _getHeaders(),
-        body: json.encode({'enabled': enabled}),
+        data: json.encode({'enabled': enabled}),
       );
 
       if (response.statusCode == 200) {
@@ -989,8 +1000,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _executePipeline(String pipelineId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/etl/pipelines/$pipelineId/execute'),
+      final response = await _dio.post(
+        '/etl/pipelines/$pipelineId/execute',
         headers: await _getHeaders(),
       );
 
@@ -1028,8 +1039,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
     if (confirmed == true) {
       try {
-        final response = await http.delete(
-          Uri.parse('${widget.baseUrl}/etl/pipelines/$pipelineId'),
+        final response = await _dio.delete(
+          '/etl/pipelines/$pipelineId',
           headers: await _getHeaders(),
         );
 
@@ -1068,8 +1079,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
     if (confirmed == true) {
       try {
-        final response = await http.delete(
-          Uri.parse('${widget.baseUrl}/etl/transformations/$transformationId'),
+        final response = await _dio.delete(
+          '/etl/transformations/$transformationId',
           headers: await _getHeaders(),
         );
 
@@ -1089,13 +1100,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _testTransformation(String transformationId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/etl/transformations/$transformationId/test'),
+      final response = await _dio.post(
+        '/etl/transformations/$transformationId/test',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+        final result = _decodeBody(response.data);
         _showTestResults(result);
       }
     } catch (e) {
@@ -1653,10 +1664,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _createPipeline(String pipelineName, List<Map<String, dynamic>> transformationRules) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/etl/pipelines?pipelineName=${Uri.encodeComponent(pipelineName)}'),
+      final response = await _dio.post(
+        '/etl/pipelines',
+        queryParameters: {'pipelineName': pipelineName},
         headers: await _getHeaders(),
-        body: json.encode(transformationRules),
+        data: json.encode(transformationRules),
       );
 
       if (response.statusCode == 201) {
@@ -1665,7 +1677,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         );
         _loadPipelines(); // Refresh the pipelines list
       } else {
-        throw Exception('Failed to create pipeline: ${response.statusCode} ${response.reasonPhrase}');
+        throw Exception('Failed to create pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1676,10 +1688,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _updatePipeline(String pipelineId, String pipelineName, List<Map<String, dynamic>> transformationRules) async {
     try {
-      final response = await http.put(
-        Uri.parse('${widget.baseUrl}/etl/pipelines/$pipelineId'),
+      final response = await _dio.put(
+        '/etl/pipelines/$pipelineId',
         headers: await _getHeaders(),
-        body: json.encode(transformationRules),
+        data: json.encode(transformationRules),
       );
 
       if (response.statusCode == 200) {
@@ -1688,7 +1700,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         );
         _loadPipelines(); // Refresh the pipelines list
       } else {
-        throw Exception('Failed to update pipeline: ${response.statusCode} ${response.reasonPhrase}');
+        throw Exception('Failed to update pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1712,10 +1724,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         }
       };
 
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/etl/jobs'),
+      final response = await _dio.post(
+        '/etl/jobs',
         headers: await _getHeaders(),
-        body: json.encode(jobConfig),
+        data: json.encode(jobConfig),
       );
 
       if (response.statusCode == 201) {
@@ -1724,7 +1736,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         );
         _loadPipelines();
       } else {
-        throw Exception('Failed to schedule pipeline: ${response.statusCode} ${response.reasonPhrase}');
+        throw Exception('Failed to schedule pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

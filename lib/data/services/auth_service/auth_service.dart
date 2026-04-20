@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/auth/models/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 
 class AuthService {
   final DioService _dioService;
@@ -93,6 +93,44 @@ class AuthService {
       throw ApiException(
         statusCode: e.response?.statusCode,
         message: _parseErrorMessage(e.response?.data) ?? 'Registration failed',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
+      );
+    }
+  }
+
+  Future<bool> checkUsernameAvailability(String username) async {
+    final trimmedUsername = username.trim();
+
+    try {
+      final response = await _dioService.get(
+        '${_dioService.baseUrl}/auth/check-username',
+        queryParameters: {'username': trimmedUsername},
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data is String
+            ? Map<String, dynamic>.from(jsonDecode(response.data))
+            : Map<String, dynamic>.from(response.data as Map);
+        return data['available'] == true;
+      }
+
+      throw ApiException(
+        statusCode: response.statusCode,
+        message:
+            _parseErrorMessage(response.data) ??
+            'Failed to verify username availability',
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message:
+            _parseErrorMessage(e.response?.data) ??
+            'Failed to verify username availability',
         responseBody: _stringifyResponseData(e.response?.data),
         originalException: e,
       );
@@ -209,7 +247,7 @@ class AuthService {
     }
   }
 
-  Future<bool> verifyEmail(String token) async {
+  Future<String> verifyEmail(String token) async {
     try {
       final response = await _dioService.get(
         '${_dioService.baseUrl}/verification/verify-email',
@@ -219,9 +257,25 @@ class AuthService {
         acceptAllStatusCodes: true,
       );
 
-      return response.statusCode == 200;
-    } catch (e) {
-      return false;
+      if (response.statusCode == 200) {
+        return _parseErrorMessage(response.data) ??
+            'Email verified successfully. Your account is now pending admin approval.';
+      }
+
+      throw ApiException(
+        statusCode: response.statusCode,
+        message:
+            _parseErrorMessage(response.data) ?? 'Email verification failed',
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message:
+            _parseErrorMessage(e.response?.data) ?? 'Email verification failed',
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
+      );
     }
   }
 }

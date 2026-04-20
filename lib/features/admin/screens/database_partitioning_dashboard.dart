@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../../core/config/app_config.dart';
-import '../../../../core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../../shared/models/partition_models.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
@@ -43,13 +41,8 @@ class _DatabasePartitioningDashboardState
     _tabController = TabController(length: 4, vsync: this);
 
     // Initialize service with proper dependencies
-    final dio = getIt<Dio>();
-    final config = getIt<AppConfig>();
-    final tokenManager = getIt<TokenManager>();
     _partitioningService = DatabasePartitioningService(
-      dio,
-      config,
-      tokenManager,
+      dioService: getIt<DioService>(),
     );
 
     _loadDashboardData();

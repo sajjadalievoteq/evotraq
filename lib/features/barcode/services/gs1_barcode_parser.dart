@@ -170,45 +170,56 @@ class GS1BarcodeParser {
     // Example: 01189024111140261721022810AFG8007A210SIATXTA39607034P
     
     // Pattern 1: Starts with 01 followed by 14 digits (GTIN)
-    if (barcode.length >= 16 && barcode.startsWith("01") && RegExp(r'^\d{16}').hasMatch(barcode.substring(0, 16))) {
+    if (normalized.length >= 16 && normalized.startsWith("01") && RegExp(r'^\d{16}').hasMatch(normalized.substring(0, 16))) {
       int position = 16; // After 01 + 14 digits for GTIN
-      String result = '(01)${barcode.substring(2, 16)}';
+      String result = '(01)${normalized.substring(2, 16)}';
       
       // Check for expiry date pattern (17 + 6 digits)
-      if (barcode.length >= position + 8 && barcode.substring(position, position+2) == "17") {
-        result += '(17)${barcode.substring(position+2, position+8)}';
+      if (normalized.length >= position + 8 && normalized.substring(position, position+2) == "17") {
+        result += '(17)${normalized.substring(position+2, position+8)}';
         position += 8;
       }
       
       // Check for batch number pattern (10 + variable)
-      if (barcode.length >= position + 2 && barcode.substring(position, position+2) == "10") {
-        // Find end of batch (usually ends where serial begins with '21')
-        int batchEnd = barcode.indexOf("21", position + 2);
+      if (normalized.length >= position + 2 && normalized.substring(position, position+2) == "10") {
+        // Find end of batch (usually ends where serial begins with '21' or <GS>)
+        int batchEnd = normalized.indexOf("21", position + 2);
+        int gsIndex = normalized.indexOf("<GS>", position + 2);
+        
+        if (gsIndex != -1 && (batchEnd == -1 || gsIndex < batchEnd)) {
+          batchEnd = gsIndex;
+        }
+
         if (batchEnd == -1) {
           // No serial number found, assume batch goes to the end
-          result += '(10)${barcode.substring(position+2)}';
+          result += '(10)${normalized.substring(position+2)}';
           return result;
         } else {
-          result += '(10)${barcode.substring(position+2, batchEnd)}';
+          result += '(10)${normalized.substring(position+2, batchEnd)}';
           position = batchEnd;
         }
       }
       
+      // Skip the <GS> separator if we're at it
+      if (position < normalized.length && normalized.substring(position).startsWith('<GS>')) {
+        position += 4;
+      }
+      
       // Check for serial number pattern (21 + remainder)
-      if (barcode.length >= position + 2 && barcode.substring(position, position+2) == "21") {
-        result += '(21)${barcode.substring(position+2)}';
-      } else if (position < barcode.length) {
+      if (normalized.length >= position + 2 && normalized.substring(position, position+2) == "21") {
+        result += '(21)${normalized.substring(position+2)}';
+      } else if (position < normalized.length) {
         // If there's remaining data but not prefixed with known AI, try to parse it
-        result += _formatRemainder(barcode.substring(position));
+        result += _formatRemainder(normalized.substring(position));
       }
       
       return result;
     }
     
     // Pattern 2: Generic approach for non-specific formats, if digits only and of sufficient length
-    if (barcode.length >= 14 && RegExp(r'^\d{14}').hasMatch(barcode)) {
+    if (normalized.length >= 14 && RegExp(r'^\d{14}').hasMatch(normalized)) {
       // Likely starts with a GTIN-14
-      return '(01)${barcode.substring(0, 14)}${barcode.length > 14 ? _formatRemainder(barcode.substring(14)) : ''}';
+      return '(01)${normalized.substring(0, 14)}${normalized.length > 14 ? _formatRemainder(normalized.substring(14)) : ''}';
     }
     
     // If we can't determine format, just return normalized value or original as fallback
@@ -284,15 +295,28 @@ class GS1BarcodeParser {
           currentPosition = gs1ElementString.length;
         }
       } else {
-        // Variable length - find the next AI or end of string
+        // Variable length - find the next AI or end of string or group separator
         int nextAI = gs1ElementString.indexOf('(', currentPosition);
-        if (nextAI == -1) {
-          // No more AIs, take the rest of the string
-          result[ai] = gs1ElementString.substring(currentPosition);
-          currentPosition = gs1ElementString.length;
+        int nextGS = gs1ElementString.indexOf('<GS>', currentPosition);
+        
+        int endOfValue;
+        if (nextAI != -1 && nextGS != -1) {
+          endOfValue = nextAI < nextGS ? nextAI : nextGS;
+        } else if (nextAI != -1) {
+          endOfValue = nextAI;
+        } else if (nextGS != -1) {
+          endOfValue = nextGS;
         } else {
-          result[ai] = gs1ElementString.substring(currentPosition, nextAI);
-          currentPosition = nextAI;
+          endOfValue = gs1ElementString.length;
+        }
+
+        result[ai] = gs1ElementString.substring(currentPosition, endOfValue);
+        currentPosition = endOfValue;
+        
+        // Skip the <GS> separator if that's what we hit
+        if (currentPosition < gs1ElementString.length && 
+            gs1ElementString.substring(currentPosition).startsWith('<GS>')) {
+          currentPosition += 4;
         }
       }
     }

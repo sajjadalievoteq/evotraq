@@ -15,7 +15,7 @@ void main() {
     });
 
     test('Parse raw concatenated barcode', () {
-      final result = GS1BarcodeParser.parseGS1Barcode('0118902411114026172102281AFG8007A210SIATXTA39607034P');
+      final result = GS1BarcodeParser.parseGS1Barcode('01189024111140261721022810AFG8007A210SIATXTA39607034P');
       
       expect(result['valid'], isTrue);
       expect(result['GTIN'], '18902411114026');

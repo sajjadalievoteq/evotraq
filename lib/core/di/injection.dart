@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import 'package:traqtrace_app/data/services/advanced_query_service.dart';
-import 'package:traqtrace_app/data/services/auth_service.dart';
+import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
 import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gln_service.dart';
@@ -23,6 +23,7 @@ import '../../data/services/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
 import '../../data/services/commissioning_operation_service.dart';
 import '../../data/services/dashboard_service.dart';
+import '../../data/services/database_partitioning_service.dart';
 import '../../data/services/epc_conversion_service.dart';
 import '../../data/services/epcis_event_service.dart';
 import '../../data/services/gln_tobacco_extension_service.dart';
@@ -49,12 +50,14 @@ import '../../data/services/data_consistency_service.dart';
 import '../../data/services/epcis_serialization_service.dart';
 import '../../data/services/error_correction_service.dart';
 import '../../data/services/gs1_barcode_api_service.dart';
-import '../../data/services/job_service.dart';
 import '../../data/services/bulk_export_service.dart';
+import '../../data/services/cache_service.dart';
 import '../../data/services/etl_service.dart';
+import '../../data/services/performance_optimization_service.dart';
 import '../../data/services/user_service.dart';
 import '../../data/services/validation_service.dart';
 import '../../data/services/websocket_service.dart';
+
 
 final getIt = GetIt.instance;
 
@@ -157,11 +160,11 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<SystemSettingsService>(
-    () => SystemSettingsService(
-      dio: getIt<Dio>(),
-      baseUrl: getIt<AppConfig>().apiBaseUrl,
-      tokenManager: getIt<TokenManager>(),
-    ),
+    () => SystemSettingsService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<DatabasePartitioningService>(
+    () => DatabasePartitioningService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<AdvancedQueryService>(
@@ -229,8 +232,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<IndustryTestDataService>(
-    () => IndustryTestDataService( tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),),
+    () => IndustryTestDataService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<AggregationEventService>(
@@ -242,8 +244,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<ValidationService>(
-    () => ValidationService(tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),),
+    () => ValidationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<DataConsistencyService>(
@@ -264,6 +265,14 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<ETLService>(
     () => ETLService(getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<CacheService>(
+    () => CacheService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<PerformanceOptimizationService>(
+    () => PerformanceOptimizationService(dioService: getIt<DioService>()),
   );
 
   // Cubits & Routers

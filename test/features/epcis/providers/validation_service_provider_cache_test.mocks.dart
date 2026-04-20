@@ -15,7 +15,6 @@ import 'package:traqtrace_app/features/epcis/models/transaction_event.dart'
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart'
     as _i7;
 
-
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
 // ignore_for_file: avoid_setters_without_getters
@@ -52,59 +51,23 @@ class MockValidationService extends _i1.Mock implements _i2.ValidationService {
           as _i3.Future<Map<String, dynamic>>);
 
   @override
-  _i3.Future<Map<String, dynamic>> validateAggregationEvent(
-    Map<String, dynamic>? eventData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#validateAggregationEvent, [eventData]),
-            returnValue: _i3.Future<Map<String, dynamic>>.value(
-              <String, dynamic>{},
-            ),
-          )
-          as _i3.Future<Map<String, dynamic>>);
-
-  @override
-  _i3.Future<Map<String, dynamic>> validateTransactionEvent(
-    Map<String, dynamic>? eventData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#validateTransactionEvent, [eventData]),
-            returnValue: _i3.Future<Map<String, dynamic>>.value(
-              <String, dynamic>{},
-            ),
-          )
-          as _i3.Future<Map<String, dynamic>>);
-
-  @override
-  _i3.Future<Map<String, dynamic>> validateTransformationEvent(
-    Map<String, dynamic>? eventData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#validateTransformationEvent, [eventData]),
-            returnValue: _i3.Future<Map<String, dynamic>>.value(
-              <String, dynamic>{},
-            ),
-          )
-          as _i3.Future<Map<String, dynamic>>);
-
-  @override
-  _i3.Future<Map<String, dynamic>> validateEvent(
-    Map<String, dynamic>? eventData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#validateEvent, [eventData]),
-            returnValue: _i3.Future<Map<String, dynamic>>.value(
-              <String, dynamic>{},
-            ),
-          )
-          as _i3.Future<Map<String, dynamic>>);
-
-  @override
   _i3.Future<Map<String, dynamic>> validateObjectEventModel(
     _i4.ObjectEvent? event,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#validateObjectEventModel, [event]),
+            returnValue: _i3.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i3.Future<Map<String, dynamic>>);
+
+  @override
+  _i3.Future<Map<String, dynamic>> validateAggregationEvent(
+    Map<String, dynamic>? eventData,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#validateAggregationEvent, [eventData]),
             returnValue: _i3.Future<Map<String, dynamic>>.value(
               <String, dynamic>{},
             ),
@@ -124,6 +87,18 @@ class MockValidationService extends _i1.Mock implements _i2.ValidationService {
           as _i3.Future<Map<String, dynamic>>);
 
   @override
+  _i3.Future<Map<String, dynamic>> validateTransactionEvent(
+    Map<String, dynamic>? eventData,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#validateTransactionEvent, [eventData]),
+            returnValue: _i3.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i3.Future<Map<String, dynamic>>);
+
+  @override
   _i3.Future<Map<String, dynamic>> validateTransactionEventModel(
     _i6.TransactionEvent? event,
   ) =>
@@ -136,11 +111,35 @@ class MockValidationService extends _i1.Mock implements _i2.ValidationService {
           as _i3.Future<Map<String, dynamic>>);
 
   @override
+  _i3.Future<Map<String, dynamic>> validateTransformationEvent(
+    Map<String, dynamic>? eventData,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#validateTransformationEvent, [eventData]),
+            returnValue: _i3.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i3.Future<Map<String, dynamic>>);
+
+  @override
   _i3.Future<Map<String, dynamic>> validateTransformationEventModel(
     _i7.TransformationEvent? event,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#validateTransformationEventModel, [event]),
+            returnValue: _i3.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i3.Future<Map<String, dynamic>>);
+
+  @override
+  _i3.Future<Map<String, dynamic>> validateEvent(
+    Map<String, dynamic>? eventData,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#validateEvent, [eventData]),
             returnValue: _i3.Future<Map<String, dynamic>>.value(
               <String, dynamic>{},
             ),

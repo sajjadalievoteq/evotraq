@@ -1,19 +1,21 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/shared/models/partition_models.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Service class for Database Partitioning API calls according to Phase 3.1 requirements
 class DatabasePartitioningService {
-  final Dio _dio;
-  final AppConfig _config;
-  final TokenManager _tokenManager;
+  final DioService _dioService;
+  late final String _baseUrl;
 
-  DatabasePartitioningService(this._dio, this._config, this._tokenManager);
+  DatabasePartitioningService({required DioService dioService})
+    : _dioService = dioService {
+    _baseUrl = _dioService.baseUrl;
+  }
 
   /// Helper method to get headers with authentication
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await _tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     if (token == null) {
       throw Exception('Authentication token not found');
     }
@@ -21,6 +23,11 @@ class DatabasePartitioningService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
+  }
+
+  dynamic _decodeJson(dynamic data) {
+    if (data is String) return jsonDecode(data);
+    return data;
   }
 
   /// Time-Based Partitioning Services
@@ -31,15 +38,18 @@ class DatabasePartitioningService {
     required int month,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/time-based/create',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/time-based/create',
         queryParameters: {
           'tableName': tableName,
           'year': year,
           'month': month,
         },
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -50,14 +60,17 @@ class DatabasePartitioningService {
     required int monthsAhead,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/time-based/create-future',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/time-based/create-future',
         queryParameters: {
           'tableName': tableName,
           'monthsAhead': monthsAhead,
         },
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -69,15 +82,18 @@ class DatabasePartitioningService {
     required DateTime endDate,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/time-based/routing',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/time-based/routing',
         queryParameters: {
           'tableName': tableName,
           'startDate': startDate.toIso8601String().split('T')[0],
           'endDate': endDate.toIso8601String().split('T')[0],
         },
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -85,13 +101,14 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> updatePartitionStatistics({String? tableName}) async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/time-based/update-statistics',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/time-based/update-statistics',
         queryParameters: tableName != null ? {'tableName': tableName} : null,
-        options: Options(headers: headers),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -104,14 +121,17 @@ class DatabasePartitioningService {
     required String eventType,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/event-type/create',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/event-type/create',
         queryParameters: {
           'tableName': tableName,
           'eventType': eventType,
         },
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -122,12 +142,15 @@ class DatabasePartitioningService {
     required Map<String, dynamic> queryParams,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/event-type/optimize-query',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/event-type/optimize-query',
         queryParameters: {'tableName': tableName},
-        data: queryParams,
+        data: jsonEncode(queryParams),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -137,11 +160,14 @@ class DatabasePartitioningService {
     required String tableName,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/event-type/assignment-rules',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/event-type/assignment-rules',
         queryParameters: {'tableName': tableName},
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return Map<String, String>.from(response.data);
+      return Map<String, String>.from(_decodeJson(response.data) as Map);
     } catch (e) {
       throw _handleError(e);
     }
@@ -151,11 +177,14 @@ class DatabasePartitioningService {
     required String tableName,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/event-type/balance',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/event-type/balance',
         queryParameters: {'tableName': tableName},
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -168,16 +197,17 @@ class DatabasePartitioningService {
     String archiveLocation = 'cold_storage',
   }) async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/archive/archive-old',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/archive/archive-old',
         queryParameters: {
           'cutoffDate': cutoffDate.toIso8601String(),
           'archiveLocation': archiveLocation,
         },
-        options: Options(headers: headers),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -189,15 +219,19 @@ class DatabasePartitioningService {
     required DateTime endDate,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/archive/retrieve',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/archive/retrieve',
         queryParameters: {
           'tableName': tableName,
           'startDate': startDate.toIso8601String(),
           'endDate': endDate.toIso8601String(),
         },
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return (response.data as List)
+      final data = (_decodeJson(response.data) as List).cast<dynamic>();
+      return data
           .map((json) => ArchiveMetadata.fromJson(json))
           .toList();
     } catch (e) {
@@ -209,10 +243,13 @@ class DatabasePartitioningService {
     required int archiveId,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/archive/optimize/$archiveId',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/archive/optimize/$archiveId',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -223,12 +260,15 @@ class DatabasePartitioningService {
     required Map<String, dynamic> queryParams,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/archive/query',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/archive/query',
         queryParameters: {'tableName': tableName},
-        data: queryParams,
+        data: jsonEncode(queryParams),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -238,12 +278,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> automatePartitionCreation() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/management/automate-creation',
-        options: Options(headers: headers),
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/management/automate-creation',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -254,12 +295,15 @@ class DatabasePartitioningService {
     required Map<String, dynamic> queryConditions,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/management/implement-pruning',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/management/implement-pruning',
         queryParameters: {'tableName': tableName},
-        data: queryConditions,
+        data: jsonEncode(queryConditions),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -267,13 +311,15 @@ class DatabasePartitioningService {
 
   Future<List<PartitionMetadata>> getPartitionMetadata({String? tableName}) async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/partitioning/management/metadata',
+      final response = await _dioService.get(
+        '$_baseUrl/partitioning/management/metadata',
         queryParameters: tableName != null ? {'tableName': tableName} : null,
-        options: Options(headers: headers),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return (response.data as List)
+      final data = (_decodeJson(response.data) as List).cast<dynamic>();
+      return data
           .map((json) => PartitionMetadata.fromJson(json))
           .toList();
     } catch (e) {
@@ -283,12 +329,13 @@ class DatabasePartitioningService {
 
   Future<PartitionStatistics> getPartitionMonitoringReport() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/partitioning/management/monitoring',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/partitioning/management/monitoring',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return PartitionStatistics.fromJson(response.data);
+      return PartitionStatistics.fromJson(_decodeJson(response.data));
     } catch (e) {
       throw _handleError(e);
     }
@@ -299,16 +346,17 @@ class DatabasePartitioningService {
     String? tableName,
   }) async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/management/maintenance',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/management/maintenance',
         queryParameters: {
           'maintenanceType': maintenanceType,
           if (tableName != null) 'tableName': tableName,
         },
-        options: Options(headers: headers),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return PartitionMaintenance.fromJson(response.data);
+      return PartitionMaintenance.fromJson(_decodeJson(response.data));
     } catch (e) {
       throw _handleError(e);
     }
@@ -316,12 +364,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> getPartitionHealthStatus() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/partitioning/management/health',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/partitioning/management/health',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -332,12 +381,15 @@ class DatabasePartitioningService {
     required Map<String, dynamic> policies,
   }) async {
     try {
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/partitioning/management/configure-policies',
+      final response = await _dioService.post(
+        '$_baseUrl/partitioning/management/configure-policies',
         queryParameters: {'tableName': tableName},
-        data: policies,
+        data: jsonEncode(policies),
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -347,12 +399,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> getDashboardOverview() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/partitioning/dashboard/overview',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/partitioning/dashboard/overview',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -362,12 +415,13 @@ class DatabasePartitioningService {
     required String tableName,
   }) async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/partitioning/dashboard/table/$tableName',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/partitioning/dashboard/table/$tableName',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -377,12 +431,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> migrateDataToPartitions() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.post(
-        '${_config.apiBaseUrl}/api/partitioning/migrate-data',
-        options: Options(headers: headers),
+      final response = await _dioService.post(
+        '$_baseUrl/api/partitioning/migrate-data',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -390,12 +445,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> getMainTableDataInfo() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/api/partitioning/main-table-data',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/api/partitioning/main-table-data',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -403,12 +459,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> getDebugTableInfo() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/api/partitioning/debug-table-info',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/api/partitioning/debug-table-info',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -416,12 +473,13 @@ class DatabasePartitioningService {
 
   Future<Map<String, dynamic>> getDebugConnectionInfo() async {
     try {
-      final headers = await _getAuthHeaders();
-      final response = await _dio.get(
-        '${_config.apiBaseUrl}/api/partitioning/debug-connection',
-        options: Options(headers: headers),
+      final response = await _dioService.get(
+        '$_baseUrl/api/partitioning/debug-connection',
+        headers: await _getAuthHeaders(),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
-      return response.data;
+      return (_decodeJson(response.data) as Map).cast<String, dynamic>();
     } catch (e) {
       throw _handleError(e);
     }
@@ -429,8 +487,14 @@ class DatabasePartitioningService {
 
   String _handleError(dynamic error) {
     if (error is DioException) {
-      if (error.response?.data != null && error.response?.data['message'] != null) {
-        return error.response!.data['message'].toString();
+      final data = error.response?.data;
+      if (data != null) {
+        try {
+          final decoded = _decodeJson(data);
+          if (decoded is Map && decoded['message'] != null) {
+            return decoded['message'].toString();
+          }
+        } catch (_) {}
       }
       return error.message ?? 'Network error occurred';
     }

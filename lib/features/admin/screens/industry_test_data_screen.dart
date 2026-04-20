@@ -46,7 +46,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testDataService ??= IndustryTestDataService( tokenManager: getIt<TokenManager>(), appConfig: getIt<AppConfig>()
+    _testDataService ??= IndustryTestDataService(dioService: getIt<DioService>() 
  
     );
   }

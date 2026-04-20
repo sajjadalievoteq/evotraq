@@ -10,26 +10,29 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: ValidatedFormField(
-              formField: TextField(
+              animate: false,
+              formField: TextFormField(
                 onChanged: (value) {
-                  ValidationNotification(value).dispatch(tester.element(find.byType(TextField)));
+                  ValidationNotification(value).dispatch(tester.element(find.byType(TextFormField)));
                 },
               ),
-              validator: (value) => value!.isEmpty ? 'Field is required' : null,
+              validator: (value) => (value == null || value.isEmpty) ? 'Field is required' : null,
             ),
           ),
         ),
       );
       
       // Enter text to trigger validation
-      await tester.enterText(find.byType(TextField), '');
+      await tester.enterText(find.byType(TextFormField), '');
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification(''));
       await tester.pump();
       
       // Should show error message
       expect(find.text('Field is required'), findsOneWidget);
       
       // Enter valid text
-      await tester.enterText(find.byType(TextField), 'Valid value');
+      await tester.enterText(find.byType(TextFormField), 'Valid value');
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification('Valid value'));
       await tester.pump();
       
       // Should show valid indicator
@@ -37,32 +40,47 @@ void main() {
     });
     
     testWidgets('should respect validateOnChange setting', (WidgetTester tester) async {
-      // Build a form field with validateOnChange=false
+      final focusNode = FocusNode();
+      // Build a form field with validateOnChange=false and another field to take focus
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ValidatedFormField(
-              validateOnChange: false,
-              formField: TextField(
-                onChanged: (value) {
-                  ValidationNotification(value).dispatch(tester.element(find.byType(TextField)));
-                },
-              ),
-              validator: (value) => value!.isEmpty ? 'Field is required' : null,
+            body: Column(
+              children: [
+                ValidatedFormField(
+                  focusNode: focusNode,
+                  animate: false,
+                  validateOnChange: false,
+                  formField: TextFormField(
+                    focusNode: focusNode,
+                    onChanged: (value) {
+                      ValidationNotification(value).dispatch(tester.element(find.byType(TextFormField)));
+                    },
+                  ),
+                  validator: (value) => (value == null || value.isEmpty) ? 'Field is required' : null,
+                ),
+                const TextField(key: Key('other_field')),
+              ],
             ),
           ),
         ),
       );
       
+      // Focus the field
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
       // Enter empty text
-      await tester.enterText(find.byType(TextField), '');
+      await tester.enterText(find.byType(TextFormField), '');
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification(''));
       await tester.pump();
       
       // Should not show error message yet
       expect(find.text('Field is required'), findsNothing);
       
       // Force focus change to trigger blur validation
-      await tester.tap(find.byType(Scaffold));
+      focusNode.unfocus();
       await tester.pump();
       
       // Now should show validation error
@@ -94,6 +112,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: ValidatedFormField(
+              animate: false,
               formField: const TextField(),
               validator: (value) => null, // Always valid
               initiallyValidated: true,
@@ -103,6 +122,7 @@ void main() {
       );
 
       // Should show valid indicator immediately
+      await tester.pump();
       expect(find.text('Valid'), findsOneWidget);
     });
   });

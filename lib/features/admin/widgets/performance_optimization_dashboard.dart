@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../data/services/performance_optimization_service.dart';
 
@@ -12,7 +13,8 @@ class PerformanceOptimizationDashboard extends StatefulWidget {
 
 class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizationDashboard>
     with SingleTickerProviderStateMixin {
-  final PerformanceOptimizationService _performanceService = PerformanceOptimizationService();
+  final PerformanceOptimizationService _performanceService =
+      getIt<PerformanceOptimizationService>();
   
   late TabController _tabController;
   Map<String, dynamic>? _performanceReport;

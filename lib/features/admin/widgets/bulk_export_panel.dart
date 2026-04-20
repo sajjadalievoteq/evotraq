@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../core/network/token_manager.dart';
 
 /// Bulk Export Panel for Phase 3.3 Batch Processing Capabilities
@@ -21,6 +23,13 @@ class BulkExportPanel extends StatefulWidget {
 }
 
 class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderStateMixin {
+  DioService get _dio => getIt<DioService>();
+
+  dynamic _decodeBody(dynamic data) {
+    if (data is String) return json.decode(data);
+    return data;
+  }
+
   late TabController _tabController;
   late Timer _refreshTimer;
 
@@ -102,28 +111,24 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportJobs() async {
     try {
-      String url = '${widget.baseUrl}/bulk-export/jobs';
-      List<String> params = [];
-
+      final qp = <String, dynamic>{};
       if (_selectedFormat != 'ALL') {
-        params.add('format=$_selectedFormat');
+        qp['format'] = _selectedFormat;
       }
       if (_selectedStatus != 'ALL') {
-        params.add('status=$_selectedStatus');
+        qp['status'] = _selectedStatus;
       }
 
-      if (params.isNotEmpty) {
-        url += '?${params.join('&')}';
-      }
-
-      final response = await http.get(
-        Uri.parse(url),
+      final response = await _dio.get(
+        '/bulk-export/jobs',
+        queryParameters: qp.isEmpty ? null : qp,
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _exportJobs = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _exportJobs =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -133,14 +138,15 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportTemplates() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/templates'),
+      final response = await _dio.get(
+        '/bulk-export/templates',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _exportTemplates = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _exportTemplates =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -150,14 +156,16 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportHistory() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/history?limit=100'),
+      final response = await _dio.get(
+        '/bulk-export/history',
+        queryParameters: {'limit': 100},
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _exportHistory = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _exportHistory =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -167,14 +175,14 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportStats() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/statistics'),
+      final response = await _dio.get(
+        '/bulk-export/statistics',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _exportStats = json.decode(response.body);
+          _exportStats = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -1032,8 +1040,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _cancelExport(String jobId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('${widget.baseUrl}/bulk-export/jobs/$jobId'),
+      final response = await _dio.delete(
+        '/bulk-export/jobs/$jobId',
         headers: await _getHeaders(),
       );
 
@@ -1053,13 +1061,14 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
   Future<void> _downloadExport(String jobId) async {
     try {
       // First get the job details to find the file ID
-      final jobResponse = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/jobs'),
+      final jobResponse = await _dio.get(
+        '/bulk-export/jobs',
         headers: await _getHeaders(),
       );
 
       if (jobResponse.statusCode == 200) {
-        final jobs = List<Map<String, dynamic>>.from(json.decode(jobResponse.body));
+        final jobs =
+            List<Map<String, dynamic>>.from(_decodeBody(jobResponse.data));
         final job = jobs.firstWhere((j) => j['job_id'] == jobId, orElse: () => {});
         
         if (job.isNotEmpty &&
@@ -1068,8 +1077,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
           // Use the file download endpoint from the API response
           final downloadUrl = job['execution_result']['export_result']['download_url'];
-          final response = await http.get(
-            Uri.parse('${widget.baseUrl}$downloadUrl'),
+          final response = await _dio.get(
+            '${widget.baseUrl}$downloadUrl',
             headers: await _getHeaders(),
           );
 
@@ -1100,8 +1109,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _retryExport(String jobId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/bulk-export/jobs/$jobId/retry'),
+      final response = await _dio.post(
+        '/bulk-export/jobs/$jobId/retry',
         headers: await _getHeaders(),
       );
 
@@ -1120,13 +1129,13 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _executeExportJob(String jobId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/bulk-export/jobs/$jobId/execute'),
+      final response = await _dio.post(
+        '/bulk-export/jobs/$jobId/execute',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+        final result = _decodeBody(response.data);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Export job executed successfully: ${result['status']}'),
@@ -1168,8 +1177,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
     if (confirmed == true) {
       try {
-        final response = await http.delete(
-          Uri.parse('${widget.baseUrl}/bulk-export/jobs/$jobId/delete'),
+        final response = await _dio.delete(
+          '/bulk-export/jobs/$jobId/delete',
           headers: await _getHeaders(),
         );
 
@@ -1193,8 +1202,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _duplicateTemplate(String templateId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/bulk-export/templates/$templateId/duplicate'),
+      final response = await _dio.post(
+        '/bulk-export/templates/$templateId/duplicate',
         headers: await _getHeaders(),
       );
 
@@ -1213,8 +1222,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _exportTemplateConfig(String templateId) async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/templates/$templateId/export'),
+      final response = await _dio.get(
+        '/bulk-export/templates/$templateId/export',
         headers: await _getHeaders(),
       );
 
@@ -1251,8 +1260,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
     if (confirmed == true) {
       try {
-        final response = await http.delete(
-          Uri.parse('${widget.baseUrl}/bulk-export/templates/$templateId'),
+        final response = await _dio.delete(
+          '/bulk-export/templates/$templateId',
           headers: await _getHeaders(),
         );
 
@@ -1387,6 +1396,13 @@ class CreateExportDialog extends StatefulWidget {
 }
 
 class _CreateExportDialogState extends State<CreateExportDialog> {
+  DioService get _dio => getIt<DioService>();
+
+  dynamic _decodeBody(dynamic data) {
+    if (data is String) return json.decode(data);
+    return data;
+  }
+
   final _formKey = GlobalKey<FormState>();
   String? _selectedTemplateId;
   String _exportName = '';
@@ -1420,8 +1436,8 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
   Future<void> _loadTemplates() async {
     try {
       final token = await widget.tokenManager.getToken();
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/bulk-export/templates'),
+      final response = await _dio.get(
+        '/bulk-export/templates',
         headers: {
           'Authorization': 'Bearer ${token ?? ''}',
           'Content-Type': 'application/json',
@@ -1430,7 +1446,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
 
       if (response.statusCode == 200) {
         setState(() {
-          _templates = json.decode(response.body);
+          _templates = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -1470,30 +1486,30 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
         
         // Use template
         final token = await widget.tokenManager.getToken();
-        final response = await http.post(
-          Uri.parse('${widget.baseUrl}/bulk-export/templates/$_selectedTemplateId/apply'),
+        final response = await _dio.post(
+          '/bulk-export/templates/$_selectedTemplateId/apply',
           headers: {
             'Authorization': 'Bearer ${token ?? ''}',
             'Content-Type': 'application/json',
           },
-          body: json.encode(templateParams),
+          data: json.encode(templateParams),
         );
 
         if (response.statusCode == 201) {
-          exportData = json.decode(response.body);
+          exportData = _decodeBody(response.data);
         } else {
           throw Exception('Failed to create export from template');
         }
       } else {
         // Create custom export job
         final token = await widget.tokenManager.getToken();
-        final response = await http.post(
-          Uri.parse('${widget.baseUrl}/bulk-export/jobs'),
+        final response = await _dio.post(
+          '/bulk-export/jobs',
           headers: {
             'Authorization': 'Bearer ${token ?? ''}',
             'Content-Type': 'application/json',
           },
-          body: json.encode({
+          data: json.encode({
             'name': _exportName,
             'format': _selectedFormat,
             'configuration': _exportConfig,
@@ -1502,7 +1518,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
         );
 
         if (response.statusCode == 201) {
-          exportData = json.decode(response.body);
+          exportData = _decodeBody(response.data);
         } else {
           throw Exception('Failed to create export job');
         }
@@ -1739,6 +1755,13 @@ class BulkExportDialog extends StatefulWidget {
 }
 
 class _BulkExportDialogState extends State<BulkExportDialog> {
+  DioService get _dio => getIt<DioService>();
+
+  dynamic _decodeBody(dynamic data) {
+    if (data is String) return json.decode(data);
+    return data;
+  }
+
   final _formKey = GlobalKey<FormState>();
   String _exportName = '';
   String _selectedFormat = 'EPCIS_JSON_LD';
@@ -1790,17 +1813,17 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
       }
 
       final token = await widget.tokenManager.getToken();
-      final response = await http.post(
-        Uri.parse(endpoint),
+      final response = await _dio.post(
+        endpoint,
         headers: {
           'Authorization': 'Bearer ${token ?? ''}',
           'Content-Type': 'application/json',
         },
-        body: json.encode(requestBody),
+        data: json.encode(requestBody),
       );
 
       if (response.statusCode == 201) {
-        final exportData = json.decode(response.body);
+        final exportData = _decodeBody(response.data);
 
         if (mounted) {
           Navigator.of(context).pop();

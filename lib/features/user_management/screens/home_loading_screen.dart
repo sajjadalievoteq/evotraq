@@ -19,43 +19,48 @@ class DashboardLoader extends StatelessWidget {
     );
   }
 
-  Widget _statsGrid(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+  Widget _sectionTitle({double width = 180}) {
+    return _box(width: width, height: 20, radius: 8);
+  }
 
-    int crossAxisCount = screenWidth ~/ 140; // responsive
-    crossAxisCount = crossAxisCount.clamp(2, 6);
+  Widget _statsGrid(double maxWidth) {
+    double cardWidth;
+    if (maxWidth < 400) {
+      cardWidth = (maxWidth - 12) / 2;
+    } else if (maxWidth < 600) {
+      cardWidth = (maxWidth - 24) / 3;
+    } else if (maxWidth < 900) {
+      cardWidth = (maxWidth - 36) / 4;
+    } else {
+      cardWidth = (maxWidth - 48) / 5;
+    }
+    cardWidth = cardWidth.clamp(100.0, 160.0);
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 9,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.6,
-      ),
-      itemBuilder: (_, __) => _box(),
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: List.generate(9, (_) => _box(width: cardWidth, height: 96)),
     );
   }
 
-  Widget _quickActions(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+  Widget _quickActions(double maxWidth) {
+    int crossAxisCount;
+    if (maxWidth < 600) {
+      crossAxisCount = 3;
+    } else if (maxWidth < 900) {
+      crossAxisCount = 4;
+    } else {
+      crossAxisCount = 6;
+    }
 
-    int crossAxisCount = screenWidth ~/ 200;
-    crossAxisCount = crossAxisCount.clamp(2, 4);
+    final spacing = 16.0;
+    final itemWidth =
+        (maxWidth - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 6,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.4,
-      ),
-      itemBuilder: (_, __) => _box(height: 120),
+    return Wrap(
+      spacing: spacing,
+      runSpacing: spacing,
+      children: List.generate(maxWidth<900?6:8, (_) => _box(width: itemWidth, height: itemWidth-50)),
     );
   }
 
@@ -64,24 +69,36 @@ class DashboardLoader extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// Header
-            _box(height: 80),
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height,
+        child: SingleChildScrollView(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final horizontalPadding = constraints.maxWidth < 600 ? 12.0 : 16.0;
+              final verticalSpacing = constraints.maxWidth < 600 ? 16.0 : 24.0;
 
-            const SizedBox(height: 20),
-
-            /// Stats Section
-            _statsGrid(context),
-
-            const SizedBox(height: 24),
-
-            /// Quick Actions
-            _quickActions(context),
-          ],
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _box(height: 100, radius: 16),
+                    SizedBox(height: verticalSpacing),
+                    _sectionTitle(width: 170),
+                    const SizedBox(height: 12),
+                    _statsGrid(constraints.maxWidth - (horizontalPadding * 2)),
+                    SizedBox(height: verticalSpacing),
+                    _sectionTitle(width: 140),
+                    const SizedBox(height: 12),
+                    _quickActions(constraints.maxWidth - (horizontalPadding * 2)),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

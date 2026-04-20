@@ -23,7 +23,6 @@ void main() {
     mockValidationService = MockValidationService();
     cubit = ValidationCubit(
       validationService: mockValidationService,
-      appConfig: appConfig,
     );
   });
   

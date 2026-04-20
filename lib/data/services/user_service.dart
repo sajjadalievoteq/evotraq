@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/auth/models/auth_models.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 
 class UserService {
   final DioService _dioService;

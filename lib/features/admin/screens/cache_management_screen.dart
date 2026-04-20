@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../core/di/injection.dart';
 import '../../../data/services/cache_service.dart';
 import '../../cache/models/cache_statistics.dart';
 import '../../cache/models/cache_health.dart';
@@ -18,7 +19,7 @@ class CacheManagementScreen extends StatefulWidget {
 
 class _CacheManagementScreenState extends State<CacheManagementScreen>
     with SingleTickerProviderStateMixin {
-  final CacheService _cacheService = CacheService();
+  final CacheService _cacheService = getIt<CacheService>();
   late TabController _tabController;
 
   CacheStatistics? _statistics;

@@ -2,13 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/auth/screens/forgot_password_screen.dart';
-import 'package:traqtrace_app/features/auth/screens/login_screen.dart';
-import 'package:traqtrace_app/features/auth/screens/register_screen.dart';
-import 'package:traqtrace_app/features/auth/screens/reset_password_screen.dart';
-import 'package:traqtrace_app/features/auth/screens/verify_email_screen.dart';
 import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_test_screen.dart';
@@ -24,6 +19,8 @@ import 'package:traqtrace_app/features/admin/screens/etl_management_screen.dart'
 import 'package:traqtrace_app/features/admin/screens/bulk_export_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity_dashboard.dart';
 import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart'; // Added import
+import 'package:traqtrace_app/features/epcis/screens/validation_rules_help_screen.dart';
+import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_screen.dart';
@@ -50,6 +47,7 @@ import 'package:traqtrace_app/features/epcis/screens/aggregation_event_form_scre
 import 'package:traqtrace_app/features/epcis/screens/aggregation_event_hierarchy_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/transaction_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/transaction_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/screens/transaction_events_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/transaction_document_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/transaction_document_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/transformation_events_list_screen.dart';
@@ -93,6 +91,16 @@ import 'package:traqtrace_app/features/api_management/screens/service_account_ma
 import 'package:traqtrace_app/features/api_management/screens/api_collection_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_access_management_screen.dart';
 
+import '../../features/auth/cubit/auth_cubit.dart';
+import '../../features/auth/cubit/auth_state.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/check_email_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/auth/presentation/screens/verify_email_screen.dart';
+
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
@@ -112,42 +120,97 @@ class AppRouter {
 
   AppRouter({required this.authCubit});
 
+  bool _isAuthCheckPending() {
+    return authCubit.state.status == AuthStatus.initial ||
+        authCubit.state.status == AuthStatus.loading;
+  }
+
+  bool _isPublicPath(String path) {
+    return path == Constants.splashRoute ||
+        path == Constants.loginRoute ||
+        path == Constants.registerRoute ||
+        path == Constants.checkEmailRoute ||
+        path == Constants.forgotPasswordRoute ||
+        path == Constants.resetPasswordRoute ||
+        path == Constants.authResetPasswordRoute ||
+        path == Constants.verifyEmailRoute ||
+        path == Constants.verifyEmailAliasRoute;
+  }
+
+  String? _buildSplashRedirect(GoRouterState state) {
+    final currentLocation = state.uri.toString();
+    if (state.uri.path == Constants.splashRoute) {
+      return null;
+    }
+
+    return Uri(
+      path: Constants.splashRoute,
+      queryParameters: {'from': currentLocation},
+    ).toString();
+  }
+
   late final GoRouter router = GoRouter(
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
     debugLogDiagnostics: true,
-    initialLocation: '/',
+    initialLocation: Constants.splashRoute,
+    redirect: (context, state) {
+      final path = state.uri.path;
+
+      // While auth is being restored, keep users on the splash screen
+      // instead of letting protected route guards send them to /login.
+      if (_isAuthCheckPending() && !_isPublicPath(path)) {
+        return _buildSplashRedirect(state);
+      }
+
+      return null;
+    },
     // Using modern GoRouter configuration
     routes: [
       GoRoute(
-        path: '/',
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (isAuthenticated) {
-            return '/home';
-          } else {
-            return '/login';
-          }
-        },
+        path: Constants.splashRoute,
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const SplashScreen()),
       ),
       GoRoute(
-        path: '/login',
+        path: Constants.loginRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const LoginScreen()),
       ),
       GoRoute(
-        path: '/register',
+        path: Constants.registerRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const RegisterScreen()),
       ),
       GoRoute(
-        path: '/forgot-password',
+        path: Constants.checkEmailRoute,
+        pageBuilder: (context, state) {
+          final email = state.uri.queryParameters['email'];
+          return MaterialPage(
+            key: state.pageKey,
+            child: CheckEmailScreen(email: email),
+          );
+        },
+      ),
+      GoRoute(
+        path: Constants.forgotPasswordRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ForgotPasswordScreen(),
         ),
       ),
       GoRoute(
-        path: '/reset-password',
+        path: Constants.resetPasswordRoute,
+        pageBuilder: (context, state) {
+          final token = state.uri.queryParameters['token'] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: ResetPasswordScreen(token: token),
+          );
+        },
+      ),
+      // Same screen as /reset-password — backend/email links often use /auth/...
+      GoRoute(
+        path: Constants.authResetPasswordRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
           return MaterialPage(
@@ -157,7 +220,17 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/auth/verify-email',
+        path: Constants.verifyEmailRoute,
+        pageBuilder: (context, state) {
+          final token = state.uri.queryParameters['token'] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: VerifyEmailScreen(token: token),
+          );
+        },
+      ),
+      GoRoute(
+        path: Constants.verifyEmailAliasRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
           return MaterialPage(
@@ -173,7 +246,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -185,7 +258,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -203,7 +276,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -220,7 +293,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -240,7 +313,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -262,7 +335,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -284,12 +357,12 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.loginRoute;
           }
 
           return null;
@@ -306,7 +379,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -328,7 +401,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -350,7 +423,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -372,7 +445,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -394,7 +467,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -416,7 +489,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -438,10 +511,88 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
+          if (user?.role != 'ADMIN') {
+            return '/home';
+          }
+
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/admin/validation-rules/help',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const ValidationRulesHelpScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          final user = authCubit.state.user;
+
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+
+          if (user?.role != 'ADMIN') {
+            return '/home';
+          }
+
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/admin/validation-rules/new/:ruleId',
+        pageBuilder: (context, state) {
+          final ruleId = state.pathParameters['ruleId'] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: RuleEditorRouteScreen(
+              ruleId: ruleId,
+              isPredefined: false,
+              isNew: true,
+            ),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          final user = authCubit.state.user;
+
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+
+          if (user?.role != 'ADMIN') {
+            return '/home';
+          }
+
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/admin/validation-rules/:ruleId/edit',
+        pageBuilder: (context, state) {
+          final ruleId = state.pathParameters['ruleId'] ?? '';
+          final isPredefined =
+              state.uri.queryParameters['predefined'] == 'true';
+          return MaterialPage(
+            key: state.pageKey,
+            child: RuleEditorRouteScreen(
+              ruleId: ruleId,
+              isPredefined: isPredefined,
+            ),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          final user = authCubit.state.user;
+
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+
           if (user?.role != 'ADMIN') {
             return '/home';
           }
@@ -460,7 +611,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -482,7 +633,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -505,7 +656,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -527,7 +678,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -549,7 +700,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -571,7 +722,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -594,7 +745,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -619,7 +770,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -644,7 +795,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -669,7 +820,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -691,7 +842,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -714,7 +865,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -740,7 +891,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -763,7 +914,7 @@ class AppRouter {
           final user = authCubit.state.user;
 
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
 
           // Check if user has admin role
@@ -782,7 +933,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -796,7 +947,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -813,7 +964,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -830,7 +981,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -843,7 +994,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -857,7 +1008,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -874,7 +1025,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -891,7 +1042,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -906,7 +1057,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -920,7 +1071,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -943,7 +1094,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -960,7 +1111,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -976,7 +1127,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -990,7 +1141,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1007,7 +1158,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1024,7 +1175,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1042,7 +1193,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1057,7 +1208,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1072,7 +1223,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1086,7 +1237,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1100,7 +1251,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1114,7 +1265,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1128,7 +1279,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1144,7 +1295,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1160,7 +1311,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1176,7 +1327,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1192,7 +1343,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1206,7 +1357,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1220,7 +1371,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1234,7 +1385,21 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/epcis/transaction-events/help',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const TransactionEventsHelpScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1248,7 +1413,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1271,7 +1436,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1315,7 +1480,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1334,7 +1499,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1353,7 +1518,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1368,7 +1533,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1382,7 +1547,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1401,7 +1566,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1426,7 +1591,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1442,7 +1607,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1456,7 +1621,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1473,7 +1638,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1489,7 +1654,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1503,7 +1668,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1520,7 +1685,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1536,7 +1701,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1550,7 +1715,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1567,7 +1732,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1583,7 +1748,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1597,7 +1762,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1614,7 +1779,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1630,7 +1795,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1644,7 +1809,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1661,7 +1826,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1675,7 +1840,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1694,7 +1859,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1709,7 +1874,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },
@@ -1729,7 +1894,7 @@ class AppRouter {
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
-            return '/login';
+            return Constants.loginRoute;
           }
           return null;
         },

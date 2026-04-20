@@ -23,6 +23,9 @@ class ValidatedFormField extends StatefulWidget {
   /// Initial validation state
   final bool initiallyValidated;
 
+  /// Whether to animate validation state changes
+  final bool animate;
+
   /// Constructor
   const ValidatedFormField({
     Key? key,
@@ -33,6 +36,7 @@ class ValidatedFormField extends StatefulWidget {
     this.validateOnChange = true,
     this.validateOnBlur = true,
     this.initiallyValidated = false,
+    this.animate = true,
   }) : super(key: key);
 
   @override
@@ -106,6 +110,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField> {
             wasValidated: _wasValidated,
             errorMessage: _errorMessage,
             helpText: widget.helpText,
+            animate: widget.animate,
           ),
         ),
       ],

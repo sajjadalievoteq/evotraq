@@ -43,15 +43,18 @@ class BarcodeScannerView extends StatefulWidget {
   State<BarcodeScannerView> createState() => _BarcodeScannerViewState();
 }
 
-class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBindingObserver {
+class _BarcodeScannerViewState extends State<BarcodeScannerView>
+    with WidgetsBindingObserver {
   CameraController? _cameraController;
-  final BarcodeScanner _barcodeScanner = BarcodeScanner(formats: [BarcodeFormat.all]);
+  final BarcodeScanner _barcodeScanner = BarcodeScanner(
+    formats: [BarcodeFormat.all],
+  );
   final BarcodeScannerService _scannerService = BarcodeScannerService();
   final BarcodeToEPCISMapper _epcisMapper = BarcodeToEPCISMapper();
   final WiredScannerService _wiredScannerService = WiredScannerService();
   final TextEditingController _manualInputController = TextEditingController();
   final FocusNode _keyboardFocusNode = FocusNode();
-    bool _isCameraInitialized = false;
+  bool _isCameraInitialized = false;
   bool _isProcessing = false;
   bool _isPermissionDenied = false;
   bool _showFlashIcon = false;
@@ -59,7 +62,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
   bool _useWiredScanner = false;
   String _manualBarcodeBuffer = '';
   DateTime? _lastKeyPressTime;
-  
+
   // Store GS1 component data
   Map<String, String> _gs1Components = {
     'GTIN (01)': '-',
@@ -68,13 +71,14 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
     'Expiry Date (17)': '-',
     'Production Date (11)': '-',
   };
-  
-  static const int _wiredScannerDelayMs = 30; // Typical delay between keystrokes from scanner
-    @override
+
+  static const int _wiredScannerDelayMs =
+      30; // Typical delay between keystrokes from scanner
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Setup focus node for keyboard/wired scanner input
     _keyboardFocusNode.addListener(() {
       if (_keyboardFocusNode.hasFocus) {
@@ -82,10 +86,10 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         _manualBarcodeBuffer = '';
       }
     });
-    
+
     // Initialize wired scanner service if configs are provided
     _initWiredScannerService();
-    
+
     // Attempt to initialize camera but fallback to wired scanner on error
     _initializeCamera().catchError((error) {
       debugPrint('Camera initialization error: $error');
@@ -96,15 +100,10 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       });
     });
   }
-  
+
   // Initialize wired scanner service with config and token manager
   void _initWiredScannerService() {
-    if (widget.appConfig != null && widget.tokenManager != null) {
-      _wiredScannerService.initApiService(
-        widget.appConfig!,
-        widget.tokenManager!,
-      );
-    }
+    _wiredScannerService.initApiService();
   }
 
   @override
@@ -120,7 +119,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = _cameraController;
-    
+
     // App state changed before camera controller is initialized
     if (cameraController == null || !cameraController.value.isInitialized) {
       return;
@@ -131,7 +130,9 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
     } else if (state == AppLifecycleState.resumed) {
       _initializeCamera();
     }
-  }  Future<void> _initializeCamera() async {
+  }
+
+  Future<void> _initializeCamera() async {
     // First check if the device has a camera
     try {
       final cameras = await availableCameras();
@@ -142,34 +143,34 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       debugPrint('Error checking cameras: $e');
       throw Exception('Failed to access device cameras: $e');
     }
-    
+
     // Request camera permissions
     final status = await Permission.camera.request();
-    
+
     if (status.isDenied) {
       setState(() {
         _isPermissionDenied = true;
       });
       return;
     }
-    
+
     setState(() {
       _isPermissionDenied = false;
     });
-    
+
     try {
       final cameras = await availableCameras();
-      
+
       if (cameras.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No camera found on the device')),
         );
         return;
       }
-      
+
       // Prefer back camera for barcode scanning
       CameraDescription? selectedCamera;
-      
+
       try {
         // First try to find a back camera
         selectedCamera = cameras.firstWhere(
@@ -189,14 +190,14 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
           selectedCamera = cameras.first;
           debugPrint('Using first available camera: ${selectedCamera.name}');
         }
-      }        // Create and initialize the camera controller with safer settings
+      } // Create and initialize the camera controller with safer settings
       _cameraController = CameraController(
         selectedCamera,
         ResolutionPreset.low, // Use low resolution for more stable operation
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.yuv420,
       );
-      
+
       debugPrint('Initializing camera controller...');
       try {
         await _cameraController!.initialize();
@@ -205,7 +206,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         debugPrint('Camera initialization failed: $e');
         throw Exception('Failed to initialize camera: $e');
       }
-      
+
       // Check if flash is available (use torch mode for checking)
       try {
         await _cameraController!.setFlashMode(FlashMode.torch);
@@ -215,15 +216,16 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         _showFlashIcon = false;
         debugPrint('Flash not available: $e');
       }
-      
+
       if (mounted) {
         setState(() {
           _isCameraInitialized = true;
         });
       }
-      
+
       // Start image stream for barcode detection
-      _startBarcodeDetection();    } catch (e) {
+      _startBarcodeDetection();
+    } catch (e) {
       debugPrint('Camera initialization error: $e');
       // We'll show an error message if in camera mode, but not if we've already
       // switched to wired scanner mode in the initState error handler
@@ -251,28 +253,29 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
   void _startBarcodeDetection() {
     _cameraController?.startImageStream((CameraImage image) {
       if (_isProcessing) return;
-      
+
       _isProcessing = true;
-      
-      _scannerService.processImage(
-        image, 
-        _cameraController!.description, 
-        _barcodeScanner
-      ).then((barcodes) {
-        if (barcodes.isNotEmpty && mounted) {
-          // Stop processing
-          _cameraController?.stopImageStream();
-          
-          // Process the detected barcode
-          _processDetectedBarcode(barcodes.first);
-        }
-      }).catchError((error) {
-        debugPrint('Barcode processing error: $error');
-      }).whenComplete(() {
-        _isProcessing = false;
-      });
+
+      _scannerService
+          .processImage(image, _cameraController!.description, _barcodeScanner)
+          .then((barcodes) {
+            if (barcodes.isNotEmpty && mounted) {
+              // Stop processing
+              _cameraController?.stopImageStream();
+
+              // Process the detected barcode
+              _processDetectedBarcode(barcodes.first);
+            }
+          })
+          .catchError((error) {
+            debugPrint('Barcode processing error: $error');
+          })
+          .whenComplete(() {
+            _isProcessing = false;
+          });
     });
   }
+
   Future<void> _processDetectedBarcode(Barcode barcode) async {
     final barcodeValue = barcode.rawValue;
     if (barcodeValue == null || barcodeValue.isEmpty) {
@@ -289,44 +292,55 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       widget.readPoint,
       widget.bizLocation,
     );
-    
+
     if (epcisEvent != null) {
       // Parse GS1 data if it's available in the event
-      if (epcisEvent.bizData != null && epcisEvent.bizData!.containsKey('gs1Data')) {
+      if (epcisEvent.bizData != null &&
+          epcisEvent.bizData!.containsKey('gs1Data')) {
         try {
           // The gs1Data is stored as a string in the bizData, parse it back to a map
           final gs1DataStr = epcisEvent.bizData!['gs1Data'].toString();
-          
+
           // Update GS1 components in state
           setState(() {
             if (gs1DataStr.contains('GTIN')) {
               _gs1Components['GTIN (01)'] = _extractValue(gs1DataStr, 'GTIN');
             }
-            
+
             if (gs1DataStr.contains('serialNumber')) {
-              _gs1Components['Serial Number (21)'] = _extractValue(gs1DataStr, 'serialNumber');
+              _gs1Components['Serial Number (21)'] = _extractValue(
+                gs1DataStr,
+                'serialNumber',
+              );
             }
-            
-            if (gs1DataStr.contains('batchNumber') || gs1DataStr.contains('lotNumber')) {
-              _gs1Components['Batch/Lot (10)'] = 
-                  _extractValue(gs1DataStr, 'batchNumber').isNotEmpty 
-                      ? _extractValue(gs1DataStr, 'batchNumber') 
-                      : _extractValue(gs1DataStr, 'lotNumber');
+
+            if (gs1DataStr.contains('batchNumber') ||
+                gs1DataStr.contains('lotNumber')) {
+              _gs1Components['Batch/Lot (10)'] =
+                  _extractValue(gs1DataStr, 'batchNumber').isNotEmpty
+                  ? _extractValue(gs1DataStr, 'batchNumber')
+                  : _extractValue(gs1DataStr, 'lotNumber');
             }
-            
+
             if (gs1DataStr.contains('expiryDate')) {
-              _gs1Components['Expiry Date (17)'] = _extractValue(gs1DataStr, 'expiryDate');
+              _gs1Components['Expiry Date (17)'] = _extractValue(
+                gs1DataStr,
+                'expiryDate',
+              );
             }
-            
+
             if (gs1DataStr.contains('productionDate')) {
-              _gs1Components['Production Date (11)'] = _extractValue(gs1DataStr, 'productionDate');
+              _gs1Components['Production Date (11)'] = _extractValue(
+                gs1DataStr,
+                'productionDate',
+              );
             }
           });
         } catch (e) {
           debugPrint('Error parsing GS1 data: $e');
         }
       }
-      
+
       widget.onScanComplete(epcisEvent);
     } else {
       // Show error and resume scanning
@@ -340,12 +354,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         _startBarcodeDetection();
       }
     }
-  }  // Process barcode input from wired scanner
+  } // Process barcode input from wired scanner
+
   void _processWiredScannerInput(String barcode) async {
     if (barcode.isEmpty) return;
-    
+
     debugPrint('Wired scanner barcode: $barcode');
-    
+
     try {
       // Use the dedicated wired scanner service
       final epcisEvent = await _wiredScannerService.processWiredScannerInput(
@@ -354,17 +369,16 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         widget.disposition,
         widget.readPoint,
         widget.bizLocation,
-        appConfig: widget.appConfig,
-        tokenManager: widget.tokenManager,
       );
-      
+
       // Parse GS1 data if it's available in the event
-      if (epcisEvent.bizData != null && epcisEvent.bizData!.containsKey('gs1Data')) {
+      if (epcisEvent.bizData != null &&
+          epcisEvent.bizData!.containsKey('gs1Data')) {
         try {
           // The gs1Data is stored as a string in the bizData, parse it back to a map
           final gs1DataStr = epcisEvent.bizData!['gs1Data'].toString();
           debugPrint('GS1 Data from wired scanner: $gs1DataStr');
-          
+
           // Update all GS1 components in a single setState call
           setState(() {
             // Check if this is a response from parse-gs1 endpoint
@@ -378,16 +392,20 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
                     _gs1Components['GTIN (01)'] = parsedData['01'].toString();
                   }
                   if (parsedData.containsKey('21')) {
-                    _gs1Components['Serial Number (21)'] = parsedData['21'].toString();
+                    _gs1Components['Serial Number (21)'] = parsedData['21']
+                        .toString();
                   }
                   if (parsedData.containsKey('10')) {
-                    _gs1Components['Batch/Lot (10)'] = parsedData['10'].toString();
+                    _gs1Components['Batch/Lot (10)'] = parsedData['10']
+                        .toString();
                   }
                   if (parsedData.containsKey('17')) {
-                    _gs1Components['Expiry Date (17)'] = parsedData['17'].toString();
+                    _gs1Components['Expiry Date (17)'] = parsedData['17']
+                        .toString();
                   }
                   if (parsedData.containsKey('11')) {
-                    _gs1Components['Production Date (11)'] = parsedData['11'].toString();
+                    _gs1Components['Production Date (11)'] = parsedData['11']
+                        .toString();
                   }
                 }
               } catch (jsonError) {
@@ -406,48 +424,58 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       } else {
         debugPrint('No GS1 data found in event bizData: ${epcisEvent.bizData}');
       }
-      
+
       widget.onScanComplete(epcisEvent);
     } catch (e) {
       debugPrint('Error processing wired scanner input: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing barcode: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error processing barcode: $e')));
       }
     }
-    
+
     // Clear buffer after processing
     _manualBarcodeBuffer = '';
   }
-  
+
   // Helper method to extract GS1 data from a string
   void _extractGS1DataFromString(String gs1DataStr) {
     // Extract GTIN, Serial Number, Batch/Lot, etc.
     if (gs1DataStr.contains('GTIN')) {
       _gs1Components['GTIN (01)'] = _extractValue(gs1DataStr, 'GTIN');
     }
-    
+
     if (gs1DataStr.contains('serialNumber')) {
-      _gs1Components['Serial Number (21)'] = _extractValue(gs1DataStr, 'serialNumber');
+      _gs1Components['Serial Number (21)'] = _extractValue(
+        gs1DataStr,
+        'serialNumber',
+      );
     }
-    
-    if (gs1DataStr.contains('batchNumber') || gs1DataStr.contains('lotNumber')) {
-      _gs1Components['Batch/Lot (10)'] = 
-          _extractValue(gs1DataStr, 'batchNumber').isNotEmpty 
-              ? _extractValue(gs1DataStr, 'batchNumber') 
-              : _extractValue(gs1DataStr, 'lotNumber');
+
+    if (gs1DataStr.contains('batchNumber') ||
+        gs1DataStr.contains('lotNumber')) {
+      _gs1Components['Batch/Lot (10)'] =
+          _extractValue(gs1DataStr, 'batchNumber').isNotEmpty
+          ? _extractValue(gs1DataStr, 'batchNumber')
+          : _extractValue(gs1DataStr, 'lotNumber');
     }
-    
+
     if (gs1DataStr.contains('expiryDate')) {
-      _gs1Components['Expiry Date (17)'] = _extractValue(gs1DataStr, 'expiryDate');
+      _gs1Components['Expiry Date (17)'] = _extractValue(
+        gs1DataStr,
+        'expiryDate',
+      );
     }
-    
+
     if (gs1DataStr.contains('productionDate')) {
-      _gs1Components['Production Date (11)'] = _extractValue(gs1DataStr, 'productionDate');
+      _gs1Components['Production Date (11)'] = _extractValue(
+        gs1DataStr,
+        'productionDate',
+      );
     }
   }
-  
+
   // Helper method to build a GS1 component row
   Widget _buildGS1Component(String label, String value) {
     return Padding(
@@ -456,18 +484,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         children: [
           Text(
             '$label:',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               _gs1Components[label] ?? value,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontSize: 16),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -475,6 +498,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       ),
     );
   }
+
   Future<void> _toggleFlash() async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
@@ -492,16 +516,17 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       });
     } catch (e) {
       debugPrint('Failed to toggle flash: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to toggle flash')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to toggle flash')));
     }
   }
-    // Toggle between camera and wired scanner modes
+
+  // Toggle between camera and wired scanner modes
   void _toggleScannerMode() {
     setState(() {
       _useWiredScanner = !_useWiredScanner;
-      
+
       // Reset GS1 components when switching modes
       _gs1Components = {
         'GTIN (01)': '-',
@@ -510,7 +535,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         'Expiry Date (17)': '-',
         'Production Date (11)': '-',
       };
-      
+
       if (_useWiredScanner) {
         // Stop camera processing when switching to wired scanner
         _cameraController?.stopImageStream();
@@ -522,6 +547,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     if (_isPermissionDenied) {
@@ -535,17 +561,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
 
     // Show loading indicator while camera initializes
     if (!_isCameraInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: LoadingIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: LoadingIndicator()));
     }
 
     // Camera is ready, show camera UI
     return _buildCameraScaffold();
   }
-  
+
   // Build scaffold with wired scanner UI
   Widget _buildWiredScannerScaffold() {
     return Scaffold(
@@ -557,16 +579,11 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
             _handleKeyEvent(event);
           }
         },
-        child: Stack(
-          children: [
-            _buildWiredScannerUI(),
-            _buildTopBar(),
-          ],
-        ),
+        child: Stack(children: [_buildWiredScannerUI(), _buildTopBar()]),
       ),
     );
   }
-  
+
   // Build scaffold with camera UI
   Widget _buildCameraScaffold() {
     return Scaffold(
@@ -578,16 +595,11 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
             _handleKeyEvent(event);
           }
         },
-        child: Stack(
-          children: [
-            _buildCameraUI(),
-            _buildTopBar(),
-          ],
-        ),
+        child: Stack(children: [_buildCameraUI(), _buildTopBar()]),
       ),
     );
   }
-  
+
   // Build the top bar with controls
   Widget _buildTopBar() {
     return SafeArea(
@@ -617,7 +629,9 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
                       color: Colors.white,
                     ),
                     onPressed: _toggleScannerMode,
-                    tooltip: _useWiredScanner ? 'Switch to Camera' : 'Switch to Wired Scanner',
+                    tooltip: _useWiredScanner
+                        ? 'Switch to Camera'
+                        : 'Switch to Wired Scanner',
                   ),
                   // Flash toggle (only show when camera is active and flash is available)
                   if (!_useWiredScanner && _showFlashIcon)
@@ -636,13 +650,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       ),
     );
   }
-  
+
   // Handle key events from the wired scanner
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is! RawKeyDownEvent) return;
-    
+
     // Check if we received a newline or carriage return (end of barcode)
-    if (event.logicalKey == LogicalKeyboardKey.enter || 
+    if (event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       // Process the complete barcode
       if (_manualBarcodeBuffer.isNotEmpty) {
@@ -650,27 +664,29 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       }
       return;
     }
-    
+
     // Get the character from the key event
     String? character = event.character;
-    
+
     // Skip modifier keys and special keys
-    if (character == null || 
-        event.isControlPressed || 
-        event.isAltPressed || 
+    if (character == null ||
+        event.isControlPressed ||
+        event.isAltPressed ||
         event.isMetaPressed) {
       return;
     }
-    
+
     // Honeywell scanners send keystrokes very quickly
     // We can use this to distinguish scanner input from manual typing
     final currentTime = DateTime.now();
-    final isLikelyScanner = _lastKeyPressTime != null && 
-                           currentTime.difference(_lastKeyPressTime!).inMilliseconds < _wiredScannerDelayMs;
-    
+    final isLikelyScanner =
+        _lastKeyPressTime != null &&
+        currentTime.difference(_lastKeyPressTime!).inMilliseconds <
+            _wiredScannerDelayMs;
+
     // Update last key press time
     _lastKeyPressTime = currentTime;
-    
+
     // If previous inputs were from a scanner or buffer is empty, treat this as scanner input
     if (isLikelyScanner || _manualBarcodeBuffer.isEmpty) {
       setState(() {
@@ -683,16 +699,17 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       });
     }
   }
-    // Build the UI for the camera scanner
+
+  // Build the UI for the camera scanner
   Widget _buildCameraUI() {
     return Stack(
       children: [
         // Camera preview
         CameraPreview(_cameraController!),
-        
+
         // Scanning overlay
         const ScannerOverlay(),
-        
+
         // Instructions
         SafeArea(
           child: Align(
@@ -727,7 +744,9 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
                           for (var entry in _gs1Components.entries)
                             if (entry.value != '-')
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 2,
+                                ),
                                 child: Row(
                                   children: [
                                     Text(
@@ -749,13 +768,10 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
                         ],
                       ),
                     ),
-                  
+
                   const Text(
                     'Point the camera at a GS1 barcode',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -766,7 +782,8 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
       ],
     );
   }
-    // Build the UI for the wired scanner
+
+  // Build the UI for the wired scanner
   Widget _buildWiredScannerUI() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -776,16 +793,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
         children: [
           const Icon(
             Icons.qr_code_scanner,
-            size: 80,  // Smaller icon to make more room for GS1 data
+            size: 80, // Smaller icon to make more room for GS1 data
             color: Colors.blue,
           ),
           const SizedBox(height: 16),
           const Text(
             'Wired Scanner Mode',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -805,18 +819,14 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
               children: [
                 Text(
                   'Raw Data:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _manualBarcodeBuffer.isEmpty ? 'Waiting for scan...' : _manualBarcodeBuffer,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Courier',
-                  ),
+                  _manualBarcodeBuffer.isEmpty
+                      ? 'Waiting for scan...'
+                      : _manualBarcodeBuffer,
+                  style: const TextStyle(fontSize: 16, fontFamily: 'Courier'),
                 ),
               ],
             ),
@@ -847,12 +857,28 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,                        children: [
-                          _buildGS1Component('GTIN (01)', _gs1Components['GTIN (01)'] ?? '-'),
-                          _buildGS1Component('Serial Number (21)', _gs1Components['Serial Number (21)'] ?? '-'),
-                          _buildGS1Component('Batch/Lot (10)', _gs1Components['Batch/Lot (10)'] ?? '-'),
-                          _buildGS1Component('Expiry Date (17)', _gs1Components['Expiry Date (17)'] ?? '-'),
-                          _buildGS1Component('Production Date (11)', _gs1Components['Production Date (11)'] ?? '-'),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildGS1Component(
+                            'GTIN (01)',
+                            _gs1Components['GTIN (01)'] ?? '-',
+                          ),
+                          _buildGS1Component(
+                            'Serial Number (21)',
+                            _gs1Components['Serial Number (21)'] ?? '-',
+                          ),
+                          _buildGS1Component(
+                            'Batch/Lot (10)',
+                            _gs1Components['Batch/Lot (10)'] ?? '-',
+                          ),
+                          _buildGS1Component(
+                            'Expiry Date (17)',
+                            _gs1Components['Expiry Date (17)'] ?? '-',
+                          ),
+                          _buildGS1Component(
+                            'Production Date (11)',
+                            _gs1Components['Production Date (11)'] ?? '-',
+                          ),
                         ],
                       ),
                     ),
@@ -864,16 +890,13 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
           const SizedBox(height: 12),
           const Text(
             'Note: Ensure the scanner is properly connected to your device',
-            style: TextStyle(
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
+            style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildPermissionDenied() {
     return Scaffold(
       drawer: const AppDrawer(),
@@ -914,7 +937,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
           if (data.containsKey('parsed')) {
             // Find matching AI based on the key name
             final Map<String, dynamic> parsed = data['parsed'];
-            
+
             // Map common field names to AI numbers
             final Map<String, String> keyToAI = {
               'GTIN': '01',
@@ -924,34 +947,37 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> with WidgetsBin
               'expiryDate': '17',
               'productionDate': '11',
             };
-            
+
             final String? ai = keyToAI[key];
             if (ai != null && parsed.containsKey(ai)) {
               return parsed[ai].toString();
             }
           }
-          
+
           // Standard field-based format
           if (data.containsKey(key)) {
             return data[key].toString();
           }
-          
+
           // No value found for the key
           return '';
-        } catch(e) {
+        } catch (e) {
           // Failed to parse as JSON, fall through to string parsing
           debugPrint('Failed to parse GS1 data as JSON: $e');
         }
       }
-      
+
       // String extraction using regex pattern
-      final RegExp pattern = RegExp('$key["\']?\\s*[:=]\\s*["\']?([^,"\'\\}\\]]+)', caseSensitive: false);
+      final RegExp pattern = RegExp(
+        '$key["\']?\\s*[:=]\\s*["\']?([^,"\'\\}\\]]+)',
+        caseSensitive: false,
+      );
       final match = pattern.firstMatch(dataStr);
-      
+
       if (match != null && match.groupCount >= 1) {
         return match.group(1)?.trim() ?? '';
       }
-      
+
       return '';
     } catch (e) {
       debugPrint('Error extracting $key from GS1 data: $e');

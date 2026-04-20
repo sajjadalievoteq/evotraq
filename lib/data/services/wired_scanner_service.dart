@@ -6,16 +6,13 @@ import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/data/services/barcode_api_service.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:http/http.dart' as http;
 
 class WiredScannerService {
   final Uuid _uuid = Uuid();
   BarcodeApiService? _barcodeApiService;
   
   // Initialize API service if needed
-  void initApiService(AppConfig appConfig, TokenManager tokenManager) {
+  void initApiService() {
     _barcodeApiService ??= BarcodeApiService(
      dioService: getIt<DioService>(),
     );
@@ -27,12 +24,8 @@ class WiredScannerService {
     String disposition,
     String readPointStr,
     String bizLocationStr,
-    {AppConfig? appConfig, TokenManager? tokenManager}
   ) async {
-    // Initialize API service if provided configs
-    if (appConfig != null && tokenManager != null) {
-      initApiService(appConfig, tokenManager);
-    }
+    initApiService();
 
     // Use the simple factory constructor for GLN to handle locations
     final readPoint = GLN.fromCode(readPointStr);

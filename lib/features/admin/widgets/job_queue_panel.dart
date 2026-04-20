@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/web/web_download_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart' as web_download;
 import '../../../core/network/token_manager.dart';
@@ -24,6 +26,13 @@ class JobQueuePanel extends StatefulWidget {
 }
 
 class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMixin {
+  DioService get _dio => getIt<DioService>();
+
+  dynamic _decodeBody(dynamic data) {
+    if (data is String) return json.decode(data);
+    return data;
+  }
+
   late TabController _tabController;
   late Timer _refreshTimer;
   
@@ -110,14 +119,14 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadDashboardData() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/jobs/dashboard'),
+      final response = await _dio.get(
+        '/jobs/dashboard',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _dashboardData = json.decode(response.body);
+          _dashboardData = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -127,14 +136,15 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadActiveJobs() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/jobs/active'),
+      final response = await _dio.get(
+        '/jobs/active',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _activeJobs = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _activeJobs =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -144,19 +154,21 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadQueuedJobs() async {
     try {
-      String url = '${widget.baseUrl}/jobs/queue?limit=100';
+      final qp = <String, dynamic>{'limit': 100};
       if (_selectedStatus != 'ALL') {
-        url += '&status=$_selectedStatus';
+        qp['status'] = _selectedStatus;
       }
 
-      final response = await http.get(
-        Uri.parse(url),
+      final response = await _dio.get(
+        '/jobs/queue',
+        queryParameters: qp,
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _queuedJobs = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _queuedJobs =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -166,19 +178,21 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadJobHistory() async {
     try {
-      String url = '${widget.baseUrl}/jobs/history?limit=100';
+      final qp = <String, dynamic>{'limit': 100};
       if (_selectedJobType != 'ALL') {
-        url += '&jobType=$_selectedJobType';
+        qp['jobType'] = _selectedJobType;
       }
 
-      final response = await http.get(
-        Uri.parse(url),
+      final response = await _dio.get(
+        '/jobs/history',
+        queryParameters: qp,
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _jobHistory = List<Map<String, dynamic>>.from(json.decode(response.body));
+          _jobHistory =
+              List<Map<String, dynamic>>.from(_decodeBody(response.data));
         });
       }
     } catch (e) {
@@ -188,14 +202,14 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadWorkerPoolStats() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/jobs/worker-pool/stats'),
+      final response = await _dio.get(
+        '/jobs/worker-pool/stats',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _workerPoolStats = json.decode(response.body);
+          _workerPoolStats = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -205,14 +219,14 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _loadQueueHealth() async {
     try {
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/jobs/health'),
+      final response = await _dio.get(
+        '/jobs/health',
         headers: await _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _queueHealth = json.decode(response.body);
+          _queueHealth = _decodeBody(response.data);
         });
       }
     } catch (e) {
@@ -1316,8 +1330,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _cancelJob(String jobId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('${widget.baseUrl}/jobs/$jobId'),
+      final response = await _dio.delete(
+        '/jobs/$jobId',
         headers: await _getHeaders(),
       );
 
@@ -1336,8 +1350,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _retryJob(String jobId) async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/jobs/$jobId/retry'),
+      final response = await _dio.post(
+        '/jobs/$jobId/retry',
         headers: await _getHeaders(),
       );
 
@@ -1466,8 +1480,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _pauseProcessing() async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/jobs/pause'),
+      final response = await _dio.post(
+        '/jobs/pause',
         headers: await _getHeaders(),
       );
 
@@ -1486,8 +1500,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _resumeProcessing() async {
     try {
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/jobs/resume'),
+      final response = await _dio.post(
+        '/jobs/resume',
         headers: await _getHeaders(),
       );
 
@@ -2034,13 +2048,18 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       int priorityInt = int.tryParse(priority) ?? 5;
 
       final token = await widget.tokenManager.getToken();
-      final response = await http.post(
-        Uri.parse('${widget.baseUrl}/jobs/submit?jobType=$jobType&priority=$priorityInt'),
+      final response = await _dio.post(
+        '/jobs/submit',
+        queryParameters: {
+          'jobType': jobType,
+          'priority': priorityInt,
+        },
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${token ?? ''}',
         },
-        body: json.encode(jobPayload),
+        data: json.encode(jobPayload),
+        acceptAllStatusCodes: true,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -2350,11 +2369,13 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       final token = await widget.tokenManager.getToken();
-      final response = await http.get(
-        Uri.parse('${widget.baseUrl}/jobs/$jobId/download'),
+      final response = await _dio.get(
+        '/jobs/$jobId/download',
         headers: {
           'Authorization': 'Bearer ${token ?? ''}',
         },
+        responseType: ResponseType.bytes,
+        acceptAllStatusCodes: true,
       );
 
       Navigator.of(context).pop(); // Close loading dialog
@@ -2362,16 +2383,22 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       if (response.statusCode == 200) {
         // Get filename from Content-Disposition header or use default
         String filename = 'export_data.csv';
-        final contentDisposition = response.headers['content-disposition'];
+        final cdHdr = response.headers['content-disposition'];
+        final contentDisposition =
+            cdHdr != null && cdHdr.isNotEmpty ? cdHdr.first : null;
         if (contentDisposition != null) {
-          final match = RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
+          final match =
+              RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
           if (match != null) {
             filename = match.group(1)!;
           }
         }
 
         // Create blob and download link (web-specific)
-        final bytes = response.bodyBytes ;
+        final raw = response.data;
+        final bytes = raw is Uint8List
+            ? raw
+            : Uint8List.fromList(List<int>.from(raw as List));
         web_download.downloadBytes(bytes: bytes, filename: filename);
 
         _showSuccessSnackBar('File downloaded successfully: $filename');

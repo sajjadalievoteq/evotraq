@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
@@ -8,7 +9,6 @@ import 'package:traqtrace_app/features/epcis/providers/validation_service_provid
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
 
-import 'package:traqtrace_app/features/epcis/screens/transaction_events_help_screen.dart';
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
@@ -361,11 +361,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
   /// Show help screen
   void _showHelpScreen(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const TransactionEventsHelpScreen(),
-      ),
-    );
+    context.push('/epcis/transaction-events/help');
   }
 
   @override
@@ -723,9 +719,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: state.loading
-                          ? null
-                          : _saveTransactionEvent,
+                      onPressed: state.loading ? null : _saveTransactionEvent,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(

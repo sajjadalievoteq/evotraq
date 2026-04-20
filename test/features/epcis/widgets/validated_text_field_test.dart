@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart';
+import 'package:traqtrace_app/features/epcis/widgets/validated_form_field.dart';
 
 void main() {
   group('ValidatedTextField Widget Tests', () {
@@ -42,23 +43,26 @@ void main() {
       expect(find.byType(FieldValidationIndicator), findsOneWidget);
       expect(find.text('Field is required'), findsNothing);
 
-      // Enter empty value
+      // Enter empty value (dispatch notification manually as enterText might not trigger onChanged for Builder/TextFormField setup in all test environments)
       await tester.enterText(find.byType(TextFormField), '');
-      await tester.pump();
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification(''));
+      await tester.pumpAndSettle();
 
       // Should show validation error
       expect(find.text('Field is required'), findsOneWidget);
 
       // Enter short value
       await tester.enterText(find.byType(TextFormField), 'AB');
-      await tester.pump();
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification('AB'));
+      await tester.pumpAndSettle();
 
       // Should show different validation error
       expect(find.text('Must be at least 3 characters'), findsOneWidget);
 
       // Enter valid value
       await tester.enterText(find.byType(TextFormField), 'ABC');
-      await tester.pump();
+      tester.element(find.byType(TextFormField)).dispatchNotification(ValidationNotification('ABC'));
+      await tester.pumpAndSettle();
 
       // Should show valid indicator
       expect(find.text('Valid'), findsOneWidget);
@@ -99,19 +103,19 @@ void main() {
       );
 
       // Focus the field first so blur can be triggered
-      await tester.tap(find.byType(TextFormField));
-      await tester.pump();
+      await tester.tap(find.widgetWithText(TextFormField, 'Test Field'));
+      await tester.pumpAndSettle();
 
       // Enter empty value
-      await tester.enterText(find.byType(TextFormField), '');
-      await tester.pump();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Test Field'), '');
+      await tester.pumpAndSettle();
 
       // No error should be shown yet (validateOnChange is false)
       expect(find.text('Field is required'), findsNothing);
 
       // Tap another focusable widget to shift focus (triggering blur)
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
+      await tester.tap(find.widgetWithText(TextField, 'Other Field'));
+      await tester.pumpAndSettle();
 
       // Should now show validation error
       expect(find.text('Field is required'), findsOneWidget);

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
-import 'package:traqtrace_app/core/theme/theme_provider.dart';
+import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/admin/cubit/admin_cubit.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -38,6 +37,7 @@ import 'package:traqtrace_app/features/notifications/presentation/cubit/notifica
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/shared/utils/app_screen_util.dart';
 // Dashboard imports
 
 // API Management imports
@@ -75,7 +75,7 @@ void main() async {
     final appConfig = AppConfig(
       apiBaseUrl: const String.fromEnvironment(
         'API_BASE_URL',
-        defaultValue: 'http://localhost:8081/api',
+        defaultValue: 'http://localhost:8080/api',
       ),
       appName: 'evotraq.io',
       appVersion: '1.0.0',
@@ -85,14 +85,6 @@ void main() async {
     // Initialize dependency injection
     await initDependencies(appConfig);
     debugPrint('Dependencies initialized.');
-
-    // Check auth status immediately
-    debugPrint('Checking auth status...');
-    try {
-      getIt<AuthCubit>().checkAuth();
-    } catch (e) {
-      debugPrint('Auth check failed: $e');
-    }
 
     // Initialize WebSocket with the base URL
     debugPrint('Initializing WebSocket...');
@@ -140,7 +132,7 @@ class TraqTraceApp extends StatelessWidget {
               TransformationEventsCubit(),
         ),
         BlocProvider<ValidationCubit>(
-          create: (context) => ValidationCubit(appConfig: getIt<AppConfig>()),
+          create: (context) => ValidationCubit(),
         ),
         BlocProvider<TransactionDocumentCubit>(
           create: (context) =>
@@ -243,6 +235,7 @@ class TraqTraceApp extends StatelessWidget {
               darkTheme: AppTheme.darkTheme(),
               themeMode: themeState.themeMode,
               routerConfig: getIt<AppRouter>().router,
+              builder: (context, child) => child ?? const SizedBox.shrink(),
             ),
           );
         },

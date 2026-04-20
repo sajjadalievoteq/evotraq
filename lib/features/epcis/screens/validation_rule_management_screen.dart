@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
-import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/validation_rules_help_screen.dart';
 import 'package:uuid/uuid.dart';
 
 /// A screen for managing validation rules
@@ -13,22 +12,24 @@ class ValidationRuleManagementScreen extends StatefulWidget {
   const ValidationRuleManagementScreen({Key? key}) : super(key: key);
 
   @override
-  State<ValidationRuleManagementScreen> createState() => _ValidationRuleManagementScreenState();
+  State<ValidationRuleManagementScreen> createState() =>
+      _ValidationRuleManagementScreenState();
 }
 
-class _ValidationRuleManagementScreenState extends State<ValidationRuleManagementScreen> {
+class _ValidationRuleManagementScreenState
+    extends State<ValidationRuleManagementScreen> {
   String _filter = '';
   String _selectedEventType = '';
   RuleSeverity? _selectedSeverity;
   bool _showOnlyCustomRules = false;
   bool _isFabOpen = false;
-  
+
   @override
   void initState() {
     super.initState();
     // No need to explicitly load rules, the provider does this in its constructor
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,15 +52,13 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
       body: Column(
         children: [
           _buildFilterBar(),
-          Expanded(
-            child: _buildRuleList(),
-          ),
+          Expanded(child: _buildRuleList()),
         ],
       ),
       floatingActionButton: _buildFloatingMenu(),
     );
   }
-  
+
   Widget _buildFilterBar() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -129,7 +128,9 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                   selected: _selectedEventType == 'TransformationEvent',
                   onSelected: (selected) {
                     setState(() {
-                      _selectedEventType = selected ? 'TransformationEvent' : '';
+                      _selectedEventType = selected
+                          ? 'TransformationEvent'
+                          : '';
                     });
                   },
                 ),
@@ -161,8 +162,8 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                   },
                 ),
                 const SizedBox(width: 8),
-                ...RuleSeverity.values.map((severity) => 
-                  Padding(
+                ...RuleSeverity.values.map(
+                  (severity) => Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: ChoiceChip(
                       label: Text(severity.displayName),
@@ -193,7 +194,7 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
       ),
     );
   }
-  
+
   Widget _buildFloatingMenu() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -281,7 +282,7 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
       ],
     );
   }
-  
+
   Widget _buildRuleList() {
     return BlocBuilder<ValidationRuleCubit, ValidationRuleState>(
       builder: (context, state) {
@@ -289,7 +290,7 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
         if (state.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (state.error != null) {
           return Center(
             child: Column(
@@ -308,56 +309,74 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
             ),
           );
         }
-        
+
         // Apply filters
         List<ValidationRule> filteredRules = state.validationRules;
-        
+
         // Custom rules filter
         if (_showOnlyCustomRules) {
-          final predefinedRuleIds =
-              cubit.getPredefinedRules().map((r) => r.id).toSet();
-          filteredRules = filteredRules.where((r) => !predefinedRuleIds.contains(r.id)).toList();
+          final predefinedRuleIds = cubit
+              .getPredefinedRules()
+              .map((r) => r.id)
+              .toSet();
+          filteredRules = filteredRules
+              .where((r) => !predefinedRuleIds.contains(r.id))
+              .toList();
         }
-        
+
         // Event type filter
         if (_selectedEventType.isNotEmpty) {
           if (_selectedEventType == 'Common') {
-            filteredRules = filteredRules.where((r) => r.eventType == null).toList();
+            filteredRules = filteredRules
+                .where((r) => r.eventType == null)
+                .toList();
           } else {
-            filteredRules = filteredRules.where((r) => r.eventType == _selectedEventType).toList();
+            filteredRules = filteredRules
+                .where((r) => r.eventType == _selectedEventType)
+                .toList();
           }
         }
-        
+
         // Severity filter
         if (_selectedSeverity != null) {
-          filteredRules = filteredRules.where((r) => r.severity == _selectedSeverity).toList();
+          filteredRules = filteredRules
+              .where((r) => r.severity == _selectedSeverity)
+              .toList();
         }
-        
+
         // Text search
         if (_filter.isNotEmpty) {
           final searchLower = _filter.toLowerCase();
-          filteredRules = filteredRules.where((r) =>
-            r.name.toLowerCase().contains(searchLower) ||
-            (r.description?.toLowerCase().contains(searchLower) ?? false) ||
-            (r.field?.toLowerCase().contains(searchLower) ?? false)
-          ).toList();
+          filteredRules = filteredRules
+              .where(
+                (r) =>
+                    r.name.toLowerCase().contains(searchLower) ||
+                    (r.description?.toLowerCase().contains(searchLower) ??
+                        false) ||
+                    (r.field?.toLowerCase().contains(searchLower) ?? false),
+              )
+              .toList();
         }
-        
+
         if (filteredRules.isEmpty) {
           return const Center(
             child: Text('No rules match the current filters'),
           );
         }
-        
+
         return ListView.builder(
           itemCount: filteredRules.length,
           itemBuilder: (context, index) {
             final rule = filteredRules[index];
-            final isPredefined =
-                cubit.getPredefinedRules().any((r) => r.id == rule.id);
-            
+            final isPredefined = cubit.getPredefinedRules().any(
+              (r) => r.id == rule.id,
+            );
+
             return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 4.0,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 side: BorderSide(
@@ -377,11 +396,16 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                         if (rule.eventType != null) ...[
                           Chip(
                             label: Text(
-                              rule.eventType!.toString().split('.').last.replaceAll('Event', ''),
+                              rule.eventType!
+                                  .toString()
+                                  .split('.')
+                                  .last
+                                  .replaceAll('Event', ''),
                               style: const TextStyle(fontSize: 12),
                             ),
                             padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                           const SizedBox(width: 8),
                         ],
@@ -392,7 +416,8 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                               style: const TextStyle(fontSize: 12),
                             ),
                             padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                         ],
                         const Spacer(),
@@ -411,7 +436,8 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
                           ),
                           backgroundColor: rule.severity.color.withOpacity(0.1),
                           padding: EdgeInsets.zero,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
                       ],
                     ),
@@ -432,38 +458,20 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
       },
     );
   }
-  
+
   void _editRule(ValidationRule rule, bool isPredefined) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => RuleEditorScreen(
-          rule: rule,
-          isPredefined: isPredefined,
-        ),
-      ),
+    context.push(
+      '/admin/validation-rules/${Uri.encodeComponent(rule.ruleId)}/edit'
+      '?predefined=$isPredefined',
     );
   }
-  
+
   void _addNewRule() {
-    // Create a new rule with a unique ID
-    final newRule = ValidationRule(
-      ruleId: 'custom_${const Uuid().v4()}',
-      name: '',
-      description: '',
-      severity: RuleSeverity.WARNING,
-    );
-    
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => RuleEditorScreen(
-          rule: newRule,
-          isPredefined: false,
-          isNew: true,
-        ),
-      ),
-    );
+    final ruleId = 'custom_${const Uuid().v4()}';
+
+    context.push('/admin/validation-rules/new/${Uri.encodeComponent(ruleId)}');
   }
-  
+
   void _confirmResetToDefaults() {
     showDialog(
       context: context,
@@ -488,15 +496,11 @@ class _ValidationRuleManagementScreenState extends State<ValidationRuleManagemen
       ),
     );
   }
-  
+
   void _showHelp() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const ValidationRulesHelpScreen(),
-      ),
-    );
+    context.push('/admin/validation-rules/help');
   }
-  
+
   void _importRules() {
     // TODO: Implement rule import functionality
     ScaffoldMessenger.of(context).showSnackBar(

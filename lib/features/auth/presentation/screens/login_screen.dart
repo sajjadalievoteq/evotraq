@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/models/auth_models.dart';
+import 'package:traqtrace_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -17,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  bool _hasRequiredInput = false;
 
   @override
   void dispose() {
@@ -29,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final loginRequest = LoginRequest(
-        username: _usernameController.text,
+        username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
 
@@ -37,20 +42,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _updateButtonState() {
+    final hasRequiredInput =
+        _usernameController.text.trim().isNotEmpty &&
+        _passwordController.text.isNotEmpty;
+    if (hasRequiredInput != _hasRequiredInput) {
+      setState(() {
+        _hasRequiredInput = hasRequiredInput;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final primary = ColorManager.primary(context);
+    final textPrimary = ColorManager.textPrimary(context);
+    final textSecondary = ColorManager.textSecondary(context);
+
     return Scaffold(
+      backgroundColor: ColorManager.background(context),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error ?? 'Authentication failed'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            context.showError(state.error ?? 'Authentication failed');
           } else if (state.status == AuthStatus.authenticated) {
-            // Explicitly navigate to home when authenticated
             context.go('/home');
           }
         },
@@ -60,79 +75,56 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
+                onChanged: _updateButtonState,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 48),
                     // Logo
-                    const Icon(
-                      Icons.track_changes_rounded,
-                      size: 80,
-                      color: AppTheme.primaryColor,
-                    ),
+                    Icon(Icons.track_changes_rounded, size: 80, color: primary),
                     const SizedBox(height: 24),
                     // App Name
-                    const Text(
+                    Text(
                       'evotraq.io',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
+                        color: primary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     // App Description
-                    const Text(
+                    Text(
                       'GS1-compliant track and trace system',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.textSecondaryLight,
-                      ),
+                      style: TextStyle(fontSize: 16, color: textSecondary),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-                    // Username Field
-                    TextFormField(
+                    // Username Or Email Field
+                    AuthInputField(
                       controller: _usernameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Username',
-                        prefixIcon: Icon(Icons.person),
-                      ),
+                      labelText: 'Username or Email',
+                      hintText: 'Enter username or email',
+                      helperText: 'Use your username or email to log in',
+                      type: AuthInputFieldType.username,
+                      enabled: state.status != AuthStatus.loading,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
+                        if ((value?.trim() ?? '').isEmpty) {
+                          return 'Username or email is required';
                         }
                         return null;
                       },
-                      enabled: state.status != AuthStatus.loading,
                     ),
                     const SizedBox(height: 16),
                     // Password Field
-                    TextFormField(
+                    AuthInputField(
                       controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                      obscureText: _obscurePassword,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
+                      labelText: 'Password',
+                      type: AuthInputFieldType.password,
                       enabled: state.status != AuthStatus.loading,
+                      textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submitForm(),
                     ),
                     const SizedBox(height: 8),
@@ -141,34 +133,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          context.push('/forgot-password');
+                          context.go(Constants.forgotPasswordRoute);
                         },
                         child: const Text('Forgot Password?'),
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Login Button
-                    SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: state.status == AuthStatus.loading ? null : _submitForm,
-                        child: state.status == AuthStatus.loading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('LOGIN', style: TextStyle(fontSize: 16)),
-                      ),
+                    AuthActionButton(
+                      label: 'LOGIN',
+                      isLoading: state.status == AuthStatus.loading,
+                      isEnabled:
+                          _hasRequiredInput &&
+                          state.status != AuthStatus.loading,
+                      onPressed: _submitForm,
                     ),
                     const SizedBox(height: 16),
                     // Register Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('Don\'t have an account?'),
-                        TextButton(
-                          onPressed: () {
-                            context.push('/register');
-                          },
-                          child: const Text('Register'),
+                        Text(
+                          'Don\'t have an account?',
+                          style: TextStyle(color: textPrimary),
                         ),
+                        TextButtonWidget(title: 'Register', onTap: () {
+              context.go(Constants.registerRoute);
+              },)
+
                       ],
                     ),
                   ],

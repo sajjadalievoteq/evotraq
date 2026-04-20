@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
-import 'package:traqtrace_app/core/theme/theme_provider.dart';
+import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
+
+import '../config/constants.dart';
 
 /// A reusable drawer component that can be used across all screens
 class AppDrawer extends StatelessWidget {
@@ -845,7 +847,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 onTap: () {
                   context.read<AuthCubit>().logout();
-                  context.go('/login');
+                  context.go(Constants.loginRoute);
                 },
               ),
             ],

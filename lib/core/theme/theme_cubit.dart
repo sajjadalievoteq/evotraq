@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
-import 'package:http/http.dart' as http;
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'dart:async';
 
 // Constants for storage keys
@@ -245,24 +246,22 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   /// Check API availability by sending a request to the server
   /// Returns true if the API is reachable, false otherwise
-  static Future<bool> checkApiAvailability(String apiBaseUrl) async {
+  static Future<bool> checkApiAvailability() async {
     try {
-      // Use the /health endpoint if it exists, or just use a simple GET to the base URL
-      final healthEndpoint = '$apiBaseUrl/health';
-
-      final response = await http.get(Uri.parse(healthEndpoint));
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        // API is reachable
+      final dioService = getIt<DioService>();
+      final response = await dioService.get(
+        '/health',
+        acceptAllStatusCodes: true,
+      );
+      final code = response.statusCode;
+      if (code != null && code >= 200 && code < 300) {
         return true;
-      } else {
-        // API responded with an error status
-        print('API returned status code: ${response.statusCode}');
-        return false;
       }
+      print('API returned status code: $code');
+      return false;
     } catch (e) {
       print('Error checking API availability: $e');
-      return false; // Assume API is not available on error
+      return false;
     }
   }
 

@@ -1,22 +1,17 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Service for managing system configuration and settings.
 class SystemSettingsService {
-  final Dio _dio;
-  final String baseUrl;
-  final TokenManager tokenManager;
+  final DioService _dioService;
 
-  SystemSettingsService({
-    required Dio dio,
-    required this.baseUrl,
-    required this.tokenManager,
-  }) : _dio = dio;
+  SystemSettingsService({required DioService dioService})
+    : _dioService = dioService;
 
   Future<Map<String, String>> _getHeaders() async {
-    final token = await tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -44,9 +39,11 @@ class SystemSettingsService {
   /// Get current system settings.
   Future<SystemSettings> getSystemSettings() async {
     final headers = await _getHeaders();
-    final response = await _dio.get(
-      '$baseUrl/system/settings',
-      options: Options(headers: headers, validateStatus: (_) => true),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/system/settings',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -61,9 +58,11 @@ class SystemSettingsService {
   /// Get current industry mode.
   Future<IndustryMode> getIndustryMode() async {
     final headers = await _getHeaders();
-    final response = await _dio.get(
-      '$baseUrl/system/industry-mode',
-      options: Options(headers: headers, validateStatus: (_) => true),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/system/industry-mode',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -79,9 +78,11 @@ class SystemSettingsService {
   /// Get available industry modes for selection.
   Future<List<Map<String, String>>> getAvailableIndustryModes() async {
     final headers = await _getHeaders();
-    final response = await _dio.get(
-      '$baseUrl/system/industry-modes',
-      options: Options(headers: headers, validateStatus: (_) => true),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/system/industry-modes',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -97,9 +98,11 @@ class SystemSettingsService {
   /// Get data statistics (before clearing).
   Future<DataClearStatistics> getDataStatistics() async {
     final headers = await _getHeaders();
-    final response = await _dio.get(
-      '$baseUrl/system/data-statistics',
-      options: Options(headers: headers, validateStatus: (_) => true),
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/system/data-statistics',
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -118,14 +121,16 @@ class SystemSettingsService {
     String? reason,
   }) async {
     final headers = await _getHeaders();
-    final response = await _dio.post(
-      '$baseUrl/system/industry-mode/change',
-      options: Options(headers: headers, validateStatus: (_) => true),
-      data: {
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/system/industry-mode/change',
+      headers: headers,
+      data: jsonEncode({
         'newMode': newMode.toApiValue(),
         'confirmDataClear': confirmDataClear,
         if (reason != null) 'reason': reason,
-      },
+      }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -143,10 +148,12 @@ class SystemSettingsService {
   /// Clear all transactional data.
   Future<DataClearStatistics> clearAllData() async {
     final headers = await _getHeaders();
-    final response = await _dio.post(
-      '$baseUrl/system/clear-data',
-      options: Options(headers: headers, validateStatus: (_) => true),
-      data: {'confirm': true},
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/system/clear-data',
+      headers: headers,
+      data: jsonEncode({'confirm': true}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
@@ -166,10 +173,12 @@ class SystemSettingsService {
     String? reason,
   }) async {
     final headers = await _getHeaders();
-    final response = await _dio.put(
-      '$baseUrl/system/config/$key',
-      options: Options(headers: headers, validateStatus: (_) => true),
-      data: {'value': value, if (reason != null) 'reason': reason},
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}/system/config/$key',
+      headers: headers,
+      data: jsonEncode({'value': value, if (reason != null) 'reason': reason}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 200) {

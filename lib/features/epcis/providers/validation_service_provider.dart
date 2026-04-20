@@ -8,8 +8,7 @@ import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 
 /// Cache validation result storage class
 class _CachedValidationResult {
@@ -98,12 +97,10 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   ValidationCubit({
     ValidationService? validationService,
-    required AppConfig appConfig,
   }) : _validationService =
            validationService ??
            ValidationService(
-             tokenManager: getIt<TokenManager>(),
-             appConfig: appConfig,
+             dioService: getIt<DioService>(),
            ),
        super(ValidationState.initial());
 

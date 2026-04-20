@@ -1,29 +1,24 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:http/http.dart' as http;
-import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/admin/data/tobacco_product_data.dart';
 import 'package:traqtrace_app/features/admin/data/pharmaceutical_product_data.dart';
 import 'package:uuid/uuid.dart';
 
 /// Service for generating industry-specific test data
 class IndustryTestDataService {
-  final TokenManager tokenManager;
-  final AppConfig appConfig;
-  final http.Client _httpClient = http.Client();
+  final DioService _dioService;
   final Uuid _uuid = const Uuid();
   final Random _random = Random();
 
-  IndustryTestDataService({
-    required this.tokenManager,
-    required this.appConfig,
-  });
+  IndustryTestDataService({required DioService dioService})
+    : _dioService = dioService;
 
-  String get _baseUrl => appConfig.apiBaseUrl;
+  String get _baseUrl => _dioService.baseUrl;
 
   Future<Map<String, String>> get _headers async {
-    final token = await tokenManager.getToken();
+    final token = await _dioService.getAuthToken();
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -42,10 +37,10 @@ class IndustryTestDataService {
       onProgress(i + 1, total, product['productName'] as String);
 
       // Create GTIN using master-data endpoint
-      final gtinResponse = await _httpClient.post(
-        Uri.parse('$_baseUrl/master-data/gtins'),
+      final gtinResponse = await _dioService.post(
+        '$_baseUrl/master-data/gtins',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'gtin': product['gtinCode'],
           'productName': product['productName'],
           'manufacturer': product['manufacturer'],
@@ -53,14 +48,16 @@ class IndustryTestDataService {
           'packSize': product['unitsPerPack'],
           'productStatus': 'ACTIVE',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (gtinResponse.statusCode == 200 || gtinResponse.statusCode == 201) {
         // Create tobacco extension
-        await _httpClient.post(
-          Uri.parse('$_baseUrl/tobacco/products/gtin/${product['gtinCode']}'),
+        await _dioService.post(
+          '$_baseUrl/tobacco/products/gtin/${product['gtinCode']}',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             'tobaccoCategory': product['tobaccoCategory'],
             'brandFamily': product['brandFamily'],
             'brandVariant': product['brandVariant'],
@@ -80,6 +77,8 @@ class IndustryTestDataService {
             'maxRetailPriceCurrency': 'AED',
             'curingMethod': product['curingMethod'],
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
       }
 
@@ -100,10 +99,10 @@ class IndustryTestDataService {
       onProgress(i + 1, total, location['locationName'] as String);
 
       // Create GLN using master-data endpoint
-      final glnResponse = await _httpClient.post(
-        Uri.parse('$_baseUrl/master-data/glns'),
+      final glnResponse = await _dioService.post(
+        '$_baseUrl/master-data/glns',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'glnCode': location['glnCode'],
           'locationName': location['locationName'],
           'locationType': _mapTobaccoLocationTypeToBackend(
@@ -115,14 +114,16 @@ class IndustryTestDataService {
           'country': 'United Arab Emirates',
           'locationStatus': 'active',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (glnResponse.statusCode == 200 || glnResponse.statusCode == 201) {
         // Create tobacco extension for the GLN
-        await _httpClient.post(
-          Uri.parse('$_baseUrl/tobacco/gln/code/${location['glnCode']}'),
+        await _dioService.post(
+          '$_baseUrl/tobacco/gln/code/${location['glnCode']}',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             'locationName': location['locationName'],
             // Location type flags
             'isManufacturingFacility':
@@ -215,6 +216,8 @@ class IndustryTestDataService {
               'Mevius',
             ],
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
       }
 
@@ -228,16 +231,19 @@ class IndustryTestDataService {
     required Function(int current, int total, String productInfo) onProgress,
   }) async {
     // First, fetch existing GTINs
-    final gtinsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/gtins?page=0&size=50'),
+    final gtinsResponse = await _dioService.get(
+      '$_baseUrl/master-data/gtins',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (gtinsResponse.statusCode != 200) {
       throw Exception('Failed to fetch GTINs. Please generate GTINs first.');
     }
 
-    final gtinsData = jsonDecode(gtinsResponse.body);
+    final gtinsData = jsonDecode(gtinsResponse.data);
     final List<dynamic> gtins = gtinsData['content'] ?? [];
 
     if (gtins.isEmpty) {
@@ -245,14 +251,17 @@ class IndustryTestDataService {
     }
 
     // Get manufacturer locations for current location assignment
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 
@@ -305,10 +314,10 @@ class IndustryTestDataService {
         onProgress(current, total, '$productName (S/N: $serialNumber)');
 
         // Create SGTIN
-        final sgtinResponse = await _httpClient.post(
-          Uri.parse('$_baseUrl/identifiers/sgtins'),
+        final sgtinResponse = await _dioService.post(
+          '$_baseUrl/identifiers/sgtins',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             'gtin': gtinCode,
             'serialNumber': serialNumber,
             'batchLotNumber': batchNumber,
@@ -318,12 +327,14 @@ class IndustryTestDataService {
             'regulatoryMarket': 'ARE',
             'currentLocationGLN': manufacturerGln,
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
 
         if (sgtinResponse.statusCode != 200 &&
             sgtinResponse.statusCode != 201) {
           // Log error but continue
-          print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.body}');
+          print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.data}');
         }
 
         await Future.delayed(const Duration(milliseconds: 50));
@@ -337,14 +348,17 @@ class IndustryTestDataService {
     required Function(int current, int total, String containerInfo) onProgress,
   }) async {
     // Fetch manufacturer locations for issuing GLN
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 
@@ -509,24 +523,26 @@ class IndustryTestDataService {
     required int stampCount,
   }) async {
     // Create base SSCC
-    final ssccResponse = await _httpClient.post(
-      Uri.parse('$_baseUrl/identifiers/sscc'),
+    final ssccResponse = await _dioService.post(
+      '$_baseUrl/identifiers/sscc',
       headers: await _headers,
-      body: jsonEncode({
+      data: jsonEncode({
         'sscc': ssccCode,
         'containerType': containerType,
         'containerStatus': 'PACKED',
         'packingDate': DateTime.now().toIso8601String(),
         if (issuingGln != null) 'issuingGLN': issuingGln,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (ssccResponse.statusCode == 200 || ssccResponse.statusCode == 201) {
       // Create tobacco extension
-      await _httpClient.post(
-        Uri.parse('$_baseUrl/tobacco/sscc/code/$ssccCode'),
+      await _dioService.post(
+        '$_baseUrl/tobacco/sscc/code/$ssccCode',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'ssccCode': ssccCode,
           // Tax stamp aggregation
           'taxStampAggregationLevel': containerType,
@@ -541,6 +557,8 @@ class IndustryTestDataService {
           // UAE compliance
           'euFirstRetailOutlet': containerType == 'CARTON',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
     }
   }
@@ -551,16 +569,19 @@ class IndustryTestDataService {
     required Function(int current, int total, String eventInfo) onProgress,
   }) async {
     // Fetch SGTINs
-    final sgtinsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/identifiers/sgtins?page=0&size=100'),
+    final sgtinsResponse = await _dioService.get(
+      '$_baseUrl/identifiers/sgtins',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 100},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (sgtinsResponse.statusCode != 200) {
       throw Exception('Failed to fetch SGTINs. Please generate SGTINs first.');
     }
 
-    final sgtinsData = jsonDecode(sgtinsResponse.body);
+    final sgtinsData = jsonDecode(sgtinsResponse.data);
     final List<dynamic> sgtins = sgtinsData['content'] ?? [];
 
     if (sgtins.isEmpty) {
@@ -568,26 +589,32 @@ class IndustryTestDataService {
     }
 
     // Fetch SSCCs
-    final ssccsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/identifiers/sscc?page=0&size=50'),
+    final ssccsResponse = await _dioService.get(
+      '$_baseUrl/identifiers/sscc',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> ssccs = [];
     if (ssccsResponse.statusCode == 200) {
-      final ssccsData = jsonDecode(ssccsResponse.body);
+      final ssccsData = jsonDecode(ssccsResponse.data);
       ssccs = ssccsData['content'] ?? [];
     }
 
     // Fetch GLNs
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 
@@ -1059,15 +1086,17 @@ class IndustryTestDataService {
         ? '$_baseUrl/events/object'
         : '$_baseUrl/events/aggregation';
 
-    final response = await _httpClient.post(
-      Uri.parse(endpoint),
+    final response = await _dioService.post(
+      endpoint,
       headers: await _headers,
-      body: jsonEncode(event),
+      data: jsonEncode(event),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception(
-        'Failed to create $eventType: ${response.statusCode} - ${response.body}',
+        'Failed to create $eventType: ${response.statusCode} - ${response.data}',
       );
     }
   }
@@ -1095,10 +1124,10 @@ class IndustryTestDataService {
       onProgress(i + 1, total, product['productName'] as String);
 
       // Create GTIN using master-data endpoint
-      final gtinResponse = await _httpClient.post(
-        Uri.parse('$_baseUrl/master-data/gtins'),
+      final gtinResponse = await _dioService.post(
+        '$_baseUrl/master-data/gtins',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'gtin': product['gtinCode'],
           'productName': product['productName'],
           'manufacturer': product['manufacturer'],
@@ -1106,16 +1135,16 @@ class IndustryTestDataService {
           'packSize': product['packageQuantity'],
           'productStatus': 'ACTIVE',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (gtinResponse.statusCode == 200 || gtinResponse.statusCode == 201) {
         // Create pharmaceutical extension
-        await _httpClient.post(
-          Uri.parse(
-            '$_baseUrl/pharmaceutical/gtin/code/${product['gtinCode']}',
-          ),
+        await _dioService.post(
+          '$_baseUrl/pharmaceutical/gtin/code/${product['gtinCode']}',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             // Product identification
             'therapeuticClass': product['therapeuticClass'],
             'strength': product['strength'].toString(),
@@ -1137,6 +1166,8 @@ class IndustryTestDataService {
             // Controlled Substance
             'isControlledSubstance': product['narcotic'] ?? false,
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
       }
 
@@ -1156,10 +1187,10 @@ class IndustryTestDataService {
       onProgress(i + 1, total, location['locationName'] as String);
 
       // Create GLN using master-data endpoint
-      final glnResponse = await _httpClient.post(
-        Uri.parse('$_baseUrl/master-data/glns'),
+      final glnResponse = await _dioService.post(
+        '$_baseUrl/master-data/glns',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           'glnCode': location['glnCode'],
           'locationName': location['locationName'],
           'locationType': _mapLocationTypeToBackend(
@@ -1171,14 +1202,16 @@ class IndustryTestDataService {
           'country': 'United Arab Emirates',
           'locationStatus': 'active',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
 
       if (glnResponse.statusCode == 200 || glnResponse.statusCode == 201) {
         // Create pharmaceutical extension for the GLN
-        await _httpClient.post(
-          Uri.parse('$_baseUrl/pharmaceutical/gln/code/${location['glnCode']}'),
+        await _dioService.post(
+          '$_baseUrl/pharmaceutical/gln/code/${location['glnCode']}',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             // Cold Chain & Storage Capabilities
             'hasColdChainCapability':
                 location['hasRefrigeratedStorage'] ?? false,
@@ -1223,6 +1256,8 @@ class IndustryTestDataService {
                 location['locationType'] == 'MANUFACTURER' ||
                 location['locationType'] == 'DISTRIBUTION_CENTER',
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
       }
 
@@ -1235,16 +1270,19 @@ class IndustryTestDataService {
     required Function(int current, int total, String productInfo) onProgress,
   }) async {
     // Fetch existing GTINs
-    final gtinsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/gtins?page=0&size=50'),
+    final gtinsResponse = await _dioService.get(
+      '$_baseUrl/master-data/gtins',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (gtinsResponse.statusCode != 200) {
       throw Exception('Failed to fetch GTINs. Please generate GTINs first.');
     }
 
-    final gtinsData = jsonDecode(gtinsResponse.body);
+    final gtinsData = jsonDecode(gtinsResponse.data);
     final List<dynamic> gtins = gtinsData['content'] ?? [];
 
     if (gtins.isEmpty) {
@@ -1252,14 +1290,17 @@ class IndustryTestDataService {
     }
 
     // Get manufacturer locations for current location assignment
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 
@@ -1285,13 +1326,16 @@ class IndustryTestDataService {
           },
         );
 
-        final retryGlnsResponse = await _httpClient.get(
-          Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+        final retryGlnsResponse = await _dioService.get(
+          '$_baseUrl/master-data/glns',
           headers: await _headers,
+          queryParameters: {'page': 0, 'size': 50},
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
 
         if (retryGlnsResponse.statusCode == 200) {
-          final retryGlnsData = jsonDecode(retryGlnsResponse.body);
+          final retryGlnsData = jsonDecode(retryGlnsResponse.data);
           glns = retryGlnsData['content'] ?? [];
         }
 
@@ -1348,10 +1392,10 @@ class IndustryTestDataService {
         onProgress(current, total, '$productName (S/N: $serialNumber)');
 
         // Create SGTIN
-        final sgtinResponse = await _httpClient.post(
-          Uri.parse('$_baseUrl/identifiers/sgtins'),
+        final sgtinResponse = await _dioService.post(
+          '$_baseUrl/identifiers/sgtins',
           headers: await _headers,
-          body: jsonEncode({
+          data: jsonEncode({
             'gtin': gtinCode,
             'serialNumber': serialNumber,
             'batchLotNumber': batchNumber,
@@ -1361,11 +1405,13 @@ class IndustryTestDataService {
             'regulatoryMarket': 'ARE',
             'currentLocationGLN': manufacturerGln,
           }),
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
         );
 
         if (sgtinResponse.statusCode != 200 &&
             sgtinResponse.statusCode != 201) {
-          print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.body}');
+          print('Failed to create SGTIN for $gtinCode: ${sgtinResponse.data}');
         }
 
         await Future.delayed(const Duration(milliseconds: 50));
@@ -1378,14 +1424,17 @@ class IndustryTestDataService {
     required Function(int current, int total, String containerInfo) onProgress,
   }) async {
     // Fetch manufacturer and pharmacy locations
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 
@@ -1546,24 +1595,26 @@ class IndustryTestDataService {
     required bool temperatureControlled,
   }) async {
     // Create base SSCC
-    final ssccResponse = await _httpClient.post(
-      Uri.parse('$_baseUrl/identifiers/sscc'),
+    final ssccResponse = await _dioService.post(
+      '$_baseUrl/identifiers/sscc',
       headers: await _headers,
-      body: jsonEncode({
+      data: jsonEncode({
         'sscc': ssccCode,
         'containerType': containerType,
         'containerStatus': 'PACKED',
         'packingDate': DateTime.now().toIso8601String(),
         if (issuingGln != null) 'issuingGLN': issuingGln,
       }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (ssccResponse.statusCode == 200 || ssccResponse.statusCode == 201) {
       // Create pharmaceutical extension
-      await _httpClient.post(
-        Uri.parse('$_baseUrl/pharmaceutical/sscc/code/$ssccCode'),
+      await _dioService.post(
+        '$_baseUrl/pharmaceutical/sscc/code/$ssccCode',
         headers: await _headers,
-        body: jsonEncode({
+        data: jsonEncode({
           // Cold Chain Requirements
           'coldChainRequired': temperatureControlled,
           'minTemperatureCelsius': temperatureControlled ? 2.0 : null,
@@ -1592,6 +1643,8 @@ class IndustryTestDataService {
           'doNotStack': false,
           'thisSideUp': containerType == 'PALLET',
         }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
       );
     }
   }
@@ -1601,16 +1654,19 @@ class IndustryTestDataService {
     required Function(int current, int total, String eventInfo) onProgress,
   }) async {
     // Fetch SGTINs
-    final sgtinsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/identifiers/sgtins?page=0&size=100'),
+    final sgtinsResponse = await _dioService.get(
+      '$_baseUrl/identifiers/sgtins',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 100},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     if (sgtinsResponse.statusCode != 200) {
       throw Exception('Failed to fetch SGTINs. Please generate SGTINs first.');
     }
 
-    final sgtinsData = jsonDecode(sgtinsResponse.body);
+    final sgtinsData = jsonDecode(sgtinsResponse.data);
     final List<dynamic> sgtins = sgtinsData['content'] ?? [];
 
     if (sgtins.isEmpty) {
@@ -1618,26 +1674,32 @@ class IndustryTestDataService {
     }
 
     // Fetch SSCCs
-    final ssccsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/identifiers/sscc?page=0&size=50'),
+    final ssccsResponse = await _dioService.get(
+      '$_baseUrl/identifiers/sscc',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> ssccs = [];
     if (ssccsResponse.statusCode == 200) {
-      final ssccsData = jsonDecode(ssccsResponse.body);
+      final ssccsData = jsonDecode(ssccsResponse.data);
       ssccs = ssccsData['content'] ?? [];
     }
 
     // Fetch GLNs
-    final glnsResponse = await _httpClient.get(
-      Uri.parse('$_baseUrl/master-data/glns?page=0&size=50'),
+    final glnsResponse = await _dioService.get(
+      '$_baseUrl/master-data/glns',
       headers: await _headers,
+      queryParameters: {'page': 0, 'size': 50},
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
     );
 
     List<dynamic> glns = [];
     if (glnsResponse.statusCode == 200) {
-      final glnsData = jsonDecode(glnsResponse.body);
+      final glnsData = jsonDecode(glnsResponse.data);
       glns = glnsData['content'] ?? [];
     }
 

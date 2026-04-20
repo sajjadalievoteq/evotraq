@@ -18,7 +18,6 @@ dependencies:
   equatable: ^2.0.8
   
   # Network and API
-  http: ^1.5.0
   dio: ^5.9.0
   json_annotation: ^4.9.0
   web_socket_channel: ^3.0.0

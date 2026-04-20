@@ -3,6 +3,99 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 
+class RuleEditorRouteScreen extends StatefulWidget {
+  final String ruleId;
+  final bool isPredefined;
+  final bool isNew;
+
+  const RuleEditorRouteScreen({
+    super.key,
+    required this.ruleId,
+    required this.isPredefined,
+    this.isNew = false,
+  });
+
+  @override
+  State<RuleEditorRouteScreen> createState() => _RuleEditorRouteScreenState();
+}
+
+class _RuleEditorRouteScreenState extends State<RuleEditorRouteScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final cubit = context.read<ValidationRuleCubit>();
+    if (!widget.isNew &&
+        cubit.getRuleByRuleId(widget.ruleId) == null &&
+        !cubit.isLoading) {
+      cubit.loadValidationRules();
+    }
+  }
+
+  ValidationRule _buildNewRule() {
+    return ValidationRule(
+      ruleId: widget.ruleId,
+      name: '',
+      description: '',
+      severity: RuleSeverity.WARNING,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isNew) {
+      return RuleEditorScreen(
+        rule: _buildNewRule(),
+        isPredefined: false,
+        isNew: true,
+      );
+    }
+
+    return BlocBuilder<ValidationRuleCubit, ValidationRuleState>(
+      builder: (context, state) {
+        final rule = context.read<ValidationRuleCubit>().getRuleByRuleId(
+          widget.ruleId,
+        );
+
+        if (rule != null) {
+          return RuleEditorScreen(
+            rule: rule,
+            isPredefined: widget.isPredefined,
+          );
+        }
+
+        if (state.isLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Rule Editor')),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'The requested validation rule could not be found.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Back'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// A screen for editing validation rules
 class RuleEditorScreen extends StatefulWidget {
   /// The rule to edit

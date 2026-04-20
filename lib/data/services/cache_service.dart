@@ -9,7 +9,7 @@ import '../../core/network/dio_service.dart';
 class CacheService {
   final DioService _dioService;
 
-  CacheService() : _dioService = DioService();
+  CacheService({required DioService dioService}) : _dioService = dioService;
 
   /// Get all cache statistics
   Future<CacheStatistics?> getAllCacheStatistics() async {

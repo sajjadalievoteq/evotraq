@@ -37,6 +37,7 @@ import 'package:traqtrace_app/features/notifications/presentation/cubit/notifica
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/utils/app_screen_util.dart';
 // Dashboard imports
 
@@ -235,7 +236,12 @@ class TraqTraceApp extends StatelessWidget {
               darkTheme: AppTheme.darkTheme(),
               themeMode: themeState.themeMode,
               routerConfig: getIt<AppRouter>().router,
-              builder: (context, child) => child ?? const SizedBox.shrink(),
+              builder: (context, child) => AppScreenUtilInit(
+                child: AppLayoutBuilder(
+                  builder: (context, layout) =>
+                      child ?? const SizedBox.shrink(),
+                ),
+              ),
             ),
           );
         },

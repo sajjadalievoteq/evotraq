@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+
+import '../../../../../core/config/constants.dart';
 
 class ForgotPasswordForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -31,6 +35,7 @@ class ForgotPasswordForm extends StatelessWidget {
       key: formKey,
       onChanged: onFormChanged,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 24),
@@ -91,11 +96,11 @@ class ForgotPasswordForm extends StatelessWidget {
                 'Remember your password?',
                 style: TextStyle(color: textPrimary),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
+              CustomTextButtonWidget(
+                title: 'Login',
+                onTap: () {
+                  context.go(Constants.loginRoute);
                 },
-                child: const Text('Login'),
               ),
             ],
           ),

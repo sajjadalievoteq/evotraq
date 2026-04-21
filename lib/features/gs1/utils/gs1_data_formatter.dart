@@ -58,7 +58,7 @@ class GS1DataFormatter {
     return result;
   }
   
-  /// Build a list of widgets to display GS1 data
+  /// Build a list of widget to display GS1 data
   static List<Widget> buildGS1DataWidgets(Map<dynamic, dynamic>? data, {Color textColor = Colors.white}) {
     if (data == null) {
       return [Text('No data available', style: TextStyle(color: textColor))];

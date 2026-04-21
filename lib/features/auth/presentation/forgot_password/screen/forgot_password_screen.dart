@@ -3,11 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/features/auth/presentation/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/build_success_message_widget.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/forgot_password_form_widget.dart';
+
+import 'package:traqtrace_app/features/auth/presentation/widgets/auth_responsive_layout_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
-import '../../../../core/config/constants.dart';
+import '../../../../../core/config/constants.dart';
+import '../widget/forgot_password_form_widget.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -56,24 +59,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state.status == AuthStatus.error) {
-            context.showError(state.error ?? 'An error occurred');
-          }
-        },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+    return  BackgroundContainerWidget(
+      child: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state.status == AuthStatus.error) {
+              context.showError(state.error ?? 'An error occurred');
+            }
+          },
+          child: AuthResponsiveFormLayout(
             child: _isSubmitted
                 ? BuildSuccessMessage(
                     title: 'Check Your Email',
-                    message: 'If an account exists with the email you provided, we have sent password reset instructions.',
+                    message:
+                        'If an account exists with the email you provided, we have sent password reset instructions.',
                     buttonLabel: 'BACK TO LOGIN',
                     onButtonPressed: () {
-                     context.go( Constants.loginRoute);
+                      context.go(Constants.loginRoute);
                     },
                   )
                 : ForgotPasswordForm(
@@ -85,7 +86,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     onFormChanged: _updateButtonState,
                   ),
           ),
-        ),
       ),
     );
   }

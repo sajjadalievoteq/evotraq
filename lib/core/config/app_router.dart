@@ -93,13 +93,13 @@ import 'package:traqtrace_app/features/api_management/screens/partner_access_man
 
 import '../../features/auth/cubit/auth_cubit.dart';
 import '../../features/auth/cubit/auth_state.dart';
-import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/auth/presentation/screens/check_email_screen.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/forgot_password/screen/forgot_password_screen.dart';
+import '../../features/auth/presentation/check_email/screen/check_email_screen.dart';
+import '../../features/auth/presentation/login/screen/login_screen.dart';
+import '../../features/auth/presentation/register/screen/register_screen.dart';
+import '../../features/auth/presentation/reset_password/screen/reset_password_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
-import '../../features/auth/presentation/screens/verify_email_screen.dart';
+import '../../features/auth/presentation/verify_email/screen/verify_email_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -223,9 +223,10 @@ class AppRouter {
         path: Constants.verifyEmailRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
+          final email = state.uri.queryParameters['email'];
           return MaterialPage(
             key: state.pageKey,
-            child: VerifyEmailScreen(token: token),
+            child: VerifyEmailScreen(token: token, email: email),
           );
         },
       ),
@@ -233,9 +234,10 @@ class AppRouter {
         path: Constants.verifyEmailAliasRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
+          final email = state.uri.queryParameters['email'];
           return MaterialPage(
             key: state.pageKey,
-            child: VerifyEmailScreen(token: token),
+            child: VerifyEmailScreen(token: token, email: email),
           );
         },
       ),

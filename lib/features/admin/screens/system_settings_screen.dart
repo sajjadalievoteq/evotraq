@@ -629,7 +629,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
           
           // Navigate to home/dashboard after mode change to avoid
           // "Looking up a deactivated widget's ancestor" errors
-          // when widgets try to rebuild with the new mode
+          // when widget try to rebuild with the new mode
           context.go('/');
         }
       } catch (e) {

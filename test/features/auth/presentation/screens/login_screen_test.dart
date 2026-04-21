@@ -7,7 +7,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/login/screen/login_screen.dart';
 
 class TestAuthService extends AuthService {
   TestAuthService() : super(dioService: DioService());

@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.
 import 'package:traqtrace_app/features/epcis/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 
-/// A demonstration screen for validation rule testing and field validation widgets
+/// A demonstration screen for validation rule testing and field validation widget
 class ValidationRuleDemoScreen extends StatefulWidget {
   /// Constructor
   const ValidationRuleDemoScreen({Key? key}) : super(key: key);

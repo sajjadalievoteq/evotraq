@@ -13,7 +13,11 @@ class AuthCubit extends Cubit<AuthState> {
 
   String _resolveErrorMessage(dynamic error, String fallback) {
     if (error is ApiException) {
-      return error.message;
+      final message = error.message.trim();
+      if (message.isNotEmpty) {
+        return message;
+      }
+      return error.getUserFriendlyMessage();
     }
     final message = error.toString().trim();
     if (message.isEmpty) {

@@ -12,6 +12,7 @@ enum AuthStatus {
   passwordResetTokenInvalid,
   passwordReset,
   emailVerified,
+  verificationEmailResent,
   error,
 }
 

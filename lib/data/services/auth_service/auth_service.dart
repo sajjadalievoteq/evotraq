@@ -140,6 +140,29 @@ class AuthService {
     }
   }
 
+  Map<String, dynamic>? parseResponseMap(dynamic data) {
+    try {
+      if (data is String) {
+        final decoded = jsonDecode(data);
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        }
+        if (decoded is Map) {
+          return Map<String, dynamic>.from(decoded);
+        }
+      }
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
   Future<AuthResponse> login(LoginRequest request) async {
     try {
       final response = await _dioService.post(
@@ -210,6 +233,44 @@ class AuthService {
           _parseErrorMessage(e.response?.data),
           statusCode: e.response?.statusCode,
           fallback: 'Registration failed',
+        ),
+        responseBody: _stringifyResponseData(e.response?.data),
+        originalException: e,
+      );
+    }
+  }
+
+  Future<String> resendVerificationEmail(String email) async {
+    try {
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}${Constants.authResendVerificationEmailEndpoint}',
+        data: jsonEncode({'email': email.trim()}),
+        headers: {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        return _parseErrorMessage(response.data) ??
+            'If an unverified account exists for that email, a new verification email has been sent.';
+      }
+
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: _userFriendlyAuthMessage(
+          _parseErrorMessage(response.data),
+          statusCode: response.statusCode,
+          fallback: 'Failed to resend verification email',
+        ),
+        responseBody: _stringifyResponseData(response.data),
+      );
+    } on DioException catch (e) {
+      throw ApiException(
+        statusCode: e.response?.statusCode,
+        message: _userFriendlyAuthMessage(
+          _parseErrorMessage(e.response?.data),
+          statusCode: e.response?.statusCode,
+          fallback: 'Failed to resend verification email',
         ),
         responseBody: _stringifyResponseData(e.response?.data),
         originalException: e,

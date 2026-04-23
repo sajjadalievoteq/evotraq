@@ -1,24 +1,30 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
+import 'package:get_it/get_it.dart';
+import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
-import 'package:traqtrace_app/features/admin/models/admin_models.dart';
+import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 
-class AdminService {
+class UserManagementService {
+  UserManagementService({
+    DioService? dioService,
+    TokenManager? tokenManager,
+  }) : _dioService = dioService ?? GetIt.instance<DioService>(),
+       _tokenManager = tokenManager ?? GetIt.instance<TokenManager>();
+
   final DioService _dioService;
   final TokenManager _tokenManager;
-  final AppConfig _appConfig;
 
-  AdminService({
-    required DioService dioService,
-    required TokenManager tokenManager,
-    required AppConfig appConfig,
-  }) : _dioService = dioService,
-       _tokenManager = tokenManager,
-       _appConfig = appConfig;
+  Future<String> _requireToken() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found');
+    }
+    return token;
+  }
 
-  // Get all users with pagination and filtering
   Future<UserListResponse> getUsers({
     String? search,
     String? role,
@@ -28,12 +34,8 @@ class AdminService {
     String sort = 'id',
     String direction = 'asc',
   }) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
-    // Build query parameters
     final queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -52,7 +54,7 @@ class AdminService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/users',
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -64,20 +66,16 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserListResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to load users: ${response.statusCode}');
     }
+
+    throw Exception('Failed to load users: ${response.statusCode}');
   }
 
-  // Get all pending approval requests
   Future<List<UserResponse>> getPendingApprovals() async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/approvals',
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -89,22 +87,16 @@ class AdminService {
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.data);
       return data.map((item) => UserResponse.fromJson(item)).toList();
-    } else {
-      throw Exception(
-        'Failed to load pending approvals: ${response.statusCode}',
-      );
     }
+
+    throw Exception('Failed to load pending approvals: ${response.statusCode}');
   }
 
-  // Approve a user registration
   Future<UserResponse> approveUser(int userId) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.put(
-      '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/approve',
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/approve',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -115,20 +107,16 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to approve user: ${response.statusCode}');
     }
+
+    throw Exception('Failed to approve user: ${response.statusCode}');
   }
 
-  // Reject a user registration
   Future<UserResponse> rejectUser(int userId) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.put(
-      '${_appConfig.apiBaseUrl}/api/admin/approvals/$userId/reject',
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/reject',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -139,20 +127,16 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to reject user: ${response.statusCode}');
     }
+
+    throw Exception('Failed to reject user: ${response.statusCode}');
   }
 
-  // Change user status (activate/deactivate)
   Future<UserResponse> changeUserStatus(int userId, bool enabled) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.put(
-      '${_appConfig.apiBaseUrl}/api/admin/users/$userId/status',
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/status',
       queryParameters: {'enabled': enabled},
       headers: {
         'Content-Type': 'application/json',
@@ -164,20 +148,16 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to change user status: ${response.statusCode}');
     }
+
+    throw Exception('Failed to change user status: ${response.statusCode}');
   }
 
-  // Change user role
   Future<UserResponse> changeUserRole(int userId, String role) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.put(
-      '${_appConfig.apiBaseUrl}/api/admin/users/$userId/roles',
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/roles',
       queryParameters: {'role': role},
       headers: {
         'Content-Type': 'application/json',
@@ -189,23 +169,19 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to change user role: ${response.statusCode}');
     }
+
+    throw Exception('Failed to change user role: ${response.statusCode}');
   }
 
-  // Update user details
   Future<UserResponse> updateUser(
     int userId,
     UpdateUserRequest updateRequest,
   ) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.put(
-      '${_appConfig.apiBaseUrl}/api/admin/users/$userId',
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId',
       data: jsonEncode(updateRequest.toJson()),
       headers: {
         'Content-Type': 'application/json',
@@ -217,20 +193,16 @@ class AdminService {
 
     if (response.statusCode == 200) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to update user: ${response.statusCode}');
     }
+
+    throw Exception('Failed to update user: ${response.statusCode}');
   }
 
-  // Create a new user
   Future<UserResponse> createUser(CreateUserRequest createRequest) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    final token = await _requireToken();
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/users',
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}',
       data: jsonEncode(createRequest.toJson()),
       headers: {
         'Content-Type': 'application/json',
@@ -242,8 +214,8 @@ class AdminService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return UserResponse.fromJson(json.decode(response.data));
-    } else {
-      throw Exception('Failed to create user: ${response.statusCode}');
     }
+
+    throw Exception('Failed to create user: ${response.statusCode}');
   }
 }

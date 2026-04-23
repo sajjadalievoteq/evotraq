@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
-                context.go('/home');
+                context.go(Constants.homeRoute);
               },
             ),
             bottom: TabBar(

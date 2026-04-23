@@ -24,6 +24,7 @@ import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_screen.dart';
+import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/screens/gtin/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gtin/gtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_detail_screen.dart';
@@ -32,10 +33,10 @@ import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_scree
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
+import 'package:traqtrace_app/data/services/gtin_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_screen.dart';
 import 'package:traqtrace_app/features/user_management/screens/profile_screen.dart';
-import 'package:traqtrace_app/features/admin/screens/user_management_screen.dart';
-import 'package:traqtrace_app/features/admin/screens/approvals_screen.dart';
+import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart';
 // EPCIS imports
 import 'package:traqtrace_app/features/epcis/screens/epcis_events_list_screen.dart';
@@ -76,7 +77,6 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/webhoo
 // Barcode imports
 import 'package:traqtrace_app/features/barcode/screens/api_enabled_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
-import 'package:provider/provider.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
@@ -91,15 +91,17 @@ import 'package:traqtrace_app/features/api_management/screens/service_account_ma
 import 'package:traqtrace_app/features/api_management/screens/api_collection_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_access_management_screen.dart';
 
-import '../../features/auth/cubit/auth_cubit.dart';
-import '../../features/auth/cubit/auth_state.dart';
-import '../../features/auth/presentation/forgot_password/screen/forgot_password_screen.dart';
-import '../../features/auth/presentation/check_email/screen/check_email_screen.dart';
-import '../../features/auth/presentation/login/screen/login_screen.dart';
-import '../../features/auth/presentation/register/screen/register_screen.dart';
-import '../../features/auth/presentation/reset_password/screen/reset_password_screen.dart';
-import '../../features/splash/presentation/splash_screen.dart';
-import '../../features/auth/presentation/verify_email/screen/verify_email_screen.dart';
+import 'package:traqtrace_app/features/admin/user_management/presentation/users/screens/user_management_screen.dart';
+import 'package:traqtrace_app/features/admin/user_management/presentation/approvals/screens/approvals_screen.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/features/auth/presentation/forgot_password/screen/forgot_password_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/check_email/screen/check_email_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/login/screen/login_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/register/screen/register_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/reset_password/screen/reset_password_screen.dart';
+import 'package:traqtrace_app/features/splash/presentation/splash_screen.dart';
+import 'package:traqtrace_app/features/auth/presentation/verify_email/screen/verify_email_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -116,6 +118,11 @@ class GoRouterRefreshStream extends ChangeNotifier {
 }
 
 class AppRouter {
+  static const bool _enableRouterDiagnostics = bool.fromEnvironment(
+    'ENABLE_ROUTER_DEBUG_LOGS',
+    defaultValue: false,
+  );
+
   final AuthCubit authCubit;
 
   AppRouter({required this.authCubit});
@@ -151,7 +158,7 @@ class AppRouter {
 
   late final GoRouter router = GoRouter(
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: _enableRouterDiagnostics,
     initialLocation: Constants.splashRoute,
     redirect: (context, state) {
       final path = state.uri.path;
@@ -242,7 +249,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/home',
+        path: Constants.homeRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const HomeScreen()),
         redirect: (context, state) {
@@ -254,7 +261,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/profile',
+        path: Constants.profileRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const ProfileScreen()),
         redirect: (context, state) {
@@ -285,10 +292,13 @@ class AppRouter {
       ),
       // Admin routes
       GoRoute(
-        path: '/admin/users',
+        path: Constants.adminUsersRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const UserManagementScreen(),
+          child: BlocProvider(
+            create: (context) => getIt<UserManagementCubit>(),
+            child: const UserManagementScreen(),
+          ),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -300,16 +310,21 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
         },
       ),
       GoRoute(
-        path: '/admin/approvals',
-        pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const ApprovalsScreen()),
+        path: Constants.adminApprovalsRoute,
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: BlocProvider(
+            create: (context) => getIt<UserManagementCubit>(),
+            child: const ApprovalsScreen(),
+          ),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           final user = authCubit.state.user;
@@ -320,14 +335,14 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
         },
       ),
       GoRoute(
-        path: '/admin/settings',
+        path: Constants.adminSettingsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SystemSettingsScreen(),
@@ -342,7 +357,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -386,7 +401,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -408,7 +423,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -430,7 +445,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -452,7 +467,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -474,7 +489,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -496,7 +511,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -518,7 +533,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -618,7 +633,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -640,7 +655,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -663,7 +678,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -685,7 +700,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -707,7 +722,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -729,7 +744,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -752,7 +767,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -777,7 +792,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -802,7 +817,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -827,7 +842,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -849,7 +864,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -872,7 +887,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -898,7 +913,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -921,7 +936,7 @@ class AppRouter {
 
           // Check if user has admin role
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
@@ -944,7 +959,10 @@ class AppRouter {
         path: '/gs1/gtins/new',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const GTINDetailScreen(isEditing: true),
+          child: BlocProvider(
+            create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+            child: const GTINDetailScreen(isEditing: true),
+          ),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -960,7 +978,10 @@ class AppRouter {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
+            child: BlocProvider(
+              create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+              child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
+            ),
           );
         },
         redirect: (context, state) {
@@ -977,7 +998,10 @@ class AppRouter {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
+            child: BlocProvider(
+              create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+              child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
+            ),
           );
         },
         redirect: (context, state) {

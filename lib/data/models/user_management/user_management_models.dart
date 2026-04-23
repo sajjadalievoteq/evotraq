@@ -1,5 +1,3 @@
-// Model classes for admin functionality
-
 class UserResponse {
   final int id;
   final String username;
@@ -59,9 +57,8 @@ class UserListResponse {
 
   factory UserListResponse.fromJson(Map<String, dynamic> json) {
     final List<dynamic> usersJson = json['users'] ?? [];
-    final List<UserResponse> users = usersJson
-        .map((user) => UserResponse.fromJson(user))
-        .toList();
+    final List<UserResponse> users =
+        usersJson.map((user) => UserResponse.fromJson(user)).toList();
 
     return UserListResponse(
       users: users,
@@ -119,12 +116,12 @@ class UpdateUserRequest {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    
+
     if (firstName != null) data['firstName'] = firstName;
     if (lastName != null) data['lastName'] = lastName;
     if (email != null) data['email'] = email;
     if (password != null) data['password'] = password;
-    
+
     return data;
   }
 }

@@ -11,6 +11,27 @@ class AuthCubit extends Cubit<AuthState> {
     : _authService = authService,
       super(const AuthState(status: AuthStatus.initial));
 
+  bool _requiresEmailVerification(String? message) {
+    final normalized = message?.trim().toLowerCase();
+    if (normalized == null || normalized.isEmpty) {
+      return false;
+    }
+    return normalized.contains('verify your email');
+  }
+
+  String? _extractEmailFromError(dynamic error) {
+    if (error is! ApiException || error.responseBody == null) {
+      return null;
+    }
+
+    final body = _authService.parseResponseMap(error.responseBody);
+    final email = body?['email'];
+    if (email is String && email.trim().isNotEmpty) {
+      return email.trim();
+    }
+    return null;
+  }
+
   String _resolveErrorMessage(dynamic error, String fallback) {
     if (error is ApiException) {
       final message = error.message.trim();
@@ -72,11 +93,18 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
+      final errorMessage = _resolveErrorMessage(e, 'Authentication failed');
+      final fallbackEmail = request.username.contains('@')
+          ? request.username.trim()
+          : null;
       emit(
         state.copyWith(
           status: AuthStatus.error,
-          error: _resolveErrorMessage(e, 'Authentication failed'),
+          error: errorMessage,
           message: null,
+          registeredEmail: _requiresEmailVerification(errorMessage)
+              ? (_extractEmailFromError(e) ?? fallbackEmail)
+              : null,
         ),
       );
     }
@@ -280,6 +308,38 @@ class AuthCubit extends Cubit<AuthState> {
           status: AuthStatus.error,
           error: _resolveErrorMessage(e, 'Email verification failed'),
           message: null,
+        ),
+      );
+    }
+  }
+
+  Future<void> resendVerificationEmail(String email) async {
+    final normalizedEmail = email.trim();
+    emit(
+      state.copyWith(
+        status: AuthStatus.loading,
+        error: null,
+        message: null,
+        registeredEmail: normalizedEmail,
+      ),
+    );
+    try {
+      final message = await _authService.resendVerificationEmail(normalizedEmail);
+      emit(
+        state.copyWith(
+          status: AuthStatus.verificationEmailResent,
+          error: null,
+          message: message,
+          registeredEmail: normalizedEmail,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _resolveErrorMessage(e, 'Failed to resend verification email'),
+          message: null,
+          registeredEmail: normalizedEmail,
         ),
       );
     }

@@ -11,9 +11,13 @@ class CheckEmailContentWidget extends StatelessWidget {
   const CheckEmailContentWidget({
     super.key,
     this.email,
+    this.isResending = false,
+    this.onResend,
   });
 
   final String? email;
+  final bool isResending;
+  final VoidCallback? onResend;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +105,16 @@ class CheckEmailContentWidget extends StatelessWidget {
           child: AuthActionButton(
             label: inboxDestination.label,
             onPressed: () => openInboxForEmail(emailText),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: AuthActionButton(
+            label: 'RESEND EMAIL',
+            onPressed: onResend,
+            isLoading: isResending,
+            isEnabled: onResend != null && !isResending,
           ),
         ),
         const SizedBox(height: 12),

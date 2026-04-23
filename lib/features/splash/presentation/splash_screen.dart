@@ -20,7 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<AuthCubit>().checkAuth());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<AuthCubit>().checkAuth();
+    });
   }
 
   void _go(String location) {
@@ -44,6 +47,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage(Constants.iconImage), context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = ColorManager.primary(context);
     final pendingLocation = _resolvePendingLocation(context);
@@ -55,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
           listenWhen: (prev, curr) => prev.status != curr.status,
           listener: (context, state) {
             if (state.status == AuthStatus.authenticated) {
-              _go(pendingLocation ?? '/home');
+              _go(pendingLocation ?? Constants.homeRoute);
             } else if (state.status == AuthStatus.unauthenticated) {
               _go(Constants.loginRoute);
             }
@@ -66,20 +75,12 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
+                  SizedBox(
                     width: 84,
                     height: 84,
-                    decoration: BoxDecoration(
-                      color: ColorManager.primaryContainer(context),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: ColorManager.primaryBorder(context),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.qr_code_scanner_rounded,
-                      color: primary,
-                      size: 44,
+                    child: Image.asset(
+                      Constants.iconImage,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -97,9 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     'Preparing your workspace...',
                     style: TextStyle(
                       fontSize: 14,
-                      color: ColorManager.textSecondary(
-                        context,
-                      ).withOpacity(0.95),
+                      color: ColorManager.textSecondary(context).withValues(alpha: 0.95),
                     ),
                   ),
                   const SizedBox(height: 22),

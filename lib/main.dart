@@ -4,10 +4,8 @@ import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
-import 'package:traqtrace_app/features/admin/cubit/admin_cubit.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -21,7 +19,6 @@ import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 
 import 'package:traqtrace_app/features/gs1/bloc/gln/gln_cubit.dart';
-import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 
@@ -41,7 +38,6 @@ import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/utils/app_screen_util.dart';
 // Dashboard imports
 
-// API Management imports
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
 import 'package:traqtrace_app/features/api_management/providers/partner_access_provider.dart';
@@ -49,10 +45,8 @@ import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit
 
 import 'package:traqtrace_app/core/di/injection.dart';
 
-import 'package:traqtrace_app/data/services/admin_service.dart';
 import 'package:traqtrace_app/data/services/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/gln_service.dart';
-import 'package:traqtrace_app/data/services/gtin_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
@@ -60,8 +54,6 @@ import 'package:traqtrace_app/data/services/sscc_service.dart';
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/user_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
-import 'package:traqtrace_app/data/services/transformation_event_service.dart';
-import 'package:traqtrace_app/data/services/receiving_operation_service.dart';
 
 import 'core/network/dio_service.dart';
 
@@ -87,16 +79,17 @@ void main() async {
     await initDependencies(appConfig);
     debugPrint('Dependencies initialized.');
 
-    // Initialize WebSocket with the base URL
-    debugPrint('Initializing WebSocket...');
-    try {
-      getIt<WebSocketService>().initialize(appConfig.apiBaseUrl, '');
-    } catch (e) {
-      debugPrint('WebSocket initialization failed: $e');
-    }
-
     debugPrint('Starting TraqTraceApp...');
     runApp(const TraqTraceApp());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('Initializing WebSocket...');
+      try {
+        getIt<WebSocketService>().initialize(appConfig.apiBaseUrl, '');
+      } catch (e) {
+        debugPrint('WebSocket initialization failed: $e');
+      }
+    });
   } catch (e, stackTrace) {
     debugPrint('FATAL ERROR DURING APP START: $e');
     debugPrint(stackTrace.toString());
@@ -156,13 +149,6 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<ThemeCubit>(
           create: (context) =>
               ThemeCubit(profileCubit: context.read<ProfileCubit>()),
-        ),
-        BlocProvider<AdminCubit>(
-          create: (context) => AdminCubit(adminService: getIt<AdminService>()),
-        ),
-        // Add GTIN Cubit
-        BlocProvider<GTINCubit>(
-          create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
         ),
         // Add GLN Cubit
         BlocProvider<GLNCubit>(

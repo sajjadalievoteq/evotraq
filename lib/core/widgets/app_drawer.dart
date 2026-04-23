@@ -165,14 +165,14 @@ class AppDrawer extends StatelessWidget {
                 leading: const Icon(Icons.dashboard),
                 title: const Text('Dashboard'),
                 onTap: () {
-                  context.go('/home');
+                  context.go(Constants.homeRoute);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.person),
                 title: const Text('My Profile'),
                 onTap: () {
-                  context.go('/profile');
+                  context.go(Constants.profileRoute);
                 },
               ),
 
@@ -631,7 +631,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('User Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/users');
+                        context.go(Constants.adminUsersRoute);
                       },
                     ),
                     ListTile(
@@ -639,7 +639,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Pending Approvals'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/approvals');
+                        context.go(Constants.adminApprovalsRoute);
                       },
                     ),
                   ],
@@ -751,7 +751,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('System Settings'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/settings');
+                        context.go(Constants.adminSettingsRoute);
                       },
                     ),
                     ListTile(

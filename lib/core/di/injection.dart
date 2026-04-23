@@ -15,9 +15,10 @@ import 'package:traqtrace_app/data/services/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
+import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
-import '../../data/services/admin_service.dart';
 import '../../data/services/advanced_performance_service.dart';
 import '../../data/services/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
@@ -93,12 +94,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => UserService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<AdminService>(
-    () => AdminService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: getIt<AppConfig>(),
-    ),
+  getIt.registerLazySingleton<UserManagementService>(
+    () => UserManagementService(),
   );
 
   getIt.registerLazySingleton<GTINService>(
@@ -278,6 +275,11 @@ Future<void> initDependencies(AppConfig appConfig) async {
   // Cubits & Routers
   getIt.registerSingleton<AuthCubit>(
     AuthCubit(authService: getIt<AuthService>()),
+  );
+  getIt.registerFactory<UserManagementCubit>(
+    () => UserManagementCubit(
+      userManagementService: getIt<UserManagementService>(),
+    ),
   );
   getIt.registerSingleton<AppRouter>(AppRouter(authCubit: getIt<AuthCubit>()));
 }

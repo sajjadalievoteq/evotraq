@@ -66,7 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _HomeDashboardCache.ownerEmail != currentUser.email) {
       _HomeDashboardCache.clear();
     }
-    context.read<AuthCubit>().getCurrentUser();
+    if (currentUser == null) {
+      context.read<AuthCubit>().getCurrentUser();
+    }
     _initializeService();
   }
 

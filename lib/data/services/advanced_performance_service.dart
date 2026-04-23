@@ -25,7 +25,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/analyze',
+      '${_appConfig.apiBaseUrl}/admin/performance/query-plan/analyze',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -49,7 +49,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/patterns',
+      '${_appConfig.apiBaseUrl}/admin/performance/query-plan/patterns',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -72,7 +72,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/recommendations',
+      '${_appConfig.apiBaseUrl}/admin/performance/query-plan/recommendations',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -95,7 +95,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/query-plan/problematic',
+      '${_appConfig.apiBaseUrl}/admin/performance/query-plan/problematic',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -121,7 +121,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/status',
+      '${_appConfig.apiBaseUrl}/admin/performance/connection-pool/status',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -146,7 +146,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/leak-detection',
+      '${_appConfig.apiBaseUrl}/admin/performance/connection-pool/leak-detection',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -171,7 +171,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/health',
+      '${_appConfig.apiBaseUrl}/admin/performance/connection-pool/health',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -196,7 +196,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/connection-pool/recommendations',
+      '${_appConfig.apiBaseUrl}/admin/performance/connection-pool/recommendations',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -222,7 +222,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/metrics',
+      '${_appConfig.apiBaseUrl}/admin/performance/thread-pool/metrics',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -247,7 +247,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/contention',
+      '${_appConfig.apiBaseUrl}/admin/performance/thread-pool/contention',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -273,7 +273,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/backpressure',
+      '${_appConfig.apiBaseUrl}/admin/performance/thread-pool/backpressure',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -301,7 +301,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/thread-pool/optimize',
+      '${_appConfig.apiBaseUrl}/admin/performance/thread-pool/optimize',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -328,7 +328,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/resources/metrics',
+      '${_appConfig.apiBaseUrl}/admin/performance/resources/metrics',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -353,7 +353,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/resources/memory/optimize',
+      '${_appConfig.apiBaseUrl}/admin/performance/resources/memory/optimize',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -378,7 +378,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/resources/cpu/optimize',
+      '${_appConfig.apiBaseUrl}/admin/performance/resources/cpu/optimize',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -401,7 +401,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/resources/io/optimize',
+      '${_appConfig.apiBaseUrl}/admin/performance/resources/io/optimize',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -426,7 +426,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/resources/recommendations',
+      '${_appConfig.apiBaseUrl}/admin/performance/resources/recommendations',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -452,7 +452,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/comprehensive/analysis',
+      '${_appConfig.apiBaseUrl}/admin/performance/comprehensive/analysis',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -477,7 +477,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.post(
-      '${_appConfig.apiBaseUrl}/api/admin/performance/comprehensive/optimize',
+      '${_appConfig.apiBaseUrl}/admin/performance/comprehensive/optimize',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

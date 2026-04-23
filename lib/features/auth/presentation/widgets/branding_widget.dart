@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/config/constants.dart';
 import '../../../../shared/layout/layout_manager.dart';
@@ -30,20 +31,22 @@ class AuthBrandingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logoSize = prominent && layout.isLarge
-        ? (layout.width * 0.11).clamp(360.0, 420.0)
+        ? (layout.width * 0.11).clamp(2180.0, 2200.0)
         : layout.resolve(
-      compact: 80.0,
-      medium: 100.0,
-      expanded: 130.0,
-      large: 120.0,
+      compact: 150.0,
+      medium: 200.0,
+      expanded: 340.0,
+      large: 300.0,
     );
 
     return SizedBox(
       width: logoSize,
       height: logoSize,
-      child: Image.asset(
-        logoAssetPath,
-        fit: BoxFit.contain,
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Image.asset(logoAssetPath),
+        ),
       ),
     );
   }

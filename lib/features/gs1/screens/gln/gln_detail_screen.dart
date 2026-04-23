@@ -10,7 +10,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/gs1/bloc/gln/gln_cubit.dart';
-import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/widgets/geospatial_coordinates_widget.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';

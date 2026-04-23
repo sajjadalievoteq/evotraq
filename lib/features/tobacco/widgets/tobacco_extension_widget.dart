@@ -14,6 +14,7 @@ class TobaccoExtensionWidget extends StatefulWidget {
   final String? gtinCode;
   final bool isEditing;
   final Function(GTINTobaccoExtension?)? onSaved;
+  final GTINTobaccoExtension? initialExtension;
 
   const TobaccoExtensionWidget({
     Key? key,
@@ -21,6 +22,7 @@ class TobaccoExtensionWidget extends StatefulWidget {
     this.gtinCode,
     this.isEditing = false,
     this.onSaved,
+    this.initialExtension,
   }) : super(key: key);
 
   @override
@@ -121,7 +123,14 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
   @override
   void initState() {
     super.initState();
-    _loadTobaccoExtension();
+    if (widget.initialExtension != null) {
+      _extension = widget.initialExtension;
+      _hasExtension = true;
+      _isLoading = false;
+      _initializeForm(widget.initialExtension!);
+    } else {
+      _loadTobaccoExtension();
+    }
   }
 
   @override
@@ -293,6 +302,15 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         collapsedBackgroundColor: Colors.brown.shade700,
         collapsedTextColor: Colors.white,
         collapsedIconColor: Colors.white,
+        // Default expanded [shape] uses [ThemeData.dividerColor] top/bottom — removes that line.
+        shape: const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        ),
+        collapsedShape: const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        ),
         leading: Icon(
           Icons.smoking_rooms,
           color: _hasExtension ? Colors.brown : Colors.grey,
@@ -303,6 +321,8 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
             fontWeight: FontWeight.bold,
             color: _hasExtension ? Colors.brown : null,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         //subtitle: _hasExtension
         //    ? Text('${_extension?.tobaccoCategory.displayName ?? ''} - ${_brandFamilyController.text}')
@@ -393,6 +413,8 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
           fontWeight: FontWeight.bold,
           color: Colors.brown.shade700,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -411,10 +433,16 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Expanded(
-            child: Text(value),
+            child: Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

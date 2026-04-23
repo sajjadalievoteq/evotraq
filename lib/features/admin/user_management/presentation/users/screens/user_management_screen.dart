@@ -5,10 +5,11 @@ import 'package:traqtrace_app/features/admin/user_management/cubit/user_manageme
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
 import 'dart:async';
 
-import 'package:traqtrace_app/features/auth/presentation/widgets/background_container_widget.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import '../widgets/user_management_constants.dart';
 import '../widgets/user_management_filter_section.dart';
 import '../widgets/user_management_form_dialog.dart';
@@ -260,14 +261,14 @@ class _UserManagementContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: Column(
               children: [
-               if(index==0) SizedBox(height: UserManagementConstants.spacing,),
+               if(index==0) SizedBox(height: Constants.spacing,),
                 UserManagementUserCard(
                   user: user,
                   isToggleLoading: togglingUserId == user.id,
                   onEdit: onEditUser,
                   onToggleStatus: onToggleStatus,
                 ),
-                SizedBox(height:index==users.length-1?0: UserManagementConstants.spacing),
+                SizedBox(height:index==users.length-1?0: Constants.spacing),
 
               ],
             ),

@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
+import '../../../../../../core/consts/app_consts.dart';
 import '../widgets/user_approval_card.dart';
 import '../widgets/user_approvals_loading_view.dart';
 import '../widgets/user_approval_reject_dialog.dart';
 import '../widgets/user_approvals_header_section.dart';
 import '../../users/widgets/user_management_constants.dart';
 import '../../users/widgets/user_management_section_width.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/background_container_widget.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 import 'dart:async';
@@ -142,7 +143,7 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                       isRefreshing: _isRefreshing,
                     ),
                   ),
-                  const SizedBox(height: UserManagementConstants.spacing),
+                  const SizedBox(height: Constants.spacing),
                   Expanded(
                     child: _ApprovalsContent(
                       approvals: filteredApprovals,
@@ -197,7 +198,7 @@ class _ApprovalsContent extends StatelessWidget {
             child: Column(
               children: [
                 if (index == 0)
-                  const SizedBox(height: UserManagementConstants.spacing),
+                  const SizedBox(height:Constants.spacing),
                 UserApprovalCard(
                   user: approval,
                   onApprove: onApprove,
@@ -206,7 +207,7 @@ class _ApprovalsContent extends StatelessWidget {
                 SizedBox(
                   height: index == approvals.length - 1
                       ? 0
-                      : UserManagementConstants.spacing,
+                      : Constants.spacing,
                 ),
               ],
             ),

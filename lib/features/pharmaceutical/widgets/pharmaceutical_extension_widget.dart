@@ -13,6 +13,7 @@ class PharmaceuticalExtensionWidget extends StatefulWidget {
   final String? gtinCode;
   final bool isEditing;
   final Function(GTINPharmaceuticalExtension?)? onSaved;
+  final GTINPharmaceuticalExtension? initialExtension;
 
   const PharmaceuticalExtensionWidget({
     Key? key,
@@ -20,6 +21,7 @@ class PharmaceuticalExtensionWidget extends StatefulWidget {
     this.gtinCode,
     this.isEditing = false,
     this.onSaved,
+    this.initialExtension,
   }) : super(key: key);
 
   @override
@@ -123,7 +125,14 @@ class PharmaceuticalExtensionWidgetState
   @override
   void initState() {
     super.initState();
-    _loadExtension();
+    if (widget.initialExtension != null) {
+      _populateFormFromExtension(widget.initialExtension!);
+      _extension = widget.initialExtension;
+      _hasExtension = true;
+      _isLoading = false;
+    } else {
+      _loadExtension();
+    }
   }
 
   @override
@@ -368,6 +377,15 @@ class PharmaceuticalExtensionWidgetState
         collapsedBackgroundColor: const Color(0xFF121F17),
         collapsedTextColor: Colors.white,
         collapsedIconColor: Colors.white,
+        // Default expanded [shape] uses [ThemeData.dividerColor] top/bottom — removes that line.
+        shape: const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        ),
+        collapsedShape: const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        ),
         leading: Icon(
           Icons.medical_services,
           color: _hasExtension ? const Color(0xFF121F17) : Colors.grey,
@@ -378,6 +396,8 @@ class PharmaceuticalExtensionWidgetState
             fontWeight: FontWeight.bold,
             color: _hasExtension ? const Color(0xFF121F17) : null,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         //subtitle: _hasExtension
         //    ? Text('${_drugClassController.text} - ${_dosageFormController.text}')
@@ -621,6 +641,8 @@ class PharmaceuticalExtensionWidgetState
           fontWeight: FontWeight.bold,
           color: Color(0xFF121F17),
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

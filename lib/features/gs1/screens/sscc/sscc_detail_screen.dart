@@ -9,7 +9,7 @@ import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
-import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';

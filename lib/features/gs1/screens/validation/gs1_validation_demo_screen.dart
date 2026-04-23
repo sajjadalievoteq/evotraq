@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
-import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 
 /// A demo screen showcasing all GS1 validation capabilities.
 /// This screen can be used for testing and demonstrating various GS1 validations.

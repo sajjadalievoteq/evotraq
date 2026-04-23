@@ -17,11 +17,11 @@ class GTIN extends Equatable {
   final DateTime? authorizationExpiry;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  
+
   /// Flag indicating if this GTIN is a tobacco product.
   /// Used for seamless tobacco workflow integration in EPCIS events.
   final bool isTobaccoProduct;
-  
+
   /// Flag indicating if this GTIN is a pharmaceutical product.
   /// Used for pharmaceutical-specific workflows.
   final bool isPharmaceuticalProduct;
@@ -104,10 +104,11 @@ class GTIN extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isTobaccoProduct: isTobaccoProduct ?? this.isTobaccoProduct,
-      isPharmaceuticalProduct: isPharmaceuticalProduct ?? this.isPharmaceuticalProduct,
+      isPharmaceuticalProduct:
+          isPharmaceuticalProduct ?? this.isPharmaceuticalProduct,
     );
   }
-  
+
   /// Convert GTIN to JSON format
   Map<String, dynamic> toJson() {
     return {
@@ -116,27 +117,34 @@ class GTIN extends Equatable {
       if (manufacturer != null) 'manufacturer': manufacturer,
       if (packagingLevel != null) 'packagingLevel': packagingLevel,
       if (packSize != null) 'packSize': packSize,
-      if (status != null) 'productStatus': status, // Use 'productStatus' expected by backend
-      if (registrationNumber != null) 'marketingAuthorizationNumber': registrationNumber, // Use field name expected by backend
+      if (status != null)
+        'productStatus': status, // Use 'productStatus' expected by backend
+      if (registrationNumber != null)
+        'marketingAuthorizationNumber':
+            registrationNumber, // Use field name expected by backend
       if (parentGTIN != null) 'parentGTIN': parentGTIN,
-      if (marketAuthorization != null) 'marketAuthorizations': {
-        'DEFAULT': marketAuthorization // Convert to map format expected by backend
-      },
-      if (registrationDate != null) 'marketingAuthorizationDate': _formatDateWithTimezone(registrationDate!),
-      if (expirationDate != null) 'discontinuationDate': _formatDateWithTimezone(expirationDate!),
-      if (authorizationExpiry != null && registrationDate == null) 'marketingAuthorizationDate': _formatDateWithTimezone(authorizationExpiry!),
+      if (marketAuthorization != null)
+        'marketAuthorizations': {
+          'DEFAULT': marketAuthorization // Convert to map format expected by backend
+        },
+      if (registrationDate != null)
+        'marketingAuthorizationDate':
+            _formatDateWithTimezone(registrationDate!),
+      if (expirationDate != null)
+        'discontinuationDate': _formatDateWithTimezone(expirationDate!),
+      if (authorizationExpiry != null && registrationDate == null)
+        'marketingAuthorizationDate':
+            _formatDateWithTimezone(authorizationExpiry!),
       // Industry extension flags are read-only from backend (set by triggers), don't send them
     };
   }
 
   /// Create GTIN from JSON
   factory GTIN.fromJson(Map<String, dynamic> json) {
-    // Debug print to see what date fields we're receiving
-    print('GTIN fromJson - date fields: marketingAuthorizationDate=${json['marketingAuthorizationDate']}, discontinuationDate=${json['discontinuationDate']}, expirationDate=${json['expirationDate']}');
-    
     // Handle marketAuthorizations map from backend
     String? marketAuth;
-    if (json['marketAuthorizations'] != null && json['marketAuthorizations'] is Map) {
+    if (json['marketAuthorizations'] != null &&
+        json['marketAuthorizations'] is Map) {
       var auths = json['marketAuthorizations'] as Map;
       if (auths.isNotEmpty) {
         // Just take the first value from the map
@@ -149,9 +157,12 @@ class GTIN extends Equatable {
       productName: json['productName'] ?? '',
       manufacturer: json['manufacturer'],
       packagingLevel: json['packagingLevel'],
-      packSize: json['packSize'] != null ? int.tryParse(json['packSize'].toString()) : null,
+      packSize: json['packSize'] != null
+          ? int.tryParse(json['packSize'].toString())
+          : null,
       status: json['status'] ?? json['productStatus'], // Handle both field names
-      registrationNumber: json['registrationNumber'] ?? json['marketingAuthorizationNumber'],
+      registrationNumber:
+          json['registrationNumber'] ?? json['marketingAuthorizationNumber'],
       parentGTIN: json['parentGTIN'],
       marketAuthorization: marketAuth ?? json['marketAuthorization'],
       authorizationCountry: json['authorizationCountry'],
@@ -182,14 +193,14 @@ class GTIN extends Equatable {
       isPharmaceuticalProduct: json['isPharmaceuticalProduct'] == true,
     );
   }
-  
+
   /// Packaging level enum values
   static const String packagingLevelItem = 'ITEM';
   static const String packagingLevelInnerPack = 'INNER_PACK';
   static const String packagingLevelPack = 'PACK';
   static const String packagingLevelCase = 'CASE';
   static const String packagingLevelPallet = 'PALLET';
-  
+
   /// Product status enum values
   static const String statusActive = 'ACTIVE';
   static const String statusWithdrawn = 'WITHDRAWN';
@@ -201,12 +212,12 @@ class GTIN extends Equatable {
     // Convert to format that Java's ZonedDateTime can parse
     // Example format: 2025-05-13T14:52:02.114Z or 2025-05-13T14:52:02.114+00:00
     final String iso8601String = dateTime.toIso8601String();
-    
+
     // Check if the string already has timezone information
     if (iso8601String.endsWith('Z') || iso8601String.contains('+')) {
       return iso8601String;
     }
-    
+
     // Add UTC timezone marker if missing
     return '${iso8601String}Z';
   }

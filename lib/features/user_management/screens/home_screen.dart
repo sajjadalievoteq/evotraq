@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -11,7 +10,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/dashboard_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_loading_screen.dart';
 
-import '../../../core/config/constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 
 class _HomeDashboardCache {
   static DashboardStats? stats;
@@ -233,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Two-column layout for Recent Events and System Health
               LayoutBuilder(
                 builder: (context, innerConstraints) {
-                  if (innerConstraints.maxWidth > 800) {
+                  if (innerConstraints.maxWidth > Constants.maxContentWidth) {
                     // Wide screen - side by side
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.qr_code,
               color: AppTheme.statsTiles, //Colors.blue,
               width: cardWidth,
-              onTap: () => context.push('/gs1/gtins'),
+              onTap: () => context.push(Constants.gs1GtinsRoute),
             ),
             _StatCard(
               title: 'GLNs',
@@ -310,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.location_on,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/gs1/glns'),
+              onTap: () => context.push(Constants.gs1GlnsRoute),
             ),
             _StatCard(
               title: 'SGTINs',
@@ -318,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.qr_code_scanner,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/gs1/sgtins'),
+              onTap: () => context.push(Constants.gs1SgtinsRoute),
             ),
             _StatCard(
               title: 'SSCCs',
@@ -326,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.inventory,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/gs1/ssccs'),
+              onTap: () => context.push(Constants.gs1SsccsRoute),
             ),
             // Event type counts
             _StatCard(
@@ -335,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.inventory_2,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/epcis/object-events'),
+              onTap: () => context.push(Constants.epcisObjectEventsRoute),
             ),
             _StatCard(
               title: 'Aggregation',
@@ -343,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.category,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/epcis/aggregation-events'),
+              onTap: () => context.push(Constants.epcisAggregationEventsRoute),
             ),
             _StatCard(
               title: 'Transaction',
@@ -351,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.receipt,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/epcis/transaction-events'),
+              onTap: () => context.push(Constants.epcisTransactionEventsRoute),
             ),
             _StatCard(
               title: 'Transform',
@@ -359,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.transform,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/epcis/transformation-events'),
+              onTap: () => context.push(Constants.epcisTransformationEventsRoute),
             ),
             _StatCard(
               title: 'Total',
@@ -367,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.event,
               color: AppTheme.statsTiles,
               width: cardWidth,
-              onTap: () => context.push('/epcis/events'),
+              onTap: () => context.push(Constants.epcisEventsRoute),
             ),
           ],
         );
@@ -380,50 +379,52 @@ class _HomeScreenState extends State<HomeScreen> {
       _QuickAction(
         icon: Icons.qr_code,
         title: 'GTIN Management',
+        subtitle: 'GS1 identifiers',
         color: Colors.blue,
-        route: '/gs1/gtins',
+        route: Constants.gs1GtinsRoute,
+        isDisabled: false,
       ),
       _QuickAction(
         icon: Icons.location_on,
         title: 'GLN Management',
         color: Colors.green,
-        route: '/gs1/glns',
+        route: Constants.gs1GlnsRoute,
       ),
       _QuickAction(
         icon: Icons.qr_code_scanner,
         title: 'SGTIN Management',
         color: Colors.orange,
-        route: '/gs1/sgtins',
+        route: Constants.gs1SgtinsRoute,
       ),
       _QuickAction(
         icon: Icons.inventory,
         title: 'SSCC Management',
         color: Colors.purple,
-        route: '/gs1/ssccs',
+        route: Constants.gs1SsccsRoute,
       ),
       _QuickAction(
         icon: Icons.local_shipping,
         title: 'Create Shipment',
         color: Colors.indigo,
-        route: '/operations/shipping/create',
+        route: Constants.opShippingCreateRoute,
       ),
       _QuickAction(
         icon: Icons.download,
         title: 'Receive Shipment',
         color: Colors.teal,
-        route: '/operations/receiving',
+        route: Constants.opReceivingRoute,
       ),
       _QuickAction(
         icon: Icons.inventory_2,
         title: 'Packing',
         color: Colors.deepOrange,
-        route: '/operations/packing',
+        route: Constants.opPackingRoute,
       ),
       _QuickAction(
         icon: Icons.play_for_work,
         title: 'Commissioning',
         color: Colors.cyan,
-        route: '/operations/commissioning',
+        route: Constants.opCommissioningRoute,
       ),
     ];
 
@@ -474,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Constants.spacing),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -486,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
-                  onPressed: () => context.push('/epcis/events'),
+                  onPressed: () => context.push(Constants.epcisEventsRoute),
                   child: const Text('View All'),
                 ),
               ],
@@ -517,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Constants.spacing),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

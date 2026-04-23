@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';
 import '../../users/widgets/user_management_section_width.dart';
 
@@ -22,13 +23,13 @@ class UserApprovalsLoadingView extends StatelessWidget {
           UserManagementSectionWidth(
             child: _UserApprovalsHeaderSkeleton(baseColor: baseColor),
           ),
-          const SizedBox(height: UserManagementConstants.spacing),
+          const SizedBox(height:Constants.spacing),
           Expanded(
             child: ListView.separated(
               itemCount: 5,
               padding: EdgeInsets.zero,
               separatorBuilder: (_, __) =>
-                  const SizedBox(height: UserManagementConstants.spacing),
+                  const SizedBox(height:Constants.spacing),
               itemBuilder: (context, index) {
                 return UserManagementSectionWidth(
                   child: _UserApprovalCardSkeleton(baseColor: baseColor),
@@ -52,13 +53,13 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(UserManagementConstants.cardRadius),
+        borderRadius: BorderRadius.circular(Constants.cardRadius),
       ),
       child: Padding(
-        padding: UserManagementConstants.sectionPadding,
+        padding: Constants.sectionPadding,
         child: Wrap(
-          spacing: UserManagementConstants.spacing,
-          runSpacing: UserManagementConstants.spacing,
+          spacing: Constants.spacing,
+          runSpacing: Constants.spacing,
           alignment: WrapAlignment.spaceBetween,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
@@ -137,8 +138,8 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
                   _skeletonBox(baseColor, width: 150, height: 14, radius: 8),
                   const SizedBox(height: 12),
                   Wrap(
-                    spacing: UserManagementConstants.spacing,
-                    runSpacing: UserManagementConstants.spacing,
+                    spacing: Constants.spacing,
+                    runSpacing: Constants.spacing,
                     children: [
                       _skeletonBox(baseColor, width: 160, height: 50),
                       _skeletonBox(baseColor, width: 160, height: 50),
@@ -163,9 +164,9 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
                         radius: 8,
                       ),
                     ),
-                    const SizedBox(width: UserManagementConstants.spacing),
+                    const SizedBox(width: Constants.spacing),
                     _skeletonBox(baseColor, width: 150, height: 50),
-                    const SizedBox(width: UserManagementConstants.spacing),
+                    const SizedBox(width: Constants.spacing),
                     _skeletonBox(baseColor, width: 150, height: 50),
                   ],
                 ),

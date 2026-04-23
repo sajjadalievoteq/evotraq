@@ -44,6 +44,7 @@ import 'package:traqtrace_app/features/api_management/providers/partner_access_p
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
 import 'package:traqtrace_app/data/services/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/gln_service.dart';
@@ -224,8 +225,13 @@ class TraqTraceApp extends StatelessWidget {
               routerConfig: getIt<AppRouter>().router,
               builder: (context, child) => AppScreenUtilInit(
                 child: AppLayoutBuilder(
-                  builder: (context, layout) =>
+                  builder: (context, layout) => Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const AppBackgroundLayer(),
                       child ?? const SizedBox.shrink(),
+                    ],
+                  ),
                 ),
               ),
             ),

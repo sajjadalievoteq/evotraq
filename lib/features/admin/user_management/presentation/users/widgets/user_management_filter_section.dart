@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
 
 class UserManagementFilterSection extends StatelessWidget {
@@ -34,10 +35,10 @@ class UserManagementFilterSection extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(UserManagementConstants.cardRadius),
+        borderRadius: BorderRadius.circular(Constants.cardRadius),
       ),
       child: Padding(
-        padding: UserManagementConstants.sectionPadding,
+        padding: Constants.sectionPadding,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final maxWidth = constraints.maxWidth;
@@ -52,10 +53,10 @@ class UserManagementFilterSection extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                 ),
-                const SizedBox(height: UserManagementConstants.spacing),
+                const SizedBox(height: Constants.spacing),
                 Wrap(
-                  spacing: UserManagementConstants.spacing,
-                  runSpacing: UserManagementConstants.spacing,
+                  spacing: Constants.spacing,
+                  runSpacing: Constants.spacing,
                   children: [
                     SizedBox(
                       width: widths.searchWidth,
@@ -120,10 +121,10 @@ class UserManagementFilterSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: UserManagementConstants.spacing),
+                const SizedBox(height: Constants.spacing),
                 Wrap(
-                  runSpacing: UserManagementConstants.spacing,
-                  spacing: UserManagementConstants.spacing,
+                  runSpacing: Constants.spacing,
+                  spacing: Constants.spacing,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   alignment: WrapAlignment.spaceBetween,
                   children: [
@@ -135,8 +136,8 @@ class UserManagementFilterSection extends StatelessWidget {
                             ),
                       ),
                     Wrap(
-                      spacing: UserManagementConstants.spacing,
-                      runSpacing: UserManagementConstants.spacing,
+                      spacing: Constants.spacing,
+                      runSpacing: Constants.spacing,
                       children: [
                         ElevatedButton.icon(
                           onPressed: onRefresh,
@@ -185,15 +186,15 @@ class _FieldWidths {
     if (maxWidth < 1080) {
       return _FieldWidths(
         searchWidth: maxWidth,
-        filterWidth: (maxWidth - UserManagementConstants.spacing) / 2,
+        filterWidth: (maxWidth - Constants.spacing) / 2,
       );
     }
 
     final filterWidth =
-        ((maxWidth * 0.42) - UserManagementConstants.spacing) / 2;
+        ((maxWidth * 0.42) - Constants.spacing) / 2;
 
     return _FieldWidths(
-      searchWidth: maxWidth * 0.58 - UserManagementConstants.spacing,
+      searchWidth: maxWidth * 0.58 - Constants.spacing,
       filterWidth: filterWidth,
     );
   }

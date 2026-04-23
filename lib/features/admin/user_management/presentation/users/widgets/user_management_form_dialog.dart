@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
 import 'user_management_input_field.dart';
 
@@ -114,7 +115,7 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
     if (maxWidth < 560 || fullWidth) {
       return maxWidth;
     }
-    return (maxWidth - UserManagementConstants.spacing) / 2;
+    return (maxWidth - Constants.spacing) / 2;
   }
 
   String get _title =>
@@ -132,7 +133,7 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
         constraints: BoxConstraints(
           maxWidth: dialogWidth.clamp(
             320.0,
-            UserManagementConstants.dialogMaxWidth,
+            Constants.dialogMaxWidth,
           ),
         ),
         child: SingleChildScrollView(
@@ -143,8 +144,8 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
               return Form(
                 key: _formKey,
                 child: Wrap(
-                  spacing: UserManagementConstants.spacing,
-                  runSpacing: UserManagementConstants.spacing,
+                  spacing: Constants.spacing,
+                  runSpacing: Constants.spacing,
                   children: [
                     if (!widget.isEditing)
                       SizedBox(

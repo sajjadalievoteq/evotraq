@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
-import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';

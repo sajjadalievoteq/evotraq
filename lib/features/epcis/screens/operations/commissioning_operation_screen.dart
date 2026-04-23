@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
+import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
-import 'package:traqtrace_app/data/services/gtin_service.dart';
 import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
@@ -71,7 +72,7 @@ class _CommissioningOperationScreenState
   @override
   void initState() {
     super.initState();
-    _loadGTINs();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGTINs());
     // Add focus listener for wired scanner
     _wiredScannerFocusNode.addListener(() {
       setState(() {
@@ -83,8 +84,7 @@ class _CommissioningOperationScreenState
   Future<void> _loadGTINs() async {
     setState(() => _isLoadingGTINs = true);
     try {
-      final gtinService = getIt<GTINService>();
-      final gtins = await gtinService.getGTINs();
+      final gtins = await context.read<GTINCubit>().fetchGtinsForPicker();
       setState(() {
         _availableGTINs = gtins;
         _isLoadingGTINs = false;

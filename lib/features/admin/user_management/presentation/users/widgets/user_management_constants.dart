@@ -54,10 +54,4 @@ abstract final class UserManagementConstants {
     inactiveStatus,
     pendingStatus,
   ];
-
-  static const double spacing = 16;
-  static const double cardRadius = 20;
-  static const double sectionMaxWidth = 1280;
-  static const double dialogMaxWidth = 720;
-  static const EdgeInsets sectionPadding = EdgeInsets.all(20);
 }

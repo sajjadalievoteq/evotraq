@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
-import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 
 /// Mixin that adds GS1-specific validation capabilities to form screens.

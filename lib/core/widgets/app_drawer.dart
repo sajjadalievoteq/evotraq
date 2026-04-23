@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 
-import '../config/constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 
 /// A reusable drawer component that can be used across all screens
 class AppDrawer extends StatelessWidget {
@@ -194,7 +194,7 @@ class AppDrawer extends StatelessWidget {
                 title: const Text('Product Journey'),
                 subtitle: const Text('Track supply chain flow'),
                 onTap: () {
-                  context.go('/dashboards/journey');
+                  context.go(Constants.journeyDashboardRoute);
                 },
               ),
 
@@ -222,7 +222,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GTIN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/gtins');
+                      context.go(Constants.gs1GtinsRoute);
                     },
                   ),
                   ListTile(
@@ -230,7 +230,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GLN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/glns');
+                      context.go(Constants.gs1GlnsRoute);
                     },
                   ),
                 ],
@@ -246,7 +246,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('SSCC Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/ssccs');
+                      context.go(Constants.gs1SsccsRoute);
                     },
                   ),
                   ListTile(
@@ -254,7 +254,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('SGTIN Management'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/sgtins');
+                      context.go(Constants.gs1SgtinsRoute);
                     },
                   ),
                 ],
@@ -270,7 +270,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Object Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/object-events');
+                      context.go(Constants.epcisObjectEventsRoute);
                     },
                   ),
                   ListTile(
@@ -278,7 +278,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Aggregation Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/aggregation-events');
+                      context.go(Constants.epcisAggregationEventsRoute);
                     },
                   ),
                   ListTile(
@@ -286,7 +286,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transaction Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/transaction-events');
+                      context.go(Constants.epcisTransactionEventsRoute);
                     },
                   ),
                   ListTile(
@@ -294,7 +294,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transformation Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/transformation-events');
+                      context.go(Constants.epcisTransformationEventsRoute);
                     },
                   ),
                 ],
@@ -310,7 +310,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('All Events'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/events');
+                      context.go(Constants.epcisEventsRoute);
                     },
                   ),
                   ListTile(
@@ -372,7 +372,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Transaction Documents'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/transaction-documents');
+                      context.go(Constants.epcisTransactionDocumentsRoute);
                     },
                   ),
                   ListTile(
@@ -380,7 +380,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Advanced Query'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/advanced-query');
+                      context.go(Constants.epcisAdvancedQueryRoute);
                     },
                   ),
                   ListTile(
@@ -388,7 +388,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Supply Chain Traversal'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/traversal-query');
+                      context.go(Constants.epcisTraversalQueryRoute);
                     },
                   ),
                   ListTile(
@@ -396,7 +396,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Event Serialization'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/epcis/serialization');
+                      context.go(Constants.epcisSerializationRoute);
                     },
                   ),
                 ],
@@ -424,7 +424,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Bulk Commission'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/commissioning/new');
+                      context.go(Constants.opCommissioningNewRoute);
                     },
                   ),
                   ListTile(
@@ -432,7 +432,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Commissioning'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/commissioning');
+                      context.go(Constants.opCommissioningRoute);
                     },
                   ),
                 ],
@@ -446,7 +446,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Packing'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/packing/create');
+                      context.go(Constants.opPackingCreateRoute);
                     },
                   ),
                   ListTile(
@@ -454,7 +454,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Packing'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/packing');
+                      context.go(Constants.opPackingRoute);
                     },
                   ),
                 ],
@@ -468,7 +468,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Shipment'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/shipping/create');
+                      context.go(Constants.opShippingCreateRoute);
                     },
                   ),
                   ListTile(
@@ -476,7 +476,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Shipments'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/shipping');
+                      context.go(Constants.opShippingRoute);
                     },
                   ),
                 ],
@@ -490,7 +490,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Create Receiving'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/receiving/create');
+                      context.go(Constants.opReceivingCreateRoute);
                     },
                   ),
                   ListTile(
@@ -498,7 +498,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('View Receiving'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/operations/receiving');
+                      context.go(Constants.opReceivingRoute);
                     },
                   ),
                 ],
@@ -528,7 +528,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Generate Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/barcode/generate');
+                      context.go(Constants.barcodeGenerateRoute);
                     },
                   ),
                   ListTile(
@@ -536,7 +536,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Scan Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/barcode/scan');
+                      context.go(Constants.barcodeScanRoute);
                     },
                   ),
                   ListTile(
@@ -544,7 +544,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Verify Barcode'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/barcode/verify');
+                      context.go(Constants.barcodeVerifyRoute);
                     },
                   ),
                 ],
@@ -560,7 +560,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GS1 Validation Demo'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/validation-demo');
+                      context.go(Constants.gs1ValidationDemoRoute);
                     },
                   ),
                   ListTile(
@@ -568,7 +568,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('GS1 Validation Tests'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/admin/gs1-validation');
+                      context.go(Constants.adminGs1ValidationRoute);
                     },
                   ),
                   ListTile(
@@ -576,7 +576,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Integration Validation'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/admin/integration-validation');
+                      context.go(Constants.adminIntegrationValidationRoute);
                     },
                   ),
                   ListTile(
@@ -584,7 +584,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('Validation Rules'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/admin/validation-rules');
+                      context.go(Constants.adminValidationRulesRoute);
                     },
                   ),
                 ],
@@ -600,7 +600,7 @@ class AppDrawer extends StatelessWidget {
                     title: const Text('EPC Conversion'),
                     contentPadding: const EdgeInsets.only(left: 32.0),
                     onTap: () {
-                      context.go('/gs1/epc-conversion');
+                      context.go(Constants.gs1EpcConversionRoute);
                     },
                   ),
                 ],
@@ -655,7 +655,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Notification Center'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/notifications');
+                        context.go(Constants.notificationsRoute);
                       },
                     ),
                     ListTile(
@@ -663,7 +663,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Manage Subscriptions'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/notifications/subscriptions');
+                        context.go(Constants.notificationSubscriptionsRoute);
                       },
                     ),
                     ListTile(
@@ -671,7 +671,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Webhook Configuration'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/notifications/webhooks');
+                        context.go(Constants.notificationWebhooksRoute);
                       },
                     ),
                   ],
@@ -687,7 +687,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Job Queue Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/job-queue');
+                        context.go(Constants.adminJobQueueRoute);
                       },
                     ),
                     ListTile(
@@ -695,7 +695,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('ETL Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/etl-management');
+                        context.go(Constants.adminEtlManagementRoute);
                       },
                     ),
                     ListTile(
@@ -703,7 +703,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Bulk Export'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/bulk-export');
+                        context.go(Constants.adminBulkExportRoute);
                       },
                     ),
                   ],
@@ -719,7 +719,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('API Collections'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/api-management/collections');
+                        context.go(Constants.adminApiCollectionsRoute);
                       },
                     ),
                     ListTile(
@@ -727,7 +727,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Partner Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/api-management/partners');
+                        context.go(Constants.adminApiPartnersRoute);
                       },
                     ),
                     ListTile(
@@ -735,7 +735,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Service Accounts'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/api-management/service-accounts');
+                        context.go(Constants.adminApiServiceAccountsRoute);
                       },
                     ),
                   ],
@@ -759,7 +759,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Cache Management'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/cache');
+                        context.go(Constants.adminCacheRoute);
                       },
                     ),
                     ListTile(
@@ -767,7 +767,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Performance Tests'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/performance-tests');
+                        context.go(Constants.adminPerformanceTestsRoute);
                       },
                     ),
                     ListTile(
@@ -775,7 +775,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Performance Optimization'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/performance-optimization');
+                        context.go(Constants.adminPerformanceOptimizationRoute);
                       },
                     ),
                     ListTile(
@@ -783,7 +783,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('System Monitoring'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/monitoring');
+                        context.go(Constants.adminMonitoringRoute);
                       },
                     ),
                     ListTile(
@@ -791,7 +791,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Database Partitioning'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/database-partitioning');
+                        context.go(Constants.adminDatabasePartitioningRoute);
                       },
                     ),
                     ListTile(
@@ -799,7 +799,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Data Consistency & Integrity'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/data-consistency-integrity');
+                        context.go(Constants.adminDataConsistencyIntegrityRoute);
                       },
                     ),
                   ],
@@ -815,7 +815,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Event Generation Tests'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/event-generation-test');
+                        context.go(Constants.adminEventGenerationTestRoute);
                       },
                     ),
                     ListTile(
@@ -823,7 +823,7 @@ class AppDrawer extends StatelessWidget {
                       title: const Text('Industry Test Data'),
                       contentPadding: const EdgeInsets.only(left: 32.0),
                       onTap: () {
-                        context.go('/admin/industry-test-data');
+                        context.go(Constants.adminIndustryTestDataRoute);
                       },
                     ),
                   ],

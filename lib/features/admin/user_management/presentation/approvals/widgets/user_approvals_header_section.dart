@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';
 
 class UserApprovalsHeaderSection extends StatelessWidget {
@@ -72,15 +73,15 @@ class UserApprovalsHeaderSection extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(UserManagementConstants.cardRadius),
+        borderRadius: BorderRadius.circular(Constants.cardRadius),
       ),
       child: Padding(
-        padding: UserManagementConstants.sectionPadding,
+        padding: Constants.sectionPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             titleBlock,
-            const SizedBox(height: UserManagementConstants.spacing),
+            const SizedBox(height: Constants.spacing),
             LayoutBuilder(
               builder: (context, constraints) {
                 final isCompact = constraints.maxWidth < 600;
@@ -90,7 +91,7 @@ class UserApprovalsHeaderSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       searchField,
-                      const SizedBox(height: UserManagementConstants.spacing),
+                      const SizedBox(height: Constants.spacing),
                       Align(
                         alignment: Alignment.centerRight,
                         child: refreshButton,
@@ -102,7 +103,7 @@ class UserApprovalsHeaderSection extends StatelessWidget {
                 return Row(
                   children: [
                     Expanded(child: searchField),
-                    const SizedBox(width: UserManagementConstants.spacing),
+                    const SizedBox(width:Constants.spacing),
                     refreshButton,
                   ],
                 );

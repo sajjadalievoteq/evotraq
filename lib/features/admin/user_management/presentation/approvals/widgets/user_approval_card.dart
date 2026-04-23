@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/user_management/user_management_models
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';
 
 class UserApprovalCard extends StatelessWidget {
@@ -83,8 +84,8 @@ class UserApprovalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Wrap(
-                    spacing: UserManagementConstants.spacing,
-                    runSpacing: UserManagementConstants.spacing,
+                    spacing: Constants.spacing,
+                    runSpacing: Constants.spacing,
                     children: [
                       SizedBox(
                         width: 160,
@@ -118,7 +119,7 @@ class UserApprovalCard extends StatelessWidget {
                               ),
                         ),
                       ),
-                      const SizedBox(width: UserManagementConstants.spacing),
+                      const SizedBox(width:Constants.spacing),
                       SizedBox(
                         width: 150,
                         child: CustomOutlinedButtonWidget(
@@ -126,7 +127,7 @@ class UserApprovalCard extends StatelessWidget {
                           onTap: () => onReject(user),
                         ),
                       ),
-                      const SizedBox(width: UserManagementConstants.spacing),
+                      const SizedBox(width: Constants.spacing),
                       SizedBox(
                         width: 150,
                         child: CustomButtonWidget(

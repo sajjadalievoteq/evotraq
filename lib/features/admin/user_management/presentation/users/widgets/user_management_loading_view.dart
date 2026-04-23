@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
 import 'user_management_section_width.dart';
 
@@ -22,13 +23,13 @@ class UserManagementLoadingView extends StatelessWidget {
           UserManagementSectionWidth(
             child: _UserManagementFilterSkeleton(baseColor: baseColor),
           ),
-          const SizedBox(height: UserManagementConstants.spacing),
+          const SizedBox(height: Constants.spacing),
           Expanded(
             child: ListView.separated(
               itemCount: 6,
               padding: EdgeInsets.zero,
               separatorBuilder: (_, __) =>
-                  const SizedBox(height: UserManagementConstants.spacing),
+                  const SizedBox(height: Constants.spacing),
               itemBuilder: (context, index) {
                 return UserManagementSectionWidth(
                   child: _UserManagementCardSkeleton(baseColor: baseColor),
@@ -52,10 +53,10 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(UserManagementConstants.cardRadius),
+        borderRadius: BorderRadius.circular(Constants.cardRadius),
       ),
       child: Padding(
-        padding: UserManagementConstants.sectionPadding,
+        padding: Constants.sectionPadding,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final widths = _FilterSkeletonWidths.fromWidth(constraints.maxWidth);
@@ -64,10 +65,10 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _skeletonBox(baseColor, width: 140, height: 28, radius: 8),
-                const SizedBox(height: UserManagementConstants.spacing),
+                const SizedBox(height: Constants.spacing),
                 Wrap(
-                  spacing: UserManagementConstants.spacing,
-                  runSpacing: UserManagementConstants.spacing,
+                  spacing: Constants.spacing,
+                  runSpacing: Constants.spacing,
                   children: [
                     _skeletonBox(
                       baseColor,
@@ -86,17 +87,17 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: UserManagementConstants.spacing),
+                const SizedBox(height:Constants.spacing),
                 Wrap(
-                  spacing: UserManagementConstants.spacing,
-                  runSpacing: UserManagementConstants.spacing,
+                  spacing: Constants.spacing,
+                  runSpacing: Constants.spacing,
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     _skeletonBox(baseColor, width: 120, height: 18, radius: 8),
                     Wrap(
-                      spacing: UserManagementConstants.spacing,
-                      runSpacing: UserManagementConstants.spacing,
+                      spacing: Constants.spacing,
+                      runSpacing: Constants.spacing,
                       children: [
                         _skeletonBox(baseColor, width: 120, height: 44),
                         _skeletonBox(baseColor, width: 132, height: 44),
@@ -232,15 +233,15 @@ class _FilterSkeletonWidths {
     if (maxWidth < 1080) {
       return _FilterSkeletonWidths(
         searchWidth: maxWidth,
-        filterWidth: (maxWidth - UserManagementConstants.spacing) / 2,
+        filterWidth: (maxWidth - Constants.spacing) / 2,
       );
     }
 
     final filterWidth =
-        ((maxWidth * 0.42) - UserManagementConstants.spacing) / 2;
+        ((maxWidth * 0.42) - Constants.spacing) / 2;
 
     return _FilterSkeletonWidths(
-      searchWidth: maxWidth * 0.58 - UserManagementConstants.spacing,
+      searchWidth: maxWidth * 0.58 - Constants.spacing,
       filterWidth: filterWidth,
     );
   }

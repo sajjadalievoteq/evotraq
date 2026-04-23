@@ -51,7 +51,7 @@ class AppTheme {
         onSurface: textPrimaryLight,
         onError: Colors.white,
       ),
-      scaffoldBackgroundColor: backgroundColor,
+      scaffoldBackgroundColor: Colors.transparent,
       appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
@@ -271,7 +271,7 @@ class AppTheme {
         onSurface: textPrimaryDark,
         onError: Colors.white,
       ),
-      scaffoldBackgroundColor: backgroundColorDark,
+      scaffoldBackgroundColor: Colors.transparent,
       appBarTheme: AppBarTheme(
         backgroundColor: backgroundColorDark,
         foregroundColor: Colors.white,

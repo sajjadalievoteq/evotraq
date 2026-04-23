@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/background_container_widget.dart';
+import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/build_success_message_widget.dart';
 
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_responsive_layout_widget.dart';

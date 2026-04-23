@@ -1,43 +1,53 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
-import 'package:traqtrace_app/features/gs1/mixins/gs1_form_validation_mixin.dart';
-import 'package:traqtrace_app/features/gs1/models/gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
-
 import 'package:traqtrace_app/features/pharmaceutical/widgets/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-
-import '../../../../data/services/gtin_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
+import 'package:traqtrace_app/features/pharmaceutical/models/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_loading_shimmer.dart';
 
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;
   final bool isEditing;
   final GTIN? gtin; // Optional GTIN for editing
+  final bool embedded;
 
   const GTINDetailScreen({
     Key? key,
     this.gtinCode,
     required this.isEditing,
     this.gtin,
+    this.embedded = false,
   }) : super(key: key);
 
   @override
   State<GTINDetailScreen> createState() => _GTINDetailScreenState();
 }
 
-class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidationMixin<GTINDetailScreen> {
+class _GTINDetailScreenState extends State<GTINDetailScreen>
+    with GS1FormValidationMixin<GTINDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
-  //bool _isLoading = false;
   bool _isValidating = false;
   bool _isSubmitting = false;
+  GTINPharmaceuticalExtension? _pharmaceuticalExtension;
+  GTINTobaccoExtension? _tobaccoExtension;
 
   // Form controllers
   final _gtinCodeController = TextEditingController();
@@ -48,7 +58,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
   final _registrationNumberController = TextEditingController();
   final _registrationDateController = TextEditingController();
   final _expirationDateController = TextEditingController();
-    DateTime? _registrationDate;
+  DateTime? _registrationDate;
   DateTime? _expirationDate;
   String? _status = 'ACTIVE';
 
@@ -58,38 +68,54 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
   @override
   void initState() {
     super.initState();
-    
+
     // If editing an existing GTIN, load its data
     if (widget.gtin != null) {
       _initializeFormWithGTIN(widget.gtin!);
     } else if (widget.gtinCode != null && !widget.isEditing) {
-      // Fetch GTIN by code if not editing
-      context.read<GTINCubit>().fetchGTIN(widget.gtinCode!);
+      // Fetch GTIN + extensions in parallel
+      context.read<GTINCubit>().fetchGTINDetails(widget.gtinCode!);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant GTINDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final oldCode = oldWidget.gtinCode;
+    final newCode = widget.gtinCode;
+    if (oldCode != newCode && newCode != null && !widget.isEditing) {
+      context.read<GTINCubit>().fetchGTINDetails(newCode);
     }
   }
 
   void _initializeFormWithGTIN(GTIN gtin) {
     print('Initializing form with GTIN: ${gtin.gtinCode}');
-    print('GTIN dates: registrationDate=${gtin.registrationDate}, expirationDate=${gtin.expirationDate}');
-    
+    print(
+      'GTIN dates: registrationDate=${gtin.registrationDate}, expirationDate=${gtin.expirationDate}',
+    );
+
     _gtinCodeController.text = gtin.gtinCode;
     _productNameController.text = gtin.productName;
     _manufacturerController.text = gtin.manufacturer ?? '';
-    _packagingLevelController.text = gtin.packagingLevel ?? '';    _packSizeController.text = gtin.packSize?.toString() ?? '';
+    _packagingLevelController.text = gtin.packagingLevel ?? '';
+    _packSizeController.text = gtin.packSize?.toString() ?? '';
     _registrationNumberController.text = gtin.registrationNumber ?? '';
-    
+
     // Convert status to uppercase to match dropdown options
     _status = gtin.status?.toUpperCase();
-    
+
     if (gtin.registrationDate != null) {
       _registrationDate = gtin.registrationDate;
-      _registrationDateController.text = DateFormat('yyyy-MM-dd').format(gtin.registrationDate!);
+      _registrationDateController.text =
+          DateFormat('yyyy-MM-dd').format(gtin.registrationDate!);
       print('Set registration date display: ${_registrationDateController.text}');
     }
-    
+
     if (gtin.expirationDate != null) {
       _expirationDate = gtin.expirationDate;
-      _expirationDateController.text = DateFormat('yyyy-MM-dd').format(gtin.expirationDate!);
+      _expirationDateController.text =
+          DateFormat('yyyy-MM-dd').format(gtin.expirationDate!);
       print('Set expiration date display: ${_expirationDateController.text}');
     }
   }
@@ -111,7 +137,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     setState(() {
       _isValidating = true;
     });
-    
+
     context.read<GTINCubit>().validateGTIN(_gtinCodeController.text);
   }
 
@@ -119,66 +145,70 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     // Re-validate required fields at submission time
     final isValid = validateAllFields({
       'gtinCode': {'value': _gtinCodeController.text, 'validator': validateGTIN},
-      'productName': {'value': _productNameController.text, 'validator': (value) {
-        if (value == null || value.isEmpty) {
-          return 'Product Name is required';
-        }
-        return null;
-      }},
-      'packSize': {'value': _packSizeController.text, 'validator': (value) {
-        if (value != null && value.isNotEmpty) {
-          if (int.tryParse(value) == null) {
-            return 'Pack Size must be a valid number';
+      'productName': {
+        'value': _productNameController.text,
+        'validator': (value) {
+          if (value == null || value.isEmpty) {
+            return 'Product Name is required';
           }
+          return null;
         }
-        return null;
-      }},
+      },
+      'packSize': {
+        'value': _packSizeController.text,
+        'validator': (value) {
+          if (value != null && value.isNotEmpty) {
+            if (int.tryParse(value) == null) {
+              return 'Pack Size must be a valid number';
+            }
+          }
+          return null;
+        }
+      },
     });
-    
+
     // Form-level validation with FormKey
     final isFormValid = _formKey.currentState?.validate() ?? false;
-    
+
     // Validate tobacco extension if present
     final tobaccoValidation = _tobaccoExtensionKey.currentState?.validate();
     if (tobaccoValidation != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(tobaccoValidation),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError(tobaccoValidation);
       return;
     }
-    
+
     // Validate pharmaceutical extension if present
     final pharmaValidation = _pharmaExtensionKey.currentState?.validate();
     if (pharmaValidation != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(pharmaValidation),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError(pharmaValidation);
       return;
     }
-    
+
     if (isValid && isFormValid) {
       setState(() {
         _isSubmitting = true;
       });
-      
+
       final gtin = GTIN(
         gtinCode: _gtinCodeController.text,
         productName: _productNameController.text,
-        manufacturer: _manufacturerController.text.isEmpty ? null : _manufacturerController.text,
-        packagingLevel: _packagingLevelController.text.isEmpty ? null : _packagingLevelController.text,
-        packSize: _packSizeController.text.isEmpty ? null : int.tryParse(_packSizeController.text),
+        manufacturer: _manufacturerController.text.isEmpty
+            ? null
+            : _manufacturerController.text,
+        packagingLevel: _packagingLevelController.text.isEmpty
+            ? null
+            : _packagingLevelController.text,
+        packSize: _packSizeController.text.isEmpty
+            ? null
+            : int.tryParse(_packSizeController.text),
         status: _status,
-        registrationNumber: _registrationNumberController.text.isEmpty ? null : _registrationNumberController.text,
+        registrationNumber: _registrationNumberController.text.isEmpty
+            ? null
+            : _registrationNumberController.text,
         registrationDate: _registrationDate,
         expirationDate: _expirationDate,
       );
-      
+
       if (widget.isEditing && widget.gtinCode != null) {
         context.read<GTINCubit>().updateGTIN(gtin);
       } else {
@@ -193,7 +223,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     if (tobaccoState == null || !tobaccoState.hasData) {
       return; // No tobacco data to save
     }
-    
+
     try {
       final extension = tobaccoState.buildExtension(gtinId: gtinId, gtinCode: gtinCode);
       if (extension != null) {
@@ -204,8 +234,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
       }
     } catch (e) {
       debugPrint('Error saving tobacco extension: $e');
-      // Don't show error to user since GTIN was saved successfully
-      // The tobacco extension can be added later if needed
     }
   }
 
@@ -215,7 +243,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
     if (pharmaState == null || !pharmaState.hasData) {
       return; // No pharmaceutical data to save
     }
-    
+
     try {
       final extension = pharmaState.buildExtension(gtinId: gtinId, gtinCode: gtinCode);
       if (extension != null) {
@@ -225,8 +253,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
       }
     } catch (e) {
       debugPrint('Error saving pharmaceutical extension: $e');
-      // Don't show error to user since GTIN was saved successfully
-      // The pharmaceutical extension can be added later if needed
     }
   }
 
@@ -251,7 +277,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
       ),
       readOnly: readOnly,
       setFieldError: setFieldError,
-      validator: validator ?? (value) => null, // Default validator that always passes
+      validator: validator ?? (value) => null,
     );
   }
 
@@ -262,123 +288,76 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
         ? 'GTIN Details'
         : widget.isEditing && widget.gtinCode != null
             ? 'Edit GTIN'
-            : 'Create GTIN';    return Scaffold(
-      appBar: AppBar(
-        title: Text(screenTitle),
-        actions: [
-          if (!isReadOnly)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _isSubmitting ? null : _submitForm,
-            ),
-        ],
-      ),
-      drawer: const AppDrawer(),
-      body: BlocConsumer<GTINCubit, GTINState>(
-        listener: (context, state) {          if (state.status == GTINStatus.error) {
+            : 'Create GTIN';
+    final body = BlocConsumer<GTINCubit, GTINState>(
+        listener: (context, state) {
+          if (state.status == GTINStatus.error) {
             setState(() {
               _isSubmitting = false;
               _isValidating = false;
             });
-            
-            String errorMessage = state.error ?? 'An error occurred';
-            
-            // Extract API exception for better error messages
-            if (errorMessage.contains('ApiException')) {
-              try {
-                // Try to extract status code and message from error string
-                final regExp = RegExp(r'ApiException: \[(\d+)\] (.+)');
-                final match = regExp.firstMatch(errorMessage);
-                
-                if (match != null && match.groupCount >= 2) {
-                  final statusCode = int.tryParse(match.group(1) ?? '');
-                  final message = match.group(2) ?? '';
-                  
-                  if (statusCode == 409) {
-                    errorMessage = 'GTIN code already exists. Please use a different code.';
-                  } else if (message.contains('integer')) {
-                    errorMessage = 'Invalid number format. Please check your inputs.';
-                  }
-                }
-              } catch (e) {
-                // If parsing failed, use original error message
-              }
-            }
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(errorMessage),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 5),
-              ),
+            debugPrint(
+              '[GTIN UI] detail error (snackbar): ${state.error} '
+              'gtinCode=${widget.gtinCode}',
             );
+            context.showError(state.error ?? '');
+
           }
 
           if (state.status == GTINStatus.success) {
             if (state.gtin != null && !widget.isEditing && widget.gtinCode != null) {
               // When loading an existing GTIN for display
               _initializeFormWithGTIN(state.gtin!);
+              _pharmaceuticalExtension = state.pharmaceuticalExtension;
+              _tobaccoExtension = state.tobaccoExtension;
             } else if (state.isValidFormat != null && _isValidating) {
               // Handle GTIN validation result
               setState(() {
                 _isValidating = false;
               });
-              
+
               if (state.isValidFormat == true) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Valid GTIN format'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                context.showSuccess('Valid GTIN format');
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Invalid GTIN format'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              }            } else if (_isSubmitting) {
+                context.showWarning('Invalid GTIN format');
+              }
+            } else if (_isSubmitting) {
               // Handle successful create/update
               setState(() {
                 _isSubmitting = false;
               });
-              
+
               // Get GTIN info from the state
               final createdGtin = state.gtin;
               final gtinCode = createdGtin?.gtinCode ?? _gtinCodeController.text;
-              
+
               // Save extensions if there's data (based on industry mode)
               _saveTobaccoExtensionIfNeeded(null, gtinCode);
               _savePharmaExtensionIfNeeded(null, gtinCode);
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(widget.isEditing && widget.gtinCode != null
-                      ? 'GTIN $gtinCode updated successfully'
-                      : 'GTIN $gtinCode created successfully'),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 3),
-                ),
+
+              context.showSuccess(
+                widget.isEditing && widget.gtinCode != null
+                    ? 'GTIN $gtinCode updated successfully'
+                    : 'GTIN $gtinCode created successfully',
               );
-              
+
               Navigator.of(context).pop();
             }
           }
         },
         builder: (context, state) {
           if (state.status == GTINStatus.loading && !_isValidating && !_isSubmitting) {
-            return const Center(child: CircularProgressIndicator());
+            return GtinDetailLoadingShimmer(readOnly: isReadOnly);
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(Constants.spacing),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // GTIN Code field
+                 SizedBox(height: Constants.spacing,),
                   _buildValidatedField(
                     controller: _gtinCodeController,
                     fieldName: 'gtinCode',
@@ -400,7 +379,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Product Name field
                   _buildValidatedField(
                     controller: _productNameController,
@@ -408,35 +387,39 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                     label: 'Product Name *',
                     readOnly: isReadOnly,
                     validator: (value) {
-                      final error = value == null || value.isEmpty 
-                          ? 'Product Name is required' 
+                      final error = value == null || value.isEmpty
+                          ? 'Product Name is required'
                           : null;
                       return error;
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Manufacturer field
                   _buildValidatedField(
                     controller: _manufacturerController,
                     fieldName: 'manufacturer',
                     label: 'Manufacturer',
                     readOnly: isReadOnly,
-                    validator: (value) => null, // Optional field, no validation needed
+                    validator: (value) => null,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Packaging Level dropdown
                   DropdownButtonFormField<String>(
-                    value: _packagingLevelController.text.isEmpty ? null : _packagingLevelController.text,
+                    value: _packagingLevelController.text.isEmpty
+                        ? null
+                        : _packagingLevelController.text,
                     decoration: const InputDecoration(
                       labelText: 'Packaging Level',
                     ),
                     items: _packagingLevelOptions
-                        .map((level) => DropdownMenuItem(
-                              value: level,
-                              child: Text(level),
-                            ))
+                        .map(
+                          (level) => DropdownMenuItem(
+                            value: level,
+                            child: Text(level),
+                          ),
+                        )
                         .toList(),
                     onChanged: isReadOnly
                         ? null
@@ -447,7 +430,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                           },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Pack Size field
                   _buildValidatedField(
                     controller: _packSizeController,
@@ -457,7 +440,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                     readOnly: isReadOnly,
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
-                        if (!RegExp(r'^\d+$').hasMatch(value)) {
+                        if (!RegExp(r'^\\d+$').hasMatch(value)) {
                           return 'Pack Size must be a valid number';
                         }
                       }
@@ -465,7 +448,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Status dropdown
                   DropdownButtonFormField<String>(
                     value: _status,
@@ -473,10 +456,12 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                       labelText: 'Status',
                     ),
                     items: _statusOptions
-                        .map((status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status),
-                            ))
+                        .map(
+                          (status) => DropdownMenuItem(
+                            value: status,
+                            child: Text(status),
+                          ),
+                        )
                         .toList(),
                     onChanged: isReadOnly
                         ? null
@@ -487,7 +472,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                           },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Registration Number field
                   _buildValidatedField(
                     controller: _registrationNumberController,
@@ -495,27 +480,29 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                     label: 'Registration Number',
                     helperText: 'Market authorization or registration number',
                     readOnly: isReadOnly,
-                    validator: (value) => null, // Optional field, no validation needed
+                    validator: (value) => null,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Registration Date field
                   GestureDetector(
-                    onTap: isReadOnly ? null : () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _registrationDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _registrationDate = picked;
-                          _registrationDateController.text =
-                              DateFormat('yyyy-MM-dd').format(picked);
-                        });
-                      }
-                    },
+                    onTap: isReadOnly
+                        ? null
+                        : () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _registrationDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _registrationDate = picked;
+                                _registrationDateController.text =
+                                    DateFormat('yyyy-MM-dd').format(picked);
+                              });
+                            }
+                          },
                     child: AbsorbPointer(
                       child: _buildValidatedField(
                         controller: _registrationDateController,
@@ -523,29 +510,32 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                         label: 'Registration Date',
                         suffixIcon: const Icon(Icons.calendar_today),
                         readOnly: true,
-                        validator: (value) => null, // Optional field, no validation needed
+                        validator: (value) => null,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Expiration Date field
                   GestureDetector(
-                    onTap: isReadOnly ? null : () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _expirationDate ?? DateTime.now().add(const Duration(days: 365)),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _expirationDate = picked;
-                          _expirationDateController.text =
-                              DateFormat('yyyy-MM-dd').format(picked);
-                        });
-                      }
-                    },
+                    onTap: isReadOnly
+                        ? null
+                        : () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _expirationDate ??
+                                  DateTime.now().add(const Duration(days: 365)),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _expirationDate = picked;
+                                _expirationDateController.text =
+                                    DateFormat('yyyy-MM-dd').format(picked);
+                              });
+                            }
+                          },
                     child: AbsorbPointer(
                       child: _buildValidatedField(
                         controller: _expirationDateController,
@@ -553,15 +543,14 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                         label: 'Expiration Date',
                         suffixIcon: const Icon(Icons.calendar_today),
                         readOnly: true,
-                        validator: (value) => null, // Optional field, no validation needed
+                        validator: (value) => null,
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Industry-specific Extension Sections
-                  // Shows either Pharmaceutical or Tobacco extension based on system mode
                   BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
                     builder: (context, settingsState) {
                       final settings = settingsState.settings;
@@ -573,55 +562,84 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> with GS1FormValidat
                       );
 
                       if (settings.isPharmaceuticalMode) {
-                        return PharmaceuticalExtensionWidget(
-                          key: _pharmaExtensionKey,
-                          gtinCode: _gtinCodeController.text.isNotEmpty 
-                              ? _gtinCodeController.text 
-                              : widget.gtinCode,
-                          isEditing: widget.isEditing,
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+
+                            PharmaceuticalExtensionWidget(
+                              key: _pharmaExtensionKey,
+                              gtinCode: _gtinCodeController.text.isNotEmpty
+                                  ? _gtinCodeController.text
+                                  : widget.gtinCode,
+                              isEditing: widget.isEditing,
+                              initialExtension: _pharmaceuticalExtension,
+                            ),
+                          ],
                         );
                       }
-                      
-                      // Tobacco Mode: Show tobacco extension
+
                       if (settings.isTobaccoMode) {
-                        return TobaccoExtensionWidget(
-                          key: _tobaccoExtensionKey,
-                          gtinCode: _gtinCodeController.text.isNotEmpty 
-                              ? _gtinCodeController.text 
-                              : widget.gtinCode,
-                          isEditing: widget.isEditing,
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+
+                            const SizedBox(height: 8),
+                            TobaccoExtensionWidget(
+                              key: _tobaccoExtensionKey,
+                              gtinCode: _gtinCodeController.text.isNotEmpty
+                                  ? _gtinCodeController.text
+                                  : widget.gtinCode,
+                              isEditing: widget.isEditing,
+                              initialExtension: _tobaccoExtension,
+                            ),
+                          ],
                         );
                       }
-                      
+
                       return const SizedBox.shrink();
                     },
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   if (!isReadOnly)
-                    ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(widget.gtinCode != null ? 'Update GTIN' : 'Create GTIN'),
+                    CustomButtonWidget(
+                      onTap: _isSubmitting ? null : _submitForm,
+                      title: widget.gtinCode != null
+                          ? 'Update GTIN'
+                          : 'Create GTIN',
                     ),
                 ],
               ),
             ),
           );
         },
+      );
+
+    if (widget.embedded) {
+      return body;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          screenTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          if (!isReadOnly)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _isSubmitting ? null : _submitForm,
+            ),
+        ],
       ),
+      drawer: const AppDrawer(),
+      body: body,
     );
   }
 }
+

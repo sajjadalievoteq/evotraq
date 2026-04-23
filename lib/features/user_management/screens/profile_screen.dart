@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user_management/cubit/profile_state.dart';
 
-import '../../../core/config/constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);

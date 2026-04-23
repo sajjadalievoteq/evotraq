@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
 
 class UserManagementSectionWidth extends StatelessWidget {
@@ -16,7 +17,7 @@ class UserManagementSectionWidth extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          maxWidth: UserManagementConstants.sectionMaxWidth,
+          maxWidth: Constants.sectionMaxWidth,
         ),
         child: child,
       ),

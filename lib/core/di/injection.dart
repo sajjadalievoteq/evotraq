@@ -16,6 +16,7 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
@@ -28,7 +29,7 @@ import '../../data/services/database_partitioning_service.dart';
 import '../../data/services/epc_conversion_service.dart';
 import '../../data/services/epcis_event_service.dart';
 import '../../data/services/gln_tobacco_extension_service.dart';
-import '../../data/services/gtin_service.dart';
+import '../../data/services/gs1/gtin/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
 import '../../data/services/packing_operation_service.dart';
@@ -279,6 +280,13 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerFactory<UserManagementCubit>(
     () => UserManagementCubit(
       userManagementService: getIt<UserManagementService>(),
+    ),
+  );
+  getIt.registerFactory<GTINCubit>(
+    () => GTINCubit(
+      gtinService: getIt<GTINService>(),
+      pharmaceuticalService: getIt<PharmaceuticalService>(),
+      tobaccoExtensionService: getIt<GTINTobaccoExtensionService>(),
     ),
   );
   getIt.registerSingleton<AppRouter>(AppRouter(authCubit: getIt<AuthCubit>()));

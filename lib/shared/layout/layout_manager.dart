@@ -162,23 +162,30 @@ class AppResponsiveBody extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content = AppLayoutBuilder(
       builder: (context, layout) {
-        final resolvedPadding =
+        final basePadding =
             padding ??
             EdgeInsets.symmetric(
               horizontal: layout.horizontalPadding,
               vertical: layout.verticalPadding,
             );
 
+        // Instead of clamping children with a maxWidth constraint, we compute
+        // additional horizontal "margin" when a maxContentWidth is provided.
+        // This keeps content visually centered while still allowing children
+        // to opt into full-width layouts (e.g., scrollbars on the screen edge).
+        final targetWidth = maxContentWidth ?? layout.width;
+        final extraHorizontalMargin =
+            (layout.width - targetWidth) > 0 ? (layout.width - targetWidth) / 2 : 0.0;
+
+        final resolvedPadding = basePadding.add(
+          EdgeInsets.symmetric(horizontal: extraHorizontalMargin),
+        );
+
         return Align(
           alignment: alignment,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxContentWidth ?? layout.width,
-            ),
-            child: Padding(
-              padding: resolvedPadding,
-              child: _buildChild(context, layout),
-            ),
+          child: Padding(
+            padding: resolvedPadding,
+            child: _buildChild(context, layout),
           ),
         );
       },

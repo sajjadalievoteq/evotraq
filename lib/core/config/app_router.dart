@@ -24,16 +24,15 @@ import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/gln/gln_screen.dart';
-import 'package:traqtrace_app/features/gs1/bloc/gtin/gtin_cubit.dart';
-import 'package:traqtrace_app/features/gs1/screens/gtin/gtin_detail_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/gtin/gtin_screen.dart';
+import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_list_screen_advanced.dart';
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
-import 'package:traqtrace_app/data/services/gtin_service.dart';
 import 'package:traqtrace_app/features/user_management/screens/home_screen.dart';
 import 'package:traqtrace_app/features/user_management/screens/profile_screen.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
@@ -274,7 +273,7 @@ class AppRouter {
       ),
       // Dashboard routes
       GoRoute(
-        path: '/dashboards/journey',
+        path: Constants.journeyDashboardRoute,
         pageBuilder: (context, state) {
           final epc = state.uri.queryParameters['epc'];
           return MaterialPage(
@@ -364,7 +363,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/gs1-validation',
+        path: Constants.adminGs1ValidationRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const GS1ValidationScreen(),
@@ -386,7 +385,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/performance-tests',
+        path: Constants.adminPerformanceTestsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PerformanceTestScreen(),
@@ -408,7 +407,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/performance-optimization',
+        path: Constants.adminPerformanceOptimizationRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PerformanceOptimizationDashboard(),
@@ -430,7 +429,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/monitoring',
+        path: Constants.adminMonitoringRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const MonitoringDashboardScreen(),
@@ -452,7 +451,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/integration-validation',
+        path: Constants.adminIntegrationValidationRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const IntegrationValidationScreen(),
@@ -474,7 +473,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/event-generation-test',
+        path: Constants.adminEventGenerationTestRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const EventGenerationTestScreen(),
@@ -496,7 +495,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/industry-test-data',
+        path: Constants.adminIndustryTestDataRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const IndustryTestDataScreen(),
@@ -518,7 +517,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/validation-rules',
+        path: Constants.adminValidationRulesRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ValidationRuleManagementScreen(),
@@ -540,7 +539,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/validation-rules/help',
+        path: Constants.adminValidationRulesHelpRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ValidationRulesHelpScreen(),
@@ -554,14 +553,14 @@ class AppRouter {
           }
 
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
         },
       ),
       GoRoute(
-        path: '/admin/validation-rules/new/:ruleId',
+        path: Constants.adminValidationRulesNewRoute,
         pageBuilder: (context, state) {
           final ruleId = state.pathParameters['ruleId'] ?? '';
           return MaterialPage(
@@ -582,14 +581,14 @@ class AppRouter {
           }
 
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
         },
       ),
       GoRoute(
-        path: '/admin/validation-rules/:ruleId/edit',
+        path: Constants.adminValidationRulesEditRoute,
         pageBuilder: (context, state) {
           final ruleId = state.pathParameters['ruleId'] ?? '';
           final isPredefined =
@@ -611,14 +610,14 @@ class AppRouter {
           }
 
           if (user?.role != 'ADMIN') {
-            return '/home';
+            return Constants.homeRoute;
           }
 
           return null;
         },
       ),
       GoRoute(
-        path: '/admin/database-partitioning',
+        path: Constants.adminDatabasePartitioningRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const DatabasePartitioningDashboard(),
@@ -640,7 +639,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/cache',
+        path: Constants.adminCacheRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const CacheManagementScreen(),
@@ -663,7 +662,7 @@ class AppRouter {
       ),
       // Phase 3.3 Batch Processing routes
       GoRoute(
-        path: '/admin/job-queue',
+        path: Constants.adminJobQueueRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const JobQueueManagementScreen(),
@@ -685,7 +684,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/etl-management',
+        path: Constants.adminEtlManagementRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ETLManagementScreen(),
@@ -707,7 +706,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/bulk-export',
+        path: Constants.adminBulkExportRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const BulkExportManagementScreen(),
@@ -729,7 +728,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/data-consistency-integrity',
+        path: Constants.adminDataConsistencyIntegrityRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const DataConsistencyIntegrityDashboard(),
@@ -752,7 +751,7 @@ class AppRouter {
       ),
       // API Management routes
       GoRoute(
-        path: '/admin/api-management/partners',
+        path: Constants.adminApiPartnersRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PartnerManagementScreen(),
@@ -774,7 +773,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/api-management/partners/:partnerId',
+        path: Constants.adminApiPartnerDetailRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
           return MaterialPage(
@@ -799,7 +798,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/api-management/partners/:partnerId/credentials',
+        path: Constants.adminApiPartnerCredentialsRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
           return MaterialPage(
@@ -824,7 +823,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/api-management/partners/:partnerId/analytics',
+        path: Constants.adminApiPartnerAnalyticsRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
           return MaterialPage(
@@ -849,7 +848,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/admin/api-management/service-accounts',
+        path: Constants.adminApiServiceAccountsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ServiceAccountManagementScreen(),
@@ -872,7 +871,7 @@ class AppRouter {
       ),
       // API Collections Management route
       GoRoute(
-        path: '/admin/api-management/collections',
+        path: Constants.adminApiCollectionsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ApiCollectionManagementScreen(),
@@ -895,7 +894,7 @@ class AppRouter {
       ),
       // Partner Access Management route
       GoRoute(
-        path: '/admin/api-management/partners/:partnerId/access',
+        path: Constants.adminApiPartnerAccessRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
           return MaterialPage(
@@ -921,7 +920,7 @@ class AppRouter {
       ),
       // Partner Access Management route (without partnerId)
       GoRoute(
-        path: '/admin/api-management/access',
+        path: Constants.adminApiAccessRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PartnerAccessManagementScreen(),
@@ -944,7 +943,7 @@ class AppRouter {
       ),
       // GTIN routes
       GoRoute(
-        path: '/gs1/gtins',
+        path: Constants.gs1GtinsRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const GTINScreen()),
         redirect: (context, state) {
@@ -956,11 +955,11 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/gtins/new',
+        path: Constants.gs1GtinNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: BlocProvider(
-            create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+            create: (_) => getIt<GTINCubit>(),
             child: const GTINDetailScreen(isEditing: true),
           ),
         ),
@@ -973,13 +972,13 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/gtins/:gtinCode',
+        path: Constants.gs1GtinDetailRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
             child: BlocProvider(
-              create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+              create: (_) => getIt<GTINCubit>(),
               child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
             ),
           );
@@ -993,13 +992,13 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/gtins/:gtinCode/edit',
+        path: Constants.gs1GtinEditRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
             child: BlocProvider(
-              create: (context) => GTINCubit(gtinService: getIt<GTINService>()),
+              create: (_) => getIt<GTINCubit>(),
               child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
             ),
           );
@@ -1014,7 +1013,7 @@ class AppRouter {
       ),
       // GLN routes
       GoRoute(
-        path: '/gs1/glns',
+        path: Constants.gs1GlnsRoute,
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const GLNScreen()),
         redirect: (context, state) {
@@ -1026,7 +1025,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/glns/new',
+        path: Constants.gs1GlnNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const GLNDetailScreen(isEditing: true),
@@ -1040,7 +1039,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/glns/:glnId',
+        path: Constants.gs1GlnDetailRoute,
         pageBuilder: (context, state) {
           final glnId = state.pathParameters['glnId'] ?? '';
           return MaterialPage(
@@ -1057,7 +1056,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/glns/:glnId/edit',
+        path: Constants.gs1GlnEditRoute,
         pageBuilder: (context, state) {
           final glnId = state.pathParameters['glnId'] ?? '';
           return MaterialPage(
@@ -1075,7 +1074,7 @@ class AppRouter {
       ),
       // SSCC routes
       GoRoute(
-        path: '/gs1/ssccs',
+        path: Constants.gs1SsccsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SSCCAdvancedListScreen(),
@@ -1089,7 +1088,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/ssccs/new',
+        path: Constants.gs1SsccNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SSCCDetailScreen(mode: SSCCDetailMode.create),
@@ -1103,7 +1102,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/ssccs/:ssccId',
+        path: Constants.gs1SsccDetailRoute,
         pageBuilder: (context, state) {
           final ssccId = state.pathParameters['ssccId'] ?? '';
           final ssccCode =
@@ -1126,7 +1125,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/ssccs/:ssccId/edit',
+        path: Constants.gs1SsccEditRoute,
         pageBuilder: (context, state) {
           final ssccId = state.pathParameters['ssccId'] ?? '';
           return MaterialPage(
@@ -1145,7 +1144,7 @@ class AppRouter {
 
       // SGTIN routes
       GoRoute(
-        path: '/gs1/sgtins',
+        path: Constants.gs1SgtinsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SGTINAdvancedListScreen(),
@@ -1159,7 +1158,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/sgtins/new',
+        path: Constants.gs1SgtinNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SGTINDetailScreen(isEditing: true),
@@ -1173,7 +1172,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/sgtins/:id',
+        path: Constants.gs1SgtinDetailRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1190,7 +1189,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/gs1/sgtins/:id/edit',
+        path: Constants.gs1SgtinEditRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1209,7 +1208,7 @@ class AppRouter {
 
       // EPC Conversion route
       GoRoute(
-        path: '/gs1/epc-conversion',
+        path: Constants.gs1EpcConversionRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: EPCConversionScreen(
@@ -1226,7 +1225,7 @@ class AppRouter {
       ),
       // GS1 Validation Demo route
       GoRoute(
-        path: '/gs1/validation-demo',
+        path: Constants.gs1ValidationDemoRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const GS1ValidationDemoScreen(),
@@ -1241,7 +1240,7 @@ class AppRouter {
       ),
       // EPCIS Event Routes with placeholder screens
       GoRoute(
-        path: '/epcis/events',
+        path: Constants.epcisEventsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const EPCISEventsListScreen(),
@@ -1255,7 +1254,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/object-events',
+        path: Constants.epcisObjectEventsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ObjectEventsListScreen(),
@@ -1269,7 +1268,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/aggregation-events',
+        path: Constants.epcisAggregationEventsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const AggregationEventsListScreen(),
@@ -1283,7 +1282,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transaction-events',
+        path: Constants.epcisTransactionEventsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransactionEventsListScreen(),
@@ -1297,7 +1296,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transformation-events',
+        path: Constants.epcisTransformationEventsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransformationEventsListScreen(),
@@ -1313,7 +1312,7 @@ class AppRouter {
 
       // Advanced Query Interface Routes
       GoRoute(
-        path: '/epcis/advanced-query',
+        path: Constants.epcisAdvancedQueryRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const AdvancedQueryScreen(),
@@ -1329,7 +1328,7 @@ class AppRouter {
 
       // Supply Chain Traversal Query Routes
       GoRoute(
-        path: '/epcis/traversal-query',
+        path: Constants.epcisTraversalQueryRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TraversalQueryScreen(),
@@ -1345,7 +1344,7 @@ class AppRouter {
 
       // EPCIS Serialization & Format Conversion Routes
       GoRoute(
-        path: '/epcis/serialization',
+        path: Constants.epcisSerializationRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: EPCISSerializationScreen(appConfig: getIt<AppConfig>()),
@@ -1361,7 +1360,7 @@ class AppRouter {
 
       // Routes for creating new EPCIS events
       GoRoute(
-        path: '/epcis/object-events/new',
+        path: Constants.epcisObjectEventNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ObjectEventFormScreen(),
@@ -1375,7 +1374,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/object-events/batch-import',
+        path: Constants.epcisObjectEventBatchImportRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ObjectEventBatchImportScreen(),
@@ -1389,7 +1388,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/aggregation-events/new',
+        path: Constants.epcisAggregationEventNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const AggregationEventFormScreen(),
@@ -1403,7 +1402,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transaction-events/new',
+        path: Constants.epcisTransactionEventNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransactionEventFormScreen(),
@@ -1417,7 +1416,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transaction-events/help',
+        path: Constants.epcisTransactionEventHelpRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransactionEventsHelpScreen(),
@@ -1431,7 +1430,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transformation-events/new',
+        path: Constants.epcisTransformationEventNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransformationEventFormScreen(),
@@ -1447,7 +1446,7 @@ class AppRouter {
 
       // Routes for viewing and editing existing EPCIS events
       GoRoute(
-        path: '/epcis/events/:id',
+        path: Constants.epcisEventDetailRoute,
         pageBuilder: (context, state) {
           final eventId = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1468,7 +1467,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/object-events/:id',
+        path: Constants.epcisObjectEventDetailRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           final extra = state.extra;
@@ -1512,7 +1511,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/aggregation-events/:id',
+        path: Constants.epcisAggregationEventDetailRoute,
         pageBuilder: (context, state) {
           final aggregationEventId = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1531,7 +1530,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transaction-events/:id',
+        path: Constants.epcisTransactionEventDetailRoute,
         pageBuilder: (context, state) {
           final transactionEventId = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1551,7 +1550,7 @@ class AppRouter {
       ),
       // Add route for Transaction Document operations
       GoRoute(
-        path: '/epcis/transaction-documents',
+        path: Constants.epcisTransactionDocumentsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransactionDocumentScreen(),
@@ -1565,7 +1564,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transaction-documents/help',
+        path: Constants.epcisTransactionDocumentHelpRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const TransactionDocumentHelpScreen(),
@@ -1579,7 +1578,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/epcis/transformation-events/:id',
+        path: Constants.epcisTransformationEventDetailRoute,
         pageBuilder: (context, state) {
           final transformationEventId = state.pathParameters['id'] ?? '';
           return MaterialPage(
@@ -1599,7 +1598,7 @@ class AppRouter {
       ),
       // Aggregation Event Hierarchy Screen
       GoRoute(
-        path: '/epcis/aggregation-events/hierarchy/:epc',
+        path: Constants.epcisAggregationEventHierarchyRoute,
         pageBuilder: (context, state) {
           final epc = state.pathParameters['epc'] ?? '';
           final Map<String, dynamic> extra =
@@ -1625,7 +1624,7 @@ class AppRouter {
 
       // Operations routes
       GoRoute(
-        path: '/operations/shipping',
+        path: Constants.opShippingRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ShippingOperationListScreen(),
@@ -1639,7 +1638,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/shipping/create',
+        path: Constants.opShippingCreateRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ShippingOperationScreen(),
@@ -1653,7 +1652,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/shipping/:operationId',
+        path: Constants.opShippingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
           return MaterialPage(
@@ -1672,7 +1671,7 @@ class AppRouter {
 
       // Receiving Operations routes
       GoRoute(
-        path: '/operations/receiving',
+        path: Constants.opReceivingRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ReceivingOperationListScreen(),
@@ -1686,7 +1685,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/receiving/create',
+        path: Constants.opReceivingCreateRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ReceivingOperationScreen(),
@@ -1700,7 +1699,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/receiving/:operationId',
+        path: Constants.opReceivingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
           return MaterialPage(
@@ -1719,7 +1718,7 @@ class AppRouter {
 
       // Packing Operations routes
       GoRoute(
-        path: '/operations/packing',
+        path: Constants.opPackingRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PackingOperationListScreen(),
@@ -1733,7 +1732,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/packing/create',
+        path: Constants.opPackingCreateRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PackingOperationScreen(),
@@ -1747,7 +1746,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/packing/:operationId',
+        path: Constants.opPackingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
           return MaterialPage(
@@ -1766,7 +1765,7 @@ class AppRouter {
 
       // Commissioning Operations routes
       GoRoute(
-        path: '/operations/commissioning',
+        path: Constants.opCommissioningRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const CommissioningOperationListScreen(),
@@ -1780,10 +1779,13 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/commissioning/new',
+        path: Constants.opCommissioningNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const CommissioningOperationScreen(),
+          child: BlocProvider(
+            create: (_) => getIt<GTINCubit>(),
+            child: const CommissioningOperationScreen(),
+          ),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1794,7 +1796,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/operations/commissioning/:operationId',
+        path: Constants.opCommissioningDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId'] ?? '';
           return MaterialPage(
@@ -1813,7 +1815,7 @@ class AppRouter {
 
       // Notification routes
       GoRoute(
-        path: '/notifications',
+        path: Constants.notificationsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const NotificationCenterScreen(),
@@ -1827,7 +1829,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/notifications/subscriptions',
+        path: Constants.notificationSubscriptionsRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const SubscriptionManagementScreen(),
@@ -1841,7 +1843,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/notifications/:subscriptionId',
+        path: Constants.notificationDetailRoute,
         pageBuilder: (context, state) {
           final subscriptionId = state.pathParameters['subscriptionId']!;
           return MaterialPage(
@@ -1858,7 +1860,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/notifications/webhooks',
+        path: Constants.notificationWebhooksRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const WebhookConfigurationScreen(),
@@ -1874,7 +1876,7 @@ class AppRouter {
 
       // Barcode Routes - Using the new GS1 Barcode Scanner
       GoRoute(
-        path: '/barcode/scan',
+        path: Constants.barcodeScanRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ApiEnabledBarcodeScannerScreen(
@@ -1892,7 +1894,7 @@ class AppRouter {
       ),
       // Barcode generation route
       GoRoute(
-        path: '/barcode/generate',
+        path: Constants.barcodeGenerateRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const BarcodeGenerationScreen(),
@@ -1906,7 +1908,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/barcode/verify',
+        path: Constants.barcodeVerifyRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: ApiEnabledBarcodeScannerScreen(
@@ -1928,7 +1930,7 @@ class AppRouter {
       // Demo routes for showcasing validation
       TransactionEventValidationDemoRoute.getRoute(),
       GoRoute(
-        path: '/demo/validation-rules',
+        path: Constants.demoValidationRulesRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const ValidationRuleManagementScreen(),

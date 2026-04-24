@@ -237,74 +237,69 @@ class _GTINListScreenState extends State<GTINListScreen> {
     final content = SafeArea(
         child: AppLayoutBuilder(
           builder: (context, layout) {
-            final horizontalMargin = MediaQuery.sizeOf(context).width<420 ? 8.0 : 16.0;
-
             return Column(
 
               children: [
-                Padding(
-                  padding:  EdgeInsets.all(horizontalMargin),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: Constants.sectionMaxWidth,
-                      ),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: Constants.spacing,
-                          ),
-                          ListenableBuilder(
-                            listenable: _searchController,
-                            builder: (context, _) {
-                              return GtinSearchBar(
-                                controller: _searchController,
-                                showAdvancedFilters: false,
-                                onSearch: _searchImmediate,
-                                onQueryChanged: _onSearchTextChanged,
-                                onRefresh: _searchImmediate,
-                                onQuickFilters: _showFilterDialog,
-                                onToggleAdvancedFilters:
-                                    _showAdvancedFiltersDialog,
-                                onClear: () {
-                                  _searchDebounce?.cancel();
-                                  _searchController.clear();
-                                  _search();
-                                },
-                              );
-                            },
-                          ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: Constants.sectionMaxWidth,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: Constants.spacing,
+                        ),
+                        ListenableBuilder(
+                          listenable: _searchController,
+                          builder: (context, _) {
+                            return GtinSearchBar(
+                              controller: _searchController,
+                              showAdvancedFilters: false,
+                              onSearch: _searchImmediate,
+                              onQueryChanged: _onSearchTextChanged,
+                              onRefresh: _searchImmediate,
+                              onQuickFilters: _showFilterDialog,
+                              onToggleAdvancedFilters:
+                                  _showAdvancedFiltersDialog,
+                              onClear: () {
+                                _searchDebounce?.cancel();
+                                _searchController.clear();
+                                _search();
+                              },
+                            );
+                          },
+                        ),
 
-                          GtinRecordInfoSection(
-                            pageSize: _pageSize,
-                            onPageSizeChanged: (newSize) {
-                              setState(() {
-                                _pageSize = newSize;
-                              });
-                              _searchImmediate();
-                            },
-                          ),
-                          SizedBox(
-                            height: Constants.spacing,
-                          ),
-                          BlocBuilder<GTINCubit, GTINState>(
-                            buildWhen: (prev, current) =>
-                                prev.gtinListSortAscending !=
-                                current.gtinListSortAscending,
-                            builder: (context, cubitState) {
-                              return GtinSortingControls(
-                                sortOrder: cubitState.gtinListSortAscending
-                                    ? 'asc'
-                                    : 'desc',
-                                onToggleSortOrder: () => context
-                                    .read<GTINCubit>()
-                                    .toggleGtinListProductNameSort(),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                        GtinRecordInfoSection(
+                          pageSize: _pageSize,
+                          onPageSizeChanged: (newSize) {
+                            setState(() {
+                              _pageSize = newSize;
+                            });
+                            _searchImmediate();
+                          },
+                        ),
+                        SizedBox(
+                          height: Constants.spacing,
+                        ),
+                        BlocBuilder<GTINCubit, GTINState>(
+                          buildWhen: (prev, current) =>
+                              prev.gtinListSortAscending !=
+                              current.gtinListSortAscending,
+                          builder: (context, cubitState) {
+                            return GtinSortingControls(
+                              sortOrder: cubitState.gtinListSortAscending
+                                  ? 'asc'
+                                  : 'desc',
+                              onToggleSortOrder: () => context
+                                  .read<GTINCubit>()
+                                  .toggleGtinListProductNameSort(),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -8,8 +8,6 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
-import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
@@ -20,6 +18,10 @@ import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_mod
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_loading_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/constants/gtin_detail_constants.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;
@@ -39,8 +41,7 @@ class GTINDetailScreen extends StatefulWidget {
   State<GTINDetailScreen> createState() => _GTINDetailScreenState();
 }
 
-class _GTINDetailScreenState extends State<GTINDetailScreen>
-    with GS1FormValidationMixin<GTINDetailScreen> {
+class _GTINDetailScreenState extends State<GTINDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
@@ -61,9 +62,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
   DateTime? _registrationDate;
   DateTime? _expirationDate;
   String? _status = 'ACTIVE';
-
-  final _packagingLevelOptions = ['ITEM', 'INNER_PACK', 'PACK', 'CASE', 'PALLET'];
-  final _statusOptions = ['ACTIVE', 'WITHDRAWN', 'SUSPENDED', 'DISCONTINUED'];
 
   @override
   void initState() {
@@ -90,10 +88,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
   }
 
   void _initializeFormWithGTIN(GTIN gtin) {
-    print('Initializing form with GTIN: ${gtin.gtinCode}');
-    print(
-      'GTIN dates: registrationDate=${gtin.registrationDate}, expirationDate=${gtin.expirationDate}',
-    );
+    // Keep verbose logs debug-only (this screen is frequently used).
+    if (kDebugMode) {
+      debugPrint('Initializing form with GTIN: ${gtin.gtinCode}');
+      debugPrint(
+        'GTIN dates: registrationDate=${gtin.registrationDate}, expirationDate=${gtin.expirationDate}',
+      );
+    }
 
     _gtinCodeController.text = gtin.gtinCode;
     _productNameController.text = gtin.productName;
@@ -109,14 +110,22 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       _registrationDate = gtin.registrationDate;
       _registrationDateController.text =
           DateFormat('yyyy-MM-dd').format(gtin.registrationDate!);
-      print('Set registration date display: ${_registrationDateController.text}');
+      if (kDebugMode) {
+        debugPrint(
+          'Set registration date display: ${_registrationDateController.text}',
+        );
+      }
     }
 
     if (gtin.expirationDate != null) {
       _expirationDate = gtin.expirationDate;
       _expirationDateController.text =
           DateFormat('yyyy-MM-dd').format(gtin.expirationDate!);
-      print('Set expiration date display: ${_expirationDateController.text}');
+      if (kDebugMode) {
+        debugPrint(
+          'Set expiration date display: ${_expirationDateController.text}',
+        );
+      }
     }
   }
 
@@ -142,32 +151,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
   }
 
   void _submitForm() {
-    // Re-validate required fields at submission time
-    final isValid = validateAllFields({
-      'gtinCode': {'value': _gtinCodeController.text, 'validator': validateGTIN},
-      'productName': {
-        'value': _productNameController.text,
-        'validator': (value) {
-          if (value == null || value.isEmpty) {
-            return 'Product Name is required';
-          }
-          return null;
-        }
-      },
-      'packSize': {
-        'value': _packSizeController.text,
-        'validator': (value) {
-          if (value != null && value.isNotEmpty) {
-            if (int.tryParse(value) == null) {
-              return 'Pack Size must be a valid number';
-            }
-          }
-          return null;
-        }
-      },
-    });
-
-    // Form-level validation with FormKey
+    // Form-level validation (validators are now pure functions, no mixins).
     final isFormValid = _formKey.currentState?.validate() ?? false;
 
     // Validate tobacco extension if present
@@ -184,7 +168,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       return;
     }
 
-    if (isValid && isFormValid) {
+    if (isFormValid) {
       setState(() {
         _isSubmitting = true;
       });
@@ -254,31 +238,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
     } catch (e) {
       debugPrint('Error saving pharmaceutical extension: $e');
     }
-  }
-
-  // Helper method to create a ValidatedTextFieldWrapper with consistent styling
-  Widget _buildValidatedField({
-    required TextEditingController controller,
-    required String fieldName,
-    required String label,
-    String? helperText,
-    bool readOnly = false,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-  }) {
-    return ValidatedTextFieldWrapper(
-      controller: controller,
-      fieldName: fieldName,
-      decoration: InputDecoration(
-        labelText: label,
-        helperText: helperText,
-        border: const OutlineInputBorder(),
-        suffixIcon: suffixIcon,
-      ),
-      readOnly: readOnly,
-      setFieldError: setFieldError,
-      validator: validator ?? (value) => null,
-    );
   }
 
   @override
@@ -358,7 +317,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                  SizedBox(height: Constants.spacing,),
-                  _buildValidatedField(
+                    GtinValidatedField(
                     controller: _gtinCodeController,
                     fieldName: 'gtinCode',
                     label: 'GTIN Code *',
@@ -373,30 +332,22 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                           )
                         : null,
                     readOnly: isReadOnly || (widget.gtinCode != null),
-                    validator: (value) {
-                      final result = validateGTIN(value);
-                      return result;
-                    },
+                      validator: GtinFieldValidators.gtinCodeRequired,
                   ),
                   const SizedBox(height: 16),
 
                   // Product Name field
-                  _buildValidatedField(
+                    GtinValidatedField(
                     controller: _productNameController,
                     fieldName: 'productName',
                     label: 'Product Name *',
                     readOnly: isReadOnly,
-                    validator: (value) {
-                      final error = value == null || value.isEmpty
-                          ? 'Product Name is required'
-                          : null;
-                      return error;
-                    },
+                      validator: GtinFieldValidators.productNameRequired,
                   ),
                   const SizedBox(height: 16),
 
                   // Manufacturer field
-                  _buildValidatedField(
+                    GtinValidatedField(
                     controller: _manufacturerController,
                     fieldName: 'manufacturer',
                     label: 'Manufacturer',
@@ -413,7 +364,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                     decoration: const InputDecoration(
                       labelText: 'Packaging Level',
                     ),
-                    items: _packagingLevelOptions
+                      items: GtinDetailConstants.packagingLevelOptions
                         .map(
                           (level) => DropdownMenuItem(
                             value: level,
@@ -432,20 +383,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                   const SizedBox(height: 16),
 
                   // Pack Size field
-                  _buildValidatedField(
+                    GtinValidatedField(
                     controller: _packSizeController,
                     fieldName: 'packSize',
                     label: 'Pack Size',
                     helperText: 'e.g., 30, 100, 500',
                     readOnly: isReadOnly,
-                    validator: (value) {
-                      if (value != null && value.isNotEmpty) {
-                        if (!RegExp(r'^\\d+$').hasMatch(value)) {
-                          return 'Pack Size must be a valid number';
-                        }
-                      }
-                      return null;
-                    },
+                      validator: GtinFieldValidators.packSizeOptionalInt,
                   ),
                   const SizedBox(height: 16),
 
@@ -455,7 +399,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                     decoration: const InputDecoration(
                       labelText: 'Status',
                     ),
-                    items: _statusOptions
+                      items: GtinDetailConstants.statusOptions
                         .map(
                           (status) => DropdownMenuItem(
                             value: status,
@@ -474,7 +418,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                   const SizedBox(height: 16),
 
                   // Registration Number field
-                  _buildValidatedField(
+                    GtinValidatedField(
                     controller: _registrationNumberController,
                     fieldName: 'registrationNumber',
                     label: 'Registration Number',
@@ -484,69 +428,51 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // Registration Date field
-                  GestureDetector(
-                    onTap: isReadOnly
-                        ? null
-                        : () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: _registrationDate ?? DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                _registrationDate = picked;
-                                _registrationDateController.text =
-                                    DateFormat('yyyy-MM-dd').format(picked);
-                              });
-                            }
-                          },
-                    child: AbsorbPointer(
-                      child: _buildValidatedField(
-                        controller: _registrationDateController,
-                        fieldName: 'registrationDate',
-                        label: 'Registration Date',
-                        suffixIcon: const Icon(Icons.calendar_today),
-                        readOnly: true,
-                        validator: (value) => null,
-                      ),
+                    // Registration Date field
+                    GtinDateField(
+                      controller: _registrationDateController,
+                      label: 'Registration Date',
+                      enabled: !isReadOnly,
+                      onPick: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _registrationDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _registrationDate = picked;
+                            _registrationDateController.text =
+                                DateFormat('yyyy-MM-dd').format(picked);
+                          });
+                        }
+                      },
                     ),
-                  ),
                   const SizedBox(height: 16),
 
-                  // Expiration Date field
-                  GestureDetector(
-                    onTap: isReadOnly
-                        ? null
-                        : () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: _expirationDate ??
-                                  DateTime.now().add(const Duration(days: 365)),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                _expirationDate = picked;
-                                _expirationDateController.text =
-                                    DateFormat('yyyy-MM-dd').format(picked);
-                              });
-                            }
-                          },
-                    child: AbsorbPointer(
-                      child: _buildValidatedField(
-                        controller: _expirationDateController,
-                        fieldName: 'expirationDate',
-                        label: 'Expiration Date',
-                        suffixIcon: const Icon(Icons.calendar_today),
-                        readOnly: true,
-                        validator: (value) => null,
-                      ),
+                    // Expiration Date field
+                    GtinDateField(
+                      controller: _expirationDateController,
+                      label: 'Expiration Date',
+                      enabled: !isReadOnly,
+                      onPick: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _expirationDate ??
+                              DateTime.now().add(const Duration(days: 365)),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _expirationDate = picked;
+                            _expirationDateController.text =
+                                DateFormat('yyyy-MM-dd').format(picked);
+                          });
+                        }
+                      },
                     ),
-                  ),
 
                   const SizedBox(height: 32),
 

@@ -92,48 +92,44 @@ class GtinResultsList extends StatelessWidget {
             interactive: true,
             child: RefreshIndicator(
               onRefresh: onRefresh,
-              child: SingleChildScrollView(
+              child: ListView.builder(
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: gtins.length +
-                      ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
-                      1,
-                  itemBuilder: (context, index) {
-                    if (index < gtins.length) {
-                      final gtin = gtins[index];
-                      return _constrainedCenter(
-                        RepaintBoundary(
-                          child: GtinListItemCard(
-                            gtin: gtin,
-                            onTap: () => onTapGtin(gtin.gtinCode),
-                          ),
+                padding: EdgeInsets.zero,
+                itemCount: gtins.length +
+                    ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
+                    1,
+                itemBuilder: (context, index) {
+                  if (index < gtins.length) {
+                    final gtin = gtins[index];
+                    return _constrainedCenter(
+                      RepaintBoundary(
+                        child: GtinListItemCard(
+                          gtin: gtin,
+                          onTap: () => onTapGtin(gtin.gtinCode),
                         ),
-                      );
-                    }
+                      ),
+                    );
+                  }
 
-                    final loaderIndex = gtins.length;
-                    final spacerIndex =
-                        gtins.length + ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
+                  final loaderIndex = gtins.length;
+                  final spacerIndex = gtins.length +
+                      ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
 
-                    if (index == loaderIndex &&
-                        state.hasMoreData &&
-                        state.isFetchingMore) {
-                      return _constrainedCenter(
-                        const GtinListLoadMoreShimmer(),
-                      );
-                    }
+                  if (index == loaderIndex &&
+                      state.hasMoreData &&
+                      state.isFetchingMore) {
+                    return _constrainedCenter(
+                      const GtinListLoadMoreShimmer(),
+                    );
+                  }
 
-                    if (index == spacerIndex) {
-                      return const SizedBox(height: Constants.spacing);
-                    }
+                  if (index == spacerIndex) {
+                    return const SizedBox(height: Constants.spacing);
+                  }
 
-                    return const SizedBox.shrink();
-                  },
-                ),
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ),

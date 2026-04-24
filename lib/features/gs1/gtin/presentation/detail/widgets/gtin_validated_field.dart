@@ -12,6 +12,9 @@ class GtinValidatedField extends StatelessWidget {
     this.readOnly = false,
     this.suffixIcon,
     this.validator,
+    this.focusNode,
+    this.onEditingComplete,
+    this.keyboardType,
   });
 
   final TextEditingController controller;
@@ -22,12 +25,18 @@ class GtinValidatedField extends StatelessWidget {
   final bool readOnly;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
+  final FocusNode? focusNode;
+  final VoidCallback? onEditingComplete;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return ValidatedTextFieldWrapper(
       controller: controller,
       fieldName: fieldName,
+      focusNode: focusNode,
+      onEditingComplete: onEditingComplete,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,

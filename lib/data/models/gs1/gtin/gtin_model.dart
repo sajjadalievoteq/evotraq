@@ -114,7 +114,8 @@ class GTIN extends Equatable {
     return {
       'gtin': gtinCode, // Use 'gtin' field name expected by backend
       'productName': productName,
-      if (manufacturer != null) 'manufacturer': manufacturer,
+      // Backend `gtins.manufacturer` is NOT NULL; send empty string when the UI leaves it blank.
+      'manufacturer': manufacturer ?? '',
       if (packagingLevel != null) 'packagingLevel': packagingLevel,
       if (packSize != null) 'packSize': packSize,
       if (status != null)

@@ -35,6 +35,10 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
   /// When to automatically validate the field
   final AutovalidateMode autovalidateMode;
 
+  final FocusNode? focusNode;
+
+  final VoidCallback? onEditingComplete;
+
   /// Constructor
   const ValidatedTextFieldWrapper({
     Key? key,
@@ -47,6 +51,8 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
     this.keyboardType,
     this.setFieldError,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
+    this.focusNode,
+    this.onEditingComplete,
   }) : super(key: key);
 
   @override
@@ -88,6 +94,7 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextFormField(
+          focusNode: widget.focusNode,
           controller: widget.controller,
           decoration: widget.decoration.copyWith(
             suffixIcon: _buildValidationIcon(widget.decoration.suffixIcon),
@@ -96,6 +103,7 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
           readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
           autovalidateMode: widget.autovalidateMode,
+          onEditingComplete: widget.onEditingComplete,
           onChanged: (value) {
             // First invoke the user's onChanged handler immediately
             if (widget.onChanged != null) {

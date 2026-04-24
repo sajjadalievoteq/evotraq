@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class GTINCubit extends Cubit<GTINState> {
   final GTINService _gtinService;
@@ -231,16 +232,27 @@ class GTINCubit extends Cubit<GTINState> {
   }
 
   Future<void> validateGTIN(String gtinCode) async {
+    final fieldError = GtinFieldValidators.validateGtinCode(gtinCode);
+    if (fieldError != null) {
+      emit(state.copyWith(
+        status: GTINStatus.success,
+        isValidFormat: false,
+        error: null,
+      ));
+      return;
+    }
+    final normalized =
+        GtinFieldValidators.canonicalGtin14FromInput(gtinCode);
     emit(state.copyWith(status: GTINStatus.loading));
     try {
-      final isValid = await _gtinService.validateGTIN(gtinCode);
+      final isValid = await _gtinService.validateGTIN(normalized);
       emit(state.copyWith(
         status: GTINStatus.success,
         isValidFormat: isValid,
         error: null,
       ));
     } catch (e, st) {
-      _logGtinCubit('validateGTIN', e, st, extra: 'gtinCode=$gtinCode');
+      _logGtinCubit('validateGTIN', e, st, extra: 'gtinCode=$normalized');
       _handleError(e);
     }
   }

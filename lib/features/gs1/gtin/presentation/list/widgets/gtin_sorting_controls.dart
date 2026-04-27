@@ -39,7 +39,7 @@ class GtinSortingControls extends StatelessWidget {
         final horizontalMargin = layout.width < 420 ? 8.0 : 16.0;
 
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: 4.0),
+
           padding: EdgeInsets.symmetric(
             horizontal: layout.resolve(compact: 12.0, medium: 16.0),
             vertical: layout.resolve(compact: 10.0, medium: 8.0),

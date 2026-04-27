@@ -37,48 +37,19 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
       builder: (context, settingsState) {
-        final settings = settingsState.settings;
-        if (kDebugMode) {
-          debugPrint(
-            'SystemSettings - isInitialized: ${settingsState.isInitialized}, '
-            'mode: ${settings.industryMode}, '
-            'isPharmaceutical: ${settings.isPharmaceuticalMode}, '
-            'isTobacco: ${settings.isTobaccoMode}',
-          );
-        }
-
-        if (settings.isPharmaceuticalMode) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PharmaceuticalExtensionWidget(
+        return settingsState.settings.isPharmaceuticalMode
+            ? PharmaceuticalExtensionWidget(
                 key: pharmaExtensionKey,
                 gtinCode: _resolvedGtinCode,
                 isEditing: isEditing,
                 initialExtension: pharmaceuticalExtension,
-              ),
-            ],
-          );
-        }
-
-        if (settings.isTobaccoMode) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              TobaccoExtensionWidget(
+              )
+            : TobaccoExtensionWidget(
                 key: tobaccoExtensionKey,
                 gtinCode: _resolvedGtinCode,
                 isEditing: isEditing,
                 initialExtension: tobaccoExtension,
-              ),
-            ],
-          );
-        }
-
-        return const SizedBox.shrink();
+              );
       },
     );
   }

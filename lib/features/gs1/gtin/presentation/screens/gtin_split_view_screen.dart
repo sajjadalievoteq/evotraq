@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
@@ -86,7 +87,7 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
                   final edge = (layout.horizontalPadding * 0.5 + Constants.spacing * 0.5)
                       .clamp(12.0, 24.0);
                   return Row(
-                    spacing: width < 900 ? 12 : 20,
+                    // spacing: width < 900 ? 12 : 20,
                     children: [
                       Flexible(
                         flex: listFlex,
@@ -95,19 +96,22 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
                             edge,
                             edge,
                             edge,
-                            edge,
+                            0
                           ),
-                          child: GTINListScreen(
-                            embedded: true,
-                            onSelectGtin: (gtinCode) {
-                              if (gtinCode == _selectedGtinCode && !_isAddingGtin) {
-                                return;
-                              }
-                              setState(() {
-                                _isAddingGtin = false;
-                                _selectedGtinCode = gtinCode;
-                              });
-                            },
+                          child: Padding(
+                            padding: EdgeInsets.only(left:width < 900 ? 12 : 20, right: width < 900 ? 12 : 20, top: width < 900 ? 12 : 20),
+                            child: GTINListScreen(
+                              embedded: true,
+                              onSelectGtin: (gtinCode) {
+                                if (gtinCode == _selectedGtinCode && !_isAddingGtin) {
+                                  return;
+                                }
+                                setState(() {
+                                  _isAddingGtin = false;
+                                  _selectedGtinCode = gtinCode;
+                                });
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -119,9 +123,12 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
                             edge,
                             edge,
                             edge,
-                            edge,
+                          0
                           ),
-                          child: _buildRightPane(),
+                          child: Padding(
+                            padding: EdgeInsets.only(left:width < 900 ? 12 : 20, right: width < 900 ? 12 : 20, top: width < 900 ? _isAddingGtin? 12:2 : _isAddingGtin?20:10),
+                            child: _buildRightPane(width),
+                          ),
                         ),
                       ),
                     ],
@@ -134,31 +141,33 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
     );
   }
 
-  Widget _buildRightPane() {
+  Widget _buildRightPane(double width) {
     if (_isAddingGtin) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Material(
-            color: Theme.of(context).colorScheme.surface,
+            color: ColorManager.primary(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: Constants.spacing),
               child: Row(
                 children: [
+
+                  Expanded(
+                    child: Text(
+                      'Create GTIN',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   IconButton(
                     tooltip: 'Close',
+                    color: Colors.white,
                     onPressed: () {
                       setState(() => _isAddingGtin = false);
                     },
                     icon: const Icon(Icons.close),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Create GTIN',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ),
                 ],
               ),

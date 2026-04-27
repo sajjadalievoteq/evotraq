@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
+import 'package:world_countries/world_countries.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -223,6 +225,10 @@ class TraqTraceApp extends StatelessWidget {
               darkTheme: AppTheme.darkTheme(),
               themeMode: themeState.themeMode,
               routerConfig: getIt<AppRouter>().router,
+              localizationsDelegates: const [
+                ...GlobalMaterialLocalizations.delegates,
+                TypedLocaleDelegate(),
+              ],
               builder: (context, child) => AppScreenUtilInit(
                 child: AppLayoutBuilder(
                   builder: (context, layout) => Stack(

@@ -37,6 +37,14 @@ class GtinStructureChips extends StatelessWidget {
               ),
               Chip(
                 label: Text(
+                  'Check digit ${data.checkDigit}',
+                  style: theme.textTheme.labelSmall,
+                ),
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              Chip(
+                label: Text(
                   'Indicator ${data.indicatorDigit}',
                   style: theme.textTheme.labelSmall,
                 ),

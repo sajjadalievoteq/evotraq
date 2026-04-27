@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import '../../../data/services/pharmaceutical_service.dart';
 import '../models/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_country_code_picker_field.dart';
+import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GTIN
 /// Can be embedded in GTIN detail screens or used standalone
@@ -122,6 +125,38 @@ class PharmaceuticalExtensionWidgetState
     'Other',
   ];
 
+  // ---------------------------------------------------------------------------
+  // Documentation-aligned pharma extension fields (UI-only for now)
+  // ---------------------------------------------------------------------------
+  final _regulatedProductNameController = TextEditingController();
+  final _dosageFormTypeCodeController = TextEditingController();
+  final _routeOfAdministrationCodeController = TextEditingController();
+
+  final _mahGlnController = TextEditingController();
+  final _mahNameController = TextEditingController();
+  final _mahCountryController = TextEditingController();
+
+  final _maNumberController = TextEditingController();
+  DateTime? _maValidFrom;
+  DateTime? _maValidTo;
+  final _maValidFromDisplay = TextEditingController();
+  final _maValidToDisplay = TextEditingController();
+
+  final _regulatoryStatusController = TextEditingController();
+
+  String _prescriptionStatus = 'RX';
+  bool _controlledSubstance = false;
+  final _controlledSubstanceScheduleController = TextEditingController();
+  bool _additionalMonitoring = false;
+
+  final _shelfLifeMonthsController = TextEditingController();
+  final _shelfLifeAfterOpenDaysController = TextEditingController();
+
+  final _countryOfManufactureController = TextEditingController();
+  final _packSizeDescriptionController = TextEditingController();
+
+  static final _docDateFmt = DateFormat('yyyy-MM-dd');
+
   @override
   void initState() {
     super.initState();
@@ -158,7 +193,44 @@ class PharmaceuticalExtensionWidgetState
     _blackBoxWarningTextController.dispose();
     _contraindicationsController.dispose();
     _drugInteractionsController.dispose();
+
+    _regulatedProductNameController.dispose();
+    _dosageFormTypeCodeController.dispose();
+    _routeOfAdministrationCodeController.dispose();
+    _mahGlnController.dispose();
+    _mahNameController.dispose();
+    _mahCountryController.dispose();
+    _maNumberController.dispose();
+    _maValidFromDisplay.dispose();
+    _maValidToDisplay.dispose();
+    _regulatoryStatusController.dispose();
+    _controlledSubstanceScheduleController.dispose();
+    _shelfLifeMonthsController.dispose();
+    _shelfLifeAfterOpenDaysController.dispose();
+    _countryOfManufactureController.dispose();
+    _packSizeDescriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDocDate({
+    required DateTime? current,
+    required ValueChanged<DateTime?> setValue,
+    required TextEditingController display,
+  }) async {
+    final initial = current ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (!mounted) return;
+    if (picked != null) {
+      setState(() {
+        setValue(picked);
+        display.text = _docDateFmt.format(picked);
+      });
+    }
   }
 
   Future<void> _loadExtension() async {
@@ -622,6 +694,200 @@ class PharmaceuticalExtensionWidgetState
                   maxLength: 1000,
                 ),
                 const SizedBox(height: 24),
+
+                // -------------------------------------------------------------------
+                // Pharma extension fields from documentation (UI-only)
+                // -------------------------------------------------------------------
+                _buildSectionHeader('Pharma Extension Fields (Documentation)'),
+                Text(
+                  'UI-only for now (not sent to the server). Labels and validations match the GTIN technical specification.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+
+                _buildTextField(
+                  _regulatedProductNameController,
+                  'Regulated Product Name (Generic / INN) *',
+                  maxLength: 200,
+                  validator: PharmaFieldValidators.validateRegulatedProductName,
+                ),
+                _buildTextField(
+                  _dosageFormTypeCodeController,
+                  'Dosage Form Type Code *',
+                  helperText: 'EDQM Standard Terms code (up to 30 chars)',
+                  maxLength: 30,
+                  validator: PharmaFieldValidators.validateDosageFormTypeCode,
+                ),
+                _buildTextField(
+                  _routeOfAdministrationCodeController,
+                  'Route of Administration Code *',
+                  helperText: 'EDQM Standard Terms code (up to 30 chars)',
+                  maxLength: 30,
+                  validator: PharmaFieldValidators.validateRouteOfAdministrationCode,
+                ),
+                const SizedBox(height: 12),
+
+                _buildTextField(
+                  _mahGlnController,
+                  'Marketing Authorization Holder (MAH) GLN *',
+                  helperText: '13 digits; Mod-10 check digit',
+                  maxLength: 13,
+                  keyboardType: TextInputType.number,
+                  validator: PharmaFieldValidators.validateMahGln,
+                ),
+                _buildTextField(
+                  _mahNameController,
+                  'MAH Name *',
+                  maxLength: 200,
+                  validator: PharmaFieldValidators.validateMahName,
+                ),
+                GtinCountryCodePickerField(
+                  controller: _mahCountryController,
+                  labelText: 'MAH Country *',
+                  helperText: 'ISO 3166-1 numeric (3 digits)',
+                  enabled: widget.isEditing,
+                  validator: PharmaFieldValidators.validateMahCountry,
+                ),
+                const SizedBox(height: 12),
+
+                _buildTextField(
+                  _maNumberController,
+                  'Marketing Authorization Number',
+                  maxLength: 50,
+                  validator: PharmaFieldValidators.validateMaNumber,
+                ),
+                GestureDetector(
+                  onTap: widget.isEditing
+                      ? () => _pickDocDate(
+                            current: _maValidFrom,
+                            setValue: (v) => _maValidFrom = v,
+                            display: _maValidFromDisplay,
+                          )
+                      : null,
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      controller: _maValidFromDisplay,
+                      decoration: const InputDecoration(
+                        labelText: 'Marketing Authorization Validity From Date',
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: widget.isEditing
+                      ? () => _pickDocDate(
+                            current: _maValidTo,
+                            setValue: (v) => _maValidTo = v,
+                            display: _maValidToDisplay,
+                          )
+                      : null,
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      controller: _maValidToDisplay,
+                      decoration: const InputDecoration(
+                        labelText: 'Marketing Authorization Validity To Date',
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                      validator: (_) {
+                        if (_maValidFrom != null &&
+                            _maValidTo != null &&
+                            _maValidTo!.isBefore(_maValidFrom!)) {
+                          return 'ma_valid_to must be >= ma_valid_from';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  _regulatoryStatusController,
+                  'Regulatory Status *',
+                  helperText: 'Code value (up to 20 chars)',
+                  maxLength: 20,
+                  validator: PharmaFieldValidators.validateRegulatoryStatus,
+                ),
+                const SizedBox(height: 12),
+
+                DropdownButtonFormField<String>(
+                  value: _prescriptionStatus,
+                  decoration: const InputDecoration(
+                    labelText: 'Prescription Status *',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: PharmaFieldValidators.prescriptionStatusCodes
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: widget.isEditing
+                      ? (v) => setState(() => _prescriptionStatus = v ?? 'RX')
+                      : null,
+                  validator: widget.isEditing
+                      ? PharmaFieldValidators.validatePrescriptionStatus
+                      : null,
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  title: const Text('Controlled Substance Indicator'),
+                  value: _controlledSubstance,
+                  onChanged: widget.isEditing
+                      ? (v) => setState(() => _controlledSubstance = v)
+                      : null,
+                ),
+                _buildTextField(
+                  _controlledSubstanceScheduleController,
+                  'Controlled Substance Schedule',
+                  helperText: 'Required when Controlled Substance Indicator = true',
+                  maxLength: 10,
+                  validator: (v) => PharmaFieldValidators
+                      .validateControlledSubstanceSchedule(v, controlled: _controlledSubstance),
+                ),
+                SwitchListTile(
+                  title: const Text(
+                    'Black Triangle / Additional Monitoring Indicator',
+                  ),
+                  value: _additionalMonitoring,
+                  onChanged: widget.isEditing
+                      ? (v) => setState(() => _additionalMonitoring = v)
+                      : null,
+                ),
+                const SizedBox(height: 12),
+
+                _buildTextField(
+                  _shelfLifeMonthsController,
+                  'Shelf Life from Production (months) *',
+                  helperText: 'Numeric, 1–360',
+                  maxLength: 3,
+                  keyboardType: TextInputType.number,
+                  validator: PharmaFieldValidators.validateShelfLifeMonths,
+                ),
+                _buildTextField(
+                  _shelfLifeAfterOpenDaysController,
+                  'Shelf Life After Opening (days)',
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  validator: PharmaFieldValidators.validateShelfLifeAfterOpenDays,
+                ),
+                GtinCountryCodePickerField(
+                  controller: _countryOfManufactureController,
+                  labelText: 'Country of Manufacture *',
+                  helperText: 'ISO 3166-1 numeric (3 digits)',
+                  enabled: widget.isEditing,
+                  validator: PharmaFieldValidators.validateCountryOfManufacture,
+                ),
+                _buildTextField(
+                  _packSizeDescriptionController,
+                  'Pack Size Description (free text)',
+                  helperText: 'Up to 100 chars',
+                  maxLength: 100,
+                  validator: PharmaFieldValidators.validatePackSizeDescription,
+                ),
+
                 // Note: Save button removed - pharmaceutical extension is saved with the main GTIN form
               ],
             ),
@@ -653,6 +919,8 @@ class PharmaceuticalExtensionWidgetState
     String? helperText,
     int maxLines = 1,
     int? maxLength,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -665,8 +933,10 @@ class PharmaceuticalExtensionWidgetState
         ),
         maxLines: maxLines,
         maxLength: maxLength,
+        keyboardType: keyboardType,
         inputFormatters: maxLength != null ? [LengthLimitingTextInputFormatter(maxLength)] : null,
         readOnly: !widget.isEditing,
+        validator: validator,
       ),
     );
   }

@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   
   # State management
@@ -80,6 +82,7 @@ dependencies:
   latlong2: ^0.9.1
   get_it: ^9.2.1
   shimmer: ^3.0.0
+  world_countries: ^4.2.0
 
 dev_dependencies:
   flutter_test:

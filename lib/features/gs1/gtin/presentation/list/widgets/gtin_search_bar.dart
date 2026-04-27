@@ -35,7 +35,7 @@ class GtinSearchBar extends StatelessWidget {
         final horizontalMargin = layout.width < 420 ? 8.0 : 16.0;
 
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: 4.0),
+
           padding: EdgeInsets.all(
             layout.resolve(
               compact: 12.0,

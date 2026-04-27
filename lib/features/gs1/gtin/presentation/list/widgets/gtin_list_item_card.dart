@@ -44,7 +44,7 @@ class GtinListItemCard extends StatelessWidget {
         }
 
         return Card(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: 4),
+
           elevation: 2,
           child: ListTile(
             contentPadding: contentPadding,

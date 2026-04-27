@@ -7,12 +7,14 @@ class GtinDateField extends StatelessWidget {
     required this.label,
     required this.onPick,
     required this.enabled,
+    this.validator,
   });
 
   final TextEditingController controller;
   final String label;
   final Future<void> Function() onPick;
   final bool enabled;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class GtinDateField extends StatelessWidget {
             suffixIcon: const Icon(Icons.calendar_today),
           ),
           readOnly: true,
+          validator: validator,
         ),
       ),
     );

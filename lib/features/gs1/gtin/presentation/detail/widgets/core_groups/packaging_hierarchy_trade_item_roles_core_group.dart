@@ -1,0 +1,250 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+
+class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {
+  const PackagingHierarchyTradeItemRolesCoreGroup({
+    super.key,
+    required this.isReadOnly,
+    required this.gtinCodeController,
+    required this.unitDescriptorController,
+  });
+
+  final bool isReadOnly;
+  final TextEditingController gtinCodeController;
+  final TextEditingController? unitDescriptorController;
+
+  @override
+  State<PackagingHierarchyTradeItemRolesCoreGroup> createState() =>
+      _PackagingHierarchyTradeItemRolesCoreGroupState();
+}
+
+class _PackagingHierarchyTradeItemRolesCoreGroupState
+    extends State<PackagingHierarchyTradeItemRolesCoreGroup> {
+  static final _dateFmt = DateFormat('yyyy-MM-dd');
+
+  late final TextEditingController _nextLowerLevelGtin;
+  late final TextEditingController _nextLowerLevelQuantity;
+  late final TextEditingController _quantityOfChildren;
+  late final TextEditingController _totalQtyNextLower;
+  late final TextEditingController _launchDateDisplay;
+  DateTime? _launchDate;
+
+  bool _isBaseUnit = false;
+  bool _isConsumerUnit = false;
+  bool _isOrderableUnit = false;
+  bool _isDespatchUnit = false;
+  bool _isInvoiceUnit = false;
+  bool _isVariableUnit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nextLowerLevelGtin = TextEditingController();
+    _nextLowerLevelQuantity = TextEditingController();
+    _quantityOfChildren = TextEditingController();
+    _totalQtyNextLower = TextEditingController();
+    _launchDateDisplay = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nextLowerLevelGtin.dispose();
+    _nextLowerLevelQuantity.dispose();
+    _quantityOfChildren.dispose();
+    _totalQtyNextLower.dispose();
+    _launchDateDisplay.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickLaunchDate() async {
+    final initial = _launchDate ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (!mounted) return;
+    if (picked == null) return;
+    setState(() {
+      _launchDate = picked;
+      _launchDateDisplay.text = _dateFmt.format(picked);
+    });
+  }
+
+  String? _indicatorDigitFromGtin() {
+    final raw = widget.gtinCodeController.text;
+    if (!GtinFieldValidators.isGtinCodeValid(raw)) return null;
+    final canon = GtinFieldValidators.canonicalGtin14FromInput(raw);
+    return GtinFormat.indicatorFromCanonical14(canon);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+
+    Widget sectionLabel(String text) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Text(
+          text,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      );
+    }
+
+    final indicatorDigit = _indicatorDigitFromGtin();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        sectionLabel('3. Packaging Hierarchy & Trade Item Roles (Core)'),
+        Text(
+          'unit_descriptor is captured in the main form (unit_descriptor *).',
+          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+        ),
+        const SizedBox(height: 12),
+        GtinValidatedField(
+          controller: _nextLowerLevelGtin,
+          fieldName: 'next_lower_level_gtin',
+          label: 'Next Lower Level GTIN',
+          helperText: 'Required when Base unit = false',
+          readOnly: widget.isReadOnly,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          validator: (v) => GtinFieldValidators.validateNextLowerLevelGtinConditional(
+            v,
+            isBaseUnit: _isBaseUnit,
+            currentGtinRaw: widget.gtinCodeController.text,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GtinValidatedField(
+          controller: _nextLowerLevelQuantity,
+          fieldName: 'next_lower_level_quantity',
+          label: 'Next Lower Level Quantity',
+          helperText: 'Required when Base unit = false',
+          readOnly: widget.isReadOnly,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          validator: (v) => GtinFieldValidators.validateNextLowerLevelQuantityConditional(
+            v,
+            isBaseUnit: _isBaseUnit,
+            nextLowerLevelGtin: _nextLowerLevelGtin.text,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GtinValidatedField(
+          controller: _quantityOfChildren,
+          fieldName: 'quantity_of_children',
+          label: 'Quantity of Children',
+          readOnly: widget.isReadOnly,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          validator: (v) => GtinFieldValidators.validateQuantityOfChildrenConditional(
+            v,
+            isBaseUnit: _isBaseUnit,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GtinValidatedField(
+          controller: _totalQtyNextLower,
+          fieldName: 'total_qty_next_lower',
+          label: 'Total Quantity of Next Lower Level Trade Items',
+          readOnly: widget.isReadOnly,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          validator: (v) => GtinFieldValidators.validateTotalQtyNextLowerConditional(
+            v,
+            isBaseUnit: _isBaseUnit,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GtinDateField(
+          controller: _launchDateDisplay,
+          label: 'Launch Date',
+          enabled: !widget.isReadOnly,
+          onPick: _pickLaunchDate,
+        ),
+        const SizedBox(height: 12),
+        sectionLabel('Trade Item Role Flags'),
+        SwitchListTile(
+          value: _isBaseUnit,
+          onChanged: widget.isReadOnly ? null : (v) => setState(() => _isBaseUnit = v),
+          title: const Text('Is Trade Item a Base Unit?'),
+        ),
+        SwitchListTile(
+          value: _isConsumerUnit,
+          onChanged:
+              widget.isReadOnly ? null : (v) => setState(() => _isConsumerUnit = v),
+          title: const Text('Is Trade Item a Consumer Unit?'),
+        ),
+        SwitchListTile(
+          value: _isOrderableUnit,
+          onChanged:
+              widget.isReadOnly ? null : (v) => setState(() => _isOrderableUnit = v),
+          title: const Text('Is Trade Item an Orderable Unit?'),
+        ),
+        SwitchListTile(
+          value: _isDespatchUnit,
+          onChanged:
+              widget.isReadOnly ? null : (v) => setState(() => _isDespatchUnit = v),
+          title: const Text('Is Trade Item a Despatch (Shipping) Unit?'),
+        ),
+        SwitchListTile(
+          value: _isInvoiceUnit,
+          onChanged:
+              widget.isReadOnly ? null : (v) => setState(() => _isInvoiceUnit = v),
+          title: const Text('Is Trade Item an Invoice Unit?'),
+        ),
+        SwitchListTile(
+          value: _isVariableUnit,
+          onChanged:
+              widget.isReadOnly ? null : (v) => setState(() => _isVariableUnit = v),
+          title: const Text('Is Trade Item a Variable Unit?'),
+        ),
+        FormField<void>(
+          validator: (_) => GtinFieldValidators.validateTradeItemRoleFlags(
+            isBaseUnit: _isBaseUnit,
+            isConsumerUnit: _isConsumerUnit,
+            isOrderableUnit: _isOrderableUnit,
+            isDespatchUnit: _isDespatchUnit,
+            isInvoiceUnit: _isInvoiceUnit,
+            isVariableUnit: _isVariableUnit,
+            unitDescriptor: widget.unitDescriptorController?.text,
+            indicatorDigit: indicatorDigit,
+            isReadOnly: widget.isReadOnly,
+          ),
+          builder: (state) {
+            if (state.errorText == null) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                state.errorText!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+

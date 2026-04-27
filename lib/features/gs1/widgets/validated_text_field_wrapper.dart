@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 
 /// A wrapper for TextFormField that provides real-time validation feedback similar to ValidatedFormBuilderTextField.
@@ -27,6 +28,12 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
   
   /// Text input type (e.g., number, email, etc.)
   final TextInputType? keyboardType;
+
+  /// Optional max length for the field (shows counter when enabled by Flutter).
+  final int? maxLength;
+
+  /// Optional input formatters (e.g., to restrict characters).
+  final List<TextInputFormatter>? inputFormatters;
   
   /// The function to call with the field name and error message.
   /// This is typically the setFieldError method from GS1FormValidationMixin.
@@ -49,6 +56,8 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
     this.readOnly = false,
     this.onChanged,
     this.keyboardType,
+    this.maxLength,
+    this.inputFormatters,
     this.setFieldError,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.focusNode,
@@ -102,6 +111,8 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
           ),
           readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
+          maxLength: widget.maxLength,
+          inputFormatters: widget.inputFormatters,
           autovalidateMode: widget.autovalidateMode,
           onEditingComplete: widget.onEditingComplete,
           onChanged: (value) {

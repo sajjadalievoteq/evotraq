@@ -64,7 +64,7 @@ class GtinRecordInfoBar extends StatelessWidget {
         );
 
         final container = Container(
-          margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: 4.0),
+
           padding: padding,
           width: double.infinity,
           decoration: BoxDecoration(

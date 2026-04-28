@@ -18,7 +18,6 @@ class GtinDetailForm extends StatelessWidget {
 
   final GlobalKey<FormState> formKey;
   final bool gtinFieldLocked;
-  /// Local-only GDSN-style fields; not bound to create/update API.
   final Widget? unboundSpecSection;
   final Widget industrySection;
   final bool showSubmitButton;

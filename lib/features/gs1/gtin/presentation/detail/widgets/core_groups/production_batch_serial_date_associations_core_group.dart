@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
@@ -11,54 +12,52 @@ class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
 
   @override
   State<ProductionBatchSerialDateAssociationsCoreGroup> createState() =>
-      _ProductionBatchSerialDateAssociationsCoreGroupState();
+      ProductionBatchSerialDateAssociationsCoreGroupState();
 }
 
-class _ProductionBatchSerialDateAssociationsCoreGroupState
+class ProductionBatchSerialDateAssociationsCoreGroupState
     extends State<ProductionBatchSerialDateAssociationsCoreGroup> {
-  // Doc (Tables 79-80): REQUESTED BY LAW / NOT REQUESTED BUT ALLOCATED / NOT ALLOCATED
-  String? _hasBatchNumberIndicator = 'REQUESTED BY LAW';
-  String? _hasSerialNumberIndicator = 'REQUESTED BY LAW';
+  // Store backend-compatible codes; display space-separated labels.
+  String? _hasBatchNumberIndicator = 'REQUESTED_BY_LAW';
+  String? _hasSerialNumberIndicator = 'REQUESTED_BY_LAW';
+
+  String? get hasBatchNumberIndicator => _hasBatchNumberIndicator;
+  String? get hasSerialNumberIndicator => _hasSerialNumberIndicator;
+
+  void setFromGtin({
+    required String? hasBatchNumberIndicator,
+    required String? hasSerialNumberIndicator,
+  }) {
+    _hasBatchNumberIndicator = (hasBatchNumberIndicator ?? 'REQUESTED_BY_LAW').trim();
+    _hasSerialNumberIndicator =
+        (hasSerialNumberIndicator ?? 'REQUESTED_BY_LAW').trim();
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('8. Production, Batch, Serial & Date Associations (Core)'),
+        const SectionLabel('Production, Batch, Serial & Date Associations'),
         DropdownButtonFormField<String>(
           initialValue: _hasBatchNumberIndicator,
           decoration: const InputDecoration(
             labelText: 'Has Batch Number Indicator',
-            helperText:
-                'Doc: default REQUESTED BY LAW for pharma; drives AI(10) encoding.',
+    helperText: 'Required for traceability in pharmaceutical products',
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
-              value: 'REQUESTED BY LAW',
+              value: 'REQUESTED_BY_LAW',
               child: Text('REQUESTED BY LAW'),
             ),
             DropdownMenuItem(
-              value: 'NOT REQUESTED BUT ALLOCATED',
+              value: 'NOT_REQUESTED_BUT_ALLOCATED',
               child: Text('NOT REQUESTED BUT ALLOCATED'),
             ),
             DropdownMenuItem(
-              value: 'NOT ALLOCATED',
+              value: 'NOT_ALLOCATED',
               child: Text('NOT ALLOCATED'),
             ),
           ],
@@ -73,21 +72,20 @@ class _ProductionBatchSerialDateAssociationsCoreGroupState
           initialValue: _hasSerialNumberIndicator,
           decoration: const InputDecoration(
             labelText: 'Has Serial Number Indicator',
-            helperText:
-                'Doc: default REQUESTED BY LAW for pharma; drives AI(21)/SGTIN.',
+            helperText: 'Required for pharmaceutical serialization and traceability',
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
-              value: 'REQUESTED BY LAW',
+              value: 'REQUESTED_BY_LAW',
               child: Text('REQUESTED BY LAW'),
             ),
             DropdownMenuItem(
-              value: 'NOT REQUESTED BUT ALLOCATED',
+              value: 'NOT_REQUESTED_BUT_ALLOCATED',
               child: Text('NOT REQUESTED BUT ALLOCATED'),
             ),
             DropdownMenuItem(
-              value: 'NOT ALLOCATED',
+              value: 'NOT_ALLOCATED',
               child: Text('NOT ALLOCATED'),
             ),
           ],

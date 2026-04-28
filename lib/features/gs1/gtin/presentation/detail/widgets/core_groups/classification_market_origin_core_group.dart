@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_country_code_picker_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class ClassificationMarketOriginCoreGroup extends StatefulWidget {
@@ -12,10 +13,10 @@ class ClassificationMarketOriginCoreGroup extends StatefulWidget {
 
   @override
   State<ClassificationMarketOriginCoreGroup> createState() =>
-      _ClassificationMarketOriginCoreGroupState();
+      ClassificationMarketOriginCoreGroupState();
 }
 
-class _ClassificationMarketOriginCoreGroupState
+class ClassificationMarketOriginCoreGroupState
     extends State<ClassificationMarketOriginCoreGroup> {
   late final TextEditingController _countryOfOrigin;
 
@@ -31,26 +32,20 @@ class _ClassificationMarketOriginCoreGroupState
     super.dispose();
   }
 
+  String? get countryOfOrigin =>
+      _countryOfOrigin.text.trim().isEmpty ? null : _countryOfOrigin.text.trim();
+
+  void setFromGtin({required String? countryOfOrigin}) {
+    _countryOfOrigin.text = (countryOfOrigin ?? '').trim();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('5. Classification, Market & Origin (Core)'),
+        const SectionLabel('Classification, Market & Origin'),
         GtinCountryCodePickerField(
           controller: _countryOfOrigin,
           labelText: 'Country of Origin',

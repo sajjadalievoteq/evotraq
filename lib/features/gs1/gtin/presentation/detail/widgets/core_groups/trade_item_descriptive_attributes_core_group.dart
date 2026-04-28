@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
@@ -13,10 +14,10 @@ class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
 
   @override
   State<TradeItemDescriptiveAttributesCoreGroup> createState() =>
-      _TradeItemDescriptiveAttributesCoreGroupState();
+      TradeItemDescriptiveAttributesCoreGroupState();
 }
 
-class _TradeItemDescriptiveAttributesCoreGroupState
+class TradeItemDescriptiveAttributesCoreGroupState
     extends State<TradeItemDescriptiveAttributesCoreGroup> {
   late final TextEditingController _functionalName;
   late final TextEditingController _tradeItemDescription;
@@ -41,32 +42,39 @@ class _TradeItemDescriptiveAttributesCoreGroupState
     super.dispose();
   }
 
+  String? get functionalName =>
+      _functionalName.text.trim().isEmpty ? null : _functionalName.text.trim();
+  String? get tradeItemDescription => _tradeItemDescription.text.trim().isEmpty
+      ? null
+      : _tradeItemDescription.text.trim();
+  String? get gpcBrickCode =>
+      _gpcCategoryCode.text.trim().isEmpty ? null : _gpcCategoryCode.text.trim();
+  String? get targetMarketCountry => _targetMarketCountryCode.text.trim().isEmpty
+      ? null
+      : _targetMarketCountryCode.text.trim();
+
+  void setFromGtin({
+    required String? functionalName,
+    required String? tradeItemDescription,
+    required String? gpcBrickCode,
+    required String? targetMarketCountry,
+  }) {
+    _functionalName.text = (functionalName ?? '').trim();
+    _tradeItemDescription.text = (tradeItemDescription ?? '').trim();
+    _gpcCategoryCode.text = (gpcBrickCode ?? '').trim();
+    _targetMarketCountryCode.text = (targetMarketCountry ?? '').trim();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
 
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('2. Trade Item Descriptive Attributes (GDSN Core)'),
-        Text(
-          'brand_name is captured in the main form (Brand Name *).',
-          style: theme.textTheme.bodySmall?.copyWith(color: muted),
-        ),
-        const SizedBox(height: 12),
+        const SectionLabel('Trade Item Descriptive Attributes'),
         GtinValidatedField(
           controller: _functionalName,
           fieldName: 'functional_name',

@@ -371,11 +371,14 @@ abstract final class GtinFieldValidators {
     return null;
   }
 
+  // Backend uses underscore codes; UI shows space-separated labels.
   static const Set<String> _aiIndicatorCodes = {
-    'REQUESTED BY LAW',
-    'NOT REQUESTED BUT ALLOCATED',
-    'NOT ALLOCATED',
+    'REQUESTED_BY_LAW',
+    'NOT_REQUESTED_BUT_ALLOCATED',
+    'NOT_ALLOCATED',
   };
+
+  static String _aiIndicatorUiLabel(String v) => v.replaceAll('_', ' ');
 
   // Doc: Table 79
   static String? validateHasBatchNumberIndicator(String? value) {
@@ -397,8 +400,8 @@ abstract final class GtinFieldValidators {
     // When serial is requested by law, batch must not be NOT_ALLOCATED.
     // (Spec: regulated pharma uses the four data elements; at minimum this prevents serial-only.)
     final b = (batchIndicator ?? '').trim();
-    if (v == 'REQUESTED BY LAW' && b == 'NOT ALLOCATED') {
-      return 'Batch indicator cannot be NOT ALLOCATED when Serial is REQUESTED BY LAW';
+    if (v == 'REQUESTED_BY_LAW' && b == 'NOT_ALLOCATED') {
+      return 'Batch indicator cannot be ${_aiIndicatorUiLabel(b)} when Serial is ${_aiIndicatorUiLabel(v)}';
     }
     return null;
   }

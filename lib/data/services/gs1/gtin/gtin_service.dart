@@ -275,6 +275,10 @@ class GTINService {
     }
 
     final jsonPayload = gtin.toJson();
+    if (kDebugMode) {
+      debugPrint('[GTINService] createGTIN request -> POST $_base');
+      debugPrint('[GTINService] createGTIN payload: ${json.encode(jsonPayload)}');
+    }
 
     final response = await _dioService.post(
       _base,
@@ -433,6 +437,63 @@ class GTINService {
       );
       _log('validateGTIN', ex,
           path: '$_base/validate', statusCode: response.statusCode, body: ex.responseBody);
+      throw ex;
+    }
+  }
+
+  static Map<String, dynamic> _decodeJsonObject(String raw) {
+    final v = json.decode(raw);
+    if (v is Map<String, dynamic>) return v;
+    if (v is Map) return Map<String, dynamic>.from(v);
+    throw FormatException('Expected JSON object, got: ${v.runtimeType}');
+  }
+
+  /// Derive GS1 identification parts for chips:
+  /// `gs1CompanyPrefixLength`, `gs1CompanyPrefix`, `itemReference`.
+  Future<Map<String, dynamic>> deriveIdentification(String gtin) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      final ex = ApiException(message: 'No authentication token found');
+      _log('deriveIdentification', ex, path: '$_base${GtinApiConsts.deriveIdentificationPath}');
+      throw ex;
+    }
+
+    final response = await _dioService.post(
+      '$_base${GtinApiConsts.deriveIdentificationPath}',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      data: json.encode({'gtin': gtin}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        // Parse JSON in an isolate to keep UI smooth.
+        return compute(_decodeJsonObject, response.data as String);
+      } catch (e) {
+        final ex = ApiException(
+          statusCode: response.statusCode,
+          message: 'Error processing derive-identification response: $e',
+          originalException: e,
+          responseBody: response.data is String ? response.data as String? : null,
+        );
+        _log('deriveIdentification:parse', ex,
+            path: '$_base${GtinApiConsts.deriveIdentificationPath}', body: ex.responseBody);
+        throw ex;
+      }
+    } else {
+      final ex = ApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to derive identification: ${response.statusMessage}',
+        responseBody: response.data is String ? response.data as String? : null,
+      );
+      _log('deriveIdentification', ex,
+          path: '$_base${GtinApiConsts.deriveIdentificationPath}',
+          statusCode: response.statusCode,
+          body: ex.responseBody);
       throw ex;
     }
   }

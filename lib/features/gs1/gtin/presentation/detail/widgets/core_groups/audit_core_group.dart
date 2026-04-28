@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
@@ -11,10 +12,10 @@ class AuditCoreGroup extends StatefulWidget {
   final bool isReadOnly;
 
   @override
-  State<AuditCoreGroup> createState() => _AuditCoreGroupState();
+  State<AuditCoreGroup> createState() => AuditCoreGroupState();
 }
 
-class _AuditCoreGroupState extends State<AuditCoreGroup> {
+class AuditCoreGroupState extends State<AuditCoreGroup> {
   late final TextEditingController _createdBy;
   late final TextEditingController _updatedBy;
 
@@ -32,26 +33,26 @@ class _AuditCoreGroupState extends State<AuditCoreGroup> {
     super.dispose();
   }
 
+  String? get createdBy =>
+      _createdBy.text.trim().isEmpty ? null : _createdBy.text.trim();
+  String? get updatedBy =>
+      _updatedBy.text.trim().isEmpty ? null : _updatedBy.text.trim();
+
+  void setFromGtin({
+    required String? createdBy,
+    required String? updatedBy,
+  }) {
+    _createdBy.text = (createdBy ?? '').trim();
+    _updatedBy.text = (updatedBy ?? '').trim();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('9. Audit (Core)'),
+        const SectionLabel('Audit'),
         GtinValidatedField(
           controller: _createdBy,
           fieldName: 'created_by',

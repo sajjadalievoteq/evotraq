@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
@@ -15,10 +16,10 @@ class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
 
   @override
   State<LifecycleAvailabilityStatusCoreGroup> createState() =>
-      _LifecycleAvailabilityStatusCoreGroupState();
+      LifecycleAvailabilityStatusCoreGroupState();
 }
 
-class _LifecycleAvailabilityStatusCoreGroupState
+class LifecycleAvailabilityStatusCoreGroupState
     extends State<LifecycleAvailabilityStatusCoreGroup> {
   static final _dateFmt = DateFormat('yyyy-MM-dd');
   static final _dateTimeNoOffsetFmt = DateFormat('yyyy-MM-dd / HH:mm:ss');
@@ -58,6 +59,41 @@ class _LifecycleAvailabilityStatusCoreGroupState
     _endAvailDateDisplay.dispose();
     _publicationDateDisplay.dispose();
     super.dispose();
+  }
+
+  String? get tradeItemStatus => _tradeItemStatus;
+  DateTime? get effectiveDate => _effectiveDate;
+  DateTime? get startAvailDate => _startAvailDate;
+  DateTime? get endAvailDate => _endAvailDate;
+  DateTime? get publicationDate => _publicationDate;
+
+  void setFromGtin({
+    required String? tradeItemStatus,
+    required DateTime? effectiveDate,
+    required DateTime? startAvailDate,
+    required DateTime? endAvailDate,
+    required DateTime? publicationDate,
+  }) {
+    _tradeItemStatus = tradeItemStatus ?? _tradeItemStatus;
+
+    if (effectiveDate != null) {
+      _effectiveDate = effectiveDate;
+      _effectiveDateDisplay.text = _formatDateTimeWithOffset(effectiveDate);
+    }
+
+    _startAvailDate = startAvailDate;
+    _startAvailDateDisplay.text =
+        startAvailDate == null ? '' : _formatDateTimeWithOffset(startAvailDate);
+
+    _endAvailDate = endAvailDate;
+    _endAvailDateDisplay.text =
+        endAvailDate == null ? '' : _formatDateTimeWithOffset(endAvailDate);
+
+    _publicationDate = publicationDate;
+    _publicationDateDisplay.text =
+        publicationDate == null ? '' : _dateFmt.format(publicationDate);
+
+    if (mounted) setState(() {});
   }
 
   String _formatDateTimeWithOffset(DateTime dt) {
@@ -131,22 +167,10 @@ class _LifecycleAvailabilityStatusCoreGroupState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('7. Lifecycle, Availability & Status (Core)'),
+        const SectionLabel('Lifecycle, Availability & Status'),
         DropdownButtonFormField<String>(
           initialValue: _tradeItemStatus,
           decoration: const InputDecoration(

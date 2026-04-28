@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
@@ -12,10 +13,10 @@ class NetContentMeasurementsCoreGroup extends StatefulWidget {
 
   @override
   State<NetContentMeasurementsCoreGroup> createState() =>
-      _NetContentMeasurementsCoreGroupState();
+      NetContentMeasurementsCoreGroupState();
 }
 
-class _NetContentMeasurementsCoreGroupState
+class NetContentMeasurementsCoreGroupState
     extends State<NetContentMeasurementsCoreGroup> {
   late final TextEditingController _netContent;
   late final TextEditingController _netContentUom;
@@ -52,26 +53,47 @@ class _NetContentMeasurementsCoreGroupState
     super.dispose();
   }
 
+  double? _doubleOrNull(TextEditingController c) =>
+      c.text.trim().isEmpty ? null : double.tryParse(c.text.trim());
+  String? _stringOrNull(TextEditingController c) =>
+      c.text.trim().isEmpty ? null : c.text.trim();
+
+  double? get netContentValue => _doubleOrNull(_netContent);
+  String? get netContentUom => _stringOrNull(_netContentUom);
+  double? get grossWeightValue => _doubleOrNull(_grossWeight);
+  String? get grossWeightUom => _stringOrNull(_grossWeightUom);
+  double? get heightValue => _doubleOrNull(_height);
+  double? get widthValue => _doubleOrNull(_width);
+  double? get depthValue => _doubleOrNull(_depth);
+  String? get dimUom => _stringOrNull(_dimensionUom);
+
+  void setFromGtin({
+    required double? netContentValue,
+    required String? netContentUom,
+    required double? grossWeightValue,
+    required String? grossWeightUom,
+    required double? heightValue,
+    required double? widthValue,
+    required double? depthValue,
+    required String? dimUom,
+  }) {
+    _netContent.text = netContentValue?.toString() ?? '';
+    _netContentUom.text = (netContentUom ?? '').trim();
+    _grossWeight.text = grossWeightValue?.toString() ?? '';
+    _grossWeightUom.text = (grossWeightUom ?? '').trim();
+    _height.text = heightValue?.toString() ?? '';
+    _width.text = widthValue?.toString() ?? '';
+    _depth.text = depthValue?.toString() ?? '';
+    _dimensionUom.text = (dimUom ?? '').trim();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('4. Net Content & Measurements (Core)'),
+        const SectionLabel('Net Content & Measurements'),
         GtinValidatedField(
           controller: _netContent,
           fieldName: 'net_content_value',
@@ -119,7 +141,7 @@ class _NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _height,
           fieldName: 'height_value',
-          label: 'Height Value',
+          label: 'Height',
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -131,7 +153,7 @@ class _NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _width,
           fieldName: 'width_value',
-          label: 'Width Value',
+          label: 'Width',
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -143,7 +165,7 @@ class _NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _depth,
           fieldName: 'depth_value',
-          label: 'Depth Value',
+          label: 'Depth',
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,

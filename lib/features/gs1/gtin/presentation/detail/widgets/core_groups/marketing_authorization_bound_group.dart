@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class MarketingAuthorizationBoundGroup extends StatefulWidget {
@@ -83,24 +84,10 @@ class MarketingAuthorizationBoundGroupState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('3. Marketing Authorization (Bound)'),
+        const SectionLabel('Marketing Authorization'),
         GtinValidatedField(
           controller: _number,
           fieldName: 'registrationNumber',

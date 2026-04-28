@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 
@@ -19,10 +20,10 @@ class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {
 
   @override
   State<PackagingHierarchyTradeItemRolesCoreGroup> createState() =>
-      _PackagingHierarchyTradeItemRolesCoreGroupState();
+      PackagingHierarchyTradeItemRolesCoreGroupState();
 }
 
-class _PackagingHierarchyTradeItemRolesCoreGroupState
+class PackagingHierarchyTradeItemRolesCoreGroupState
     extends State<PackagingHierarchyTradeItemRolesCoreGroup> {
   static final _dateFmt = DateFormat('yyyy-MM-dd');
 
@@ -60,6 +61,56 @@ class _PackagingHierarchyTradeItemRolesCoreGroupState
     super.dispose();
   }
 
+  int? _intOrNull(TextEditingController c) =>
+      c.text.trim().isEmpty ? null : int.tryParse(c.text.trim());
+  String? _stringOrNull(TextEditingController c) =>
+      c.text.trim().isEmpty ? null : c.text.trim();
+
+  String? get nextLowerLevelGtin => _stringOrNull(_nextLowerLevelGtin);
+  int? get nextLowerLevelQuantity => _intOrNull(_nextLowerLevelQuantity);
+  int? get quantityOfChildren => _intOrNull(_quantityOfChildren);
+  int? get totalQtyNextLower => _intOrNull(_totalQtyNextLower);
+  DateTime? get launchDate => _launchDate;
+
+  bool get isBaseUnit => _isBaseUnit;
+  bool get isConsumerUnit => _isConsumerUnit;
+  bool get isOrderableUnit => _isOrderableUnit;
+  bool get isDespatchUnit => _isDespatchUnit;
+  bool get isInvoiceUnit => _isInvoiceUnit;
+  bool get isVariableUnit => _isVariableUnit;
+
+  void setFromGtin({
+    required String? nextLowerLevelGtin,
+    required int? nextLowerLevelQuantity,
+    required int? quantityOfChildren,
+    required int? totalQtyNextLower,
+    required DateTime? launchDate,
+    required bool? isBaseUnit,
+    required bool? isConsumerUnit,
+    required bool? isOrderableUnit,
+    required bool? isDespatchUnit,
+    required bool? isInvoiceUnit,
+    required bool? isVariableUnit,
+  }) {
+    _nextLowerLevelGtin.text = (nextLowerLevelGtin ?? '').trim();
+    _nextLowerLevelQuantity.text = nextLowerLevelQuantity?.toString() ?? '';
+    _quantityOfChildren.text = quantityOfChildren?.toString() ?? '';
+    _totalQtyNextLower.text = totalQtyNextLower?.toString() ?? '';
+
+    _launchDate = launchDate;
+    _launchDateDisplay.text =
+        launchDate == null ? '' : _dateFmt.format(launchDate);
+
+    _isBaseUnit = isBaseUnit ?? _isBaseUnit;
+    _isConsumerUnit = isConsumerUnit ?? _isConsumerUnit;
+    _isOrderableUnit = isOrderableUnit ?? _isOrderableUnit;
+    _isDespatchUnit = isDespatchUnit ?? _isDespatchUnit;
+    _isInvoiceUnit = isInvoiceUnit ?? _isInvoiceUnit;
+    _isVariableUnit = isVariableUnit ?? _isVariableUnit;
+
+    if (mounted) setState(() {});
+  }
+
   Future<void> _pickLaunchDate() async {
     final initial = _launchDate ?? DateTime.now();
     final picked = await showDatePicker(
@@ -88,29 +139,12 @@ class _PackagingHierarchyTradeItemRolesCoreGroupState
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
 
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     final indicatorDigit = _indicatorDigitFromGtin();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('3. Packaging Hierarchy & Trade Item Roles (Core)'),
-        Text(
-          'unit_descriptor is captured in the main form (unit_descriptor *).',
-          style: theme.textTheme.bodySmall?.copyWith(color: muted),
-        ),
-        const SizedBox(height: 12),
+        const SectionLabel('Packaging Hierarchy & Trade Item Roles'),
         GtinValidatedField(
           controller: _nextLowerLevelGtin,
           fieldName: 'next_lower_level_gtin',
@@ -182,37 +216,43 @@ class _PackagingHierarchyTradeItemRolesCoreGroupState
           onPick: _pickLaunchDate,
         ),
         const SizedBox(height: 12),
-        sectionLabel('Trade Item Role Flags'),
+        const SectionLabel('Trade Item Role Flags'),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isBaseUnit,
           onChanged: widget.isReadOnly ? null : (v) => setState(() => _isBaseUnit = v),
           title: const Text('Is Trade Item a Base Unit?'),
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isConsumerUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isConsumerUnit = v),
           title: const Text('Is Trade Item a Consumer Unit?'),
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isOrderableUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isOrderableUnit = v),
           title: const Text('Is Trade Item an Orderable Unit?'),
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isDespatchUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isDespatchUnit = v),
           title: const Text('Is Trade Item a Despatch (Shipping) Unit?'),
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isInvoiceUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isInvoiceUnit = v),
           title: const Text('Is Trade Item an Invoice Unit?'),
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           value: _isVariableUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isVariableUnit = v),

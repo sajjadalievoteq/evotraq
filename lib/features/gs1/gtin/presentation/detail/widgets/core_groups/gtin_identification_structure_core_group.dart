@@ -1,14 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_structure_chips.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+
+import '../../../../../../../core/theme/color_manager.dart';
 
 class GtinIdentificationStructureCoreGroup extends StatefulWidget {
   const GtinIdentificationStructureCoreGroup({
     super.key,
     required this.isReadOnly,
     required this.gtinCodeController,
+    this.initialGs1CompanyPrefixLength,
+    this.initialGs1CompanyPrefix,
+    this.initialItemReference,
     this.gtinFocusNode,
     this.onGtinEditingComplete,
     this.gtinFieldLocked,
@@ -16,6 +27,9 @@ class GtinIdentificationStructureCoreGroup extends StatefulWidget {
 
   final bool isReadOnly;
   final TextEditingController gtinCodeController;
+  final int? initialGs1CompanyPrefixLength;
+  final String? initialGs1CompanyPrefix;
+  final String? initialItemReference;
   final FocusNode? gtinFocusNode;
   final VoidCallback? onGtinEditingComplete;
   final bool? gtinFieldLocked;
@@ -37,6 +51,9 @@ class _GtinIdentificationStructureCoreGroupState
   late final TextEditingController _gs1CompanyPrefix;
   late final TextEditingController _itemReference;
 
+  Timer? _deriveDebounce;
+  bool _isDeriving = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,10 +71,25 @@ class _GtinIdentificationStructureCoreGroupState
     _companyPrefixLength = TextEditingController();
     _gs1CompanyPrefix = TextEditingController();
     _itemReference = TextEditingController();
+
+    // When opening an existing GTIN detail screen, show persisted chip values immediately.
+    final initLen = widget.initialGs1CompanyPrefixLength;
+    if (initLen != null) _companyPrefixLength.text = initLen.toString();
+    _gs1CompanyPrefix.text = (widget.initialGs1CompanyPrefix ?? '').trim();
+    _itemReference.text = (widget.initialItemReference ?? '').trim();
+
+    // Populate chips when user leaves the GTIN field (more reliable than only on "done").
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        _normalizeGtinIfPossible();
+        _deriveIdentificationDebounced();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _deriveDebounce?.cancel();
     if (_ownsFocusNode) {
       _focusNode.dispose();
     }
@@ -84,31 +116,115 @@ class _GtinIdentificationStructureCoreGroupState
     );
   }
 
+  Future<void> _deriveIdentificationFromBackend() async {
+    if (widget.isReadOnly) return;
+    final raw = widget.gtinCodeController.text;
+    if (!GtinFieldValidators.isGtinCodeValid(raw)) {
+      if (mounted) setState(() => _isDeriving = false);
+      return;
+    }
+
+    try {
+      final svc = getIt<GTINService>();
+      final res = await svc.deriveIdentification(raw);
+      if (!mounted) return;
+
+      final pfxLen = res['gs1CompanyPrefixLength']?.toString() ?? '';
+      final pfx = res['gs1CompanyPrefix']?.toString() ?? '';
+      final itemRef = res['itemReference']?.toString() ?? '';
+
+      debugPrint(
+        '[GtinIdentification] derived chips | gtin=$raw | len=$pfxLen | pfx=$pfx | itemRef=$itemRef',
+      );
+
+      _companyPrefixLength.text = pfxLen;
+      _gs1CompanyPrefix.text = pfx;
+      _itemReference.text = itemRef;
+    } catch (e) {
+      // Keep UI non-blocking: chips remain blank if derivation fails.
+      // But log so we can see auth/400/network failures during debugging.
+      debugPrint('[GtinIdentification] derive-identification failed: $e');
+    } finally {
+      if (mounted) setState(() => _isDeriving = false);
+    }
+  }
+
+  void _deriveIdentificationDebounced() {
+    _deriveDebounce?.cancel();
+    if (!mounted) return;
+    // Immediately show shimmer while we wait for the backend response.
+    setState(() => _isDeriving = true);
+    _deriveDebounce = Timer(const Duration(milliseconds: 250), () {
+      _deriveIdentificationFromBackend();
+    });
+  }
+
+  Widget _chip({
+    required ThemeData theme,
+    required String label,
+    required String value,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    final v = value.trim();
+    final text = v.isEmpty ? '—' : v;
+    return Chip(
+      backgroundColor: backgroundColor,
+      label: Text(
+        '$label $text',
+        style: theme.textTheme.labelSmall?.copyWith(color: foregroundColor),
+      ),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+
+  Widget _shimmerChip({
+    required ThemeData theme,
+    required String label,
+  }) {
+    // Match the same shimmer colors used by our loading screens.
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
+    final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      period: const Duration(milliseconds: 900),
+      child: Chip(
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        label: Container(
+          height: 14,
+          width: 120,
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
 
-    Widget sectionLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Text(
-          text,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        sectionLabel('1. GTIN Identification & Structure (Core)'),
+        const SectionLabel(
+          'Identification & Structure',
+          padding: EdgeInsets.only(top: 0, bottom: 8),
+        ),
         GtinValidatedField(
           focusNode: _focusNode,
           onEditingComplete: () {
             _normalizeGtinIfPossible();
+            _deriveIdentificationDebounced();
             widget.onGtinEditingComplete?.call();
           },
           keyboardType: const TextInputType.numberWithOptions(
@@ -119,15 +235,85 @@ class _GtinIdentificationStructureCoreGroupState
           fieldName: 'gtinCode',
           label: 'GTIN *',
           helperText:
-              '8, 12, 13, or 14 digits; GS1 check digit. Spaces and hyphens are ignored.',
+              '8, 12, 13, or 14 digits',
           readOnly: widget.gtinFieldLocked ?? widget.isReadOnly,
           validator: GtinFieldValidators.validateGtinCode,
         ),
         GtinStructureChips(gtinCodeController: widget.gtinCodeController),
+        const SizedBox(height: 16),
         ListenableBuilder(
           listenable: Listenable.merge([
             widget.gtinCodeController,
             _companyPrefixLength,
+            _gs1CompanyPrefix,
+            _itemReference,
+          ]),
+          builder: (context, _) {
+            final theme = Theme.of(context);
+
+            final muted = theme.colorScheme.onSurfaceVariant;
+
+            if (_isDeriving) {
+              return Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  _shimmerChip(theme: theme, label: 'GCP length'),
+                  _shimmerChip(theme: theme, label: 'GCP'),
+                  _shimmerChip(theme: theme, label: 'Item reference'),
+                ],
+              );
+            }
+
+            final chips = <Widget>[];
+            if (_companyPrefixLength.text.trim().isNotEmpty) {
+              chips.add(
+                _chip(
+                  theme: theme,
+                  label: 'GCP length',
+                  value: _companyPrefixLength.text,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  foregroundColor: theme.colorScheme.onSurface,
+                ),
+              );
+            }
+            if (_gs1CompanyPrefix.text.trim().isNotEmpty) {
+              chips.add(
+                _chip(
+                  theme: theme,
+                  label: 'GCP',
+                  value: _gs1CompanyPrefix.text,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  foregroundColor: muted,
+                ),
+              );
+            }
+            if (_itemReference.text.trim().isNotEmpty) {
+              chips.add(
+                _chip(
+                  theme: theme,
+                  label: 'Item reference',
+                  value: _itemReference.text,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  foregroundColor: muted,
+                ),
+              );
+            }
+
+            if (chips.isEmpty) return const SizedBox.shrink();
+
+            return Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: chips,
+            );
+          },
+        ),
+        ListenableBuilder(
+          listenable: Listenable.merge([
+            widget.gtinCodeController,
           ]),
           builder: (context, _) {
             final raw = widget.gtinCodeController.text;
@@ -137,7 +323,7 @@ class _GtinIdentificationStructureCoreGroupState
               _indicatorDigit.text = '';
               _checkDigit.text = '';
               return Text(
-                'Enter a valid GTIN above to populate structure fields (gtin_structure, indicator_digit, check_digit).',
+                'Enter a valid GTIN',
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               );
             }
@@ -151,72 +337,8 @@ class _GtinIdentificationStructureCoreGroupState
             _indicatorDigit.text = indicator ?? '';
             _checkDigit.text = check;
 
-            final prefixLen = int.tryParse(_companyPrefixLength.text);
-            if (prefixLen != null && prefixLen >= 6 && prefixLen <= 12) {
-              final withoutCheck = canon.substring(0, canon.length - 1);
-              final rest = withoutCheck.substring(1); // drop indicator
-              if (prefixLen <= rest.length) {
-                _gs1CompanyPrefix.text = rest.substring(0, prefixLen);
-                _itemReference.text = rest.substring(prefixLen);
-              }
-            }
-
             return const SizedBox.shrink();
           },
-        ),
-        const SizedBox(height: 12),
-        GtinValidatedField(
-          controller: _companyPrefixLength,
-          fieldName: 'gs1_company_prefix_length',
-          label: 'GS1 Company Prefix (GCP) Length',
-          helperText:
-              'Helper for now. Per documentation, GCP is derived using a prefix-length table (variable length).',
-          readOnly: widget.isReadOnly,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
-          validator: GtinFieldValidators.validateGs1CompanyPrefixLengthHelper,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: GtinValidatedField(
-                controller: _gs1CompanyPrefix,
-                fieldName: 'gs1_company_prefix',
-                label: 'GS1 Company Prefix (GCP)',
-                helperText: 'Derived from GTIN (read-only)',
-                readOnly: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: false,
-                  signed: false,
-                ),
-                validator: (v) => GtinFieldValidators.validateGs1CompanyPrefix(
-                  v,
-                  prefixLength: int.tryParse(_companyPrefixLength.text.trim()),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: GtinValidatedField(
-                controller: _itemReference,
-                fieldName: 'item_reference',
-                label: 'Item Reference',
-                helperText: 'Derived from GTIN (read-only)',
-                readOnly: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: false,
-                  signed: false,
-                ),
-                validator: (v) => GtinFieldValidators.validateItemReference(
-                  v,
-                  prefixLength: int.tryParse(_companyPrefixLength.text.trim()),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );

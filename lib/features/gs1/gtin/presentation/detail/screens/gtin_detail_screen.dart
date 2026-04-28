@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
@@ -59,12 +58,43 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   final _boundMasterdataKey = GlobalKey<TradeItemMasterdataBoundGroupState>();
   final _boundMarketingAuthKey =
       GlobalKey<MarketingAuthorizationBoundGroupState>();
+  final _descriptiveAttrsKey =
+      GlobalKey<TradeItemDescriptiveAttributesCoreGroupState>();
+  final _packagingHierarchyKey =
+      GlobalKey<PackagingHierarchyTradeItemRolesCoreGroupState>();
+  final _netContentKey = GlobalKey<NetContentMeasurementsCoreGroupState>();
+  final _classificationKey =
+      GlobalKey<ClassificationMarketOriginCoreGroupState>();
+  final _infoProviderKey =
+      GlobalKey<InformationProviderManufacturerCoreGroupState>();
+  final _lifecycleKey = GlobalKey<LifecycleAvailabilityStatusCoreGroupState>();
+  final _batchSerialKey =
+      GlobalKey<ProductionBatchSerialDateAssociationsCoreGroupState>();
+  final _auditKey = GlobalKey<AuditCoreGroupState>();
   bool _isSubmitting = false;
   GTINPharmaceuticalExtension? _pharmaceuticalExtension;
   GTINTobaccoExtension? _tobaccoExtension;
 
   final _gtinCodeController = TextEditingController();
   String? _status = 'ACTIVE';
+
+  String? _docUnitDescriptorFromBackend({
+    required String? unitDescriptor,
+    required String? packagingLevel,
+  }) {
+    final u = (unitDescriptor ?? '').trim();
+    if (u.isNotEmpty) return u;
+
+    // Backward compatibility for older rows that only had backend enum `packagingLevel`.
+    final p = (packagingLevel ?? '').trim().toUpperCase();
+    return switch (p) {
+      'ITEM' => 'BASE_UNIT_OR_EACH',
+      'PACK' => 'PACK_OR_INNER_PACK',
+      'CASE' => 'CASE',
+      'PALLET' => 'PALLET',
+      _ => null,
+    };
+  }
 
   @override
   void initState() {
@@ -99,10 +129,15 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     _status = gtin.status?.toUpperCase();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final unitDescriptor = _docUnitDescriptorFromBackend(
+        unitDescriptor: gtin.unitDescriptor,
+        packagingLevel: gtin.packagingLevel,
+      );
+
       _boundMasterdataKey.currentState?.setFromGtin(
         brandName: gtin.productName,
         manufacturer: gtin.manufacturer ?? '',
-        unitDescriptor: gtin.packagingLevel ?? '',
+        unitDescriptor: unitDescriptor ?? '',
         status: gtin.status?.toUpperCase(),
         packSize: gtin.packSize?.toString() ?? '',
       );
@@ -111,6 +146,66 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         number: gtin.registrationNumber ?? '',
         validFrom: gtin.registrationDate,
         validTo: gtin.expirationDate,
+      );
+
+      _descriptiveAttrsKey.currentState?.setFromGtin(
+        functionalName: gtin.functionalName,
+        tradeItemDescription: gtin.tradeItemDescription,
+        gpcBrickCode: gtin.gpcBrickCode,
+        targetMarketCountry: gtin.targetMarketCountry,
+      );
+
+      _packagingHierarchyKey.currentState?.setFromGtin(
+        nextLowerLevelGtin: gtin.nextLowerLevelGtin,
+        nextLowerLevelQuantity: gtin.nextLowerLevelQuantity,
+        quantityOfChildren: gtin.quantityOfChildren,
+        totalQtyNextLower: gtin.totalQtyNextLower,
+        launchDate: gtin.launchDate,
+        isBaseUnit: gtin.isBaseUnit,
+        isConsumerUnit: gtin.isConsumerUnit,
+        isOrderableUnit: gtin.isOrderableUnit,
+        isDespatchUnit: gtin.isDespatchUnit,
+        isInvoiceUnit: gtin.isInvoiceUnit,
+        isVariableUnit: gtin.isVariableUnit,
+      );
+
+      _netContentKey.currentState?.setFromGtin(
+        netContentValue: gtin.netContentValue,
+        netContentUom: gtin.netContentUom,
+        grossWeightValue: gtin.grossWeightValue,
+        grossWeightUom: gtin.grossWeightUom,
+        heightValue: gtin.heightValue,
+        widthValue: gtin.widthValue,
+        depthValue: gtin.depthValue,
+        dimUom: gtin.dimUom,
+      );
+
+      _classificationKey.currentState?.setFromGtin(
+        countryOfOrigin: gtin.countryOfOrigin,
+      );
+
+      _infoProviderKey.currentState?.setFromGtin(
+        informationProviderGln: gtin.informationProviderGln,
+        informationProviderName: gtin.informationProviderName,
+        manufacturerGln: gtin.manufacturerGln,
+      );
+
+      _lifecycleKey.currentState?.setFromGtin(
+        tradeItemStatus: gtin.tradeItemStatus,
+        effectiveDate: gtin.effectiveDate,
+        startAvailDate: gtin.startAvailDate,
+        endAvailDate: gtin.endAvailDate,
+        publicationDate: gtin.publicationDate,
+      );
+
+      _batchSerialKey.currentState?.setFromGtin(
+        hasBatchNumberIndicator: gtin.hasBatchNumberIndicator,
+        hasSerialNumberIndicator: gtin.hasSerialNumberIndicator,
+      );
+
+      _auditKey.currentState?.setFromGtin(
+        createdBy: gtin.createdBy,
+        updatedBy: gtin.updatedBy,
       );
     });
   }
@@ -146,7 +241,25 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
 
       final boundMasterdata = _boundMasterdataKey.currentState;
       final boundMarketingAuth = _boundMarketingAuthKey.currentState;
-      if (boundMasterdata == null || boundMarketingAuth == null) {
+      final descriptive = _descriptiveAttrsKey.currentState;
+      final packagingHierarchy = _packagingHierarchyKey.currentState;
+      final netContent = _netContentKey.currentState;
+      final classification = _classificationKey.currentState;
+      final infoProvider = _infoProviderKey.currentState;
+      final lifecycle = _lifecycleKey.currentState;
+      final batchSerial = _batchSerialKey.currentState;
+      final audit = _auditKey.currentState;
+
+      if (boundMasterdata == null ||
+          boundMarketingAuth == null ||
+          descriptive == null ||
+          packagingHierarchy == null ||
+          netContent == null ||
+          classification == null ||
+          infoProvider == null ||
+          lifecycle == null ||
+          batchSerial == null ||
+          audit == null) {
         setState(() {
           _isSubmitting = false;
         });
@@ -158,6 +271,11 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         gtinCode: gtinCodeForApi,
         productName: boundMasterdata.brandName,
         manufacturer: boundMasterdata.manufacturer.trim(),
+        // Doc field (dropdown).
+        unitDescriptor: boundMasterdata.unitDescriptor.isEmpty
+            ? null
+            : boundMasterdata.unitDescriptor.trim(),
+        // Backend enum for now (subset mapping).
         packagingLevel: boundMasterdata.unitDescriptor.isEmpty
             ? null
             : GtinFieldValidators.mapUnitDescriptorToBackendPackagingLevel(
@@ -169,6 +287,51 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
             boundMarketingAuth.number.isEmpty ? null : boundMarketingAuth.number,
         registrationDate: boundMarketingAuth.validFrom,
         expirationDate: boundMarketingAuth.validTo,
+
+        // Core spec fields (Groups 2–9) collected from modular widgets
+        functionalName: descriptive.functionalName,
+        tradeItemDescription: descriptive.tradeItemDescription,
+        gpcBrickCode: descriptive.gpcBrickCode,
+        targetMarketCountry: descriptive.targetMarketCountry,
+
+        nextLowerLevelGtin: packagingHierarchy.nextLowerLevelGtin,
+        nextLowerLevelQuantity: packagingHierarchy.nextLowerLevelQuantity,
+        quantityOfChildren: packagingHierarchy.quantityOfChildren,
+        totalQtyNextLower: packagingHierarchy.totalQtyNextLower,
+        launchDate: packagingHierarchy.launchDate,
+        isBaseUnit: packagingHierarchy.isBaseUnit,
+        isConsumerUnit: packagingHierarchy.isConsumerUnit,
+        isOrderableUnit: packagingHierarchy.isOrderableUnit,
+        isDespatchUnit: packagingHierarchy.isDespatchUnit,
+        isInvoiceUnit: packagingHierarchy.isInvoiceUnit,
+        isVariableUnit: packagingHierarchy.isVariableUnit,
+
+        netContentValue: netContent.netContentValue,
+        netContentUom: netContent.netContentUom,
+        grossWeightValue: netContent.grossWeightValue,
+        grossWeightUom: netContent.grossWeightUom,
+        heightValue: netContent.heightValue,
+        widthValue: netContent.widthValue,
+        depthValue: netContent.depthValue,
+        dimUom: netContent.dimUom,
+
+        countryOfOrigin: classification.countryOfOrigin,
+
+        informationProviderGln: infoProvider.informationProviderGln,
+        informationProviderName: infoProvider.informationProviderName,
+        manufacturerGln: infoProvider.manufacturerGln,
+
+        tradeItemStatus: lifecycle.tradeItemStatus,
+        effectiveDate: lifecycle.effectiveDate,
+        startAvailDate: lifecycle.startAvailDate,
+        endAvailDate: lifecycle.endAvailDate,
+        publicationDate: lifecycle.publicationDate,
+
+        hasBatchNumberIndicator: batchSerial.hasBatchNumberIndicator,
+        hasSerialNumberIndicator: batchSerial.hasSerialNumberIndicator,
+
+        createdBy: audit.createdBy,
+        updatedBy: audit.updatedBy,
       );
 
       if (widget.isEditing && widget.gtinCode != null) {
@@ -286,6 +449,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
                 isReadOnly: isReadOnly,
                 gtinCodeController: _gtinCodeController,
                 gtinFieldLocked: isReadOnly || (widget.gtinCode != null),
+                initialGs1CompanyPrefixLength: state.gtin?.gs1CompanyPrefixLength,
+                initialGs1CompanyPrefix: state.gtin?.gs1CompanyPrefix,
+                initialItemReference: state.gtin?.itemReference,
               ),
               TradeItemMasterdataBoundGroup(
                 key: _boundMasterdataKey,
@@ -297,31 +463,39 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
                 isReadOnly: isReadOnly,
               ),
               TradeItemDescriptiveAttributesCoreGroup(
+                key: _descriptiveAttrsKey,
                 isReadOnly: isReadOnly,
               ),
               NetContentMeasurementsCoreGroup(
+                key: _netContentKey,
                 isReadOnly: isReadOnly,
               ),
               PackagingHierarchyTradeItemRolesCoreGroup(
+                key: _packagingHierarchyKey,
                 isReadOnly: isReadOnly,
                 gtinCodeController: _gtinCodeController,
                 unitDescriptorController:
                     _boundMasterdataKey.currentState?.unitDescriptorController,
               ),
               ClassificationMarketOriginCoreGroup(
+                key: _classificationKey,
                 isReadOnly: isReadOnly,
               ),
               InformationProviderManufacturerCoreGroup(
+                key: _infoProviderKey,
                 isReadOnly: isReadOnly,
               ),
               LifecycleAvailabilityStatusCoreGroup(
+                key: _lifecycleKey,
                 isReadOnly: isReadOnly,
                 isUpdate: widget.gtinCode != null,
               ),
               ProductionBatchSerialDateAssociationsCoreGroup(
+                key: _batchSerialKey,
                 isReadOnly: isReadOnly,
               ),
               AuditCoreGroup(
+                key: _auditKey,
                 isReadOnly: isReadOnly,
               ),
             ],

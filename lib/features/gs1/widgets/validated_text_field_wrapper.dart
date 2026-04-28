@@ -48,7 +48,7 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
 
   /// Constructor
   const ValidatedTextFieldWrapper({
-    Key? key,
+    super.key,
     required this.controller,
     required this.fieldName,
     this.decoration = const InputDecoration(),
@@ -62,7 +62,7 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.focusNode,
     this.onEditingComplete,
-  }) : super(key: key);
+  });
 
   @override
   _ValidatedTextFieldWrapperState createState() => _ValidatedTextFieldWrapperState();

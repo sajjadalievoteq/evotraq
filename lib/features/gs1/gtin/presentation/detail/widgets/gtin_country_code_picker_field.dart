@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
-class GtinCountryCodePickerField extends StatelessWidget {
+class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
     super.key,
     required this.controller,
@@ -17,9 +17,71 @@ class GtinCountryCodePickerField extends StatelessWidget {
   final bool enabled;
   final String? Function(String?)? validator;
 
+  @override
+  State<GtinCountryCodePickerField> createState() =>
+      _GtinCountryCodePickerFieldState();
+}
+
+class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField> {
+  late final TextEditingController _displayController;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayController = TextEditingController(text: _format(widget.controller.text));
+    widget.controller.addListener(_syncFromCode);
+  }
+
+  @override
+  void didUpdateWidget(covariant GtinCountryCodePickerField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_syncFromCode);
+      widget.controller.addListener(_syncFromCode);
+      _displayController.text = _format(widget.controller.text);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncFromCode);
+    _displayController.dispose();
+    super.dispose();
+  }
+
+  void _syncFromCode() {
+    final formatted = _format(widget.controller.text);
+    if (_displayController.text != formatted) {
+      _displayController.text = formatted;
+    }
+  }
+
+  String _format(String numericCode) {
+    final code = numericCode.trim();
+    if (code.isEmpty) return '';
+    final c = WorldCountry.maybeFromCodeNumeric(code);
+    if (c == null) return code;
+    final name = _countryName(c);
+    return '$name ($code)';
+  }
+
+  String _countryName(WorldCountry c) {
+    // `world_countries` exposes `name` with localized variants in newer versions.
+    // We try common fallbacks while keeping compilation-safe.
+    try {
+      final dynamic n = (c as dynamic).name;
+      if (n is String) return n;
+      final dynamic common = (n as dynamic).common;
+      if (common is String) return common;
+      return n.toString();
+    } catch (_) {
+      return c.toString();
+    }
+  }
+
   Future<void> _openPicker(BuildContext context) async {
     WorldCountry? chosen;
-    final existing = controller.text.trim();
+    final existing = widget.controller.text.trim();
     if (existing.isNotEmpty) {
       chosen = WorldCountry.maybeFromCodeNumeric(existing);
     }
@@ -70,25 +132,26 @@ class GtinCountryCodePickerField extends StatelessWidget {
     );
 
     if (chosen != null) {
-      controller.text = chosen!.codeNumeric;
+      widget.controller.text = chosen!.codeNumeric;
+      _displayController.text = _format(chosen!.codeNumeric);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: enabled ? () => _openPicker(context) : null,
+      onTap: widget.enabled ? () => _openPicker(context) : null,
       child: AbsorbPointer(
         child: TextFormField(
-          controller: controller,
+          controller: _displayController,
           decoration: InputDecoration(
-            labelText: labelText,
-            helperText: helperText,
+            labelText: widget.labelText,
+            helperText: widget.helperText,
             border: const OutlineInputBorder(),
             suffixIcon: const Icon(Icons.public),
           ),
           readOnly: true,
-          validator: enabled ? validator : null,
+          validator: widget.enabled ? (_) => widget.validator?.call(widget.controller.text) : null,
         ),
       ),
     );

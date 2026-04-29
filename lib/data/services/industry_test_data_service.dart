@@ -1112,6 +1112,40 @@ class IndustryTestDataService {
 
   // ==================== PHARMACEUTICAL METHODS ====================
 
+  String _iso2ToIso3166Numeric3(String iso2) {
+    switch (iso2.toUpperCase()) {
+      case 'AE':
+      case 'ARE':
+        return '784';
+      case 'GB':
+      case 'GBR':
+        return '826';
+      case 'US':
+      case 'USA':
+        return '840';
+      case 'CH':
+      case 'CHE':
+        return '756';
+      case 'FR':
+      case 'FRA':
+        return '250';
+      default:
+        return '784';
+    }
+  }
+
+  Map<String, String> _resolveManufacturerPrefix(String manufacturerName) {
+    final prefixes = PharmaceuticalProductData.getManufacturerPrefixes();
+    final m = manufacturerName.toLowerCase();
+    for (final p in prefixes) {
+      final name = (p['name'] ?? '').toLowerCase();
+      if (name.isNotEmpty && m.contains(name.split(' ').first)) {
+        return p;
+      }
+    }
+    return prefixes.first;
+  }
+
   /// Generate pharmaceutical GTINs with extensions
   Future<void> generatePharmaGTINs({
     required Function(int current, int total, String productName) onProgress,
@@ -1123,52 +1157,159 @@ class IndustryTestDataService {
       final product = products[i];
       onProgress(i + 1, total, product['productName'] as String);
 
+      final String gtinCode = product['gtinCode'] as String;
+      final String productName = product['productName'] as String;
+      final String manufacturer = product['manufacturer'] as String;
+      final int packSize = product['packageQuantity'] as int;
+      final String packagingType = product['packagingType'] as String;
+      final String originIso2 = product['countryOfOrigin'] as String;
+      final String atcCode = product['atcCode'] as String;
+      final String therapeuticClass = product['therapeuticClass'] as String;
+      final String activeIngredient = product['activeIngredient'] as String;
+      final double strength = (product['strength'] as num).toDouble();
+      final String strengthUnit = product['strengthUnit'] as String;
+      final bool requiresPrescription = product['requiresPrescription'] == true;
+      final bool temperatureControlled = product['temperatureControlled'] == true;
+      final String mohapRegistrationNumber =
+          product['mohapRegistrationNumber'] as String;
+
+      final manufacturerPrefix = _resolveManufacturerPrefix(manufacturer);
+      final String? manufacturerGln = manufacturerPrefix['glnCode'];
+      final String? infoProviderGln = manufacturerGln;
+
+      final now = DateTime.now().toUtc();
+      final validFrom = now.subtract(const Duration(days: 365));
+      final validTo = now.add(const Duration(days: 365 * 2));
+
       // Create GTIN using master-data endpoint
       final gtinResponse = await _dioService.post(
         '$_baseUrl/master-data/gtins',
         headers: await _headers,
         data: jsonEncode({
-          'gtin': product['gtinCode'],
-          'productName': product['productName'],
-          'manufacturer': product['manufacturer'],
-          'packagingLevel': 'Primary',
-          'packSize': product['packageQuantity'],
+          // ===== Core identity =====
+          'gtin': gtinCode,
+          'productName': productName,
+          'manufacturer': manufacturer,
+          'packagingLevel': 'ITEM',
+          'packSize': packSize,
           'productStatus': 'ACTIVE',
+
+          // ===== Core (GTIN technical spec) fields =====
+          'functionalName': 'Medicine',
+          'tradeItemDescription': productName,
+          'packagingType': packagingType,
+          'unitOfMeasure': 'EA',
+
+          'unitDescriptor': 'BASE_UNIT_OR_EACH',
+          'isBaseUnit': true,
+          'isConsumerUnit': true,
+          'isOrderableUnit': true,
+          'isDespatchUnit': false,
+          'isInvoiceUnit': false,
+          'isVariableUnit': false,
+
+          'netContentValue': packSize,
+          'netContentUom': 'EA',
+          'grossWeightValue': 0.05,
+          'grossWeightUom': 'KGM',
+          'heightValue': 10,
+          'widthValue': 4,
+          'depthValue': 2,
+          'dimUom': 'CM',
+
+          'gpcBrickCode': '10001234',
+          'targetMarketCountry': '784',
+          'countryOfOrigin': _iso2ToIso3166Numeric3(originIso2),
+
+          if (infoProviderGln != null) 'informationProviderGln': infoProviderGln,
+          'informationProviderName': 'TraqTrace Test Provider',
+          if (manufacturerGln != null) 'manufacturerGln': manufacturerGln,
+
+          'tradeItemStatus': 'ADD',
+          'effectiveDate': now.toIso8601String(),
+          'startAvailDate': now.toIso8601String(),
+          'endAvailDate': validTo.toIso8601String(),
+          'publicationDate': now.toIso8601String().split('T').first,
+          'hasBatchNumberIndicator': 'REQUESTED_BY_LAW',
+          'hasSerialNumberIndicator': 'REQUESTED_BY_LAW',
+
+          // Marketing authorization (core-bound group fields)
+          'marketingAuthorizationNumber': mohapRegistrationNumber,
+          'marketingAuthorizationDate': validFrom.toIso8601String(),
+          'marketAuthorizations': {'784': 'REGISTERED'},
+
+          // Audit
+          'createdBy': 'industry_test_data',
+          'updatedBy': 'industry_test_data',
+
+          'isPharmaceuticalProduct': true,
+          'isTobaccoProduct': false,
+
+          // ===== Bundled extensions (single GTIN API) =====
+          'pharmaceuticalExtension': {
+            'regulatedProductName': productName,
+            'dosageFormTypeCode': '1020',
+            'routeOfAdministrationEdqmCode': '2000',
+
+            'mahGln': manufacturerGln,
+            'mahName': manufacturer,
+            'mahCountry': '784',
+            'licensedAgentGlns': manufacturerGln == null ? [] : [manufacturerGln],
+
+            'marketingAuthorizationNumber': mohapRegistrationNumber,
+            'marketingAuthorizationValidFrom':
+                validFrom.toIso8601String().split('T').first,
+            'marketingAuthorizationValidTo':
+                validTo.toIso8601String().split('T').first,
+            'regulatoryStatus': 'REGISTERED',
+
+            'atcCode': atcCode,
+            'therapeuticClass': therapeuticClass,
+
+            'activeIngredients': [
+              {
+                'name': activeIngredient,
+                'substanceRoleCode': 'ACTIVE',
+                'amount': strength,
+                'unit': strengthUnit.toUpperCase(),
+              },
+            ],
+            'inactiveIngredients': 'Excipients',
+            'activePotencyAi7004': strength,
+
+            'dataCarrierTypeCode': 'GS1_DATAMATRIX',
+            'antiTamperingIndicator': true,
+
+            'minStorageTempCelsius': temperatureControlled ? 2 : 15,
+            'maxStorageTempCelsius': temperatureControlled ? 8 : 25,
+            'requiresRefrigeration': temperatureControlled,
+            'requiresFreezing': false,
+            'lightSensitive': false,
+            'humiditySensitive': false,
+
+            'prescriptionStatusCategory': requiresPrescription ? 'RX' : 'OTC',
+            'specControlledSubstanceIndicator': false,
+            'specControlledSubstanceSchedule': null,
+            'additionalMonitoringIndicator': false,
+
+            'shelfLifeMonths': 24,
+            'shelfLifeAfterOpeningDays': 30,
+            'countryOfManufactureNumeric': '784',
+            'packSizeDescription': '$packSize unit(s)',
+          },
+          'uaeRegulatoryExtension': {
+            'uaeLocalDrugCode': 'UAE-LDC-$gtinCode',
+            'uaeMarketingAuthorizationNumber': mohapRegistrationNumber,
+            'licensedAgentGlns': manufacturerGln == null ? [] : [manufacturerGln],
+            'regulatedProductNameEnglish': productName,
+          },
         }),
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
 
       if (gtinResponse.statusCode == 200 || gtinResponse.statusCode == 201) {
-        // Create pharmaceutical extension
-        await _dioService.post(
-          '$_baseUrl/pharmaceutical/gtin/code/${product['gtinCode']}',
-          headers: await _headers,
-          data: jsonEncode({
-            // Product identification
-            'therapeuticClass': product['therapeuticClass'],
-            'strength': product['strength'].toString(),
-            'strengthUnit': product['strengthUnit'],
-            'dosageForm': product['dosageForm'],
-
-            // Regulatory
-            'atcCode': product['atcCode'],
-
-            // Pricing & Access
-            'requiresPrescription': product['requiresPrescription'],
-
-            // Storage & Handling
-            'storageConditions': product['temperatureControlled']
-                ? '2-8°C'
-                : 'Room Temperature',
-            'requiresRefrigeration': product['temperatureControlled'],
-
-            // Controlled Substance
-            'isControlledSubstance': product['narcotic'] ?? false,
-          }),
-          responseType: ResponseType.plain,
-          acceptAllStatusCodes: true,
-        );
+        // Extensions are now bundled through the GTIN API on create.
       }
 
       await Future.delayed(const Duration(milliseconds: 100));

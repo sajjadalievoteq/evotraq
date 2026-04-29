@@ -11,12 +11,12 @@ enum IndustryMode {
   /// Parse from string (case-insensitive).
   static IndustryMode fromString(String? value) {
     if (value == null || value.isEmpty) {
-      return IndustryMode.tobacco; // Default
+      return IndustryMode.pharmaceutical; // Default
     }
     final normalized = value.toUpperCase().trim();
     return IndustryMode.values.firstWhere(
       (mode) => mode.name.toUpperCase() == normalized,
-      orElse: () => IndustryMode.tobacco,
+      orElse: () => IndustryMode.pharmaceutical,
     );
   }
 
@@ -45,7 +45,7 @@ class SystemSettings {
   /// Default settings.
   factory SystemSettings.defaults() {
     return const SystemSettings(
-      industryMode: IndustryMode.tobacco,
+      industryMode: IndustryMode.pharmaceutical,
       systemName: 'TraqTrace',
       systemVersion: '1.0.0',
       defaultTimezone: 'UTC',

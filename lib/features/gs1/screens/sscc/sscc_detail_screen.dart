@@ -13,6 +13,7 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart'
 import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/sscc_pharmaceutical_extension_widget.dart';
 
@@ -134,6 +135,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     int? ssccId,
     String ssccCode,
   ) async {
+    if (!kTobaccoExtensionEnabled) return;
     final tobaccoState = _tobaccoExtensionKey.currentState;
     debugPrint(
       'SSCC Tobacco extension check - state: ${tobaccoState != null}, hasData: ${tobaccoState?.hasData}',
@@ -866,8 +868,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   );
                 }
 
-                // Tobacco Mode: Show tobacco extension
-                if (settings.isTobaccoMode) {
+                // Tobacco Mode: Show tobacco extension (when feature enabled)
+                if (settings.isTobaccoMode && kTobaccoExtensionEnabled) {
                   return SSCCTobaccoExtensionWidget(
                     key: _tobaccoExtensionKey,
                     ssccCode: hasExistingSscc ? currentSsccCode : null,

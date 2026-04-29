@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
@@ -6,9 +7,11 @@ class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
   const ProductionBatchSerialDateAssociationsCoreGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<ProductionBatchSerialDateAssociationsCoreGroup> createState() =>
@@ -36,7 +39,7 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Production, Batch, Serial & Date Associations'),
@@ -100,6 +103,20 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
               : (v) => setState(() => _hasSerialNumberIndicator = v),
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Production, Batch, Serial & Date Associations'),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 76),
+        ],
+      ),
     );
   }
 }

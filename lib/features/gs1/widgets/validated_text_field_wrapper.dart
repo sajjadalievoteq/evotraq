@@ -32,6 +32,9 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
   /// Optional max length for the field (shows counter when enabled by Flutter).
   final int? maxLength;
 
+  /// Number of visible text lines.
+  final int maxLines;
+
   /// Optional input formatters (e.g., to restrict characters).
   final List<TextInputFormatter>? inputFormatters;
   
@@ -57,6 +60,7 @@ class ValidatedTextFieldWrapper extends StatefulWidget {
     this.onChanged,
     this.keyboardType,
     this.maxLength,
+    this.maxLines = 1,
     this.inputFormatters,
     this.setFieldError,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
@@ -112,6 +116,7 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
           readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
           maxLength: widget.maxLength,
+          maxLines: widget.maxLines,
           inputFormatters: widget.inputFormatters,
           autovalidateMode: widget.autovalidateMode,
           onEditingComplete: widget.onEditingComplete,

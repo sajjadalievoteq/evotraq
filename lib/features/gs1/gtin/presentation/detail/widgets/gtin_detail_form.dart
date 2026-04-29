@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 /// Core GTIN master-data form: identity, product, packaging, status, dates, and footer button.
@@ -14,6 +15,7 @@ class GtinDetailForm extends StatelessWidget {
     required this.isSubmitting,
     required this.onSubmit,
     required this.submitButtonTitle,
+    this.showFieldSkeletons = false,
   });
 
   final GlobalKey<FormState> formKey;
@@ -24,6 +26,9 @@ class GtinDetailForm extends StatelessWidget {
   final bool isSubmitting;
   final VoidCallback onSubmit;
   final String submitButtonTitle;
+
+  /// When true, submit control shows a skeleton while sections load or hydrate.
+  final bool showFieldSkeletons;
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +48,13 @@ class GtinDetailForm extends StatelessWidget {
             industrySection,
             const SizedBox(height: 32),
             if (showSubmitButton)
-              CustomButtonWidget(
-                onTap: isSubmitting ? null : onSubmit,
-                title: submitButtonTitle,
+              GtinFieldSkeletonMask(
+                show: showFieldSkeletons,
+                child: CustomButtonWidget(
+                  onTap: isSubmitting ? null : onSubmit,
+                  title: submitButtonTitle,
+                ),
+                skeletonBuilder: (c) => GtinSkeletonPrimaryButton(color: c),
               ),
           ],
         ),

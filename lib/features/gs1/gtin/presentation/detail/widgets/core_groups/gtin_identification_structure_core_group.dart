@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_structure_chips.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
-
-import '../../../../../../../core/theme/color_manager.dart';
 
 class GtinIdentificationStructureCoreGroup extends StatefulWidget {
   const GtinIdentificationStructureCoreGroup({
@@ -23,6 +22,7 @@ class GtinIdentificationStructureCoreGroup extends StatefulWidget {
     this.gtinFocusNode,
     this.onGtinEditingComplete,
     this.gtinFieldLocked,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
@@ -33,6 +33,7 @@ class GtinIdentificationStructureCoreGroup extends StatefulWidget {
   final FocusNode? gtinFocusNode;
   final VoidCallback? onGtinEditingComplete;
   final bool? gtinFieldLocked;
+  final bool showFieldSkeleton;
 
   @override
   State<GtinIdentificationStructureCoreGroup> createState() =>
@@ -213,7 +214,7 @@ class _GtinIdentificationStructureCoreGroupState
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
 
-    return Column(
+    final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel(
@@ -341,6 +342,31 @@ class _GtinIdentificationStructureCoreGroupState
           },
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: fields,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel(
+            'Identification & Structure',
+            padding: EdgeInsets.only(top: 0, bottom: 8),
+          ),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+              const SizedBox(width: 8),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+              const SizedBox(width: 8),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -17,6 +17,7 @@ class GtinValidatedField extends StatelessWidget {
     this.onEditingComplete,
     this.keyboardType,
     this.maxLength,
+    this.maxLines = 1,
     this.inputFormatters,
   });
 
@@ -32,6 +33,7 @@ class GtinValidatedField extends StatelessWidget {
   final VoidCallback? onEditingComplete;
   final TextInputType? keyboardType;
   final int? maxLength;
+  final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
 
   @override
@@ -43,6 +45,7 @@ class GtinValidatedField extends StatelessWidget {
       onEditingComplete: onEditingComplete,
       keyboardType: keyboardType,
       maxLength: maxLength,
+      maxLines: maxLines,
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,

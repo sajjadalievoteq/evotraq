@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
@@ -50,8 +51,9 @@ class GTINCubit extends Cubit<GTINState> {
       final pharmaFuture = _pharmaceuticalService
           .getExtensionByGtinCode(gtinCode)
           .catchError((_) => null);
-      final tobaccoFuture =
-          _tobaccoExtensionService.getByGtinCode(gtinCode).catchError((_) => null);
+      final tobaccoFuture = kTobaccoExtensionEnabled
+          ? _tobaccoExtensionService.getByGtinCode(gtinCode).catchError((_) => null)
+          : Future<Object?>.value(null);
 
       final results = await Future.wait<Object?>([
         _gtinService.getGTIN(gtinCode),

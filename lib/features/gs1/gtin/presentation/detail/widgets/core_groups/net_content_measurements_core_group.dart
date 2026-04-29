@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -7,9 +8,11 @@ class NetContentMeasurementsCoreGroup extends StatefulWidget {
   const NetContentMeasurementsCoreGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<NetContentMeasurementsCoreGroup> createState() =>
@@ -90,7 +93,7 @@ class NetContentMeasurementsCoreGroupState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Net Content & Measurements'),
@@ -184,6 +187,24 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateDimUom,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Net Content & Measurements'),
+          for (var i = 0; i < 8; i++) ...[
+            if (i > 0) const SizedBox(height: 12),
+            GtinSkeletonOutlineField(
+              color: c,
+              height: {1, 3, 7}.contains(i) ? 76 : 56,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

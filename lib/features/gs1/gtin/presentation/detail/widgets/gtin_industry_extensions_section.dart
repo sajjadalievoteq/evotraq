@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/features/pharmaceutical/models/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/pharmaceutical/widgets/pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
@@ -16,8 +17,10 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
     required this.gtinCodeText,
     required this.routeGtinCode,
     required this.isEditing,
+    required this.targetMarketCountry,
     this.pharmaceuticalExtension,
     this.tobaccoExtension,
+    this.showFieldSkeleton = false,
   });
 
   final GlobalKey<PharmaceuticalExtensionWidgetState> pharmaExtensionKey;
@@ -25,8 +28,10 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
   final String gtinCodeText;
   final String? routeGtinCode;
   final bool isEditing;
+  final String? targetMarketCountry;
   final GTINPharmaceuticalExtension? pharmaceuticalExtension;
   final GTINTobaccoExtension? tobaccoExtension;
+  final bool showFieldSkeleton;
 
   String? get _resolvedGtinCode {
     if (gtinCodeText.isNotEmpty) return gtinCodeText;
@@ -37,19 +42,48 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
       builder: (context, settingsState) {
-        return settingsState.settings.isPharmaceuticalMode
-            ? PharmaceuticalExtensionWidget(
-                key: pharmaExtensionKey,
-                gtinCode: _resolvedGtinCode,
-                isEditing: isEditing,
-                initialExtension: pharmaceuticalExtension,
-              )
-            : TobaccoExtensionWidget(
-                key: tobaccoExtensionKey,
-                gtinCode: _resolvedGtinCode,
-                isEditing: isEditing,
-                initialExtension: tobaccoExtension,
-              );
+        final settings = settingsState.settings;
+        final tobaccoUiAllowed =
+            settings.isTobaccoMode && kTobaccoExtensionEnabled;
+
+        final industryEnabled =
+            settings.isPharmaceuticalMode || tobaccoUiAllowed;
+
+        final Widget extension;
+        if (settings.isPharmaceuticalMode) {
+          extension = PharmaceuticalExtensionWidget(
+            key: pharmaExtensionKey,
+            gtinCode: _resolvedGtinCode,
+            isEditing: isEditing,
+            targetMarketCountry: targetMarketCountry,
+            initialExtension: pharmaceuticalExtension,
+          );
+        } else if (tobaccoUiAllowed) {
+          extension = TobaccoExtensionWidget(
+            key: tobaccoExtensionKey,
+            gtinCode: _resolvedGtinCode,
+            isEditing: isEditing,
+            initialExtension: tobaccoExtension,
+          );
+        } else {
+          extension = const SizedBox.shrink();
+        }
+
+        if (!industryEnabled) return extension;
+
+        return GtinFieldSkeletonMask(
+          show: showFieldSkeleton,
+          child: extension,
+          skeletonBuilder: (c) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(height: 1, color: c),
+              const SizedBox(height: 8),
+              GtinSkeletonExtensionTile(color: c),
+            ],
+          ),
+        );
       },
     );
   }

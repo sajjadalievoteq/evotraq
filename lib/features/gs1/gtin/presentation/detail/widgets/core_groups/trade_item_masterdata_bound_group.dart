@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/constants/gtin_detail_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
@@ -9,10 +10,12 @@ class TradeItemMasterdataBoundGroup extends StatefulWidget {
     super.key,
     required this.isReadOnly,
     required this.initialStatus,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
   final String? initialStatus;
+  final bool showFieldSkeleton;
 
   @override
   State<TradeItemMasterdataBoundGroup> createState() =>
@@ -71,7 +74,7 @@ class TradeItemMasterdataBoundGroupState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel(
@@ -142,6 +145,29 @@ class TradeItemMasterdataBoundGroupState
           onChanged: widget.isReadOnly ? null : (value) => setState(() => _status = value),
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel(
+            'Trade Item Data',
+            padding: EdgeInsets.only(top: 16, bottom: 12),
+          ),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 16),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 16),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 16),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 16),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

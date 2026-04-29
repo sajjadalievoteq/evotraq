@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -7,9 +8,11 @@ class AuditCoreGroup extends StatefulWidget {
   const AuditCoreGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<AuditCoreGroup> createState() => AuditCoreGroupState();
@@ -49,7 +52,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Audit'),
@@ -71,6 +74,20 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
           validator: GtinFieldValidators.validateUpdatedBy,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Audit'),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

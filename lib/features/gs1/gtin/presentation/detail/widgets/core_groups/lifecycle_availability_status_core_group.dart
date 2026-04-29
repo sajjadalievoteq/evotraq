@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -9,10 +10,12 @@ class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
     super.key,
     required this.isReadOnly,
     required this.isUpdate,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
   final bool isUpdate;
+  final bool showFieldSkeleton;
 
   @override
   State<LifecycleAvailabilityStatusCoreGroup> createState() =>
@@ -167,7 +170,7 @@ class LifecycleAvailabilityStatusCoreGroupState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Lifecycle, Availability & Status'),
@@ -273,6 +276,26 @@ class LifecycleAvailabilityStatusCoreGroupState
           },
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Lifecycle, Availability & Status'),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+        ],
+      ),
     );
   }
 }

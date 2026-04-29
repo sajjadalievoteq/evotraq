@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
@@ -9,9 +10,11 @@ class MarketingAuthorizationBoundGroup extends StatefulWidget {
   const MarketingAuthorizationBoundGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<MarketingAuthorizationBoundGroup> createState() =>
@@ -84,7 +87,7 @@ class MarketingAuthorizationBoundGroupState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Marketing Authorization'),
@@ -130,6 +133,22 @@ class MarketingAuthorizationBoundGroupState
                   ),
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Marketing Authorization'),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 16),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+          const SizedBox(height: 16),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+        ],
+      ),
     );
   }
 }

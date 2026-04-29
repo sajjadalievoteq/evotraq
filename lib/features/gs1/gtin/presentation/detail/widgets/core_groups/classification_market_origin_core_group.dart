@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -7,9 +8,11 @@ class ClassificationMarketOriginCoreGroup extends StatefulWidget {
   const ClassificationMarketOriginCoreGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<ClassificationMarketOriginCoreGroup> createState() =>
@@ -42,7 +45,7 @@ class ClassificationMarketOriginCoreGroupState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Classification, Market & Origin'),
@@ -54,6 +57,18 @@ class ClassificationMarketOriginCoreGroupState
           validator: GtinFieldValidators.validateCountryOfOrigin,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Classification, Market & Origin'),
+          GtinSkeletonOutlineField(color: c, height: 76),
+        ],
+      ),
     );
   }
 }

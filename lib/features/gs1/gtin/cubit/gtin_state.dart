@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/features/pharmaceutical/models/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 
 enum GTINStatus { initial, loading, success, error }

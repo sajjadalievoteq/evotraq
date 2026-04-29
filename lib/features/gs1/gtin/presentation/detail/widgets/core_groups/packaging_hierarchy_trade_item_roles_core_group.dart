@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
@@ -12,11 +13,13 @@ class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {
     required this.isReadOnly,
     required this.gtinCodeController,
     required this.unitDescriptorController,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
   final TextEditingController gtinCodeController;
   final TextEditingController? unitDescriptorController;
+  final bool showFieldSkeleton;
 
   @override
   State<PackagingHierarchyTradeItemRolesCoreGroup> createState() =>
@@ -137,11 +140,10 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
 
     final indicatorDigit = _indicatorDigitFromGtin();
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Packaging Hierarchy & Trade Item Roles'),
@@ -284,6 +286,33 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           },
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Packaging Hierarchy & Trade Item Roles'),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 76),
+          const SizedBox(height: 12),
+          GtinSkeletonDateRow(color: c, fieldHeight: 56),
+          const SizedBox(height: 12),
+          const SectionLabel('Trade Item Role Flags'),
+          const SizedBox(height: 8),
+          for (var i = 0; i < 6; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            GtinSkeletonOutlineField(color: c, height: 56),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
@@ -8,9 +9,11 @@ class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
   const TradeItemDescriptiveAttributesCoreGroup({
     super.key,
     required this.isReadOnly,
+    this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final bool showFieldSkeleton;
 
   @override
   State<TradeItemDescriptiveAttributesCoreGroup> createState() =>
@@ -53,6 +56,8 @@ class TradeItemDescriptiveAttributesCoreGroupState
       ? null
       : _targetMarketCountryCode.text.trim();
 
+  TextEditingController get targetMarketCountryController => _targetMarketCountryCode;
+
   void setFromGtin({
     required String? functionalName,
     required String? tradeItemDescription,
@@ -68,10 +73,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel('Trade Item Descriptive Attributes'),
@@ -115,6 +117,24 @@ class TradeItemDescriptiveAttributesCoreGroupState
           validator: GtinFieldValidators.validateTargetMarketCountry,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel('Trade Item Descriptive Attributes'),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

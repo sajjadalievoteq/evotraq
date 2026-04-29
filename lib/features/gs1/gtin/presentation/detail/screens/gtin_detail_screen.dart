@@ -2,20 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/models/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_loading_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_form.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
-import 'package:traqtrace_app/features/pharmaceutical/widgets/pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/uae_regulatory_extension.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/audit_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/classification_market_origin_core_group.dart';
@@ -55,6 +56,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
+  final _uaeRegulatoryKey = GlobalKey<UaeRegulatoryExtensionState>();
   final _boundMasterdataKey = GlobalKey<TradeItemMasterdataBoundGroupState>();
   final _boundMarketingAuthKey =
       GlobalKey<MarketingAuthorizationBoundGroupState>();
@@ -72,6 +74,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       GlobalKey<ProductionBatchSerialDateAssociationsCoreGroupState>();
   final _auditKey = GlobalKey<AuditCoreGroupState>();
   bool _isSubmitting = false;
+
+  /// After a network fetch, child groups hydrate in a post-frame callback (they need mounted keys).
+  /// Until then, keep showing the detail shimmer so users never see empty fields flash.
+  bool _formFieldsHydrated = true;
+
+  /// Route opened with [gtinCode] only — fetch remote GTIN and hydrate form after load.
+  bool get _remoteFetchPath => widget.gtinCode != null && widget.gtin == null;
   GTINPharmaceuticalExtension? _pharmaceuticalExtension;
   GTINTobaccoExtension? _tobaccoExtension;
 
@@ -99,6 +108,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   void initState() {
     super.initState();
+    if (_remoteFetchPath) {
+      _formFieldsHydrated = false;
+    }
     if (widget.gtin != null) {
       _initializeFormWithGTIN(widget.gtin!);
     } else if (widget.gtinCode != null && !widget.isEditing) {
@@ -113,6 +125,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     final oldCode = oldWidget.gtinCode;
     final newCode = widget.gtinCode;
     if (oldCode != newCode && newCode != null && !widget.isEditing) {
+      setState(() {
+        if (widget.gtin == null) _formFieldsHydrated = false;
+      });
       context.read<GTINCubit>().fetchGTINDetails(newCode);
     }
   }
@@ -129,84 +144,90 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     _status = gtin.status?.toUpperCase();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final unitDescriptor = _docUnitDescriptorFromBackend(
-        unitDescriptor: gtin.unitDescriptor,
-        packagingLevel: gtin.packagingLevel,
-      );
+      try {
+        final unitDescriptor = _docUnitDescriptorFromBackend(
+          unitDescriptor: gtin.unitDescriptor,
+          packagingLevel: gtin.packagingLevel,
+        );
 
-      _boundMasterdataKey.currentState?.setFromGtin(
-        brandName: gtin.productName,
-        manufacturer: gtin.manufacturer ?? '',
-        unitDescriptor: unitDescriptor ?? '',
-        status: gtin.status?.toUpperCase(),
-        packSize: gtin.packSize?.toString() ?? '',
-      );
+        _boundMasterdataKey.currentState?.setFromGtin(
+          brandName: gtin.productName,
+          manufacturer: gtin.manufacturer ?? '',
+          unitDescriptor: unitDescriptor ?? '',
+          status: gtin.status?.toUpperCase(),
+          packSize: gtin.packSize?.toString() ?? '',
+        );
 
-      _boundMarketingAuthKey.currentState?.setFromGtin(
-        number: gtin.registrationNumber ?? '',
-        validFrom: gtin.registrationDate,
-        validTo: gtin.expirationDate,
-      );
+        _boundMarketingAuthKey.currentState?.setFromGtin(
+          number: gtin.registrationNumber ?? '',
+          validFrom: gtin.registrationDate,
+          validTo: gtin.expirationDate,
+        );
 
-      _descriptiveAttrsKey.currentState?.setFromGtin(
-        functionalName: gtin.functionalName,
-        tradeItemDescription: gtin.tradeItemDescription,
-        gpcBrickCode: gtin.gpcBrickCode,
-        targetMarketCountry: gtin.targetMarketCountry,
-      );
+        _descriptiveAttrsKey.currentState?.setFromGtin(
+          functionalName: gtin.functionalName,
+          tradeItemDescription: gtin.tradeItemDescription,
+          gpcBrickCode: gtin.gpcBrickCode,
+          targetMarketCountry: gtin.targetMarketCountry,
+        );
 
-      _packagingHierarchyKey.currentState?.setFromGtin(
-        nextLowerLevelGtin: gtin.nextLowerLevelGtin,
-        nextLowerLevelQuantity: gtin.nextLowerLevelQuantity,
-        quantityOfChildren: gtin.quantityOfChildren,
-        totalQtyNextLower: gtin.totalQtyNextLower,
-        launchDate: gtin.launchDate,
-        isBaseUnit: gtin.isBaseUnit,
-        isConsumerUnit: gtin.isConsumerUnit,
-        isOrderableUnit: gtin.isOrderableUnit,
-        isDespatchUnit: gtin.isDespatchUnit,
-        isInvoiceUnit: gtin.isInvoiceUnit,
-        isVariableUnit: gtin.isVariableUnit,
-      );
+        _packagingHierarchyKey.currentState?.setFromGtin(
+          nextLowerLevelGtin: gtin.nextLowerLevelGtin,
+          nextLowerLevelQuantity: gtin.nextLowerLevelQuantity,
+          quantityOfChildren: gtin.quantityOfChildren,
+          totalQtyNextLower: gtin.totalQtyNextLower,
+          launchDate: gtin.launchDate,
+          isBaseUnit: gtin.isBaseUnit,
+          isConsumerUnit: gtin.isConsumerUnit,
+          isOrderableUnit: gtin.isOrderableUnit,
+          isDespatchUnit: gtin.isDespatchUnit,
+          isInvoiceUnit: gtin.isInvoiceUnit,
+          isVariableUnit: gtin.isVariableUnit,
+        );
 
-      _netContentKey.currentState?.setFromGtin(
-        netContentValue: gtin.netContentValue,
-        netContentUom: gtin.netContentUom,
-        grossWeightValue: gtin.grossWeightValue,
-        grossWeightUom: gtin.grossWeightUom,
-        heightValue: gtin.heightValue,
-        widthValue: gtin.widthValue,
-        depthValue: gtin.depthValue,
-        dimUom: gtin.dimUom,
-      );
+        _netContentKey.currentState?.setFromGtin(
+          netContentValue: gtin.netContentValue,
+          netContentUom: gtin.netContentUom,
+          grossWeightValue: gtin.grossWeightValue,
+          grossWeightUom: gtin.grossWeightUom,
+          heightValue: gtin.heightValue,
+          widthValue: gtin.widthValue,
+          depthValue: gtin.depthValue,
+          dimUom: gtin.dimUom,
+        );
 
-      _classificationKey.currentState?.setFromGtin(
-        countryOfOrigin: gtin.countryOfOrigin,
-      );
+        _classificationKey.currentState?.setFromGtin(
+          countryOfOrigin: gtin.countryOfOrigin,
+        );
 
-      _infoProviderKey.currentState?.setFromGtin(
-        informationProviderGln: gtin.informationProviderGln,
-        informationProviderName: gtin.informationProviderName,
-        manufacturerGln: gtin.manufacturerGln,
-      );
+        _infoProviderKey.currentState?.setFromGtin(
+          informationProviderGln: gtin.informationProviderGln,
+          informationProviderName: gtin.informationProviderName,
+          manufacturerGln: gtin.manufacturerGln,
+        );
 
-      _lifecycleKey.currentState?.setFromGtin(
-        tradeItemStatus: gtin.tradeItemStatus,
-        effectiveDate: gtin.effectiveDate,
-        startAvailDate: gtin.startAvailDate,
-        endAvailDate: gtin.endAvailDate,
-        publicationDate: gtin.publicationDate,
-      );
+        _lifecycleKey.currentState?.setFromGtin(
+          tradeItemStatus: gtin.tradeItemStatus,
+          effectiveDate: gtin.effectiveDate,
+          startAvailDate: gtin.startAvailDate,
+          endAvailDate: gtin.endAvailDate,
+          publicationDate: gtin.publicationDate,
+        );
 
-      _batchSerialKey.currentState?.setFromGtin(
-        hasBatchNumberIndicator: gtin.hasBatchNumberIndicator,
-        hasSerialNumberIndicator: gtin.hasSerialNumberIndicator,
-      );
+        _batchSerialKey.currentState?.setFromGtin(
+          hasBatchNumberIndicator: gtin.hasBatchNumberIndicator,
+          hasSerialNumberIndicator: gtin.hasSerialNumberIndicator,
+        );
 
-      _auditKey.currentState?.setFromGtin(
-        createdBy: gtin.createdBy,
-        updatedBy: gtin.updatedBy,
-      );
+        _auditKey.currentState?.setFromGtin(
+          createdBy: gtin.createdBy,
+          updatedBy: gtin.updatedBy,
+        );
+      } finally {
+        if (mounted) {
+          setState(() => _formFieldsHydrated = true);
+        }
+      }
     });
   }
 
@@ -219,16 +240,29 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   void _submitForm() {
     final isFormValid = _formKey.currentState?.validate() ?? false;
 
-    final tobaccoValidation = _tobaccoExtensionKey.currentState?.validate();
-    if (tobaccoValidation != null) {
-      context.showError(tobaccoValidation);
-      return;
+    if (kTobaccoExtensionEnabled) {
+      final tobaccoValidation = _tobaccoExtensionKey.currentState?.validate();
+      if (tobaccoValidation != null) {
+        context.showError(tobaccoValidation);
+        return;
+      }
     }
 
     final pharmaValidation = _pharmaExtensionKey.currentState?.validate();
     if (pharmaValidation != null) {
       context.showError(pharmaValidation);
       return;
+    }
+
+    final uaeState = _uaeRegulatoryKey.currentState;
+    final pharmaState = _pharmaExtensionKey.currentState;
+    if (uaeState != null && pharmaState != null && uaeState.hasData) {
+      pharmaState.applyUaeRegulatoryValues(
+        localDrugCode: uaeState.localDrugCode,
+        marketingAuthorizationNumber: uaeState.marketingAuthorizationNumber,
+        licensedAgentGlns: uaeState.licensedAgentGlns,
+        regulatedProductName: uaeState.regulatedProductName,
+      );
     }
 
     if (isFormValid) {
@@ -343,6 +377,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   }
 
   Future<void> _saveTobaccoExtensionIfNeeded(int? gtinId, String gtinCode) async {
+    if (!kTobaccoExtensionEnabled) return;
     final tobaccoState = _tobaccoExtensionKey.currentState;
     if (tobaccoState == null || !tobaccoState.hasData) {
       return;
@@ -368,6 +403,15 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     }
 
     try {
+      final uaeState = _uaeRegulatoryKey.currentState;
+      if (uaeState != null && uaeState.hasData) {
+        pharmaState.applyUaeRegulatoryValues(
+          localDrugCode: uaeState.localDrugCode,
+          marketingAuthorizationNumber: uaeState.marketingAuthorizationNumber,
+          licensedAgentGlns: uaeState.licensedAgentGlns,
+          regulatedProductName: uaeState.regulatedProductName,
+        );
+      }
       final extension =
           pharmaState.buildExtension(gtinId: gtinId, gtinCode: gtinCode);
       if (extension != null) {
@@ -378,6 +422,163 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     } catch (e) {
       debugPrint('Error saving pharmaceutical extension: $e');
     }
+  }
+
+  /// Loading fetch or post-fetch hydration: shimmer on each section’s fields (real widgets stay mounted).
+  bool _fieldSkeletonsActive(GTINState state) {
+    if (_isSubmitting) return false;
+    if (state.status == GTINStatus.loading) return true;
+    return _remoteFetchPath &&
+        state.status == GTINStatus.success &&
+        state.gtin != null &&
+        !_formFieldsHydrated;
+  }
+
+  static bool _isUaeMarket(String? targetMarketCountry) {
+    final raw = (targetMarketCountry ?? '').trim();
+    if (raw.isEmpty) return false;
+    final digits = RegExp(r'\d+').stringMatch(raw);
+    return digits == '784';
+  }
+
+  Widget _buildGtinDetailForm(
+    BuildContext context,
+    GTINState state, {
+    required bool isReadOnly,
+    required bool showFieldSkeletons,
+  }) {
+    final gtinFieldLocked = isReadOnly || widget.gtinCode != null;
+    return GtinDetailForm(
+      formKey: _formKey,
+      gtinFieldLocked: gtinFieldLocked,
+      showFieldSkeletons: showFieldSkeletons,
+      unboundSpecSection: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GtinIdentificationStructureCoreGroup(
+            isReadOnly: isReadOnly,
+            gtinCodeController: _gtinCodeController,
+            gtinFieldLocked: gtinFieldLocked,
+            initialGs1CompanyPrefixLength: state.gtin?.gs1CompanyPrefixLength,
+            initialGs1CompanyPrefix: state.gtin?.gs1CompanyPrefix,
+            initialItemReference: state.gtin?.itemReference,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          TradeItemMasterdataBoundGroup(
+            key: _boundMasterdataKey,
+            isReadOnly: isReadOnly,
+            initialStatus: _status,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          MarketingAuthorizationBoundGroup(
+            key: _boundMarketingAuthKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          TradeItemDescriptiveAttributesCoreGroup(
+            key: _descriptiveAttrsKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          NetContentMeasurementsCoreGroup(
+            key: _netContentKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          PackagingHierarchyTradeItemRolesCoreGroup(
+            key: _packagingHierarchyKey,
+            isReadOnly: isReadOnly,
+            gtinCodeController: _gtinCodeController,
+            unitDescriptorController:
+                _boundMasterdataKey.currentState?.unitDescriptorController,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          ClassificationMarketOriginCoreGroup(
+            key: _classificationKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          InformationProviderManufacturerCoreGroup(
+            key: _infoProviderKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          LifecycleAvailabilityStatusCoreGroup(
+            key: _lifecycleKey,
+            isReadOnly: isReadOnly,
+            isUpdate: widget.gtinCode != null,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          ProductionBatchSerialDateAssociationsCoreGroup(
+            key: _batchSerialKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+          AuditCoreGroup(
+            key: _auditKey,
+            isReadOnly: isReadOnly,
+            showFieldSkeleton: showFieldSkeletons,
+          ),
+        ],
+      ),
+      industrySection: ListenableBuilder(
+        listenable: Listenable.merge([
+          _gtinCodeController,
+          // Ensure UAE extension appears immediately when Target Market changes.
+          _descriptiveAttrsKey.currentState?.targetMarketCountryController ??
+              _gtinCodeController,
+        ]),
+        builder: (context, _) {
+          final targetMarket =
+              _descriptiveAttrsKey.currentState?.targetMarketCountry ??
+              widget.gtin?.targetMarketCountry;
+
+          final pharmaExt = _pharmaceuticalExtension;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GtinIndustryExtensionsSection(
+                pharmaExtensionKey: _pharmaExtensionKey,
+                tobaccoExtensionKey: _tobaccoExtensionKey,
+                gtinCodeText: _gtinCodeController.text,
+                routeGtinCode: widget.gtinCode,
+                isEditing: widget.isEditing,
+                targetMarketCountry: targetMarket,
+                pharmaceuticalExtension: pharmaExt,
+                tobaccoExtension: _tobaccoExtension,
+                showFieldSkeleton: showFieldSkeletons,
+              ),
+              UaeRegulatoryExtension(
+                key: _uaeRegulatoryKey,
+                isEditing: widget.isEditing,
+                showFieldSkeleton: showFieldSkeletons,
+                isUaeMarket: _isUaeMarket(targetMarket),
+                isImportedProduct: (pharmaExt?.mahCountry ?? '').trim().isNotEmpty &&
+                    (pharmaExt?.mahCountry ?? '').trim() != '784',
+                initialLocalDrugCode: pharmaExt?.localDrugCodeUaeGcc ?? '',
+                initialMarketingAuthorizationNumber:
+                    pharmaExt?.marketingAuthorizationNumber ?? '',
+                initialLicensedAgentGlns:
+                    (pharmaExt?.licensedAgentGlns ?? const []).join(', '),
+                initialRegulatedProductName: pharmaExt?.regulatedProductName ?? '',
+                onChanged: ({
+                  required localDrugCode,
+                  required marketingAuthorizationNumber,
+                  required licensedAgentGlns,
+                  required regulatedProductName,
+                }) {},
+              ),
+            ],
+          );
+        },
+      ),
+      showSubmitButton: !isReadOnly,
+      isSubmitting: _isSubmitting,
+      onSubmit: _submitForm,
+      submitButtonTitle:
+          widget.gtinCode != null ? 'Update GTIN' : 'Create GTIN',
+    );
   }
 
   @override
@@ -394,6 +595,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         if (state.status == GTINStatus.error) {
           setState(() {
             _isSubmitting = false;
+            if (_remoteFetchPath) {
+              _formFieldsHydrated = true;
+            }
           });
           debugPrint(
             '[GTIN UI] detail error (snackbar): ${state.error} '
@@ -406,7 +610,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
           if (state.gtin != null &&
               !widget.isEditing &&
               widget.gtinCode != null) {
-            _initializeFormWithGTIN(state.gtin!);
+            if (_remoteFetchPath) {
+              _initializeFormWithGTIN(state.gtin!);
+            }
             _pharmaceuticalExtension = state.pharmaceuticalExtension;
             _tobaccoExtension = state.tobaccoExtension;
           } else if (_isSubmitting) {
@@ -435,91 +641,12 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         }
       },
       builder: (context, state) {
-        if (state.status == GTINStatus.loading && !_isSubmitting) {
-          return GtinDetailLoadingShimmer(readOnly: isReadOnly);
-        }
-
-        return GtinDetailForm(
-          formKey: _formKey,
-          gtinFieldLocked: isReadOnly || (widget.gtinCode != null),
-          unboundSpecSection: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GtinIdentificationStructureCoreGroup(
-                isReadOnly: isReadOnly,
-                gtinCodeController: _gtinCodeController,
-                gtinFieldLocked: isReadOnly || (widget.gtinCode != null),
-                initialGs1CompanyPrefixLength: state.gtin?.gs1CompanyPrefixLength,
-                initialGs1CompanyPrefix: state.gtin?.gs1CompanyPrefix,
-                initialItemReference: state.gtin?.itemReference,
-              ),
-              TradeItemMasterdataBoundGroup(
-                key: _boundMasterdataKey,
-                isReadOnly: isReadOnly,
-                initialStatus: _status,
-              ),
-              MarketingAuthorizationBoundGroup(
-                key: _boundMarketingAuthKey,
-                isReadOnly: isReadOnly,
-              ),
-              TradeItemDescriptiveAttributesCoreGroup(
-                key: _descriptiveAttrsKey,
-                isReadOnly: isReadOnly,
-              ),
-              NetContentMeasurementsCoreGroup(
-                key: _netContentKey,
-                isReadOnly: isReadOnly,
-              ),
-              PackagingHierarchyTradeItemRolesCoreGroup(
-                key: _packagingHierarchyKey,
-                isReadOnly: isReadOnly,
-                gtinCodeController: _gtinCodeController,
-                unitDescriptorController:
-                    _boundMasterdataKey.currentState?.unitDescriptorController,
-              ),
-              ClassificationMarketOriginCoreGroup(
-                key: _classificationKey,
-                isReadOnly: isReadOnly,
-              ),
-              InformationProviderManufacturerCoreGroup(
-                key: _infoProviderKey,
-                isReadOnly: isReadOnly,
-              ),
-              LifecycleAvailabilityStatusCoreGroup(
-                key: _lifecycleKey,
-                isReadOnly: isReadOnly,
-                isUpdate: widget.gtinCode != null,
-              ),
-              ProductionBatchSerialDateAssociationsCoreGroup(
-                key: _batchSerialKey,
-                isReadOnly: isReadOnly,
-              ),
-              AuditCoreGroup(
-                key: _auditKey,
-                isReadOnly: isReadOnly,
-              ),
-            ],
-          ),
-          industrySection: ListenableBuilder(
-            listenable: _gtinCodeController,
-            builder: (context, _) {
-              return GtinIndustryExtensionsSection(
-                pharmaExtensionKey: _pharmaExtensionKey,
-                tobaccoExtensionKey: _tobaccoExtensionKey,
-                gtinCodeText: _gtinCodeController.text,
-                routeGtinCode: widget.gtinCode,
-                isEditing: widget.isEditing,
-                pharmaceuticalExtension: _pharmaceuticalExtension,
-                tobaccoExtension: _tobaccoExtension,
-              );
-            },
-          ),
-          showSubmitButton: !isReadOnly,
-          isSubmitting: _isSubmitting,
-          onSubmit: _submitForm,
-          submitButtonTitle: widget.gtinCode != null
-              ? 'Update GTIN'
-              : 'Create GTIN',
+        final sk = _fieldSkeletonsActive(state);
+        return _buildGtinDetailForm(
+          context,
+          state,
+          isReadOnly: isReadOnly,
+          showFieldSkeletons: sk,
         );
       },
     );

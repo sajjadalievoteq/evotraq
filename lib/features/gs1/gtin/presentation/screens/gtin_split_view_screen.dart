@@ -121,7 +121,7 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
                             edge,
-                            edge,
+                            0,
                             edge,
                           0
                           ),

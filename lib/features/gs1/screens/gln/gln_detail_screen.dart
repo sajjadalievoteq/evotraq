@@ -16,6 +16,7 @@ import 'package:traqtrace_app/features/epcis/widgets/geospatial_coordinates_widg
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_form_builder_text_field.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/data/services/gln_tobacco_extension_service.dart';
@@ -230,6 +231,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen> with GS1FormValidatio
 
   /// Save tobacco extension if the widget has data
   Future<void> _saveTobaccoExtensionIfNeeded(int? glnId, String glnCode) async {
+    if (!kTobaccoExtensionEnabled) return;
     final tobaccoState = _tobaccoExtensionKey.currentState;
     if (tobaccoState == null || !tobaccoState.hasData) {
       return; // No tobacco data to save
@@ -844,8 +846,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen> with GS1FormValidatio
                         );
                       }
                       
-                      // Tobacco Mode: Show tobacco extension
-                      if (settings.isTobaccoMode) {
+                      // Tobacco Mode: Show tobacco extension (when feature enabled)
+                      if (settings.isTobaccoMode && kTobaccoExtensionEnabled) {
                         return GLNTobaccoExtensionWidget(
                           key: _tobaccoExtensionKey,
                           glnCode: currentGlnCode,

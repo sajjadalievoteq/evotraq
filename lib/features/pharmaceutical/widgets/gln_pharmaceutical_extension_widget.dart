@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../data/services/gln_pharmaceutical_extension_service.dart';
-import '../models/gln_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/features/pharmaceutical/models/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)
 /// Can be embedded in GLN detail screens or used standalone
@@ -153,6 +154,15 @@ class GLNPharmaceuticalExtensionWidgetState
   final _regulatoryContactEmailController = TextEditingController();
   final _regulatoryContactPhoneController = TextEditingController();
 
+  final _brandsyncPartyIdController = TextEditingController();
+  final _tatmeenPartyCodeController = TextEditingController();
+  final _pharmacovigilanceEmailController = TextEditingController();
+  final _recallContactEmailController = TextEditingController();
+  final _recallContactPhoneController = TextEditingController();
+  final _epcisCaptureEndpointUrlController = TextEditingController();
+  final _licensedAgentAuthorisationController = TextEditingController();
+  final _authorisedPrincipalMahGlnsController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -208,6 +218,14 @@ class GLNPharmaceuticalExtensionWidgetState
     _regulatoryContactNameController.dispose();
     _regulatoryContactEmailController.dispose();
     _regulatoryContactPhoneController.dispose();
+    _brandsyncPartyIdController.dispose();
+    _tatmeenPartyCodeController.dispose();
+    _pharmacovigilanceEmailController.dispose();
+    _recallContactEmailController.dispose();
+    _recallContactPhoneController.dispose();
+    _epcisCaptureEndpointUrlController.dispose();
+    _licensedAgentAuthorisationController.dispose();
+    _authorisedPrincipalMahGlnsController.dispose();
     super.dispose();
   }
 
@@ -363,6 +381,17 @@ class GLNPharmaceuticalExtensionWidgetState
     _regulatoryContactNameController.text = ext.regulatoryContactName ?? '';
     _regulatoryContactEmailController.text = ext.regulatoryContactEmail ?? '';
     _regulatoryContactPhoneController.text = ext.regulatoryContactPhone ?? '';
+
+    _brandsyncPartyIdController.text = ext.brandsyncPartyId ?? '';
+    _tatmeenPartyCodeController.text = ext.tatmeenPartyCode ?? '';
+    _pharmacovigilanceEmailController.text = ext.pharmacovigilanceEmail ?? '';
+    _recallContactEmailController.text = ext.recallContactEmail ?? '';
+    _recallContactPhoneController.text = ext.recallContactPhone ?? '';
+    _epcisCaptureEndpointUrlController.text = ext.epcisCaptureEndpointUrl ?? '';
+    _licensedAgentAuthorisationController.text =
+        ext.licensedAgentAuthorisationNumber ?? '';
+    _authorisedPrincipalMahGlnsController.text =
+        ext.authorisedPrincipalMahGlns ?? '';
   }
 
   GLNPharmaceuticalExtension _buildExtensionFromForm() {
@@ -485,6 +514,34 @@ class GLNPharmaceuticalExtensionWidgetState
           ? _regulatoryContactEmailController.text : null,
       regulatoryContactPhone: _regulatoryContactPhoneController.text.isNotEmpty 
           ? _regulatoryContactPhoneController.text : null,
+      brandsyncPartyId: _brandsyncPartyIdController.text.isNotEmpty
+          ? _brandsyncPartyIdController.text
+          : null,
+      tatmeenPartyCode: _tatmeenPartyCodeController.text.isNotEmpty
+          ? _tatmeenPartyCodeController.text
+          : null,
+      pharmacovigilanceEmail:
+          _pharmacovigilanceEmailController.text.isNotEmpty
+              ? _pharmacovigilanceEmailController.text
+              : null,
+      recallContactEmail: _recallContactEmailController.text.isNotEmpty
+          ? _recallContactEmailController.text
+          : null,
+      recallContactPhone: _recallContactPhoneController.text.isNotEmpty
+          ? _recallContactPhoneController.text
+          : null,
+      epcisCaptureEndpointUrl:
+          _epcisCaptureEndpointUrlController.text.isNotEmpty
+              ? _epcisCaptureEndpointUrlController.text
+              : null,
+      licensedAgentAuthorisationNumber:
+          _licensedAgentAuthorisationController.text.isNotEmpty
+              ? _licensedAgentAuthorisationController.text
+              : null,
+      authorisedPrincipalMahGlns:
+          _authorisedPrincipalMahGlnsController.text.isNotEmpty
+              ? _authorisedPrincipalMahGlnsController.text
+              : null,
     );
   }
 
@@ -502,7 +559,15 @@ class GLNPharmaceuticalExtensionWidgetState
       _isClinicalTrialSite ||
       _isDscsaCompliant ||
       _npiNumberController.text.isNotEmpty ||
-      _healthcareFacilityType != HealthcareFacilityType.other;
+      _healthcareFacilityType != HealthcareFacilityType.other ||
+      _brandsyncPartyIdController.text.isNotEmpty ||
+      _tatmeenPartyCodeController.text.isNotEmpty ||
+      _pharmacovigilanceEmailController.text.isNotEmpty ||
+      _recallContactEmailController.text.isNotEmpty ||
+      _recallContactPhoneController.text.isNotEmpty ||
+      _epcisCaptureEndpointUrlController.text.isNotEmpty ||
+      _licensedAgentAuthorisationController.text.isNotEmpty ||
+      _authorisedPrincipalMahGlnsController.text.isNotEmpty;
 
   /// Build the extension object from form data for external callers
   GLNPharmaceuticalExtension? buildExtension({int? glnId, String? glnCode}) {
@@ -591,6 +656,15 @@ class GLNPharmaceuticalExtensionWidgetState
       regulatoryContactName: extension.regulatoryContactName,
       regulatoryContactEmail: extension.regulatoryContactEmail,
       regulatoryContactPhone: extension.regulatoryContactPhone,
+      brandsyncPartyId: extension.brandsyncPartyId,
+      tatmeenPartyCode: extension.tatmeenPartyCode,
+      pharmacovigilanceEmail: extension.pharmacovigilanceEmail,
+      recallContactEmail: extension.recallContactEmail,
+      recallContactPhone: extension.recallContactPhone,
+      epcisCaptureEndpointUrl: extension.epcisCaptureEndpointUrl,
+      licensedAgentAuthorisationNumber:
+          extension.licensedAgentAuthorisationNumber,
+      authorisedPrincipalMahGlns: extension.authorisedPrincipalMahGlns,
     );
   }
 
@@ -637,31 +711,47 @@ class GLNPharmaceuticalExtensionWidgetState
       return const Center(child: CircularProgressIndicator());
     }
 
+    final scheme = Theme.of(context).colorScheme;
     return Card(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.only(top: 8),
+      elevation: 0,
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
       child: ExpansionTile(
-        collapsedBackgroundColor: const Color(0xFF121F17),
-        collapsedTextColor: Colors.white,
-        collapsedIconColor: Colors.white,
+        collapsedBackgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
+        collapsedIconColor: scheme.primary,
+        iconColor: scheme.primary,
+        collapsedTextColor: scheme.onSurface,
+        textColor: scheme.onSurface,
         title: Row(
           children: [
             Icon(
               Icons.local_pharmacy,
-              color: _hasExtension ? Colors.green : Colors.grey,
+              color: _hasExtension ? scheme.primary : scheme.outline,
             ),
             const SizedBox(width: 8),
-            const Text('Pharmaceutical Extension'),
+            Text(
+              'Pharmaceutical extension',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
             if (_hasExtension)
               Container(
                 margin: const EdgeInsets.only(left: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'Active',
-                  style: TextStyle(fontSize: 12, color: Colors.green),
+                child: Text(
+                  'Saved',
+                  style: TextStyle(fontSize: 12, color: scheme.onPrimaryContainer),
                 ),
               ),
           ],
@@ -673,6 +763,8 @@ class GLNPharmaceuticalExtensionWidgetState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildUaeRegistryAndSafetySection(),
+                const SizedBox(height: 16),
                 _buildFacilitySection(),
                 const SizedBox(height: 16),
                 _buildFdaSection(),
@@ -703,6 +795,95 @@ class GLNPharmaceuticalExtensionWidgetState
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildUaeRegistryAndSafetySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionLabel('UAE registry & national IDs'),
+        Row(
+          children: [
+            Expanded(
+              child: _buildTextField(
+                controller: _brandsyncPartyIdController,
+                label: 'BrandSync Party ID',
+                enabled: widget.isEditing,
+                maxLength: 50,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTextField(
+                controller: _tatmeenPartyCodeController,
+                label: 'Tatmeen Party Code',
+                enabled: widget.isEditing,
+                maxLength: 50,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const SectionLabel('Licensed agent (import markets)'),
+        _buildTextField(
+          controller: _licensedAgentAuthorisationController,
+          label: 'Licensed agent authorisation number',
+          enabled: widget.isEditing,
+          maxLength: 50,
+        ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          controller: _authorisedPrincipalMahGlnsController,
+          label: 'Authorised principal MAH GLNs',
+          hint: 'Comma-separated 13-digit GLNs',
+          enabled: widget.isEditing,
+          maxLength: 500,
+        ),
+        const SizedBox(height: 16),
+        const SectionLabel('Pharmacovigilance & recall'),
+        _buildTextField(
+          controller: _pharmacovigilanceEmailController,
+          label: 'Pharmacovigilance contact email',
+          enabled: widget.isEditing,
+          keyboardType: TextInputType.emailAddress,
+          maxLength: 254,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildTextField(
+                controller: _recallContactEmailController,
+                label: 'Recall contact email (24/7)',
+                enabled: widget.isEditing,
+                keyboardType: TextInputType.emailAddress,
+                maxLength: 254,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTextField(
+                controller: _recallContactPhoneController,
+                label: 'Recall contact phone',
+                enabled: widget.isEditing,
+                keyboardType: TextInputType.phone,
+                maxLength: 20,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const SectionLabel('EPCIS & data exchange'),
+        _buildTextField(
+          controller: _epcisCaptureEndpointUrlController,
+          label: 'EPCIS capture endpoint URL',
+          hint: 'https://…',
+          enabled: widget.isEditing,
+          keyboardType: TextInputType.url,
+          maxLength: 500,
+        ),
+      ],
     );
   }
 

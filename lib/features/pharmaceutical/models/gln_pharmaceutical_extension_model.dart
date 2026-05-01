@@ -201,6 +201,24 @@ class GLNPharmaceuticalExtension extends Equatable {
   final String? regulatoryContactEmail;
   final String? regulatoryContactPhone;
 
+  /// UAE BrandSync / Tatmeen (GS1 pharma party registry)
+  final String? brandsyncPartyId;
+  final String? tatmeenPartyCode;
+
+  /// Pharmacovigilance & recall readiness (spec §5.J)
+  final String? pharmacovigilanceEmail;
+  final String? recallContactEmail;
+  final String? recallContactPhone;
+
+  /// EPCIS capture endpoint (HTTPS)
+  final String? epcisCaptureEndpointUrl;
+
+  /// Licensed agent (UAE / import markets)
+  final String? licensedAgentAuthorisationNumber;
+
+  /// Comma-separated principal MAH GLNs represented by this agent
+  final String? authorisedPrincipalMahGlns;
+
   // Additional Data
   final List<Map<String, dynamic>>? additionalLicenses;
   final List<Map<String, dynamic>>? certifications;
@@ -292,6 +310,14 @@ class GLNPharmaceuticalExtension extends Equatable {
     this.regulatoryContactName,
     this.regulatoryContactEmail,
     this.regulatoryContactPhone,
+    this.brandsyncPartyId,
+    this.tatmeenPartyCode,
+    this.pharmacovigilanceEmail,
+    this.recallContactEmail,
+    this.recallContactPhone,
+    this.epcisCaptureEndpointUrl,
+    this.licensedAgentAuthorisationNumber,
+    this.authorisedPrincipalMahGlns,
     this.additionalLicenses,
     this.certifications,
     this.serviceAreas,
@@ -415,6 +441,16 @@ class GLNPharmaceuticalExtension extends Equatable {
       regulatoryContactName: json['regulatoryContactName'] as String?,
       regulatoryContactEmail: json['regulatoryContactEmail'] as String?,
       regulatoryContactPhone: json['regulatoryContactPhone'] as String?,
+      brandsyncPartyId: json['brandsyncPartyId'] as String?,
+      tatmeenPartyCode: json['tatmeenPartyCode'] as String?,
+      pharmacovigilanceEmail: json['pharmacovigilanceEmail'] as String?,
+      recallContactEmail: json['recallContactEmail'] as String?,
+      recallContactPhone: json['recallContactPhone'] as String?,
+      epcisCaptureEndpointUrl: json['epcisCaptureEndpointUrl'] as String?,
+      licensedAgentAuthorisationNumber:
+          json['licensedAgentAuthorisationNumber'] as String?,
+      authorisedPrincipalMahGlns:
+          json['authorisedPrincipalMahGlns'] as String?,
       additionalLicenses: (json['additionalLicenses'] as List<dynamic>?)
           ?.map((e) => Map<String, dynamic>.from(e as Map))
           .toList(),
@@ -555,6 +591,18 @@ class GLNPharmaceuticalExtension extends Equatable {
         'regulatoryContactEmail': regulatoryContactEmail,
       if (regulatoryContactPhone != null)
         'regulatoryContactPhone': regulatoryContactPhone,
+      if (brandsyncPartyId != null) 'brandsyncPartyId': brandsyncPartyId,
+      if (tatmeenPartyCode != null) 'tatmeenPartyCode': tatmeenPartyCode,
+      if (pharmacovigilanceEmail != null)
+        'pharmacovigilanceEmail': pharmacovigilanceEmail,
+      if (recallContactEmail != null) 'recallContactEmail': recallContactEmail,
+      if (recallContactPhone != null) 'recallContactPhone': recallContactPhone,
+      if (epcisCaptureEndpointUrl != null)
+        'epcisCaptureEndpointUrl': epcisCaptureEndpointUrl,
+      if (licensedAgentAuthorisationNumber != null)
+        'licensedAgentAuthorisationNumber': licensedAgentAuthorisationNumber,
+      if (authorisedPrincipalMahGlns != null)
+        'authorisedPrincipalMahGlns': authorisedPrincipalMahGlns,
       if (additionalLicenses != null) 'additionalLicenses': additionalLicenses,
       if (certifications != null) 'certifications': certifications,
       if (serviceAreas != null) 'serviceAreas': serviceAreas,
@@ -643,6 +691,14 @@ class GLNPharmaceuticalExtension extends Equatable {
     String? regulatoryContactName,
     String? regulatoryContactEmail,
     String? regulatoryContactPhone,
+    String? brandsyncPartyId,
+    String? tatmeenPartyCode,
+    String? pharmacovigilanceEmail,
+    String? recallContactEmail,
+    String? recallContactPhone,
+    String? epcisCaptureEndpointUrl,
+    String? licensedAgentAuthorisationNumber,
+    String? authorisedPrincipalMahGlns,
     List<Map<String, dynamic>>? additionalLicenses,
     List<Map<String, dynamic>>? certifications,
     List<String>? serviceAreas,
@@ -766,6 +822,18 @@ class GLNPharmaceuticalExtension extends Equatable {
           regulatoryContactEmail ?? this.regulatoryContactEmail,
       regulatoryContactPhone:
           regulatoryContactPhone ?? this.regulatoryContactPhone,
+      brandsyncPartyId: brandsyncPartyId ?? this.brandsyncPartyId,
+      tatmeenPartyCode: tatmeenPartyCode ?? this.tatmeenPartyCode,
+      pharmacovigilanceEmail:
+          pharmacovigilanceEmail ?? this.pharmacovigilanceEmail,
+      recallContactEmail: recallContactEmail ?? this.recallContactEmail,
+      recallContactPhone: recallContactPhone ?? this.recallContactPhone,
+      epcisCaptureEndpointUrl:
+          epcisCaptureEndpointUrl ?? this.epcisCaptureEndpointUrl,
+      licensedAgentAuthorisationNumber: licensedAgentAuthorisationNumber ??
+          this.licensedAgentAuthorisationNumber,
+      authorisedPrincipalMahGlns:
+          authorisedPrincipalMahGlns ?? this.authorisedPrincipalMahGlns,
       additionalLicenses: additionalLicenses ?? this.additionalLicenses,
       certifications: certifications ?? this.certifications,
       serviceAreas: serviceAreas ?? this.serviceAreas,

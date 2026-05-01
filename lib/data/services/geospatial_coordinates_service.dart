@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 /// Implementation of the GeospatialCoordinatesService interface
 class GeospatialCoordinatesService {

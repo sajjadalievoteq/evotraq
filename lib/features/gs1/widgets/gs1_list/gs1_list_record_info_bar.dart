@@ -1,36 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-import '../../../../../../core/consts/app_consts.dart';
-import '../../../../../../shared/layout/layout_manager.dart';
-
-class GtinRecordInfoBar extends StatelessWidget {
-  const GtinRecordInfoBar({
+/// “Showing N+ … / page size” row (GTIN/GLN list “information” tile).
+class Gs1ListRecordInfoBar extends StatelessWidget {
+  const Gs1ListRecordInfoBar({
     super.key,
+    required this.entityPlural,
     required this.loadedRecords,
     required this.hasMoreData,
     required this.pageSize,
     required this.onPageSizeChanged,
+    this.pageSizeOptions = Gs1ListPageSizes.defaults,
   });
 
+  /// e.g. `"GTINs"` or `"GLNs"`.
+  final String entityPlural;
   final int loadedRecords;
   final bool hasMoreData;
   final int pageSize;
   final ValueChanged<int> onPageSizeChanged;
+  final List<int> pageSizeOptions;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final showText = hasMoreData
-        ? 'Showing $loadedRecords+ GTINs (scroll for more)'
-        : 'Showing all $loadedRecords GTINs';
+        ? 'Showing $loadedRecords+ $entityPlural (scroll for more)'
+        : 'Showing all $loadedRecords $entityPlural';
 
-    Widget buildPageSizeDropdown({bool compact = false}) {
+    Widget buildPageSizeDropdown() {
       return DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: pageSize,
           isDense: true,
-          items: GtinUiConstants.pageSizeOptions.map((size) {
+          items: pageSizeOptions.map((size) {
             return DropdownMenuItem(
               value: size,
               child: Text(
@@ -57,14 +62,12 @@ class GtinRecordInfoBar extends StatelessWidget {
 
     return AppLayoutBuilder(
       builder: (context, layout) {
-        final horizontalMargin = layout.width < 420 ? 8.0 : 16.0;
         final padding = EdgeInsets.symmetric(
           horizontal: layout.resolve(compact: 12.0, medium: 16.0),
           vertical: layout.resolve(compact: 10.0, medium: 8.0),
         );
 
-        final container = Container(
-
+        return Container(
           padding: padding,
           width: double.infinity,
           decoration: BoxDecoration(
@@ -91,11 +94,9 @@ class GtinRecordInfoBar extends StatelessWidget {
                         spacing: 12,
                         runSpacing: 8,
                         crossAxisAlignment: WrapCrossAlignment.center,
-
                         children: [
-                           if (hasMoreData) buildLoadedBatches(),
-
-                          buildPageSizeDropdown(compact: true),
+                          if (hasMoreData) buildLoadedBatches(),
+                          buildPageSizeDropdown(),
                         ],
                       ),
                     ),
@@ -125,17 +126,13 @@ class GtinRecordInfoBar extends StatelessWidget {
                           ),
                           const SizedBox(width: 16),
                         ],
-
                         buildPageSizeDropdown(),
                       ],
                     ),
                   ],
                 ),
         );
-
-        return container;
       },
     );
   }
 }
-

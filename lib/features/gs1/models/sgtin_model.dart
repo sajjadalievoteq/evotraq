@@ -1,6 +1,6 @@
 // SGTIN (Serialized GTIN) model class
 import 'package:equatable/equatable.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 
 class SGTIN extends Equatable {

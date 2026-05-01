@@ -8,7 +8,7 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';

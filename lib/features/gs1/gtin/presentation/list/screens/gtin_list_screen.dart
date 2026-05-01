@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,12 +6,15 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_quick_filter_dialog.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_search_bar.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_advanced_filters_panel.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_sorting_controls.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_results_list.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_record_info_section.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_filter_value.dart';
+import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
 class GTINListScreen extends StatefulWidget {
@@ -31,10 +32,8 @@ class GTINListScreen extends StatefulWidget {
 }
 
 class _GTINListScreenState extends State<GTINListScreen> {
-  static const _searchDebounceDuration = Duration(milliseconds: 400);
-
   final _searchController = TextEditingController();
-  Timer? _searchDebounce;
+  late Gs1ListSearchDebouncer _searchDebouncer;
   final _productNameController = TextEditingController();
   final _gtinCodeController = TextEditingController();
   final _manufacturerController = TextEditingController();
@@ -51,13 +50,19 @@ class _GTINListScreenState extends State<GTINListScreen> {
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Gs1ListSearchDebouncer(
+      onDebounced: () {
+        if (!mounted) return;
+        _search();
+      },
+    );
     // Initial load of GTINs
     context.read<GTINCubit>().fetchGTINList();
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _productNameController.dispose();
     _gtinCodeController.dispose();
@@ -96,10 +101,8 @@ class _GTINListScreenState extends State<GTINListScreen> {
       productName: _getAdvancedFilterValue('productName'),
       gtinCode: _getAdvancedFilterValue('gtinCode'),
       manufacturer: _getAdvancedFilterValue('manufacturer'),
-      status: _selectedStatus == 'All' ? null : _selectedStatus?.toLowerCase(),
-      packagingLevel: _selectedPackagingLevel == 'All'
-          ? null
-          : _selectedPackagingLevel,
+      status: gs1ValueUnlessAll(_selectedStatus)?.toLowerCase(),
+      packagingLevel: gs1ValueUnlessAll(_selectedPackagingLevel),
       registrationDateFrom: _registrationDateFrom?.toIso8601String().split(
         'T',
       )[0],
@@ -119,10 +122,8 @@ class _GTINListScreenState extends State<GTINListScreen> {
       productName: _getAdvancedFilterValue('productName'),
       gtinCode: _getAdvancedFilterValue('gtinCode'),
       manufacturer: _getAdvancedFilterValue('manufacturer'),
-      status: _selectedStatus == 'All' ? null : _selectedStatus?.toLowerCase(),
-      packagingLevel: _selectedPackagingLevel == 'All'
-          ? null
-          : _selectedPackagingLevel,
+      status: gs1ValueUnlessAll(_selectedStatus)?.toLowerCase(),
+      packagingLevel: gs1ValueUnlessAll(_selectedPackagingLevel),
       registrationDateFrom: _registrationDateFrom?.toIso8601String().split(
         'T',
       )[0],
@@ -134,16 +135,12 @@ class _GTINListScreenState extends State<GTINListScreen> {
 
   /// Cancels pending debounce and runs search now (Enter, refresh, filters, clear).
   void _searchImmediate() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.cancel();
     _search();
   }
 
   void _onSearchTextChanged(String _) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(_searchDebounceDuration, () {
-      if (!mounted) return;
-      _search();
-    });
+    _searchDebouncer.schedule();
   }
 
   void _showFilterDialog() {
@@ -236,79 +233,67 @@ class _GTINListScreenState extends State<GTINListScreen> {
   Widget build(BuildContext context) {
     final content = AppLayoutBuilder(
       builder: (context, layout) {
-        return Column(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: Constants.sectionMaxWidth,
-                ),
-                child: Column(
-                  children: [
-                    ListenableBuilder(
-                      listenable: _searchController,
-                      builder: (context, _) {
-                        return GtinSearchBar(
-                          controller: _searchController,
-                          showAdvancedFilters: false,
-                          onSearch: _searchImmediate,
-                          onQueryChanged: _onSearchTextChanged,
-                          onRefresh: _searchImmediate,
-                          onQuickFilters: _showFilterDialog,
-                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                          onClear: () {
-                            _searchDebounce?.cancel();
-                            _searchController.clear();
-                            _search();
-                          },
-                        );
-                      },
-                    ),
-
-                    GtinRecordInfoSection(
-                      pageSize: _pageSize,
-                      onPageSizeChanged: (newSize) {
-                        setState(() {
-                          _pageSize = newSize;
-                        });
-                        _searchImmediate();
-                      },
-                    ),
-                    SizedBox(height: Constants.spacing),
-                    BlocBuilder<GTINCubit, GTINState>(
-                      buildWhen: (prev, current) =>
-                          prev.gtinListSortAscending !=
-                          current.gtinListSortAscending,
-                      builder: (context, cubitState) {
-                        return GtinSortingControls(
-                          sortOrder: cubitState.gtinListSortAscending
-                              ? 'asc'
-                              : 'desc',
-                          onToggleSortOrder: () => context
-                              .read<GTINCubit>()
-                              .toggleGtinListProductNameSort(),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: Constants.spacing),
-            Expanded(
-              child: GtinResultsList(
-                scrollController: _scrollController,
-                onRefresh: _refresh,
-                onClearFilters: () {
-                  _searchController.clear();
-                  _clearAllFilters();
+        return Gs1MasterListBody(
+          toolbar: Column(
+            children: [
+              ListenableBuilder(
+                listenable: _searchController,
+                builder: (context, _) {
+                  return Gs1ListSearchBar(
+                    hintText: GtinUiConstants.listSearchHint,
+                    controller: _searchController,
+                    showAdvancedFilters: false,
+                    onSearch: _searchImmediate,
+                    onQueryChanged: _onSearchTextChanged,
+                    onRefresh: _searchImmediate,
+                    onQuickFilters: _showFilterDialog,
+                    onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                    onClear: () {
+                      _searchDebouncer.cancel();
+                      _searchController.clear();
+                      _search();
+                    },
+                  );
                 },
-                onTapGtin: _navigateToGTINDetails,
-                onLoadMore: _loadMore,
               ),
-            ),
-          ],
+              GtinRecordInfoSection(
+                pageSize: _pageSize,
+                onPageSizeChanged: (newSize) {
+                  setState(() {
+                    _pageSize = newSize;
+                  });
+                  _searchImmediate();
+                },
+              ),
+              SizedBox(height: Constants.spacing),
+              BlocBuilder<GTINCubit, GTINState>(
+                buildWhen: (prev, current) =>
+                    prev.gtinListSortAscending !=
+                    current.gtinListSortAscending,
+                builder: (context, cubitState) {
+                  return Gs1ListSortingControls(
+                    label: 'Sort by product name (A–Z)',
+                    sortOrder: cubitState.gtinListSortAscending
+                        ? 'asc'
+                        : 'desc',
+                    onToggleSortOrder: () => context
+                        .read<GTINCubit>()
+                        .toggleGtinListProductNameSort(),
+                  );
+                },
+              ),
+            ],
+          ),
+          results: GtinResultsList(
+            scrollController: _scrollController,
+            onRefresh: _refresh,
+            onClearFilters: () {
+              _searchController.clear();
+              _clearAllFilters();
+            },
+            onTapGtin: _navigateToGTINDetails,
+            onLoadMore: _loadMore,
+          ),
         );
       },
     );

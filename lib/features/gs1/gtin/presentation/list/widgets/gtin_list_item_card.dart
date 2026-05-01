@@ -22,7 +22,6 @@ class GtinListItemCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 420;
-        final horizontalMargin = isCompact ? 8.0 : 16.0;
         final contentPadding = isCompact
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);

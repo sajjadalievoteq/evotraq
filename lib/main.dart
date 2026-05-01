@@ -20,7 +20,7 @@ import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 
-import 'package:traqtrace_app/features/gs1/bloc/gln/gln_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 

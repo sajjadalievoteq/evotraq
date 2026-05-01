@@ -1,6 +1,6 @@
 import 'package:traqtrace_app/features/epcis/models/certification_info.dart';
 import 'package:traqtrace_app/features/epcis/models/sensor_element.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
 
 /// Base class for EPCIS event models

@@ -6,7 +6,7 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_dosage_route_composition_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_prescription_requirements_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_regulatory_approvals_widget.dart';

@@ -1,5 +1,3 @@
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
-
 /// Utility functions for GS1 standards implementation
 class GS1Utils {
   /// Extracts GS1 Company Prefix from a GLN code

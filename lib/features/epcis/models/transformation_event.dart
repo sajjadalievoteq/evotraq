@@ -1,5 +1,5 @@
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/models/certification_info.dart';
 
 /// TransformationEvent represents EPCIS events that track transformation processes

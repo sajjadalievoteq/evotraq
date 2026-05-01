@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_loading_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/screens/gtin_list_screen.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/split_view.dart';
 
 class GTINSplitViewScreen extends StatefulWidget {
   const GTINSplitViewScreen({super.key});
@@ -77,71 +77,27 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
               setState(() => _selectedGtinCode = gtins.first.gtinCode);
             }
           },
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final listFlex = width < 1100 ? 40 : 30;
-              final detailFlex = 100 - listFlex;
-              return AppLayoutBuilder(
-                builder: (context, layout) {
-                  final edge = (layout.horizontalPadding * 0.5 + Constants.spacing * 0.5)
-                      .clamp(12.0, 24.0);
-                  return Row(
-                    // spacing: width < 900 ? 12 : 20,
-                    children: [
-                      Flexible(
-                        flex: listFlex,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            edge,
-                            edge,
-                            edge,
-                            0
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.only(left:width < 900 ? 12 : 20, right: width < 900 ? 12 : 20, top: width < 900 ? 12 : 20),
-                            child: GTINListScreen(
-                              embedded: true,
-                              onSelectGtin: (gtinCode) {
-                                if (gtinCode == _selectedGtinCode && !_isAddingGtin) {
-                                  return;
-                                }
-                                setState(() {
-                                  _isAddingGtin = false;
-                                  _selectedGtinCode = gtinCode;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      const VerticalDivider(width: 1),
-                      Expanded(
-                        flex: detailFlex,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            edge,
-                            0,
-                            edge,
-                          0
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.only(left:width < 900 ? 12 : 20, right: width < 900 ? 12 : 20, top: width < 900 ? _isAddingGtin? 12:2 : _isAddingGtin?20:10),
-                            child: _buildRightPane(width),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          )
+          child: MasterDetailSplitLayout(
+            isCreateMode: _isAddingGtin,
+            list: GTINListScreen(
+              embedded: true,
+              onSelectGtin: (gtinCode) {
+                if (gtinCode == _selectedGtinCode && !_isAddingGtin) {
+                  return;
+                }
+                setState(() {
+                  _isAddingGtin = false;
+                  _selectedGtinCode = gtinCode;
+                });
+              },
+            ),
+            detail: _buildRightPane(),
+          ),
       ),
     );
   }
 
-  Widget _buildRightPane(double width) {
+  Widget _buildRightPane() {
     if (_isAddingGtin) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

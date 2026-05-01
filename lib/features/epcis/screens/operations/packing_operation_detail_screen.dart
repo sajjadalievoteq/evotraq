@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
 import 'package:traqtrace_app/data/services/packing_operation_service.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gln_service.dart';
 import 'package:intl/intl.dart';
 

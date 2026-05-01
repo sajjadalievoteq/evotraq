@@ -13,7 +13,7 @@ import 'package:traqtrace_app/features/epcis/widgets/transformation_event_form_h
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
 
 /// Screen for creating and editing Transformation Events with support for GS1 EPCIS 2.0

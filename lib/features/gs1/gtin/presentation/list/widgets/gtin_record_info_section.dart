@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_record_info_bar.dart';
-
-import '../../../../../../core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list.dart';
 
 class GtinRecordInfoSection extends StatelessWidget {
   const GtinRecordInfoSection({
@@ -29,11 +29,13 @@ class GtinRecordInfoSection extends StatelessWidget {
             SizedBox(
               height: Constants.spacing,
             ),
-            GtinRecordInfoBar(
+            Gs1ListRecordInfoBar(
+              entityPlural: 'GTINs',
               loadedRecords: count,
               hasMoreData: selected.hasMore,
               pageSize: pageSize,
               onPageSizeChanged: onPageSizeChanged,
+              pageSizeOptions: GtinUiConstants.pageSizeOptions,
             ),
           ],
         );
@@ -41,4 +43,3 @@ class GtinRecordInfoSection extends StatelessWidget {
     );
   }
 }
-

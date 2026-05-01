@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-import '../../../../../../core/consts/app_consts.dart';
-import '../../../../../../core/theme/color_manager.dart';
-import '../../../../../../shared/layout/layout_manager.dart';
-
-class GtinSortingControls extends StatelessWidget {
-  const GtinSortingControls({
+/// “Sort by … / direction” row (GTIN/GLN list “sort” tile). Build [label] in the parent.
+class Gs1ListSortingControls extends StatelessWidget {
+  const Gs1ListSortingControls({
     super.key,
+    required this.label,
     required this.sortOrder,
     required this.onToggleSortOrder,
   });
 
+  final String label;
   final String sortOrder;
   final VoidCallback onToggleSortOrder;
 
@@ -18,8 +20,8 @@ class GtinSortingControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final label = Text(
-      'Sort by product name (A–Z)',
+    final text = Text(
+      label,
       style: theme.textTheme.bodyMedium,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
@@ -36,10 +38,7 @@ class GtinSortingControls extends StatelessWidget {
 
     return AppLayoutBuilder(
       builder: (context, layout) {
-        final horizontalMargin = layout.width < 420 ? 8.0 : 16.0;
-
         return Container(
-
           padding: EdgeInsets.symmetric(
             horizontal: layout.resolve(compact: 12.0, medium: 16.0),
             vertical: layout.resolve(compact: 10.0, medium: 8.0),
@@ -52,14 +51,14 @@ class GtinSortingControls extends StatelessWidget {
           child: layout.isCompact
               ? Row(
                   children: [
-                    Expanded(child: label),
+                    Expanded(child: text),
                     toggle,
                   ],
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: label),
+                    Expanded(child: text),
                     const SizedBox(width: 16),
                     toggle,
                   ],

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-class GtinSearchBar extends StatelessWidget {
-  const GtinSearchBar({
+/// Search field + optional refresh / quick-filters row (GTIN/GLN list “tile”).
+class Gs1ListSearchBar extends StatelessWidget {
+  const Gs1ListSearchBar({
     super.key,
+    required this.hintText,
     required this.controller,
     required this.showAdvancedFilters,
     required this.onSearch,
@@ -17,11 +18,10 @@ class GtinSearchBar extends StatelessWidget {
     this.onQuickFilters,
   });
 
+  final String hintText;
   final TextEditingController controller;
   final bool showAdvancedFilters;
-  /// Called on Enter; should run search immediately (after debounce cancel).
   final VoidCallback onSearch;
-  /// Called on every text change while typing (wire to a debounced search).
   final ValueChanged<String> onQueryChanged;
   final VoidCallback onToggleAdvancedFilters;
   final VoidCallback onClear;
@@ -32,10 +32,7 @@ class GtinSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppLayoutBuilder(
       builder: (context, layout) {
-        final horizontalMargin = layout.width < 420 ? 8.0 : 16.0;
-
         return Container(
-
           padding: EdgeInsets.all(
             layout.resolve(
               compact: 12.0,
@@ -47,7 +44,7 @@ class GtinSearchBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(Constants.cardRadius),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 2,
                 offset: const Offset(0, 1),
@@ -81,8 +78,7 @@ class GtinSearchBar extends StatelessWidget {
                 controller: controller,
                 onChanged: onQueryChanged,
                 decoration: InputDecoration(
-                  hintText:
-                      'Search by GTIN code, product name, or manufacturer...',
+                  hintText: hintText,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -126,4 +122,3 @@ class GtinSearchBar extends StatelessWidget {
     );
   }
 }
-

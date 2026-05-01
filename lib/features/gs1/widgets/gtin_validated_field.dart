@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 
+/// Shared GS1 validated text field (used by GTIN and GLN detail forms).
 class GtinValidatedField extends StatelessWidget {
   const GtinValidatedField({
     super.key,
     required this.controller,
     required this.fieldName,
     required this.label,
+    this.hintText,
     this.setFieldError,
     this.helperText,
     this.readOnly = false,
@@ -24,6 +26,7 @@ class GtinValidatedField extends StatelessWidget {
   final TextEditingController controller;
   final String fieldName;
   final String label;
+  final String? hintText;
   final void Function(String, String?)? setFieldError;
   final String? helperText;
   final bool readOnly;
@@ -49,6 +52,7 @@ class GtinValidatedField extends StatelessWidget {
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hintText,
         helperText: helperText,
         border: const OutlineInputBorder(),
         suffixIcon: suffixIcon,
@@ -59,4 +63,3 @@ class GtinValidatedField extends StatelessWidget {
     );
   }
 }
-

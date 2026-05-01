@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
+/// ISO 3166-1 numeric country picker (shared by GTIN and GLN).
 class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
     super.key,
@@ -66,8 +67,6 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
   }
 
   String _countryName(WorldCountry c) {
-    // `world_countries` exposes `name` with localized variants in newer versions.
-    // We try common fallbacks while keeping compilation-safe.
     try {
       final dynamic n = (c as dynamic).name;
       if (n is String) return n;

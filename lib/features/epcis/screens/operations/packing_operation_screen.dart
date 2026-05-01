@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/packing_models.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
 import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Section heading used across GS1 (GTIN / GLN) detail forms.
 class SectionLabel extends StatelessWidget {
   const SectionLabel(
     this.text, {
@@ -24,4 +25,3 @@ class SectionLabel extends StatelessWidget {
     );
   }
 }
-

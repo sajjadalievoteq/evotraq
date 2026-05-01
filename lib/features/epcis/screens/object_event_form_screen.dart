@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/epcis/providers/validation_service_provid
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 import 'package:traqtrace_app/features/epcis/widgets/object_event_help_widget.dart';

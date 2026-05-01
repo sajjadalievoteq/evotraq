@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 class CommissioningOperationService {
   final DioService _dioService;

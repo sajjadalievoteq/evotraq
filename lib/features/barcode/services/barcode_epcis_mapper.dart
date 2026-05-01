@@ -3,7 +3,7 @@ import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
 
 /// Service that maps barcode data to EPCIS events

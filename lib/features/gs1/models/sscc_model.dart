@@ -1,5 +1,5 @@
 // filepath: c:\Code\traqTrace\frontend\traqtrace_app\lib\features\gs1\models\sscc_model.dart
-import 'package:traqtrace_app/features/gs1/models/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 // SSCC (Serial Shipping Container Code) model class
 class SSCC {

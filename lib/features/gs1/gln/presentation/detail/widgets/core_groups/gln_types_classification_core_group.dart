@@ -40,7 +40,7 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('GLN types & classification'),
+        const SectionLabel('GLN types * & classification'),
         GlnGlnTypeChipsField(
           selection: glnTypes,
           onChanged: onGlnTypesChanged,

@@ -103,6 +103,8 @@ abstract final class GlnFieldValidators {
     return _rejectControlOrTooLong(v, _maxDbVarchar, 'City');
   }
 
+  /// DB schema: `state_province VARCHAR(255)` — column is nullable (not NOT NULL),
+  /// but the form treats it as required for postal address completeness.
   static String? validateStateProvinceRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'State/Province is required';

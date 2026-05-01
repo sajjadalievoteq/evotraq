@@ -163,6 +163,10 @@ class GLNPharmaceuticalExtensionWidgetState
   final _licensedAgentAuthorisationController = TextEditingController();
   final _authorisedPrincipalMahGlnsController = TextEditingController();
 
+  bool _mahQualificationIndicator = false;
+  final _mahTargetMarketsController = TextEditingController();
+  final _mahRegulatoryRegistrationNumberController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -226,6 +230,8 @@ class GLNPharmaceuticalExtensionWidgetState
     _epcisCaptureEndpointUrlController.dispose();
     _licensedAgentAuthorisationController.dispose();
     _authorisedPrincipalMahGlnsController.dispose();
+    _mahTargetMarketsController.dispose();
+    _mahRegulatoryRegistrationNumberController.dispose();
     super.dispose();
   }
 
@@ -381,6 +387,11 @@ class GLNPharmaceuticalExtensionWidgetState
     _regulatoryContactNameController.text = ext.regulatoryContactName ?? '';
     _regulatoryContactEmailController.text = ext.regulatoryContactEmail ?? '';
     _regulatoryContactPhoneController.text = ext.regulatoryContactPhone ?? '';
+
+    _mahQualificationIndicator = ext.mahQualificationIndicator;
+    _mahTargetMarketsController.text = ext.mahTargetMarkets?.join(', ') ?? '';
+    _mahRegulatoryRegistrationNumberController.text =
+        ext.mahRegulatoryRegistrationNumber ?? '';
 
     _brandsyncPartyIdController.text = ext.brandsyncPartyId ?? '';
     _tatmeenPartyCodeController.text = ext.tatmeenPartyCode ?? '';
@@ -542,7 +553,21 @@ class GLNPharmaceuticalExtensionWidgetState
           _authorisedPrincipalMahGlnsController.text.isNotEmpty
               ? _authorisedPrincipalMahGlnsController.text
               : null,
+      mahQualificationIndicator: _mahQualificationIndicator,
+      mahTargetMarkets: _mahMarketsFromForm(),
+      mahRegulatoryRegistrationNumber:
+          _mahRegulatoryRegistrationNumberController.text.isNotEmpty
+              ? _mahRegulatoryRegistrationNumberController.text
+              : null,
     );
+  }
+
+  List<String>? _mahMarketsFromForm() {
+    final t = _mahTargetMarketsController.text.trim();
+    if (t.isEmpty) return null;
+    final parts =
+        t.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    return parts.isEmpty ? null : parts;
   }
 
   /// Check if user has entered any pharmaceutical data
@@ -567,7 +592,10 @@ class GLNPharmaceuticalExtensionWidgetState
       _recallContactPhoneController.text.isNotEmpty ||
       _epcisCaptureEndpointUrlController.text.isNotEmpty ||
       _licensedAgentAuthorisationController.text.isNotEmpty ||
-      _authorisedPrincipalMahGlnsController.text.isNotEmpty;
+      _authorisedPrincipalMahGlnsController.text.isNotEmpty ||
+      _mahQualificationIndicator ||
+      _mahTargetMarketsController.text.isNotEmpty ||
+      _mahRegulatoryRegistrationNumberController.text.isNotEmpty;
 
   /// Build the extension object from form data for external callers
   GLNPharmaceuticalExtension? buildExtension({int? glnId, String? glnCode}) {
@@ -665,6 +693,10 @@ class GLNPharmaceuticalExtensionWidgetState
       licensedAgentAuthorisationNumber:
           extension.licensedAgentAuthorisationNumber,
       authorisedPrincipalMahGlns: extension.authorisedPrincipalMahGlns,
+      mahQualificationIndicator: extension.mahQualificationIndicator,
+      mahTargetMarkets: extension.mahTargetMarkets,
+      mahRegulatoryRegistrationNumber:
+          extension.mahRegulatoryRegistrationNumber,
     );
   }
 
@@ -823,6 +855,30 @@ class GLNPharmaceuticalExtensionWidgetState
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        const SectionLabel('MAH & target markets'),
+        _buildSwitch(
+          label: 'MAH qualification indicator',
+          value: _mahQualificationIndicator,
+          onChanged: widget.isEditing
+              ? (value) => setState(() => _mahQualificationIndicator = value)
+              : null,
+        ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          controller: _mahTargetMarketsController,
+          label: 'MAH target markets (ISO numeric)',
+          hint: 'Comma-separated, e.g. 784 for UAE',
+          enabled: widget.isEditing,
+          maxLength: 200,
+        ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          controller: _mahRegulatoryRegistrationNumberController,
+          label: 'MAH regulatory registration number',
+          enabled: widget.isEditing,
+          maxLength: 50,
         ),
         const SizedBox(height: 16),
         const SectionLabel('Licensed agent (import markets)'),

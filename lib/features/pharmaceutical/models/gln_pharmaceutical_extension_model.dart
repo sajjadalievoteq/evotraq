@@ -92,6 +92,20 @@ extension HealthcareFacilityTypeExtension on HealthcareFacilityType {
   }
 }
 
+List<String>? _stringListFromJson(dynamic v) {
+  if (v == null) return null;
+  if (v is List) {
+    final out = v.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList();
+    return out.isEmpty ? null : out;
+  }
+  if (v is String) {
+    final parts =
+        v.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    return parts.isEmpty ? null : parts;
+  }
+  return null;
+}
+
 /// GLN Pharmaceutical Extension model
 /// Based on GS1 Healthcare GLN Implementation Guideline
 class GLNPharmaceuticalExtension extends Equatable {
@@ -219,6 +233,15 @@ class GLNPharmaceuticalExtension extends Equatable {
   /// Comma-separated principal MAH GLNs represented by this agent
   final String? authorisedPrincipalMahGlns;
 
+  /// MAH qualification flag (required for UAE-targeting MAHs when core GLN roles include MAH)
+  final bool mahQualificationIndicator;
+
+  /// ISO 3166-1 numeric target markets for MAH qualification (e.g. 784 UAE)
+  final List<String>? mahTargetMarkets;
+
+  /// Market-specific MAH regulatory registration identifier where applicable
+  final String? mahRegulatoryRegistrationNumber;
+
   // Additional Data
   final List<Map<String, dynamic>>? additionalLicenses;
   final List<Map<String, dynamic>>? certifications;
@@ -318,6 +341,9 @@ class GLNPharmaceuticalExtension extends Equatable {
     this.epcisCaptureEndpointUrl,
     this.licensedAgentAuthorisationNumber,
     this.authorisedPrincipalMahGlns,
+    this.mahQualificationIndicator = false,
+    this.mahTargetMarkets,
+    this.mahRegulatoryRegistrationNumber,
     this.additionalLicenses,
     this.certifications,
     this.serviceAreas,
@@ -451,6 +477,11 @@ class GLNPharmaceuticalExtension extends Equatable {
           json['licensedAgentAuthorisationNumber'] as String?,
       authorisedPrincipalMahGlns:
           json['authorisedPrincipalMahGlns'] as String?,
+      mahQualificationIndicator:
+          json['mahQualificationIndicator'] as bool? ?? false,
+      mahTargetMarkets: _stringListFromJson(json['mahTargetMarkets']),
+      mahRegulatoryRegistrationNumber:
+          json['mahRegulatoryRegistrationNumber'] as String?,
       additionalLicenses: (json['additionalLicenses'] as List<dynamic>?)
           ?.map((e) => Map<String, dynamic>.from(e as Map))
           .toList(),
@@ -603,6 +634,11 @@ class GLNPharmaceuticalExtension extends Equatable {
         'licensedAgentAuthorisationNumber': licensedAgentAuthorisationNumber,
       if (authorisedPrincipalMahGlns != null)
         'authorisedPrincipalMahGlns': authorisedPrincipalMahGlns,
+      'mahQualificationIndicator': mahQualificationIndicator,
+      if (mahTargetMarkets != null && mahTargetMarkets!.isNotEmpty)
+        'mahTargetMarkets': mahTargetMarkets,
+      if (mahRegulatoryRegistrationNumber != null)
+        'mahRegulatoryRegistrationNumber': mahRegulatoryRegistrationNumber,
       if (additionalLicenses != null) 'additionalLicenses': additionalLicenses,
       if (certifications != null) 'certifications': certifications,
       if (serviceAreas != null) 'serviceAreas': serviceAreas,
@@ -699,6 +735,9 @@ class GLNPharmaceuticalExtension extends Equatable {
     String? epcisCaptureEndpointUrl,
     String? licensedAgentAuthorisationNumber,
     String? authorisedPrincipalMahGlns,
+    bool? mahQualificationIndicator,
+    List<String>? mahTargetMarkets,
+    String? mahRegulatoryRegistrationNumber,
     List<Map<String, dynamic>>? additionalLicenses,
     List<Map<String, dynamic>>? certifications,
     List<String>? serviceAreas,
@@ -834,6 +873,11 @@ class GLNPharmaceuticalExtension extends Equatable {
           this.licensedAgentAuthorisationNumber,
       authorisedPrincipalMahGlns:
           authorisedPrincipalMahGlns ?? this.authorisedPrincipalMahGlns,
+      mahQualificationIndicator:
+          mahQualificationIndicator ?? this.mahQualificationIndicator,
+      mahTargetMarkets: mahTargetMarkets ?? this.mahTargetMarkets,
+      mahRegulatoryRegistrationNumber: mahRegulatoryRegistrationNumber ??
+          this.mahRegulatoryRegistrationNumber,
       additionalLicenses: additionalLicenses ?? this.additionalLicenses,
       certifications: certifications ?? this.certifications,
       serviceAreas: serviceAreas ?? this.serviceAreas,

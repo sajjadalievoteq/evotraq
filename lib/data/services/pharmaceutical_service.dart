@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
 /// Service for pharmaceutical extension operations
 class PharmaceuticalService {

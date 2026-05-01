@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_list_empty_view.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_list_loading_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_list_item_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class GtinResultsList extends StatelessWidget {
@@ -63,13 +63,17 @@ class GtinResultsList extends StatelessWidget {
       builder: (context, state) {
         if (state.gtins == null &&
             (state.isGtinListLoading || state.status == GTINStatus.initial)) {
-          return const GtinListLoadingShimmer();
+          return const Gs1ListLoadingShimmer();
         }
 
         final gtins = state.gtins;
         if (gtins == null || gtins.isEmpty) {
           return _constrainedCenter(
-            GtinListEmptyView(onClearFilters: onClearFilters),
+            Gs1ListEmptyView(
+              icon: Icons.qr_code_2,
+              title: 'No GTINs found',
+              onClearFilters: onClearFilters,
+            ),
           );
         }
 
@@ -120,7 +124,7 @@ class GtinResultsList extends StatelessWidget {
                       state.hasMoreData &&
                       state.isFetchingMore) {
                     return _constrainedCenter(
-                      const GtinListLoadMoreShimmer(),
+                      const Gs1ListLoadMoreShimmer(),
                     );
                   }
 

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 
-/// Shimmer placeholder matching [GtinListItemCard] layout (list + load-more).
-class GtinListLoadingShimmer extends StatelessWidget {
-  const GtinListLoadingShimmer({
+/// Shimmer placeholder for GS1 master-data list rows (GLN / GTIN card layout).
+class Gs1ListLoadingShimmer extends StatelessWidget {
+  const Gs1ListLoadingShimmer({
     super.key,
     this.itemCount = 8,
   });
@@ -35,7 +35,7 @@ class GtinListLoadingShimmer extends StatelessWidget {
                 itemCount: itemCount,
                 separatorBuilder: (_, __) => const SizedBox(height: 4),
                 itemBuilder: (context, index) {
-                  return _GtinListItemShimmer(
+                  return _Gs1ListItemShimmer(
                     baseColor: baseColor,
                     isCompact: isCompact,
                   );
@@ -49,8 +49,8 @@ class GtinListLoadingShimmer extends StatelessWidget {
   }
 }
 
-class GtinListLoadMoreShimmer extends StatelessWidget {
-  const GtinListLoadMoreShimmer({super.key});
+class Gs1ListLoadMoreShimmer extends StatelessWidget {
+  const Gs1ListLoadMoreShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +76,8 @@ class GtinListLoadMoreShimmer extends StatelessWidget {
   }
 }
 
-class _GtinListItemShimmer extends StatelessWidget {
-  const _GtinListItemShimmer({
+class _Gs1ListItemShimmer extends StatelessWidget {
+  const _Gs1ListItemShimmer({
     required this.baseColor,
     required this.isCompact,
   });

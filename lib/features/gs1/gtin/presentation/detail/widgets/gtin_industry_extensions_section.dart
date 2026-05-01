@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';

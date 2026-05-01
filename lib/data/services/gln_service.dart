@@ -429,12 +429,43 @@ class GLNService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.data);
-      return data['valid'] as bool;
+      final dynamic v = data['valid'] ?? data['isValid'];
+      if (v is bool) return v;
+      if (v is String) return v.toLowerCase() == 'true';
+      return false;
     } else {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to validate GLN code: ${response.statusMessage}',
       );
     }
+  }
+
+  /// Derive GS1 identification for chips: [gs1CompanyPrefixLength], [gs1CompanyPrefix], [locationReference], [checkDigit].
+  Future<Map<String, dynamic>> deriveIdentification(String glnCode) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      throw ApiException(message: 'No authentication token found');
+    }
+
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}/master-data/glns/derive-identification',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      data: json.encode({'glnCode': glnCode}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return Map<String, dynamic>.from(json.decode(response.data) as Map);
+    }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to derive GLN identification: ${response.statusMessage}',
+      responseBody: response.data,
+    );
   }
 }

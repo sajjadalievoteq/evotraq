@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
-import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';

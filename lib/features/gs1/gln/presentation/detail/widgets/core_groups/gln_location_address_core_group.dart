@@ -46,7 +46,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: locationNameController,
           fieldName: 'locationName',
-          label: 'Location name',
+          label: 'Location name *',
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateLocationNameRequired,
@@ -87,7 +87,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: addressLine1Controller,
           fieldName: 'addressLine1',
-          label: 'Address line 1',
+          label: 'Address line 1 *',
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateAddressLine1Required,
@@ -99,7 +99,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           label: 'Address line 2',
           readOnly: readOnly,
           setFieldError: setFieldError,
-          validator: (_) => null,
+          validator: GlnFieldValidators.validateAddressLine2Optional,
         ),
         const SizedBox(height: 12),
         Row(
@@ -108,7 +108,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: cityController,
                 fieldName: 'city',
-                label: 'City',
+                label: 'City *',
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateCityRequired,
@@ -119,7 +119,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: stateProvinceController,
                 fieldName: 'stateProvince',
-                label: 'State / province',
+                label: 'State / province *',
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateStateProvinceRequired,
@@ -135,7 +135,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: postalCodeController,
                 fieldName: 'postalCode',
-                label: 'Postal code',
+                label: 'Postal code *',
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validatePostalCodeRequired,
@@ -147,7 +147,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: countryController,
                 fieldName: 'country',
-                label: 'Country',
+                label: 'Country *',
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateCountryRequired,

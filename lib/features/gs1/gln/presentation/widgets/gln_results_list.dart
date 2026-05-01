@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_list_item_card.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_list_loading_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class GlnResultsList extends StatelessWidget {
@@ -54,12 +54,16 @@ class GlnResultsList extends StatelessWidget {
                 state.status == GLNStatus.initial);
 
         if (loadingInitial) {
-          return const GlnListLoadingShimmer();
+          return const Gs1ListLoadingShimmer();
         }
 
         if (state.glns.isEmpty) {
           return _constrainedCenter(
-            GlnListEmptyView(onClearFilters: onClearFilters),
+            Gs1ListEmptyView(
+              icon: Icons.location_off_outlined,
+              title: 'No GLNs found',
+              onClearFilters: onClearFilters,
+            ),
           );
         }
 
@@ -114,7 +118,7 @@ class GlnResultsList extends StatelessWidget {
                       state.hasMoreData &&
                       state.isFetchingMore) {
                     return _constrainedCenter(
-                      const GlnListLoadMoreShimmer(),
+                      const Gs1ListLoadMoreShimmer(),
                     );
                   }
 

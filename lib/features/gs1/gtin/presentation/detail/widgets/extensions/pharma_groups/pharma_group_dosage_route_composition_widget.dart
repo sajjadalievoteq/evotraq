@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';

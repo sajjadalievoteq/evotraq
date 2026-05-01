@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/data/models/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_form.dart';

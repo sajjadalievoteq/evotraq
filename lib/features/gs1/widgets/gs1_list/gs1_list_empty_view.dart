@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
-/// Empty state when no GTINs match filters or search.
-class GtinListEmptyView extends StatelessWidget {
-  const GtinListEmptyView({
+/// Empty state when no GS1 master-data rows match search or filters.
+class Gs1ListEmptyView extends StatelessWidget {
+  const Gs1ListEmptyView({
     super.key,
+    required this.icon,
+    required this.title,
     required this.onClearFilters,
   });
 
+  final IconData icon;
+  final String title;
   final VoidCallback onClearFilters;
 
   @override
@@ -22,13 +26,13 @@ class GtinListEmptyView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.qr_code_2,
+              icon,
               size: 64,
               color: muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              'No GTINs found',
+              title,
               style: theme.textTheme.headlineSmall?.copyWith(color: muted),
               textAlign: TextAlign.center,
             ),
@@ -53,4 +57,3 @@ class GtinListEmptyView extends StatelessWidget {
     );
   }
 }
-

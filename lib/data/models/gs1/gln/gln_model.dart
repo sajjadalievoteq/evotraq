@@ -84,6 +84,9 @@ class GLN extends Equatable {
   final String? locationReferenceDigits;
   final String? checkDigit;
 
+  /// Resolved GCP length from backend (GS1 Company Prefix length table).
+  final int? gs1CompanyPrefixLength;
+
   final String? registeredLegalName;
   final String? tradingName;
   final String? leiCode;
@@ -138,6 +141,7 @@ class GLN extends Equatable {
     this.gs1CompanyPrefix,
     this.locationReferenceDigits,
     this.checkDigit,
+    this.gs1CompanyPrefixLength,
     this.registeredLegalName,
     this.tradingName,
     this.leiCode,
@@ -200,6 +204,7 @@ class GLN extends Equatable {
     String? gs1CompanyPrefix,
     String? locationReferenceDigits,
     String? checkDigit,
+    int? gs1CompanyPrefixLength,
     String? registeredLegalName,
     String? tradingName,
     String? leiCode,
@@ -245,6 +250,8 @@ class GLN extends Equatable {
       locationReferenceDigits:
           locationReferenceDigits ?? this.locationReferenceDigits,
       checkDigit: checkDigit ?? this.checkDigit,
+      gs1CompanyPrefixLength:
+          gs1CompanyPrefixLength ?? this.gs1CompanyPrefixLength,
       registeredLegalName: registeredLegalName ?? this.registeredLegalName,
       tradingName: tradingName ?? this.tradingName,
       leiCode: leiCode ?? this.leiCode,
@@ -363,6 +370,7 @@ class GLN extends Equatable {
       locationReferenceDigits: json['locationReference']?.toString() ??
           json['locationReferenceDigits']?.toString(),
       checkDigit: json['checkDigit']?.toString(),
+      gs1CompanyPrefixLength: (json['gs1CompanyPrefixLength'] as num?)?.toInt(),
       registeredLegalName: json['registeredLegalName']?.toString(),
       tradingName: json['tradingName']?.toString(),
       leiCode: json['leiCode']?.toString(),

@@ -110,6 +110,10 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   bool _hasSubmittedForm = false;
   GeospatialCoordinates? _coordinates;
 
+  /// Cached in [didChangeDependencies] so we never call [context.read] in [dispose].
+  GLNCubit? _glnCubit;
+  bool _glnInitialLoadStarted = false;
+
   bool get _readOnly => !widget.isEditing;
 
   @override
@@ -143,10 +147,24 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     _locationRolesController = TextEditingController();
     _licenseNumberController = TextEditingController();
     _licenseTypeController = TextEditingController();
+  }
 
-    context.read<GLNCubit>().clearSelection();
-    if (widget.glnId != null) {
-      context.read<GLNCubit>().fetchGLNById(widget.glnId!);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _glnCubit = context.read<GLNCubit>();
+    if (!_glnInitialLoadStarted) {
+      _glnInitialLoadStarted = true;
+      _glnCubit!.clearSelection();
+      if (widget.glnId != null) {
+        _glnCubit!.fetchGLNById(widget.glnId!);
+      } else {
+        // Create GLN: hydrate defaults off the build phase (do not call from BlocBuilder.builder).
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _maybeHydrateFromGln(null);
+        });
+      }
     }
   }
 
@@ -180,7 +198,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     _locationRolesController.dispose();
     _licenseNumberController.dispose();
     _licenseTypeController.dispose();
-    context.read<GLNCubit>().clearSelection();
+    _glnCubit?.clearSelection();
     super.dispose();
   }
 
@@ -483,40 +501,45 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   Widget build(BuildContext context) {
     final body = BlocConsumer<GLNCubit, GLNState>(
       listener: (context, state) {
-        if (state.status == GLNStatus.error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error ?? 'An error occurred'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-        if (state.status == GLNStatus.success && _hasSubmittedForm) {
-          setState(() => _hasSubmittedForm = false);
-          final glnCode = GlnFormat.stripGlnInput(_glnCodeController.text);
-          _saveTobaccoExtensionIfNeeded(glnCode);
-          _savePharmaExtensionIfNeeded(glnCode);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('GLN saved successfully'),
-              backgroundColor: AppTheme.successColor,
-            ),
-          );
-
-          if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
-            widget.onEmbeddedActionSuccess!();
-          } else {
-            Navigator.of(context).pop();
+        // BlocListener can run in the same scheduling phase as BlocBuilder.build; never
+        // call setState / hydrate during that synchronous window.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (state.status == GLNStatus.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error ?? 'An error occurred'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
           }
-          return;
-        }
-        if (state.status == GLNStatus.success &&
-            state.selectedGLN != null &&
-            widget.glnId != null) {
-          _maybeHydrateFromGln(state.selectedGLN);
-        }
+          if (state.status == GLNStatus.success && _hasSubmittedForm) {
+            setState(() => _hasSubmittedForm = false);
+            final glnCode = GlnFormat.stripGlnInput(_glnCodeController.text);
+            _saveTobaccoExtensionIfNeeded(glnCode);
+            _savePharmaExtensionIfNeeded(glnCode);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('GLN saved successfully'),
+                backgroundColor: AppTheme.successColor,
+              ),
+            );
+
+            if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
+              widget.onEmbeddedActionSuccess!();
+            } else {
+              Navigator.of(context).pop();
+            }
+            return;
+          }
+          if (state.status == GLNStatus.success &&
+              state.selectedGLN != null &&
+              widget.glnId != null) {
+            _maybeHydrateFromGln(state.selectedGLN);
+          }
+        });
       },
       builder: (context, state) {
         if (widget.glnId != null &&
@@ -530,8 +553,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
         if (widget.glnId != null && gln == null) {
           return const Center(child: Text('Loading GLN details...'));
         }
-
-        _maybeHydrateFromGln(gln);
 
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -551,6 +572,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
                   parentGlnCodeController: _parentGlnCodeController,
                   glnExtensionComponentController:
                       _glnExtensionComponentController,
+                  initialGs1CompanyPrefixLength: gln?.gs1CompanyPrefixLength,
                 ),
                 GlnLifecycleStatusCoreGroup(
                   isEditing: widget.isEditing,

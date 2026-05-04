@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 
 /// A reusable widget for selecting GLNs from available system GLNs
 /// Provides a searchable dropdown interface with GLN code and location name

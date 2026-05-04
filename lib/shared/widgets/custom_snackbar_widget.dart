@@ -33,6 +33,18 @@ extension CustomSnackBarExtension on BuildContext {
   void showInfo(String message, {String? title, Duration? duration}) =>
       _show(CustomSnackBarVariant.info, message, title, duration);
 
+  /// Plain [SnackBar] (e.g. with [SnackBarAction]) via the nearest scaffold messenger.
+  void showSnackBar(SnackBar snackBar) {
+    final messenger = ScaffoldMessenger.maybeOf(this);
+    if (messenger == null) return;
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(snackBar);
+  }
+
+  void dismissSnackBar() {
+    ScaffoldMessenger.maybeOf(this)?.hideCurrentSnackBar();
+  }
+
   void _show(CustomSnackBarVariant variant, String message, String? title, Duration? duration) {
     final messenger = ScaffoldMessenger.maybeOf(this);
     if (messenger == null) return;

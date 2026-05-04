@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class InformationProviderManufacturerCoreGroup extends StatefulWidget {
   const InformationProviderManufacturerCoreGroup({
@@ -66,12 +67,14 @@ class InformationProviderManufacturerCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Information Provider & Manufacturer'),
+        const SectionLabel(
+          GtinUiConstants.sectionInformationProviderManufacturer,
+        ),
         GtinValidatedField(
           controller: _informationProviderGln,
           fieldName: 'information_provider_gln',
-          label: 'Information Provider GLN',
-          helperText: 'Enter a 13-digit barcode (numbers only, last digit is auto-verified)',
+          label: GtinUiConstants.labelInformationProviderGln,
+          helperText: GtinUiConstants.helperInformationProviderGln,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -93,8 +96,8 @@ class InformationProviderManufacturerCoreGroupState
         GtinValidatedField(
           controller: _manufacturerGln,
           fieldName: 'manufacturer_gln',
-          label: 'Manufacturer GLN',
-          helperText: 'Enter a 13-digit GLN (provided by your organization)',
+          label: GtinUiConstants.labelManufacturerGlnField,
+          helperText: GtinUiConstants.helperManufacturerGlnField,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -112,7 +115,9 @@ class InformationProviderManufacturerCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Information Provider & Manufacturer'),
+          const SectionLabel(
+          GtinUiConstants.sectionInformationProviderManufacturer,
+        ),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),

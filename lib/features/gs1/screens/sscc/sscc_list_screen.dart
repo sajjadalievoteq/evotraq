@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class SSCCListScreen extends StatefulWidget {
   const SSCCListScreen({Key? key}) : super(key: key);
@@ -73,9 +74,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
             child: BlocConsumer<SSCCCubit, SSCCState>(
               listener: (context, state) {
                 if (state.status == SSCCStatus.error && state.error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.error!)),
-                  );
+                  context.showError(state.error!);
                 }
               },
               builder: (context, state) {
@@ -272,12 +271,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
           print('Navigating to SSCC details: ID=${sscc.id}, Code=${sscc.ssccCode}');
           
           // Show a loading message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Loading SSCC details...'),
-              duration: Duration(seconds: 1),
-            ),
-          );
+          context.showInfo('Loading SSCC details...', duration: const Duration(seconds: 1));
           
           // Use SSCC code as fallback when ID is null
           final routeParam = sscc.id?.isNotEmpty == true ? sscc.id! : sscc.ssccCode;

@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_dosage_route_composition_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_prescription_requirements_widget.dart';
@@ -573,7 +574,7 @@ class PharmaceuticalExtensionWidgetState
           color: _hasExtension ? const Color(0xFF121F17) : Colors.grey,
         ),
         title: Text(
-          'Pharmaceutical Details',
+          GtinPharmaceuticalExtensionUiConstants.expansionTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: _hasExtension ? const Color(0xFF121F17) : null,
@@ -917,7 +918,7 @@ class PharmaceuticalExtensionWidgetState
     );
   }
 
-  void applyUaeRegulatoryValues({
+  void applyRegulatoryAuthorityValues({
     required String localDrugCode,
     required String marketingAuthorizationNumber,
     required String licensedAgentGlns,

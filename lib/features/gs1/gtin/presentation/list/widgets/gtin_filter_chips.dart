@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class GtinFilterChips extends StatelessWidget {
   const GtinFilterChips({
@@ -43,31 +44,32 @@ class GtinFilterChips extends StatelessWidget {
         children: [
           if (manufacturer.isNotEmpty)
             Chip(
-              label: Text('Manufacturer: $manufacturer'),
+              label: Text(GtinUiConstants.chipManufacturer(manufacturer)),
               deleteIcon: const Icon(Icons.close, size: 16),
               onDeleted: onClearManufacturer,
             ),
-          if (status != null && status != 'All')
+          if (status != null && status != GtinUiConstants.filterAll)
             Chip(
-              label: Text('Status: $status'),
+              label: Text(GtinUiConstants.chipStatus(status??'')),
               deleteIcon: const Icon(Icons.close, size: 16),
               onDeleted: onClearStatus,
             ),
-          if (packagingLevel != null && packagingLevel != 'All')
+          if (packagingLevel != null &&
+              packagingLevel != GtinUiConstants.filterAll)
             Chip(
-              label: Text('Level: $packagingLevel'),
+              label: Text(GtinUiConstants.chipLevel(packagingLevel??'')),
               deleteIcon: const Icon(Icons.close, size: 16),
               onDeleted: onClearPackagingLevel,
             ),
           if (productName.isNotEmpty)
             Chip(
-              label: Text('Product: $productName'),
+              label: Text(GtinUiConstants.chipProduct(productName)),
               deleteIcon: const Icon(Icons.close, size: 16),
               onDeleted: onClearProductName,
             ),
           if (gtinCode.isNotEmpty)
             Chip(
-              label: Text('GTIN: $gtinCode'),
+              label: Text(GtinUiConstants.chipGtinCode(gtinCode)),
               deleteIcon: const Icon(Icons.close, size: 16),
               onDeleted: onClearGtinCode,
             ),

@@ -17,6 +17,18 @@ class GLNState extends Equatable {
   final bool hasMoreData;
   final bool isFetchingMore;
 
+  /// List reload (search, filters) without forcing [status] to loading (detail pane stays stable).
+  final bool isGlnListLoading;
+
+  /// Set when [searchGLNsAdvanced] fails; separate from [error] so detail errors are not overwritten.
+  final String? listFetchError;
+
+  /// Raw HTTP body for the last GLN list/search failure (debugging).
+  final String? listFetchErrorBody;
+
+  /// HTTP status code for the last GLN list/search failure (debugging).
+  final int? listFetchErrorStatusCode;
+
   const GLNState({
     this.status = GLNStatus.initial,
     this.glns = const [],
@@ -30,6 +42,10 @@ class GLNState extends Equatable {
     this.totalItems = 0,
     this.hasMoreData = false,
     this.isFetchingMore = false,
+    this.isGlnListLoading = false,
+    this.listFetchError,
+    this.listFetchErrorBody,
+    this.listFetchErrorStatusCode,
   });
 
   GLNState copyWith({
@@ -45,8 +61,13 @@ class GLNState extends Equatable {
     int? totalItems,
     bool? hasMoreData,
     bool? isFetchingMore,
+    bool? isGlnListLoading,
+    String? listFetchError,
+    String? listFetchErrorBody,
+    int? listFetchErrorStatusCode,
     bool clearSelectedGLN = false,
     bool clearError = false,
+    bool clearListFetchError = false,
   }) {
     return GLNState(
       status: status ?? this.status,
@@ -61,6 +82,16 @@ class GLNState extends Equatable {
       totalItems: totalItems ?? this.totalItems,
       hasMoreData: hasMoreData ?? this.hasMoreData,
       isFetchingMore: isFetchingMore ?? this.isFetchingMore,
+      isGlnListLoading: isGlnListLoading ?? this.isGlnListLoading,
+      listFetchError: clearListFetchError
+          ? null
+          : (listFetchError ?? this.listFetchError),
+      listFetchErrorBody: clearListFetchError
+          ? null
+          : (listFetchErrorBody ?? this.listFetchErrorBody),
+      listFetchErrorStatusCode: clearListFetchError
+          ? null
+          : (listFetchErrorStatusCode ?? this.listFetchErrorStatusCode),
     );
   }
 
@@ -78,5 +109,9 @@ class GLNState extends Equatable {
         totalItems,
         hasMoreData,
         isFetchingMore,
+        isGlnListLoading,
+        listFetchError,
+        listFetchErrorBody,
+        listFetchErrorStatusCode,
       ];
 }

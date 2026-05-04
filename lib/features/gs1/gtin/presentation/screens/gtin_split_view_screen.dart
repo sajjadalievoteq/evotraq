@@ -6,9 +6,9 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_loading_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/screens/gtin_list_screen.dart';
-import 'package:traqtrace_app/features/gs1/widgets/split_view/split_view.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 
 class GTINSplitViewScreen extends StatefulWidget {
   const GTINSplitViewScreen({super.key});
@@ -44,7 +44,7 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('GTIN Management')),
+      appBar: AppBar(title: const Text(GtinUiConstants.appBarManagement)),
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: _onFabPressed,
@@ -111,14 +111,14 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
 
                   Expanded(
                     child: Text(
-                      'Create GTIN',
+                      GtinUiConstants.splitCreateHeader,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close',
+                    tooltip: GtinUiConstants.tooltipClose,
                     color: Colors.white,
                     onPressed: () {
                       setState(() => _isAddingGtin = false);
@@ -142,15 +142,38 @@ class _GTINSplitViewScreenState extends State<GTINSplitViewScreen> {
       );
     }
 
-    if (_selectedGtinCode == null) {
-      return const GtinDetailLoadingShimmer();
-    }
+    return BlocBuilder<GTINCubit, GTINState>(
+      builder: (context, state) {
+        if (state.status == GTINStatus.success &&
+            state.gtins != null &&
+            state.gtins!.isEmpty &&
+            !state.isGtinListLoading) {
+          return const Center(
+            child: Text(GtinUiConstants.emptyNoMatchSearch),
+          );
+        }
 
-    return GTINDetailScreen(
-      key: ValueKey(_selectedGtinCode),
-      gtinCode: _selectedGtinCode,
-      isEditing: false,
-      embedded: true,
+        final effectiveCode = _selectedGtinCode ??
+            (state.gtins != null && state.gtins!.isNotEmpty
+                ? state.gtins!.first.gtinCode
+                : null);
+
+        if (effectiveCode != null) {
+          return GTINDetailScreen(
+            key: ValueKey(effectiveCode),
+            gtinCode: effectiveCode,
+            isEditing: false,
+            embedded: true,
+          );
+        }
+
+        return GTINDetailScreen(
+          key: const ValueKey('__gtin_split_await_list__'),
+          isEditing: false,
+          embedded: true,
+          awaitingListSelection: true,
+        );
+      },
     );
   }
 }

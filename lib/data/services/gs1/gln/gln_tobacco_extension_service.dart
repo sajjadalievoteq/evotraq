@@ -1,22 +1,26 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/tobacco/models/gln_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
 
 /// Service for GLN tobacco extension operations
 class GLNTobaccoExtensionService {
   final DioService _dioService;
 
   GLNTobaccoExtensionService({required DioService dioService})
-    : _dioService = dioService;
+      : _dioService = dioService;
 
-  String get _baseUrl => '${_dioService.baseUrl}/tobacco/gln';
+  String get _baseUrl =>
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.prefix}';
 
   Future<Map<String, String>> get _headers async {
     final token = await _dioService.getAuthToken();
     return {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
+      if (token != null)
+        GlnApiHttpConsts.authorizationHeader:
+            '${GlnApiHttpConsts.bearerPrefix}$token',
     };
   }
 
@@ -26,7 +30,7 @@ class GLNTobaccoExtensionService {
     GLNTobaccoExtension extension,
   ) async {
     final response = await _dioService.post(
-      '$_baseUrl/code/$glnCode',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byGlnCodePath(glnCode)}',
       headers: await _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
@@ -37,7 +41,7 @@ class GLNTobaccoExtensionService {
       return GLNTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception(
-        'Failed to create GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.createFailed(response.statusCode),
       );
     }
   }
@@ -59,7 +63,7 @@ class GLNTobaccoExtensionService {
       return GLNTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception(
-        'Failed to save GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.saveFailed(response.statusCode),
       );
     }
   }
@@ -79,7 +83,7 @@ class GLNTobaccoExtensionService {
       return null;
     } else {
       throw Exception(
-        'Failed to fetch GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.fetchFailed(response.statusCode),
       );
     }
   }
@@ -87,7 +91,7 @@ class GLNTobaccoExtensionService {
   /// Get tobacco extension by GLN code
   Future<GLNTobaccoExtension?> getByGlnCode(String glnCode) async {
     final response = await _dioService.get(
-      '$_baseUrl/code/$glnCode',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byGlnCodePath(glnCode)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -99,7 +103,7 @@ class GLNTobaccoExtensionService {
       return null;
     } else {
       throw Exception(
-        'Failed to fetch GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.fetchFailed(response.statusCode),
       );
     }
   }
@@ -107,7 +111,7 @@ class GLNTobaccoExtensionService {
   /// Get extension by ID
   Future<GLNTobaccoExtension?> getById(int id) async {
     final response = await _dioService.get(
-      '$_baseUrl/$id',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byIdPath(id)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -119,7 +123,7 @@ class GLNTobaccoExtensionService {
       return null;
     } else {
       throw Exception(
-        'Failed to fetch GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.fetchFailed(response.statusCode),
       );
     }
   }
@@ -131,9 +135,7 @@ class GLNTobaccoExtensionService {
     } else if (extension.glnId > 0) {
       return await saveByGlnId(extension.glnId, extension);
     }
-    throw Exception(
-      'Either glnCode or glnId must be provided to create an extension',
-    );
+    throw Exception(GlnTobaccoExtensionMessages.createRequiresGlnCodeOrId);
   }
 
   /// Update extension
@@ -142,7 +144,7 @@ class GLNTobaccoExtensionService {
     GLNTobaccoExtension extension,
   ) async {
     final response = await _dioService.put(
-      '$_baseUrl/$id',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byIdPath(id)}',
       headers: await _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
@@ -153,7 +155,7 @@ class GLNTobaccoExtensionService {
       return GLNTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
       throw Exception(
-        'Failed to update GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.updateFailed(response.statusCode),
       );
     }
   }
@@ -161,7 +163,7 @@ class GLNTobaccoExtensionService {
   /// Delete tobacco extension for a GLN
   Future<void> deleteByGlnId(int glnId) async {
     final response = await _dioService.delete(
-      '$_baseUrl/gln/$glnId',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.deleteByGlnIdPath(glnId)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -169,7 +171,7 @@ class GLNTobaccoExtensionService {
 
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception(
-        'Failed to delete GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.deleteFailed(response.statusCode),
       );
     }
   }
@@ -177,7 +179,7 @@ class GLNTobaccoExtensionService {
   /// Delete by extension ID
   Future<void> delete(int id) async {
     final response = await _dioService.delete(
-      '$_baseUrl/$id',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byIdPath(id)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -185,7 +187,7 @@ class GLNTobaccoExtensionService {
 
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception(
-        'Failed to delete GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.deleteFailed(response.statusCode),
       );
     }
   }
@@ -193,7 +195,7 @@ class GLNTobaccoExtensionService {
   /// Check if a GLN has tobacco extension
   Future<bool> exists(int glnId) async {
     final response = await _dioService.get(
-      '$_baseUrl/gln/$glnId/exists',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.existsPath(glnId)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -203,7 +205,7 @@ class GLNTobaccoExtensionService {
       return jsonDecode(response.data) as bool;
     } else {
       throw Exception(
-        'Failed to check GLN tobacco extension: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.existsCheckFailed(response.statusCode),
       );
     }
   }
@@ -211,7 +213,7 @@ class GLNTobaccoExtensionService {
   /// Find EU TPD registered locations
   Future<List<GLNTobaccoExtension>> findEuTpdRegistered() async {
     final response = await _dioService.get(
-      '$_baseUrl/eu-tpd-registered',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.euTpdRegistered}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -222,7 +224,7 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to fetch EU TPD registered: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.euTpdFailed(response.statusCode),
       );
     }
   }
@@ -230,7 +232,7 @@ class GLNTobaccoExtensionService {
   /// Find PACT Act registered locations
   Future<List<GLNTobaccoExtension>> findPactActRegistered() async {
     final response = await _dioService.get(
-      '$_baseUrl/pact-act-registered',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.pactActRegistered}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -241,7 +243,7 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to fetch PACT Act registered: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.pactActFailed(response.statusCode),
       );
     }
   }
@@ -249,24 +251,7 @@ class GLNTobaccoExtensionService {
   /// Find UI issuers
   Future<List<GLNTobaccoExtension>> findUiIssuers() async {
     final response = await _dioService.get(
-      '$_baseUrl/ui-issuers',
-      headers: await _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.data);
-      return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to fetch UI issuers: ${response.statusCode}');
-    }
-  }
-
-  /// Find manufacturing facilities
-  Future<List<GLNTobaccoExtension>> findManufacturingFacilities() async {
-    final response = await _dioService.get(
-      '$_baseUrl/manufacturing-facilities',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.uiIssuers}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -277,7 +262,26 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to fetch manufacturing facilities: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.uiIssuersFailed(response.statusCode),
+      );
+    }
+  }
+
+  /// Find manufacturing facilities
+  Future<List<GLNTobaccoExtension>> findManufacturingFacilities() async {
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.manufacturingFacilities}',
+      headers: await _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.data);
+      return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
+    } else {
+      throw Exception(
+        GlnTobaccoExtensionMessages.manufacturingFailed(response.statusCode),
       );
     }
   }
@@ -285,7 +289,7 @@ class GLNTobaccoExtensionService {
   /// Find first retail outlets
   Future<List<GLNTobaccoExtension>> findFirstRetailOutlets() async {
     final response = await _dioService.get(
-      '$_baseUrl/first-retail-outlets',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.firstRetailOutlets}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -296,7 +300,7 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to fetch first retail outlets: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.retailOutletsFailed(response.statusCode),
       );
     }
   }
@@ -304,7 +308,7 @@ class GLNTobaccoExtensionService {
   /// Find bonded warehouses
   Future<List<GLNTobaccoExtension>> findBondedWarehouses() async {
     final response = await _dioService.get(
-      '$_baseUrl/bonded-warehouses',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.bondedWarehouses}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -315,7 +319,7 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to fetch bonded warehouses: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.bondedFailed(response.statusCode),
       );
     }
   }
@@ -323,7 +327,7 @@ class GLNTobaccoExtensionService {
   /// Find AEO certified locations
   Future<List<GLNTobaccoExtension>> findAeoCertified() async {
     final response = await _dioService.get(
-      '$_baseUrl/aeo-certified',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.aeoCertified}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -333,14 +337,16 @@ class GLNTobaccoExtensionService {
       final List<dynamic> data = jsonDecode(response.data);
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to fetch AEO certified: ${response.statusCode}');
+      throw Exception(
+        GlnTobaccoExtensionMessages.aeoFailed(response.statusCode),
+      );
     }
   }
 
   /// Find by EU Economic Operator ID
   Future<GLNTobaccoExtension?> findByEuEconomicOperatorId(String eoId) async {
     final response = await _dioService.get(
-      '$_baseUrl/eu-economic-operator/$eoId',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.euEconomicOperatorPath(eoId)}',
       headers: await _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -351,7 +357,9 @@ class GLNTobaccoExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception('Failed to fetch by EU EO ID: ${response.statusCode}');
+      throw Exception(
+        GlnTobaccoExtensionMessages.euEoFailed(response.statusCode),
+      );
     }
   }
 
@@ -394,7 +402,7 @@ class GLNTobaccoExtensionService {
     }
 
     final response = await _dioService.get(
-      '$_baseUrl/search',
+      '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.search}',
       queryParameters: queryParams,
       headers: await _headers,
       responseType: ResponseType.plain,
@@ -406,7 +414,7 @@ class GLNTobaccoExtensionService {
       return data.map((json) => GLNTobaccoExtension.fromJson(json)).toList();
     } else {
       throw Exception(
-        'Failed to search GLN tobacco extensions: ${response.statusCode}',
+        GlnTobaccoExtensionMessages.searchFailed(response.statusCode),
       );
     }
   }

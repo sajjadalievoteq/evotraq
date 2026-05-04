@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/constants/gt
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class TradeItemMasterdataBoundGroup extends StatefulWidget {
   const TradeItemMasterdataBoundGroup({
@@ -78,13 +79,13 @@ class TradeItemMasterdataBoundGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel(
-          'Trade Item Data',
+          GtinUiConstants.sectionTradeItemData,
           padding: EdgeInsets.only(top: 16, bottom: 12),
         ),
         GtinValidatedField(
           controller: _brandName,
           fieldName: 'brand_name',
-          label: 'Brand Name *',
+          label: GtinUiConstants.labelBrandNameRequired,
           readOnly: widget.isReadOnly,
           maxLength: 70,
           validator: GtinFieldValidators.validateProductName,
@@ -93,17 +94,21 @@ class TradeItemMasterdataBoundGroupState
         GtinValidatedField(
           controller: _manufacturer,
           fieldName: 'manufacturer',
-          label: 'Manufacturer *',
+          label: GtinUiConstants.labelManufacturerRequired,
           readOnly: widget.isReadOnly,
           maxLength: 200,
           validator: GtinFieldValidators.validateManufacturer,
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _unitDescriptor.text.isEmpty ? null : _unitDescriptor.text,
+          key: ValueKey(
+            'ud_${_unitDescriptor.text.isEmpty ? '' : _unitDescriptor.text}',
+          ),
+          initialValue:
+              _unitDescriptor.text.isEmpty ? null : _unitDescriptor.text,
           decoration: const InputDecoration(
-            labelText: 'Trade Item Unit Descriptor *',
-            helperText: 'GDSN tradeItemUnitDescriptorCode',
+            labelText: GtinUiConstants.labelTradeItemUnitDescriptor,
+            helperText: GtinUiConstants.helperGdsnUnitDescriptor,
           ),
           items: GtinDetailConstants.unitDescriptorOptions
               .map(
@@ -122,16 +127,17 @@ class TradeItemMasterdataBoundGroupState
         GtinValidatedField(
           controller: _packSize,
           fieldName: 'packSize',
-          label: 'Pack Size',
-          helperText: 'e.g., 30, 100, 500',
+          label: GtinUiConstants.labelPackSize,
+          helperText: GtinUiConstants.helperPackSizeExamples,
           readOnly: widget.isReadOnly,
           validator: GtinFieldValidators.validatePackSizeOptionalInt,
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _status,
+          key: ValueKey('st_$_status'),
+          initialValue: _status,
           decoration: const InputDecoration(
-            labelText: 'Status',
+            labelText: GtinUiConstants.labelProductLifecycleStatus,
           ),
           items: GtinDetailConstants.statusOptions
               .map(
@@ -154,7 +160,7 @@ class TradeItemMasterdataBoundGroupState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SectionLabel(
-            'Trade Item Data',
+            GtinUiConstants.sectionTradeItemData,
             padding: EdgeInsets.only(top: 16, bottom: 12),
           ),
           GtinSkeletonOutlineField(color: c, height: 56),

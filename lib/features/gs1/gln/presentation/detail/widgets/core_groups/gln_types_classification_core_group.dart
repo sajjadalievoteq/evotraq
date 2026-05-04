@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_form_types.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_gln_type_chips_field.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
@@ -9,6 +10,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 class GlnTypesClassificationCoreGroup extends StatelessWidget {
   const GlnTypesClassificationCoreGroup({
     super.key,
+    this.showFieldSkeleton = false,
     required this.isEditing,
     required this.setFieldError,
     required this.glnTypes,
@@ -22,6 +24,7 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
     required this.locationRolesController,
   });
 
+  final bool showFieldSkeleton;
   final bool isEditing;
   final GlnFormSetFieldError setFieldError;
   final List<String> glnTypes;
@@ -37,10 +40,10 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final readOnly = !isEditing;
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('GLN types * & classification'),
+        SectionLabel(GlnUiConstants.sectionGlnTypesClassification),
         GlnGlnTypeChipsField(
           selection: glnTypes,
           onChanged: onGlnTypesChanged,
@@ -52,26 +55,33 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: industryClassification,
+                key: ValueKey(industryClassification),
+                initialValue: industryClassification,
                 decoration: const InputDecoration(
-                  labelText: 'Industry classification',
+                  labelText: GlnUiConstants.labelIndustryClassification,
                   border: OutlineInputBorder(),
                 ),
                 items: const [
                   DropdownMenuItem(
-                    value: 'HEALTHCARE',
-                    child: Text('HEALTHCARE'),
-                  ),
-                  DropdownMenuItem(value: 'CPG', child: Text('CPG')),
-                  DropdownMenuItem(
-                    value: 'APPAREL',
-                    child: Text('APPAREL'),
+                    value: GlnUiConstants.industryHealthcare,
+                    child: Text(GlnUiConstants.industryHealthcare),
                   ),
                   DropdownMenuItem(
-                    value: 'FOODSERVICE',
-                    child: Text('FOODSERVICE'),
+                    value: GlnUiConstants.industryCpg,
+                    child: Text(GlnUiConstants.industryCpg),
                   ),
-                  DropdownMenuItem(value: 'OTHER', child: Text('OTHER')),
+                  DropdownMenuItem(
+                    value: GlnUiConstants.industryApparel,
+                    child: Text(GlnUiConstants.industryApparel),
+                  ),
+                  DropdownMenuItem(
+                    value: GlnUiConstants.industryFoodservice,
+                    child: Text(GlnUiConstants.industryFoodservice),
+                  ),
+                  DropdownMenuItem(
+                    value: GlnUiConstants.industryOther,
+                    child: Text(GlnUiConstants.industryOther),
+                  ),
                 ],
                 onChanged: isEditing ? onIndustryClassificationChanged : null,
               ),
@@ -79,27 +89,28 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: glnSource,
+                key: ValueKey(glnSource),
+                initialValue: glnSource,
                 decoration: const InputDecoration(
-                  labelText: 'GLN source',
+                  labelText: GlnUiConstants.labelGlnSource,
                   border: OutlineInputBorder(),
                 ),
                 items: const [
                   DropdownMenuItem(
-                    value: 'SELF_ALLOCATED',
-                    child: Text('Self allocated'),
+                    value: GlnUiConstants.glnSourceSelfAllocatedValue,
+                    child: Text(GlnUiConstants.glnSourceSelfAllocatedLabel),
                   ),
                   DropdownMenuItem(
-                    value: 'PARTNER_PROVIDED',
-                    child: Text('Partner provided'),
+                    value: GlnUiConstants.glnSourcePartnerValue,
+                    child: Text(GlnUiConstants.glnSourcePartnerLabel),
                   ),
                   DropdownMenuItem(
-                    value: 'GS1_MANAGED_GLN',
-                    child: Text('GS1 managed'),
+                    value: GlnUiConstants.glnSourceGs1Value,
+                    child: Text(GlnUiConstants.glnSourceGs1Label),
                   ),
                   DropdownMenuItem(
-                    value: 'REGULATOR_ASSIGNED',
-                    child: Text('Regulator assigned'),
+                    value: GlnUiConstants.glnSourceRegulatorValue,
+                    child: Text(GlnUiConstants.glnSourceRegulatorLabel),
                   ),
                 ],
                 onChanged: isEditing ? onGlnSourceChanged : null,
@@ -111,8 +122,8 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: supplyChainRolesController,
           fieldName: 'supplyChainRoles',
-          label: 'Supply-chain roles',
-          helperText: 'Comma-separated (e.g. MANUFACTURER, DISTRIBUTOR)',
+          label: GlnUiConstants.labelSupplyChainRoles,
+          helperText: GlnUiConstants.helperSupplyChainRoles,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateCommaSeparatedRolesOptional,
@@ -121,13 +132,37 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: locationRolesController,
           fieldName: 'locationRoles',
-          label: 'Location roles',
-          helperText: 'Comma-separated (e.g. WAREHOUSE, PHARMACY)',
+          label: GlnUiConstants.labelLocationRoles,
+          helperText: GlnUiConstants.helperLocationRoles,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateCommaSeparatedRolesOptional,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionLabel(GlnUiConstants.sectionGlnTypesClassification),
+          GtinSkeletonOutlineField(color: c, height: 72),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

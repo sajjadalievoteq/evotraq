@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_form_types.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_structure_chips.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
@@ -25,6 +25,7 @@ class GlnIdentificationStructureCoreGroup extends StatefulWidget {
     required this.parentGlnCodeController,
     required this.glnExtensionComponentController,
     this.initialGs1CompanyPrefixLength,
+    this.showFieldSkeleton = false,
   });
 
   final GlnFormSetFieldError setFieldError;
@@ -39,6 +40,8 @@ class GlnIdentificationStructureCoreGroup extends StatefulWidget {
 
   /// From persisted GLN / GET — drives GCP length chip before first derive.
   final int? initialGs1CompanyPrefixLength;
+
+  final bool showFieldSkeleton;
 
   @override
   State<GlnIdentificationStructureCoreGroup> createState() =>
@@ -162,34 +165,28 @@ class _GlnIdentificationStructureCoreGroupState
   Widget _shimmerChip({required ThemeData theme}) {
     final isDark = theme.brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
 
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      period: const Duration(milliseconds: 900),
-      child: Chip(
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        label: Container(
-          height: 14,
-          width: 120,
-          decoration: BoxDecoration(
-            color: baseColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
+    return Chip(
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      label: Container(
+        height: 14,
+        width: 120,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(8),
         ),
-        visualDensity: VisualDensity.compact,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Identification & structure'),
+        SectionLabel(GlnUiConstants.sectionIdentificationStructure),
         GtinValidatedField(
           focusNode: _glnFocusNode,
           onEditingComplete: () {
@@ -197,8 +194,8 @@ class _GlnIdentificationStructureCoreGroupState
           },
           controller: widget.glnCodeController,
           fieldName: 'glnCode',
-          label: 'GLN (13 digits) *',
-          hintText: 'Enter 13-digit GLN',
+          label: GlnUiConstants.labelGlnThirteenDigits,
+          hintText: GlnUiConstants.hintGlnThirteen,
           readOnly: widget.readOnly,
           setFieldError: widget.setFieldError,
           keyboardType: TextInputType.number,
@@ -238,7 +235,7 @@ class _GlnIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: t,
-                  label: 'GCP length',
+                  label: GlnUiConstants.labelGcpLength,
                   value: _companyPrefixLength.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,
                   foregroundColor: t.colorScheme.onSurface,
@@ -249,7 +246,7 @@ class _GlnIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: t,
-                  label: 'GCP',
+                  label: GlnUiConstants.labelGcp,
                   value: widget.gs1CompanyPrefixController.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,
                   foregroundColor: m,
@@ -260,7 +257,7 @@ class _GlnIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: t,
-                  label: 'Location reference',
+                  label: GlnUiConstants.labelLocationReference,
                   value: widget.locationReferenceDigitsController.text,
                   backgroundColor: t.colorScheme.surfaceContainerHighest,
                   foregroundColor: m,
@@ -282,8 +279,8 @@ class _GlnIdentificationStructureCoreGroupState
         GtinValidatedField(
           controller: widget.parentGlnCodeController,
           fieldName: 'parentGlnCode',
-          label: 'Parent GLN',
-          hintText: '13-digit parent (e.g. legal entity for a function)',
+          label: GlnUiConstants.labelParentGln,
+          hintText: GlnUiConstants.hintParentGln,
           readOnly: widget.readOnly,
           setFieldError: widget.setFieldError,
           keyboardType: TextInputType.number,
@@ -295,14 +292,39 @@ class _GlnIdentificationStructureCoreGroupState
         GtinValidatedField(
           controller: widget.glnExtensionComponentController,
           fieldName: 'glnExtensionComponent',
-          label: 'GLN extension component (AI 254)',
-          helperText:
-              'Internal sub-location — max 20 chars; pairs with physical GLN',
+          label: GlnUiConstants.labelGlnExtensionAi254,
+          helperText: GlnUiConstants.helperGlnExtensionAi254,
           readOnly: widget.readOnly,
           setFieldError: widget.setFieldError,
           validator: GlnFieldValidators.validateGlnExtensionComponentOptional,
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: widget.showFieldSkeleton,
+      child: fields,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionLabel(GlnUiConstants.sectionIdentificationStructure),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+              const SizedBox(width: 8),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+              const SizedBox(width: 8),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 36)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

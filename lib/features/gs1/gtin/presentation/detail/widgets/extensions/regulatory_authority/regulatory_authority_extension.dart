@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/widgets/uae_authorization_section.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/widgets/uae_distribution_section.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/widgets/uae_labeling_section.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/widgets/uae_regulatory_identifiers_section.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_authorization_section.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_distribution_section.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_labeling_section.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_identifiers_section.dart';
 
-class UaeRegulatoryExtension extends StatefulWidget {
-  const UaeRegulatoryExtension({
+class RegulatoryAuthorityExtension extends StatefulWidget {
+  const RegulatoryAuthorityExtension({
     super.key,
     required this.isEditing,
     required this.showFieldSkeleton,
-    required this.isUaeMarket,
+    required this.isRegulatoryAuthorityMarket,
     required this.initialLocalDrugCode,
     required this.initialMarketingAuthorizationNumber,
     required this.initialLicensedAgentGlns,
@@ -20,7 +21,7 @@ class UaeRegulatoryExtension extends StatefulWidget {
 
   final bool isEditing;
   final bool showFieldSkeleton;
-  final bool isUaeMarket;
+  final bool isRegulatoryAuthorityMarket;
   final String initialLocalDrugCode;
   final String initialMarketingAuthorizationNumber;
   final String initialLicensedAgentGlns;
@@ -34,10 +35,11 @@ class UaeRegulatoryExtension extends StatefulWidget {
   }) onChanged;
 
   @override
-  State<UaeRegulatoryExtension> createState() => UaeRegulatoryExtensionState();
+  State<RegulatoryAuthorityExtension> createState() =>
+      RegulatoryAuthorityExtensionState();
 }
 
-class UaeRegulatoryExtensionState extends State<UaeRegulatoryExtension> {
+class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtension> {
   late final TextEditingController _localDrugCodeController;
   late final TextEditingController _marketingAuthorizationNumberController;
   late final TextEditingController _licensedAgentGlnsController;
@@ -60,7 +62,7 @@ class UaeRegulatoryExtensionState extends State<UaeRegulatoryExtension> {
   }
 
   @override
-  void didUpdateWidget(covariant UaeRegulatoryExtension oldWidget) {
+  void didUpdateWidget(covariant RegulatoryAuthorityExtension oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialLocalDrugCode != oldWidget.initialLocalDrugCode &&
         widget.initialLocalDrugCode != _localDrugCodeController.text) {
@@ -130,7 +132,7 @@ class UaeRegulatoryExtensionState extends State<UaeRegulatoryExtension> {
         ),
         leading: const Icon(Icons.flag, color: Colors.white),
         title: const Text(
-          'UAE Regulatory Details',
+          GtinRegulatoryAuthorityExtensionUiConstants.expansionTitle,
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -142,30 +144,30 @@ class UaeRegulatoryExtensionState extends State<UaeRegulatoryExtension> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                UaeRegulatoryIdentifiersSection(
+                RegulatoryAuthorityIdentifiersSection(
                   isReadOnly: !widget.isEditing,
                   showFieldSkeleton: widget.showFieldSkeleton,
-                  isUaeMarket: widget.isUaeMarket,
+                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
                   localDrugCodeController: _localDrugCodeController,
                   marketingAuthorizationNumberController:
                       _marketingAuthorizationNumberController,
                 ),
-                UaeAuthorizationSection(
+                RegulatoryAuthorityAuthorizationSection(
                   isReadOnly: !widget.isEditing,
                   showFieldSkeleton: widget.showFieldSkeleton,
-                  isUaeMarket: widget.isUaeMarket,
+                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
                   isImportedProduct: widget.isImportedProduct,
                   licensedAgentGlnsController: _licensedAgentGlnsController,
                 ),
-                UaeDistributionSection(
+                RegulatoryAuthorityDistributionSection(
                   showFieldSkeleton: widget.showFieldSkeleton,
-                  isUaeMarket: widget.isUaeMarket,
+                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
                   isImportedProduct: widget.isImportedProduct,
                 ),
-                UaeLabelingSection(
+                RegulatoryAuthorityLabelingSection(
                   isReadOnly: !widget.isEditing,
                   showFieldSkeleton: widget.showFieldSkeleton,
-                  isUaeMarket: widget.isUaeMarket,
+                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
                   regulatedProductNameController: _regulatedProductNameController,
                 ),
               ],

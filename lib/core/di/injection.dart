@@ -7,8 +7,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/data/services/advanced_query_service.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
-import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
@@ -28,7 +27,7 @@ import '../../data/services/dashboard_service.dart';
 import '../../data/services/database_partitioning_service.dart';
 import '../../data/services/epc_conversion_service.dart';
 import '../../data/services/epcis_event_service.dart';
-import '../../data/services/gln_tobacco_extension_service.dart';
+import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import '../../data/services/gs1/gtin/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
@@ -171,10 +170,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<PharmaceuticalService>(
     () => PharmaceuticalService(dioService: getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<GLNPharmaceuticalExtensionService>(
-    () => GLNPharmaceuticalExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GTINTobaccoExtensionService>(

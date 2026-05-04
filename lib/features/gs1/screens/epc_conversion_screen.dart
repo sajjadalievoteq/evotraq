@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 import '../../../data/services/epc_conversion_service.dart';
 
@@ -177,12 +178,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
   // Copy result to clipboard
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Copied to clipboard'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    context.showInfo('Copied to clipboard', duration: const Duration(seconds: 1));
   }
   @override
   Widget build(BuildContext context) {

@@ -50,12 +50,12 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Advanced Filters (Database Filters)',
+              GtinUiConstants.advancedFiltersHeader,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 4),
             Text(
-              'Note: These filters are applied at database level for precise results',
+              GtinUiConstants.advancedFiltersNote,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey[600],
@@ -70,8 +70,8 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                     controller: productNameController,
                     textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
-                      labelText: 'Product Name',
-                      hintText: 'e.g., Aspirin, Paracetamol',
+                      labelText: GtinUiConstants.labelProductNameField,
+                      hintText: GtinUiConstants.hintProductNameExample,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -85,8 +85,8 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
-                      labelText: 'GTIN Code',
-                      hintText: 'e.g., 1234567890123',
+                      labelText: GtinUiConstants.labelGtinCodeField,
+                      hintText: GtinUiConstants.hintGtinCodeExample,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -100,9 +100,10 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: selectedPackagingLevel,
+                    key: ValueKey<String?>(selectedPackagingLevel),
+                    initialValue: selectedPackagingLevel,
                     decoration: const InputDecoration(
-                      labelText: 'Packaging Level',
+                      labelText: GtinUiConstants.labelPackagingLevelField,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -124,8 +125,8 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                     controller: manufacturerController,
                     textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
-                      labelText: 'Manufacturer',
-                      hintText: 'e.g., Pfizer, Johnson & Johnson',
+                      labelText: GtinUiConstants.labelManufacturerField,
+                      hintText: GtinUiConstants.hintManufacturerExample,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -145,7 +146,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                           readOnly: true,
                           controller: registrationDateFromController,
                           decoration: InputDecoration(
-                            labelText: 'Reg. Date From',
+                            labelText: GtinUiConstants.labelRegDateFrom,
                             border: const OutlineInputBorder(),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -155,7 +156,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                             onTap: onPickFromDate,
                             icon: Icons.calendar_today,
                             iconOnly: true,
-                            tooltip: 'Pick from date',
+                            tooltip: GtinUiConstants.tooltipPickFromDate,
                             height: 40,
                           ),
                           ),
@@ -167,7 +168,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                           readOnly: true,
                           controller: registrationDateToController,
                           decoration: InputDecoration(
-                            labelText: 'Reg. Date To',
+                            labelText: GtinUiConstants.labelRegDateTo,
                             border: const OutlineInputBorder(),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -177,7 +178,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                             onTap: onPickToDate,
                             icon: Icons.calendar_today,
                             iconOnly: true,
-                            tooltip: 'Pick to date',
+                            tooltip: GtinUiConstants.tooltipPickToDate,
                             height: 40,
                           ),
                           ),
@@ -194,13 +195,13 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                 Expanded(
                   child: CustomButtonWidget(
                     onTap: onApply,
-                    title: 'Apply Filters',
+                    title: GtinUiConstants.buttonApplyFilters,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: CustomOutlinedButtonWidget(
-                    title: 'Clear All',
+                    title: GtinUiConstants.buttonClearAll,
                     onTap: onClearAll,
                   ),
                 ),
@@ -224,7 +225,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Database-level filtering is now active! These filters are applied directly at the database for optimal performance with large datasets.',
+                      GtinUiConstants.advancedFiltersSuccessBanner,
                       style: TextStyle(fontSize: 12, color: Colors.green[700]),
                     ),
                   ),

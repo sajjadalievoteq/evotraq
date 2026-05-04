@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/screens/gtin_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_split_view_screen.dart';
-import 'package:traqtrace_app/features/gs1/widgets/split_view/split_view.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
 /// Main screen for GTIN (Global Trade Item Number) functionality
 class GTINScreen extends StatefulWidget {

@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/validators/uae_regulatory_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/validators/regulatory_authority_validators.dart';
 
-class UaeRegulatoryIdentifiersSection extends StatelessWidget {
-  const UaeRegulatoryIdentifiersSection({
+class RegulatoryAuthorityIdentifiersSection extends StatelessWidget {
+  const RegulatoryAuthorityIdentifiersSection({
     super.key,
     required this.isReadOnly,
     required this.showFieldSkeleton,
-    required this.isUaeMarket,
+    required this.isRegulatoryAuthorityMarket,
     required this.localDrugCodeController,
     required this.marketingAuthorizationNumberController,
   });
 
   final bool isReadOnly;
   final bool showFieldSkeleton;
-  final bool isUaeMarket;
+  final bool isRegulatoryAuthorityMarket;
   final TextEditingController localDrugCodeController;
   final TextEditingController marketingAuthorizationNumberController;
 
@@ -30,34 +31,36 @@ class UaeRegulatoryIdentifiersSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionLabel(
-            'UAE regulatory identifiers',
+            GtinRegulatoryAuthorityExtensionUiConstants.sectionIdentifiers,
             padding: EdgeInsets.only(bottom: 12),
           ),
           GtinValidatedField(
             controller: localDrugCodeController,
             fieldName: 'localDrugCodeUaeGcc',
-            label: 'UAE Local Drug Code (MoHAP) *',
-            helperText: 'Required for UAE market; configurable MoHAP format',
+            label: GtinRegulatoryAuthorityExtensionUiConstants.labelLocalDrugCode,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperLocalDrugCode,
             maxLength: 50,
             inputFormatters: [LengthLimitingTextInputFormatter(50)],
             readOnly: isReadOnly,
-            validator: (v) => UaeRegulatoryValidators.validateUaeLocalDrugCode(
+            validator: (v) =>
+                RegulatoryAuthorityValidators.validateLocalDrugCodeForRegulatoryAuthority(
               v,
-              isUaeMarket: isUaeMarket,
+              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
             ),
           ),
           const SizedBox(height: 8),
           GtinValidatedField(
             controller: marketingAuthorizationNumberController,
             fieldName: 'marketingAuthorizationNumber',
-            label: 'UAE Marketing Authorization Number *',
-            helperText: 'Example format: MOHAP-12345-2026 (configurable)',
+            label: GtinRegulatoryAuthorityExtensionUiConstants.labelMarketingAuthorizationNumber,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperMarketingAuthorizationNumber,
             maxLength: 50,
             inputFormatters: [LengthLimitingTextInputFormatter(50)],
             readOnly: isReadOnly,
-            validator: (v) => UaeRegulatoryValidators.validateUaeMarketingAuthorization(
+            validator: (v) => RegulatoryAuthorityValidators
+                .validateMarketingAuthorizationForRegulatoryAuthority(
               v,
-              isUaeMarket: isUaeMarket,
+              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
             ),
           ),
         ],
@@ -81,7 +84,7 @@ class UaeRegulatoryIdentifiersSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel(
-                'UAE regulatory identifiers',
+                GtinRegulatoryAuthorityExtensionUiConstants.sectionIdentifiers,
                 padding: EdgeInsets.only(bottom: 12),
               ),
               GtinSkeletonOutlineField(color: c, height: 56),

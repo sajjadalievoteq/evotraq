@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
@@ -16,7 +17,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/uae_regulatory_extension.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/regulatory_authority_extension.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/audit_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/classification_market_origin_core_group.dart';
@@ -29,6 +30,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/production_batch_serial_date_associations_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/trade_item_masterdata_bound_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/core_groups/trade_item_descriptive_attributes_core_group.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;
@@ -39,6 +41,9 @@ class GTINDetailScreen extends StatefulWidget {
   /// When [embedded] is true, invoked after a successful create/update instead of [Navigator.pop].
   final VoidCallback? onEmbeddedActionSuccess;
 
+  /// Split view: list not ready yet — show the real form with field skeletons; no fetch until [gtinCode] is set.
+  final bool awaitingListSelection;
+
   const GTINDetailScreen({
     super.key,
     this.gtinCode,
@@ -46,6 +51,7 @@ class GTINDetailScreen extends StatefulWidget {
     this.gtin,
     this.embedded = false,
     this.onEmbeddedActionSuccess,
+    this.awaitingListSelection = false,
   });
 
   @override
@@ -56,7 +62,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
-  final _uaeRegulatoryKey = GlobalKey<UaeRegulatoryExtensionState>();
+  final _regulatoryAuthorityKey = GlobalKey<RegulatoryAuthorityExtensionState>();
   final _boundMasterdataKey = GlobalKey<TradeItemMasterdataBoundGroupState>();
   final _boundMarketingAuthKey =
       GlobalKey<MarketingAuthorizationBoundGroupState>();
@@ -75,8 +81,11 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   final _auditKey = GlobalKey<AuditCoreGroupState>();
   bool _isSubmitting = false;
 
-  /// After a network fetch, child groups hydrate in a post-frame callback (they need mounted keys).
-  /// Until then, keep showing the detail shimmer so users never see empty fields flash.
+  /// Cached in [didChangeDependencies] for parity with GLN detail lifecycle.
+  GTINCubit? _gtinCubit;
+  bool _gtinInitialLoadStarted = false;
+
+  /// After fetch / hydration, child groups show real values; until then field skeletons (same rule as GLN detail).
   bool _formFieldsHydrated = true;
 
   /// Route opened with [gtinCode] only — fetch remote GTIN and hydrate form after load.
@@ -108,13 +117,25 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   void initState() {
     super.initState();
-    if (_remoteFetchPath) {
-      _formFieldsHydrated = false;
-    }
-    if (widget.gtin != null) {
-      _initializeFormWithGTIN(widget.gtin!);
-    } else if (widget.gtinCode != null && !widget.isEditing) {
-      context.read<GTINCubit>().fetchGTINDetails(widget.gtinCode!);
+    _formFieldsHydrated = widget.gtinCode == null &&
+        widget.gtin == null &&
+        !widget.awaitingListSelection;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _gtinCubit = context.read<GTINCubit>();
+    if (!_gtinInitialLoadStarted) {
+      _gtinInitialLoadStarted = true;
+      if (widget.awaitingListSelection) {
+        return;
+      }
+      if (widget.gtin != null) {
+        _initializeFormWithGTIN(widget.gtin!);
+      } else if (widget.gtinCode != null && !widget.isEditing) {
+        _gtinCubit!.fetchGTINDetails(widget.gtinCode!);
+      }
     }
   }
 
@@ -254,14 +275,14 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       return;
     }
 
-    final uaeState = _uaeRegulatoryKey.currentState;
+    final regulatoryAuthorityState = _regulatoryAuthorityKey.currentState;
     final pharmaState = _pharmaExtensionKey.currentState;
-    if (uaeState != null && pharmaState != null && uaeState.hasData) {
-      pharmaState.applyUaeRegulatoryValues(
-        localDrugCode: uaeState.localDrugCode,
-        marketingAuthorizationNumber: uaeState.marketingAuthorizationNumber,
-        licensedAgentGlns: uaeState.licensedAgentGlns,
-        regulatedProductName: uaeState.regulatedProductName,
+    if (regulatoryAuthorityState != null && pharmaState != null && regulatoryAuthorityState.hasData) {
+      pharmaState.applyRegulatoryAuthorityValues(
+        localDrugCode: regulatoryAuthorityState.localDrugCode,
+        marketingAuthorizationNumber: regulatoryAuthorityState.marketingAuthorizationNumber,
+        licensedAgentGlns: regulatoryAuthorityState.licensedAgentGlns,
+        regulatedProductName: regulatoryAuthorityState.regulatedProductName,
       );
     }
 
@@ -368,7 +389,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         updatedBy: audit.updatedBy,
       );
 
-      if (widget.isEditing && widget.gtinCode != null) {
+      if (widget.gtinCode != null) {
         context.read<GTINCubit>().updateGTIN(gtin);
       } else {
         context.read<GTINCubit>().createGTIN(gtin);
@@ -403,13 +424,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     }
 
     try {
-      final uaeState = _uaeRegulatoryKey.currentState;
-      if (uaeState != null && uaeState.hasData) {
-        pharmaState.applyUaeRegulatoryValues(
-          localDrugCode: uaeState.localDrugCode,
-          marketingAuthorizationNumber: uaeState.marketingAuthorizationNumber,
-          licensedAgentGlns: uaeState.licensedAgentGlns,
-          regulatedProductName: uaeState.regulatedProductName,
+      final regulatoryAuthorityState = _regulatoryAuthorityKey.currentState;
+      if (regulatoryAuthorityState != null && regulatoryAuthorityState.hasData) {
+        pharmaState.applyRegulatoryAuthorityValues(
+          localDrugCode: regulatoryAuthorityState.localDrugCode,
+          marketingAuthorizationNumber: regulatoryAuthorityState.marketingAuthorizationNumber,
+          licensedAgentGlns: regulatoryAuthorityState.licensedAgentGlns,
+          regulatedProductName: regulatoryAuthorityState.regulatedProductName,
         );
       }
       final extension =
@@ -424,17 +445,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     }
   }
 
-  /// Loading fetch or post-fetch hydration: shimmer on each section’s fields (real widgets stay mounted).
+  /// One rule for split-view placeholder, fetch, and post-fetch hydrate: skeleton until [_formFieldsHydrated] is true.
   bool _fieldSkeletonsActive(GTINState state) {
-    if (_isSubmitting) return false;
-    if (state.status == GTINStatus.loading) return true;
-    return _remoteFetchPath &&
-        state.status == GTINStatus.success &&
-        state.gtin != null &&
-        !_formFieldsHydrated;
+    if (state.status == GTINStatus.error) return false;
+    return !_formFieldsHydrated;
   }
 
-  static bool _isUaeMarket(String? targetMarketCountry) {
+  static bool _isRegulatoryAuthorityMarket(String? targetMarketCountry) {
     final raw = (targetMarketCountry ?? '').trim();
     if (raw.isEmpty) return false;
     final digits = RegExp(r'\d+').stringMatch(raw);
@@ -444,87 +461,89 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   Widget _buildGtinDetailForm(
     BuildContext context,
     GTINState state, {
-    required bool isReadOnly,
-    required bool showFieldSkeletons,
+    required bool allowMasterDataActions,
+    required bool formFieldsReadOnly,
+    required bool idStructureReadOnly,
+    required bool gtinFieldLocked,
+    required bool fullFormShimmer,
   }) {
-    final gtinFieldLocked = isReadOnly || widget.gtinCode != null;
     return GtinDetailForm(
       formKey: _formKey,
       gtinFieldLocked: gtinFieldLocked,
-      showFieldSkeletons: showFieldSkeletons,
+      fullFormShimmer: fullFormShimmer,
       unboundSpecSection: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           GtinIdentificationStructureCoreGroup(
-            isReadOnly: isReadOnly,
+            isReadOnly: idStructureReadOnly,
             gtinCodeController: _gtinCodeController,
             gtinFieldLocked: gtinFieldLocked,
             initialGs1CompanyPrefixLength: state.gtin?.gs1CompanyPrefixLength,
             initialGs1CompanyPrefix: state.gtin?.gs1CompanyPrefix,
             initialItemReference: state.gtin?.itemReference,
-            showFieldSkeleton: showFieldSkeletons,
+            showFieldSkeleton: false,
           ),
           TradeItemMasterdataBoundGroup(
             key: _boundMasterdataKey,
-            isReadOnly: isReadOnly,
+            isReadOnly: formFieldsReadOnly,
             initialStatus: _status,
-            showFieldSkeleton: showFieldSkeletons,
+            showFieldSkeleton: false,
           ),
           MarketingAuthorizationBoundGroup(
             key: _boundMarketingAuthKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           TradeItemDescriptiveAttributesCoreGroup(
             key: _descriptiveAttrsKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           NetContentMeasurementsCoreGroup(
             key: _netContentKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           PackagingHierarchyTradeItemRolesCoreGroup(
             key: _packagingHierarchyKey,
-            isReadOnly: isReadOnly,
+            isReadOnly: formFieldsReadOnly,
             gtinCodeController: _gtinCodeController,
             unitDescriptorController:
                 _boundMasterdataKey.currentState?.unitDescriptorController,
-            showFieldSkeleton: showFieldSkeletons,
+            showFieldSkeleton: false,
           ),
           ClassificationMarketOriginCoreGroup(
             key: _classificationKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           InformationProviderManufacturerCoreGroup(
             key: _infoProviderKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           LifecycleAvailabilityStatusCoreGroup(
             key: _lifecycleKey,
-            isReadOnly: isReadOnly,
+            isReadOnly: formFieldsReadOnly,
             isUpdate: widget.gtinCode != null,
-            showFieldSkeleton: showFieldSkeletons,
+            showFieldSkeleton: false,
           ),
           ProductionBatchSerialDateAssociationsCoreGroup(
             key: _batchSerialKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
           AuditCoreGroup(
             key: _auditKey,
-            isReadOnly: isReadOnly,
-            showFieldSkeleton: showFieldSkeletons,
+            isReadOnly: formFieldsReadOnly,
+            showFieldSkeleton: false,
           ),
         ],
       ),
       industrySection: ListenableBuilder(
         listenable: Listenable.merge([
           _gtinCodeController,
-          // Ensure UAE extension appears immediately when Target Market changes.
+          // Ensure regulatory authority section appears when target market changes.
           _descriptiveAttrsKey.currentState?.targetMarketCountryController ??
               _gtinCodeController,
         ]),
@@ -543,17 +562,17 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
                 tobaccoExtensionKey: _tobaccoExtensionKey,
                 gtinCodeText: _gtinCodeController.text,
                 routeGtinCode: widget.gtinCode,
-                isEditing: widget.isEditing,
+                isEditing: allowMasterDataActions,
                 targetMarketCountry: targetMarket,
                 pharmaceuticalExtension: pharmaExt,
                 tobaccoExtension: _tobaccoExtension,
-                showFieldSkeleton: showFieldSkeletons,
+                showFieldSkeleton: false,
               ),
-              UaeRegulatoryExtension(
-                key: _uaeRegulatoryKey,
-                isEditing: widget.isEditing,
-                showFieldSkeleton: showFieldSkeletons,
-                isUaeMarket: _isUaeMarket(targetMarket),
+              RegulatoryAuthorityExtension(
+                key: _regulatoryAuthorityKey,
+                isEditing: allowMasterDataActions,
+                showFieldSkeleton: false,
+                isRegulatoryAuthorityMarket: _isRegulatoryAuthorityMarket(targetMarket),
                 isImportedProduct: (pharmaExt?.mahCountry ?? '').trim().isNotEmpty &&
                     (pharmaExt?.mahCountry ?? '').trim() != '784',
                 initialLocalDrugCode: pharmaExt?.localDrugCodeUaeGcc ?? '',
@@ -573,31 +592,35 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
           );
         },
       ),
-      showSubmitButton: !isReadOnly,
+      showSubmitButton: allowMasterDataActions,
       isSubmitting: _isSubmitting,
       onSubmit: _submitForm,
-      submitButtonTitle:
-          widget.gtinCode != null ? 'Update GTIN' : 'Create GTIN',
+      submitButtonTitle: widget.gtinCode != null
+          ? GtinUiConstants.submitUpdateGtin
+          : GtinUiConstants.submitCreateGtin,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isReadOnly = !widget.isEditing && widget.gtinCode != null;
-    final screenTitle = isReadOnly
-        ? 'GTIN Details'
-        : widget.isEditing && widget.gtinCode != null
-            ? 'Edit GTIN'
-            : 'Create GTIN';
+    final role = context.watch<AuthCubit>().state.user?.role;
+    final canEditMasterData =
+        role == 'ADMIN' || role == 'MANUFACTURER';
+    final allowMasterDataActions =
+        canEditMasterData && !widget.awaitingListSelection;
+    final formFieldsReadOnly = !canEditMasterData;
+    final screenTitle = !widget.isEditing && widget.gtinCode != null
+        ? GtinUiConstants.detailTitleView
+        : widget.gtinCode != null
+            ? GtinUiConstants.detailTitleEdit
+            : GtinUiConstants.detailTitleCreate;
 
     final body = BlocConsumer<GTINCubit, GTINState>(
       listener: (context, state) {
         if (state.status == GTINStatus.error) {
           setState(() {
             _isSubmitting = false;
-            if (_remoteFetchPath) {
-              _formFieldsHydrated = true;
-            }
+            _formFieldsHydrated = true;
           });
           debugPrint(
             '[GTIN UI] detail error (snackbar): ${state.error} '
@@ -627,9 +650,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
             _savePharmaExtensionIfNeeded(null, gtinCode);
 
             context.showSuccess(
-              widget.isEditing && widget.gtinCode != null
-                  ? 'GTIN $gtinCode updated successfully'
-                  : 'GTIN $gtinCode created successfully',
+              widget.gtinCode != null
+                  ? GtinUiConstants.successGtinUpdated(gtinCode)
+                  : GtinUiConstants.successGtinCreated(gtinCode),
             );
 
             if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
@@ -642,35 +665,29 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       },
       builder: (context, state) {
         final sk = _fieldSkeletonsActive(state);
+        final idStructureReadOnly = !canEditMasterData ||
+            widget.gtinCode != null ||
+            sk;
+        final gtinFieldLocked =
+            widget.gtinCode != null || !canEditMasterData || sk;
         return _buildGtinDetailForm(
           context,
           state,
-          isReadOnly: isReadOnly,
-          showFieldSkeletons: sk,
+          allowMasterDataActions: allowMasterDataActions,
+          formFieldsReadOnly: formFieldsReadOnly,
+          idStructureReadOnly: idStructureReadOnly,
+          gtinFieldLocked: gtinFieldLocked,
+          fullFormShimmer: sk,
         );
       },
     );
 
-    if (widget.embedded) {
-      return body;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          screenTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          if (!isReadOnly)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _isSubmitting ? null : _submitForm,
-            ),
-        ],
-      ),
-      drawer: const AppDrawer(),
+    return Gs1MasterDataDetailScaffold(
+      embedded: widget.embedded,
+      title: screenTitle,
+      showSaveAction: allowMasterDataActions,
+      onSave: _submitForm,
+      saveEnabled: allowMasterDataActions && !_isSubmitting,
       body: body,
     );
   }

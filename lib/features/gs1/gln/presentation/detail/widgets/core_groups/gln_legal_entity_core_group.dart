@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_form_types.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
@@ -9,6 +10,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 class GlnLegalEntityCoreGroup extends StatelessWidget {
   const GlnLegalEntityCoreGroup({
     super.key,
+    this.showFieldSkeleton = false,
     required this.setFieldError,
     required this.readOnly,
     required this.registeredLegalNameController,
@@ -19,6 +21,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
     required this.websiteController,
   });
 
+  final bool showFieldSkeleton;
   final GlnFormSetFieldError setFieldError;
   final bool readOnly;
 
@@ -32,14 +35,14 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = !readOnly;
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Legal entity attributes'),
+        const SectionLabel(GlnUiConstants.sectionLegalEntity),
         GtinValidatedField(
           controller: registeredLegalNameController,
           fieldName: 'registeredLegalName',
-          label: 'Registered legal name',
+          label: GlnUiConstants.labelRegisteredLegalName,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateRegisteredLegalNameOptional,
@@ -48,7 +51,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: tradingNameController,
           fieldName: 'tradingName',
-          label: 'Trading / brand name',
+          label: GlnUiConstants.labelTradingName,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateTradingNameOptional,
@@ -60,7 +63,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: leiCodeController,
                 fieldName: 'leiCode',
-                label: 'LEI (20 chars)',
+                label: GlnUiConstants.labelLei,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateLeiOptional,
@@ -71,7 +74,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: taxRegistrationNumberController,
                 fieldName: 'taxRegistrationNumber',
-                label: 'Tax / VAT registration',
+                label: GlnUiConstants.labelTaxVat,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateTaxRegistrationOptional,
@@ -86,8 +89,8 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
             Expanded(
               child: GtinCountryCodePickerField(
                 controller: countryOfIncorporationNumericController,
-                labelText: 'Country of incorporation (ISO 3166-1 numeric)',
-                helperText: 'Tap to choose (stores numeric code, e.g. 784)',
+                labelText: GlnUiConstants.labelCountryIncorporationNumeric,
+                helperText: GlnUiConstants.helperCountryIncorporationNumeric,
                 enabled: enabled,
                 validator: GlnFieldValidators.validateCountryOfIncorporationOptional,
               ),
@@ -97,7 +100,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: websiteController,
                 fieldName: 'website',
-                label: 'Website',
+                label: GlnUiConstants.labelWebsite,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateHttpsUrlOptional,
@@ -106,6 +109,36 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
           ],
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel(GlnUiConstants.sectionLegalEntity),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

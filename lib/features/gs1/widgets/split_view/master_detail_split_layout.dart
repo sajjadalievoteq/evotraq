@@ -31,52 +31,61 @@ class MasterDetailSplitLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final listFlex = width < narrowWidthBreakpoint ? narrowListFlex : wideListFlex;
-        final detailFlex = 100 - listFlex;
-        return AppLayoutBuilder(
-          builder: (context, layout) {
-            final edge = (layout.horizontalPadding * 0.5 + Constants.spacing * 0.5)
-                .clamp(12.0, 24.0);
-            final gutter = width < 900 ? 12.0 : 20.0;
-            final detailTop = width < 900
-                ? (isCreateMode ? 12.0 : 2.0)
-                : (isCreateMode ? 20.0 : 10.0);
+        // [AppLayoutBuilder] nests another LayoutBuilder; on the first pass its
+        // maxWidth can be 0 so [AppLayoutData] flips breakpoint next frame and
+        // [edge] / detail insets jump (reads as “top padding” shifting). Derive
+        // layout from this row’s width with a stable fallback instead.
+        final media = MediaQuery.sizeOf(context);
+        final rawW = constraints.maxWidth;
+        final width = (rawW.isFinite && rawW >= 1.0) ? rawW : media.width;
+        final height =
+            constraints.maxHeight.isFinite && constraints.maxHeight >= 1.0
+                ? constraints.maxHeight
+                : media.height;
 
-            return Row(
-              children: [
-                Flexible(
-                  flex: listFlex,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(edge, edge, edge, 0),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: gutter,
-                        right: gutter,
-                        top: gutter,
-                      ),
-                      child: list,
-                    ),
+        final layout = AppLayoutData.fromSize(Size(width, height));
+        final edge = (layout.horizontalPadding * 0.5 + Constants.spacing * 0.5)
+            .clamp(12.0, 24.0);
+        final listFlex =
+            width < narrowWidthBreakpoint ? narrowListFlex : wideListFlex;
+        final detailFlex = 100 - listFlex;
+        final gutter = width < 900 ? 12.0 : 20.0;
+        final detailTop = width < 900
+            ? (isCreateMode ? 12.0 : 2.0)
+            : (isCreateMode ? 20.0 : 10.0);
+
+        return Row(
+          children: [
+            Flexible(
+              flex: listFlex,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(edge, edge, edge, 0),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: gutter,
+                    right: gutter,
+                    top: gutter,
                   ),
+                  child: list,
                 ),
-                const VerticalDivider(width: 1),
-                Expanded(
-                  flex: detailFlex,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(edge, 0, edge, 0),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: gutter,
-                        right: gutter,
-                        top: detailTop,
-                      ),
-                      child: detail,
-                    ),
+              ),
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(
+              flex: detailFlex,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(edge, 0, edge, 0),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: gutter,
+                    right: gutter,
+                    top: detailTop,
                   ),
+                  child: detail,
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         );
       },
     );

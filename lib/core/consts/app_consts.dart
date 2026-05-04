@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 
 /// Centralized application constants: routes, API paths, and assets.
 /// Prefer importing this library from `core/consts/app_consts.dart`.
@@ -86,10 +87,10 @@ class Constants {
   static const String gs1GtinNewRoute = '/gs1/gtins/new';
   static const String gs1GtinDetailRoute = '/gs1/gtins/:gtinCode';
   static const String gs1GtinEditRoute = '/gs1/gtins/:gtinCode/edit';
-  static const String gs1GlnsRoute = '/gs1/glns';
-  static const String gs1GlnNewRoute = '/gs1/glns/new';
-  static const String gs1GlnDetailRoute = '/gs1/glns/:glnId';
-  static const String gs1GlnEditRoute = '/gs1/glns/:glnId/edit';
+  static const String gs1GlnsRoute = GlnRouteConstants.base;
+  static const String gs1GlnNewRoute = GlnRouteConstants.newGln;
+  static const String gs1GlnDetailRoute = GlnRouteConstants.detail;
+  static const String gs1GlnEditRoute = GlnRouteConstants.edit;
   static const String gs1SsccsRoute = '/gs1/ssccs';
   static const String gs1SsccNewRoute = '/gs1/ssccs/new';
   static const String gs1SsccDetailRoute = '/gs1/ssccs/:ssccId';

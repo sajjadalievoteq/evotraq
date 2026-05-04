@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
   const LifecycleAvailabilityStatusCoreGroup({
@@ -173,31 +174,40 @@ class LifecycleAvailabilityStatusCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Lifecycle, Availability & Status'),
+        const SectionLabel(GtinUiConstants.sectionLifecycleAvailabilityStatus),
         DropdownButtonFormField<String>(
           initialValue: _tradeItemStatus,
           decoration: const InputDecoration(
-            labelText: 'Trade Item Status',
-            helperText: "ADD / CHN / COR",
+            labelText: GtinUiConstants.labelTradeItemStatus,
+            helperText: GtinUiConstants.helperTradeItemStatusCodes,
             border: OutlineInputBorder(),
           ),
           items: const [
-            DropdownMenuItem(value: 'ADD', child: Text('ADD')),
-            DropdownMenuItem(value: 'CHN', child: Text('CHN')),
-            DropdownMenuItem(value: 'COR', child: Text('COR')),
+            DropdownMenuItem(
+              value: GtinUiConstants.tradeItemStatusAdd,
+              child: Text(GtinUiConstants.tradeItemStatusAdd),
+            ),
+            DropdownMenuItem(
+              value: GtinUiConstants.tradeItemStatusChn,
+              child: Text(GtinUiConstants.tradeItemStatusChn),
+            ),
+            DropdownMenuItem(
+              value: GtinUiConstants.tradeItemStatusCor,
+              child: Text(GtinUiConstants.tradeItemStatusCor),
+            ),
           ],
           validator: (v) => GtinFieldValidators.validateTradeItemStatus(v),
           onChanged: widget.isReadOnly ? null : (v) => setState(() => _tradeItemStatus = v),
         ),
         const SizedBox(height: 12),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _effectiveDateDisplay,
-          label: 'Effective Date / Time',
+          label: GtinUiConstants.labelEffectiveDateTime,
           enabled: !widget.isReadOnly,
           validator: widget.isReadOnly
               ? null
               : (v) => (v == null || v.trim().isEmpty)
-                  ? 'effective_date is required'
+                  ? GtinUiConstants.errorEffectiveDateRequired
                   : null,
           onPick: () => _pickDateTime(
             current: _effectiveDate,
@@ -206,9 +216,9 @@ class LifecycleAvailabilityStatusCoreGroupState
           ),
         ),
         const SizedBox(height: 12),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _startAvailDateDisplay,
-          label: 'Start Availability Date / Time',
+          label: GtinUiConstants.labelStartAvailabilityDateTime,
           enabled: !widget.isReadOnly,
           onPick: () => _pickDateTime(
             current: _startAvailDate,
@@ -217,9 +227,9 @@ class LifecycleAvailabilityStatusCoreGroupState
           ),
         ),
         const SizedBox(height: 12),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _endAvailDateDisplay,
-          label: 'End Availability Date / Time',
+          label: GtinUiConstants.labelEndAvailabilityDateTime,
           enabled: !widget.isReadOnly,
           onPick: () => _pickDateTime(
             current: _endAvailDate,
@@ -228,9 +238,9 @@ class LifecycleAvailabilityStatusCoreGroupState
           ),
         ),
         const SizedBox(height: 12),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _publicationDateDisplay,
-          label: 'Publication Date',
+          label: GtinUiConstants.labelPublicationDate,
           enabled: !widget.isReadOnly,
           validator: widget.isReadOnly
               ? null
@@ -284,7 +294,7 @@ class LifecycleAvailabilityStatusCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Lifecycle, Availability & Status'),
+          const SectionLabel(GtinUiConstants.sectionLifecycleAvailabilityStatus),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),

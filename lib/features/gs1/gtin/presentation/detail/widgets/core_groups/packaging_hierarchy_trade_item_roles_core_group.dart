@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {
   const PackagingHierarchyTradeItemRolesCoreGroup({
@@ -146,12 +147,14 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Packaging Hierarchy & Trade Item Roles'),
+        const SectionLabel(
+          GtinUiConstants.sectionPackagingHierarchyTradeItemRoles,
+        ),
         GtinValidatedField(
           controller: _nextLowerLevelGtin,
           fieldName: 'next_lower_level_gtin',
-          label: 'Next Lower Level GTIN',
-          helperText: 'Required when Base unit = false',
+          label: GtinUiConstants.labelNextLowerLevelGtin,
+          helperText: GtinUiConstants.helperWhenBaseUnitFalse,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -167,8 +170,8 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
         GtinValidatedField(
           controller: _nextLowerLevelQuantity,
           fieldName: 'next_lower_level_quantity',
-          label: 'Next Lower Level Quantity',
-          helperText: 'Required when Base unit = false',
+          label: GtinUiConstants.labelNextLowerLevelQuantity,
+          helperText: GtinUiConstants.helperWhenBaseUnitFalse,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -184,7 +187,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
         GtinValidatedField(
           controller: _quantityOfChildren,
           fieldName: 'quantity_of_children',
-          label: 'Quantity of Children',
+          label: GtinUiConstants.labelQuantityOfChildren,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -199,7 +202,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
         GtinValidatedField(
           controller: _totalQtyNextLower,
           fieldName: 'total_qty_next_lower',
-          label: 'Total Quantity of Next Lower Level Trade Items',
+          label: GtinUiConstants.labelTotalQtyNextLower,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
@@ -211,54 +214,54 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           ),
         ),
         const SizedBox(height: 12),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _launchDateDisplay,
-          label: 'Launch Date',
+          label: GtinUiConstants.labelLaunchDate,
           enabled: !widget.isReadOnly,
           onPick: _pickLaunchDate,
         ),
         const SizedBox(height: 12),
-        const SectionLabel('Trade Item Role Flags'),
+        const SectionLabel(GtinUiConstants.sectionTradeItemRoleFlags),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isBaseUnit,
           onChanged: widget.isReadOnly ? null : (v) => setState(() => _isBaseUnit = v),
-          title: const Text('Is Trade Item a Base Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemBaseUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isConsumerUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isConsumerUnit = v),
-          title: const Text('Is Trade Item a Consumer Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemConsumerUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isOrderableUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isOrderableUnit = v),
-          title: const Text('Is Trade Item an Orderable Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemOrderableUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isDespatchUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isDespatchUnit = v),
-          title: const Text('Is Trade Item a Despatch (Shipping) Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemDespatchUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isInvoiceUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isInvoiceUnit = v),
-          title: const Text('Is Trade Item an Invoice Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemInvoiceUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isVariableUnit,
           onChanged:
               widget.isReadOnly ? null : (v) => setState(() => _isVariableUnit = v),
-          title: const Text('Is Trade Item a Variable Unit?'),
+          title: const Text(GtinUiConstants.switchTradeItemVariableUnit),
         ),
         FormField<void>(
           validator: (_) => GtinFieldValidators.validateTradeItemRoleFlags(
@@ -294,7 +297,9 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Packaging Hierarchy & Trade Item Roles'),
+          const SectionLabel(
+            GtinUiConstants.sectionPackagingHierarchyTradeItemRoles,
+          ),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 76),
@@ -305,7 +310,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           const SizedBox(height: 12),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
           const SizedBox(height: 12),
-          const SectionLabel('Trade Item Role Flags'),
+          const SectionLabel(GtinUiConstants.sectionTradeItemRoleFlags),
           const SizedBox(height: 8),
           for (var i = 0; i < 6; i++) ...[
             if (i > 0) const SizedBox(height: 8),

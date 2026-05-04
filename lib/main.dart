@@ -49,7 +49,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
 import 'package:traqtrace_app/data/services/epcis_event_service.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/shipping_operation_service.dart';

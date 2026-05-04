@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class GtinAdvancedFiltersToggle extends StatelessWidget {
   const GtinAdvancedFiltersToggle({
@@ -24,14 +25,16 @@ class GtinAdvancedFiltersToggle extends StatelessWidget {
               showAdvancedFilters ? Icons.expand_less : Icons.expand_more,
             ),
             label: Text(
-              showAdvancedFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters',
+              showAdvancedFilters
+                  ? GtinUiConstants.hideAdvancedFilters
+                  : GtinUiConstants.showAdvancedFilters,
             ),
           ),
           const Spacer(),
           if (showAdvancedFilters)
             TextButton(
               onPressed: onClearAll,
-              child: const Text('Clear All Filters'),
+              child: const Text(GtinUiConstants.clearAllFiltersButton),
             ),
         ],
       ),

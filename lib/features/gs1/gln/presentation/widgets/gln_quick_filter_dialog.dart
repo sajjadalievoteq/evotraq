@@ -60,14 +60,14 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
   @override
   void initState() {
     super.initState();
-    _status = widget.initialStatus ?? 'All';
-    _locationType = widget.initialLocationType ?? 'All';
+    _status = widget.initialStatus ?? GlnUiConstants.filterAll;
+    _locationType = widget.initialLocationType ?? GlnUiConstants.filterAll;
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Quick Filters'),
+      title: Text(GlnUiConstants.quickFiltersTitle),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: Constants.dialogMaxWidth),
         child: SingleChildScrollView(
@@ -75,23 +75,24 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Location Name'),
+              Text(GlnUiConstants.filterSectionLocationName),
               const SizedBox(height: 8),
               TextField(
                 controller: widget.locationNameController,
-                decoration: const InputDecoration(
-                  hintText: 'e.g., Main Warehouse, Central Pharmacy',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: GlnUiConstants.hintLocationNameExample,
+                  border: const OutlineInputBorder(),
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
-              const Text('Status'),
+              Text(GlnUiConstants.filterSectionStatus),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _status,
+                key: ValueKey(_status),
+                initialValue: _status,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding:
@@ -110,10 +111,11 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text('Location Type'),
+              Text(GlnUiConstants.filterSectionLocationType),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _locationType,
+                key: ValueKey(_locationType),
+                initialValue: _locationType,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding:
@@ -135,7 +137,7 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
               const Divider(),
               const SizedBox(height: 8),
               Text(
-                'For more advanced filters, use the tune icon on the search bar.',
+                GlnUiConstants.quickFiltersFooterHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -144,11 +146,11 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
       ),
       actions: [
         CustomTextButtonWidget(
-          title: 'Cancel',
+          title: GlnUiConstants.buttonCancel,
           onTap: () => Navigator.of(context).pop(),
         ),
         CustomTextButtonWidget(
-          title: 'Apply',
+          title: GlnUiConstants.buttonApply,
           onTap: () {
             Navigator.of(context).pop(
               GlnQuickFilterResult.applied(_status, _locationType),
@@ -156,7 +158,7 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
           },
         ),
         CustomOutlinedButtonWidget(
-          title: 'Clear Filters',
+          title: GlnUiConstants.buttonClearFilters,
           onTap: () {
             widget.locationNameController.clear();
             Navigator.of(context).pop(const GlnQuickFilterResult.cleared());

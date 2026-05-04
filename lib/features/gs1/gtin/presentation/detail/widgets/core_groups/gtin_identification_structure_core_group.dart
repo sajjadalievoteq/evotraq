@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
@@ -10,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class GtinIdentificationStructureCoreGroup extends StatefulWidget {
   const GtinIdentificationStructureCoreGroup({
@@ -184,28 +184,21 @@ class _GtinIdentificationStructureCoreGroupState
     required ThemeData theme,
     required String label,
   }) {
-    // Match the same shimmer colors used by our loading screens.
     final isDark = theme.brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
 
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      period: const Duration(milliseconds: 900),
-      child: Chip(
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        label: Container(
-          height: 14,
-          width: 120,
-          decoration: BoxDecoration(
-            color: baseColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
+    return Chip(
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      label: Container(
+        height: 14,
+        width: 120,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(8),
         ),
-        visualDensity: VisualDensity.compact,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 
@@ -218,7 +211,7 @@ class _GtinIdentificationStructureCoreGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionLabel(
-          'Identification & Structure',
+          GtinUiConstants.sectionIdentificationStructure,
           padding: EdgeInsets.only(top: 0, bottom: 8),
         ),
         GtinValidatedField(
@@ -234,9 +227,8 @@ class _GtinIdentificationStructureCoreGroupState
           ),
           controller: widget.gtinCodeController,
           fieldName: 'gtinCode',
-          label: 'GTIN *',
-          helperText:
-              '8, 12, 13, or 14 digits',
+          label: GtinUiConstants.labelGtinRequired,
+          helperText: GtinUiConstants.helperGtinDigits,
           readOnly: widget.gtinFieldLocked ?? widget.isReadOnly,
           validator: GtinFieldValidators.validateGtinCode,
         ),
@@ -260,9 +252,12 @@ class _GtinIdentificationStructureCoreGroupState
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  _shimmerChip(theme: theme, label: 'GCP length'),
-                  _shimmerChip(theme: theme, label: 'GCP'),
-                  _shimmerChip(theme: theme, label: 'Item reference'),
+                  _shimmerChip(theme: theme, label: GtinUiConstants.labelGcpLengthChip),
+                  _shimmerChip(theme: theme, label: GtinUiConstants.labelGcpChip),
+                  _shimmerChip(
+                    theme: theme,
+                    label: GtinUiConstants.labelItemReferenceChip,
+                  ),
                 ],
               );
             }
@@ -272,7 +267,7 @@ class _GtinIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: theme,
-                  label: 'GCP length',
+                  label: GtinUiConstants.labelGcpLengthChip,
                   value: _companyPrefixLength.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   foregroundColor: theme.colorScheme.onSurface,
@@ -283,7 +278,7 @@ class _GtinIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: theme,
-                  label: 'GCP',
+                  label: GtinUiConstants.labelGcpChip,
                   value: _gs1CompanyPrefix.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   foregroundColor: muted,
@@ -294,7 +289,7 @@ class _GtinIdentificationStructureCoreGroupState
               chips.add(
                 _chip(
                   theme: theme,
-                  label: 'Item reference',
+                  label: GtinUiConstants.labelItemReferenceChip,
                   value: _itemReference.text,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   foregroundColor: muted,
@@ -324,7 +319,7 @@ class _GtinIdentificationStructureCoreGroupState
               _indicatorDigit.text = '';
               _checkDigit.text = '';
               return Text(
-                'Enter a valid GTIN',
+                GtinUiConstants.messageEnterValidGtin,
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               );
             }
@@ -351,7 +346,7 @@ class _GtinIdentificationStructureCoreGroupState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SectionLabel(
-            'Identification & Structure',
+            GtinUiConstants.sectionIdentificationStructure,
             padding: EdgeInsets.only(top: 0, bottom: 8),
           ),
           GtinSkeletonOutlineField(color: c, height: 76),

@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class SGTINListScreen extends StatefulWidget {
   const SGTINListScreen({Key? key}) : super(key: key);
@@ -111,9 +112,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
       listener: (context, state) {
         // Show error if present
         if (state.status == SGTINStatus.error && state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.error}')),
-          );
+          context.showError('Error: ${state.error}');
         }
       },
       child: Scaffold(
@@ -342,9 +341,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
             context.go('/gs1/sgtins/${sgtin.id.toString()}');
           } else {
             // Handle case when ID is null or empty
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cannot view SGTIN: Invalid ID')),
-            );
+            context.showWarning('Cannot view SGTIN: Invalid ID');
             // Log this occurrence for debugging
             print('Warning: Attempted to navigate to SGTIN with null or empty ID: $sgtin');
           }

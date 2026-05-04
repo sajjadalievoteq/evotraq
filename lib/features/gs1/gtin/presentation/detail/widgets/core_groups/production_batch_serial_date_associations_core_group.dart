@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
   const ProductionBatchSerialDateAssociationsCoreGroup({
@@ -42,26 +43,28 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Production, Batch, Serial & Date Associations'),
+        const SectionLabel(
+          GtinUiConstants.sectionProductionBatchSerialDateAssociations,
+        ),
         DropdownButtonFormField<String>(
           initialValue: _hasBatchNumberIndicator,
           decoration: const InputDecoration(
-            labelText: 'Has Batch Number Indicator',
-    helperText: 'Required for traceability in pharmaceutical products',
+            labelText: GtinUiConstants.labelHasBatchNumberIndicator,
+            helperText: GtinUiConstants.helperBatchIndicatorPharma,
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
-              value: 'REQUESTED_BY_LAW',
-              child: Text('REQUESTED BY LAW'),
+              value: GtinUiConstants.batchSerialValueRequestedByLaw,
+              child: Text(GtinUiConstants.batchSerialRequestedByLaw),
             ),
             DropdownMenuItem(
-              value: 'NOT_REQUESTED_BUT_ALLOCATED',
-              child: Text('NOT REQUESTED BUT ALLOCATED'),
+              value: GtinUiConstants.batchSerialValueNotRequestedButAllocated,
+              child: Text(GtinUiConstants.batchSerialNotRequestedButAllocated),
             ),
             DropdownMenuItem(
-              value: 'NOT_ALLOCATED',
-              child: Text('NOT ALLOCATED'),
+              value: GtinUiConstants.batchSerialValueNotAllocated,
+              child: Text(GtinUiConstants.batchSerialNotAllocated),
             ),
           ],
           validator:
@@ -74,22 +77,22 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
         DropdownButtonFormField<String>(
           initialValue: _hasSerialNumberIndicator,
           decoration: const InputDecoration(
-            labelText: 'Has Serial Number Indicator',
-            helperText: 'Required for pharmaceutical serialization and traceability',
+            labelText: GtinUiConstants.labelHasSerialNumberIndicator,
+            helperText: GtinUiConstants.helperSerialIndicatorPharma,
             border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
-              value: 'REQUESTED_BY_LAW',
-              child: Text('REQUESTED BY LAW'),
+              value: GtinUiConstants.batchSerialValueRequestedByLaw,
+              child: Text(GtinUiConstants.batchSerialRequestedByLaw),
             ),
             DropdownMenuItem(
-              value: 'NOT_REQUESTED_BUT_ALLOCATED',
-              child: Text('NOT REQUESTED BUT ALLOCATED'),
+              value: GtinUiConstants.batchSerialValueNotRequestedButAllocated,
+              child: Text(GtinUiConstants.batchSerialNotRequestedButAllocated),
             ),
             DropdownMenuItem(
-              value: 'NOT_ALLOCATED',
-              child: Text('NOT ALLOCATED'),
+              value: GtinUiConstants.batchSerialValueNotAllocated,
+              child: Text(GtinUiConstants.batchSerialNotAllocated),
             ),
           ],
           validator: widget.isReadOnly
@@ -111,7 +114,9 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Production, Batch, Serial & Date Associations'),
+          const SectionLabel(
+          GtinUiConstants.sectionProductionBatchSerialDateAssociations,
+        ),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 76),

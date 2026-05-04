@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
@@ -71,7 +72,7 @@ class GtinResultsList extends StatelessWidget {
           return _constrainedCenter(
             Gs1ListEmptyView(
               icon: Icons.qr_code_2,
-              title: 'No GTINs found',
+              title: GtinUiConstants.emptyListTitle,
               onClearFilters: onClearFilters,
             ),
           );

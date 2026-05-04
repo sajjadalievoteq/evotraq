@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/data/services/gln_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/features/pharmaceutical/models/gln_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)
 /// Can be embedded in GLN detail screens or used standalone
@@ -13,12 +12,16 @@ class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
   final bool isEditing;
   final Function(GLNPharmaceuticalExtension?)? onSaved;
 
+  /// From master-data GLN payload (`GET .../glns/code/{code}`); avoids a separate extension API call.
+  final GLNPharmaceuticalExtension? initialExtension;
+
   const GLNPharmaceuticalExtensionWidget({
     Key? key,
     this.glnId,
     this.glnCode,
     this.isEditing = false,
     this.onSaved,
+    this.initialExtension,
   }) : super(key: key);
 
   @override
@@ -174,6 +177,19 @@ class GLNPharmaceuticalExtensionWidgetState
   }
 
   @override
+  void didUpdateWidget(covariant GLNPharmaceuticalExtensionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialExtension != oldWidget.initialExtension &&
+        widget.initialExtension != null) {
+      _populateFormFromExtension(widget.initialExtension!);
+      setState(() {
+        _extension = widget.initialExtension;
+        _hasExtension = true;
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _fdaEstablishmentIdController.dispose();
     _fdaRegistrationNumberController.dispose();
@@ -236,50 +252,23 @@ class GLNPharmaceuticalExtensionWidgetState
   }
 
   Future<void> _loadExtension() async {
-    // Skip loading if no valid GLN code or ID is provided (e.g., when creating a new GLN)
-    final hasValidGlnCode = widget.glnCode != null && widget.glnCode!.isNotEmpty;
-    final hasValidGlnId = widget.glnId != null;
-    
-    if (!hasValidGlnCode && !hasValidGlnId) {
+    if (widget.initialExtension != null) {
+      _populateFormFromExtension(widget.initialExtension!);
       if (mounted) {
         setState(() {
+          _extension = widget.initialExtension;
+          _hasExtension = true;
           _isLoading = false;
         });
       }
       return;
     }
 
-    try {
-      final service = getIt<GLNPharmaceuticalExtensionService>();
-
-      GLNPharmaceuticalExtension? ext;
-      if (hasValidGlnCode) {
-        ext = await service.getByGlnCode(widget.glnCode!);
-      } else if (widget.glnId != null) {
-        ext = await service.getByGlnId(widget.glnId!);
-      }
-
-      if (!mounted) return;
-
-      if (ext != null) {
-        _populateFormFromExtension(ext);
-        setState(() {
-          _extension = ext;
-          _hasExtension = true;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading GLN pharmaceutical extension: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    // Pharmaceutical extension is supplied by the master-data GLN response when present.
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -707,34 +696,8 @@ class GLNPharmaceuticalExtensionWidgetState
   }
 
   Future<bool> save() async {
-    if (widget.glnCode == null && widget.glnId == null) {
-      return false;
-    }
-
-    try {
-      final service = getIt<GLNPharmaceuticalExtensionService>();
-      final extension = _buildExtensionFromForm();
-
-      GLNPharmaceuticalExtension? result;
-      if (_hasExtension && _extension?.id != null) {
-        result = await service.update(_extension!.id!, extension);
-      } else {
-        result = await service.create(extension);
-      }
-
-      if (result != null) {
-        setState(() {
-          _extension = result;
-          _hasExtension = true;
-        });
-        widget.onSaved?.call(result);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      debugPrint('Error saving GLN pharmaceutical extension: $e');
-      return false;
-    }
+    // Persisted with master-data GLN create/update ([GLN.toJson] → `/master-data/glns` ).
+    return false;
   }
 
   @override
@@ -767,7 +730,7 @@ class GLNPharmaceuticalExtensionWidgetState
             ),
             const SizedBox(width: 8),
             Text(
-              'Pharmaceutical extension',
+              GlnPharmaceuticalExtensionUiConstants.expansionTitle,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: scheme.onSurface,
@@ -782,7 +745,7 @@ class GLNPharmaceuticalExtensionWidgetState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Saved',
+                  GlnPharmaceuticalExtensionUiConstants.badgeSaved,
                   style: TextStyle(fontSize: 12, color: scheme.onPrimaryContainer),
                 ),
               ),
@@ -834,13 +797,13 @@ class GLNPharmaceuticalExtensionWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel('UAE registry & national IDs'),
+        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionUaeRegistry),
         Row(
           children: [
             Expanded(
               child: _buildTextField(
                 controller: _brandsyncPartyIdController,
-                label: 'BrandSync Party ID',
+                label: GlnPharmaceuticalExtensionUiConstants.labelBrandSyncPartyId,
                 enabled: widget.isEditing,
                 maxLength: 50,
               ),
@@ -849,7 +812,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _tatmeenPartyCodeController,
-                label: 'Tatmeen Party Code',
+                label: GlnPharmaceuticalExtensionUiConstants.labelTatmeenPartyCode,
                 enabled: widget.isEditing,
                 maxLength: 50,
               ),
@@ -857,9 +820,9 @@ class GLNPharmaceuticalExtensionWidgetState
           ],
         ),
         const SizedBox(height: 16),
-        const SectionLabel('MAH & target markets'),
+        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionMahTargetMarkets),
         _buildSwitch(
-          label: 'MAH qualification indicator',
+          label: GlnPharmaceuticalExtensionUiConstants.labelMahQualificationIndicator,
           value: _mahQualificationIndicator,
           onChanged: widget.isEditing
               ? (value) => setState(() => _mahQualificationIndicator = value)
@@ -868,39 +831,39 @@ class GLNPharmaceuticalExtensionWidgetState
         const SizedBox(height: 12),
         _buildTextField(
           controller: _mahTargetMarketsController,
-          label: 'MAH target markets (ISO numeric)',
-          hint: 'Comma-separated, e.g. 784 for UAE',
+          label: GlnPharmaceuticalExtensionUiConstants.labelMahTargetMarketsIso,
+          hint: GlnPharmaceuticalExtensionUiConstants.hintMahTargetMarketsIso,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _mahRegulatoryRegistrationNumberController,
-          label: 'MAH regulatory registration number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelMahRegulatoryRegistrationNumber,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 16),
-        const SectionLabel('Licensed agent (import markets)'),
+        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionLicensedAgent),
         _buildTextField(
           controller: _licensedAgentAuthorisationController,
-          label: 'Licensed agent authorisation number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelLicensedAgentAuthorisationNumber,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _authorisedPrincipalMahGlnsController,
-          label: 'Authorised principal MAH GLNs',
-          hint: 'Comma-separated 13-digit GLNs',
+          label: GlnPharmaceuticalExtensionUiConstants.labelAuthorisedPrincipalMahGlns,
+          hint: GlnPharmaceuticalExtensionUiConstants.hintAuthorisedPrincipalMahGlns,
           enabled: widget.isEditing,
           maxLength: 500,
         ),
         const SizedBox(height: 16),
-        const SectionLabel('Pharmacovigilance & recall'),
+        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionPharmacovigilance),
         _buildTextField(
           controller: _pharmacovigilanceEmailController,
-          label: 'Pharmacovigilance contact email',
+          label: GlnPharmaceuticalExtensionUiConstants.labelPharmacovigilanceEmail,
           enabled: widget.isEditing,
           keyboardType: TextInputType.emailAddress,
           maxLength: 254,
@@ -911,7 +874,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _recallContactEmailController,
-                label: 'Recall contact email (24/7)',
+                label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactEmail,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.emailAddress,
                 maxLength: 254,
@@ -921,7 +884,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _recallContactPhoneController,
-                label: 'Recall contact phone',
+                label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactPhone,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.phone,
                 maxLength: 20,
@@ -930,11 +893,11 @@ class GLNPharmaceuticalExtensionWidgetState
           ],
         ),
         const SizedBox(height: 16),
-        const SectionLabel('EPCIS & data exchange'),
+        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionEpicsDataExchange),
         _buildTextField(
           controller: _epcisCaptureEndpointUrlController,
-          label: 'EPCIS capture endpoint URL',
-          hint: 'https://…',
+          label: GlnPharmaceuticalExtensionUiConstants.labelEpicsCaptureEndpointUrl,
+          hint: GlnPharmaceuticalExtensionUiConstants.hintHttpsUrl,
           enabled: widget.isEditing,
           keyboardType: TextInputType.url,
           maxLength: 500,
@@ -945,13 +908,13 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildFacilitySection() {
     return _buildSection(
-      'Healthcare Facility Type',
+      GlnPharmaceuticalExtensionUiConstants.cardHealthcareFacilityType,
       Icons.local_hospital,
       [
         DropdownButtonFormField<HealthcareFacilityType>(
           value: _healthcareFacilityType,
           decoration: const InputDecoration(
-            labelText: 'Facility Type',
+            labelText: GlnPharmaceuticalExtensionUiConstants.labelFacilityType,
             border: OutlineInputBorder(),
           ),
           items: HealthcareFacilityType.values.map((type) {
@@ -976,26 +939,26 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildFdaSection() {
     return _buildSection(
-      'FDA Establishment Data',
+      GlnPharmaceuticalExtensionUiConstants.cardFdaEstablishment,
       Icons.verified_user,
       [
         _buildTextField(
           controller: _fdaEstablishmentIdController,
-          label: 'FDA Establishment ID',
+          label: GlnPharmaceuticalExtensionUiConstants.labelFdaEstablishmentId,
           enabled: widget.isEditing,
           maxLength: 20,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _fdaRegistrationNumberController,
-          label: 'FDA Registration Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelFdaRegistrationNumber,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _fdaEstablishmentTypeController,
-          label: 'FDA Establishment Type',
+          label: GlnPharmaceuticalExtensionUiConstants.labelFdaEstablishmentType,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
@@ -1004,7 +967,7 @@ class GLNPharmaceuticalExtensionWidgetState
           children: [
             Expanded(
               child: _buildDateField(
-                label: 'Registration Date',
+                label: GlnPharmaceuticalExtensionUiConstants.labelRegistrationDate,
                 value: _fdaRegistrationDate,
                 onChanged: widget.isEditing
                     ? (date) => setState(() => _fdaRegistrationDate = date)
@@ -1014,7 +977,7 @@ class GLNPharmaceuticalExtensionWidgetState
             const SizedBox(width: 12),
             Expanded(
               child: _buildDateField(
-                label: 'Registration Expiry',
+                label: GlnPharmaceuticalExtensionUiConstants.labelRegistrationExpiry,
                 value: _fdaRegistrationExpiry,
                 onChanged: widget.isEditing
                     ? (date) => setState(() => _fdaRegistrationExpiry = date)
@@ -1029,18 +992,18 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildDeaSection() {
     return _buildSection(
-      'DEA Registration',
+      GlnPharmaceuticalExtensionUiConstants.cardDeaRegistration,
       Icons.security,
       [
         _buildTextField(
           controller: _deaRegistrationNumberController,
-          label: 'DEA Registration Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDeaRegistrationNumber,
           enabled: widget.isEditing,
           maxLength: 20,
         ),
         const SizedBox(height: 12),
         _buildDateField(
-          label: 'DEA Registration Expiry',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDeaRegistrationExpiry,
           value: _deaRegistrationExpiry,
           onChanged: widget.isEditing
               ? (date) => setState(() => _deaRegistrationExpiry = date)
@@ -1049,15 +1012,15 @@ class GLNPharmaceuticalExtensionWidgetState
         const SizedBox(height: 12),
         _buildTextField(
           controller: _deaScheduleAuthorizationController,
-          label: 'DEA Schedule Authorization',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDeaScheduleAuthorization,
           enabled: widget.isEditing,
-          hint: 'e.g., II, III, IV, V',
+          hint: GlnPharmaceuticalExtensionUiConstants.hintDeaSchedule,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _deaBusinessActivityController,
-          label: 'DEA Business Activity',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDeaBusinessActivity,
           enabled: widget.isEditing,
           maxLength: 100,
         ),
@@ -1067,7 +1030,7 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildStateLicenseSection() {
     return _buildSection(
-      'State/Provincial License',
+      GlnPharmaceuticalExtensionUiConstants.cardStateProvincialLicense,
       Icons.badge,
       [
         Row(
@@ -1075,7 +1038,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _stateLicenseNumberController,
-                label: 'License Number',
+                label: GlnPharmaceuticalExtensionUiConstants.labelLicenseNumber,
                 enabled: widget.isEditing,
                 maxLength: 50,
               ),
@@ -1085,11 +1048,14 @@ class GLNPharmaceuticalExtensionWidgetState
               child: DropdownButtonFormField<String>(
                 value: _stateLicenseState,
                 decoration: const InputDecoration(
-                  labelText: 'State',
+                  labelText: GlnPharmaceuticalExtensionUiConstants.labelStateDropdown,
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  const DropdownMenuItem<String>(value: null, child: Text('Select State')),
+                  const DropdownMenuItem<String>(
+                    value: null,
+                    child: Text(GlnExtensionSharedUiConstants.selectState),
+                  ),
                   ..._usStateOptions.entries.map((entry) => DropdownMenuItem<String>(
                     value: entry.key,
                     child: Text('${entry.key} - ${entry.value}'),
@@ -1103,13 +1069,13 @@ class GLNPharmaceuticalExtensionWidgetState
         const SizedBox(height: 12),
         _buildTextField(
           controller: _stateLicenseTypeController,
-          label: 'License Type',
+          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseType,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildDateField(
-          label: 'License Expiry',
+          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseExpiry,
           value: _stateLicenseExpiry,
           onChanged: widget.isEditing
               ? (date) => setState(() => _stateLicenseExpiry = date)
@@ -1121,18 +1087,18 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildWholesaleSection() {
     return _buildSection(
-      'Wholesale Distribution',
+      GlnPharmaceuticalExtensionUiConstants.cardWholesaleDistribution,
       Icons.local_shipping,
       [
         _buildTextField(
           controller: _wholesaleLicenseNumberController,
-          label: 'Wholesale License Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelWholesaleLicenseNumber,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildDateField(
-          label: 'Wholesale License Expiry',
+          label: GlnPharmaceuticalExtensionUiConstants.labelWholesaleLicenseExpiry,
           value: _wholesaleLicenseExpiry,
           onChanged: widget.isEditing
               ? (date) => setState(() => _wholesaleLicenseExpiry = date)
@@ -1140,7 +1106,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ),
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Authorized Trading Partner (ATP)',
+          label: GlnPharmaceuticalExtensionUiConstants.labelAuthorizedTradingPartner,
           value: _isAuthorizedTradingPartner,
           onChanged: widget.isEditing
               ? (value) => setState(() => _isAuthorizedTradingPartner = value)
@@ -1149,7 +1115,7 @@ class GLNPharmaceuticalExtensionWidgetState
         if (_isAuthorizedTradingPartner) ...[
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'ATP Verification Date',
+            label: GlnPharmaceuticalExtensionUiConstants.labelAtpVerificationDate,
             value: _atpVerificationDate,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _atpVerificationDate = date)
@@ -1158,7 +1124,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'VAWD Accredited',
+          label: GlnPharmaceuticalExtensionUiConstants.labelVawdAccredited,
           value: _vawdAccredited,
           onChanged: widget.isEditing
               ? (value) => setState(() => _vawdAccredited = value)
@@ -1168,13 +1134,13 @@ class GLNPharmaceuticalExtensionWidgetState
           const SizedBox(height: 12),
           _buildTextField(
             controller: _vawdAccreditationNumberController,
-            label: 'VAWD Accreditation Number',
+            label: GlnPharmaceuticalExtensionUiConstants.labelVawdAccreditationNumber,
             enabled: widget.isEditing,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'VAWD Expiry Date',
+            label: GlnPharmaceuticalExtensionUiConstants.labelVawdExpiryDate,
             value: _vawdExpiryDate,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _vawdExpiryDate = date)
@@ -1187,11 +1153,11 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildColdChainSection() {
     return _buildSection(
-      'Cold Chain & Storage Capabilities',
+      GlnPharmaceuticalExtensionUiConstants.cardColdChainStorage,
       Icons.ac_unit,
       [
         _buildSwitch(
-          label: 'Cold Chain Capability',
+          label: GlnPharmaceuticalExtensionUiConstants.labelColdChainCapability,
           value: _hasColdChainCapability,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasColdChainCapability = value)
@@ -1204,7 +1170,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _coldStorageMinTempController,
-                  label: 'Min Temp (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelMinTempC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1214,7 +1180,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _coldStorageMaxTempController,
-                  label: 'Max Temp (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelMaxTempC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1225,7 +1191,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Freezer Capability',
+          label: GlnPharmaceuticalExtensionUiConstants.labelFreezerCapability,
           value: _hasFreezerCapability,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasFreezerCapability = value)
@@ -1238,7 +1204,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _freezerMinTempController,
-                  label: 'Freezer Min (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelFreezerMinC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1248,7 +1214,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _freezerMaxTempController,
-                  label: 'Freezer Max (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelFreezerMaxC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1259,7 +1225,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Controlled Room Temperature',
+          label: GlnPharmaceuticalExtensionUiConstants.labelControlledRoomTemperature,
           value: _hasControlledRoomTemp,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasControlledRoomTemp = value)
@@ -1272,7 +1238,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _crtMinTempController,
-                  label: 'CRT Min (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelCrtMinC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1282,7 +1248,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _crtMaxTempController,
-                  label: 'CRT Max (°C)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelCrtMaxC,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1293,7 +1259,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Humidity Control',
+          label: GlnPharmaceuticalExtensionUiConstants.labelHumidityControl,
           value: _hasHumidityControl,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasHumidityControl = value)
@@ -1306,7 +1272,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _humidityRangeMinController,
-                  label: 'Min Humidity (%)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelMinHumidityPct,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1316,7 +1282,7 @@ class GLNPharmaceuticalExtensionWidgetState
               Expanded(
                 child: _buildTextField(
                   controller: _humidityRangeMaxController,
-                  label: 'Max Humidity (%)',
+                  label: GlnPharmaceuticalExtensionUiConstants.labelMaxHumidityPct,
                   enabled: widget.isEditing,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
@@ -1327,7 +1293,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'GDP Certified',
+          label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertified,
           value: _gdpCertified,
           onChanged: widget.isEditing
               ? (value) => setState(() => _gdpCertified = value)
@@ -1337,13 +1303,13 @@ class GLNPharmaceuticalExtensionWidgetState
           const SizedBox(height: 12),
           _buildTextField(
             controller: _gdpCertificationNumberController,
-            label: 'GDP Certification Number',
+            label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertificationNumber,
             enabled: widget.isEditing,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'GDP Certification Expiry',
+            label: GlnPharmaceuticalExtensionUiConstants.labelGdpCertificationExpiry,
             value: _gdpCertificationExpiry,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _gdpCertificationExpiry = date)
@@ -1356,11 +1322,11 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildClinicalTrialSection() {
     return _buildSection(
-      'Clinical Trial Site',
+      GlnPharmaceuticalExtensionUiConstants.cardClinicalTrialSite,
       Icons.science,
       [
         _buildSwitch(
-          label: 'Clinical Trial Site',
+          label: GlnPharmaceuticalExtensionUiConstants.labelClinicalTrialSiteSwitch,
           value: _isClinicalTrialSite,
           onChanged: widget.isEditing
               ? (value) => setState(() => _isClinicalTrialSite = value)
@@ -1370,21 +1336,21 @@ class GLNPharmaceuticalExtensionWidgetState
           const SizedBox(height: 12),
           _buildTextField(
             controller: _clinicalTrialPhaseAuthorizedController,
-            label: 'Clinical Trial Phase Authorized',
+            label: GlnPharmaceuticalExtensionUiConstants.labelClinicalTrialPhaseAuthorized,
             enabled: widget.isEditing,
-            hint: 'e.g., Phase I, II, III, IV',
+            hint: GlnPharmaceuticalExtensionUiConstants.hintClinicalTrialPhase,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _irbApprovalNumberController,
-            label: 'IRB Approval Number',
+            label: GlnPharmaceuticalExtensionUiConstants.labelIrbApprovalNumber,
             enabled: widget.isEditing,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'IRB Approval Expiry',
+            label: GlnPharmaceuticalExtensionUiConstants.labelIrbApprovalExpiry,
             value: _irbApprovalExpiry,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _irbApprovalExpiry = date)
@@ -1397,11 +1363,11 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildDscsaSection() {
     return _buildSection(
-      'DSCSA Compliance',
+      GlnPharmaceuticalExtensionUiConstants.cardDscsaCompliance,
       Icons.verified,
       [
         _buildSwitch(
-          label: 'DSCSA Compliant',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDscsaCompliant,
           value: _isDscsaCompliant,
           onChanged: widget.isEditing
               ? (value) => setState(() => _isDscsaCompliant = value)
@@ -1410,7 +1376,7 @@ class GLNPharmaceuticalExtensionWidgetState
         if (_isDscsaCompliant) ...[
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'DSCSA Compliance Date',
+            label: GlnPharmaceuticalExtensionUiConstants.labelDscsaComplianceDate,
             value: _dscsaComplianceDate,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _dscsaComplianceDate = date)
@@ -1419,7 +1385,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Serialization Capability',
+          label: GlnPharmaceuticalExtensionUiConstants.labelSerializationCapability,
           value: _hasSerializationCapability,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasSerializationCapability = value)
@@ -1427,7 +1393,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ),
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Aggregation Capability',
+          label: GlnPharmaceuticalExtensionUiConstants.labelAggregationCapability,
           value: _hasAggregationCapability,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasAggregationCapability = value)
@@ -1436,7 +1402,7 @@ class GLNPharmaceuticalExtensionWidgetState
         const SizedBox(height: 12),
         _buildTextField(
           controller: _interoperabilitySystemController,
-          label: 'Interoperability System',
+          label: GlnPharmaceuticalExtensionUiConstants.labelInteroperabilitySystem,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
@@ -1446,33 +1412,33 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildHealthcareIdsSection() {
     return _buildSection(
-      'Healthcare Identifiers',
+      GlnPharmaceuticalExtensionUiConstants.cardHealthcareIdentifiers,
       Icons.numbers,
       [
         _buildTextField(
           controller: _npiNumberController,
-          label: 'NPI Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelNpiNumber,
           enabled: widget.isEditing,
           maxLength: 15,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _ncpdpIdController,
-          label: 'NCPDP ID',
+          label: GlnPharmaceuticalExtensionUiConstants.labelNcpdpId,
           enabled: widget.isEditing,
           maxLength: 20,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _medicareProviderNumberController,
-          label: 'Medicare Provider Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelMedicareProviderNumber,
           enabled: widget.isEditing,
           maxLength: 20,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _medicaidProviderNumberController,
-          label: 'Medicaid Provider Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelMedicaidProviderNumber,
           enabled: widget.isEditing,
           maxLength: 20,
         ),
@@ -1482,11 +1448,11 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildCertificationsSection() {
     return _buildSection(
-      'Certifications & Accreditations',
+      GlnPharmaceuticalExtensionUiConstants.cardCertificationsAccreditations,
       Icons.workspace_premium,
       [
         _buildSwitch(
-          label: 'ISO Certified',
+          label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertified,
           value: _isIsoCertified,
           onChanged: widget.isEditing
               ? (value) => setState(() => _isIsoCertified = value)
@@ -1496,21 +1462,21 @@ class GLNPharmaceuticalExtensionWidgetState
           const SizedBox(height: 12),
           _buildTextField(
             controller: _isoCertificationTypeController,
-            label: 'ISO Certification Type',
+            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationType,
             enabled: widget.isEditing,
-            hint: 'e.g., ISO 9001, ISO 13485',
+            hint: GlnPharmaceuticalExtensionUiConstants.hintIsoCertificationType,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildTextField(
             controller: _isoCertificationNumberController,
-            label: 'ISO Certification Number',
+            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationNumber,
             enabled: widget.isEditing,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'ISO Certification Expiry',
+            label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertificationExpiry,
             value: _isoCertificationExpiry,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _isoCertificationExpiry = date)
@@ -1519,7 +1485,7 @@ class GLNPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'JCAHO Accredited',
+          label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccredited,
           value: _jcahoAccredited,
           onChanged: widget.isEditing
               ? (value) => setState(() => _jcahoAccredited = value)
@@ -1529,13 +1495,13 @@ class GLNPharmaceuticalExtensionWidgetState
           const SizedBox(height: 12),
           _buildTextField(
             controller: _jcahoAccreditationNumberController,
-            label: 'JCAHO Accreditation Number',
+            label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccreditationNumber,
             enabled: widget.isEditing,
             maxLength: 50,
           ),
           const SizedBox(height: 12),
           _buildDateField(
-            label: 'JCAHO Accreditation Expiry',
+            label: GlnPharmaceuticalExtensionUiConstants.labelJcahoAccreditationExpiry,
             value: _jcahoAccreditationExpiry,
             onChanged: widget.isEditing
                 ? (date) => setState(() => _jcahoAccreditationExpiry = date)
@@ -1548,33 +1514,33 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildInternationalSection() {
     return _buildSection(
-      'International Regulatory IDs',
+      GlnPharmaceuticalExtensionUiConstants.cardInternationalRegulatoryIds,
       Icons.public,
       [
         _buildTextField(
           controller: _emaSiteIdController,
-          label: 'EMA Site ID (Europe)',
+          label: GlnPharmaceuticalExtensionUiConstants.labelEmaSiteId,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _pmdaSiteIdController,
-          label: 'PMDA Site ID (Japan)',
+          label: GlnPharmaceuticalExtensionUiConstants.labelPmdaSiteId,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _anvisaSiteIdController,
-          label: 'ANVISA Site ID (Brazil)',
+          label: GlnPharmaceuticalExtensionUiConstants.labelAnvisaSiteId,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _nmpaSiteIdController,
-          label: 'NMPA Site ID (China)',
+          label: GlnPharmaceuticalExtensionUiConstants.labelNmpaSiteId,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
@@ -1584,46 +1550,46 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildOperationalSection() {
     return _buildSection(
-      'Operational Details',
+      GlnPharmaceuticalExtensionUiConstants.cardOperationalDetails,
       Icons.access_time,
       [
         _buildTextField(
           controller: _receivingHoursController,
-          label: 'Receiving Hours',
+          label: GlnPharmaceuticalExtensionUiConstants.labelReceivingHours,
           enabled: widget.isEditing,
           maxLength: 100,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _dispatchHoursController,
-          label: 'Dispatch Hours',
+          label: GlnPharmaceuticalExtensionUiConstants.labelDispatchHours,
           enabled: widget.isEditing,
           maxLength: 100,
         ),
         const SizedBox(height: 12),
         _buildSwitch(
-          label: 'Has Weighbridge',
+          label: GlnPharmaceuticalExtensionUiConstants.labelHasWeighbridge,
           value: _hasWeighbridge,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasWeighbridge = value)
               : null,
         ),
         _buildSwitch(
-          label: 'Has Loading Dock',
+          label: GlnPharmaceuticalExtensionUiConstants.labelHasLoadingDock,
           value: _hasLoadingDock,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasLoadingDock = value)
               : null,
         ),
         _buildSwitch(
-          label: 'Has Forklift Capability',
+          label: GlnPharmaceuticalExtensionUiConstants.labelHasForkliftCapability,
           value: _hasForkliftCapability,
           onChanged: widget.isEditing
               ? (value) => setState(() => _hasForkliftCapability = value)
               : null,
         ),
         _buildSwitch(
-          label: 'Can Receive Hazmat',
+          label: GlnPharmaceuticalExtensionUiConstants.labelCanReceiveHazmat,
           value: _canReceiveHazmat,
           onChanged: widget.isEditing
               ? (value) => setState(() => _canReceiveHazmat = value)
@@ -1635,36 +1601,36 @@ class GLNPharmaceuticalExtensionWidgetState
 
   Widget _buildContactsSection() {
     return _buildSection(
-      'Contact Information',
+      GlnPharmaceuticalExtensionUiConstants.cardContactInformation,
       Icons.contact_phone,
       [
         const Text(
-          'Pharmacist in Charge',
+          GlnPharmaceuticalExtensionUiConstants.headingPharmacistInCharge,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         _buildTextField(
           controller: _pharmacistInChargeController,
-          label: 'Name',
+          label: GlnPharmaceuticalExtensionUiConstants.labelName,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _picLicenseNumberController,
-          label: 'License Number',
+          label: GlnPharmaceuticalExtensionUiConstants.labelLicenseNumber,
           enabled: widget.isEditing,
           maxLength: 50,
         ),
         const SizedBox(height: 16),
         const Text(
-          'Responsible Person',
+          GlnPharmaceuticalExtensionUiConstants.headingResponsiblePerson,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         _buildTextField(
           controller: _responsiblePersonNameController,
-          label: 'Name',
+          label: GlnPharmaceuticalExtensionUiConstants.labelName,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
@@ -1674,7 +1640,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _responsiblePersonEmailController,
-                label: 'Email',
+                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.emailAddress,
                 maxLength: 255,
@@ -1684,7 +1650,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _responsiblePersonPhoneController,
-                label: 'Phone',
+                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.phone,
                 maxLength: 50,
@@ -1694,13 +1660,13 @@ class GLNPharmaceuticalExtensionWidgetState
         ),
         const SizedBox(height: 16),
         const Text(
-          'Quality Contact',
+          GlnPharmaceuticalExtensionUiConstants.headingQualityContact,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         _buildTextField(
           controller: _qualityContactNameController,
-          label: 'Name',
+          label: GlnPharmaceuticalExtensionUiConstants.labelName,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
@@ -1710,7 +1676,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _qualityContactEmailController,
-                label: 'Email',
+                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.emailAddress,
                 maxLength: 255,
@@ -1720,7 +1686,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _qualityContactPhoneController,
-                label: 'Phone',
+                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.phone,
                 maxLength: 50,
@@ -1730,13 +1696,13 @@ class GLNPharmaceuticalExtensionWidgetState
         ),
         const SizedBox(height: 16),
         const Text(
-          'Regulatory Contact',
+          GlnPharmaceuticalExtensionUiConstants.headingRegulatoryContact,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         _buildTextField(
           controller: _regulatoryContactNameController,
-          label: 'Name',
+          label: GlnPharmaceuticalExtensionUiConstants.labelName,
           enabled: widget.isEditing,
           maxLength: 200,
         ),
@@ -1746,7 +1712,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _regulatoryContactEmailController,
-                label: 'Email',
+                label: GlnPharmaceuticalExtensionUiConstants.labelEmail,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.emailAddress,
                 maxLength: 255,
@@ -1756,7 +1722,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: _buildTextField(
                 controller: _regulatoryContactPhoneController,
-                label: 'Phone',
+                label: GlnPharmaceuticalExtensionUiConstants.labelPhone,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.phone,
                 maxLength: 50,
@@ -1851,7 +1817,7 @@ class GLNPharmaceuticalExtensionWidgetState
             Text(
               value != null
                   ? '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}'
-                  : 'Not set',
+                  : GlnExtensionSharedUiConstants.dateNotSet,
               style: TextStyle(
                 color: value != null ? Colors.black : Colors.grey,
               ),

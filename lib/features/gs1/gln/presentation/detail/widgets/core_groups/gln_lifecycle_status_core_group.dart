@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_date_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
 /// Operating status, effective dates, non-reuse display.
 class GlnLifecycleStatusCoreGroup extends StatelessWidget {
   const GlnLifecycleStatusCoreGroup({
     super.key,
+    this.showFieldSkeleton = false,
     required this.isEditing,
     required this.operatingStatus,
     required this.onOperatingStatusChanged,
@@ -16,6 +19,7 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
     required this.onPickEffectiveTo,
   });
 
+  final bool showFieldSkeleton;
   final bool isEditing;
   final String operatingStatus;
   final ValueChanged<String?> onOperatingStatusChanged;
@@ -27,23 +31,33 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Lifecycle & status'),
+        const SectionLabel(GlnUiConstants.sectionLifecycleStatus),
         DropdownButtonFormField<String>(
-          value: operatingStatus,
+          key: ValueKey(operatingStatus),
+          initialValue: operatingStatus,
           decoration: const InputDecoration(
-            labelText: 'Operating status',
+            labelText: GlnUiConstants.labelOperatingStatus,
             border: OutlineInputBorder(),
           ),
           items: const [
-            DropdownMenuItem(value: 'DRAFT', child: Text('DRAFT')),
-            DropdownMenuItem(value: 'ACTIVE', child: Text('ACTIVE')),
-            DropdownMenuItem(value: 'INACTIVE', child: Text('INACTIVE')),
             DropdownMenuItem(
-              value: 'DISCONTINUED',
-              child: Text('DISCONTINUED'),
+              value: GlnUiConstants.operatingDraft,
+              child: Text(GlnUiConstants.operatingDraft),
+            ),
+            DropdownMenuItem(
+              value: GlnUiConstants.operatingActive,
+              child: Text(GlnUiConstants.operatingActive),
+            ),
+            DropdownMenuItem(
+              value: GlnUiConstants.operatingInactive,
+              child: Text(GlnUiConstants.operatingInactive),
+            ),
+            DropdownMenuItem(
+              value: GlnUiConstants.operatingDiscontinued,
+              child: Text(GlnUiConstants.operatingDiscontinued),
             ),
           ],
           onChanged: isEditing ? onOperatingStatusChanged : null,
@@ -52,16 +66,16 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GlnDetailDateField(
-                label: 'Effective from',
+              child: Gs1DatePickerField(
+                label: GlnUiConstants.labelEffectiveFrom,
                 value: effectiveFrom,
                 onTap: isEditing ? onPickEffectiveFrom : null,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GlnDetailDateField(
-                label: 'Effective to',
+              child: Gs1DatePickerField(
+                label: GlnUiConstants.labelEffectiveTo,
                 value: effectiveTo,
                 onTap: isEditing ? onPickEffectiveTo : null,
               ),
@@ -71,13 +85,13 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
         const SizedBox(height: 12),
         InputDecorator(
           decoration: const InputDecoration(
-            labelText: 'Non-reuse waiting until',
+            labelText: GlnUiConstants.labelNonReuseWaiting,
             border: OutlineInputBorder(),
-            helperText: 'Read-only — set by backend when discontinued',
+            helperText: GlnUiConstants.helperNonReuseReadonly,
           ),
           child: Text(
             nonReuseUntil != null
-                ? GlnDetailDateField.displayFormat.format(nonReuseUntil!)
+                ? Gs1DatePickerField.displayDateFormat.format(nonReuseUntil!)
                 : '—',
             style: TextStyle(
               color: nonReuseUntil != null ? Colors.black87 : Colors.grey,
@@ -85,6 +99,28 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
           ),
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel(GlnUiConstants.sectionLifecycleStatus),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+        ],
+      ),
     );
   }
 }

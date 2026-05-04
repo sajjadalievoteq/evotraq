@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class AuditCoreGroup extends StatefulWidget {
   const AuditCoreGroup({
@@ -55,11 +56,11 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Audit'),
+        const SectionLabel(GtinUiConstants.sectionAudit),
         GtinValidatedField(
           controller: _createdBy,
           fieldName: 'created_by',
-          label: 'Created By',
+          label: GtinUiConstants.labelCreatedBy,
           readOnly: widget.isReadOnly,
           maxLength: 64,
           validator: GtinFieldValidators.validateCreatedBy,
@@ -68,7 +69,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
         GtinValidatedField(
           controller: _updatedBy,
           fieldName: 'updated_by',
-          label: 'Updated By',
+          label: GtinUiConstants.labelUpdatedBy,
           readOnly: widget.isReadOnly,
           maxLength: 64,
           validator: GtinFieldValidators.validateUpdatedBy,
@@ -82,7 +83,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Audit'),
+          const SectionLabel(GtinUiConstants.sectionAudit),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),

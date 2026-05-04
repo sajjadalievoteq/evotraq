@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
@@ -40,20 +42,33 @@ class GlnResultsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<GLNCubit, GLNState>(
       listenWhen: (previous, current) {
+        if (current.listFetchError != null) return true;
         return current.status == GLNStatus.error &&
             current.error != null &&
             (previous.status != GLNStatus.error ||
                 previous.error != current.error);
       },
       listener: (context, state) {
-        context.showError(state.error!);
+        if (state.listFetchError != null) {
+          context.showError(state.listFetchError!);
+          context.read<GLNCubit>().clearGlnListError();
+          return;
+        }
+        if (state.status == GLNStatus.error && state.error != null) {
+          context.showError(state.error!);
+        }
       },
+      buildWhen: (previous, current) =>
+          previous.glns != current.glns ||
+          previous.isGlnListLoading != current.isGlnListLoading ||
+          previous.hasMoreData != current.hasMoreData ||
+          previous.isFetchingMore != current.isFetchingMore ||
+          previous.listFetchError != current.listFetchError ||
+          previous.status != current.status,
       builder: (context, state) {
-        final loadingInitial = state.glns.isEmpty &&
-            (state.status == GLNStatus.loading ||
-                state.status == GLNStatus.initial);
-
-        if (loadingInitial) {
+        if (state.glns.isEmpty &&
+            (state.isGlnListLoading ||
+                state.status == GLNStatus.initial)) {
           return const Gs1ListLoadingShimmer();
         }
 
@@ -61,7 +76,7 @@ class GlnResultsList extends StatelessWidget {
           return _constrainedCenter(
             Gs1ListEmptyView(
               icon: Icons.location_off_outlined,
-              title: 'No GLNs found',
+              title: GlnUiConstants.emptyListTitle,
               onClearFilters: onClearFilters,
             ),
           );
@@ -92,6 +107,9 @@ class GlnResultsList extends StatelessWidget {
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: true,
+                cacheExtent: 400,
                 itemCount: glns.length +
                     ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
                     1,

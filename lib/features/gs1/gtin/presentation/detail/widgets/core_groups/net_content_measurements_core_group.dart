@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class NetContentMeasurementsCoreGroup extends StatefulWidget {
   const NetContentMeasurementsCoreGroup({
@@ -96,11 +97,11 @@ class NetContentMeasurementsCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Net Content & Measurements'),
+        const SectionLabel(GtinUiConstants.sectionNetContentMeasurements),
         GtinValidatedField(
           controller: _netContent,
           fieldName: 'net_content_value',
-          label: 'Net Content Value',
+          label: GtinUiConstants.labelNetContentValue,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -112,8 +113,8 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _netContentUom,
           fieldName: 'net_content_uom',
-          label: 'Net Content UOM',
-          helperText: 'UN/ECE Rec 20 code (2–3 chars, uppercase)',
+          label: GtinUiConstants.labelNetContentUom,
+          helperText: GtinUiConstants.helperUneceRec20,
           readOnly: widget.isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateNetContentUomRequired,
@@ -122,7 +123,7 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _grossWeight,
           fieldName: 'gross_weight_value',
-          label: 'Gross Weight Value',
+          label: GtinUiConstants.labelGrossWeightValue,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -134,8 +135,8 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _grossWeightUom,
           fieldName: 'gross_weight_uom',
-          label: 'Gross Weight UOM',
-          helperText: 'UN/ECE Rec 20 code (2–3 chars, uppercase)',
+          label: GtinUiConstants.labelGrossWeightUom,
+          helperText: GtinUiConstants.helperUneceRec20,
           readOnly: widget.isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateGrossWeightUom,
@@ -144,7 +145,7 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _height,
           fieldName: 'height_value',
-          label: 'Height',
+          label: GtinUiConstants.labelHeight,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -156,7 +157,7 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _width,
           fieldName: 'width_value',
-          label: 'Width',
+          label: GtinUiConstants.labelWidth,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -168,7 +169,7 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _depth,
           fieldName: 'depth_value',
-          label: 'Depth',
+          label: GtinUiConstants.labelDepth,
           readOnly: widget.isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
@@ -180,8 +181,8 @@ class NetContentMeasurementsCoreGroupState
         GtinValidatedField(
           controller: _dimensionUom,
           fieldName: 'dim_uom',
-          label: 'Dimension UOM',
-          helperText: 'UN/ECE Rec 20 code (2–3 chars, uppercase)',
+          label: GtinUiConstants.labelDimensionUom,
+          helperText: GtinUiConstants.helperUneceRec20,
           readOnly: widget.isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateDimUom,
@@ -195,7 +196,7 @@ class NetContentMeasurementsCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Net Content & Measurements'),
+          const SectionLabel(GtinUiConstants.sectionNetContentMeasurements),
           for (var i = 0; i < 8; i++) ...[
             if (i > 0) const SizedBox(height: 12),
             GtinSkeletonOutlineField(

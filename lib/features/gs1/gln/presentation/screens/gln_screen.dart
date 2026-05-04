@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_split_view_screen.dart';
-import 'package:traqtrace_app/features/gs1/widgets/split_view/split_view.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
 /// Main screen for GLN (Global Location Number) functionality
 class GLNScreen extends StatefulWidget {

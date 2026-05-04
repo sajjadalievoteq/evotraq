@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/uae_regulatory/validators/uae_regulatory_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/validators/regulatory_authority_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
-class UaeAuthorizationSection extends StatelessWidget {
-  const UaeAuthorizationSection({
+class RegulatoryAuthorityLabelingSection extends StatelessWidget {
+  const RegulatoryAuthorityLabelingSection({
     super.key,
     required this.isReadOnly,
     required this.showFieldSkeleton,
-    required this.isUaeMarket,
-    required this.isImportedProduct,
-    required this.licensedAgentGlnsController,
+    required this.isRegulatoryAuthorityMarket,
+    required this.regulatedProductNameController,
   });
 
   final bool isReadOnly;
   final bool showFieldSkeleton;
-  final bool isUaeMarket;
-  final bool isImportedProduct;
-  final TextEditingController licensedAgentGlnsController;
+  final bool isRegulatoryAuthorityMarket;
+  final TextEditingController regulatedProductNameController;
 
   @override
   Widget build(BuildContext context) {
@@ -30,22 +29,21 @@ class UaeAuthorizationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionLabel(
-            'UAE authorization',
+            GtinRegulatoryAuthorityExtensionUiConstants.sectionLabeling,
             padding: EdgeInsets.only(bottom: 12),
           ),
           GtinValidatedField(
-            controller: licensedAgentGlnsController,
-            fieldName: 'licensedAgentGlns',
-            label: 'Licensed Agent GLNs',
-            helperText: 'Required for imported UAE products; comma/semicolon/newline separated',
-            maxLines: 3,
-            maxLength: 500,
-            inputFormatters: [LengthLimitingTextInputFormatter(500)],
+            controller: regulatedProductNameController,
+            fieldName: 'regulatedProductName',
+            label: GtinRegulatoryAuthorityExtensionUiConstants.labelRegulatedProductName,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperRegulatedProductName,
+            maxLength: 200,
+            inputFormatters: [LengthLimitingTextInputFormatter(200)],
             readOnly: isReadOnly,
-            validator: (v) => UaeRegulatoryValidators.validateUaeLicensedAgent(
+            validator: (v) => RegulatoryAuthorityValidators
+                .validateEnglishRegulatedNameForRegulatoryAuthority(
               v,
-              isUaeMarket: isUaeMarket,
-              isImportedProduct: isImportedProduct,
+              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
             ),
           ),
         ],
@@ -69,10 +67,10 @@ class UaeAuthorizationSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel(
-                'UAE authorization',
+                GtinRegulatoryAuthorityExtensionUiConstants.sectionLabeling,
                 padding: EdgeInsets.only(bottom: 12),
               ),
-              GtinSkeletonOutlineField(color: c, height: 72),
+              GtinSkeletonOutlineField(color: c, height: 56),
             ],
           ),
         ),

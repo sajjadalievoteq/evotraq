@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_record_info_section.dart';
@@ -13,18 +15,19 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
 /// Screen to display and manage GLNs — layout aligned with [GTINListScreen].
 class GLNListScreen extends StatefulWidget {
   const GLNListScreen({
-    Key? key,
+    super.key,
     this.embedded = false,
     this.onSelectGln,
     this.onBindRefresh,
     this.onEmbeddedCreate,
-  }) : super(key: key);
+  });
 
   final bool embedded;
   final ValueChanged<String>? onSelectGln;
@@ -61,13 +64,13 @@ class _GLNListScreenState extends State<GLNListScreen> {
         _search();
       },
     );
-
+    // Initial load (aligned with [GTINListScreen.fetchGTINList] — no extra frame wait).
+    _search();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onBindRefresh?.call(() {
         if (mounted) _searchImmediate();
       });
-      _searchImmediate();
     });
   }
 
@@ -113,7 +116,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
   }
 
   String? _locationTypeApiValue() {
-    if (_selectedLocationType == null || _selectedLocationType == 'All') {
+    if (_selectedLocationType == null ||
+        _selectedLocationType == GlnUiConstants.filterAll) {
       return null;
     }
     return _selectedLocationType!.replaceAll(' ', '_').toLowerCase();
@@ -129,7 +133,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
           licenseNumber: _getAdvancedFilterValue('licenseNumber'),
           contactEmail: _getAdvancedFilterValue('contactEmail'),
           contactName: _getAdvancedFilterValue('contactName'),
-          active: _selectedStatus == null || _selectedStatus == 'All'
+          active: _selectedStatus == null ||
+              _selectedStatus == GlnUiConstants.filterAll
               ? null
               : (_selectedStatus!.toLowerCase() == 'active'),
           locationType: _locationTypeApiValue(),
@@ -178,8 +183,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
       if (result.cleared) {
         setState(() {
           _locationNameController.clear();
-          _selectedStatus = 'All';
-          _selectedLocationType = 'All';
+          _selectedStatus = GlnUiConstants.filterAll;
+          _selectedLocationType = GlnUiConstants.filterAll;
         });
         _searchImmediate();
         return;
@@ -198,7 +203,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Advanced Filters'),
+          title: Text(GlnUiConstants.dialogAdvancedFiltersTitle),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: SingleChildScrollView(
@@ -211,8 +216,9 @@ class _GLNListScreenState extends State<GLNListScreen> {
                     licenseNumberController: _licenseNumberController,
                     contactEmailController: _contactEmailController,
                     contactNameController: _contactNameController,
-                    selectedLocationType: _selectedLocationType ?? 'All',
-                    selectedStatus: _selectedStatus ?? 'All',
+                    selectedLocationType:
+                        _selectedLocationType ?? GlnUiConstants.filterAll,
+                    selectedStatus: _selectedStatus ?? GlnUiConstants.filterAll,
                     sortBy: _sortBy,
                     onLocationTypeChanged: (value) {
                       setLocalState(() => _selectedLocationType = value);
@@ -241,7 +247,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
           ),
           actions: [
             CustomTextButtonWidget(
-              title: 'Close',
+              title: GlnUiConstants.buttonClose,
               onTap: () => Navigator.of(dialogContext).pop(),
             ),
           ],
@@ -263,12 +269,14 @@ class _GLNListScreenState extends State<GLNListScreen> {
       widget.onSelectGln!(glnCode);
       return;
     }
-    context.push('${Constants.gs1GlnsRoute}/$glnCode').then((_) => _searchImmediate());
+    context
+        .push(GlnRouteConstants.pathForGlnCode(glnCode))
+        .then((_) => _searchImmediate());
   }
 
   void _openGlnEdit(String glnCode) {
     context
-        .push('${Constants.gs1GlnsRoute}/$glnCode/edit')
+        .push(GlnRouteConstants.pathForGlnCodeEdit(glnCode))
         .then((_) => _searchImmediate());
   }
 
@@ -290,14 +298,12 @@ class _GLNListScreenState extends State<GLNListScreen> {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: Text(
-          'Are you sure you want to delete the GLN for "${gln.locationName}"?',
-        ),
+        title: Text(GlnUiConstants.dialogConfirmDeletionTitle),
+        content: Text(GlnUiConstants.deleteGlnConfirm(gln.locationName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('CANCEL'),
+            child: Text(GlnUiConstants.dialogCancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -305,7 +311,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
               context.read<GLNCubit>().deleteGLN(gln.glnCode);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('DELETE'),
+            child: Text(GlnUiConstants.dialogDelete),
           ),
         ],
       ),
@@ -337,7 +343,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
   }
 
   String _sortFieldDisplayLabel() {
-    return GlnUiConstants.sortFieldLabels[_sortBy] ?? 'location name';
+    return GlnUiConstants.sortFieldLabels[_sortBy] ??
+        GlnUiConstants.sortFieldFallback;
   }
 
   @override
@@ -378,8 +385,12 @@ class _GLNListScreenState extends State<GLNListScreen> {
               ),
               SizedBox(height: Constants.spacing),
               Gs1ListSortingControls(
-                label:
-                    'Sort by ${_sortFieldDisplayLabel()} (${_sortOrder == 'asc' ? 'A–Z' : 'Z–A'})',
+                label: GlnUiConstants.sortByLine(
+                  _sortFieldDisplayLabel(),
+                  _sortOrder == 'asc'
+                      ? GlnUiConstants.sortAscendingLabel
+                      : GlnUiConstants.sortDescendingLabel,
+                ),
                 sortOrder: _sortOrder,
                 onToggleSortOrder: _toggleSortOrder,
               ),
@@ -402,12 +413,12 @@ class _GLNListScreenState extends State<GLNListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('GLN Management')),
+      appBar: AppBar(title: Text(GlnUiConstants.appBarManagement)),
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateGLN,
-        tooltip: 'Add New GLN',
+        tooltip: GlnUiConstants.fabAddNew,
         child: const Icon(Icons.add),
       ),
     );

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// [OutlineInputBorder] radius; matches M3 text fields.
 const double kGtinSkeletonInputRadius = 4;
 
-/// Keeps [child] mounted for keys/controllers while showing an animated skeleton on top.
+/// Keeps [child] mounted for keys/controllers while showing a static skeleton on top.
+///
+/// GLN/GTIN **full-screen** loading uses [Gs1FormShimmerLayer] (one [Shimmer] for
+/// the whole form). Use this for **section-level** masks (e.g. pharma subgroups) only.
+/// Do not wrap every field in this with [Shimmer] (see [Gs1FormShimmerLayer]).
 class GtinFieldSkeletonMask extends StatelessWidget {
   const GtinFieldSkeletonMask({
     super.key,
@@ -23,7 +26,6 @@ class GtinFieldSkeletonMask extends StatelessWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
 
     return Stack(
       alignment: Alignment.topCenter,
@@ -34,14 +36,10 @@ class GtinFieldSkeletonMask extends StatelessWidget {
           child: IgnorePointer(child: child),
         ),
         IgnorePointer(
-          child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-            child: Align(
-              alignment: Alignment.topCenter,
-              widthFactor: 1,
-              child: skeletonBuilder(baseColor),
-            ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            widthFactor: 1,
+            child: skeletonBuilder(baseColor),
           ),
         ),
       ],

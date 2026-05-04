@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_form_types.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
@@ -8,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 class GlnLocationAddressCoreGroup extends StatelessWidget {
   const GlnLocationAddressCoreGroup({
     super.key,
+    this.showFieldSkeleton = false,
     required this.setFieldError,
     required this.readOnly,
     required this.locationNameController,
@@ -22,6 +24,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
     required this.countryController,
   });
 
+  final bool showFieldSkeleton;
   final GlnFormSetFieldError setFieldError;
   final bool readOnly;
 
@@ -39,14 +42,14 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEditing = !readOnly;
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Location & address'),
+        const SectionLabel(GlnUiConstants.sectionLocationAddress),
         GtinValidatedField(
           controller: locationNameController,
           fieldName: 'locationName',
-          label: 'Location name *',
+          label: GlnUiConstants.labelLocationNameRequired,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateLocationNameRequired,
@@ -57,14 +60,21 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: mobility,
+                key: ValueKey(mobility),
+                initialValue: mobility,
                 decoration: const InputDecoration(
-                  labelText: 'Fixed vs mobile',
+                  labelText: GlnUiConstants.labelFixedVsMobile,
                   border: OutlineInputBorder(),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'FIXED', child: Text('FIXED')),
-                  DropdownMenuItem(value: 'MOBILE', child: Text('MOBILE')),
+                  DropdownMenuItem(
+                    value: GlnUiConstants.mobilityFixed,
+                    child: Text(GlnUiConstants.mobilityFixed),
+                  ),
+                  DropdownMenuItem(
+                    value: GlnUiConstants.mobilityMobile,
+                    child: Text(GlnUiConstants.mobilityMobile),
+                  ),
                 ],
                 onChanged: isEditing ? onMobilityChanged : null,
               ),
@@ -74,8 +84,8 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: mobileLocationIdentifierController,
                 fieldName: 'mobileLocationIdentifier',
-                label: 'Mobile location ID',
-                helperText: 'Vehicle reg, IMO, tail number…',
+                label: GlnUiConstants.labelMobileLocationId,
+                helperText: GlnUiConstants.helperMobileLocationId,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateMobileLocationIdOptional,
@@ -87,7 +97,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: addressLine1Controller,
           fieldName: 'addressLine1',
-          label: 'Address line 1 *',
+          label: GlnUiConstants.labelAddressLine1,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateAddressLine1Required,
@@ -96,7 +106,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
         GtinValidatedField(
           controller: addressLine2Controller,
           fieldName: 'addressLine2',
-          label: 'Address line 2',
+          label: GlnUiConstants.labelAddressLine2,
           readOnly: readOnly,
           setFieldError: setFieldError,
           validator: GlnFieldValidators.validateAddressLine2Optional,
@@ -108,7 +118,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: cityController,
                 fieldName: 'city',
-                label: 'City *',
+                label: GlnUiConstants.labelCityRequired,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateCityRequired,
@@ -119,7 +129,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: stateProvinceController,
                 fieldName: 'stateProvince',
-                label: 'State / province *',
+                label: GlnUiConstants.labelStateProvince,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateStateProvinceRequired,
@@ -135,7 +145,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: postalCodeController,
                 fieldName: 'postalCode',
-                label: 'Postal code *',
+                label: GlnUiConstants.labelPostalCode,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validatePostalCodeRequired,
@@ -147,7 +157,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
               child: GtinValidatedField(
                 controller: countryController,
                 fieldName: 'country',
-                label: 'Country *',
+                label: GlnUiConstants.labelCountryRequired,
                 readOnly: readOnly,
                 setFieldError: setFieldError,
                 validator: GlnFieldValidators.validateCountryRequired,
@@ -156,6 +166,46 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           ],
         ),
       ],
+    );
+
+    return GtinFieldSkeletonMask(
+      show: showFieldSkeleton,
+      child: body,
+      skeletonBuilder: (c) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionLabel(GlnUiConstants.sectionLocationAddress),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          GtinSkeletonOutlineField(color: c, height: 56),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(flex: 1, child: GtinSkeletonOutlineField(color: c, height: 56)),
+              const SizedBox(width: 12),
+              Expanded(flex: 2, child: GtinSkeletonOutlineField(color: c, height: 56)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

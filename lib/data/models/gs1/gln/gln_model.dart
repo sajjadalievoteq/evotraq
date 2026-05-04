@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 
 /// Enum representing the type of location (legacy operational subtype).
@@ -113,6 +114,9 @@ class GLN extends Equatable {
   final List<String> supplyChainRoles;
   final List<String> locationRoles;
 
+  /// Nested pharmaceutical extension (loaded/saved with master-data GLN).
+  final GLNPharmaceuticalExtension? pharmaceuticalExtension;
+
   /// Creates a new GLN instance
   const GLN({
     required this.glnCode,
@@ -158,6 +162,7 @@ class GLN extends Equatable {
     this.glnTypes = const [],
     this.supplyChainRoles = const [],
     this.locationRoles = const [],
+    this.pharmaceuticalExtension,
   });
 
   /// Simple constructor that creates a GLN with only the code
@@ -221,6 +226,7 @@ class GLN extends Equatable {
     List<String>? glnTypes,
     List<String>? supplyChainRoles,
     List<String>? locationRoles,
+    GLNPharmaceuticalExtension? pharmaceuticalExtension,
   }) {
     return GLN(
       glnCode: glnCode ?? this.glnCode,
@@ -273,6 +279,8 @@ class GLN extends Equatable {
       glnTypes: glnTypes ?? this.glnTypes,
       supplyChainRoles: supplyChainRoles ?? this.supplyChainRoles,
       locationRoles: locationRoles ?? this.locationRoles,
+      pharmaceuticalExtension:
+          pharmaceuticalExtension ?? this.pharmaceuticalExtension,
     );
   }
 
@@ -342,6 +350,13 @@ class GLN extends Equatable {
       parentGln = GLN.fromCode(parentRaw.toString());
     }
 
+    GLNPharmaceuticalExtension? pharmaceuticalExtension;
+    final pharmaRaw = json['pharmaceuticalExtension'];
+    if (pharmaRaw is Map<String, dynamic>) {
+      pharmaceuticalExtension =
+          GLNPharmaceuticalExtension.fromJson(pharmaRaw);
+    }
+
     return GLN(
       glnCode: json['glnCode']?.toString() ?? '',
       locationName: json['locationName']?.toString() ?? '',
@@ -392,6 +407,7 @@ class GLN extends Equatable {
       glnTypes: _stringListFromJson(json['glnTypes']),
       supplyChainRoles: _stringListFromJson(json['supplyChainRoles']),
       locationRoles: _stringListFromJson(json['locationRoles']),
+      pharmaceuticalExtension: pharmaceuticalExtension,
     );
   }
 
@@ -473,6 +489,9 @@ class GLN extends Equatable {
     }
     if (locationRoles.isNotEmpty) json['locationRoles'] = locationRoles;
     if (coordinates != null) json['coordinates'] = coordinates!.toJson();
+    if (pharmaceuticalExtension != null) {
+      json['pharmaceuticalExtension'] = pharmaceuticalExtension!.toJson();
+    }
 
     return json;
   }
@@ -559,5 +578,6 @@ class GLN extends Equatable {
         effectiveFrom,
         effectiveTo,
         glnTypes,
+        pharmaceuticalExtension,
       ];
 }

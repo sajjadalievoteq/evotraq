@@ -62,14 +62,14 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
   @override
   void initState() {
     super.initState();
-    _status = widget.initialStatus ?? 'All';
-    _packaging = widget.initialPackagingLevel ?? 'All';
+    _status = widget.initialStatus ?? GtinUiConstants.filterAll;
+    _packaging = widget.initialPackagingLevel ?? GtinUiConstants.filterAll;
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Quick Filters'),
+      title: const Text(GtinUiConstants.quickFiltersTitle),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: Constants.dialogMaxWidth),
         child: SingleChildScrollView(
@@ -82,17 +82,18 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
               TextField(
                 controller: widget.manufacturerController,
                 decoration: const InputDecoration(
-                  hintText: 'e.g., Pfizer, Johnson & Johnson',
+                  hintText: GtinUiConstants.hintManufacturerExample,
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
-              const Text('Status'),
+              const Text(GtinUiConstants.filterSectionStatus),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _status,
+                key: ValueKey('qf_st_$_status'),
+                initialValue: _status,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -110,10 +111,11 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text('Packaging Level'),
+              const Text(GtinUiConstants.filterSectionPackagingLevel),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _packaging,
+                key: ValueKey('qf_pk_$_packaging'),
+                initialValue: _packaging,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -134,7 +136,7 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
               const Divider(),
               const SizedBox(height: 8),
               Text(
-                'For more advanced filters, use the "Show Advanced Filters" option below the search bar.',
+                GtinUiConstants.quickFiltersFooterHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -143,11 +145,11 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
       ),
       actions: [
         CustomTextButtonWidget(
-          title: 'Cancel',
+          title: GtinUiConstants.buttonCancel,
           onTap: () => Navigator.of(context).pop(),
         ),
         CustomTextButtonWidget(
-          title: 'Apply',
+          title: GtinUiConstants.buttonApply,
           onTap: () {
             Navigator.of(context).pop(
               GtinQuickFilterResult.applied(_status, _packaging),
@@ -155,7 +157,7 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
           },
         ),
         CustomOutlinedButtonWidget(
-          title: 'Clear Filters',
+          title: GtinUiConstants.buttonClearFilters,
           onTap: () {
             widget.manufacturerController.clear();
             Navigator.of(context).pop(const GtinQuickFilterResult.cleared());

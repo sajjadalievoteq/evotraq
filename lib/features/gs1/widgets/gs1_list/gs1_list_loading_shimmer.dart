@@ -23,7 +23,7 @@ class Gs1ListLoadingShimmer extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isCompact = constraints.maxWidth < 420;
-          final horizontalMargin = isCompact ? 8.0 : 16.0;
+
           return Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -31,7 +31,7 @@ class Gs1ListLoadingShimmer extends StatelessWidget {
                 maxWidth: Constants.sectionMaxWidth,
               ),
               child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
+
                 itemCount: itemCount,
                 separatorBuilder: (_, __) => const SizedBox(height: 4),
                 itemBuilder: (context, index) {

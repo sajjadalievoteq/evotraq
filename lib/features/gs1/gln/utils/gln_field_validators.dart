@@ -1,5 +1,9 @@
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+
+/// Callback for GLN core groups to report field errors (same shape as GTIN detail forms).
+typedef GlnFormSetFieldError = void Function(String field, String? error);
 
 /// GLN master-data **input** validation for forms (parallel to [GtinFieldValidators]).
 ///
@@ -24,10 +28,10 @@ abstract final class GlnFieldValidators {
 
   static String? _rejectControlOrTooLong(String v, int max, String fieldLabel) {
     if (_controlChars.hasMatch(v)) {
-      return '$fieldLabel contains invalid control characters';
+      return GlnValidationConstants.invalidControlChars(fieldLabel);
     }
     if (v.length > max) {
-      return '$fieldLabel must be at most $max characters';
+      return GlnValidationConstants.mustBeAtMostChars(fieldLabel, max);
     }
     return null;
   }
@@ -38,13 +42,13 @@ abstract final class GlnFieldValidators {
   static String? validateGlnCode(String? value) {
     final s = GlnFormat.stripGlnInput(value);
     if (s.isEmpty) {
-      return 'GLN Code is required';
+      return GlnValidationConstants.glnCodeRequired;
     }
     if (!RegExp(r'^\d{13}$').hasMatch(s)) {
-      return 'GLN must be exactly 13 digits';
+      return GlnValidationConstants.glnMustBe13Digits;
     }
     if (!GlnFormat.isValidGln(s)) {
-      return 'Invalid check digit. Verify the GLN or use a GS1 check-digit calculator.';
+      return GlnValidationConstants.glnInvalidCheckDigit;
     }
     return null;
   }
@@ -75,56 +79,88 @@ abstract final class GlnFieldValidators {
   /// Required location display name.
   static String? validateLocationNameRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Location Name is required';
+      return GlnValidationConstants.locationNameRequired;
     }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Location Name');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldLocationName,
+    );
   }
 
   /// Required single address line.
   static String? validateAddressLine1Required(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Address Line 1 is required';
+      return GlnValidationConstants.addressLine1Required;
     }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Address Line 1');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldAddressLine1,
+    );
   }
 
   /// Optional second address line (same DB limit as line 1).
   static String? validateAddressLine2Optional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Address Line 2');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldAddressLine2,
+    );
   }
 
   static String? validateCityRequired(String? value) {
-    if (value == null || value.trim().isEmpty) return 'City is required';
+    if (value == null || value.trim().isEmpty) {
+      return GlnValidationConstants.cityRequired;
+    }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'City');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldCity,
+    );
   }
 
   /// DB schema: `state_province VARCHAR(255)` — column is nullable (not NOT NULL),
   /// but the form treats it as required for postal address completeness.
   static String? validateStateProvinceRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'State/Province is required';
+      return GlnValidationConstants.stateProvinceRequired;
     }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'State/Province');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldStateProvince,
+    );
   }
 
   static String? validatePostalCodeRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Postal Code is required';
+      return GlnValidationConstants.postalCodeRequired;
     }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, 64, 'Postal Code');
+    return _rejectControlOrTooLong(
+      v,
+      64,
+      GlnValidationConstants.fieldPostalCode,
+    );
   }
 
   static String? validateCountryRequired(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Country is required';
+    if (value == null || value.trim().isEmpty) {
+      return GlnValidationConstants.countryRequired;
+    }
     final v = value.trim();
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Country');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldCountry,
+    );
   }
 
   // --- Contact ---
@@ -132,11 +168,11 @@ abstract final class GlnFieldValidators {
   static String? validateEmailOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    if (v.length > 254) return 'Email must be at most 254 characters';
-    if (_controlChars.hasMatch(v)) return 'Email contains invalid characters';
+    if (v.length > 254) return GlnValidationConstants.emailMaxLength;
+    if (_controlChars.hasMatch(v)) return GlnValidationConstants.emailInvalidChars;
     // Practical RFC 5322 subset for forms
     if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(v)) {
-      return 'Enter a valid email';
+      return GlnValidationConstants.emailInvalidFormat;
     }
     return null;
   }
@@ -145,7 +181,11 @@ abstract final class GlnFieldValidators {
   static String? validateContactNameOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Contact name');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldContactName,
+    );
   }
 
   /// Optional phone — international-friendly (E.164-ish display, not strict E.164).
@@ -160,10 +200,10 @@ abstract final class GlnFieldValidators {
     }
     final compact = raw.replaceAll(RegExp(r'[\s\-().]'), '');
     if (compact.length < _minPhoneChars) {
-      return 'Phone number is too short';
+      return GlnValidationConstants.phoneTooShort;
     }
     if (!RegExp(r'^\+?[0-9]+$').hasMatch(compact)) {
-      return 'Use digits with optional + prefix (spaces/parentheses allowed)';
+      return GlnValidationConstants.phoneFormatHint;
     }
     return null;
   }
@@ -175,10 +215,10 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (v.length > _maxAi254) {
-      return 'Extension component must be at most $_maxAi254 characters (GS1 AI 254)';
+      return GlnValidationConstants.extensionAi254Max(_maxAi254);
     }
     if (!_ai254Charset.hasMatch(v)) {
-      return 'Use letters, digits, and - _ . / & + only (GS1 character set)';
+      return GlnValidationConstants.extensionAi254Charset;
     }
     return null;
   }
@@ -190,13 +230,13 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim().toUpperCase();
     if (v.isEmpty) return null;
     if (v.length != 20) {
-      return 'LEI must be exactly 20 characters';
+      return GlnValidationConstants.leiLength;
     }
     if (!RegExp(r'^[0-9A-Z]{20}$').hasMatch(v)) {
-      return 'LEI must be alphanumeric (A–Z, 0–9) only';
+      return GlnValidationConstants.leiAlphanumeric;
     }
     if (!GlnFormat.isValidLei(v)) {
-      return 'Invalid LEI check characters (ISO 7064 Mod 97-10)';
+      return GlnValidationConstants.leiInvalidCheck;
     }
     return null;
   }
@@ -212,14 +252,22 @@ abstract final class GlnFieldValidators {
   static String? validateTradingNameOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Trading name');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldTradingName,
+    );
   }
 
   /// Free-text tax / VAT ID (no country-specific rules on frontend).
   static String? validateTaxRegistrationOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'Tax / VAT registration');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.taxVatField,
+    );
   }
 
   // --- URL ---
@@ -228,17 +276,17 @@ abstract final class GlnFieldValidators {
   static String? validateHttpsUrlOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    if (v.length > 2000) return 'URL must be at most 2000 characters';
+    if (v.length > 2000) return GlnValidationConstants.urlMax;
     final uri = Uri.tryParse(v);
     if (uri == null || !uri.hasScheme) {
-      return 'Enter a valid URL (include http:// or https://)';
+      return GlnValidationConstants.urlValidWithScheme;
     }
     final s = uri.scheme.toLowerCase();
     if (s != 'http' && s != 'https') {
-      return 'URL must use http or https';
+      return GlnValidationConstants.urlHttpHttpsOnly;
     }
     if (!uri.hasAuthority || uri.host.isEmpty) {
-      return 'URL must include a host name';
+      return GlnValidationConstants.urlHostRequired;
     }
     return null;
   }
@@ -250,7 +298,7 @@ abstract final class GlnFieldValidators {
     final raw = (value ?? '').trim();
     if (raw.isEmpty) return null;
     if (raw.length > _maxDbVarchar) {
-      return 'Must be at most $_maxDbVarchar characters';
+      return GlnValidationConstants.rolesMaxLen(_maxDbVarchar);
     }
     final parts = raw.split(',').map((s) => s.trim().toUpperCase()).where((s) => s.isNotEmpty);
     for (final token in parts) {
@@ -268,10 +316,10 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (!RegExp(r'^\d+$').hasMatch(v)) {
-      return 'GS1 Company Prefix must contain only digits';
+      return GlnValidationConstants.gs1PrefixDigitsOnly;
     }
     if (v.length < 4 || v.length > 12) {
-      return 'GS1 Company Prefix must be 4–12 digits';
+      return GlnValidationConstants.gs1PrefixLength;
     }
     return null;
   }
@@ -281,7 +329,7 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (!RegExp(r'^\d{1,11}$').hasMatch(v)) {
-      return 'Location reference must be 1–11 digits';
+      return GlnValidationConstants.locationRefDigits;
     }
     return null;
   }
@@ -291,7 +339,7 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (!RegExp(r'^\d$').hasMatch(v)) {
-      return 'Check digit must be a single digit (0–9)';
+      return GlnValidationConstants.checkDigitSingle;
     }
     return null;
   }
@@ -300,7 +348,11 @@ abstract final class GlnFieldValidators {
   static String? validateMobileLocationIdOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, 128, 'Mobile location ID');
+    return _rejectControlOrTooLong(
+      v,
+      128,
+      GlnValidationConstants.fieldMobileLocationId,
+    );
   }
 
   /// Digital address value: length cap; if it looks like a URL or email, validate loosely.
@@ -308,10 +360,12 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (v.length > _maxDigitalAddressValue) {
-      return 'Digital address must be at most $_maxDigitalAddressValue characters';
+      return GlnValidationConstants.digitalAddressMaxLen(_maxDigitalAddressValue);
     }
     if (_controlChars.hasMatch(v)) {
-      return 'Digital address contains invalid control characters';
+      return GlnValidationConstants.invalidControlChars(
+        GlnValidationConstants.fieldDigitalAddress,
+      );
     }
     final lower = v.toLowerCase();
     if (lower.startsWith('http://') || lower.startsWith('https://')) {
@@ -328,12 +382,20 @@ abstract final class GlnFieldValidators {
   static String? validateLicenseNumberOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'License number');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldLicenseNumber,
+    );
   }
 
   static String? validateLicenseTypeOptional(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
-    return _rejectControlOrTooLong(v, _maxDbVarchar, 'License type');
+    return _rejectControlOrTooLong(
+      v,
+      _maxDbVarchar,
+      GlnValidationConstants.fieldLicenseType,
+    );
   }
 }

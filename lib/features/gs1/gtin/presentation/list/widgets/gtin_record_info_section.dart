@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_record_info_bar.dart';
 
 class GtinRecordInfoSection extends StatelessWidget {
   const GtinRecordInfoSection({
@@ -30,7 +30,7 @@ class GtinRecordInfoSection extends StatelessWidget {
               height: Constants.spacing,
             ),
             Gs1ListRecordInfoBar(
-              entityPlural: 'GTINs',
+              entityPlural: GtinUiConstants.entityPluralGtins,
               loadedRecords: count,
               hasMoreData: selected.hasMore,
               pageSize: pageSize,

@@ -25,7 +25,8 @@ import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_screen.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
@@ -1046,7 +1047,8 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1GlnDetailRoute,
         pageBuilder: (context, state) {
-          final glnId = state.pathParameters['glnId'] ?? '';
+          final glnId =
+              state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
           return MaterialPage(
             key: state.pageKey,
             child: BlocProvider(
@@ -1066,7 +1068,8 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1GlnEditRoute,
         pageBuilder: (context, state) {
-          final glnId = state.pathParameters['glnId'] ?? '';
+          final glnId =
+              state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
           return MaterialPage(
             key: state.pageKey,
             child: BlocProvider(

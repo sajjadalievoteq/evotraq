@@ -43,6 +43,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locationTypeValue =
+        selectedLocationType ?? GlnUiConstants.filterAll;
+    final statusValue = selectedStatus ?? GlnUiConstants.filterAll;
+
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.all(Constants.spacing),
@@ -53,13 +57,13 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Advanced Filters (Database Filters)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Text(
+              GlnUiConstants.advancedFiltersHeader,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 4),
             Text(
-              'Note: These filters are applied at database level for precise results',
+              GlnUiConstants.advancedFiltersNote,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey[600],
@@ -73,12 +77,12 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                   child: TextField(
                     controller: locationNameController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Name',
-                      hintText: 'e.g., Main Warehouse, Central Pharmacy',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelLocationNameField,
+                      hintText: GlnUiConstants.hintLocationNameExample,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -88,12 +92,12 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     controller: glnCodeController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'GLN Code',
-                      hintText: 'e.g., 1234567890123',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelGlnCode,
+                      hintText: GlnUiConstants.hintGlnCodeExample,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -104,12 +108,13 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: selectedLocationType,
-                    decoration: const InputDecoration(
-                      labelText: 'Location Type',
-                      border: OutlineInputBorder(),
+                    key: ValueKey(locationTypeValue),
+                    initialValue: locationTypeValue,
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelLocationType,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                     items: GlnUiConstants.locationTypeOptions.map((type) {
                       return DropdownMenuItem(value: type, child: Text(type));
@@ -120,12 +125,13 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: OutlineInputBorder(),
+                    key: ValueKey(statusValue),
+                    initialValue: statusValue,
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelStatus,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                     items: GlnUiConstants.statusOptions.map((status) {
                       return DropdownMenuItem(
@@ -143,12 +149,12 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                   child: TextField(
                     controller: addressController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Address',
-                      hintText: 'Street, city, state, country',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelAddress,
+                      hintText: GlnUiConstants.hintAddress,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -157,12 +163,12 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                   child: TextField(
                     controller: licenseNumberController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'License Number',
-                      hintText: 'Regulatory license number',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelLicenseNumberField,
+                      hintText: GlnUiConstants.hintLicenseNumber,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -176,11 +182,11 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     controller: contactEmailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Email',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelContactEmail,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -189,11 +195,11 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                   child: TextField(
                     controller: contactNameController,
                     textInputAction: TextInputAction.done,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Name',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: GlnUiConstants.labelContactNameField,
+                      border: const OutlineInputBorder(),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
@@ -201,12 +207,13 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: sortBy,
-              decoration: const InputDecoration(
-                labelText: 'Sort results by',
-                border: OutlineInputBorder(),
+              key: ValueKey(sortBy),
+              initialValue: sortBy,
+              decoration: InputDecoration(
+                labelText: GlnUiConstants.labelSortResultsBy,
+                border: const OutlineInputBorder(),
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: GlnUiConstants.sortFieldLabels.entries
                   .map(
@@ -224,13 +231,13 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                 Expanded(
                   child: CustomButtonWidget(
                     onTap: onApply,
-                    title: 'Apply Filters',
+                    title: GlnUiConstants.buttonApplyFilters,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: CustomOutlinedButtonWidget(
-                    title: 'Clear All',
+                    title: GlnUiConstants.buttonClearAll,
                     onTap: onClearAll,
                   ),
                 ),
@@ -254,7 +261,7 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Database-level filtering is now active! These filters are applied directly at the database for optimal performance with large datasets.',
+                      GlnUiConstants.advancedFiltersSuccessBanner,
                       style: TextStyle(fontSize: 12, color: Colors.green[700]),
                     ),
                   ),

@@ -10,6 +10,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class SGTINDetailScreen extends StatefulWidget {
   final SGTIN? sgtin; // If provided, we're viewing or editing an existing SGTIN
@@ -144,9 +145,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
     if (_formKey.currentState!.validate()) {
       // Check commissioning location for new SGTINs
       if (widget.sgtin == null && _selectedLocation == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Commissioning Location is required for new SGTINs')),
-        );
+        context.showWarning('Commissioning Location is required for new SGTINs');
         return;
       }
       
@@ -188,9 +187,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
           _isLoading = false;
         });
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        context.showError('Error: $e');
       }
     }
   }
@@ -272,8 +269,8 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
 
           // Handle successful creation/update
           if (state.creationSuccessful) {
-             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(widget.sgtin == null ? 'SGTIN created successfully' : 'SGTIN updated successfully')),
+            context.showSuccess(
+              widget.sgtin == null ? 'SGTIN created successfully' : 'SGTIN updated successfully',
             );
             context.go('/gs1/sgtins');
           }
@@ -283,9 +280,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
           });
           
           if (state.error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
-            );
+            context.showError('Error: ${state.error}');
           }
         }
       },

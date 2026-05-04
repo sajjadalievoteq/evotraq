@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gtin_country_code_picker_fiel
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
   const TradeItemDescriptiveAttributesCoreGroup({
@@ -76,11 +77,11 @@ class TradeItemDescriptiveAttributesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Trade Item Descriptive Attributes'),
+        const SectionLabel(GtinUiConstants.sectionTradeItemDescriptiveAttributes),
         GtinValidatedField(
           controller: _functionalName,
           fieldName: 'functional_name',
-          label: 'Functional Name',
+          label: GtinUiConstants.labelFunctionalName,
           readOnly: widget.isReadOnly,
           maxLength: 35,
           validator: (v) => GtinFieldValidators.validateFunctionalName(
@@ -92,7 +93,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
         GtinValidatedField(
           controller: _tradeItemDescription,
           fieldName: 'trade_item_description',
-          label: 'Trade Item Description',
+          label: GtinUiConstants.labelTradeItemDescription,
           readOnly: widget.isReadOnly,
           maxLength: 200,
           validator: GtinFieldValidators.validateTradeItemDescription,
@@ -101,8 +102,8 @@ class TradeItemDescriptiveAttributesCoreGroupState
         GtinValidatedField(
           controller: _gpcCategoryCode,
           fieldName: 'gpc_brick_code',
-          label: 'GPC Brick Code',
-          helperText: "8 digits, must start with '1000'",
+          label: GtinUiConstants.labelGpcBrickCode,
+          helperText: GtinUiConstants.helperGpcBrickCode,
           readOnly: widget.isReadOnly,
           keyboardType: TextInputType.number,
           maxLength: 8,
@@ -111,8 +112,8 @@ class TradeItemDescriptiveAttributesCoreGroupState
         const SizedBox(height: 12),
         GtinCountryCodePickerField(
           controller: _targetMarketCountryCode,
-          labelText: 'Target Market Country Code',
-          helperText: 'ISO 3166-1 numeric (3 digits)',
+          labelText: GtinUiConstants.labelTargetMarketCountryCode,
+          helperText: GtinUiConstants.helperIso3166Numeric3,
           enabled: !widget.isReadOnly,
           validator: GtinFieldValidators.validateTargetMarketCountry,
         ),
@@ -125,7 +126,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Trade Item Descriptive Attributes'),
+          const SectionLabel(GtinUiConstants.sectionTradeItemDescriptiveAttributes),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),

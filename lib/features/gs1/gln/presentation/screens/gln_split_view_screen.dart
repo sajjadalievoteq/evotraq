@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_list_screen.dart';
-import 'package:traqtrace_app/features/gs1/widgets/split_view/split_view.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 
 class GLNSplitViewScreen extends StatefulWidget {
   const GLNSplitViewScreen({super.key});
@@ -44,7 +45,7 @@ class _GLNSplitViewScreenState extends State<GLNSplitViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('GLN Management')),
+      appBar: AppBar(title: Text(GlnUiConstants.appBarManagement)),
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: _onFabPressed,
@@ -111,7 +112,7 @@ class _GLNSplitViewScreenState extends State<GLNSplitViewScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Create GLN',
+                      GlnUiConstants.splitCreateHeader,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Colors.white,
                           ),
@@ -120,7 +121,7 @@ class _GLNSplitViewScreenState extends State<GLNSplitViewScreen> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close',
+                    tooltip: GlnUiConstants.tooltipClose,
                     color: Colors.white,
                     onPressed: () {
                       setState(() => _isAddingGln = false);
@@ -144,15 +145,34 @@ class _GLNSplitViewScreenState extends State<GLNSplitViewScreen> {
       );
     }
 
-    if (_selectedGlnCode == null) {
-      return const Center(child: LoadingIndicator());
-    }
+    return BlocBuilder<GLNCubit, GLNState>(
+      builder: (context, state) {
+        if (state.status == GLNStatus.success && state.glns.isEmpty) {
+          return Center(
+            child: Text(GlnUiConstants.emptyNoMatchSearch),
+          );
+        }
 
-    return GLNDetailScreen(
-      key: ValueKey(_selectedGlnCode),
-      glnId: _selectedGlnCode,
-      isEditing: false,
-      embedded: true,
+        final effectiveCode = _selectedGlnCode ??
+            (state.glns.isNotEmpty ? state.glns.first.glnCode : null);
+
+        if (effectiveCode != null) {
+          return GLNDetailScreen(
+            key: ValueKey(effectiveCode),
+            glnId: effectiveCode,
+            isEditing: false,
+            embedded: true,
+          );
+        }
+
+        return GLNDetailScreen(
+          key: const ValueKey('__gln_split_await_list__'),
+          glnId: null,
+          isEditing: false,
+          embedded: true,
+          awaitingListSelection: true,
+        );
+      },
     );
   }
 }

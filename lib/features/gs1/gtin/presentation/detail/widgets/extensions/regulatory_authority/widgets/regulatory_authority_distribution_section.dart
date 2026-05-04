@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
-class UaeDistributionSection extends StatelessWidget {
-  const UaeDistributionSection({
+class RegulatoryAuthorityDistributionSection extends StatelessWidget {
+  const RegulatoryAuthorityDistributionSection({
     super.key,
     required this.showFieldSkeleton,
-    required this.isUaeMarket,
+    required this.isRegulatoryAuthorityMarket,
     required this.isImportedProduct,
   });
 
   final bool showFieldSkeleton;
-  final bool isUaeMarket;
+  final bool isRegulatoryAuthorityMarket;
   final bool isImportedProduct;
 
   @override
@@ -23,25 +24,27 @@ class UaeDistributionSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionLabel(
-            'UAE distribution',
+            GtinRegulatoryAuthorityExtensionUiConstants.sectionDistribution,
             padding: EdgeInsets.only(bottom: 12),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('UAE market active (target market = 784)'),
-            value: isUaeMarket,
+            title: const Text(
+                GtinRegulatoryAuthorityExtensionUiConstants.checkboxRegulatoryAuthorityMarket),
+            value: isRegulatoryAuthorityMarket,
             onChanged: null,
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Imported product (licensed agent required)'),
-            subtitle:
-                const Text('Derived from MAH country being non-UAE for UAE market'),
-            value: isUaeMarket && isImportedProduct,
+            title: const Text(GtinRegulatoryAuthorityExtensionUiConstants.checkboxImportedProduct),
+            subtitle: const Text(
+              GtinRegulatoryAuthorityExtensionUiConstants.subtitleImportedProduct,
+            ),
+            value: isRegulatoryAuthorityMarket && isImportedProduct,
             onChanged: null,
           ),
         ],
@@ -65,7 +68,7 @@ class UaeDistributionSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel(
-                'UAE distribution',
+                GtinRegulatoryAuthorityExtensionUiConstants.sectionDistribution,
                 padding: EdgeInsets.only(bottom: 12),
               ),
               GtinSkeletonOutlineField(color: c, height: 56),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_form_skeleton.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 /// Core GTIN master-data form: identity, product, packaging, status, dates, and footer button.
 /// Industry extensions are supplied via [industrySection].
+///
+/// When [fullFormShimmer] is true, a single shimmer runs over [GtinDetailFormSkeleton]
+/// while the real form stays mounted underneath (invisible).
 class GtinDetailForm extends StatelessWidget {
   const GtinDetailForm({
     super.key,
@@ -15,7 +19,7 @@ class GtinDetailForm extends StatelessWidget {
     required this.isSubmitting,
     required this.onSubmit,
     required this.submitButtonTitle,
-    this.showFieldSkeletons = false,
+    this.fullFormShimmer = false,
   });
 
   final GlobalKey<FormState> formKey;
@@ -27,37 +31,40 @@ class GtinDetailForm extends StatelessWidget {
   final VoidCallback onSubmit;
   final String submitButtonTitle;
 
-  /// When true, submit control shows a skeleton while sections load or hydrate.
-  final bool showFieldSkeletons;
+  /// One shimmer overlay for the whole form (see [Gs1FormShimmerLayer]).
+  final bool fullFormShimmer;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    final formColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (unboundSpecSection != null) ...[
+          const SizedBox(height: 24),
+          unboundSpecSection!,
+        ],
+        const SizedBox(height: 32),
+        industrySection,
+        const SizedBox(height: 32),
+        if (showSubmitButton)
+          CustomButtonWidget(
+            onTap: isSubmitting ? null : onSubmit,
+            title: submitButtonTitle,
+          ),
+      ],
+    );
 
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Form(
         key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 10),
-            if (unboundSpecSection != null) ...[
-              const SizedBox(height: 24),
-              unboundSpecSection!,
-            ],
-            const SizedBox(height: 32),
-            industrySection,
-            const SizedBox(height: 32),
-            if (showSubmitButton)
-              GtinFieldSkeletonMask(
-                show: showFieldSkeletons,
-                child: CustomButtonWidget(
-                  onTap: isSubmitting ? null : onSubmit,
-                  title: submitButtonTitle,
-                ),
-                skeletonBuilder: (c) => GtinSkeletonPrimaryButton(color: c),
-              ),
-          ],
-        ),
+        child: fullFormShimmer
+            ? Gs1FormShimmerLayer(
+                show: true,
+                formColumn: formColumn,
+                skeleton: const GtinDetailFormSkeleton(),
+              )
+            : formColumn,
       ),
     );
   }

@@ -14,12 +14,12 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_filter_value.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
 class GTINListScreen extends StatefulWidget {
-  const GTINListScreen({Key? key, this.embedded = false, this.onSelectGtin})
-    : super(key: key);
+  const GTINListScreen({super.key, this.embedded = false, this.onSelectGtin});
 
   /// When true, renders only the content (no Scaffold/AppDrawer/FAB).
   final bool embedded;
@@ -155,8 +155,8 @@ class _GTINListScreenState extends State<GTINListScreen> {
       if (result.cleared) {
         setState(() {
           _manufacturerController.clear();
-          _selectedStatus = 'All';
-          _selectedPackagingLevel = 'All';
+          _selectedStatus = GtinUiConstants.filterAll;
+          _selectedPackagingLevel = GtinUiConstants.filterAll;
         });
         _searchImmediate();
         return;
@@ -175,7 +175,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Advanced Filters'),
+          title: const Text(GtinUiConstants.dialogAdvancedFiltersTitle),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: SingleChildScrollView(
@@ -206,7 +206,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
           ),
           actions: [
             CustomTextButtonWidget(
-              title: 'Close',
+              title: GtinUiConstants.buttonClose,
               onTap: () => Navigator.of(dialogContext).pop(),
             ),
           ],
@@ -272,7 +272,9 @@ class _GTINListScreenState extends State<GTINListScreen> {
                     current.gtinListSortAscending,
                 builder: (context, cubitState) {
                   return Gs1ListSortingControls(
-                    label: 'Sort by product name (A–Z)',
+                    label: GtinUiConstants.sortByProductNameLine(
+                      cubitState.gtinListSortAscending,
+                    ),
                     sortOrder: cubitState.gtinListSortAscending
                         ? 'asc'
                         : 'desc',
@@ -303,12 +305,12 @@ class _GTINListScreenState extends State<GTINListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('GTIN Management')),
+      appBar: AppBar(title: const Text(GtinUiConstants.appBarManagement)),
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateGTIN,
-        tooltip: 'Add New GTIN',
+        tooltip: GtinUiConstants.fabAddNew,
         child: const Icon(Icons.add),
       ),
     );
@@ -343,8 +345,8 @@ class _GTINListScreenState extends State<GTINListScreen> {
 
   void _clearAllFilters() {
     setState(() {
-      _selectedStatus = 'All';
-      _selectedPackagingLevel = 'All';
+      _selectedStatus = GtinUiConstants.filterAll;
+      _selectedPackagingLevel = GtinUiConstants.filterAll;
       _registrationDateFrom = null;
       _registrationDateTo = null;
       _registrationDateFromController.clear();

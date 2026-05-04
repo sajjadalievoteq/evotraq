@@ -16,6 +16,7 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/sscc_pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 import '../../../../data/services/sscc_pharmaceutical_extension_service.dart';
 import '../../../../data/services/sscc_tobacco_extension_service.dart';
@@ -120,12 +121,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
       // Show error message
       Future.delayed(Duration.zero, () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error: No SSCC code or ID provided for lookup'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Error: No SSCC code or ID provided for lookup');
       });
     }
   }
@@ -246,13 +242,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     // Check if SSCC code has been generated
     if (_ssccCodeController.text.isEmpty &&
         widget.mode == SSCCDetailMode.create) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please generate an SSCC code first by clicking the generate button',
-          ),
-          backgroundColor: Colors.orange,
-        ),
+      context.showWarning(
+        'Please generate an SSCC code first by clicking the generate button',
       );
       return;
     }
@@ -283,13 +274,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                 ssccCode; // Update the controller with the fixed code
           } else {
             // If we couldn't fix the SSCC, show an error
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Invalid SSCC code - must be 18 digits (current: ${ssccCode.length} digits)',
-                ),
-                backgroundColor: Colors.red,
-              ),
+            context.showError(
+              'Invalid SSCC code - must be 18 digits (current: ${ssccCode.length} digits)',
             );
             setState(() {
               _isLoading = false;
@@ -312,12 +298,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
         );
       } else {
         // If no SSCC code available, we can't save
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please generate an SSCC code first'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        context.showWarning('Please generate an SSCC code first');
         setState(() {
           _isLoading = false;
         });
@@ -431,36 +412,21 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   void _generateSSCCCode() {
     // Clear any previous errors
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    context.dismissSnackBar();
 
     if (_glnController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('GLN is required to generate SSCC'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('GLN is required to generate SSCC');
       return;
     }
 
     if (_extensionDigitController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Extension Digit is required to generate SSCC'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Extension Digit is required to generate SSCC');
       return;
     }
 
     // Validate extension digit
     if (!RegExp(r'^\d$').hasMatch(_extensionDigitController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Extension Digit must be a single digit (0-9)'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Extension Digit must be a single digit (0-9)');
       return;
     }
 
@@ -470,12 +436,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     });
 
     // Show loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Generating SSCC code...'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    context.showInfo('Generating SSCC code...', duration: const Duration(seconds: 2));
 
     print(
       'Generating SSCC from GLN: ${_glnController.text}, Extension: ${_extensionDigitController.text}',
@@ -508,20 +469,9 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
             });
 
             // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.error}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 8),
-                action: SnackBarAction(
-                  label: 'OK',
-                  textColor: Colors.white,
-                  onPressed: () {
-                    // Dismiss the snackbar
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                ),
-              ),
+            context.showError(
+              'Error: ${state.error}',
+              duration: const Duration(seconds: 8),
             );
           } else if (state.status == SSCCStatus.success &&
               state.selectedSSCC != null) {
@@ -539,12 +489,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                 _isLoading = false;
               });
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('SSCC saved successfully'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              context.showSuccess('SSCC saved successfully');
 
               Navigator.of(context).pop();
             }
@@ -562,13 +507,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                 print('Fixed SSCC code from backend: $ssccCode');
               } else {
                 // Show an error if we couldn't fix the SSCC
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Invalid SSCC generated (${ssccCode.length} digits instead of 18). Trying to regenerate...',
-                    ),
-                    backgroundColor: Colors.orange,
-                  ),
+                context.showWarning(
+                  'Invalid SSCC generated (${ssccCode.length} digits instead of 18). Trying to regenerate...',
                 );
 
                 // Try to generate locally
@@ -587,12 +527,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   print('Generated SSCC locally: $ssccCode');
                 } catch (e) {
                   print('Error generating SSCC locally: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to generate valid SSCC: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  context.showError('Failed to generate valid SSCC: $e');
                   setState(() {
                     _isLoading = false;
                   });
@@ -938,11 +873,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                         tooltip: 'Scan GLN Barcode',
                         onPressed: () {
                           // This would integrate with a barcode scanner
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Barcode scanner not implemented'),
-                            ),
-                          );
+                          context.showInfo('Barcode scanner not implemented');
                         },
                       )
                     : null,

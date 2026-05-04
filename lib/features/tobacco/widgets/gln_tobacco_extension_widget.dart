@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/services/gln_tobacco_extension_service.dart';
-import '../models/gln_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 
 /// Widget that displays/edits tobacco extension data for a GLN (location)
@@ -571,7 +572,7 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
           color: _hasExtension ? Colors.brown : Colors.grey,
         ),
         title: Text(
-          'Tobacco Location Details',
+          GlnTobaccoExtensionUiConstants.expansionTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: _hasExtension ? Colors.brown : null,
@@ -585,89 +586,111 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // EU TPD Section
-                _buildSectionHeader('EU Tobacco Products Directive (TPD)'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionEuTpd),
                 SwitchListTile(
-                  title: const Text('EU TPD Registered'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchEuTpdRegistered),
                   value: _euTpdRegistered,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _euTpdRegistered = value)
                       : null,
                 ),
-                _buildTextField(_euEconomicOperatorIdController, 'EU Economic Operator ID',
-                    helperText: 'EU-TPD Economic Operator Identifier', maxLength: 50),
-                _buildTextField(_euFacilityIdController, 'EU Facility ID', maxLength: 50),
-                _buildDateField('TPD Registration Date', _euTpdRegistrationDate, (date) {
+                _buildTextField(_euEconomicOperatorIdController,
+                    GlnTobaccoExtensionUiConstants.labelEuEconomicOperatorId,
+                    helperText: GlnTobaccoExtensionUiConstants.helperEuEconomicOperatorId,
+                    maxLength: 50),
+                _buildTextField(_euFacilityIdController, GlnTobaccoExtensionUiConstants.labelEuFacilityId,
+                    maxLength: 50),
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelTpdRegistrationDate,
+                    _euTpdRegistrationDate, (date) {
                   setState(() => _euTpdRegistrationDate = date);
                 }),
                 SwitchListTile(
-                  title: const Text('First Retail Outlet'),
-                  subtitle: const Text('Is this the first retail point of sale?'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchFirstRetailOutlet),
+                  subtitle: const Text(GlnTobaccoExtensionUiConstants.subtitleFirstRetailOutlet),
                   value: _euFirstRetailOutlet,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _euFirstRetailOutlet = value)
                       : null,
                 ),
-                _buildTextField(_euImporterIdController, 'EU Importer ID', maxLength: 50),
+                _buildTextField(_euImporterIdController, GlnTobaccoExtensionUiConstants.labelEuImporterId,
+                    maxLength: 50),
                 const SizedBox(height: 16),
 
                 // Tax Stamp Authority Section
-                _buildSectionHeader('Tax Stamp Authority'),
-                _buildTextField(_taxStampAuthorityIdController, 'Tax Stamp Authority ID', maxLength: 50),
-                _buildTextField(_taxStampAuthorityNameController, 'Tax Stamp Authority Name', maxLength: 200),
-                _buildDateField('Authorization Date', _taxStampAuthorizationDate, (date) {
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionTaxStampAuthority),
+                _buildTextField(_taxStampAuthorityIdController,
+                    GlnTobaccoExtensionUiConstants.labelTaxStampAuthorityId, maxLength: 50),
+                _buildTextField(_taxStampAuthorityNameController,
+                    GlnTobaccoExtensionUiConstants.labelTaxStampAuthorityName, maxLength: 200),
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelAuthorizationDate,
+                    _taxStampAuthorizationDate, (date) {
                   setState(() => _taxStampAuthorizationDate = date);
                 }),
-                _buildDateField('Authorization Expiry', _taxStampAuthorizationExpiry, (date) {
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelAuthorizationExpiry,
+                    _taxStampAuthorizationExpiry, (date) {
                   setState(() => _taxStampAuthorizationExpiry = date);
                 }),
-                _buildTextField(_authorizedTaxStampTypesController, 'Authorized Tax Stamp Types',
-                    helperText: 'Comma-separated list', maxLength: 500),
+                _buildTextField(_authorizedTaxStampTypesController,
+                    GlnTobaccoExtensionUiConstants.labelAuthorizedTaxStampTypes,
+                    helperText: GlnTobaccoExtensionUiConstants.helperCommaSeparatedList,
+                    maxLength: 500),
                 const SizedBox(height: 16),
 
                 // FDA Tobacco Section
-                _buildSectionHeader('FDA Tobacco Registration (US)'),
-                _buildTextField(_fdaTobaccoEstablishmentIdController, 'FDA Tobacco Establishment ID', maxLength: 50),
-                _buildDateField('Registration Date', _fdaTobaccoRegistrationDate, (date) {
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionFdaTobaccoUs),
+                _buildTextField(_fdaTobaccoEstablishmentIdController,
+                    GlnTobaccoExtensionUiConstants.labelFdaTobaccoEstablishmentId, maxLength: 50),
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelRegistrationDateGeneric,
+                    _fdaTobaccoRegistrationDate, (date) {
                   setState(() => _fdaTobaccoRegistrationDate = date);
                 }),
-                _buildDateField('Registration Expiry', _fdaTobaccoRegistrationExpiry, (date) {
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelRegistrationExpiryGeneric,
+                    _fdaTobaccoRegistrationExpiry, (date) {
                   setState(() => _fdaTobaccoRegistrationExpiry = date);
                 }),
-                _buildTextField(_fdaPmtaSiteListingController, 'PMTA Site Listing', maxLength: 200),
-                _buildTextField(_fdaSeSiteListingController, 'SE Site Listing', maxLength: 200),
+                _buildTextField(_fdaPmtaSiteListingController,
+                    GlnTobaccoExtensionUiConstants.labelPmtaSiteListing, maxLength: 200),
+                _buildTextField(_fdaSeSiteListingController,
+                    GlnTobaccoExtensionUiConstants.labelSeSiteListing, maxLength: 200),
                 const SizedBox(height: 16),
 
                 // PACT Act Section
-                _buildSectionHeader('PACT Act Compliance (US)'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionPactActUs),
                 SwitchListTile(
-                  title: const Text('PACT Act Registered'),
-                  subtitle: const Text('Prevent All Cigarette Trafficking Act'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchPactActRegistered),
+                  subtitle: const Text(GlnTobaccoExtensionUiConstants.subtitlePactAct),
                   value: _pactActRegistered,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _pactActRegistered = value)
                       : null,
                 ),
                 if (_pactActRegistered) ...[
-                  _buildTextField(_pactActRegistrationNumberController, 'PACT Act Registration Number', maxLength: 50),
-                  _buildDateField('Registration Date', _pactActRegistrationDate, (date) {
+                  _buildTextField(_pactActRegistrationNumberController,
+                      GlnTobaccoExtensionUiConstants.labelPactActRegistrationNumber, maxLength: 50),
+                  _buildDateField(GlnTobaccoExtensionUiConstants.labelRegistrationDateGeneric,
+                      _pactActRegistrationDate, (date) {
                     setState(() => _pactActRegistrationDate = date);
                   }),
-                  _buildTextField(_pactAtfLicenseNumberController, 'ATF License Number', maxLength: 50),
+                  _buildTextField(_pactAtfLicenseNumberController,
+                      GlnTobaccoExtensionUiConstants.labelAtfLicenseNumber, maxLength: 50),
                 ],
                 const SizedBox(height: 16),
 
                 // State License Section
-                _buildSectionHeader('State Tobacco License'),
-                _buildTextField(_stateTobaccoLicenseNumberController, 'State License Number', maxLength: 50),
-                _buildTextField(_stateTobaccoLicenseTypeController, 'License Type', maxLength: 50),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionStateTobaccoLicense),
+                _buildTextField(_stateTobaccoLicenseNumberController,
+                    GlnTobaccoExtensionUiConstants.labelStateLicenseNumber, maxLength: 50),
+                _buildTextField(_stateTobaccoLicenseTypeController,
+                    GlnTobaccoExtensionUiConstants.labelLicenseTypeShort, maxLength: 50),
                 DropdownButtonFormField<String>(
                   value: _stateTobaccoLicenseState,
                   decoration: const InputDecoration(
-                    labelText: 'State',
+                    labelText: GlnTobaccoExtensionUiConstants.labelStateDropdown,
                     border: OutlineInputBorder(),
                   ),
                   items: [
-                    const DropdownMenuItem<String>(value: null, child: Text('Select State')),
+                    const DropdownMenuItem<String>(
+                        value: null, child: Text(GlnExtensionSharedUiConstants.selectState)),
                     ..._usStateOptions.entries.map((entry) => DropdownMenuItem<String>(
                       value: entry.key,
                       child: Text('${entry.key} - ${entry.value}'),
@@ -676,145 +699,168 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                   onChanged: widget.isEditing ? (value) => setState(() => _stateTobaccoLicenseState = value) : null,
                 ),
                 const SizedBox(height: 16),
-                _buildDateField('License Expiry', _stateTobaccoLicenseExpiry, (date) {
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelLicenseExpiryGeneric,
+                    _stateTobaccoLicenseExpiry, (date) {
                   setState(() => _stateTobaccoLicenseExpiry = date);
                 }),
                 const SizedBox(height: 16),
 
                 // Wholesale Section
-                _buildSectionHeader('Wholesale/Distribution'),
-                _buildTextField(_tobaccoWholesaleLicenseNumberController, 'Wholesale License Number', maxLength: 50),
-                _buildDateField('Wholesale License Expiry', _tobaccoWholesaleLicenseExpiry, (date) {
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionWholesaleDistribution),
+                _buildTextField(_tobaccoWholesaleLicenseNumberController,
+                    GlnTobaccoExtensionUiConstants.labelWholesaleLicenseNumber, maxLength: 50),
+                _buildDateField(GlnTobaccoExtensionUiConstants.labelWholesaleLicenseExpiry,
+                    _tobaccoWholesaleLicenseExpiry, (date) {
                   setState(() => _tobaccoWholesaleLicenseExpiry = date);
                 }),
                 SwitchListTile(
-                  title: const Text('Master Settlement Agreement Participant'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchMsaParticipant),
                   value: _masterSettlementAgreementParticipant,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _masterSettlementAgreementParticipant = value)
                       : null,
                 ),
                 if (_masterSettlementAgreementParticipant)
-                  _buildTextField(_msaEscrowAccountStatusController, 'MSA Escrow Account Status', maxLength: 50),
+                  _buildTextField(_msaEscrowAccountStatusController,
+                      GlnTobaccoExtensionUiConstants.labelMsaEscrowAccountStatus, maxLength: 50),
                 const SizedBox(height: 16),
 
                 // Manufacturing Section
-                _buildSectionHeader('Manufacturing'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionManufacturing),
                 SwitchListTile(
-                  title: const Text('Manufacturing Facility'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchManufacturingFacility),
                   value: _isManufacturingFacility,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _isManufacturingFacility = value)
                       : null,
                 ),
                 if (_isManufacturingFacility) ...[  
-                  _buildTextField(_manufacturingLicenseNumberController, 'Manufacturing License Number', maxLength: 50),
-                  _buildDateField('Manufacturing License Expiry', _manufacturingLicenseExpiry, (date) {
+                  _buildTextField(_manufacturingLicenseNumberController,
+                      GlnTobaccoExtensionUiConstants.labelManufacturingLicenseNumber, maxLength: 50),
+                  _buildDateField(GlnTobaccoExtensionUiConstants.labelManufacturingLicenseExpiry,
+                      _manufacturingLicenseExpiry, (date) {
                     setState(() => _manufacturingLicenseExpiry = date);
                   }),
-                  _buildTextField(_manufacturingCapacityController, 'Manufacturing Capacity (units/day)',
+                  _buildTextField(_manufacturingCapacityController,
+                      GlnTobaccoExtensionUiConstants.labelManufacturingCapacity,
                       keyboardType: TextInputType.number, maxLength: 20),
-                  _buildTextField(_tobaccoTypesManufacturedController, 'Tobacco Types Manufactured',
-                      helperText: 'e.g., Cigarettes, Cigars, RYO, etc.', maxLength: 500),
+                  _buildTextField(_tobaccoTypesManufacturedController,
+                      GlnTobaccoExtensionUiConstants.labelTobaccoTypesManufactured,
+                      helperText: GlnTobaccoExtensionUiConstants.helperTobaccoTypesManufactured,
+                      maxLength: 500),
                 ],
                 const SizedBox(height: 16),
 
                 // UI Issuer Section
-                _buildSectionHeader('Unique Identifier Issuance'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionUniqueIdentifierIssuance),
                 SwitchListTile(
-                  title: const Text('UI Issuer'),
-                  subtitle: const Text('Authorized to issue Unique Identifiers'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchUiIssuer),
+                  subtitle: const Text(GlnTobaccoExtensionUiConstants.subtitleUiIssuer),
                   value: _isUiIssuer,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _isUiIssuer = value)
                       : null,
                 ),
                 if (_isUiIssuer) ...[  
-                  _buildTextField(_uiIssuerRegistrationIdController, 'UI Issuer Registration ID', maxLength: 50),
-                  _buildTextField(_uiSystemProviderController, 'UI System Provider', maxLength: 200),
-                  _buildTextField(_antiTamperingDeviceProviderController, 'Anti-Tampering Device Provider', maxLength: 200),
+                  _buildTextField(_uiIssuerRegistrationIdController,
+                      GlnTobaccoExtensionUiConstants.labelUiIssuerRegistrationId, maxLength: 50),
+                  _buildTextField(_uiSystemProviderController,
+                      GlnTobaccoExtensionUiConstants.labelUiSystemProvider, maxLength: 200),
+                  _buildTextField(_antiTamperingDeviceProviderController,
+                      GlnTobaccoExtensionUiConstants.labelAntiTamperingDeviceProvider, maxLength: 200),
                 ],
                 const SizedBox(height: 16),
 
                 // Import/Export Section
-                _buildSectionHeader('Import/Export'),
-                _buildTextField(_customsRegistrationNumberController, 'Customs Registration Number', maxLength: 50),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionImportExport),
+                _buildTextField(_customsRegistrationNumberController,
+                    GlnTobaccoExtensionUiConstants.labelCustomsRegistrationNumber, maxLength: 50),
                 SwitchListTile(
-                  title: const Text('Authorized Economic Operator (AEO)'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchAuthorizedEconomicOperator),
                   value: _authorizedEconomicOperator,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _authorizedEconomicOperator = value)
                       : null,
                 ),
                 if (_authorizedEconomicOperator) ...[  
-                  _buildTextField(_aeoCertificateNumberController, 'AEO Certificate Number', maxLength: 50),
-                  _buildDateField('AEO Certificate Expiry', _aeoCertificateExpiry, (date) {
+                  _buildTextField(_aeoCertificateNumberController,
+                      GlnTobaccoExtensionUiConstants.labelAeoCertificateNumber, maxLength: 50),
+                  _buildDateField(GlnTobaccoExtensionUiConstants.labelAeoCertificateExpiry, _aeoCertificateExpiry,
+                      (date) {
                     setState(() => _aeoCertificateExpiry = date);
                   }),
                 ],
                 SwitchListTile(
-                  title: const Text('Bonded Warehouse'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchBondedWarehouse),
                   value: _bondedWarehouse,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _bondedWarehouse = value)
                       : null,
                 ),
                 if (_bondedWarehouse)
-                  _buildTextField(_bondedWarehouseLicenseNumberController, 'Bonded Warehouse License Number', maxLength: 50),
+                  _buildTextField(_bondedWarehouseLicenseNumberController,
+                      GlnTobaccoExtensionUiConstants.labelBondedWarehouseLicenseNumber, maxLength: 50),
                 const SizedBox(height: 16),
 
                 // Security Section
-                _buildSectionHeader('Security & Compliance'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionSecurityCompliance),
                 SwitchListTile(
-                  title: const Text('Has Security Features'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchHasSecurityFeatures),
                   value: _hasSecurityFeatures,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _hasSecurityFeatures = value)
                       : null,
                 ),
                 SwitchListTile(
-                  title: const Text('Video Surveillance'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchVideoSurveillance),
                   value: _videoSurveillance,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _videoSurveillance = value)
                       : null,
                 ),
                 SwitchListTile(
-                  title: const Text('Access Control System'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchAccessControlSystem),
                   value: _accessControlSystem,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _accessControlSystem = value)
                       : null,
                 ),
-                _buildTextField(_inventoryTrackingSystemController, 'Inventory Tracking System', maxLength: 200),
+                _buildTextField(_inventoryTrackingSystemController,
+                    GlnTobaccoExtensionUiConstants.labelInventoryTrackingSystem, maxLength: 200),
                 const SizedBox(height: 16),
 
                 // Retail Section
-                _buildSectionHeader('Retail'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionRetail),
                 SwitchListTile(
-                  title: const Text('Retail Location'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchRetailLocation),
                   value: _isRetailLocation,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _isRetailLocation = value)
                       : null,
                 ),
                 if (_isRetailLocation) ...[  
-                  _buildTextField(_ageVerificationSystemController, 'Age Verification System', maxLength: 200),
-                  _buildTextField(_tobaccoSalesPermitNumberController, 'Tobacco Sales Permit Number', maxLength: 50),
-                  _buildDateField('Sales Permit Expiry', _tobaccoSalesPermitExpiry, (date) {
+                  _buildTextField(_ageVerificationSystemController,
+                      GlnTobaccoExtensionUiConstants.labelAgeVerificationSystem, maxLength: 200),
+                  _buildTextField(_tobaccoSalesPermitNumberController,
+                      GlnTobaccoExtensionUiConstants.labelTobaccoSalesPermitNumber, maxLength: 50),
+                  _buildDateField(GlnTobaccoExtensionUiConstants.labelSalesPermitExpiry, _tobaccoSalesPermitExpiry,
+                      (date) {
                     setState(() => _tobaccoSalesPermitExpiry = date);
                   }),
                 ],
                 const SizedBox(height: 16),
 
                 // Operational Section
-                _buildSectionHeader('Operational Details'),
-                _buildTextField(_receivingHoursController, 'Receiving Hours', maxLength: 100),
-                _buildTextField(_dispatchHoursController, 'Dispatch Hours', maxLength: 100),
-                _buildTextField(_storageCapacityPalletsController, 'Storage Capacity (pallets)',
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionOperationalDetails),
+                _buildTextField(_receivingHoursController,
+                    GlnTobaccoExtensionUiConstants.labelReceivingHours, maxLength: 100),
+                _buildTextField(_dispatchHoursController,
+                    GlnTobaccoExtensionUiConstants.labelDispatchHours, maxLength: 100),
+                _buildTextField(_storageCapacityPalletsController,
+                    GlnTobaccoExtensionUiConstants.labelStorageCapacityPallets,
                     keyboardType: TextInputType.number, maxLength: 20),
                 SwitchListTile(
-                  title: const Text('Climate Control'),
+                  title: const Text(GlnTobaccoExtensionUiConstants.switchClimateControl),
                   value: _hasClimateControl,
                   onChanged: widget.isEditing
                       ? (value) => setState(() => _hasClimateControl = value)
@@ -824,12 +870,14 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildTextField(_climateControlTempMinController, 'Min Temp (°C)',
+                        child: _buildTextField(_climateControlTempMinController,
+                            GlnTobaccoExtensionUiConstants.labelMinTempC,
                             keyboardType: TextInputType.number, maxLength: 10),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _buildTextField(_climateControlTempMaxController, 'Max Temp (°C)',
+                        child: _buildTextField(_climateControlTempMaxController,
+                            GlnTobaccoExtensionUiConstants.labelMaxTempC,
                             keyboardType: TextInputType.number, maxLength: 10),
                       ),
                     ],
@@ -837,12 +885,14 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildTextField(_climateControlHumidityMinController, 'Min Humidity (%)',
+                        child: _buildTextField(_climateControlHumidityMinController,
+                            GlnTobaccoExtensionUiConstants.labelMinHumidityPct,
                             keyboardType: TextInputType.number, maxLength: 10),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _buildTextField(_climateControlHumidityMaxController, 'Max Humidity (%)',
+                        child: _buildTextField(_climateControlHumidityMaxController,
+                            GlnTobaccoExtensionUiConstants.labelMaxHumidityPct,
                             keyboardType: TextInputType.number, maxLength: 10),
                       ),
                     ],
@@ -851,28 +901,38 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 const SizedBox(height: 16),
 
                 // Responsible Persons Section
-                _buildSectionHeader('Responsible Persons'),
-                _buildTextField(_responsiblePersonNameController, 'Responsible Person Name', maxLength: 200),
-                _buildTextField(_responsiblePersonEmailController, 'Responsible Person Email', maxLength: 255),
-                _buildTextField(_responsiblePersonPhoneController, 'Responsible Person Phone', maxLength: 50),
-                _buildTextField(_qualityManagerNameController, 'Quality Manager Name', maxLength: 200),
-                _buildTextField(_qualityManagerEmailController, 'Quality Manager Email', maxLength: 255),
-                _buildTextField(_qualityManagerPhoneController, 'Quality Manager Phone', maxLength: 50),
-                _buildTextField(_regulatoryAffairsContactNameController, 'Regulatory Affairs Contact Name', maxLength: 200),
-                _buildTextField(_regulatoryAffairsContactEmailController, 'Regulatory Affairs Contact Email', maxLength: 255),
-                _buildTextField(_regulatoryAffairsContactPhoneController, 'Regulatory Affairs Contact Phone', maxLength: 50),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionResponsiblePersons),
+                _buildTextField(_responsiblePersonNameController,
+                    GlnTobaccoExtensionUiConstants.labelResponsiblePersonName, maxLength: 200),
+                _buildTextField(_responsiblePersonEmailController,
+                    GlnTobaccoExtensionUiConstants.labelResponsiblePersonEmail, maxLength: 255),
+                _buildTextField(_responsiblePersonPhoneController,
+                    GlnTobaccoExtensionUiConstants.labelResponsiblePersonPhone, maxLength: 50),
+                _buildTextField(_qualityManagerNameController,
+                    GlnTobaccoExtensionUiConstants.labelQualityManagerName, maxLength: 200),
+                _buildTextField(_qualityManagerEmailController,
+                    GlnTobaccoExtensionUiConstants.labelQualityManagerEmail, maxLength: 255),
+                _buildTextField(_qualityManagerPhoneController,
+                    GlnTobaccoExtensionUiConstants.labelQualityManagerPhone, maxLength: 50),
+                _buildTextField(_regulatoryAffairsContactNameController,
+                    GlnTobaccoExtensionUiConstants.labelRegulatoryAffairsContactName, maxLength: 200),
+                _buildTextField(_regulatoryAffairsContactEmailController,
+                    GlnTobaccoExtensionUiConstants.labelRegulatoryAffairsContactEmail, maxLength: 255),
+                _buildTextField(_regulatoryAffairsContactPhoneController,
+                    GlnTobaccoExtensionUiConstants.labelRegulatoryAffairsContactPhone, maxLength: 50),
                 const SizedBox(height: 16),
 
                 // International Section
-                _buildSectionHeader('International Regulatory IDs'),
+                _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionInternationalRegulatoryIds),
                 DropdownButtonFormField<String>(
                   value: _whoFctcPartyCountry,
                   decoration: const InputDecoration(
-                    labelText: 'WHO FCTC Party Country',
+                    labelText: GlnTobaccoExtensionUiConstants.labelWhoFctcPartyCountry,
                     border: OutlineInputBorder(),
                   ),
                   items: [
-                    const DropdownMenuItem<String>(value: null, child: Text('Select Country')),
+                    const DropdownMenuItem<String>(
+                        value: null, child: Text(GlnExtensionSharedUiConstants.selectCountry)),
                     ..._countryOptions.entries.map((entry) => DropdownMenuItem<String>(
                       value: entry.key,
                       child: Text('${entry.key} - ${entry.value}'),
@@ -881,9 +941,12 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                   onChanged: widget.isEditing ? (value) => setState(() => _whoFctcPartyCountry = value) : null,
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(_ukTobaccoTraceabilityIdController, 'UK Tobacco Traceability ID', maxLength: 50),
-                _buildTextField(_canadaTobaccoLicenseIdController, 'Canada Tobacco License ID', maxLength: 50),
-                _buildTextField(_australiaTobaccoLicenseIdController, 'Australia Tobacco License ID', maxLength: 50),
+                _buildTextField(_ukTobaccoTraceabilityIdController,
+                    GlnTobaccoExtensionUiConstants.labelUkTobaccoTraceabilityId, maxLength: 50),
+                _buildTextField(_canadaTobaccoLicenseIdController,
+                    GlnTobaccoExtensionUiConstants.labelCanadaTobaccoLicenseId, maxLength: 50),
+                _buildTextField(_australiaTobaccoLicenseIdController,
+                    GlnTobaccoExtensionUiConstants.labelAustraliaTobaccoLicenseId, maxLength: 50),
               ],
             ),
           ),
@@ -958,7 +1021,7 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
               Text(
                 date != null
                     ? '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}'
-                    : 'Not set',
+                    : GlnExtensionSharedUiConstants.dateNotSet,
                 style: TextStyle(
                   color: date != null ? null : Colors.grey,
                 ),

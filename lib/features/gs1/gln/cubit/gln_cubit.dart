@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/services/gln_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
-
-export 'gln_state.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 
 class GLNCubit extends Cubit<GLNState> {
   final GLNService _glnService;
@@ -42,13 +42,20 @@ class GLNCubit extends Cubit<GLNState> {
     String sortBy = 'createdAt',
     String direction = 'DESC',
   }) async {
+    // Prevent overlapping "load more" requests (common source of scroll jank).
+    if (page > 0 && state.isFetchingMore) {
+      return;
+    }
+
     if (page == 0) {
-      emit(state.copyWith(
-        status: GLNStatus.loading,
-        isFetchingMore: false,
-      ));
+      emit(
+        state.copyWith(
+          isGlnListLoading: true,
+          isFetchingMore: false,
+          clearListFetchError: true,
+        ),
+      );
     } else {
-      if (state.isFetchingMore) return;
       emit(state.copyWith(isFetchingMore: true));
     }
 
@@ -74,32 +81,58 @@ class GLNCubit extends Cubit<GLNState> {
       final int totalElements = result['totalElements'] ?? 0;
       final bool hasMore = (page + 1) * size < totalElements;
 
+      final bool detailLoading = state.status == GLNStatus.loading;
+      final GLNStatus nextStatus =
+          detailLoading ? GLNStatus.loading : GLNStatus.success;
+
       if (page == 0) {
         emit(state.copyWith(
-          status: GLNStatus.success,
+          status: nextStatus,
+          isGlnListLoading: false,
           glns: glns,
           totalItems: totalElements,
           currentPage: page,
           pageSize: size,
           hasMoreData: hasMore,
           isFetchingMore: false,
+          clearListFetchError: true,
         ));
       } else {
         final List<GLN> updatedGlns = List.from(state.glns)..addAll(glns);
         emit(state.copyWith(
-          status: GLNStatus.success,
+          status: nextStatus,
+          isGlnListLoading: false,
           glns: updatedGlns,
           totalItems: totalElements,
           currentPage: page,
           pageSize: size,
           hasMoreData: hasMore,
           isFetchingMore: false,
+          clearListFetchError: true,
         ));
       }
     } catch (e) {
-      emit(state.copyWith(isFetchingMore: false));
-      _handleError(e);
+      _handleListFetchError(e);
     }
+  }
+
+  void clearGlnListError() {
+    if (state.listFetchError == null) return;
+    emit(state.copyWith(clearListFetchError: true));
+  }
+
+  void _handleListFetchError(Object e) {
+    String errorMessage = e.toString();
+    if (e is ApiException) {
+      errorMessage = e.getUserFriendlyMessage();
+    }
+    emit(state.copyWith(
+      isGlnListLoading: false,
+      isFetchingMore: false,
+      listFetchError: errorMessage,
+      listFetchErrorBody: e is ApiException ? e.responseBody : null,
+      listFetchErrorStatusCode: e is ApiException ? e.statusCode : null,
+    ));
   }
 
   Future<void> fetchGLNById(String id) async {
@@ -184,7 +217,7 @@ class GLNCubit extends Cubit<GLNState> {
       } else {
         emit(state.copyWith(
           status: GLNStatus.error,
-          error: 'Failed to delete GLN',
+          error: GlnUiConstants.errorDeleteGlnFailed,
         ));
       }
     } catch (e) {

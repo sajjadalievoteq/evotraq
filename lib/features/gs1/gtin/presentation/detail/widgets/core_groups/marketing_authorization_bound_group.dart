@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_date_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
+import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 
 class MarketingAuthorizationBoundGroup extends StatefulWidget {
   const MarketingAuthorizationBoundGroup({
@@ -90,7 +91,7 @@ class MarketingAuthorizationBoundGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Marketing Authorization'),
+        const SectionLabel(GtinUiConstants.sectionMarketingAuthorization),
         GtinValidatedField(
           controller: _number,
           fieldName: 'registrationNumber',
@@ -102,9 +103,9 @@ class MarketingAuthorizationBoundGroupState
           validator: GtinFieldValidators.validateMarketingAuthorizationNumber,
         ),
         const SizedBox(height: 16),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _validFromDisplay,
-          label: 'Authorization Validity From Date',
+          label: GtinUiConstants.labelAuthorizationValidityFromDate,
           enabled: !widget.isReadOnly,
           onPick: () => _pickDate(
             current: _validFrom,
@@ -116,9 +117,9 @@ class MarketingAuthorizationBoundGroupState
               : GtinFieldValidators.validateAuthorizationValidityFromDate,
         ),
         const SizedBox(height: 16),
-        GtinDateField(
+        Gs1DateFormField(
           controller: _validToDisplay,
-          label: 'Authorization Validity To Date',
+          label: GtinUiConstants.labelAuthorizationValidityToDate,
           enabled: !widget.isReadOnly,
           onPick: () => _pickDate(
             current: _validTo,
@@ -141,7 +142,7 @@ class MarketingAuthorizationBoundGroupState
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel('Marketing Authorization'),
+          const SectionLabel(GtinUiConstants.sectionMarketingAuthorization),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 16),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
@@ -53,12 +55,18 @@ class VerifyEmailContentWidget extends StatelessWidget {
                     ),
                   ),
                 )
-              : Icon(
-                  successMessage != null
-                      ? Icons.verified_user_rounded
-                      : Icons.mark_email_unread_outlined,
-                  size: 48,
-                  color: successMessage != null ? success : error,
+              : Center(
+                  child: SvgPicture.asset(
+                    successMessage != null
+                        ? AppAssets.iconCheck
+                        : AppAssets.iconMail,
+                    width: 48,
+                    height: 48,
+                    colorFilter: ColorFilter.mode(
+                      successMessage != null ? success : error,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
         ),
         const SizedBox(height: 24),

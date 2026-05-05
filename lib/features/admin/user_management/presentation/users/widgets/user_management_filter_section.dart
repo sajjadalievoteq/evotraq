@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
@@ -64,7 +66,19 @@ class UserManagementFilterSection extends StatelessWidget {
                         controller: searchController,
                         decoration: InputDecoration(
                           hintText: UserManagementConstants.searchHint,
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: SvgPicture.asset(
+                              AppAssets.iconSearch,
+                              width: 18,
+                              height: 18,
+                              colorFilter: ColorFilter.mode(
+                                Theme.of(context).iconTheme.color ??
+                                    Theme.of(context).colorScheme.onSurface,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -141,12 +155,28 @@ class UserManagementFilterSection extends StatelessWidget {
                       children: [
                         ElevatedButton.icon(
                           onPressed: onRefresh,
-                          icon: const Icon(Icons.refresh),
+                          icon: SvgPicture.asset(
+                            AppAssets.iconRefresh,
+                            width: 18,
+                            height: 18,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           label: const Text(UserManagementConstants.refreshLabel),
                         ),
                         ElevatedButton.icon(
                           onPressed: onAddUser,
-                          icon: const Icon(Icons.add),
+                          icon: SvgPicture.asset(
+                            AppAssets.iconPlus,
+                            width: 18,
+                            height: 18,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           label: const Text(UserManagementConstants.addUserLabel),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryColor,

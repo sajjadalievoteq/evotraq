@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
@@ -43,7 +45,19 @@ class UserApprovalsHeaderSection extends StatelessWidget {
       controller: searchController,
       decoration: InputDecoration(
         hintText: UserManagementConstants.searchHint,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(14),
+          child: SvgPicture.asset(
+            AppAssets.iconSearch,
+            width: 18,
+            height: 18,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).iconTheme.color ??
+                  Theme.of(context).colorScheme.onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
         ),
@@ -64,7 +78,15 @@ class UserApprovalsHeaderSection extends StatelessWidget {
             )
           : CustomButtonWidget(
               onTap: onRefresh,
-              icon: Icons.refresh,
+              iconWidget: SvgPicture.asset(
+                AppAssets.iconRefresh,
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
+              ),
               iconOnly: true,
               tooltip: UserManagementConstants.refreshLabel,
             ),

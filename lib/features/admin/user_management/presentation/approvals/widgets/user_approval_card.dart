@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
@@ -101,7 +103,15 @@ class UserApprovalCard extends StatelessWidget {
                         child: CustomButtonWidget(
                           onTap: () => onApprove(user),
                           title: UserManagementConstants.approveLabel,
-                          icon: Icons.check_circle,
+                          iconWidget: SvgPicture.asset(
+                            AppAssets.iconCheck,
+                            width: 18,
+                            height: 18,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           backgroundColor: AppTheme.successColor,
                           foregroundColor: Colors.white,
                         ),
@@ -133,7 +143,15 @@ class UserApprovalCard extends StatelessWidget {
                         child: CustomButtonWidget(
                           onTap: () => onApprove(user),
                           title: UserManagementConstants.approveLabel,
-                          icon: Icons.check_circle,
+                          iconWidget: SvgPicture.asset(
+                            AppAssets.iconCheck,
+                            width: 18,
+                            height: 18,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           backgroundColor: AppTheme.successColor,
                           foregroundColor: Colors.white,
                         ),

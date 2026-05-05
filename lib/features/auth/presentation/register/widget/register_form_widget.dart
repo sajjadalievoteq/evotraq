@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -200,7 +201,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthInputField(
             controller: _firstNameController,
             labelText: 'First Name',
-            prefixIcon: Icons.person_outline,
+            prefixAsset: AppAssets.iconUser,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your first name';
@@ -213,7 +214,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthInputField(
             controller: _lastNameController,
             labelText: 'Last Name',
-            prefixIcon: Icons.person_outline,
+            prefixAsset: AppAssets.iconUser,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your last name';
@@ -227,7 +228,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             controller: _usernameController,
             labelText: 'Username',
             type: AuthInputFieldType.username,
-            prefixIcon: Icons.account_circle,
+            prefixAsset: AppAssets.iconUser,
             onChanged: _handleUsernameChanged,
             suffixIcon:
                 _usernameAvailabilityStatus ==
@@ -293,7 +294,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             controller: _confirmPasswordController,
             labelText: 'Confirm Password',
             type: AuthInputFieldType.password,
-            prefixIcon: Icons.lock_outline,
+            prefixAsset: AppAssets.iconLock,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please confirm your password';

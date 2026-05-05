@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
@@ -41,7 +43,12 @@ class ForgotPasswordForm extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Icon
-          Icon(Icons.lock_reset, size: 80, color: primary),
+          SvgPicture.asset(
+            AppAssets.iconLock,
+            width: 80,
+            height: 80,
+            colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+          ),
 
           const SizedBox(height: 24),
 

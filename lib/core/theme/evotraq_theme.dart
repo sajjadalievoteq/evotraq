@@ -4,8 +4,6 @@
 // NOTE: This file is intentionally kept standalone so it can be
 // swapped in/out without touching app logic (routing/blocs/services).
 
-import 'dart:ui' show FontFeature;
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -305,10 +303,11 @@ class EvotraqText {
       height: 1.3,
       letterSpacing: 0.88,
       fontWeight: FontWeight.w500,
+      color: c.fg2,
     );
     final monoBase = m(mono.bodyMedium).copyWith(
-      fontSize: 14,
-      height: 1.45,
+      fontSize: 13,
+      height: 1.4,
       fontWeight: FontWeight.w400,
     );
 
@@ -321,9 +320,16 @@ class EvotraqText {
       bodySm: bodySm,
       cap: cap,
       mono: monoBase,
-      monoNum: monoBase.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+      monoNum: monoBase.copyWith(
+        fontWeight: FontWeight.w500,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
     );
   }
+
+  /// Pull from context — we stash it on the theme via an extension.
+  static EvotraqText of(BuildContext context) =>
+      Theme.of(context).extension<_EvotraqTextExt>()!.text;
 }
 
 class _EvotraqTextExt extends ThemeExtension<_EvotraqTextExt> {
@@ -338,18 +344,87 @@ class _EvotraqTextExt extends ThemeExtension<_EvotraqTextExt> {
 }
 
 class EvotraqSpacing {
-  static const double xs = 6;
-  static const double sm = 10;
-  static const double md = 14;
-  static const double lg = 18;
+  // 4-pt scale used throughout the designs
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
   static const double xl = 24;
-  static const double buttonH = 38;
+  static const double xxl = 32;
+  static const double xxxl = 48;
+
+  // Common paddings
+  static const EdgeInsets cardPad = EdgeInsets.all(20);
+  static const EdgeInsets surfacePad = EdgeInsets.all(16);
+  static const EdgeInsets pagePad =
+      EdgeInsets.symmetric(horizontal: 24, vertical: 24);
+
+  // Component heights
+  static const double buttonH = 36;
+  static const double buttonHLarge = 44;
+  static const double inputH = 44;
+  static const double topbarH = 64;
+  static const double sidebarW = 240;
+  static const double sidebarWClose = 64;
 }
 
 class EvotraqRadius {
-  static const BorderRadius input = BorderRadius.all(Radius.circular(4));
-  static const BorderRadius button = BorderRadius.all(Radius.circular(4));
+  // Tight corners: 4px default
+  static const Radius xs = Radius.circular(2);
+  static const Radius sm = Radius.circular(3);
   static const Radius md = Radius.circular(4);
+  static const Radius lg = Radius.circular(8);
+  static const Radius pill = Radius.circular(999);
+
+  static const BorderRadius card = BorderRadius.all(md);
+  static const BorderRadius input = BorderRadius.all(md);
+  static const BorderRadius button = BorderRadius.all(md);
+  static const BorderRadius chip = BorderRadius.all(sm);
+}
+
+class EvotraqDuration {
+  static const Duration fast = Duration(milliseconds: 120);
+  static const Duration normal = Duration(milliseconds: 200);
+  static const Duration slow = Duration(milliseconds: 400);
+  static const Cubic ease = Cubic(0.4, 0.0, 0.2, 1.0);
+}
+
+class EvotraqShadows {
+  static List<BoxShadow> sm({required Brightness brightness}) => [
+        BoxShadow(
+          color: brightness == Brightness.dark
+              ? const Color(0x66000000)
+              : const Color(0x0F000000),
+          blurRadius: 2,
+          offset: const Offset(0, 1),
+        ),
+      ];
+
+  static List<BoxShadow> md({required Brightness brightness}) => [
+        BoxShadow(
+          color: brightness == Brightness.dark
+              ? const Color(0x99000000)
+              : const Color(0x1F000000),
+          blurRadius: 24,
+          spreadRadius: -8,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  static List<BoxShadow> lg({required Brightness brightness}) => [
+        BoxShadow(
+          color: brightness == Brightness.dark
+              ? const Color(0xB3000000)
+              : const Color(0x2E000000),
+          blurRadius: 48,
+          spreadRadius: -12,
+          offset: const Offset(0, 24),
+        ),
+      ];
+
+  static List<BoxShadow> sigGlow(EvotraqColors c) => [
+        BoxShadow(color: c.sigGlow, blurRadius: 16, spreadRadius: -2),
+      ];
 }
 
 class EvotraqTheme {
@@ -369,7 +444,10 @@ class EvotraqTheme {
       colorScheme: ColorScheme(
         brightness: b,
         primary: c.sig,
-        onPrimary: c.sigInk,
+        // For Evotraq filled buttons we want:
+        // - light mode: white text/icons on green
+        // - dark mode: slightly gray text/icons on lime
+        onPrimary: b == Brightness.dark ? c.fg1 : Colors.white,
         secondary: c.fg1,
         onSecondary: c.bg0,
         error: c.err,
@@ -406,7 +484,20 @@ class EvotraqTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: c.sig,
-          foregroundColor: c.sigInk,
+          // Handoff token `sigInk` is great for dark text, but for buttons we want:
+          // - light mode: white text on green
+          // - dark mode: slightly gray text on lime
+          foregroundColor: b == Brightness.dark ? c.fg1 : Colors.white,
+          textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
+          minimumSize: const Size(0, EvotraqSpacing.buttonH),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: c.sig,
+          foregroundColor: b == Brightness.dark ? c.fg1 : Colors.white,
           textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
@@ -459,8 +550,150 @@ class EvotraqTheme {
   }
 }
 
-extension EvotraqThemeX on BuildContext {
+extension EvotraqContextX on BuildContext {
   EvotraqColors get colors => EvotraqColors.of(this);
-  EvotraqText get text => Theme.of(this).extension<_EvotraqTextExt>()!.text;
+  EvotraqText get text => EvotraqText.of(this);
+}
+
+/// Convenience semantic aliases for handoff tokens.
+///
+/// This does **not** change any handoff constants; it only provides readable
+/// names (primary/secondary/background/etc.) that map onto Evotraq tokens.
+extension EvotraqSemanticColors on EvotraqColors {
+  Color get primary => sig;
+  Color get onPrimary => sigInk;
+  Color get primarySoft => sigSoft;
+  Color get primaryGlow => sigGlow;
+
+  Color get background => bg0;
+  Color get surface => bg1;
+  Color get surfaceAlt => bg2;
+  Color get border => line1;
+  Color get borderStrong => lineStrong;
+
+  Color get textPrimary => fg0;
+  Color get textSecondary => fg1;
+  Color get textMuted => fg2;
+  Color get textFaint => fg3;
+  Color get textOnInverse => fgInv;
+
+  Color get success => ok;
+  Color get warning => warn;
+  Color get danger => err;
+  Color get infoBlue => info;
+}
+
+class EvotraqCard extends StatelessWidget {
+  const EvotraqCard({
+    super.key,
+    required this.child,
+    this.padding = EvotraqSpacing.cardPad,
+    this.brackets = false,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final bool brackets;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: c.bg1,
+        border: Border.all(color: c.line1),
+        borderRadius: EvotraqRadius.card,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Status / identifier chip — accepts a tone via [EvotraqChipTone].
+enum EvotraqChipTone { gtin, gln, sgtin, sscc, event, ok, warn, err, muted, live }
+
+class EvotraqChip extends StatelessWidget {
+  final String label;
+  final EvotraqChipTone tone;
+  const EvotraqChip(this.label, {super.key, this.tone = EvotraqChipTone.muted});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    Color fg;
+    Color bd;
+    Color bg;
+    switch (tone) {
+      case EvotraqChipTone.gtin:
+        fg = c.idGtin;
+        bd = c.idGtin.withOpacity(.4);
+        bg = c.idGtin.withOpacity(.1);
+        break;
+      case EvotraqChipTone.gln:
+        fg = c.idGln;
+        bd = c.idGln.withOpacity(.4);
+        bg = c.idGln.withOpacity(.1);
+        break;
+      case EvotraqChipTone.sgtin:
+        fg = c.idSgtin;
+        bd = c.idSgtin.withOpacity(.4);
+        bg = c.idSgtin.withOpacity(.1);
+        break;
+      case EvotraqChipTone.sscc:
+        fg = c.idSscc;
+        bd = c.idSscc.withOpacity(.4);
+        bg = c.idSscc.withOpacity(.1);
+        break;
+      case EvotraqChipTone.event:
+        fg = c.idEvent;
+        bd = c.idEvent.withOpacity(.4);
+        bg = c.idEvent.withOpacity(.1);
+        break;
+      case EvotraqChipTone.ok:
+        fg = c.ok;
+        bd = c.ok.withOpacity(.4);
+        bg = c.ok.withOpacity(.1);
+        break;
+      case EvotraqChipTone.warn:
+        fg = c.warn;
+        bd = c.warn.withOpacity(.4);
+        bg = c.warn.withOpacity(.1);
+        break;
+      case EvotraqChipTone.err:
+        fg = c.err;
+        bd = c.err.withOpacity(.4);
+        bg = c.err.withOpacity(.1);
+        break;
+      case EvotraqChipTone.live:
+        fg = c.sig;
+        bd = c.sig.withOpacity(.4);
+        bg = c.sigSoft;
+        break;
+      case EvotraqChipTone.muted:
+        fg = c.fg2;
+        bd = c.line1;
+        bg = c.bg2;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: EvotraqRadius.chip,
+        border: Border.all(color: bd),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: context.text.mono.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: fg,
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
 }
 

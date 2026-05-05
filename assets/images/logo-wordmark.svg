@@ -1,0 +1,13 @@
+
+<svg width="200" height="32" viewBox="0 0 200 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  
+  <rect x="4" y="4" width="24" height="24" rx="1" stroke="currentColor" stroke-width="2"></rect>
+  <line x1="16" y1="9" x2="16" y2="13" stroke="currentColor" stroke-width="1.5"></line>
+  <line x1="16" y1="19" x2="16" y2="23" stroke="currentColor" stroke-width="1.5"></line>
+  <line x1="9" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="1.5"></line>
+  <line x1="19" y1="16" x2="23" y2="16" stroke="currentColor" stroke-width="1.5"></line>
+  <circle cx="28" cy="4" r="2.5" fill="#C4F03B"></circle>
+  
+  <text x="44" y="24" font-family="Geist, -apple-system, system-ui, sans-serif" font-weight="600" font-size="24" letter-spacing="-0.72" fill="currentColor">evotraq</text>
+  <text x="158" y="24" font-family="Geist, -apple-system, system-ui, sans-serif" font-weight="600" font-size="24" fill="#C4F03B">.</text>
+</svg>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 class CustomButtonWidget extends StatelessWidget {
   const CustomButtonWidget({
@@ -6,6 +7,7 @@ class CustomButtonWidget extends StatelessWidget {
     required this.onTap,
     this.title,
     this.icon,
+    this.iconWidget,
     this.iconOnly,
     this.height = 50,
     this.backgroundColor,
@@ -17,6 +19,7 @@ class CustomButtonWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final String? title;
   final IconData? icon;
+  final Widget? iconWidget;
 
   /// When true, renders an icon-only button.
   final bool? iconOnly;
@@ -29,16 +32,21 @@ class CustomButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final resolvedIconOnly = iconOnly ?? false;
-    final hasIcon = icon != null;
+    final hasIcon = icon != null || iconWidget != null;
     final hasTitle = (title ?? '').trim().isNotEmpty;
 
     final buttonWidth = minimumWidth ?? (resolvedIconOnly ? height : null);
+    final resolvedBackgroundColor = backgroundColor ?? scheme.primary;
+    final resolvedForegroundColor = foregroundColor ?? scheme.onPrimary;
 
     assert(
     resolvedIconOnly ? hasIcon : hasTitle,
-    'CustomButtonWidget requires `icon` when iconOnly=true, otherwise it requires a non-empty `title`.',
+    'CustomButtonWidget requires `icon` or `iconWidget` when iconOnly=true, otherwise it requires a non-empty `title`.',
     );
+
+    final resolvedIconWidget = iconWidget ?? (icon != null ? Icon(icon) : null);
 
     final button = SizedBox(
       height: height,
@@ -46,8 +54,8 @@ class CustomButtonWidget extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
+          backgroundColor: resolvedBackgroundColor,
+          foregroundColor: resolvedForegroundColor,
           minimumSize: Size(buttonWidth ?? 0, height),
 
           // ✅ FIX: remove default padding & force perfect centering
@@ -65,7 +73,7 @@ class CustomButtonWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (hasIcon) ...[
-              Icon(icon),
+              resolvedIconWidget!,
               const SizedBox(width: 8),
             ],
             Text(title!.trim()),
@@ -82,15 +90,15 @@ class CustomButtonWidget extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
+          backgroundColor: resolvedBackgroundColor,
+          foregroundColor: resolvedForegroundColor,
           minimumSize: Size(buttonWidth ?? 0, height),
           padding: EdgeInsets.zero,
           alignment: Alignment.center,
         ),
         child: SizedBox.expand(
           child: Center(
-            child: Icon(icon),
+            child: resolvedIconWidget,
           ),
         ),
       ),

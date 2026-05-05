@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -68,10 +70,11 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(
-            Icons.lock_reset,
-            size: 80,
-            color: primary,
+          SvgPicture.asset(
+            AppAssets.iconLock,
+            width: 80,
+            height: 80,
+            colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
           ),
           const SizedBox(height: 24),
           Text(
@@ -97,10 +100,23 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
             controller: _passwordController,
             decoration: InputDecoration(
               labelText: 'New Password',
-              prefixIcon: const Icon(Icons.lock),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: SvgPicture.asset(
+                  AppAssets.iconLock,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+                ),
+              ),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                icon: SvgPicture.asset(
+                  _obscurePassword
+                      ? AppAssets.iconEyeOff
+                      : AppAssets.iconEye,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
                 ),
                 onPressed: () {
                   setState(() {
@@ -126,12 +142,23 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
             controller: _confirmPasswordController,
             decoration: InputDecoration(
               labelText: 'Confirm Password',
-              prefixIcon: const Icon(Icons.lock_outline),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: SvgPicture.asset(
+                  AppAssets.iconLock,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+                ),
+              ),
               suffixIcon: IconButton(
-                icon: Icon(
+                icon: SvgPicture.asset(
                   _obscureConfirmPassword
-                      ? Icons.visibility_off
-                      : Icons.visibility,
+                      ? AppAssets.iconEyeOff
+                      : AppAssets.iconEye,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
                 ),
                 onPressed: () {
                   setState(() {

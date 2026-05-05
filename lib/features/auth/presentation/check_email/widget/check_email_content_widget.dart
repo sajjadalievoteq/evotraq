@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
@@ -37,10 +39,13 @@ class CheckEmailContentWidget extends StatelessWidget {
             color: ColorManager.primaryContainer(context),
             borderRadius: BorderRadius.circular(28),
           ),
-          child: Icon(
-            Icons.mark_email_read_rounded,
-            size: 48,
-            color: primary,
+          child: Center(
+            child: SvgPicture.asset(
+              AppAssets.iconMail,
+              width: 48,
+              height: 48,
+              colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+            ),
           ),
         ),
         const SizedBox(height: 24),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_responsive_layout_widget.dart';
@@ -18,10 +20,14 @@ class ResetPasswordInvalidTokenWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 80,
-            color: ColorManager.error(context),
+          SvgPicture.asset(
+            AppAssets.iconAlert,
+            width: 80,
+            height: 80,
+            colorFilter: ColorFilter.mode(
+              ColorManager.error(context),
+              BlendMode.srcIn,
+            ),
           ),
           const SizedBox(height: 24),
           Text(

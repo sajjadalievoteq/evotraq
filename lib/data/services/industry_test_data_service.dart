@@ -21,10 +21,10 @@ class IndustryTestDataService {
   Future<void> _postAdmin(String path) async {
     final response = await _dioService.post(
       '$_baseUrl$path',
-      headers: await _headers,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
+        headers: await _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Request failed: HTTP ${response.statusCode}');
     }

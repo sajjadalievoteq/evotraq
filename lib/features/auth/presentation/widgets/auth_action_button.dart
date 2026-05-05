@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 class AuthActionButton extends StatelessWidget {
   final String label;
@@ -21,34 +21,32 @@ class AuthActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = ColorManager.primary(context);
+    final colors = context.colors;
 
     return SizedBox(
       height: height,
-      child: isLoading || isEnabled
-          ? ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        child: isLoading
-            ? const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2.2,
-          ),
-        )
-            : Text(label, style: TextStyle(fontSize: fontSize)),
-      )
-          : AbsorbPointer(
-        child: OutlinedButton(
-          onPressed: () {},
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: primary.withOpacity(0.55)),
-            foregroundColor: primary.withOpacity(0.75),
-          ),
-          child: Text(label, style: TextStyle(fontSize: fontSize)),
-        ),
-      ),
+      child: isEnabled
+          ? FilledButton(
+              onPressed: isLoading ? null : onPressed,
+              child: isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: colors.onPrimary,
+                        strokeWidth: 2.2,
+                      ),
+                    )
+                  : Text(label, style: TextStyle(fontSize: fontSize,)),
+            )
+          : OutlinedButton(
+              onPressed: null,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: colors.primary.withOpacity(0.55)),
+                foregroundColor: colors.primary.withOpacity(0.75),
+              ),
+              child: Text(label, style: TextStyle(fontSize: fontSize,)),
+            ),
     );
   }
 }

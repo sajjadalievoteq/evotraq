@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
 
@@ -28,10 +30,14 @@ class BuildSuccessMessage extends StatelessWidget {
         const SizedBox(height: 40),
 
         // Success Icon
-        Icon(
-          Icons.check_circle,
-          size: 100,
-          color: ColorManager.success(context),
+        SvgPicture.asset(
+          AppAssets.iconCheck,
+          width: 100,
+          height: 100,
+          colorFilter: ColorFilter.mode(
+            ColorManager.success(context),
+            BlendMode.srcIn,
+          ),
         ),
 
         const SizedBox(height: 32),

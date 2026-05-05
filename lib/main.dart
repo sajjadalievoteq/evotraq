@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:world_countries/world_countries.dart';
 
@@ -57,6 +58,7 @@ import 'package:traqtrace_app/data/services/user_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 
 import 'core/network/dio_service.dart';
+import 'core/widgets/app_animated_background_layer.dart';
 
 void main() async {
   try {
@@ -214,9 +216,9 @@ class TraqTraceApp extends StatelessWidget {
             },
             child: MaterialApp.router(
               title: getIt<AppConfig>().appName,
-              theme: AppTheme.lightTheme(),
+              theme: EvotraqTheme.light(),
               debugShowCheckedModeBanner: false,
-              darkTheme: AppTheme.darkTheme(),
+              darkTheme: EvotraqTheme.dark(),
               themeMode: themeState.themeMode,
               routerConfig: getIt<AppRouter>().router,
               localizationsDelegates: const [
@@ -228,8 +230,17 @@ class TraqTraceApp extends StatelessWidget {
                   builder: (context, layout) => Stack(
                     fit: StackFit.expand,
                     children: [
-                      const AppBackgroundLayer(),
-                      child ?? const SizedBox.shrink(),
+                      const AppAnimatedBackgroundLayer(),
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          // Most screens use Scaffold with the theme's
+                          // scaffoldBackgroundColor. Keep it transparent so the
+                          // global animated background is visible behind routes.
+                          scaffoldBackgroundColor: Colors.transparent,
+                          canvasColor: Colors.transparent,
+                        ),
+                        child: child ?? const SizedBox.shrink(),
+                      ),
                     ],
                   ),
                 ),

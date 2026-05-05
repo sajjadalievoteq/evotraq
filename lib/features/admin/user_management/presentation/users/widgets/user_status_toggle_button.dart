@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 
 import '../../../../../../core/theme/color_manager.dart';
@@ -73,11 +75,17 @@ class UserStatusToggleButton extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Icon(
-                        value ? Icons.check_rounded : Icons.close_rounded,
-                        size: 14,
-                        color: Colors.white,
-                      ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    value ? AppAssets.iconCheck : AppAssets.iconX,
+                    width: 14,
+                    height: 14,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

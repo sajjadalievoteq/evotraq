@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 enum AuthInputFieldType { email, password, username, text }
 
@@ -12,6 +15,7 @@ class AuthInputField extends StatefulWidget {
   final void Function(String)? onFieldSubmitted;
   final ValueChanged<String>? onChanged;
   final IconData? prefixIcon;
+  final String? prefixAsset;
   final Widget? suffixIcon;
   final String? hintText;
   final String? helperText;
@@ -28,6 +32,7 @@ class AuthInputField extends StatefulWidget {
     this.onFieldSubmitted,
     this.onChanged,
     this.prefixIcon,
+    this.prefixAsset,
     this.suffixIcon,
     this.hintText,
     this.helperText,
@@ -47,19 +52,39 @@ class _AuthInputFieldState extends State<AuthInputField> {
     _obscureText = widget.type == AuthInputFieldType.password;
   }
 
-  IconData _getPrefixIcon() {
-    if (widget.prefixIcon != null) return widget.prefixIcon!;
-
+  String _defaultPrefixAsset() {
     switch (widget.type) {
       case AuthInputFieldType.password:
-        return Icons.lock;
+        return AppAssets.iconLock;
       case AuthInputFieldType.email:
-        return Icons.email;
+        return AppAssets.iconMail;
       case AuthInputFieldType.username:
-        return Icons.person;
+        return AppAssets.iconUser;
       default:
-        return Icons.text_fields;
+        return AppAssets.iconInfo;
     }
+  }
+
+  Widget _svgIcon(String asset, {double size = 22}) {
+    // Be explicit: use Evotraq token so icons don't accidentally inherit a
+    // white IconTheme (and disappear on light surfaces).
+    final themeColor = context.colors.fg2;
+    return SvgPicture.asset(
+      asset,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(
+        themeColor.withOpacity(0.75),
+        BlendMode.srcIn,
+      ),
+      placeholderBuilder: (_) => SizedBox(
+        width: size,
+        height: size,
+        child: const Center(
+          child: SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+      ),
+    );
   }
 
   TextInputType _getKeyboardType() {
@@ -152,7 +177,11 @@ class _AuthInputFieldState extends State<AuthInputField> {
   Widget _buildPrefixIcon() {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 8),
-      child: Icon(_getPrefixIcon(), size: 22),
+      child: widget.prefixAsset != null
+          ? _svgIcon(widget.prefixAsset!, size: 22,)
+          : (widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, size: 22)
+                : _svgIcon(_defaultPrefixAsset(), size: 22)),
     );
   }
 
@@ -171,8 +200,10 @@ class _AuthInputFieldState extends State<AuthInputField> {
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
       child: IconButton(
-        icon: Icon(
-          _obscureText ? Icons.visibility_off : Icons.visibility,
+        icon: _svgIcon(
+          _obscureText
+              ? AppAssets.iconEyeOff
+              : AppAssets.iconEye,
           size: 22,
         ),
         onPressed: () {

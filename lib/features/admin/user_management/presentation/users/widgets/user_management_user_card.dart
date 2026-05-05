@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 
@@ -227,7 +229,16 @@ class _UserActions extends StatelessWidget {
       children: [
         IconButton(
           padding: EdgeInsets.all(1),
-          icon: const Icon(size: 18,Icons.edit),
+          icon: SvgPicture.asset(
+            AppAssets.iconEdit,
+            width: 18,
+            height: 18,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).iconTheme.color ??
+                  Theme.of(context).colorScheme.onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
           tooltip: 'Edit User',
           onPressed: () => onEdit(user),
         ),

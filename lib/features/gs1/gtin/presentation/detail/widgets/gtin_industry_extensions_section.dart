@@ -21,6 +21,8 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
     required this.targetMarketCountry,
     this.pharmaceuticalExtension,
     this.tobaccoExtension,
+    this.deferIndustryExtensionNetworkFetch = false,
+    this.industryExtensionFetchResolved = true,
     this.showFieldSkeleton = false,
   });
 
@@ -32,6 +34,11 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
   final String? targetMarketCountry;
   final GTINPharmaceuticalExtension? pharmaceuticalExtension;
   final GTINTobaccoExtension? tobaccoExtension;
+
+  /// When true, extensions come from master GET (see [pharmaceuticalExtension] / [tobaccoExtension]); no widget GET.
+  final bool deferIndustryExtensionNetworkFetch;
+  final bool industryExtensionFetchResolved;
+
   final bool showFieldSkeleton;
 
   String? get _resolvedGtinCode {
@@ -50,20 +57,32 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
         final industryEnabled =
             settings.isPharmaceuticalMode || tobaccoUiAllowed;
 
+        final scopeKey = _resolvedGtinCode ?? '';
+
         final extension = Gs1IndustryModeContent(
           settings: settings,
-          buildPharmaceutical: (_) => PharmaceuticalExtensionWidget(
-            key: pharmaExtensionKey,
-            gtinCode: _resolvedGtinCode,
-            isEditing: isEditing,
-            targetMarketCountry: targetMarketCountry,
-            initialExtension: pharmaceuticalExtension,
+          buildPharmaceutical: (_) => KeyedSubtree(
+            key: ValueKey<String>('gtin_pharma_$scopeKey'),
+            child: PharmaceuticalExtensionWidget(
+              key: pharmaExtensionKey,
+              gtinCode: _resolvedGtinCode,
+              isEditing: isEditing,
+              targetMarketCountry: targetMarketCountry,
+              initialExtension: pharmaceuticalExtension,
+              deferInitialExtensionFetch: deferIndustryExtensionNetworkFetch,
+              extensionFetchResolved: industryExtensionFetchResolved,
+            ),
           ),
-          buildTobacco: (_) => TobaccoExtensionWidget(
-            key: tobaccoExtensionKey,
-            gtinCode: _resolvedGtinCode,
-            isEditing: isEditing,
-            initialExtension: tobaccoExtension,
+          buildTobacco: (_) => KeyedSubtree(
+            key: ValueKey<String>('gtin_tobacco_$scopeKey'),
+            child: TobaccoExtensionWidget(
+              key: tobaccoExtensionKey,
+              gtinCode: _resolvedGtinCode,
+              isEditing: isEditing,
+              initialExtension: tobaccoExtension,
+              deferInitialExtensionFetch: deferIndustryExtensionNetworkFetch,
+              extensionFetchResolved: industryExtensionFetchResolved,
+            ),
           ),
         );
 

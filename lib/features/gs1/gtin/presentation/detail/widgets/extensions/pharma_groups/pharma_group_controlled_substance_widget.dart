@@ -51,18 +51,22 @@ class _ControlledSubstanceGroupWidgetState
   @override
   void didUpdateWidget(covariant ControlledSubstanceGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialIsControlledSubstance != oldWidget.initialIsControlledSubstance &&
-        widget.initialIsControlledSubstance != _isControlledSubstance) {
-      _isControlledSubstance = widget.initialIsControlledSubstance;
+    if (widget.initialIsControlledSubstance == oldWidget.initialIsControlledSubstance &&
+        widget.initialDeaSchedule == oldWidget.initialDeaSchedule &&
+        widget.initialControlClass == oldWidget.initialControlClass) {
+      return;
     }
-    if (widget.initialDeaSchedule != oldWidget.initialDeaSchedule &&
-        widget.initialDeaSchedule != _deaSchedule) {
-      _deaSchedule = widget.initialDeaSchedule;
-    }
-    if (widget.initialControlClass != oldWidget.initialControlClass &&
-        widget.initialControlClass != _controlClassController.text) {
-      _controlClassController.text = widget.initialControlClass;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _isControlledSubstance = widget.initialIsControlledSubstance;
+        _deaSchedule = widget.initialDeaSchedule;
+      });
+      if (widget.initialControlClass != oldWidget.initialControlClass &&
+          widget.initialControlClass != _controlClassController.text) {
+        _controlClassController.text = widget.initialControlClass;
+      }
+    });
   }
 
   @override

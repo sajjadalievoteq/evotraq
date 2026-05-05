@@ -9,6 +9,8 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
+import '../../../../../../core/utils/responsive_utils.dart';
+
 class GtinResultsList extends StatelessWidget {
   const GtinResultsList({
     super.key,
@@ -99,8 +101,8 @@ class GtinResultsList extends StatelessWidget {
               onRefresh: onRefresh,
               child: ListView.builder(
                 controller: scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
+                physics:  AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(right: context.padding.left,left: context.padding.left),
                 itemCount: gtins.length +
                     ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
                     1,

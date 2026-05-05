@@ -22,11 +22,9 @@ import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_
 import 'package:traqtrace_app/features/epcis/screens/validation_rules_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
-import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_screen.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
@@ -961,10 +959,7 @@ class AppRouter {
         path: Constants.gs1GtinNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: BlocProvider(
-            create: (_) => getIt<GTINCubit>(),
-            child: const GTINDetailScreen(isEditing: true),
-          ),
+          child: const GTINDetailScreen(isEditing: true),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -980,10 +975,7 @@ class AppRouter {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: BlocProvider(
-              create: (_) => getIt<GTINCubit>(),
-              child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
-            ),
+            child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
           );
         },
         redirect: (context, state) {
@@ -1000,10 +992,7 @@ class AppRouter {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: BlocProvider(
-              create: (_) => getIt<GTINCubit>(),
-              child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
-            ),
+            child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
           );
         },
         redirect: (context, state) {
@@ -1031,10 +1020,7 @@ class AppRouter {
         path: Constants.gs1GlnNewRoute,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: BlocProvider(
-            create: (_) => GLNCubit(glnService: getIt<GLNService>()),
-            child: const GLNDetailScreen(isEditing: true),
-          ),
+          child: const GLNDetailScreen(isEditing: true),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1051,10 +1037,7 @@ class AppRouter {
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: BlocProvider(
-              create: (_) => GLNCubit(glnService: getIt<GLNService>()),
-              child: GLNDetailScreen(glnId: glnId, isEditing: false),
-            ),
+            child: GLNDetailScreen(glnId: glnId, isEditing: false),
           );
         },
         redirect: (context, state) {
@@ -1072,10 +1055,7 @@ class AppRouter {
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
           return MaterialPage(
             key: state.pageKey,
-            child: BlocProvider(
-              create: (_) => GLNCubit(glnService: getIt<GLNService>()),
-              child: GLNDetailScreen(glnId: glnId, isEditing: true),
-            ),
+            child: GLNDetailScreen(glnId: glnId, isEditing: true),
           );
         },
         redirect: (context, state) {

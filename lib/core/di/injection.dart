@@ -280,8 +280,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerFactory<GTINCubit>(
     () => GTINCubit(
       gtinService: getIt<GTINService>(),
-      pharmaceuticalService: getIt<PharmaceuticalService>(),
-      tobaccoExtensionService: getIt<GTINTobaccoExtensionService>(),
     ),
   );
   getIt.registerSingleton<AppRouter>(AppRouter(authCubit: getIt<AuthCubit>()));

@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_dosage_route_composition_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_prescription_requirements_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharma_groups/pharma_group_regulatory_approvals_widget.dart';
@@ -34,6 +29,12 @@ class PharmaceuticalExtensionWidget extends StatefulWidget {
   final Function(GTINPharmaceuticalExtension?)? onSaved;
   final GTINPharmaceuticalExtension? initialExtension;
 
+  /// When true, industry data is expected from the master-data GET via [initialExtension]; no separate extension GET.
+  final bool deferInitialExtensionFetch;
+
+  /// When [deferInitialExtensionFetch] is true, becomes true once master-detail loading finished (success/error).
+  final bool extensionFetchResolved;
+
   const PharmaceuticalExtensionWidget({
     Key? key,
     this.gtinId,
@@ -42,6 +43,8 @@ class PharmaceuticalExtensionWidget extends StatefulWidget {
     this.targetMarketCountry,
     this.onSaved,
     this.initialExtension,
+    this.deferInitialExtensionFetch = false,
+    this.extensionFetchResolved = true,
   }) : super(key: key);
 
   @override
@@ -151,11 +154,6 @@ class PharmaceuticalExtensionWidgetState
   bool _coldChainRequired = false;
 
   String _activePotencyAi7004 = '';
-  final _fdaApprovalDateDisplay = TextEditingController();
-  final _emaApprovalDateDisplay = TextEditingController();
-
-  static final _docDateFmt = DateFormat('yyyy-MM-dd');
-
   @override
   void initState() {
     super.initState();
@@ -165,7 +163,39 @@ class PharmaceuticalExtensionWidgetState
       _hasExtension = true;
       _isLoading = false;
     } else {
-      _loadExtension();
+      _isLoading =
+          widget.deferInitialExtensionFetch && !widget.extensionFetchResolved;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant PharmaceuticalExtensionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.deferInitialExtensionFetch) {
+      if (!widget.extensionFetchResolved && oldWidget.extensionFetchResolved) {
+        _applyState(() => _isLoading = true);
+      }
+      if (widget.extensionFetchResolved && !oldWidget.extensionFetchResolved) {
+        _applyState(() {
+          _isLoading = false;
+          if (widget.initialExtension != null) {
+            _populateFormFromExtension(widget.initialExtension!);
+            _extension = widget.initialExtension;
+            _hasExtension = true;
+          }
+        });
+      }
+    }
+    if (widget.initialExtension != oldWidget.initialExtension) {
+      final next = widget.initialExtension;
+      if (next != null) {
+        _populateFormFromExtension(next);
+        _applyState(() {
+          _extension = next;
+          _hasExtension = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -176,80 +206,7 @@ class PharmaceuticalExtensionWidgetState
 
   @override
   void dispose() {
-
-
-    _fdaApprovalDateDisplay.dispose();
-    _emaApprovalDateDisplay.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickDocDate({
-    required DateTime? current,
-    required ValueChanged<DateTime?> setValue,
-    required TextEditingController display,
-  }) async {
-    final initial = current ?? DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (!mounted) return;
-    if (picked != null) {
-      setState(() {
-        setValue(picked);
-        display.text = _docDateFmt.format(picked);
-      });
-    }
-  }
-
-  Future<void> _loadExtension() async {
-    // Skip loading if no valid GTIN code or ID is provided (e.g., when creating a new GTIN)
-    final hasValidGtinCode = widget.gtinCode != null && widget.gtinCode!.isNotEmpty;
-    final hasValidGtinId = widget.gtinId != null;
-    
-    if (!hasValidGtinCode && !hasValidGtinId) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    try {
-      final service = getIt<PharmaceuticalService>();
-
-      GTINPharmaceuticalExtension? ext;
-      if (hasValidGtinCode) {
-        ext = await service.getExtensionByGtinCode(widget.gtinCode!);
-      } else if (widget.gtinId != null) {
-        ext = await service.getExtensionByGtinId(widget.gtinId!);
-      }
-
-      if (!mounted) return;
-
-      if (ext != null) {
-        _populateFormFromExtension(ext);
-        setState(() {
-          _extension = ext;
-          _hasExtension = true;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading pharmaceutical extension: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 
   static List<String> _splitDelimitedGlnsOrCodes(String raw) {
@@ -286,10 +243,6 @@ class PharmaceuticalExtensionWidgetState
     _fdaApplicationNumber = ext.fdaApplicationNumber ?? '';
     _emaApprovalDate = ext.emaApprovalDate;
     _emaProcedureNumber = ext.emaProcedureNumber ?? '';
-    _fdaApprovalDateDisplay.text =
-        ext.fdaApprovalDate != null ? _docDateFmt.format(ext.fdaApprovalDate!) : '';
-    _emaApprovalDateDisplay.text =
-        ext.emaApprovalDate != null ? _docDateFmt.format(ext.emaApprovalDate!) : '';
     _blackBoxWarning = ext.blackBoxWarning;
     _blackBoxWarningText = ext.blackBoxWarningText ?? '';
     _contraindications = ext.contraindications ?? '';
@@ -592,33 +545,6 @@ class PharmaceuticalExtensionWidgetState
             child: _buildGroupedPharmaExtensionBody(context),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Card + [SectionLabel], matching GTIN core trade-item groups (see [SectionLabel]).
-  Widget _buildPharmaCoreGroup(BuildContext context, String title, List<Widget> children) {
-    final outline = Theme.of(context).colorScheme.outlineVariant;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: outline.withOpacity(0.45)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SectionLabel(
-              title,
-              padding: const EdgeInsets.only(bottom: 12),
-            ),
-            ...children,
-          ],
-        ),
       ),
     );
   }
@@ -928,46 +854,5 @@ class PharmaceuticalExtensionWidgetState
     _maNumber = marketingAuthorizationNumber;
     _licensedAgentGlns = licensedAgentGlns;
     _regulatedProductName = regulatedProductName;
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    String? helperText,
-    int maxLines = 1,
-    int? maxLength,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          helperText: helperText,
-          border: const OutlineInputBorder(),
-        ),
-        maxLines: maxLines,
-        maxLength: maxLength,
-        keyboardType: keyboardType,
-        inputFormatters: maxLength != null ? [LengthLimitingTextInputFormatter(maxLength)] : null,
-        readOnly: !widget.isEditing,
-        validator: validator,
-      ),
-    );
-  }
-
-  Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: widget.isEditing ? onChanged : null,
-        ),
-        Text(label),
-      ],
-    );
   }
 }

@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
 /// ISO 3166-1 numeric country picker (shared by GTIN and GLN).
+///
+/// Display text is derived from [controller] in [build]; there is no second
+/// [TextEditingController], so parent updates to the numeric code do not notify
+/// a nested [TextFormField] during the same layout/build phase (split-view GTIN
+/// switches).
 class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
     super.key,
@@ -24,37 +29,43 @@ class GtinCountryCodePickerField extends StatefulWidget {
 }
 
 class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField> {
-  late final TextEditingController _displayController;
+  final GlobalKey<FormFieldState<String>> _formFieldKey =
+      GlobalKey<FormFieldState<String>>();
 
   @override
   void initState() {
     super.initState();
-    _displayController = TextEditingController(text: _format(widget.controller.text));
-    widget.controller.addListener(_syncFromCode);
+    widget.controller.addListener(_onCodeControllerChanged);
   }
 
   @override
   void didUpdateWidget(covariant GtinCountryCodePickerField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_syncFromCode);
-      widget.controller.addListener(_syncFromCode);
-      _displayController.text = _format(widget.controller.text);
+      oldWidget.controller.removeListener(_onCodeControllerChanged);
+      widget.controller.addListener(_onCodeControllerChanged);
+      _scheduleSync();
     }
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_syncFromCode);
-    _displayController.dispose();
+    widget.controller.removeListener(_onCodeControllerChanged);
     super.dispose();
   }
 
-  void _syncFromCode() {
-    final formatted = _format(widget.controller.text);
-    if (_displayController.text != formatted) {
-      _displayController.text = formatted;
-    }
+  void _onCodeControllerChanged() {
+    _scheduleSync();
+  }
+
+  /// Never call [setState] synchronously from [TextEditingController] listeners:
+  /// parents often assign [.text] during [didUpdateWidget], which overlaps layout.
+  void _scheduleSync() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _formFieldKey.currentState?.didChange(widget.controller.text);
+      setState(() {});
+    });
   }
 
   String _format(String numericCode) {
@@ -132,27 +143,40 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
 
     if (chosen != null) {
       widget.controller.text = chosen!.codeNumeric;
-      _displayController.text = _format(chosen!.codeNumeric);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.enabled ? () => _openPicker(context) : null,
-      child: AbsorbPointer(
-        child: TextFormField(
-          controller: _displayController,
-          decoration: InputDecoration(
-            labelText: widget.labelText,
-            helperText: widget.helperText,
-            border: const OutlineInputBorder(),
-            suffixIcon: const Icon(Icons.public),
+    final formatted = _format(widget.controller.text);
+
+    return FormField<String>(
+      key: _formFieldKey,
+      initialValue: widget.controller.text,
+      validator: (_) =>
+          widget.enabled ? widget.validator?.call(widget.controller.text) : null,
+      builder: (fieldState) {
+        return GestureDetector(
+          onTap: widget.enabled ? () => _openPicker(context) : null,
+          child: AbsorbPointer(
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText: widget.labelText,
+                helperText: widget.helperText,
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.public),
+                errorText: fieldState.errorText,
+              ),
+              child: Text(
+                formatted.isEmpty ? ' ' : formatted,
+                style: Theme.of(context).textTheme.bodyLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
-          readOnly: true,
-          validator: widget.enabled ? (_) => widget.validator?.call(widget.controller.text) : null,
-        ),
-      ),
+        );
+      },
     );
   }
 }

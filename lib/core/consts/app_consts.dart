@@ -12,6 +12,9 @@ class Constants {
   /// Standard max width for primary screen content.
   static const double maxContentWidth = 800;
   static const double spacing = 16;
+  static const double webPadding = 60;
+  static const double tabletPadding = 30;
+  static const double mobilePadding = 16;
   static const double cardRadius = 20;
   static const double sectionMaxWidth = 1280;
   static const double dialogMaxWidth = 720;

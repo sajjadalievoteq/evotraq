@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 
 /// Represents a Global Trade Item Number (GTIN)
 class GTIN extends Equatable {
@@ -81,6 +83,10 @@ class GTIN extends Equatable {
   /// Used for pharmaceutical-specific workflows.
   final bool isPharmaceuticalProduct;
 
+  /// Nested extensions returned on master-data GET (single round-trip).
+  final GTINPharmaceuticalExtension? pharmaceuticalExtension;
+  final GTINTobaccoExtension? tobaccoExtension;
+
   const GTIN({
     required this.gtinCode,
     required this.productName,
@@ -142,6 +148,8 @@ class GTIN extends Equatable {
     this.updatedAt,
     this.isTobaccoProduct = false,
     this.isPharmaceuticalProduct = false,
+    this.pharmaceuticalExtension,
+    this.tobaccoExtension,
   });
 
   @override
@@ -206,6 +214,8 @@ class GTIN extends Equatable {
         updatedAt,
         isTobaccoProduct,
         isPharmaceuticalProduct,
+        pharmaceuticalExtension,
+        tobaccoExtension,
       ];
 
   /// Create a copy of this GTIN with updated fields
@@ -270,6 +280,8 @@ class GTIN extends Equatable {
     DateTime? updatedAt,
     bool? isTobaccoProduct,
     bool? isPharmaceuticalProduct,
+    GTINPharmaceuticalExtension? pharmaceuticalExtension,
+    GTINTobaccoExtension? tobaccoExtension,
   }) {
     return GTIN(
       gtinCode: gtinCode ?? this.gtinCode,
@@ -339,6 +351,9 @@ class GTIN extends Equatable {
       isTobaccoProduct: isTobaccoProduct ?? this.isTobaccoProduct,
       isPharmaceuticalProduct:
           isPharmaceuticalProduct ?? this.isPharmaceuticalProduct,
+      pharmaceuticalExtension:
+          pharmaceuticalExtension ?? this.pharmaceuticalExtension,
+      tobaccoExtension: tobaccoExtension ?? this.tobaccoExtension,
     );
   }
 
@@ -441,6 +456,18 @@ class GTIN extends Equatable {
         // Just take the first value from the map
         marketAuth = auths.values.first?.toString();
       }
+    }
+
+    GTINPharmaceuticalExtension? pharmaceuticalExtension;
+    final pharmaRaw = json['pharmaceuticalExtension'];
+    if (pharmaRaw is Map<String, dynamic>) {
+      pharmaceuticalExtension =
+          GTINPharmaceuticalExtension.fromJson(pharmaRaw);
+    }
+    GTINTobaccoExtension? tobaccoExtension;
+    final tobaccoRaw = json['tobaccoExtension'];
+    if (tobaccoRaw is Map<String, dynamic>) {
+      tobaccoExtension = GTINTobaccoExtension.fromJson(tobaccoRaw);
     }
 
     return GTIN(
@@ -558,6 +585,8 @@ class GTIN extends Equatable {
       // Parse industry extension flags - automatically set by database triggers
       isTobaccoProduct: json['isTobaccoProduct'] == true,
       isPharmaceuticalProduct: json['isPharmaceuticalProduct'] == true,
+      pharmaceuticalExtension: pharmaceuticalExtension,
+      tobaccoExtension: tobaccoExtension,
     );
   }
 

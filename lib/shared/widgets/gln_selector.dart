@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 
 /// A reusable widget for selecting GLNs from available system GLNs
 /// Provides a searchable dropdown interface with GLN code and location name
-class GLNSelector extends StatefulWidget {
+class GLNSelector extends StatelessWidget {
   final String label;
   final String? hintText;
   final GLN? initialValue;
@@ -25,10 +27,43 @@ class GLNSelector extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<GLNSelector> createState() => _GLNSelectorState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GLNCubit(glnService: getIt<GLNService>()),
+      child: _GLNSelectorBody(
+        label: label,
+        hintText: hintText,
+        initialValue: initialValue,
+        onChanged: onChanged,
+        isRequired: isRequired,
+        errorText: errorText,
+      ),
+    );
+  }
 }
 
-class _GLNSelectorState extends State<GLNSelector> {
+class _GLNSelectorBody extends StatefulWidget {
+  final String label;
+  final String? hintText;
+  final GLN? initialValue;
+  final Function(GLN?) onChanged;
+  final bool isRequired;
+  final String? errorText;
+
+  const _GLNSelectorBody({
+    required this.label,
+    this.hintText,
+    this.initialValue,
+    required this.onChanged,
+    this.isRequired = false,
+    this.errorText,
+  });
+
+  @override
+  State<_GLNSelectorBody> createState() => _GLNSelectorBodyState();
+}
+
+class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isDropdownOpen = false;
@@ -69,8 +104,8 @@ class _GLNSelectorState extends State<GLNSelector> {
         _filteredGLNs = _allGLNs.where((gln) {
           final lowerQuery = query.toLowerCase();
           return gln.glnCode.toLowerCase().contains(lowerQuery) ||
-                 gln.locationName.toLowerCase().contains(lowerQuery) ||
-                 (gln.contactName?.toLowerCase().contains(lowerQuery) ?? false);
+              gln.locationName.toLowerCase().contains(lowerQuery) ||
+              (gln.contactName?.toLowerCase().contains(lowerQuery) ?? false);
         }).toList();
       }
     });

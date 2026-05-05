@@ -46,18 +46,27 @@ class GlnIndustryExtensionsSection extends StatelessWidget {
                 ? fromPersisted
                 : (fromField.isNotEmpty ? fromField : null);
 
+        final scopeKey = currentGlnCode ?? '';
+
         final extension = Gs1IndustryModeContent(
           settings: settings,
-          buildPharmaceutical: (_) => GLNPharmaceuticalExtensionWidget(
-            key: pharmaExtensionKey,
-            glnCode: currentGlnCode,
-            isEditing: isEditing,
-            initialExtension: gln?.pharmaceuticalExtension,
+          buildPharmaceutical: (_) => KeyedSubtree(
+            key: ValueKey<String>('gln_pharma_$scopeKey'),
+            child: GLNPharmaceuticalExtensionWidget(
+              key: pharmaExtensionKey,
+              glnCode: currentGlnCode,
+              isEditing: isEditing,
+              initialExtension: gln?.pharmaceuticalExtension,
+            ),
           ),
-          buildTobacco: (_) => GLNTobaccoExtensionWidget(
-            key: tobaccoExtensionKey,
-            glnCode: currentGlnCode,
-            isEditing: isEditing,
+          buildTobacco: (_) => KeyedSubtree(
+            key: ValueKey<String>('gln_tobacco_$scopeKey'),
+            child: GLNTobaccoExtensionWidget(
+              key: tobaccoExtensionKey,
+              glnCode: currentGlnCode,
+              isEditing: isEditing,
+              initialExtension: gln?.tobaccoExtension,
+            ),
           ),
         );
 

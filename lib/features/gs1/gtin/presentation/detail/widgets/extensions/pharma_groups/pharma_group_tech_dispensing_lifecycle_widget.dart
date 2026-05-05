@@ -94,35 +94,68 @@ class _TechDispensingLifecycleGroupWidgetState
   @override
   void didUpdateWidget(covariant TechDispensingLifecycleGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _prescriptionStatus = widget.initialPrescriptionStatus;
-    _controlledSubstance = widget.initialControlledSubstance;
-    _additionalMonitoring = widget.initialAdditionalMonitoring;
-    _controlledSubstanceSchedule =
-        widget.initialControlledSubstanceSchedule.trim().isEmpty
-            ? null
-            : widget.initialControlledSubstanceSchedule;
-    if (widget.initialShelfLifeMonths != oldWidget.initialShelfLifeMonths &&
-        widget.initialShelfLifeMonths != _shelfLifeMonthsController.text) {
-      _shelfLifeMonthsController.text = widget.initialShelfLifeMonths;
-    }
-    if (widget.initialShelfLifeAfterOpenDays !=
+    if (widget.initialPrescriptionStatus == oldWidget.initialPrescriptionStatus &&
+        widget.initialControlledSubstance == oldWidget.initialControlledSubstance &&
+        widget.initialControlledSubstanceSchedule ==
+            oldWidget.initialControlledSubstanceSchedule &&
+        widget.initialAdditionalMonitoring == oldWidget.initialAdditionalMonitoring &&
+        widget.initialShelfLifeMonths == oldWidget.initialShelfLifeMonths &&
+        widget.initialShelfLifeAfterOpenDays ==
             oldWidget.initialShelfLifeAfterOpenDays &&
-        widget.initialShelfLifeAfterOpenDays !=
-            _shelfLifeAfterOpenDaysController.text) {
-      _shelfLifeAfterOpenDaysController.text = widget.initialShelfLifeAfterOpenDays;
+        widget.initialCountryOfManufacture ==
+            oldWidget.initialCountryOfManufacture &&
+        widget.initialPackSizeDescription ==
+            oldWidget.initialPackSizeDescription &&
+        widget.initialActivePotencyAi7004 ==
+            oldWidget.initialActivePotencyAi7004) {
+      return;
     }
-    if (widget.initialCountryOfManufacture != oldWidget.initialCountryOfManufacture &&
-        widget.initialCountryOfManufacture != _countryOfManufactureController.text) {
-      _countryOfManufactureController.text = widget.initialCountryOfManufacture;
-    }
-    if (widget.initialPackSizeDescription != oldWidget.initialPackSizeDescription &&
-        widget.initialPackSizeDescription != _packSizeDescriptionController.text) {
-      _packSizeDescriptionController.text = widget.initialPackSizeDescription;
-    }
-    if (widget.initialActivePotencyAi7004 != oldWidget.initialActivePotencyAi7004 &&
-        widget.initialActivePotencyAi7004 != _activePotencyAi7004Controller.text) {
-      _activePotencyAi7004Controller.text = widget.initialActivePotencyAi7004;
-    }
+    // Defer controller writes (feeds [GtinCountryCodePickerField] and FormFields)
+    // so we never notify during layout when switching GTIN in split view.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _prescriptionStatus = widget.initialPrescriptionStatus;
+        _controlledSubstance = widget.initialControlledSubstance;
+        _additionalMonitoring = widget.initialAdditionalMonitoring;
+        _controlledSubstanceSchedule =
+            widget.initialControlledSubstanceSchedule.trim().isEmpty
+                ? null
+                : widget.initialControlledSubstanceSchedule;
+      });
+      if (widget.initialShelfLifeMonths != oldWidget.initialShelfLifeMonths &&
+          widget.initialShelfLifeMonths != _shelfLifeMonthsController.text) {
+        _shelfLifeMonthsController.text = widget.initialShelfLifeMonths;
+      }
+      if (widget.initialShelfLifeAfterOpenDays !=
+              oldWidget.initialShelfLifeAfterOpenDays &&
+          widget.initialShelfLifeAfterOpenDays !=
+              _shelfLifeAfterOpenDaysController.text) {
+        _shelfLifeAfterOpenDaysController.text =
+            widget.initialShelfLifeAfterOpenDays;
+      }
+      if (widget.initialCountryOfManufacture !=
+              oldWidget.initialCountryOfManufacture &&
+          widget.initialCountryOfManufacture !=
+              _countryOfManufactureController.text) {
+        _countryOfManufactureController.text =
+            widget.initialCountryOfManufacture;
+      }
+      if (widget.initialPackSizeDescription !=
+              oldWidget.initialPackSizeDescription &&
+          widget.initialPackSizeDescription !=
+              _packSizeDescriptionController.text) {
+        _packSizeDescriptionController.text =
+            widget.initialPackSizeDescription;
+      }
+      if (widget.initialActivePotencyAi7004 !=
+              oldWidget.initialActivePotencyAi7004 &&
+          widget.initialActivePotencyAi7004 !=
+              _activePotencyAi7004Controller.text) {
+        _activePotencyAi7004Controller.text =
+            widget.initialActivePotencyAi7004;
+      }
+    });
   }
 
   @override

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:traqtrace_app/data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
 
@@ -16,12 +14,16 @@ class GLNTobaccoExtensionWidget extends StatefulWidget {
   final bool isEditing;
   final Function(GLNTobaccoExtension?)? onSaved;
 
+  /// From master-data GLN GET response when present; avoids a separate extension API call.
+  final GLNTobaccoExtension? initialExtension;
+
   const GLNTobaccoExtensionWidget({
     Key? key,
     this.glnId,
     this.glnCode,
     this.isEditing = false,
     this.onSaved,
+    this.initialExtension,
   }) : super(key: key);
 
   @override
@@ -181,6 +183,19 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant GLNTobaccoExtensionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialExtension != oldWidget.initialExtension &&
+        widget.initialExtension != null) {
+      _populateFormFromExtension(widget.initialExtension!);
+      setState(() {
+        _extension = widget.initialExtension;
+        _hasExtension = true;
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _euEconomicOperatorIdController.dispose();
     _euFacilityIdController.dispose();
@@ -232,50 +247,23 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   }
 
   Future<void> _loadExtension() async {
-    // Skip loading if no valid GLN code or ID is provided (e.g., when creating a new GLN)
-    final hasValidGlnCode = widget.glnCode != null && widget.glnCode!.isNotEmpty;
-    final hasValidGlnId = widget.glnId != null;
-    
-    if (!hasValidGlnCode && !hasValidGlnId) {
+    if (widget.initialExtension != null) {
+      _populateFormFromExtension(widget.initialExtension!);
       if (mounted) {
         setState(() {
+          _extension = widget.initialExtension;
+          _hasExtension = true;
           _isLoading = false;
         });
       }
       return;
     }
 
-    try {
-      final service = getIt<GLNTobaccoExtensionService>();
-
-      GLNTobaccoExtension? ext;
-      if (hasValidGlnCode) {
-        ext = await service.getByGlnCode(widget.glnCode!);
-      } else if (widget.glnId != null) {
-        ext = await service.getByGlnId(widget.glnId!);
-      }
-
-      if (!mounted) return;
-
-      if (ext != null) {
-        _populateFormFromExtension(ext);
-        setState(() {
-          _extension = ext;
-          _hasExtension = true;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading GLN tobacco extension: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    // Tobacco extension is supplied by the master-data GLN response when present.
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 

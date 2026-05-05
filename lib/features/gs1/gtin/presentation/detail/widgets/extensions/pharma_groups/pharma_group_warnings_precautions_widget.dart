@@ -66,20 +66,32 @@ class _WarningsPrecautionsGroupWidgetState
   @override
   void didUpdateWidget(covariant WarningsPrecautionsGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _blackBoxWarning = widget.initialBlackBoxWarning;
-    _pregnancyCategory = widget.initialPregnancyCategory;
-    if (widget.initialBlackBoxWarningText != oldWidget.initialBlackBoxWarningText &&
-        widget.initialBlackBoxWarningText != _blackBoxWarningTextController.text) {
-      _blackBoxWarningTextController.text = widget.initialBlackBoxWarningText;
+    if (widget.initialBlackBoxWarning == oldWidget.initialBlackBoxWarning &&
+        widget.initialPregnancyCategory == oldWidget.initialPregnancyCategory &&
+        widget.initialBlackBoxWarningText == oldWidget.initialBlackBoxWarningText &&
+        widget.initialContraindications == oldWidget.initialContraindications &&
+        widget.initialDrugInteractions == oldWidget.initialDrugInteractions) {
+      return;
     }
-    if (widget.initialContraindications != oldWidget.initialContraindications &&
-        widget.initialContraindications != _contraindicationsController.text) {
-      _contraindicationsController.text = widget.initialContraindications;
-    }
-    if (widget.initialDrugInteractions != oldWidget.initialDrugInteractions &&
-        widget.initialDrugInteractions != _drugInteractionsController.text) {
-      _drugInteractionsController.text = widget.initialDrugInteractions;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _blackBoxWarning = widget.initialBlackBoxWarning;
+        _pregnancyCategory = widget.initialPregnancyCategory;
+      });
+      if (widget.initialBlackBoxWarningText != oldWidget.initialBlackBoxWarningText &&
+          widget.initialBlackBoxWarningText != _blackBoxWarningTextController.text) {
+        _blackBoxWarningTextController.text = widget.initialBlackBoxWarningText;
+      }
+      if (widget.initialContraindications != oldWidget.initialContraindications &&
+          widget.initialContraindications != _contraindicationsController.text) {
+        _contraindicationsController.text = widget.initialContraindications;
+      }
+      if (widget.initialDrugInteractions != oldWidget.initialDrugInteractions &&
+          widget.initialDrugInteractions != _drugInteractionsController.text) {
+        _drugInteractionsController.text = widget.initialDrugInteractions;
+      }
+    });
   }
 
   @override

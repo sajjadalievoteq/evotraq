@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
@@ -12,6 +13,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_r
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_filter_value.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
@@ -47,6 +49,9 @@ class _GTINListScreenState extends State<GTINListScreen> {
   DateTime? _registrationDateTo;
   int _pageSize = 25;
 
+  /// Avoid duplicate list fetch: [SplitOrListIndexedStack] keeps split + list mounted.
+  bool _didRunPrimaryInitialFetch = false;
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +61,15 @@ class _GTINListScreenState extends State<GTINListScreen> {
         _search();
       },
     );
-    // Initial load of GTINs
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didRunPrimaryInitialFetch) return;
+    final primary = PrimaryFetchScope.maybeOf(context)?.isPrimary ?? true;
+    if (!primary) return;
+    _didRunPrimaryInitialFetch = true;
     context.read<GTINCubit>().fetchGTINList();
   }
 
@@ -236,54 +249,62 @@ class _GTINListScreenState extends State<GTINListScreen> {
         return Gs1MasterListBody(
           toolbar: Column(
             children: [
-              ListenableBuilder(
-                listenable: _searchController,
-                builder: (context, _) {
-                  return Gs1ListSearchBar(
-                    hintText: GtinUiConstants.listSearchHint,
-                    controller: _searchController,
-                    showAdvancedFilters: false,
-                    onSearch: _searchImmediate,
-                    onQueryChanged: _onSearchTextChanged,
-                    onRefresh: _searchImmediate,
-                    onQuickFilters: _showFilterDialog,
-                    onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                    onClear: () {
-                      _searchDebouncer.cancel();
-                      _searchController.clear();
-                      _search();
-                    },
-                  );
-                },
-              ),
-              GtinRecordInfoSection(
-                pageSize: _pageSize,
-                onPageSizeChanged: (newSize) {
-                  setState(() {
-                    _pageSize = newSize;
-                  });
-                  _searchImmediate();
-                },
-              ),
-              SizedBox(height: Constants.spacing),
-              BlocBuilder<GTINCubit, GTINState>(
-                buildWhen: (prev, current) =>
-                    prev.gtinListSortAscending !=
-                    current.gtinListSortAscending,
-                builder: (context, cubitState) {
-                  return Gs1ListSortingControls(
-                    label: GtinUiConstants.sortByProductNameLine(
-                      cubitState.gtinListSortAscending,
+              Padding(
+                padding: EdgeInsets.only(top:context.padding.left,right: context.padding.left,left: context.padding.left),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: _searchController,
+                      builder: (context, _) {
+                        return Gs1ListSearchBar(
+                          hintText: GtinUiConstants.listSearchHint,
+                          controller: _searchController,
+                          showAdvancedFilters: false,
+                          onSearch: _searchImmediate,
+                          onQueryChanged: _onSearchTextChanged,
+                          onRefresh: _searchImmediate,
+                          onQuickFilters: _showFilterDialog,
+                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                          onClear: () {
+                            _searchDebouncer.cancel();
+                            _searchController.clear();
+                            _search();
+                          },
+                        );
+                      },
                     ),
-                    sortOrder: cubitState.gtinListSortAscending
-                        ? 'asc'
-                        : 'desc',
-                    onToggleSortOrder: () => context
-                        .read<GTINCubit>()
-                        .toggleGtinListProductNameSort(),
-                  );
-                },
+                    GtinRecordInfoSection(
+                      pageSize: _pageSize,
+                      onPageSizeChanged: (newSize) {
+                        setState(() {
+                          _pageSize = newSize;
+                        });
+                        _searchImmediate();
+                      },
+                    ),
+                    SizedBox(height: Constants.spacing),
+                    BlocBuilder<GTINCubit, GTINState>(
+                      buildWhen: (prev, current) =>
+                      prev.gtinListSortAscending !=
+                          current.gtinListSortAscending,
+                      builder: (context, cubitState) {
+                        return Gs1ListSortingControls(
+                          label: GtinUiConstants.sortByProductNameLine(
+                            cubitState.gtinListSortAscending,
+                          ),
+                          sortOrder: cubitState.gtinListSortAscending
+                              ? 'asc'
+                              : 'desc',
+                          onToggleSortOrder: () => context
+                              .read<GTINCubit>()
+                              .toggleGtinListProductNameSort(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
+
             ],
           ),
           results: GtinResultsList(
@@ -309,6 +330,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(
+        heroTag: 'gtin_list_standalone_add_fab',
         onPressed: _navigateToCreateGTIN,
         tooltip: GtinUiConstants.fabAddNew,
         child: const Icon(Icons.add),

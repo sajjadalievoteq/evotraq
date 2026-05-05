@@ -69,20 +69,29 @@ class _RegulatoryApprovalsGroupWidgetState
   @override
   void didUpdateWidget(covariant RegulatoryApprovalsGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialFdaApplicationNumber != oldWidget.initialFdaApplicationNumber &&
-        widget.initialFdaApplicationNumber != _fdaApplicationNumberController.text) {
-      _fdaApplicationNumberController.text = widget.initialFdaApplicationNumber;
+    if (widget.initialFdaApplicationNumber == oldWidget.initialFdaApplicationNumber &&
+        widget.initialEmaProcedureNumber == oldWidget.initialEmaProcedureNumber &&
+        widget.initialFdaApprovalDate == oldWidget.initialFdaApprovalDate &&
+        widget.initialEmaApprovalDate == oldWidget.initialEmaApprovalDate) {
+      return;
     }
-    if (widget.initialEmaProcedureNumber != oldWidget.initialEmaProcedureNumber &&
-        widget.initialEmaProcedureNumber != _emaProcedureNumberController.text) {
-      _emaProcedureNumberController.text = widget.initialEmaProcedureNumber;
-    }
-    _fdaApprovalDate = widget.initialFdaApprovalDate;
-    _emaApprovalDate = widget.initialEmaApprovalDate;
-    _fdaApprovalDateDisplay.text =
-        _fdaApprovalDate != null ? _docDateFmt.format(_fdaApprovalDate!) : '';
-    _emaApprovalDateDisplay.text =
-        _emaApprovalDate != null ? _docDateFmt.format(_emaApprovalDate!) : '';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialFdaApplicationNumber != oldWidget.initialFdaApplicationNumber &&
+          widget.initialFdaApplicationNumber != _fdaApplicationNumberController.text) {
+        _fdaApplicationNumberController.text = widget.initialFdaApplicationNumber;
+      }
+      if (widget.initialEmaProcedureNumber != oldWidget.initialEmaProcedureNumber &&
+          widget.initialEmaProcedureNumber != _emaProcedureNumberController.text) {
+        _emaProcedureNumberController.text = widget.initialEmaProcedureNumber;
+      }
+      _fdaApprovalDate = widget.initialFdaApprovalDate;
+      _emaApprovalDate = widget.initialEmaApprovalDate;
+      _fdaApprovalDateDisplay.text =
+          _fdaApprovalDate != null ? _docDateFmt.format(_fdaApprovalDate!) : '';
+      _emaApprovalDateDisplay.text =
+          _emaApprovalDate != null ? _docDateFmt.format(_emaApprovalDate!) : '';
+    });
   }
 
   @override

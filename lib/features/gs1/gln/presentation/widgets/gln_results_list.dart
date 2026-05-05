@@ -8,6 +8,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class GlnResultsList extends StatelessWidget {
@@ -106,7 +107,7 @@ class GlnResultsList extends StatelessWidget {
               child: ListView.builder(
                 controller: scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
+                padding: context.horizontalPadding,
                 addAutomaticKeepAlives: false,
                 addRepaintBoundaries: true,
                 cacheExtent: 400,

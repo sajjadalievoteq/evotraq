@@ -10,8 +10,6 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_form.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_industry_extensions_section.dart';
@@ -88,10 +86,8 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   /// After fetch / hydration, child groups show real values; until then field skeletons (same rule as GLN detail).
   bool _formFieldsHydrated = true;
 
-  /// Route opened with [gtinCode] only — fetch remote GTIN and hydrate form after load.
-  bool get _remoteFetchPath => widget.gtinCode != null && widget.gtin == null;
-  GTINPharmaceuticalExtension? _pharmaceuticalExtension;
-  GTINTobaccoExtension? _tobaccoExtension;
+  /// Avoid re-applying [GTIN] from cubit on every unrelated success emission.
+  bool _detailHydratedForRouteGtin = false;
 
   final _gtinCodeController = TextEditingController();
   String? _status = 'ACTIVE';
@@ -117,6 +113,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   void initState() {
     super.initState();
+    if (!widget.embedded) {
+      _gtinCubit = getIt<GTINCubit>();
+    }
     _formFieldsHydrated = widget.gtinCode == null &&
         widget.gtin == null &&
         !widget.awaitingListSelection;
@@ -125,16 +124,23 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _gtinCubit = context.read<GTINCubit>();
+    if (widget.embedded) {
+      _gtinCubit = context.read<GTINCubit>();
+    }
     if (!_gtinInitialLoadStarted) {
       _gtinInitialLoadStarted = true;
       if (widget.awaitingListSelection) {
         return;
       }
-      if (widget.gtin != null) {
+      final cubit = _gtinCubit;
+      if (cubit == null) {
+        return;
+      }
+      if (widget.gtinCode != null) {
+        cubit.fetchGTINDetails(widget.gtinCode!);
+      } else if (widget.gtin != null) {
+        _detailHydratedForRouteGtin = true;
         _initializeFormWithGTIN(widget.gtin!);
-      } else if (widget.gtinCode != null && !widget.isEditing) {
-        _gtinCubit!.fetchGTINDetails(widget.gtinCode!);
       }
     }
   }
@@ -145,11 +151,12 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
 
     final oldCode = oldWidget.gtinCode;
     final newCode = widget.gtinCode;
-    if (oldCode != newCode && newCode != null && !widget.isEditing) {
+    if (oldCode != newCode && newCode != null) {
       setState(() {
-        if (widget.gtin == null) _formFieldsHydrated = false;
+        _detailHydratedForRouteGtin = false;
+        _formFieldsHydrated = false;
       });
-      context.read<GTINCubit>().fetchGTINDetails(newCode);
+      _gtinCubit?.fetchGTINDetails(newCode);
     }
   }
 
@@ -161,10 +168,11 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       );
     }
 
-    _gtinCodeController.text = gtin.gtinCode;
-    _status = gtin.status?.toUpperCase();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _gtinCodeController.text = gtin.gtinCode;
+      _status = gtin.status?.toUpperCase();
+
       try {
         final unitDescriptor = _docUnitDescriptorFromBackend(
           unitDescriptor: gtin.unitDescriptor,
@@ -254,6 +262,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
 
   @override
   void dispose() {
+    if (!widget.embedded) {
+      _gtinCubit?.close();
+    }
     _gtinCodeController.dispose();
     super.dispose();
   }
@@ -389,10 +400,15 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         updatedBy: audit.updatedBy,
       );
 
+      final cubit = _gtinCubit;
+      if (cubit == null) {
+        setState(() => _isSubmitting = false);
+        return;
+      }
       if (widget.gtinCode != null) {
-        context.read<GTINCubit>().updateGTIN(gtin);
+        cubit.updateGTIN(gtin);
       } else {
-        context.read<GTINCubit>().createGTIN(gtin);
+        cubit.createGTIN(gtin);
       }
     }
   }
@@ -467,6 +483,13 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     required bool gtinFieldLocked,
     required bool fullFormShimmer,
   }) {
+    final deferIndustryFetch = widget.gtinCode != null &&
+        (state.status == GTINStatus.loading ||
+            state.status == GTINStatus.initial);
+    final industryFetchResolved = !deferIndustryFetch ||
+        state.status == GTINStatus.success ||
+        state.status == GTINStatus.error;
+
     return GtinDetailForm(
       formKey: _formKey,
       gtinFieldLocked: gtinFieldLocked,
@@ -552,7 +575,8 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
               _descriptiveAttrsKey.currentState?.targetMarketCountry ??
               widget.gtin?.targetMarketCountry;
 
-          final pharmaExt = _pharmaceuticalExtension;
+          final synced = state.gtin;
+          final pharmaExt = synced?.pharmaceuticalExtension;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -565,7 +589,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
                 isEditing: allowMasterDataActions,
                 targetMarketCountry: targetMarket,
                 pharmaceuticalExtension: pharmaExt,
-                tobaccoExtension: _tobaccoExtension,
+                tobaccoExtension: synced?.tobaccoExtension,
+                deferIndustryExtensionNetworkFetch: deferIndustryFetch,
+                industryExtensionFetchResolved: industryFetchResolved,
                 showFieldSkeleton: false,
               ),
               RegulatoryAuthorityExtension(
@@ -630,15 +656,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
         }
 
         if (state.status == GTINStatus.success) {
-          if (state.gtin != null &&
-              !widget.isEditing &&
-              widget.gtinCode != null) {
-            if (_remoteFetchPath) {
-              _initializeFormWithGTIN(state.gtin!);
-            }
-            _pharmaceuticalExtension = state.pharmaceuticalExtension;
-            _tobaccoExtension = state.tobaccoExtension;
-          } else if (_isSubmitting) {
+          if (_isSubmitting) {
             setState(() {
               _isSubmitting = false;
             });
@@ -660,6 +678,12 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
             } else {
               Navigator.of(context).pop();
             }
+          } else if (widget.gtinCode != null &&
+              state.gtin != null &&
+              state.gtin!.gtinCode == widget.gtinCode &&
+              !_detailHydratedForRouteGtin) {
+            _initializeFormWithGTIN(state.gtin!);
+            _detailHydratedForRouteGtin = true;
           }
         }
       },
@@ -682,13 +706,25 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       },
     );
 
-    return Gs1MasterDataDetailScaffold(
+    final scaffold = Gs1MasterDataDetailScaffold(
       embedded: widget.embedded,
       title: screenTitle,
       showSaveAction: allowMasterDataActions,
       onSave: _submitForm,
       saveEnabled: allowMasterDataActions && !_isSubmitting,
       body: body,
+    );
+
+    if (widget.embedded) {
+      return scaffold;
+    }
+    final cubit = _gtinCubit;
+    if (cubit == null) {
+      return scaffold;
+    }
+    return BlocProvider<GTINCubit>.value(
+      value: cubit,
+      child: scaffold,
     );
   }
 }

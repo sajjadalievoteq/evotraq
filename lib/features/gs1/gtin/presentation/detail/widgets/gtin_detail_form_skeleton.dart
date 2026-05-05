@@ -13,7 +13,6 @@ class GtinDetailFormSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 24),
         GtinSkeletonOutlineField(color: c, height: 76),
         const SizedBox(height: 16),
         Row(

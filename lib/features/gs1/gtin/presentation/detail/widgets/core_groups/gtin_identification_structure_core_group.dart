@@ -212,7 +212,8 @@ class _GtinIdentificationStructureCoreGroupState
       children: [
         const SectionLabel(
           GtinUiConstants.sectionIdentificationStructure,
-          padding: EdgeInsets.only(top: 0, bottom: 8),
+          padding: EdgeInsets.only(top: 0,bottom: 12),
+
         ),
         GtinValidatedField(
           focusNode: _focusNode,

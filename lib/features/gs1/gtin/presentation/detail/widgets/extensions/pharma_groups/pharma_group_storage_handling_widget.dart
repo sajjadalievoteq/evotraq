@@ -75,22 +75,36 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
   @override
   void didUpdateWidget(covariant StorageHandlingGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialStorageConditions != oldWidget.initialStorageConditions &&
-        widget.initialStorageConditions != _storageConditionsController.text) {
-      _storageConditionsController.text = widget.initialStorageConditions;
+    if (widget.initialStorageConditions == oldWidget.initialStorageConditions &&
+        widget.initialMinStorageTemp == oldWidget.initialMinStorageTemp &&
+        widget.initialMaxStorageTemp == oldWidget.initialMaxStorageTemp &&
+        widget.initialRequiresRefrigeration == oldWidget.initialRequiresRefrigeration &&
+        widget.initialRequiresFreezing == oldWidget.initialRequiresFreezing &&
+        widget.initialLightSensitive == oldWidget.initialLightSensitive &&
+        widget.initialHumiditySensitive == oldWidget.initialHumiditySensitive) {
+      return;
     }
-    if (widget.initialMinStorageTemp != oldWidget.initialMinStorageTemp &&
-        widget.initialMinStorageTemp != _minStorageTempController.text) {
-      _minStorageTempController.text = widget.initialMinStorageTemp;
-    }
-    if (widget.initialMaxStorageTemp != oldWidget.initialMaxStorageTemp &&
-        widget.initialMaxStorageTemp != _maxStorageTempController.text) {
-      _maxStorageTempController.text = widget.initialMaxStorageTemp;
-    }
-    _requiresRefrigeration = widget.initialRequiresRefrigeration;
-    _requiresFreezing = widget.initialRequiresFreezing;
-    _lightSensitive = widget.initialLightSensitive;
-    _humiditySensitive = widget.initialHumiditySensitive;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _requiresRefrigeration = widget.initialRequiresRefrigeration;
+        _requiresFreezing = widget.initialRequiresFreezing;
+        _lightSensitive = widget.initialLightSensitive;
+        _humiditySensitive = widget.initialHumiditySensitive;
+      });
+      if (widget.initialStorageConditions != oldWidget.initialStorageConditions &&
+          widget.initialStorageConditions != _storageConditionsController.text) {
+        _storageConditionsController.text = widget.initialStorageConditions;
+      }
+      if (widget.initialMinStorageTemp != oldWidget.initialMinStorageTemp &&
+          widget.initialMinStorageTemp != _minStorageTempController.text) {
+        _minStorageTempController.text = widget.initialMinStorageTemp;
+      }
+      if (widget.initialMaxStorageTemp != oldWidget.initialMaxStorageTemp &&
+          widget.initialMaxStorageTemp != _maxStorageTempController.text) {
+        _maxStorageTempController.text = widget.initialMaxStorageTemp;
+      }
+    });
   }
 
   @override

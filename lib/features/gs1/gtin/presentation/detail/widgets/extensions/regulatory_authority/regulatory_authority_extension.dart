@@ -64,25 +64,35 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
   @override
   void didUpdateWidget(covariant RegulatoryAuthorityExtension oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialLocalDrugCode != oldWidget.initialLocalDrugCode &&
-        widget.initialLocalDrugCode != _localDrugCodeController.text) {
-      _localDrugCodeController.text = widget.initialLocalDrugCode;
-    }
-    if (widget.initialMarketingAuthorizationNumber !=
+    if (widget.initialLocalDrugCode == oldWidget.initialLocalDrugCode &&
+        widget.initialMarketingAuthorizationNumber ==
             oldWidget.initialMarketingAuthorizationNumber &&
-        widget.initialMarketingAuthorizationNumber !=
-            _marketingAuthorizationNumberController.text) {
-      _marketingAuthorizationNumberController.text =
-          widget.initialMarketingAuthorizationNumber;
+        widget.initialLicensedAgentGlns == oldWidget.initialLicensedAgentGlns &&
+        widget.initialRegulatedProductName == oldWidget.initialRegulatedProductName) {
+      return;
     }
-    if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
-        widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
-      _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
-    }
-    if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
-        widget.initialRegulatedProductName != _regulatedProductNameController.text) {
-      _regulatedProductNameController.text = widget.initialRegulatedProductName;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialLocalDrugCode != oldWidget.initialLocalDrugCode &&
+          widget.initialLocalDrugCode != _localDrugCodeController.text) {
+        _localDrugCodeController.text = widget.initialLocalDrugCode;
+      }
+      if (widget.initialMarketingAuthorizationNumber !=
+              oldWidget.initialMarketingAuthorizationNumber &&
+          widget.initialMarketingAuthorizationNumber !=
+              _marketingAuthorizationNumberController.text) {
+        _marketingAuthorizationNumberController.text =
+            widget.initialMarketingAuthorizationNumber;
+      }
+      if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
+          widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
+        _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
+      }
+      if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
+          widget.initialRegulatedProductName != _regulatedProductNameController.text) {
+        _regulatedProductNameController.text = widget.initialRegulatedProductName;
+      }
+    });
   }
 
   @override

@@ -166,34 +166,54 @@ class _DosageRouteCompositionGroupWidgetState
   @override
   void didUpdateWidget(covariant DosageRouteCompositionGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialDosageForm != oldWidget.initialDosageForm &&
-        widget.initialDosageForm != _dosageFormController.text) {
-      _dosageFormController.text = widget.initialDosageForm;
+    if (widget.initialDosageForm == oldWidget.initialDosageForm &&
+        widget.initialStrength == oldWidget.initialStrength &&
+        widget.initialStrengthUnit == oldWidget.initialStrengthUnit &&
+        widget.initialRouteOfAdministration == oldWidget.initialRouteOfAdministration &&
+        widget.initialInactiveIngredients == oldWidget.initialInactiveIngredients &&
+        identical(widget.initialActiveIngredients, oldWidget.initialActiveIngredients)) {
+      return;
     }
-    if (widget.initialStrength != oldWidget.initialStrength &&
-        widget.initialStrength != _strengthController.text) {
-      _strengthController.text = widget.initialStrength;
-    }
-    if (widget.initialStrengthUnit != oldWidget.initialStrengthUnit &&
-        widget.initialStrengthUnit != _strengthUnitController.text) {
-      _strengthUnitController.text = widget.initialStrengthUnit;
-    }
-    if (widget.initialRouteOfAdministration != oldWidget.initialRouteOfAdministration &&
-        widget.initialRouteOfAdministration != _routeOfAdministrationController.text) {
-      _routeOfAdministrationController.text = widget.initialRouteOfAdministration;
-    }
-    if (widget.initialInactiveIngredients != oldWidget.initialInactiveIngredients &&
-        widget.initialInactiveIngredients != _inactiveIngredientsController.text) {
-      _inactiveIngredientsController.text = widget.initialInactiveIngredients;
-    }
-    if (!identical(widget.initialActiveIngredients, oldWidget.initialActiveIngredients)) {
-      for (final row in _activeIngredientRows) {
-        row.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialDosageForm != oldWidget.initialDosageForm &&
+          widget.initialDosageForm != _dosageFormController.text) {
+        _dosageFormController.text = widget.initialDosageForm;
       }
-      _activeIngredientRows = widget.initialActiveIngredients
-          .map((e) => _IngredientRow(initial: e, onChanged: _emitChange))
-          .toList();
-    }
+      if (widget.initialStrength != oldWidget.initialStrength &&
+          widget.initialStrength != _strengthController.text) {
+        _strengthController.text = widget.initialStrength;
+      }
+      if (widget.initialStrengthUnit != oldWidget.initialStrengthUnit &&
+          widget.initialStrengthUnit != _strengthUnitController.text) {
+        _strengthUnitController.text = widget.initialStrengthUnit;
+      }
+      if (widget.initialRouteOfAdministration !=
+              oldWidget.initialRouteOfAdministration &&
+          widget.initialRouteOfAdministration !=
+              _routeOfAdministrationController.text) {
+        _routeOfAdministrationController.text =
+            widget.initialRouteOfAdministration;
+      }
+      if (widget.initialInactiveIngredients !=
+              oldWidget.initialInactiveIngredients &&
+          widget.initialInactiveIngredients !=
+              _inactiveIngredientsController.text) {
+        _inactiveIngredientsController.text = widget.initialInactiveIngredients;
+      }
+      if (!identical(
+          widget.initialActiveIngredients, oldWidget.initialActiveIngredients)) {
+        for (final row in _activeIngredientRows) {
+          row.dispose();
+        }
+        setState(() {
+          _activeIngredientRows = widget.initialActiveIngredients
+              .map((e) =>
+                  _IngredientRow(initial: e, onChanged: _emitChange))
+              .toList();
+        });
+      }
+    });
   }
 
   @override

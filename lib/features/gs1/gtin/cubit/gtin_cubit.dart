@@ -1,26 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
-import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
-import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
 class GTINCubit extends Cubit<GTINState> {
   final GTINService _gtinService;
-  final PharmaceuticalService _pharmaceuticalService;
-  final GTINTobaccoExtensionService _tobaccoExtensionService;
 
   GTINCubit({
     required GTINService gtinService,
-    required PharmaceuticalService pharmaceuticalService,
-    required GTINTobaccoExtensionService tobaccoExtensionService,
   })  : _gtinService = gtinService,
-        _pharmaceuticalService = pharmaceuticalService,
-        _tobaccoExtensionService = tobaccoExtensionService,
         super(const GTINState());
 
   /// Loads GTINs for pickers (e.g. commissioning) without mutating list-screen state.
@@ -35,8 +26,6 @@ class GTINCubit extends Cubit<GTINState> {
       emit(state.copyWith(
         status: GTINStatus.success,
         gtin: gtin,
-        pharmaceuticalExtension: null,
-        tobaccoExtension: null,
         error: null,
       ));
     } catch (e, st) {
@@ -48,25 +37,10 @@ class GTINCubit extends Cubit<GTINState> {
   Future<void> fetchGTINDetails(String gtinCode) async {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
-      final pharmaFuture = _pharmaceuticalService
-          .getExtensionByGtinCode(gtinCode)
-          .catchError((_) => null);
-      final tobaccoFuture = kTobaccoExtensionEnabled
-          ? _tobaccoExtensionService.getByGtinCode(gtinCode).catchError((_) => null)
-          : Future<Object?>.value(null);
-
-      final results = await Future.wait<Object?>([
-        _gtinService.getGTIN(gtinCode),
-        pharmaFuture,
-        tobaccoFuture,
-      ]);
-
-      final gtin = results[0] as GTIN;
+      final gtin = await _gtinService.getGTIN(gtinCode);
       emit(state.copyWith(
         status: GTINStatus.success,
         gtin: gtin,
-        pharmaceuticalExtension: results[1] as dynamic,
-        tobaccoExtension: results[2] as dynamic,
         error: null,
       ));
     } catch (e, st) {

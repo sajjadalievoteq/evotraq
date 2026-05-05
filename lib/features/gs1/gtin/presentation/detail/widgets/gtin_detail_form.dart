@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_detail_form_skeleton.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
@@ -40,7 +41,7 @@ class GtinDetailForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (unboundSpecSection != null) ...[
-          const SizedBox(height: 24),
+
           unboundSpecSection!,
         ],
         const SizedBox(height: 32),
@@ -55,7 +56,7 @@ class GtinDetailForm extends StatelessWidget {
     );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.only(top:context.padding.left,right: context.padding.left,left: context.padding.left),
       child: Form(
         key: formKey,
         child: fullFormShimmer

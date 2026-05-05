@@ -48,11 +48,22 @@ class _DataCarrierIntegrityGroupWidgetState
   @override
   void didUpdateWidget(covariant DataCarrierIntegrityGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _dataCarrierTypeCode = widget.initialDataCarrierTypeCode.trim().isEmpty
-        ? null
-        : widget.initialDataCarrierTypeCode;
-    _antiTamperingIndicator = widget.initialAntiTamperingIndicator;
-    _pseudoGtinNtinFlag = widget.initialPseudoGtinNtinFlag;
+    if (widget.initialDataCarrierTypeCode == oldWidget.initialDataCarrierTypeCode &&
+        widget.initialAntiTamperingIndicator ==
+            oldWidget.initialAntiTamperingIndicator &&
+        widget.initialPseudoGtinNtinFlag == oldWidget.initialPseudoGtinNtinFlag) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _dataCarrierTypeCode = widget.initialDataCarrierTypeCode.trim().isEmpty
+            ? null
+            : widget.initialDataCarrierTypeCode;
+        _antiTamperingIndicator = widget.initialAntiTamperingIndicator;
+        _pseudoGtinNtinFlag = widget.initialPseudoGtinNtinFlag;
+      });
+    });
   }
 
   void _emitChange() {

@@ -54,18 +54,31 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
   @override
   void didUpdateWidget(covariant TechProductCodedGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
-        widget.initialRegulatedProductName != _regulatedProductNameController.text) {
-      _regulatedProductNameController.text = widget.initialRegulatedProductName;
+    if (widget.initialRegulatedProductName == oldWidget.initialRegulatedProductName &&
+        widget.initialDosageFormTypeCode == oldWidget.initialDosageFormTypeCode &&
+        widget.initialRouteOfAdministrationCode ==
+            oldWidget.initialRouteOfAdministrationCode) {
+      return;
     }
-    if (widget.initialDosageFormTypeCode != oldWidget.initialDosageFormTypeCode &&
-        widget.initialDosageFormTypeCode != _dosageFormTypeCodeController.text) {
-      _dosageFormTypeCodeController.text = widget.initialDosageFormTypeCode;
-    }
-    if (widget.initialRouteOfAdministrationCode != oldWidget.initialRouteOfAdministrationCode &&
-        widget.initialRouteOfAdministrationCode != _routeOfAdministrationCodeController.text) {
-      _routeOfAdministrationCodeController.text = widget.initialRouteOfAdministrationCode;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
+          widget.initialRegulatedProductName !=
+              _regulatedProductNameController.text) {
+        _regulatedProductNameController.text = widget.initialRegulatedProductName;
+      }
+      if (widget.initialDosageFormTypeCode != oldWidget.initialDosageFormTypeCode &&
+          widget.initialDosageFormTypeCode != _dosageFormTypeCodeController.text) {
+        _dosageFormTypeCodeController.text = widget.initialDosageFormTypeCode;
+      }
+      if (widget.initialRouteOfAdministrationCode !=
+              oldWidget.initialRouteOfAdministrationCode &&
+          widget.initialRouteOfAdministrationCode !=
+              _routeOfAdministrationCodeController.text) {
+        _routeOfAdministrationCodeController.text =
+            widget.initialRouteOfAdministrationCode;
+      }
+    });
   }
 
   @override

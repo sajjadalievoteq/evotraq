@@ -95,34 +95,52 @@ class _TechMahAuthorizationGroupWidgetState
   @override
   void didUpdateWidget(covariant TechMahAuthorizationGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialMahGln != oldWidget.initialMahGln &&
-        widget.initialMahGln != _mahGlnController.text) {
-      _mahGlnController.text = widget.initialMahGln;
+    if (widget.initialMahGln == oldWidget.initialMahGln &&
+        widget.initialMahName == oldWidget.initialMahName &&
+        widget.initialMahCountry == oldWidget.initialMahCountry &&
+        widget.initialLicensedAgentGlns == oldWidget.initialLicensedAgentGlns &&
+        widget.initialMaNumber == oldWidget.initialMaNumber &&
+        widget.initialMaValidFrom == oldWidget.initialMaValidFrom &&
+        widget.initialMaValidTo == oldWidget.initialMaValidTo &&
+        widget.initialRegulatoryStatus == oldWidget.initialRegulatoryStatus) {
+      return;
     }
-    if (widget.initialMahName != oldWidget.initialMahName &&
-        widget.initialMahName != _mahNameController.text) {
-      _mahNameController.text = widget.initialMahName;
-    }
-    if (widget.initialMahCountry != oldWidget.initialMahCountry &&
-        widget.initialMahCountry != _mahCountryController.text) {
-      _mahCountryController.text = widget.initialMahCountry;
-    }
-    if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
-        widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
-      _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
-    }
-    if (widget.initialMaNumber != oldWidget.initialMaNumber &&
-        widget.initialMaNumber != _maNumberController.text) {
-      _maNumberController.text = widget.initialMaNumber;
-    }
-    _regulatoryStatus = widget.initialRegulatoryStatus.trim().isEmpty
-        ? null
-        : widget.initialRegulatoryStatus;
-    _maValidFrom = widget.initialMaValidFrom;
-    _maValidTo = widget.initialMaValidTo;
-    _maValidFromDisplay.text =
-        _maValidFrom != null ? _docDateFmt.format(_maValidFrom!) : '';
-    _maValidToDisplay.text = _maValidTo != null ? _docDateFmt.format(_maValidTo!) : '';
+    // Defer controller writes: doing this synchronously during update can notify
+    // dependent fields (e.g. country display) and trigger Form.markNeedsBuild mid-build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialMahGln != oldWidget.initialMahGln &&
+          widget.initialMahGln != _mahGlnController.text) {
+        _mahGlnController.text = widget.initialMahGln;
+      }
+      if (widget.initialMahName != oldWidget.initialMahName &&
+          widget.initialMahName != _mahNameController.text) {
+        _mahNameController.text = widget.initialMahName;
+      }
+      if (widget.initialMahCountry != oldWidget.initialMahCountry &&
+          widget.initialMahCountry != _mahCountryController.text) {
+        _mahCountryController.text = widget.initialMahCountry;
+      }
+      if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
+          widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
+        _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
+      }
+      if (widget.initialMaNumber != oldWidget.initialMaNumber &&
+          widget.initialMaNumber != _maNumberController.text) {
+        _maNumberController.text = widget.initialMaNumber;
+      }
+      setState(() {
+        _regulatoryStatus = widget.initialRegulatoryStatus.trim().isEmpty
+            ? null
+            : widget.initialRegulatoryStatus;
+        _maValidFrom = widget.initialMaValidFrom;
+        _maValidTo = widget.initialMaValidTo;
+      });
+      _maValidFromDisplay.text =
+          _maValidFrom != null ? _docDateFmt.format(_maValidFrom!) : '';
+      _maValidToDisplay.text =
+          _maValidTo != null ? _docDateFmt.format(_maValidTo!) : '';
+    });
   }
 
   @override

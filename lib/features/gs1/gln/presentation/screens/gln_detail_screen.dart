@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_detail_form_skeleton.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
@@ -17,7 +19,7 @@ import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart'
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_contact_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_digital_location_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_geospatial_core_group.dart';
@@ -158,20 +160,30 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     _locationRolesController = TextEditingController();
     _licenseNumberController = TextEditingController();
     _licenseTypeController = TextEditingController();
+
+    if (!widget.embedded) {
+      _glnCubit = GLNCubit(glnService: getIt<GLNService>());
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _glnCubit = context.read<GLNCubit>();
+    if (widget.embedded) {
+      _glnCubit = context.read<GLNCubit>();
+    }
     if (!_glnInitialLoadStarted) {
       _glnInitialLoadStarted = true;
       if (widget.awaitingListSelection) {
         return;
       }
-      _glnCubit!.clearSelection();
+      final cubit = _glnCubit;
+      if (cubit == null) {
+        return;
+      }
+      cubit.clearSelection();
       if (widget.glnId != null) {
-        _glnCubit!.fetchGLNById(widget.glnId!);
+        cubit.fetchGLNById(widget.glnId!);
       } else {
         // Create GLN: hydrate defaults off the build phase (do not call from BlocBuilder.builder).
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -212,7 +224,11 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     _locationRolesController.dispose();
     _licenseNumberController.dispose();
     _licenseTypeController.dispose();
-    _glnCubit?.clearSelection();
+    if (widget.embedded) {
+      _glnCubit?.clearSelection();
+    } else {
+      _glnCubit?.close();
+    }
     super.dispose();
   }
 
@@ -418,6 +434,17 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       );
     }
 
+    GLNTobaccoExtension? tobaccoExtension;
+    final tobaccoSt = _tobaccoExtensionKey.currentState;
+    if (kTobaccoExtensionEnabled &&
+        tobaccoSt != null &&
+        tobaccoSt.hasData) {
+      tobaccoExtension = tobaccoSt.buildExtension(
+        glnId: null,
+        glnCode: glnCode,
+      );
+    }
+
     final gln = GLN(
       glnCode: glnCode,
       locationName: locationName,
@@ -467,35 +494,25 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       supplyChainRoles: _splitRoles(_supplyChainRolesController.text),
       locationRoles: _splitRoles(_locationRolesController.text),
       pharmaceuticalExtension: pharmaceuticalExtension,
+      tobaccoExtension: tobaccoExtension,
     );
 
     setState(() => _hasSubmittedForm = true);
 
+    final cubit = _glnCubit;
+    if (cubit == null) {
+      return;
+    }
     if (widget.glnId != null) {
-      context.read<GLNCubit>().updateGLN(widget.glnId!, gln);
+      cubit.updateGLN(widget.glnId!, gln);
     } else {
-      context.read<GLNCubit>().createGLN(gln);
+      cubit.createGLN(gln);
     }
   }
 
   String? _nonEmptyOrNull(String s) {
     final t = s.trim();
     return t.isEmpty ? null : t;
-  }
-
-  Future<void> _saveTobaccoExtensionIfNeeded(String glnCode) async {
-    if (!kTobaccoExtensionEnabled) return;
-    final tobaccoState = _tobaccoExtensionKey.currentState;
-    if (tobaccoState == null || !tobaccoState.hasData) return;
-
-    try {
-      final extension = tobaccoState.buildExtension(glnId: null, glnCode: glnCode);
-      if (extension != null) {
-        await getIt<GLNTobaccoExtensionService>().createByGlnCode(glnCode, extension);
-      }
-    } catch (e) {
-      debugPrint('Error saving GLN tobacco extension: $e');
-    }
   }
 
   /// One rule for split-view placeholder, fetch, and post-fetch hydrate: skeleton until [ _formFieldsHydrated ] is true.
@@ -526,8 +543,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           }
           if (state.status == GLNStatus.success && _hasSubmittedForm) {
             setState(() => _hasSubmittedForm = false);
-            final glnCode = GlnFormat.stripGlnInput(_glnCodeController.text);
-            _saveTobaccoExtensionIfNeeded(glnCode);
 
             context.showSuccess(GlnUiConstants.successGlnSaved);
 
@@ -554,7 +569,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
             sk;
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    padding: EdgeInsets.only(top: context.horizontalPadding.left,right: context.horizontalPadding.left,left: context.horizontalPadding.left),
           child: Form(
             key: _formKey,
             child: Gs1FormShimmerLayer(
@@ -727,7 +742,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       },
     );
 
-    return Gs1MasterDataDetailScaffold(
+    final scaffold = Gs1MasterDataDetailScaffold(
       embedded: widget.embedded,
       title: widget.isEditing
           ? (widget.glnId != null
@@ -737,6 +752,18 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       showSaveAction: allowMasterDataActions,
       onSave: _submitForm,
       body: body,
+    );
+
+    if (widget.embedded) {
+      return scaffold;
+    }
+    final cubit = _glnCubit;
+    if (cubit == null) {
+      return scaffold;
+    }
+    return BlocProvider<GLNCubit>.value(
+      value: cubit,
+      child: scaffold,
     );
   }
 }

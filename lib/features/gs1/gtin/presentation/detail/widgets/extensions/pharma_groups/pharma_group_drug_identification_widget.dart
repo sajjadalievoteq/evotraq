@@ -54,18 +54,26 @@ class _DrugIdentificationGroupWidgetState
   @override
   void didUpdateWidget(covariant DrugIdentificationGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialNdcNumber != oldWidget.initialNdcNumber &&
-        widget.initialNdcNumber != _ndcNumberController.text) {
-      _ndcNumberController.text = widget.initialNdcNumber;
+    if (widget.initialNdcNumber == oldWidget.initialNdcNumber &&
+        widget.initialDinNumber == oldWidget.initialDinNumber &&
+        widget.initialEanPharmaCode == oldWidget.initialEanPharmaCode) {
+      return;
     }
-    if (widget.initialDinNumber != oldWidget.initialDinNumber &&
-        widget.initialDinNumber != _dinNumberController.text) {
-      _dinNumberController.text = widget.initialDinNumber;
-    }
-    if (widget.initialEanPharmaCode != oldWidget.initialEanPharmaCode &&
-        widget.initialEanPharmaCode != _eanPharmaCodeController.text) {
-      _eanPharmaCodeController.text = widget.initialEanPharmaCode;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialNdcNumber != oldWidget.initialNdcNumber &&
+          widget.initialNdcNumber != _ndcNumberController.text) {
+        _ndcNumberController.text = widget.initialNdcNumber;
+      }
+      if (widget.initialDinNumber != oldWidget.initialDinNumber &&
+          widget.initialDinNumber != _dinNumberController.text) {
+        _dinNumberController.text = widget.initialDinNumber;
+      }
+      if (widget.initialEanPharmaCode != oldWidget.initialEanPharmaCode &&
+          widget.initialEanPharmaCode != _eanPharmaCodeController.text) {
+        _eanPharmaCodeController.text = widget.initialEanPharmaCode;
+      }
+    });
   }
 
   @override

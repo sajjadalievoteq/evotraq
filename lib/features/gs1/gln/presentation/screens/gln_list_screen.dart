@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
@@ -13,11 +14,13 @@ import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_record_i
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_results_list.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
+import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:world_countries/helpers.dart';
 
 /// Screen to display and manage GLNs — layout aligned with [GTINListScreen].
 class GLNListScreen extends StatefulWidget {
@@ -55,6 +58,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
   String _sortOrder = 'asc';
   int _pageSize = 25;
 
+  bool _didRunPrimaryInitialFetch = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,14 +69,22 @@ class _GLNListScreenState extends State<GLNListScreen> {
         _search();
       },
     );
-    // Initial load (aligned with [GTINListScreen.fetchGTINList] — no extra frame wait).
-    _search();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onBindRefresh?.call(() {
         if (mounted) _searchImmediate();
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didRunPrimaryInitialFetch) return;
+    final primary = PrimaryFetchScope.maybeOf(context)?.isPrimary ?? true;
+    if (!primary) return;
+    _didRunPrimaryInitialFetch = true;
+    _search();
   }
 
   @override
@@ -354,46 +367,54 @@ class _GLNListScreenState extends State<GLNListScreen> {
         return Gs1MasterListBody(
           toolbar: Column(
             children: [
-              ListenableBuilder(
-                listenable: _searchController,
-                builder: (context, _) {
-                  return Gs1ListSearchBar(
-                    hintText: GlnUiConstants.listSearchHint,
-                    controller: _searchController,
-                    showAdvancedFilters: false,
-                    onSearch: _searchImmediate,
-                    onQueryChanged: _onSearchTextChanged,
-                    onRefresh: _searchImmediate,
-                    onQuickFilters: _showFilterDialog,
-                    onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                    onClear: () {
-                      _searchDebouncer.cancel();
-                      _searchController.clear();
-                      _search();
-                    },
-                  );
-                },
-              ),
-              GlnRecordInfoSection(
-                pageSize: _pageSize,
-                onPageSizeChanged: (newSize) {
-                  setState(() {
-                    _pageSize = newSize;
-                  });
-                  _searchImmediate();
-                },
-              ),
-              SizedBox(height: Constants.spacing),
-              Gs1ListSortingControls(
-                label: GlnUiConstants.sortByLine(
-                  _sortFieldDisplayLabel(),
-                  _sortOrder == 'asc'
-                      ? GlnUiConstants.sortAscendingLabel
-                      : GlnUiConstants.sortDescendingLabel,
+              Padding(
+                padding:  EdgeInsets.only(left: context.horizontalPadding.left,right:  context.horizontalPadding.left,top:  context.horizontalPadding.left),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: _searchController,
+                      builder: (context, _) {
+                        return Gs1ListSearchBar(
+                          hintText: GlnUiConstants.listSearchHint,
+                          controller: _searchController,
+                          showAdvancedFilters: false,
+                          onSearch: _searchImmediate,
+                          onQueryChanged: _onSearchTextChanged,
+                          onRefresh: _searchImmediate,
+                          onQuickFilters: _showFilterDialog,
+                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                          onClear: () {
+                            _searchDebouncer.cancel();
+                            _searchController.clear();
+                            _search();
+                          },
+                        );
+                      },
+                    ),
+                    GlnRecordInfoSection(
+                      pageSize: _pageSize,
+                      onPageSizeChanged: (newSize) {
+                        setState(() {
+                          _pageSize = newSize;
+                        });
+                        _searchImmediate();
+                      },
+                    ),
+                    SizedBox(height: Constants.spacing),
+                    Gs1ListSortingControls(
+                      label: GlnUiConstants.sortByLine(
+                        _sortFieldDisplayLabel(),
+                        _sortOrder == 'asc'
+                            ? GlnUiConstants.sortAscendingLabel
+                            : GlnUiConstants.sortDescendingLabel,
+                      ),
+                      sortOrder: _sortOrder,
+                      onToggleSortOrder: _toggleSortOrder,
+                    ),
+                  ],
                 ),
-                sortOrder: _sortOrder,
-                onToggleSortOrder: _toggleSortOrder,
               ),
+
             ],
           ),
           results: GlnResultsList(
@@ -417,6 +438,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(
+        heroTag: 'gln_list_standalone_add_fab',
         onPressed: _navigateToCreateGLN,
         tooltip: GlnUiConstants.fabAddNew,
         child: const Icon(Icons.add),

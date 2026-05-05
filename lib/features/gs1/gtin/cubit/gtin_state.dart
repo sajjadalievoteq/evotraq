@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 
 enum GTINStatus { initial, loading, success, error }
 
@@ -9,8 +7,6 @@ class GTINState extends Equatable {
   final GTINStatus status;
   final List<GTIN>? gtins;
   final GTIN? gtin;
-  final GTINPharmaceuticalExtension? pharmaceuticalExtension;
-  final GTINTobaccoExtension? tobaccoExtension;
   final bool? isValidFormat;
   final String? error;
   final int currentPage;
@@ -31,8 +27,6 @@ class GTINState extends Equatable {
     this.status = GTINStatus.initial,
     this.gtins,
     this.gtin,
-    this.pharmaceuticalExtension,
-    this.tobaccoExtension,
     this.isValidFormat,
     this.error,
     this.currentPage = 0,
@@ -49,8 +43,6 @@ class GTINState extends Equatable {
     GTINStatus? status,
     List<GTIN>? gtins,
     GTIN? gtin,
-    GTINPharmaceuticalExtension? pharmaceuticalExtension,
-    GTINTobaccoExtension? tobaccoExtension,
     bool? isValidFormat,
     String? error,
     int? currentPage,
@@ -67,9 +59,6 @@ class GTINState extends Equatable {
       status: status ?? this.status,
       gtins: gtins ?? this.gtins,
       gtin: gtin ?? this.gtin,
-      pharmaceuticalExtension:
-          pharmaceuticalExtension ?? this.pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension ?? this.tobaccoExtension,
       isValidFormat: isValidFormat ?? this.isValidFormat,
       error: error ?? this.error,
       currentPage: currentPage ?? this.currentPage,
@@ -95,8 +84,6 @@ class GTINState extends Equatable {
         status,
         gtins,
         gtin,
-        pharmaceuticalExtension,
-        tobaccoExtension,
         isValidFormat,
         error,
         currentPage,

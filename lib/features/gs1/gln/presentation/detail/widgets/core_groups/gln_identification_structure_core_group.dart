@@ -186,7 +186,7 @@ class _GlnIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(GlnUiConstants.sectionIdentificationStructure),
+        SectionLabel(GlnUiConstants.sectionIdentificationStructure,padding: EdgeInsets.only(top: 0,bottom: 12),),
         GtinValidatedField(
           focusNode: _glnFocusNode,
           onEditingComplete: () {

@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-
-import '../../../data/services/gtin_tobacco_extension_service.dart';
 
 /// Widget that displays/edits tobacco extension data for a GTIN
 /// Can be embedded in GTIN detail screens or used standalone
@@ -16,6 +13,9 @@ class TobaccoExtensionWidget extends StatefulWidget {
   final Function(GTINTobaccoExtension?)? onSaved;
   final GTINTobaccoExtension? initialExtension;
 
+  final bool deferInitialExtensionFetch;
+  final bool extensionFetchResolved;
+
   const TobaccoExtensionWidget({
     Key? key,
     this.gtinId,
@@ -23,6 +23,8 @@ class TobaccoExtensionWidget extends StatefulWidget {
     this.isEditing = false,
     this.onSaved,
     this.initialExtension,
+    this.deferInitialExtensionFetch = false,
+    this.extensionFetchResolved = true,
   }) : super(key: key);
 
   @override
@@ -129,7 +131,41 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
       _isLoading = false;
       _initializeForm(widget.initialExtension!);
     } else {
-      _loadTobaccoExtension();
+      _isLoading =
+          widget.deferInitialExtensionFetch && !widget.extensionFetchResolved;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant TobaccoExtensionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.deferInitialExtensionFetch) {
+      if (!widget.extensionFetchResolved && oldWidget.extensionFetchResolved) {
+        if (mounted) setState(() => _isLoading = true);
+      }
+      if (widget.extensionFetchResolved && !oldWidget.extensionFetchResolved) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            if (widget.initialExtension != null) {
+              _extension = widget.initialExtension;
+              _hasExtension = true;
+              _initializeForm(widget.initialExtension!);
+            }
+          });
+        }
+      }
+    }
+    if (widget.initialExtension != oldWidget.initialExtension) {
+      final next = widget.initialExtension;
+      if (next != null && mounted) {
+        setState(() {
+          _extension = next;
+          _hasExtension = true;
+          _isLoading = false;
+          _initializeForm(next);
+        });
+      }
     }
   }
 
@@ -150,51 +186,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
     _moistureContentController.dispose();
     _qualityGradeController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadTobaccoExtension() async {
-    // Skip loading if no valid GTIN code or ID is provided (e.g., when creating a new GTIN)
-    final hasValidGtinCode = widget.gtinCode != null && widget.gtinCode!.isNotEmpty;
-    final hasValidGtinId = widget.gtinId != null;
-    
-    if (!hasValidGtinCode && !hasValidGtinId) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    try {
-      final service = getIt<GTINTobaccoExtensionService>();
-      
-      GTINTobaccoExtension? ext;
-      if (hasValidGtinCode) {
-        ext = await service.getByGtinCode(widget.gtinCode!);
-      } else if (widget.gtinId != null) {
-        ext = await service.getByGtinId(widget.gtinId!);
-      }
-      
-      if (mounted) {
-        setState(() {
-          _extension = ext;
-          _hasExtension = ext != null;
-          _isLoading = false;
-          if (ext != null) {
-            _initializeForm(ext);
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _hasExtension = false;
-          // Not an error if extension doesn't exist - it's optional
-        });
-      }
-    }
   }
 
   void _initializeForm(GTINTobaccoExtension ext) {

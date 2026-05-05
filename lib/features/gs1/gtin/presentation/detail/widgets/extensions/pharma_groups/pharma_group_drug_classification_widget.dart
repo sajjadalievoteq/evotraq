@@ -68,26 +68,36 @@ class _DrugClassificationGroupWidgetState
   @override
   void didUpdateWidget(covariant DrugClassificationGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialDrugClass != oldWidget.initialDrugClass &&
-        widget.initialDrugClass != _drugClassController.text) {
-      _drugClassController.text = widget.initialDrugClass;
+    if (widget.initialDrugClass == oldWidget.initialDrugClass &&
+        widget.initialTherapeuticClass == oldWidget.initialTherapeuticClass &&
+        widget.initialPharmacologicalClass == oldWidget.initialPharmacologicalClass &&
+        widget.initialAtcCode == oldWidget.initialAtcCode &&
+        widget.initialAdditionalAtcCodes == oldWidget.initialAdditionalAtcCodes) {
+      return;
     }
-    if (widget.initialTherapeuticClass != oldWidget.initialTherapeuticClass &&
-        widget.initialTherapeuticClass != _therapeuticClassController.text) {
-      _therapeuticClassController.text = widget.initialTherapeuticClass;
-    }
-    if (widget.initialPharmacologicalClass != oldWidget.initialPharmacologicalClass &&
-        widget.initialPharmacologicalClass != _pharmacologicalClassController.text) {
-      _pharmacologicalClassController.text = widget.initialPharmacologicalClass;
-    }
-    if (widget.initialAtcCode != oldWidget.initialAtcCode &&
-        widget.initialAtcCode != _atcCodeController.text) {
-      _atcCodeController.text = widget.initialAtcCode;
-    }
-    if (widget.initialAdditionalAtcCodes != oldWidget.initialAdditionalAtcCodes &&
-        widget.initialAdditionalAtcCodes != _additionalAtcCodesController.text) {
-      _additionalAtcCodesController.text = widget.initialAdditionalAtcCodes;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.initialDrugClass != oldWidget.initialDrugClass &&
+          widget.initialDrugClass != _drugClassController.text) {
+        _drugClassController.text = widget.initialDrugClass;
+      }
+      if (widget.initialTherapeuticClass != oldWidget.initialTherapeuticClass &&
+          widget.initialTherapeuticClass != _therapeuticClassController.text) {
+        _therapeuticClassController.text = widget.initialTherapeuticClass;
+      }
+      if (widget.initialPharmacologicalClass != oldWidget.initialPharmacologicalClass &&
+          widget.initialPharmacologicalClass != _pharmacologicalClassController.text) {
+        _pharmacologicalClassController.text = widget.initialPharmacologicalClass;
+      }
+      if (widget.initialAtcCode != oldWidget.initialAtcCode &&
+          widget.initialAtcCode != _atcCodeController.text) {
+        _atcCodeController.text = widget.initialAtcCode;
+      }
+      if (widget.initialAdditionalAtcCodes != oldWidget.initialAdditionalAtcCodes &&
+          widget.initialAdditionalAtcCodes != _additionalAtcCodesController.text) {
+        _additionalAtcCodesController.text = widget.initialAdditionalAtcCodes;
+      }
+    });
   }
 
   @override

@@ -46,11 +46,20 @@ class _PrescriptionRequirementsGroupWidgetState
   @override
   void didUpdateWidget(covariant PrescriptionRequirementsGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _requiresPrescription = widget.initialRequiresPrescription;
-    if (widget.initialPrescriptionType != oldWidget.initialPrescriptionType &&
-        widget.initialPrescriptionType != _prescriptionTypeController.text) {
-      _prescriptionTypeController.text = widget.initialPrescriptionType;
+    if (widget.initialRequiresPrescription == oldWidget.initialRequiresPrescription &&
+        widget.initialPrescriptionType == oldWidget.initialPrescriptionType) {
+      return;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _requiresPrescription = widget.initialRequiresPrescription;
+      });
+      if (widget.initialPrescriptionType != oldWidget.initialPrescriptionType &&
+          widget.initialPrescriptionType != _prescriptionTypeController.text) {
+        _prescriptionTypeController.text = widget.initialPrescriptionType;
+      }
+    });
   }
 
   @override

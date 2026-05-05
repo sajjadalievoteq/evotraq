@@ -20,7 +20,6 @@ import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 
-import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 
@@ -49,7 +48,6 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
 import 'package:traqtrace_app/data/services/epcis_event_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
@@ -152,10 +150,6 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<ThemeCubit>(
           create: (context) =>
               ThemeCubit(profileCubit: context.read<ProfileCubit>()),
-        ),
-        // Add GLN Cubit
-        BlocProvider<GLNCubit>(
-          create: (context) => GLNCubit(glnService: getIt<GLNService>()),
         ),
         BlocProvider<SSCCCubit>(
           create: (context) => SSCCCubit(ssccService: getIt<SSCCService>()),

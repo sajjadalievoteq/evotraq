@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
 /// Shimmer placeholder for GS1 master-data list rows (GLN / GTIN card layout).
 class Gs1ListLoadingShimmer extends StatelessWidget {
@@ -31,7 +32,7 @@ class Gs1ListLoadingShimmer extends StatelessWidget {
                 maxWidth: Constants.sectionMaxWidth,
               ),
               child: ListView.separated(
-
+padding: EdgeInsets.symmetric(horizontal: context.padding.left),
                 itemCount: itemCount,
                 separatorBuilder: (_, __) => const SizedBox(height: 4),
                 itemBuilder: (context, index) {
@@ -62,7 +63,7 @@ class Gs1ListLoadMoreShimmer extends StatelessWidget {
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: Constants.spacing),
+        padding: EdgeInsets.symmetric(vertical: Constants.spacing,),
         child: Center(
           child: _skeletonBox(
             baseColor,

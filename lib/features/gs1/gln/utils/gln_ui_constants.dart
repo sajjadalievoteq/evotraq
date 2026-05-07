@@ -129,6 +129,7 @@ abstract final class GlnUiConstants {
   static const advancedFiltersSuccessBanner =
       'Database-level filtering is now active! These filters are applied directly at the database for optimal performance with large datasets.';
 
+  // --- Detail scaffold ---
   static const detailSaveButton = 'SAVE GLN';
   static const detailTitleCreate = 'Create GLN';
   static const detailTitleEdit = 'Edit GLN';
@@ -140,17 +141,19 @@ abstract final class GlnUiConstants {
 
   static const errorDeleteGlnFailed = 'Failed to delete GLN';
 
-  static const sectionIdentificationStructure = 'Identification & structure';
-  static const sectionGlnTypesClassification = 'GLN types * & classification';
-  static const sectionLegalEntity = 'Legal entity attributes';
-  static const sectionLocationAddress = 'Location & address';
-  static const sectionDigitalLocation = 'Digital location';
+  // --- Detail form: sections ---
+  static const sectionIdentificationStructure = 'Identification & Structure';
+  static const sectionGlnTypesClassification = 'GLN Types * & Classification';
+  static const sectionLegalEntity = 'Legal Entity Attributes';
+  static const sectionLocationAddress = 'Location & Address';
+  static const sectionDigitalLocation = 'Digital Location';
   static const sectionLicense = 'License';
   static const sectionContact = 'Contact';
-  static const sectionGeospatial = 'Geospatial coordinates (EPCIS 2.0)';
-  static const sectionOperationalLocationType = 'Operational location type';
-  static const sectionLifecycleStatus = 'Lifecycle & status';
+  static const sectionGeospatial = 'Geospatial Coordinates (EPCIS 2.0)';
+  static const sectionOperationalLocationType = 'Operational Location Type';
+  static const sectionLifecycleStatus = 'Lifecycle & Status';
 
+  // --- Detail form: labels & helpers ---
   static const labelGlnThirteenDigits = 'GLN (13 digits) *';
   static const hintGlnThirteen = 'Enter 13-digit GLN';
   static const labelGcpLength = 'GCP length';
@@ -165,11 +168,15 @@ abstract final class GlnUiConstants {
 
   static const labelIndustryClassification = 'Industry classification';
   static const labelGlnSource = 'GLN source';
+
+  // values (industry)
   static const industryHealthcare = 'HEALTHCARE';
   static const industryCpg = 'CPG';
   static const industryApparel = 'APPAREL';
   static const industryFoodservice = 'FOODSERVICE';
   static const industryOther = 'OTHER';
+
+  // values (source)
   static const glnSourceSelfAllocatedValue = 'SELF_ALLOCATED';
   static const glnSourceSelfAllocatedLabel = 'Self allocated';
   static const glnSourcePartnerValue = 'PARTNER_PROVIDED';

@@ -126,65 +126,46 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ExpansionTile(
-        collapsedBackgroundColor: const Color(0xFF121F17),
-        collapsedTextColor: Colors.white,
-        collapsedIconColor: Colors.white,
-        shape: const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        ),
-        collapsedShape: const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        ),
-        leading: const Icon(Icons.flag, color: Colors.white),
-        title: const Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
           GtinRegulatoryAuthorityExtensionUiConstants.expansionTitle,
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 16),
           maxLines: 1,
+
           overflow: TextOverflow.ellipsis,
+
         ),
-        initiallyExpanded: widget.showFieldSkeleton || hasData,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                RegulatoryAuthorityIdentifiersSection(
-                  isReadOnly: !widget.isEditing,
-                  showFieldSkeleton: widget.showFieldSkeleton,
-                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
-                  localDrugCodeController: _localDrugCodeController,
-                  marketingAuthorizationNumberController:
-                      _marketingAuthorizationNumberController,
-                ),
-                RegulatoryAuthorityAuthorizationSection(
-                  isReadOnly: !widget.isEditing,
-                  showFieldSkeleton: widget.showFieldSkeleton,
-                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
-                  isImportedProduct: widget.isImportedProduct,
-                  licensedAgentGlnsController: _licensedAgentGlnsController,
-                ),
-                RegulatoryAuthorityDistributionSection(
-                  showFieldSkeleton: widget.showFieldSkeleton,
-                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
-                  isImportedProduct: widget.isImportedProduct,
-                ),
-                RegulatoryAuthorityLabelingSection(
-                  isReadOnly: !widget.isEditing,
-                  showFieldSkeleton: widget.showFieldSkeleton,
-                  isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
-                  regulatedProductNameController: _regulatedProductNameController,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        SizedBox(height: 16,),
+        RegulatoryAuthorityIdentifiersSection(
+          isReadOnly: !widget.isEditing,
+          showFieldSkeleton: widget.showFieldSkeleton,
+          isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
+          localDrugCodeController: _localDrugCodeController,
+          marketingAuthorizationNumberController:
+          _marketingAuthorizationNumberController,
+        ),
+        RegulatoryAuthorityAuthorizationSection(
+          isReadOnly: !widget.isEditing,
+          showFieldSkeleton: widget.showFieldSkeleton,
+          isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
+          isImportedProduct: widget.isImportedProduct,
+          licensedAgentGlnsController: _licensedAgentGlnsController,
+        ),
+        RegulatoryAuthorityDistributionSection(
+          showFieldSkeleton: widget.showFieldSkeleton,
+          isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
+          isImportedProduct: widget.isImportedProduct,
+        ),
+        RegulatoryAuthorityLabelingSection(
+          isReadOnly: !widget.isEditing,
+          showFieldSkeleton: widget.showFieldSkeleton,
+          isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
+          regulatedProductNameController: _regulatedProductNameController,
+        ),
+      ],
     );
   }
 }
+

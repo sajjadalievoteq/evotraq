@@ -58,9 +58,6 @@ class UserApprovalsHeaderSection extends StatelessWidget {
             ),
           ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
         isDense: true,
       ),
     );
@@ -94,9 +91,6 @@ class UserApprovalsHeaderSection extends StatelessWidget {
 
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardRadius),
-      ),
       child: Padding(
         padding: Constants.sectionPadding,
         child: Column(

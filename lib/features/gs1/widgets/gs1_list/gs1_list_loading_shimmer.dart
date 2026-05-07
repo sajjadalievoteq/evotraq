@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
 /// Shimmer placeholder for GS1 master-data list rows (GLN / GTIN card layout).
 class Gs1ListLoadingShimmer extends StatelessWidget {
@@ -18,7 +18,7 @@ class Gs1ListLoadingShimmer extends StatelessWidget {
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
 
-    return Shimmer.fromColors(
+    return AppShimmer(
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: LayoutBuilder(
@@ -50,27 +50,18 @@ padding: EdgeInsets.symmetric(horizontal: context.padding.left),
   }
 }
 
-class Gs1ListLoadMoreShimmer extends StatelessWidget {
-  const Gs1ListLoadMoreShimmer({super.key});
+class Gs1ListLoadMoreIndicator extends StatelessWidget {
+  const Gs1ListLoadMoreIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: Constants.spacing,),
-        child: Center(
-          child: _skeletonBox(
-            baseColor,
-            width: 160,
-            height: 40,
-            radius: 20,
-          ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: Constants.spacing),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
         ),
       ),
     );

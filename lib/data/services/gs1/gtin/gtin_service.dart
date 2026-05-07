@@ -103,8 +103,8 @@ class GTINService {
     final queryParams = <String, dynamic>{
       'page': page,
       'size': size,
-      if (manufacturer != null) 'manufacturer': manufacturer,
-      if (status != null) 'status': status,
+      'manufacturer': ?manufacturer,
+      'status': ?status,
     };
 
     final response = await _dioService.get(

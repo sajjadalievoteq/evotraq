@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 /// A custom loading indicator with the app's primary color
 class LoadingIndicator extends StatelessWidget {
@@ -23,7 +23,7 @@ class LoadingIndicator extends StatelessWidget {
       height: size,
       child: CircularProgressIndicator(
         strokeWidth: strokeWidth,
-        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+        valueColor: AlwaysStoppedAnimation<Color>(context.colors.primary),
       ),
     );
   }

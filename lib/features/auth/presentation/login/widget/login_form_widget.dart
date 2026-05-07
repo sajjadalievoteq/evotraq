@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:world_countries/helpers.dart';
 
 class LoginFormWidget extends StatefulWidget {
   const LoginFormWidget({
@@ -36,6 +37,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   }
 
   void _submitForm() {
+
     if (_formKey.currentState!.validate()) {
       final loginRequest = LoginRequest(
         username: _usernameController.text.trim(),
@@ -59,9 +61,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = ColorManager.textPrimary(context);
     final isLoading = widget.state.status == AuthStatus.loading;
-
+    final c = context.colors;
+    final t = context.text;
     return Form(
       key: _formKey,
       onChanged: _updateButtonState,
@@ -112,11 +114,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           ),
           const SizedBox(height: 16),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Don\'t have an account?',
-                style: TextStyle(color: textPrimary),
+                style: t.body.copyWith(color: c.textPrimary),
               ),
               CustomTextButtonWidget(
                 title: 'Register',

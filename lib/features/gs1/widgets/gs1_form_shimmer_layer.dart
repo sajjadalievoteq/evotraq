@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
 /// One shimmer over the entire form column while the real [formColumn] stays
 /// mounted (invisible) for controllers and hydration.
@@ -33,7 +33,7 @@ class Gs1FormShimmerLayer extends StatelessWidget {
           child: IgnorePointer(child: formColumn),
         ),
         IgnorePointer(
-          child: Shimmer.fromColors(
+          child: AppShimmer(
             baseColor: baseColor,
             highlightColor: highlightColor,
             period: const Duration(milliseconds: 1200),

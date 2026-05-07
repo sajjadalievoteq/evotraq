@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
+import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
+import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'dart:async';
 
 // Constants for storage keys
@@ -39,29 +41,21 @@ class ThemeCubit extends Cubit<ThemeState> {
       super(const ThemeState(isDarkMode: false)) {
     _initThemePreference();
     _profileSubscription = _profileCubit.stream.listen((profileState) {
-      final newDarkMode = profileState.darkMode;
-      if (newDarkMode != state.isDarkMode) {
-        emit(state.copyWith(isDarkMode: newDarkMode));
-        Future(() async {
-          await _saveLocalThemePreference(newDarkMode);
-        });
-      }
+      // Only trust server/user-preference updates when ProfileCubit explicitly reports
+      // preferences were updated. The profile endpoint does not include theme, so
+      // default `darkMode=false` would otherwise overwrite local preference on startup.
+      if (profileState.status != ProfileStatus.preferencesUpdated) return;
+
+      final newDarkMode = profileState.preferences.darkMode;
+      if (newDarkMode == state.isDarkMode) return;
+
+      emit(state.copyWith(isDarkMode: newDarkMode));
+      Future(() async => _saveLocalThemePreference(newDarkMode));
     });
   }
 
   Future<void> _initThemePreference() async {
-    var isDarkMode = await _getLocalThemePreference();
-
-    try {
-      final cubitDarkMode = _profileCubit.state.darkMode;
-      if (isDarkMode != cubitDarkMode) {
-        print('Theme sync: Local($isDarkMode) -> ProfileCubit($cubitDarkMode)');
-        isDarkMode = cubitDarkMode;
-        await _saveLocalThemePreference(isDarkMode);
-      }
-    } catch (e) {
-      print('Using local theme preference due to ProfileCubit error: $e');
-    }
+    final isDarkMode = await _getLocalThemePreference();
 
     if (isDarkMode != state.isDarkMode) {
       emit(state.copyWith(isDarkMode: isDarkMode));
@@ -165,21 +159,19 @@ class ThemeCubit extends Cubit<ThemeState> {
         return false;
       }
 
-      // Attempt to update server via ProfileCubit
-      _profileCubit.updateAppPreferences(
+      // Attempt to update server without driving ProfileCubit UI loading state.
+      // Profile preference persistence should not block UI or show loaders on unrelated buttons.
+      final profileService = getIt<ProfileService>();
+      await profileService.updateAppPreferences(
         darkMode: state.isDarkMode,
-        language: _profileCubit.state.language,
+        language: _profileCubit.state.preferences.language,
       );
 
       print(
         'Sent theme preference update to server: darkMode=${state.isDarkMode}',
       );
 
-      // Listen for the response (scheduled for the next event loop cycle)
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      // This is a best-effort attempt - we don't actually know if the API call succeeded
-      // But the user's theme preference is already applied locally, so it's not critical
+      // Best-effort: theme is already applied locally, so server failure is non-fatal.
       return true;
     } catch (e) {
       print('Error syncing theme with server: $e');
@@ -200,9 +192,9 @@ class ThemeCubit extends Cubit<ThemeState> {
       final profileState = _profileCubit.state;
 
       // If server and local disagree, prefer local but log the difference
-      if (profileState.darkMode != localPreference) {
+      if (profileState.preferences.darkMode != localPreference) {
         print(
-          'Theme mismatch: Server(${profileState.darkMode}) vs Local($localPreference)',
+          'Theme mismatch: Server(${profileState.preferences.darkMode}) vs Local($localPreference)',
         );
         print('Using local preference as source of truth');
       }

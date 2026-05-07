@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
@@ -124,13 +124,13 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
+            backgroundColor: context.colors.primary.withOpacity(0.2),
             child: Text(
               partner.companyName.isNotEmpty ? partner.companyName[0].toUpperCase() : 'P',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+                color: context.colors.primary,
               ),
             ),
           ),
@@ -264,7 +264,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
                   Container(
                     height: height,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.7),
+                      color: context.colors.primary.withOpacity(0.7),
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                     ),
                   ),

@@ -56,6 +56,7 @@ import '../../data/services/cache_service.dart';
 import '../../data/services/etl_service.dart';
 import '../../data/services/performance_optimization_service.dart';
 import '../../data/services/user_service.dart';
+import '../../data/services/profile_service.dart';
 import '../../data/services/validation_service.dart';
 import '../../data/services/websocket_service.dart';
 
@@ -92,6 +93,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<UserService>(
     () => UserService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ProfileService>(
+    () => ProfileService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<UserManagementService>(

@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
 import '../../../../../shared/utils/email_provider_launch_utils.dart';
@@ -23,9 +23,10 @@ class CheckEmailContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = ColorManager.textPrimary(context);
-    final textSecondary = ColorManager.textSecondary(context);
-    final primary = ColorManager.primary(context);
+    final c = context.colors;
+    final textPrimary = c.textPrimary;
+    final textSecondary = c.textSecondary;
+    final primary = c.primary;
     final emailText = email?.trim();
     final inboxDestination = resolveEmailInboxDestination(emailText);
 
@@ -36,8 +37,8 @@ class CheckEmailContentWidget extends StatelessWidget {
           width: 96,
           height: 96,
           decoration: BoxDecoration(
-            color: ColorManager.primaryContainer(context),
-            borderRadius: BorderRadius.circular(28),
+            color: primary.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12),
+            borderRadius: BorderRadius.circular(EvotraqRadius.lg.x),
           ),
           child: Center(
             child: SvgPicture.asset(
@@ -75,10 +76,9 @@ class CheckEmailContentWidget extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(EvotraqRadius.md.x),
             border: Border.all(
-              color: ColorManager.primaryBorder(context),
+              color: primary.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.25),
             ),
           ),
           child: Column(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
@@ -33,8 +33,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('System Settings'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -259,7 +257,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
               icon: const Icon(Icons.save),
               label: const Text('Save All Settings'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
+                backgroundColor: context.colors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),

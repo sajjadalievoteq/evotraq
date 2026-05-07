@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/data/services/integration_validation_service.dart';
@@ -80,10 +80,7 @@ class _IntegrationValidationScreenState
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode
-        ? AppTheme.primaryColorDark
-        : AppTheme.primaryColor;
+    final primaryColor = context.colors.primary;
 
     return Scaffold(
       appBar: AppBar(

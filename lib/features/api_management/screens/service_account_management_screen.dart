@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
 
@@ -237,11 +237,11 @@ class _ServiceAccountManagementScreenState
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: isUsable
-                      ? AppTheme.primaryColor.withOpacity(0.2)
+                      ? context.colors.primary.withOpacity(0.2)
                       : Colors.grey.withOpacity(0.2),
                   child: Icon(
                     Icons.api,
-                    color: isUsable ? AppTheme.primaryColor : Colors.grey,
+                    color: isUsable ? context.colors.primary : Colors.grey,
                   ),
                 ),
                 const SizedBox(width: 12),

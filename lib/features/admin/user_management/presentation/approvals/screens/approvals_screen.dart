@@ -9,7 +9,6 @@ import '../widgets/user_approvals_loading_view.dart';
 import '../widgets/user_approval_reject_dialog.dart';
 import '../widgets/user_approvals_header_section.dart';
 import '../../users/widgets/user_management_constants.dart';
-import '../../users/widgets/user_management_section_width.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
@@ -135,15 +134,12 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  UserManagementSectionWidth(
-                    child: UserApprovalsHeaderSection(
-                      pendingCount: filteredApprovals.length,
-                      searchController: _searchController,
-                      onRefresh: _refreshApprovalsList,
-                      isRefreshing: _isRefreshing,
-                    ),
+                  UserApprovalsHeaderSection(
+                    pendingCount: filteredApprovals.length,
+                    searchController: _searchController,
+                    onRefresh: _refreshApprovalsList,
+                    isRefreshing: _isRefreshing,
                   ),
-                  const SizedBox(height: Constants.spacing),
                   Expanded(
                     child: _ApprovalsContent(
                       approvals: filteredApprovals,
@@ -186,32 +182,25 @@ class _ApprovalsContent extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      itemCount: approvals.length,
-      padding: const EdgeInsets.all(0),
+    const tileMaxExtent = 340.0;
+    const spacing = Constants.spacing;
 
+    return GridView.builder(
+      padding: const EdgeInsets.only(top: spacing),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: tileMaxExtent,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
+        childAspectRatio: 1,
+      ),
+      itemCount: approvals.length,
       itemBuilder: (context, index) {
         final approval = approvals[index];
-        return UserManagementSectionWidth(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: Column(
-              children: [
-                if (index == 0)
-                  const SizedBox(height:Constants.spacing),
-                UserApprovalCard(
-                  user: approval,
-                  onApprove: onApprove,
-                  onReject: onReject,
-                ),
-                SizedBox(
-                  height: index == approvals.length - 1
-                      ? 0
-                      : Constants.spacing,
-                ),
-              ],
-            ),
-          ),
+        return UserApprovalCard(
+          user: approval,
+          onApprove: onApprove,
+          onReject: onReject,
+          variant: UserApprovalCardVariant.gridSquare,
         );
       },
     );

@@ -52,6 +52,7 @@ class GtinDetailForm extends StatelessWidget {
             onTap: isSubmitting ? null : onSubmit,
             title: submitButtonTitle,
           ),
+        const SizedBox(height: 32),
       ],
     );
 

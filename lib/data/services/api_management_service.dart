@@ -86,10 +86,10 @@ class ApiManagementService {
       'companyName': companyName,
       'partnerType': partnerType.value,
       'preferredDataFormat': preferredDataFormat.value,
-      if (gln != null) 'gln': gln,
-      if (webhookUrl != null) 'webhookUrl': webhookUrl,
-      if (contactEmail != null) 'contactEmail': contactEmail,
-      if (contactPhone != null) 'contactPhone': contactPhone,
+      'gln': ?gln,
+      'webhookUrl': ?webhookUrl,
+      'contactEmail': ?contactEmail,
+      'contactPhone': ?contactPhone,
     };
 
     final headers = await _getHeaders();
@@ -123,14 +123,14 @@ class ApiManagementService {
     bool? active,
   }) async {
     final body = <String, dynamic>{
-      if (companyName != null) 'companyName': companyName,
-      if (gln != null) 'gln': gln,
+      'companyName': ?companyName,
+      'gln': ?gln,
       if (partnerType != null) 'partnerType': partnerType.value,
       if (preferredDataFormat != null) 'preferredDataFormat': preferredDataFormat.value,
-      if (webhookUrl != null) 'webhookUrl': webhookUrl,
-      if (contactEmail != null) 'contactEmail': contactEmail,
-      if (contactPhone != null) 'contactPhone': contactPhone,
-      if (active != null) 'active': active,
+      'webhookUrl': ?webhookUrl,
+      'contactEmail': ?contactEmail,
+      'contactPhone': ?contactPhone,
+      'active': ?active,
     };
 
     final headers = await _getHeaders();
@@ -216,9 +216,9 @@ class ApiManagementService {
     DateTime? expiresAt,
   }) async {
     final body = <String, dynamic>{
-      if (allowedIps != null) 'allowedIps': allowedIps,
-      if (rateLimitPerMinute != null) 'rateLimitPerMinute': rateLimitPerMinute,
-      if (scopes != null) 'scopes': scopes,
+      'allowedIps': ?allowedIps,
+      'rateLimitPerMinute': ?rateLimitPerMinute,
+      'scopes': ?scopes,
       if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
     };
 
@@ -246,9 +246,9 @@ class ApiManagementService {
     DateTime? expiresAt,
   }) async {
     final body = <String, dynamic>{
-      if (allowedIps != null) 'allowedIps': allowedIps,
-      if (rateLimitPerMinute != null) 'rateLimitPerMinute': rateLimitPerMinute,
-      if (scopes != null) 'scopes': scopes,
+      'allowedIps': ?allowedIps,
+      'rateLimitPerMinute': ?rateLimitPerMinute,
+      'scopes': ?scopes,
       if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
     };
 

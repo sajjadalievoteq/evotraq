@@ -291,10 +291,11 @@ class DashboardService {
         if (healthData is Map && healthData['components'] != null) {
           final components = healthData['components'] as Map<String, dynamic>;
           databaseHealthy = components['db']?['status'] == 'UP';
+          final redisStatus = components['redis']?['status'] as String?;
+          final cacheComponentStatus =
+              components['cache']?['status'] as String?;
           cacheHealthy =
-              components['redis']?['status'] == 'UP' ||
-              components['cache']?['status'] == 'UP' ||
-              true; // Default to true if no cache component
+              redisStatus == 'UP' || cacheComponentStatus == 'UP';
         } else {
           // If no components, assume healthy if main status is UP
           databaseHealthy = healthData['status'] == 'UP';

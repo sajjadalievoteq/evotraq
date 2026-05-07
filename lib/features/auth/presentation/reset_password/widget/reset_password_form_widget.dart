@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 
 class ResetPasswordFormWidget extends StatefulWidget {
   const ResetPasswordFormWidget({
@@ -58,8 +58,9 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = ColorManager.primary(context);
-    final textSecondary = ColorManager.textSecondary(context);
+    final c = context.colors;
+    final primary = c.primary;
+    final textSecondary = c.textSecondary;
     final isLoading = context.select<AuthCubit, bool>(
       (cubit) => cubit.state.status == AuthStatus.loading,
     );

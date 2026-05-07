@@ -445,10 +445,10 @@ class SGTINService {
     final queryParams = <String, dynamic>{
       'page': page,
       'size': size,
-      if (gtinId != null) 'gtinId': gtinId,
-      if (batchLotNumber != null) 'batchLotNumber': batchLotNumber,
+      'gtinId': ?gtinId,
+      'batchLotNumber': ?batchLotNumber,
       if (status != null) 'status': status.name,
-      if (locationId != null) 'locationId': locationId,
+      'locationId': ?locationId,
     };
 
     final response = await _dioService.get(
@@ -750,7 +750,7 @@ class SGTINService {
         'quantity': quantity,
         'batchLotNumber': batchLotNumber,
         'expiryDate': expiryDateStr,
-        if (currentLocation != null) 'currentLocation': currentLocation,
+        'currentLocation': ?currentLocation,
       }),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

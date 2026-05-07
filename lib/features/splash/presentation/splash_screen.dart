@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 
@@ -54,11 +54,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = ColorManager.primary(context);
+    final c = context.colors;
+    final primary = c.primary;
     final pendingLocation = _resolvePendingLocation(context);
 
     return Scaffold(
-      backgroundColor: ColorManager.background(context),
+      backgroundColor: c.background,
       body: SafeArea(
         child: BlocListener<AuthCubit, AuthState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
@@ -98,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     'Preparing your workspace...',
                     style: TextStyle(
                       fontSize: 14,
-                      color: ColorManager.textSecondary(context).withValues(alpha: 0.95),
+                      color: c.textSecondary.withValues(alpha: 0.95),
                     ),
                   ),
                   const SizedBox(height: 22),
@@ -108,7 +109,9 @@ class _SplashScreenState extends State<SplashScreen> {
                       borderRadius: BorderRadius.circular(999),
                       child: LinearProgressIndicator(
                         minHeight: 6,
-                        backgroundColor: ColorManager.primaryTrack(context),
+                        backgroundColor: primary.withOpacity(
+                          Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.12,
+                        ),
                         valueColor: AlwaysStoppedAnimation<Color>(primary),
                       ),
                     ),

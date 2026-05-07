@@ -48,7 +48,7 @@ class GTINTobaccoExtensionService {
     GTINTobaccoExtension extension,
   ) async {
     final response = await _dioService.post(
-      '$_baseUrl',
+      _baseUrl,
       headers: await _headers,
       data: jsonEncode({
         ...extension.toJson(),

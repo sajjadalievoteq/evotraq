@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 
 import '../../../../../core/config/constants.dart';
 import '../../../../../shared/widgets/custom_text_button_widget.dart';
@@ -173,13 +173,14 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   }
 
   Color? _usernameMessageColor(BuildContext context) {
+    final c = context.colors;
     switch (_usernameAvailabilityStatus) {
       case _UsernameAvailabilityStatus.available:
         return Colors.green.shade600;
       case _UsernameAvailabilityStatus.taken:
         return Theme.of(context).colorScheme.error;
       case _UsernameAvailabilityStatus.error:
-        return ColorManager.textSecondary(context);
+        return c.textSecondary;
       case _UsernameAvailabilityStatus.initial:
       case _UsernameAvailabilityStatus.checking:
         return null;
@@ -188,7 +189,8 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = ColorManager.textPrimary(context);
+    final c = context.colors;
+    final textPrimary = c.textPrimary;
     final isLoading = widget.state.status == AuthStatus.loading;
 
     return Form(

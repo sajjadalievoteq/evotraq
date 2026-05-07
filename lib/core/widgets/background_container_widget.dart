@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 
 /// Full-screen background (image + light overlay). Use behind the navigator in
@@ -49,8 +48,6 @@ class BackgroundContainerWidget extends StatelessWidget {
       appBar: showAppBar
           ? AppBar(
               title: Text(appBarTitle ?? ''),
-              backgroundColor: ColorManager.primary(context),
-              foregroundColor: Colors.white,
               leading: Builder(
                 builder: (context) => IconButton(
                   icon: const Icon(Icons.menu),

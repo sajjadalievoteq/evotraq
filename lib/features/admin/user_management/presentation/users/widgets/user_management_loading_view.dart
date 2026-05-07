@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
-import 'user_management_section_width.dart';
 
 class UserManagementLoadingView extends StatelessWidget {
   const UserManagementLoadingView({super.key});
@@ -14,26 +14,25 @@ class UserManagementLoadingView extends StatelessWidget {
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
 
-    return Shimmer.fromColors(
+    return AppShimmer(
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          UserManagementSectionWidth(
-            child: _UserManagementFilterSkeleton(baseColor: baseColor),
-          ),
-          const SizedBox(height: Constants.spacing),
+          _UserManagementFilterSkeleton(baseColor: baseColor),
           Expanded(
-            child: ListView.separated(
-              itemCount: 6,
-              padding: EdgeInsets.zero,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: Constants.spacing),
+            child: GridView.builder(
+              padding: const EdgeInsets.only(top: Constants.spacing),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 340,
+                mainAxisSpacing: Constants.spacing,
+                crossAxisSpacing: Constants.spacing,
+                childAspectRatio: 1,
+              ),
+              itemCount: 8,
               itemBuilder: (context, index) {
-                return UserManagementSectionWidth(
-                  child: _UserManagementCardSkeleton(baseColor: baseColor),
-                );
+                return _UserManagementCardSkeleton(baseColor: baseColor);
               },
             ),
           ),
@@ -52,19 +51,17 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardRadius),
-      ),
       child: Padding(
         padding: Constants.sectionPadding,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final widths = _FilterSkeletonWidths.fromWidth(constraints.maxWidth);
+            final r = EvotraqRadius.md.x.toDouble();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _skeletonBox(baseColor, width: 140, height: 28, radius: 8),
+                _skeletonBox(baseColor, width: 140, height: 28, radius: r),
                 const SizedBox(height: Constants.spacing),
                 Wrap(
                   spacing: Constants.spacing,
@@ -73,17 +70,17 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
                     _skeletonBox(
                       baseColor,
                       width: widths.searchWidth,
-                      height: 56,
+                      height: 50,
                     ),
                     _skeletonBox(
                       baseColor,
                       width: widths.filterWidth,
-                      height: 56,
+                      height: 50,
                     ),
                     _skeletonBox(
                       baseColor,
                       width: widths.filterWidth,
-                      height: 56,
+                      height: 50,
                     ),
                   ],
                 ),
@@ -94,13 +91,13 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _skeletonBox(baseColor, width: 120, height: 18, radius: 8),
+                    _skeletonBox(baseColor, width: 120, height: 18, radius: r),
                     Wrap(
                       spacing: Constants.spacing,
                       runSpacing: Constants.spacing,
                       children: [
-                        _skeletonBox(baseColor, width: 120, height: 44),
-                        _skeletonBox(baseColor, width: 132, height: 44),
+                        _skeletonBox(baseColor, width: 120, height: 36, radius: EvotraqRadius.sm.x.toDouble()),
+                        _skeletonBox(baseColor, width: 132, height: 36, radius: EvotraqRadius.sm.x.toDouble()),
                       ],
                     ),
                   ],
@@ -121,76 +118,63 @@ class _UserManagementCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = EvotraqRadius.md.x.toDouble();
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxWidth < 760;
-
-            final details = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // Match `UserManagementUserCardVariant.gridSquare`
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                _skeletonBox(baseColor, width: 180, height: 20, radius: 8),
-                const SizedBox(height: 8),
-                _skeletonBox(baseColor, width: 220, height: 16, radius: 8),
-                const SizedBox(height: 8),
-                _skeletonBox(baseColor, width: 160, height: 16, radius: 8),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _skeletonBox(baseColor, width: 72, height: 28, radius: 999),
-                    _skeletonBox(baseColor, width: 82, height: 28, radius: 999),
-                    _skeletonBox(baseColor, width: 90, height: 28, radius: 999),
-                  ],
+                _skeletonBox(baseColor, width: 36, height: 36, radius: 999),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _skeletonBox(
+                    baseColor,
+                    width: double.infinity,
+                    height: 18,
+                    radius: r,
+                  ),
                 ),
               ],
-            );
-
-            final actions = Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _skeletonBox(baseColor, width: 28, height: 28, radius: 999),
-                const SizedBox(width: 8),
-                _skeletonBox(baseColor, width: 60, height: 24, radius: 999),
-              ],
-            );
-
-            if (compact) {
-              return Column(
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  _skeletonBox(baseColor, width: double.infinity, height: 14, radius: r),
+                  const SizedBox(height: 8),
+                  _skeletonBox(baseColor, width: 220, height: 14, radius: r),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      _skeletonBox(baseColor, width: 40, height: 40, radius: 999),
-                      const SizedBox(width: 12),
-                      Expanded(child: details),
+                      _skeletonBox(baseColor, width: 72, height: 26, radius: 999),
+                      _skeletonBox(baseColor, width: 82, height: 26, radius: 999),
+                      _skeletonBox(baseColor, width: 90, height: 26, radius: 999),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: actions,
-                  ),
                 ],
-              );
-            }
-
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _skeletonBox(baseColor, width: 40, height: 40, radius: 999),
-                const SizedBox(width: 16),
-                Expanded(child: details),
-                const SizedBox(width: 16),
-                actions,
-              ],
-            );
-          },
+              ),
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _skeletonBox(baseColor, width: 28, height: 28, radius: 999),
+                  const SizedBox(width: 8),
+                  _skeletonBox(baseColor, width: 60, height: 24, radius: 999),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

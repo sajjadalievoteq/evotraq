@@ -88,10 +88,10 @@ class ServiceAccountService {
     try {
       final body = {
         'name': name,
-        if (description != null) 'description': description,
+        'description': ?description,
         if (allowedIps != null && allowedIps.isNotEmpty) 'allowedIps': allowedIps.join(','),
         if (allowedEndpoints != null && allowedEndpoints.isNotEmpty) 'allowedEndpoints': allowedEndpoints.join(','),
-        if (rateLimitPerMinute != null) 'rateLimitPerMinute': rateLimitPerMinute,
+        'rateLimitPerMinute': ?rateLimitPerMinute,
         if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
       };
 

@@ -14,7 +14,6 @@ import '../widgets/user_management_constants.dart';
 import '../widgets/user_management_filter_section.dart';
 import '../widgets/user_management_form_dialog.dart';
 import '../widgets/user_management_loading_view.dart';
-import '../widgets/user_management_section_width.dart';
 import '../widgets/user_management_user_card.dart';
 
 class UserManagementScreen extends StatefulWidget {
@@ -180,28 +179,26 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   : state.users.where((user) => _matchesSearch(user, query)).toList();
 
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  UserManagementSectionWidth(
-                    child: UserManagementFilterSection(
-                      searchController: _searchController,
-                      selectedRole: _selectedRole,
-                      selectedStatus: _selectedStatus,
-                      totalItems:
-                          query.isEmpty ? state.totalItems : filteredUsers.length,
-                      showResultsCount: state.users.isNotEmpty || query.isNotEmpty,
-                      onApplyFilters: _applyFilters,
-                      onRoleChanged: (value) {
-                        setState(() => _selectedRole = value);
-                        _applyFilters();
-                      },
-                      onStatusChanged: (value) {
-                        setState(() => _selectedStatus = value);
-                        _applyFilters();
-                      },
-                      onRefresh: _refreshUserList,
-                      onAddUser: _showAddUserDialog,
-                    ),
+                  UserManagementFilterSection(
+                    searchController: _searchController,
+                    selectedRole: _selectedRole,
+                    selectedStatus: _selectedStatus,
+                    totalItems:
+                        query.isEmpty ? state.totalItems : filteredUsers.length,
+                    showResultsCount: state.users.isNotEmpty || query.isNotEmpty,
+                    onApplyFilters: _applyFilters,
+                    onRoleChanged: (value) {
+                      setState(() => _selectedRole = value);
+                      _applyFilters();
+                    },
+                    onStatusChanged: (value) {
+                      setState(() => _selectedStatus = value);
+                      _applyFilters();
+                    },
+                    onRefresh: _refreshUserList,
+                    onAddUser: _showAddUserDialog,
                   ),
 
                   Expanded(
@@ -249,30 +246,26 @@ class _UserManagementContent extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
+    const tileMaxExtent = 340.0;
+    const spacing = Constants.spacing;
+
+    return GridView.builder(
+      padding: EdgeInsets.only(top: spacing),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: tileMaxExtent,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
+        childAspectRatio: 1,
+      ),
       itemCount: users.length,
-      padding: const EdgeInsets.all(0),
-
-
       itemBuilder: (context, index) {
         final user = users[index];
-        return UserManagementSectionWidth(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: Column(
-              children: [
-               if(index==0) SizedBox(height: Constants.spacing,),
-                UserManagementUserCard(
-                  user: user,
-                  isToggleLoading: togglingUserId == user.id,
-                  onEdit: onEditUser,
-                  onToggleStatus: onToggleStatus,
-                ),
-                SizedBox(height:index==users.length-1?0: Constants.spacing),
-
-              ],
-            ),
-          ),
+        return UserManagementUserCard(
+          user: user,
+          isToggleLoading: togglingUserId == user.id,
+          onEdit: onEditUser,
+          onToggleStatus: onToggleStatus,
+          variant: UserManagementUserCardVariant.gridSquare,
         );
       },
     );

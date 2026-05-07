@@ -24,7 +24,7 @@ class AppAnimatedBackgroundLayer extends StatelessWidget {
         child: ColoredBox(
           // TraceNetworkBackground doesn't paint a background, so without this
           // the "empty" pixels can appear white. This ensures bg0 switches with theme.
-          color: colors.bg0,
+          color: colors.background,
           child: TraceNetworkBackground(
             // Stable key so this element/state doesn't reset.
             key: const ValueKey('app-trace-network-bg'),

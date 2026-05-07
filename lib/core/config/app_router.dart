@@ -34,8 +34,8 @@ import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_scree
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
-import 'package:traqtrace_app/features/user_management/screens/home_screen.dart';
-import 'package:traqtrace_app/features/user_management/screens/profile_screen.dart';
+import 'package:traqtrace_app/features/home/presentation/screens/home_screen.dart';
+import 'package:traqtrace_app/features/user/presentation/screens/profile_screen.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart';
 // EPCIS imports

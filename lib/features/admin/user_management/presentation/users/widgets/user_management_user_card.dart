@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 
 import 'user_management_constants.dart';
 import 'user_status_toggle_button.dart';
+
+enum UserManagementUserCardVariant {
+  listTile,
+  gridSquare,
+}
 
 class UserManagementUserCard extends StatelessWidget {
   const UserManagementUserCard({
@@ -14,15 +19,24 @@ class UserManagementUserCard extends StatelessWidget {
     this.isToggleLoading = false,
     required this.onEdit,
     required this.onToggleStatus,
+    this.variant = UserManagementUserCardVariant.listTile,
   });
 
   final UserResponse user;
   final bool isToggleLoading;
   final ValueChanged<UserResponse> onEdit;
   final ValueChanged<UserResponse> onToggleStatus;
+  final UserManagementUserCardVariant variant;
 
   @override
   Widget build(BuildContext context) {
+    return switch (variant) {
+      UserManagementUserCardVariant.listTile => _buildListCard(context),
+      UserManagementUserCardVariant.gridSquare => _buildGridSquareCard(context),
+    };
+  }
+
+  Widget _buildListCard(BuildContext context) {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -30,7 +44,7 @@ class UserManagementUserCard extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 760;
-            final details = _UserDetails(user: user);
+            final details = _UserDetails(user: user, density: _UserDetailsDensity.comfy);
             final actions = _UserActions(
               user: user,
               isToggleLoading: isToggleLoading,
@@ -75,6 +89,57 @@ class UserManagementUserCard extends StatelessWidget {
     );
   }
 
+  Widget _buildGridSquareCard(BuildContext context) {
+    final details = _UserDetails(user: user, density: _UserDetailsDensity.compact);
+    final actions = _UserActions(
+      user: user,
+      isToggleLoading: isToggleLoading,
+      onEdit: onEdit,
+      onToggleStatus: onToggleStatus,
+    );
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _UserAvatar(
+                  initial: _resolveInitial(user.firstName),
+                  radius: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    ('${user.firstName} ${user.lastName}').trim().isEmpty
+                        ? user.username
+                        : ('${user.firstName} ${user.lastName}').trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(child: details),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: actions,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _resolveInitial(String firstName) {
     if (firstName.isEmpty) {
       return 'U';
@@ -84,14 +149,19 @@ class UserManagementUserCard extends StatelessWidget {
 }
 
 class _UserAvatar extends StatelessWidget {
-  const _UserAvatar({required this.initial});
+  const _UserAvatar({
+    required this.initial,
+    this.radius = 20,
+  });
 
   final String initial;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      backgroundColor: AppTheme.accentColor,
+      backgroundColor: context.colors.textSecondary,
+      radius: radius,
       child: Text(
         initial,
         style: const TextStyle(color: Colors.white),
@@ -100,59 +170,86 @@ class _UserAvatar extends StatelessWidget {
   }
 }
 
+enum _UserDetailsDensity {
+  comfy,
+  compact,
+}
+
 class _UserDetails extends StatelessWidget {
-  const _UserDetails({required this.user});
+  const _UserDetails({
+    required this.user,
+    required this.density,
+  });
 
   final UserResponse user;
+  final _UserDetailsDensity density;
 
   @override
   Widget build(BuildContext context) {
     final name = '${user.firstName} ${user.lastName}'.trim();
+    final spacingSm = density == _UserDetailsDensity.compact ? 2.0 : 4.0;
+    final spacingMd = density == _UserDetailsDensity.compact ? 8.0 : 12.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          name.isEmpty ? user.username : name,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(user.email),
-        const SizedBox(height: 4),
-        Text(
-          'Username: ${user.username}',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
-              ),
-        ),
-        const SizedBox(height: 12),
+        if (density == _UserDetailsDensity.comfy) ...[
+          Text(
+            name.isEmpty ? user.username : name,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          SizedBox(height: spacingSm),
+          Text(
+            user.email,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: spacingSm),
+          Text(
+            'Username: ${user.username}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.primary,
+                ),
+          ),
+          SizedBox(height: spacingMd),
+        ] else ...[
+          Text(
+            user.email,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          SizedBox(height: spacingMd),
+        ],
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             _StatusChip(
               label: user.role,
-              backgroundColor: _roleBackgroundColor(user.role),
-              foregroundColor: _roleForegroundColor(user.role),
+              backgroundColor: _roleBackgroundColor(context, user.role),
+              foregroundColor: _roleForegroundColor(context, user.role),
             ),
             _StatusChip(
               label: user.enabled
                   ? UserManagementConstants.activeStatus
                   : UserManagementConstants.inactiveStatus,
               backgroundColor: user.enabled
-                  ? AppTheme.successColor.withValues(alpha: 0.15)
+                  ? context.colors.success.withValues(alpha: 0.15)
                   : Colors.grey.withValues(alpha: 0.18),
               foregroundColor:
-                  user.enabled ? AppTheme.successColor : Colors.grey[800]!,
+                  user.enabled ? context.colors.success : Colors.grey[800]!,
             ),
             if (user.approvalStatus == UserManagementConstants.pendingStatus)
               _StatusChip(
                 label: UserManagementConstants.pendingStatus,
-                backgroundColor: AppTheme.warningColor.withValues(alpha: 0.15),
-                foregroundColor: AppTheme.warningColor,
+                backgroundColor: context.colors.warning.withValues(alpha: 0.15),
+                foregroundColor: context.colors.warning,
               ),
           ],
         ),
@@ -160,25 +257,27 @@ class _UserDetails extends StatelessWidget {
     );
   }
 
-  static Color _roleBackgroundColor(String role) {
+  static Color _roleBackgroundColor(BuildContext context, String role) {
+    final c = context.colors;
     switch (role) {
       case 'ADMIN':
         return Colors.purple.withValues(alpha: 0.15);
       case 'VIEWER':
-        return AppTheme.infoColor.withValues(alpha: 0.15);
+        return c.secondary.withValues(alpha: 0.15);
       default:
-        return AppTheme.successColor.withValues(alpha: 0.15);
+        return c.success.withValues(alpha: 0.15);
     }
   }
 
-  static Color _roleForegroundColor(String role) {
+  static Color _roleForegroundColor(BuildContext context, String role) {
+    final c = context.colors;
     switch (role) {
       case 'ADMIN':
         return Colors.purple;
       case 'VIEWER':
-        return AppTheme.infoColor;
+        return c.secondary;
       default:
-        return AppTheme.successColor;
+        return c.success;
     }
   }
 }

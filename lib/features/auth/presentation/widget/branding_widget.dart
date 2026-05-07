@@ -45,7 +45,7 @@ class AuthBrandingSection extends StatelessWidget {
           alignment: Alignment.topRight,
           child: RichText(
             text: TextSpan(
-              style: t.body.copyWith(color: c.fg2),
+              style: t.body.copyWith(color: c.textMuted),
               children: [
                 TextSpan(text: "N 28.40"),
                 WidgetSpan(
@@ -54,13 +54,13 @@ class AuthBrandingSection extends StatelessWidget {
                     offset: const Offset(0, -4), // adjust height here
                     child: Text(
                       "•",
-                      style: t.body.copyWith(color: c.fg2),
+                      style: t.body.copyWith(color: c.textMuted),
                     ),
                   ),
                 ),
                 TextSpan(
                   text: "  •  ",
-                  style: t.body.copyWith(color: c.fg2,fontSize: 20),
+                  style: t.body.copyWith(color: c.textMuted,fontSize: 20),
                 ),
                 TextSpan(text: "E 28.40"),
                 WidgetSpan(
@@ -69,7 +69,7 @@ class AuthBrandingSection extends StatelessWidget {
                     offset: const Offset(0, -4), // adjust height here
                     child: Text(
                       "•",
-                      style: t.body.copyWith(color: c.fg2),
+                      style: t.body.copyWith(color: c.textMuted),
                     ),
                   ),
                 ),
@@ -84,6 +84,7 @@ class AuthBrandingSection extends StatelessWidget {
               logoAssetPath,
               height:50,
               fit: BoxFit.contain,
+              colorFilter: ColorFilter.mode(c.textPrimary, BlendMode.srcIn),
             ),
             SizedBox(height:  40),
             Align(
@@ -93,7 +94,7 @@ class AuthBrandingSection extends StatelessWidget {
                 style: t.mono.copyWith(
                   fontSize: 12,
                   letterSpacing: 1.2,
-                  color: c.sig,
+                  color: c.primary,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: textAlign,
@@ -108,7 +109,7 @@ class AuthBrandingSection extends StatelessWidget {
                 style: t.h1.copyWith(
                   fontSize: 20,
                   height: 1.05,
-                  color: c.fg0,
+                  color: c.textPrimary,
                 ),
 
               ),
@@ -116,7 +117,7 @@ class AuthBrandingSection extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'A serialization & EPCIS platform for regulated supply chains. GTIN, GLN, SSCC and event-level visibility — at production scale.',
-              style: t.body.copyWith(color: c.fg2,fontSize: 12),
+              style: t.body.copyWith(color: c.textMuted,fontSize: 12),
 
             ),
           ],
@@ -135,6 +136,7 @@ class AuthBrandingSection extends StatelessWidget {
                       logoAssetPath,
                       height: 30 ,
                       fit: BoxFit.contain,
+                      colorFilter: ColorFilter.mode(c.textPrimary, BlendMode.srcIn),
                     ),
                   ],
                 ),
@@ -151,7 +153,7 @@ class AuthBrandingSection extends StatelessWidget {
                         style: t.mono.copyWith(
                           fontSize: 16,
                           letterSpacing: 1.2,
-                          color: c.sig,
+                          color: c.primary,
                           fontWeight: FontWeight.w600,
                         ),
                         textAlign: textAlign,
@@ -166,7 +168,7 @@ class AuthBrandingSection extends StatelessWidget {
                         style: t.h1.copyWith(
                           fontSize: isLarge ? 74 : 46,
                           height: 1.05,
-                          color: c.fg0,
+                          color: c.textPrimary,
                         ),
                         textAlign: textAlign,
                       ),
@@ -174,7 +176,7 @@ class AuthBrandingSection extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       'A serialization & EPCIS platform for regulated supply chains. GTIN, GLN, SSCC and event-level visibility — at production scale.',
-                      style: t.body.copyWith(color: c.fg2,fontSize: 16),
+                      style: t.body.copyWith(color: c.textMuted,fontSize: 16),
                       textAlign: textAlign,
                     ),
                   ],
@@ -185,29 +187,29 @@ class AuthBrandingSection extends StatelessWidget {
                   children: [
                     Text(
                       "GS1 EPCIS 2.0",
-                      style: t.body.copyWith(color: c.fg2),
+                      style: t.body.copyWith(color: c.textMuted),
                       textAlign: textAlign,
                     ),
                     Container(height: 5,width: 5,
                       decoration: BoxDecoration(
-                        color: c.fg2,
+                        color: c.textMuted,
                         shape: BoxShape.circle,
                       ),
                     ),
                     Text(
                       "CBV 2.0",
-                      style: t.body.copyWith(color: c.fg2),
+                      style: t.body.copyWith(color: c.textMuted),
                       textAlign: textAlign,
                     ),
                     Container(height: 5,width: 5,
                       decoration: BoxDecoration(
-                        color: c.fg2,
+                        color: c.textMuted,
                         shape: BoxShape.circle,
                       ),
                     ),
                     Text(
                       "DSCSA • EU FMD",
-                      style: t.body.copyWith(color: c.fg2),
+                      style: t.body.copyWith(color: c.textMuted),
                       textAlign: textAlign,
 
                     ),

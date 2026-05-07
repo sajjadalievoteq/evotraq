@@ -99,7 +99,7 @@ class GtinResultsList extends StatelessWidget {
             interactive: true,
             child: RefreshIndicator(
               onRefresh: onRefresh,
-              child: ListView.builder(
+              child: ListView.separated(
                 controller: scrollController,
                 physics:  AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.only(right: context.padding.left,left: context.padding.left),
@@ -127,7 +127,7 @@ class GtinResultsList extends StatelessWidget {
                       state.hasMoreData &&
                       state.isFetchingMore) {
                     return _constrainedCenter(
-                      const Gs1ListLoadMoreShimmer(),
+                      const Gs1ListLoadMoreIndicator(),
                     );
                   }
 
@@ -136,7 +136,7 @@ class GtinResultsList extends StatelessWidget {
                   }
 
                   return const SizedBox.shrink();
-                },
+                }, separatorBuilder: (BuildContext context, int index) { return const SizedBox(height: Constants.spacing); },
               ),
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class MarketingAuthorizationBoundGroup extends StatefulWidget {
   const MarketingAuthorizationBoundGroup({
@@ -91,7 +92,6 @@ class MarketingAuthorizationBoundGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GtinUiConstants.sectionMarketingAuthorization),
         GtinValidatedField(
           controller: _number,
           fieldName: 'registrationNumber',
@@ -136,13 +136,14 @@ class MarketingAuthorizationBoundGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionMarketingAuthorization,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GtinUiConstants.sectionMarketingAuthorization),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 16),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
@@ -150,6 +151,7 @@ class MarketingAuthorizationBoundGroupState
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
         ],
       ),
+      child: body,
     );
   }
 }

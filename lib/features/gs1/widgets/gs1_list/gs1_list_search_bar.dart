@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 /// Search field + optional refresh / quick-filters row (GTIN/GLN list “tile”).
@@ -32,6 +32,7 @@ class Gs1ListSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppLayoutBuilder(
       builder: (context, layout) {
+        final c = context.colors;
         return Container(
           padding: EdgeInsets.all(
             layout.resolve(
@@ -40,8 +41,8 @@ class Gs1ListSearchBar extends StatelessWidget {
             ),
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(Constants.cardRadius),
+            color: Color.fromRGBO(87,52,62,1),
+            borderRadius: BorderRadius.circular(12.0),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),
@@ -57,19 +58,20 @@ class Gs1ListSearchBar extends StatelessWidget {
               if (onRefresh != null || onQuickFilters != null)
                 Row(
                   children: [
+                    Text('Gtin Management', style: Theme.of(context).textTheme.titleMedium),
                     const Spacer(),
                     if (onRefresh != null)
                       IconButton(
                         onPressed: onRefresh,
                         icon: const Icon(Icons.refresh),
-                        color: ColorManager.primary(context),
+                        color: Colors.white,
                         tooltip: 'Refresh',
                       ),
                     if (onQuickFilters != null)
                       IconButton(
                         onPressed: onQuickFilters,
                         icon: const Icon(Icons.filter_list),
-                        color: ColorManager.primary(context),
+                        color: Colors.white,
                         tooltip: 'Quick Filters',
                       ),
                   ],
@@ -87,13 +89,13 @@ class Gs1ListSearchBar extends StatelessWidget {
                         IconButton(
                           onPressed: onClear,
                           icon: const Icon(Icons.clear),
-                          color: ColorManager.primary(context),
+                          color: c.primary,
                           tooltip: 'Clear',
                         ),
                       IconButton(
                         onPressed: onToggleAdvancedFilters,
                         icon: const Icon(Icons.tune),
-                        color: ColorManager.primary(context),
+                        color: c.primary,
                         tooltip: showAdvancedFilters
                             ? 'Hide Advanced Filters'
                             : 'Advanced Filters',
@@ -110,7 +112,7 @@ class Gs1ListSearchBar extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                    borderSide: BorderSide(color: c.primary, width: 2),
                   ),
                 ),
                 onSubmitted: (_) => onSearch(),

@@ -507,46 +507,7 @@ class PharmaceuticalExtensionWidgetState
       return const SizedBox.shrink();
     }
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ExpansionTile(
-        collapsedBackgroundColor: const Color(0xFF121F17),
-        collapsedTextColor: Colors.white,
-        collapsedIconColor: Colors.white,
-        // Default expanded [shape] uses [ThemeData.dividerColor] top/bottom — removes that line.
-        shape: const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        ),
-        collapsedShape: const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        ),
-        leading: Icon(
-          Icons.medical_services,
-          color: _hasExtension ? const Color(0xFF121F17) : Colors.grey,
-        ),
-        title: Text(
-          GtinPharmaceuticalExtensionUiConstants.expansionTitle,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: _hasExtension ? const Color(0xFF121F17) : null,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        //subtitle: _hasExtension
-        //    ? Text('$_drugClass - $_dosageForm')
-        //    : const Text('No pharmaceutical extension'),
-        initiallyExpanded: _isLoading || _hasExtension,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _buildGroupedPharmaExtensionBody(context),
-          ),
-        ],
-      ),
-    );
+    return  _buildGroupedPharmaExtensionBody(context);
   }
 
   /// Groups pharma fields into separate files (one file per group section).
@@ -554,6 +515,14 @@ class PharmaceuticalExtensionWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Pharmaceutical Details',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 16,),
+
         DrugIdentificationGroupWidget(
           isEditing: widget.isEditing && !_isLoading,
           showFieldSkeleton: _isLoading,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
@@ -725,14 +726,14 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
                   pharmaExtensionKey: _pharmaExtensionKey,
                   tobaccoExtensionKey: _tobaccoExtensionKey,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 if ((MediaQuery.of(context).size.width < 600 || widget.embedded) &&
                     allowMasterDataActions)
                   CustomButtonWidget(
                     onTap: _submitForm,
                     title: GlnUiConstants.detailSaveButton,
                   ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 ],
               ),
               skeleton: const GlnDetailFormSkeleton(),

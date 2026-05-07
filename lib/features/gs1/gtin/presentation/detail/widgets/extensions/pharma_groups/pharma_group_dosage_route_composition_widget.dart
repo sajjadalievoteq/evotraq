@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class DosageRouteCompositionGroupWidget extends StatefulWidget {
   const DosageRouteCompositionGroupWidget({
@@ -276,10 +277,6 @@ class _DosageRouteCompositionGroupWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel(
-          'Dosage, route & composition',
-          padding: EdgeInsets.only(bottom: 12),
-        ),
         DropdownButtonFormField<String>(
           value: _dosageFormController.text.isEmpty
               ? null
@@ -470,38 +467,15 @@ class _DosageRouteCompositionGroupWidgetState
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
     final content = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: EdgeInsets.zero,
       child: _buildCardContent(context),
     );
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: outline.withOpacity(0.45)),
-      ),
-      child: GtinFieldSkeletonMask(
-        show: widget.showFieldSkeleton,
-        child: content,
-        skeletonBuilder: (c) => Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SectionLabel(
-                'Dosage, route & composition',
-                padding: EdgeInsets.only(bottom: 12),
-              ),
-              GtinSkeletonOutlineField(color: c, height: 56),
-              SizedBox(height: 8),
-              GtinSkeletonOutlineField(color: c, height: 56),
-              SizedBox(height: 8),
-              GtinSkeletonOutlineField(color: c, height: 56),
-            ],
-          ),
-        ),
-      ),
+    return Gs1GroupCard(
+      title: 'Dosage, route & composition',
+      outlineColor: outline,
+      showFieldSkeleton: widget.showFieldSkeleton,
+      skeletonFieldCount: 3,
+      child: content,
     );
   }
 }

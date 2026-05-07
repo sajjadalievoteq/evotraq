@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
@@ -497,6 +499,29 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       unboundSpecSection: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+
+          Container(
+            height: 150,
+            width: double.infinity,
+            
+            child: Center(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('123344556666',style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color: Colors.black
+                  ),),
+                  Text('123344556666'),
+                ],
+              ),
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(image: AssetImage('assets/images/background_image.png',),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: _gtinCodeController,

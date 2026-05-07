@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 /// Multi-select GS1 GLN types (spec §2.3).
 class GlnGlnTypeChipsField extends StatelessWidget {
@@ -25,7 +26,7 @@ class GlnGlnTypeChipsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final scheme = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -35,6 +36,7 @@ class GlnGlnTypeChipsField extends StatelessWidget {
           children: _options.map((o) {
             final selected = selection.contains(o.$1);
             return FilterChip(
+
               label: Text(o.$2),
               selected: selected,
               onSelected: enabled
@@ -48,8 +50,8 @@ class GlnGlnTypeChipsField extends StatelessWidget {
                       onChanged(next);
                     }
                   : null,
-              selectedColor: scheme.primaryContainer,
-              checkmarkColor: scheme.onPrimaryContainer,
+              selectedColor: scheme.primary,
+              checkmarkColor: Colors.white,
             );
           }).toList(),
         ),

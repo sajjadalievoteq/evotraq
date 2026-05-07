@@ -102,52 +102,50 @@ class GlnResultsList extends StatelessWidget {
           child: Scrollbar(
             controller: scrollController,
             interactive: true,
-            child: RefreshIndicator(
-              onRefresh: onRefresh,
-              child: ListView.builder(
-                controller: scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: context.horizontalPadding,
-                addAutomaticKeepAlives: false,
-                addRepaintBoundaries: true,
-                cacheExtent: 400,
-                itemCount: glns.length +
-                    ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
-                    1,
-                itemBuilder: (context, index) {
-                  if (index < glns.length) {
-                    final gln = glns[index];
-                    return _constrainedCenter(
-                      RepaintBoundary(
-                        child: GlnListItemCard(
-                          gln: gln,
-                          onTap: () => onTapGln(gln.glnCode),
-                          onMenuSelected: (action) =>
-                              onRowMenuAction(gln, action),
-                        ),
+            child: ListView.separated(
+              separatorBuilder: (BuildContext context, int index) { return const SizedBox(height: Constants.spacing); },
+              controller: scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: context.horizontalPadding,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: true,
+              cacheExtent: 400,
+              itemCount: glns.length +
+                  ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
+                  1,
+              itemBuilder: (context, index) {
+                if (index < glns.length) {
+                  final gln = glns[index];
+                  return _constrainedCenter(
+                    RepaintBoundary(
+                      child: GlnListItemCard(
+                        gln: gln,
+                        onTap: () => onTapGln(gln.glnCode),
+                        onMenuSelected: (action) =>
+                            onRowMenuAction(gln, action),
                       ),
-                    );
-                  }
+                    ),
+                  );
+                }
 
-                  final loaderIndex = glns.length;
-                  final spacerIndex = glns.length +
-                      ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
+                final loaderIndex = glns.length;
+                final spacerIndex = glns.length +
+                    ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
 
-                  if (index == loaderIndex &&
-                      state.hasMoreData &&
-                      state.isFetchingMore) {
-                    return _constrainedCenter(
-                      const Gs1ListLoadMoreShimmer(),
-                    );
-                  }
+                if (index == loaderIndex &&
+                    state.hasMoreData &&
+                    state.isFetchingMore) {
+                  return _constrainedCenter(
+                    const Gs1ListLoadMoreIndicator(),
+                  );
+                }
 
-                  if (index == spacerIndex) {
-                    return const SizedBox(height: Constants.spacing);
-                  }
+                if (index == spacerIndex) {
+                  return const SizedBox(height: Constants.spacing);
+                }
 
-                  return const SizedBox.shrink();
-                },
-              ),
+                return const SizedBox.shrink();
+              },
             ),
           ),
         );

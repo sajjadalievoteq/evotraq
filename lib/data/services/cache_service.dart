@@ -105,6 +105,18 @@ class CacheService {
     }
   }
 
+  /// Clear all master data cache
+  Future<bool> clearAllMasterDataCache() async {
+    try {
+      await _dioService.delete('/cache/master-data');
+      print('Master data cache cleared successfully');
+      return true;
+    } catch (e) {
+      print('Error clearing master data cache: $e');
+      return false;
+    }
+  }
+
   /// Evict specific master data entry
   Future<bool> evictMasterData(String dataType, String key) async {
     try {

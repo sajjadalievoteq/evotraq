@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -111,9 +111,7 @@ class AppDrawer extends StatelessWidget {
                           style: const TextStyle(fontSize: 14),
                         ),
                         currentAccountPicture: CircleAvatar(
-                          backgroundColor: isDarkMode
-                              ? AppTheme.accentColorDark
-                              : AppTheme.accentColor,
+                          backgroundColor: context.colors.primary,
                           child: Text(
                             user.firstName.isNotEmpty
                                 ? user.firstName[0].toUpperCase()
@@ -126,16 +124,14 @@ class AppDrawer extends StatelessWidget {
                           ),
                         ),
                         decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? AppTheme.primaryColorDark
-                              : AppTheme.primaryColor,
+                          color: context.colors.primary,
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: isDarkMode
                                 ? [
-                                    AppTheme.primaryColorDark,
-                                    AppTheme.backgroundColorDark,
+                                    context.colors.primary,
+                                    context.colors.background,
                                   ]
                                 : isTobaccoMode
                                 ? [Colors.brown.shade800, Colors.brown.shade400]

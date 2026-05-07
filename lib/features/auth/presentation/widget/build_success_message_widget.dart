@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 
 class BuildSuccessMessage extends StatelessWidget {
   final String title;
@@ -20,8 +20,9 @@ class BuildSuccessMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = ColorManager.primary(context);
-    final textSecondary = ColorManager.textSecondary(context);
+    final c = context.colors;
+    final primary = c.primary;
+    final textSecondary = c.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -35,7 +36,7 @@ class BuildSuccessMessage extends StatelessWidget {
           width: 100,
           height: 100,
           colorFilter: ColorFilter.mode(
-            ColorManager.success(context),
+            c.success,
             BlendMode.srcIn,
           ),
         ),

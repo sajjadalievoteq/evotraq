@@ -14,7 +14,7 @@ abstract final class GtinPharmaceuticalExtensionUiConstants {
 
 /// Regulatory authority expansion + nested cards for GTIN pharmaceutical extension.
 abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
-  static const expansionTitle = 'Regulatory authority';
+  static const expansionTitle = 'Regulatory Details';
 
   static const sectionIdentifiers = 'Regulatory authority — identifiers';
   static const labelLocalDrugCode = 'Local drug code (MoHAP) *';

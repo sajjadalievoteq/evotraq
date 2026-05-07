@@ -187,8 +187,9 @@ class ApiCollectionService {
     if (category != null) body['category'] = category;
     if (icon != null) body['icon'] = icon;
     if (isPublic != null) body['isPublic'] = isPublic;
-    if (rateLimitPerMinute != null)
+    if (rateLimitPerMinute != null) {
       body['rateLimitPerMinute'] = rateLimitPerMinute;
+    }
 
     final response = await _dioService.put(
       '$baseUrl/admin/v1/collections/$id',
@@ -349,8 +350,9 @@ class ApiCollectionService {
     if (pathPattern != null) body['pathPattern'] = pathPattern;
     if (timeoutSeconds != null) body['timeoutSeconds'] = timeoutSeconds;
     if (cacheTtlSeconds != null) body['cacheTtlSeconds'] = cacheTtlSeconds;
-    if (rateLimitPerMinute != null)
+    if (rateLimitPerMinute != null) {
       body['rateLimitPerMinute'] = rateLimitPerMinute;
+    }
     if (tags != null) body['tags'] = tags;
 
     final response = await _dioService.put(

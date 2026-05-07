@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/features/user/presentation/widgets/responsive_modules_row.dart';
 
 enum AppLayoutBreakpoint { compact, medium, expanded, large }
 
@@ -162,12 +164,7 @@ class AppResponsiveBody extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content = AppLayoutBuilder(
       builder: (context, layout) {
-        final basePadding =
-            padding ??
-            EdgeInsets.symmetric(
-              horizontal: layout.horizontalPadding,
-              vertical: layout.verticalPadding,
-            );
+        final basePadding = ResponsiveUtils.paddingAll(context);
 
         // Instead of clamping children with a maxWidth constraint, we compute
         // additional horizontal "margin" when a maxContentWidth is provided.

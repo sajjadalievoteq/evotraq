@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
-
-import '../../../../../../core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 
 class UserStatusToggleButton extends StatelessWidget {
@@ -20,7 +18,7 @@ class UserStatusToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = AppTheme.successColor;
+    final activeColor = context.colors.success;
     final inactiveColor = Colors.grey.shade500;
     final trackColor =
         value ? activeColor.withValues(alpha: 0.16) : inactiveColor.withValues(alpha: 0.16);
@@ -32,7 +30,7 @@ class UserStatusToggleButton extends StatelessWidget {
           width: 18,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(ColorManager.primary(context)),
+            valueColor: AlwaysStoppedAnimation<Color>(context.colors.primary),
           ),
         )
         : Tooltip(

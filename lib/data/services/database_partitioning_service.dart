@@ -350,7 +350,7 @@ class DatabasePartitioningService {
         '$_baseUrl/partitioning/management/maintenance',
         queryParameters: {
           'maintenanceType': maintenanceType,
-          if (tableName != null) 'tableName': tableName,
+          'tableName': ?tableName,
         },
         headers: await _getAuthHeaders(),
         responseType: ResponseType.plain,

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
@@ -86,15 +86,15 @@ class _CredentialManagementScreenState
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
+            backgroundColor: context.colors.primary.withOpacity(0.2),
             child: Text(
               partner.companyName.isNotEmpty
                   ? partner.companyName[0].toUpperCase()
                   : 'P',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+                color: context.colors.primary,
               ),
             ),
           ),
@@ -184,7 +184,7 @@ class _CredentialManagementScreenState
                             CredentialType.oauth2ClientCredentials
                       ? Icons.lock
                       : Icons.security,
-                  color: isActive ? AppTheme.primaryColor : Colors.grey,
+                  color: isActive ? context.colors.primary : Colors.grey,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

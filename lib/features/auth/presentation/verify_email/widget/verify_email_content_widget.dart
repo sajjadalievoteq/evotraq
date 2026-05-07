@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/shared/utils/email_provider_launch_utils.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
@@ -24,11 +24,12 @@ class VerifyEmailContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = ColorManager.textPrimary(context);
-    final textSecondary = ColorManager.textSecondary(context);
-    final primary = ColorManager.primary(context);
-    final success = ColorManager.success(context);
-    final error = ColorManager.error(context);
+    final c = context.colors;
+    final textPrimary = c.textPrimary;
+    final textSecondary = c.textSecondary;
+    final primary = c.primary;
+    final success = c.success;
+    final error = c.error;
     final inboxDestination = resolveEmailInboxDestination(email);
 
     return Column(
@@ -39,11 +40,13 @@ class VerifyEmailContentWidget extends StatelessWidget {
           height: 96,
           decoration: BoxDecoration(
             color: isVerifying
-                ? ColorManager.primaryContainer(context)
+                ? primary.withOpacity(
+                    Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12,
+                  )
                 : (successMessage != null
                       ? success.withValues(alpha: 0.14)
                       : error.withValues(alpha: 0.14)),
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(EvotraqRadius.lg.x),
           ),
           child: isVerifying
               ? Padding(
@@ -103,10 +106,11 @@ class VerifyEmailContentWidget extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-        
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(EvotraqRadius.md.x),
               border: Border.all(
-                color: ColorManager.primaryBorder(context),
+                color: primary.withOpacity(
+                  Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.25,
+                ),
               ),
             ),
             child: Text(

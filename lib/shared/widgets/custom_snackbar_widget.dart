@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 enum CustomSnackBarVariant {
   success(Icons.check_circle_rounded),
@@ -11,11 +11,12 @@ enum CustomSnackBarVariant {
   const CustomSnackBarVariant(this.icon);
 
   Color color(BuildContext context) {
+    final c = context.colors;
     return switch (this) {
-      success => AppTheme.successColor,
-      error => AppTheme.errorColor,
-      warning => AppTheme.warningColor,
-      info => AppTheme.infoColor,
+      success => c.success,
+      error => c.error,
+      warning => c.warning,
+      info => c.secondary,
     };
   }
 }
@@ -88,10 +89,11 @@ class CustomSnackBarWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final tone = variant.color(context);
+    final ec = context.colors;
 
-    final surface = isDark ? AppTheme.cardColorDark : AppTheme.cardColor;
-    final text = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
-    final subText = isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+    final surface = ec.surface;
+    final text = ec.textPrimary;
+    final subText = ec.textMuted;
 
     return DecoratedBox(
       decoration: BoxDecoration(

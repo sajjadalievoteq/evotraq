@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
+import '../../../core/theme/evotraq_theme.dart';
+
 /// ISO 3166-1 numeric country picker (shared by GTIN and GLN).
 ///
 /// Display text is derived from [controller] in [build]; there is no second
@@ -168,8 +170,12 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
                 errorText: fieldState.errorText,
               ),
               child: Text(
-                formatted.isEmpty ? ' ' : formatted,
-                style: Theme.of(context).textTheme.bodyLarge,
+                // formatted.isEmpty ?
+                ' '
+                //     :
+                // formatted,,
+                  ,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: context.colors.textPrimary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

@@ -27,7 +27,6 @@ class GlnDetailFormSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-      const SizedBox(height: Constants.spacing),
         GtinSkeletonOutlineField(color: c, height: 56),
         const SizedBox(height: 12),
         row3(),

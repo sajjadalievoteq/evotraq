@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
 class DashboardLoader extends StatelessWidget {
   const DashboardLoader({super.key});
@@ -60,15 +60,16 @@ class DashboardLoader extends StatelessWidget {
     return Wrap(
       spacing: spacing,
       runSpacing: spacing,
-      children: List.generate(maxWidth<900?6:8, (_) => _box(width: itemWidth, height: itemWidth-50)),
+      children: List.generate(
+        maxWidth < 900 ? 6 : 8,
+        (_) => _box(width: itemWidth, height: itemWidth - 50),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+    return AppShimmer(
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height,
         child: SingleChildScrollView(
@@ -93,7 +94,9 @@ class DashboardLoader extends StatelessWidget {
                     SizedBox(height: verticalSpacing),
                     _sectionTitle(width: 140),
                     const SizedBox(height: 12),
-                    _quickActions(constraints.maxWidth - (horizontalPadding * 2)),
+                    _quickActions(
+                      constraints.maxWidth - (horizontalPadding * 2),
+                    ),
                   ],
                 ),
               );
@@ -104,3 +107,4 @@ class DashboardLoader extends StatelessWidget {
     );
   }
 }
+

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
 import '../../../../../core/config/constants.dart';
@@ -29,9 +29,10 @@ class ForgotPasswordForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = ColorManager.primary(context);
-    final textPrimary = ColorManager.textPrimary(context);
-    final textSecondary = ColorManager.textSecondary(context);
+    final c = context.colors;
+    final primary = c.primary;
+    final textPrimary = c.textPrimary;
+    final textSecondary = c.textSecondary;
 
     return Form(
       key: formKey,

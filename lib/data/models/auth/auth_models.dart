@@ -78,6 +78,7 @@ class User {
   final String lastName;
   final String role;
   final bool enabled;
+  final bool hasProfilePicture;
 
   User({
     required this.id,
@@ -87,6 +88,7 @@ class User {
     required this.lastName,
     required this.role,
     required this.enabled,
+    this.hasProfilePicture = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -98,6 +100,7 @@ class User {
       lastName: json['lastName'] ?? '',
       role: json['role'] ?? 'USER',
       enabled: json['enabled'] ?? true,
+      hasProfilePicture: json['hasProfilePicture'] ?? false,
     );
   }
 
@@ -109,5 +112,6 @@ class User {
     'lastName': lastName,
     'role': role,
     'enabled': enabled,
+    'hasProfilePicture': hasProfilePicture,
   };
 }

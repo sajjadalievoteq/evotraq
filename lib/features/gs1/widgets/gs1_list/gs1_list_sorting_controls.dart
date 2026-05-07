@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 /// “Sort by … / direction” row (GTIN/GLN list “sort” tile). Build [label] in the parent.
@@ -19,6 +19,7 @@ class Gs1ListSortingControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final c = context.colors;
 
     final text = Text(
       label,
@@ -32,7 +33,7 @@ class Gs1ListSortingControls extends StatelessWidget {
       icon: Icon(
         sortOrder == 'asc' ? Icons.arrow_upward : Icons.arrow_downward,
       ),
-      color: ColorManager.primary(context),
+      color: c.primary,
       tooltip: sortOrder == 'asc' ? 'Ascending' : 'Descending',
     );
 
@@ -44,8 +45,8 @@ class Gs1ListSortingControls extends StatelessWidget {
             vertical: layout.resolve(compact: 10.0, medium: 8.0),
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Constants.cardRadius),
-            color: Colors.white,
+            color: context.colors.surface,
+            borderRadius: EvotraqRadius.card,
             border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: layout.isCompact

@@ -26,13 +26,13 @@ class TraceNetworkBackground extends StatefulWidget {
   /// How many glowing "signal" pulses travel along edges.
   final int travelerCount;
 
-  /// Override the line/dot color. Defaults to `EvotraqColors.fg2`.
+  /// Override the line/dot color. Defaults to `EvotraqColors.textMuted`.
   final Color? lineColor;
 
-  /// Override the traveler core color. Defaults to `EvotraqColors.sig`.
+  /// Override the traveler core color. Defaults to `EvotraqColors.primary`.
   final Color? signalCoreColor;
 
-  /// Override the traveler glow color. Defaults to `EvotraqColors.sigGlow`.
+  /// Override the traveler glow color. Defaults to `EvotraqColors.primaryGlow`.
   final Color? signalGlowColor;
 
   /// Random seed — pin this if you want a deterministic layout (tests, goldens).
@@ -113,9 +113,9 @@ class _TraceNetworkBackgroundState extends State<TraceNetworkBackground>
             painter: _TraceNetworkPainter(
               graph: _graph!,
               elapsed: reduceMotion ? 0 : _elapsed,
-              lineColor: widget.lineColor ?? colors.fg2,
-              signalCoreColor: widget.signalCoreColor ?? colors.sig,
-              signalGlowColor: widget.signalGlowColor ?? colors.sigGlow,
+              lineColor: widget.lineColor ?? colors.textMuted,
+              signalCoreColor: widget.signalCoreColor ?? colors.primary,
+              signalGlowColor: widget.signalGlowColor ?? colors.primaryGlow,
             ),
           ),
         );

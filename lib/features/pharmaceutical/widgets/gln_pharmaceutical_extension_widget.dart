@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
@@ -712,7 +713,7 @@ class GLNPharmaceuticalExtensionWidgetState
       elevation: 0,
       color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadiusGeometry.circular(EvotraqRadius.sm.x),
         side: BorderSide(color: scheme.outlineVariant),
       ),
       child: ExpansionTile(
@@ -733,7 +734,7 @@ class GLNPharmaceuticalExtensionWidgetState
               GlnPharmaceuticalExtensionUiConstants.expansionTitle,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: scheme.onSurface,
+                color: context.colors.textPrimary,
               ),
             ),
             if (_hasExtension)
@@ -746,7 +747,8 @@ class GLNPharmaceuticalExtensionWidgetState
                 ),
                 child: Text(
                   GlnPharmaceuticalExtensionUiConstants.badgeSaved,
-                  style: TextStyle(fontSize: 12, color: scheme.onPrimaryContainer),
+                  style: TextStyle(fontSize: 12,
+                    color: context.colors.textMuted,),
                 ),
               ),
           ],
@@ -758,13 +760,13 @@ class GLNPharmaceuticalExtensionWidgetState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildUaeRegistryAndSafetySection(),
+                _buildRegistryAndSafetySection(),
                 const SizedBox(height: 16),
                 _buildFacilitySection(),
                 const SizedBox(height: 16),
-                _buildFdaSection(),
+                _buildFdaSection(context),
                 const SizedBox(height: 16),
-                _buildDeaSection(),
+                _buildDeaSection(context),
                 const SizedBox(height: 16),
                 _buildStateLicenseSection(),
                 const SizedBox(height: 16),
@@ -793,7 +795,7 @@ class GLNPharmaceuticalExtensionWidgetState
     );
   }
 
-  Widget _buildUaeRegistryAndSafetySection() {
+  Widget _buildRegistryAndSafetySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -913,9 +915,12 @@ class GLNPharmaceuticalExtensionWidgetState
       [
         DropdownButtonFormField<HealthcareFacilityType>(
           value: _healthcareFacilityType,
+          dropdownColor: context.colors.surface,
           decoration: const InputDecoration(
             labelText: GlnPharmaceuticalExtensionUiConstants.labelFacilityType,
             border: OutlineInputBorder(),
+
+
           ),
           items: HealthcareFacilityType.values.map((type) {
             return DropdownMenuItem(
@@ -934,10 +939,11 @@ class GLNPharmaceuticalExtensionWidgetState
               : null,
         ),
       ],
+      context
     );
   }
 
-  Widget _buildFdaSection() {
+  Widget _buildFdaSection(BuildContext context) {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardFdaEstablishment,
       Icons.verified_user,
@@ -987,13 +993,15 @@ class GLNPharmaceuticalExtensionWidgetState
           ],
         ),
       ],
+      context
     );
   }
 
-  Widget _buildDeaSection() {
+  Widget _buildDeaSection(BuildContext context) {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardDeaRegistration,
       Icons.security,
+
       [
         _buildTextField(
           controller: _deaRegistrationNumberController,
@@ -1025,6 +1033,7 @@ class GLNPharmaceuticalExtensionWidgetState
           maxLength: 100,
         ),
       ],
+      context
     );
   }
 
@@ -1047,7 +1056,9 @@ class GLNPharmaceuticalExtensionWidgetState
             Expanded(
               child: DropdownButtonFormField<String>(
                 value: _stateLicenseState,
+                dropdownColor: context.colors.surface,
                 decoration: const InputDecoration(
+
                   labelText: GlnPharmaceuticalExtensionUiConstants.labelStateDropdown,
                   border: OutlineInputBorder(),
                 ),
@@ -1082,6 +1093,7 @@ class GLNPharmaceuticalExtensionWidgetState
               : null,
         ),
       ],
+      context
     );
   }
 
@@ -1147,7 +1159,7 @@ class GLNPharmaceuticalExtensionWidgetState
                 : null,
           ),
         ],
-      ],
+      ],context
     );
   }
 
@@ -1317,6 +1329,7 @@ class GLNPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      context
     );
   }
 
@@ -1358,6 +1371,7 @@ class GLNPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      context
     );
   }
 
@@ -1407,6 +1421,7 @@ class GLNPharmaceuticalExtensionWidgetState
           maxLength: 200,
         ),
       ],
+      context
     );
   }
 
@@ -1443,6 +1458,7 @@ class GLNPharmaceuticalExtensionWidgetState
           maxLength: 20,
         ),
       ],
+      context
     );
   }
 
@@ -1509,6 +1525,7 @@ class GLNPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      context
     );
   }
 
@@ -1545,6 +1562,7 @@ class GLNPharmaceuticalExtensionWidgetState
           maxLength: 50,
         ),
       ],
+      context
     );
   }
 
@@ -1596,6 +1614,7 @@ class GLNPharmaceuticalExtensionWidgetState
               : null,
         ),
       ],
+      context
     );
   }
 
@@ -1731,23 +1750,24 @@ class GLNPharmaceuticalExtensionWidgetState
           ],
         ),
       ],
+      context
     );
   }
 
-  Widget _buildSection(String title, IconData icon, List<Widget> children) {
+  Widget _buildSection(String title, IconData icon, List<Widget> children,BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 20, color: const Color(0xFF121F17)),
+            Icon(icon, size: 20, color: context.colors.textPrimary),
             const SizedBox(width: 8),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF121F17),
+                color: context.colors.textPrimary,
               ),
             ),
           ],

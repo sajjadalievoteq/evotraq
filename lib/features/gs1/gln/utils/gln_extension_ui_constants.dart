@@ -9,33 +9,33 @@ abstract final class GlnExtensionSharedUiConstants {
 
 /// [GLNPharmaceuticalExtensionWidget] — strings only (location pharma extension).
 abstract final class GlnPharmaceuticalExtensionUiConstants {
-  static const expansionTitle = 'Pharmaceutical extension';
+  static const expansionTitle = 'Pharmaceutical Extension';
   static const badgeSaved = 'Saved';
 
-  static const sectionUaeRegistry = 'UAE registry & national IDs';
+  static const sectionUaeRegistry = 'Registry & National IDs';
   static const labelBrandSyncPartyId = 'BrandSync Party ID';
   static const labelTatmeenPartyCode = 'Tatmeen Party Code';
 
-  static const sectionMahTargetMarkets = 'MAH & target markets';
-  static const labelMahQualificationIndicator = 'MAH qualification indicator';
-  static const labelMahTargetMarketsIso = 'MAH target markets (ISO numeric)';
-  static const hintMahTargetMarketsIso = 'Comma-separated, e.g. 784 for UAE';
+  static const sectionMahTargetMarkets = 'MAH & Target Markets';
+  static const labelMahQualificationIndicator = 'MAH Qualification Indicator';
+  static const labelMahTargetMarketsIso = 'MAH Target Markets (ISO numeric)';
+  static const hintMahTargetMarketsIso = 'Comma-Separated, e.g. 784 for UAE';
   static const labelMahRegulatoryRegistrationNumber =
-      'MAH regulatory registration number';
+      'MAH Regulatory Registration Number';
 
-  static const sectionLicensedAgent = 'Licensed agent (import markets)';
+  static const sectionLicensedAgent = 'Licensed Agent (Import Markets)';
   static const labelLicensedAgentAuthorisationNumber =
-      'Licensed agent authorisation number';
-  static const labelAuthorisedPrincipalMahGlns = 'Authorised principal MAH GLNs';
-  static const hintAuthorisedPrincipalMahGlns = 'Comma-separated 13-digit GLNs';
+      'Licensed Agent Authorisation Number';
+  static const labelAuthorisedPrincipalMahGlns = 'Authorised Principal MAH GLNs';
+  static const hintAuthorisedPrincipalMahGlns = 'Comma-Separated 13-digit GLNs';
 
-  static const sectionPharmacovigilance = 'Pharmacovigilance & recall';
-  static const labelPharmacovigilanceEmail = 'Pharmacovigilance contact email';
-  static const labelRecallContactEmail = 'Recall contact email (24/7)';
-  static const labelRecallContactPhone = 'Recall contact phone';
+  static const sectionPharmacovigilance = 'Pharmacovigilance & Recall';
+  static const labelPharmacovigilanceEmail = 'Pharmacovigilance Contact Email';
+  static const labelRecallContactEmail = 'Recall Contact Email (24/7)';
+  static const labelRecallContactPhone = 'Recall Contact Phone';
 
-  static const sectionEpicsDataExchange = 'EPCIS & data exchange';
-  static const labelEpicsCaptureEndpointUrl = 'EPCIS capture endpoint URL';
+  static const sectionEpicsDataExchange = 'EPCIS & Data Exchange';
+  static const labelEpicsCaptureEndpointUrl = 'EPCIS Capture Endpoint URL';
   static const hintHttpsUrl = 'https://…';
 
   static const cardHealthcareFacilityType = 'Healthcare Facility Type';

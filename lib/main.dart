@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
 import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:world_countries/world_countries.dart';
@@ -24,7 +23,7 @@ import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart
 import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 
-import 'package:traqtrace_app/features/user_management/cubit/profile_cubit.dart';
+import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
@@ -54,6 +53,7 @@ import 'package:traqtrace_app/data/services/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/sscc_service.dart';
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
+import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/user_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 
@@ -147,7 +147,8 @@ class TraqTraceApp extends StatelessWidget {
               AggregationEventsCubit(),
         ),
         BlocProvider<ProfileCubit>(
-          create: (context) => ProfileCubit(userService: getIt<UserService>()),
+          create: (context) =>
+              ProfileCubit(profileService: getIt<ProfileService>()),
         ),
         BlocProvider<ThemeCubit>(
           create: (context) =>
@@ -233,9 +234,6 @@ class TraqTraceApp extends StatelessWidget {
                       const AppAnimatedBackgroundLayer(),
                       Theme(
                         data: Theme.of(context).copyWith(
-                          // Most screens use Scaffold with the theme's
-                          // scaffoldBackgroundColor. Keep it transparent so the
-                          // global animated background is visible behind routes.
                           scaffoldBackgroundColor: Colors.transparent,
                           canvasColor: Colors.transparent,
                         ),

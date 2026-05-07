@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class TradeItemMasterdataBoundGroup extends StatefulWidget {
   const TradeItemMasterdataBoundGroup({
@@ -78,10 +79,6 @@ class TradeItemMasterdataBoundGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(
-          GtinUiConstants.sectionTradeItemData,
-          padding: EdgeInsets.only(top: 16, bottom: 12),
-        ),
         GtinValidatedField(
           controller: _brandName,
           fieldName: 'brand_name',
@@ -153,16 +150,14 @@ class TradeItemMasterdataBoundGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionTradeItemData,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(
-            GtinUiConstants.sectionTradeItemData,
-            padding: EdgeInsets.only(top: 16, bottom: 12),
-          ),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 16),
           GtinSkeletonOutlineField(color: c, height: 56),
@@ -174,6 +169,7 @@ class TradeItemMasterdataBoundGroupState
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

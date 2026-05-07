@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/widgets/create_partner_dialog.dart';
@@ -118,7 +118,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   Widget _buildStatCard(String label, String value, IconData icon, {Color? color}) {
     return Column(
       children: [
-        Icon(icon, color: color ?? AppTheme.primaryColor, size: 28),
+        Icon(icon, color: color ?? context.colors.primary, size: 28),
         const SizedBox(height: 4),
         Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
@@ -216,12 +216,12 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                 children: [
                   CircleAvatar(
                     backgroundColor: partner.active 
-                        ? AppTheme.primaryColor.withOpacity(0.2)
+                        ? context.colors.primary.withOpacity(0.2)
                         : Colors.grey.shade200,
                     child: Text(
                       partner.companyName.isNotEmpty ? partner.companyName[0].toUpperCase() : 'P',
                       style: TextStyle(
-                        color: partner.active ? AppTheme.primaryColor : Colors.grey,
+                        color: partner.active ? context.colors.primary : Colors.grey,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
@@ -37,7 +37,7 @@ class UserManagementFilterSection extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardRadius),
+        borderRadius: BorderRadius.circular(EvotraqRadius.sm.x),
       ),
       child: Padding(
         padding: Constants.sectionPadding,
@@ -49,13 +49,7 @@ class UserManagementFilterSection extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  UserManagementConstants.usersTitle,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: Constants.spacing),
+
                 Wrap(
                   spacing: Constants.spacing,
                   runSpacing: Constants.spacing,
@@ -78,9 +72,6 @@ class UserManagementFilterSection extends StatelessWidget {
                                 BlendMode.srcIn,
                               ),
                             ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
                           ),
                           isDense: true,
                         ),
@@ -144,7 +135,7 @@ class UserManagementFilterSection extends StatelessWidget {
                   children: [
                     if (showResultsCount)
                       Text(
-                        '$totalItems users found',
+                        '$totalItems Users Found',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey[700],
                             ),
@@ -164,7 +155,11 @@ class UserManagementFilterSection extends StatelessWidget {
                               BlendMode.srcIn,
                             ),
                           ),
-                          label: const Text(UserManagementConstants.refreshLabel),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.colors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          label:  Text(UserManagementConstants.refreshLabel),
                         ),
                         ElevatedButton.icon(
                           onPressed: onAddUser,
@@ -179,7 +174,7 @@ class UserManagementFilterSection extends StatelessWidget {
                           ),
                           label: const Text(UserManagementConstants.addUserLabel),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
+                            backgroundColor: context.colors.primary,
                             foregroundColor: Colors.white,
                           ),
                         ),

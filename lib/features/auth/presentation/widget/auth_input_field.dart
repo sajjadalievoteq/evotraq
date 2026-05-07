@@ -68,7 +68,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
   Widget _svgIcon(String asset, {double size = 22}) {
     // Be explicit: use Evotraq token so icons don't accidentally inherit a
     // white IconTheme (and disappear on light surfaces).
-    final themeColor = context.colors.fg2;
+    final themeColor = context.colors.textMuted;
     return SvgPicture.asset(
       asset,
       width: size,

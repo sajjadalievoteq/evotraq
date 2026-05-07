@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
@@ -391,7 +391,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Industry Test Data Generation'),
-        backgroundColor: isDarkMode ? AppTheme.primaryColorDark : AppTheme.primaryColor,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -454,7 +453,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                       value: _gtinTotal > 0 ? _gtinProgress / _gtinTotal : 0,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isDarkMode ? AppTheme.accentColorDark : AppTheme.accentColor,
+                        context.colors.textSecondary,
                       ),
                     ),
                   if (_glnProgress > 0)
@@ -462,7 +461,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                       value: _glnTotal > 0 ? _glnProgress / _glnTotal : 0,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isDarkMode ? AppTheme.accentColorDark : AppTheme.accentColor,
+                        context.colors.textSecondary,
                       ),
                     ),
                   if (_sgtinProgress > 0)
@@ -470,7 +469,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                       value: _sgtinTotal > 0 ? _sgtinProgress / _sgtinTotal : 0,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isDarkMode ? AppTheme.accentColorDark : AppTheme.accentColor,
+                        context.colors.textSecondary,
                       ),
                     ),
                   if (_ssccProgress > 0)
@@ -478,7 +477,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                       value: _ssccTotal > 0 ? _ssccProgress / _ssccTotal : 0,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isDarkMode ? AppTheme.accentColorDark : AppTheme.accentColor,
+                        context.colors.textSecondary,
                       ),
                     ),
                   if (_eventProgress > 0)
@@ -486,7 +485,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                       value: _eventTotal > 0 ? _eventProgress / _eventTotal : 0,
                       backgroundColor: Colors.grey.shade300,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isDarkMode ? AppTheme.accentColorDark : AppTheme.accentColor,
+                        context.colors.textSecondary,
                       ),
                     ),
                 ],

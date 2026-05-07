@@ -1,8 +1,7 @@
-// Temporary Evotraq UI theme (developer handoff)
-// Source: /handoff/flutter/app_theme.dart
-//
-// NOTE: This file is intentionally kept standalone so it can be
-// swapped in/out without touching app logic (routing/blocs/services).
+/// Evotraq design tokens and [ThemeData] for TraqTrace (evotraq.io).
+///
+/// This is the canonical app theme; use [EvotraqTheme.light]/[EvotraqTheme.dark]
+/// in [MaterialApp] and [EvotraqColors]/[EvotraqText] from [BuildContext] in widgets.
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,128 +9,139 @@ import 'package:google_fonts/google_fonts.dart';
 @immutable
 class EvotraqColors extends ThemeExtension<EvotraqColors> {
   // Surfaces
-  final Color bg0;
-  final Color bg1;
-  final Color bg2;
-  final Color bg3;
-  final Color bgInv;
+  final Color background;
+  final Color surface;
+  final Color surfaceMuted;
+  final Color surfaceElevated;
+  final Color inverseSurface;
 
-  // Lines
-  final Color line1;
-  final Color line2;
-  final Color lineStrong;
+  // Borders
+  final Color border;
+  final Color borderVariant;
+  final Color borderStrong;
 
   // Text
-  final Color fg0;
-  final Color fg1;
-  final Color fg2;
-  final Color fg3;
-  final Color fgInv;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color textFaint;
+  final Color textOnInverse;
 
-  // Signal
-  final Color sig;
-  final Color sigInk;
-  final Color sigSoft;
-  final Color sigGlow;
+  // Brand
+  final Color primary;
+  /// High-contrast ink on primary fills (handoff “sig ink”).
+  final Color onPrimary;
+  final Color primaryMuted;
+  final Color primaryGlow;
+
+  /// Second accent (informational blue; links, info UI, GTIN chip base).
+  final Color secondary;
 
   // Status
-  final Color ok;
-  final Color warn;
-  final Color err;
-  final Color info;
+  final Color success;
+  final Color warning;
+  final Color error;
 
   // Identifier coding
-  final Color idGtin;
-  final Color idGln;
-  final Color idSgtin;
-  final Color idSscc;
-  final Color idEvent;
+  final Color identifierGtin;
+  final Color identifierGln;
+  final Color identifierSgtin;
+  final Color identifierSscc;
+  final Color identifierEvent;
 
   const EvotraqColors({
-    required this.bg0,
-    required this.bg1,
-    required this.bg2,
-    required this.bg3,
-    required this.bgInv,
-    required this.line1,
-    required this.line2,
-    required this.lineStrong,
-    required this.fg0,
-    required this.fg1,
-    required this.fg2,
-    required this.fg3,
-    required this.fgInv,
-    required this.sig,
-    required this.sigInk,
-    required this.sigSoft,
-    required this.sigGlow,
-    required this.ok,
-    required this.warn,
-    required this.err,
-    required this.info,
-    required this.idGtin,
-    required this.idGln,
-    required this.idSgtin,
-    required this.idSscc,
-    required this.idEvent,
+    required this.background,
+    required this.surface,
+    required this.surfaceMuted,
+    required this.surfaceElevated,
+    required this.inverseSurface,
+    required this.border,
+    required this.borderVariant,
+    required this.borderStrong,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.textFaint,
+    required this.textOnInverse,
+    required this.primary,
+    required this.onPrimary,
+    required this.primaryMuted,
+    required this.primaryGlow,
+    required this.secondary,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.identifierGtin,
+    required this.identifierGln,
+    required this.identifierSgtin,
+    required this.identifierSscc,
+    required this.identifierEvent,
   });
 
-  static const dark = EvotraqColors(
-    bg0: Color(0xFF1A1B1E),
-    bg1: Color(0xFF222428),
-    bg2: Color(0xFF2C2E33),
-    bg3: Color(0xFF383B41),
-    bgInv: Color(0xFFF7F7F5),
-    line1: Color(0xFF3D4047),
-    line2: Color(0xFF4C5058),
-    lineStrong: Color(0xFF6A6F78),
-    fg0: Color(0xFFF7F7F5),
-    fg1: Color(0xFFCFCFCC),
-    fg2: Color(0xFF8E939B),
-    fg3: Color(0xFF666B73),
-    fgInv: Color(0xFF1A1B1E),
-    sig: Color(0xFFC4F03B),
-    sigInk: Color(0xFF26321A),
-    sigSoft: Color(0x1FC4F03B),
-    sigGlow: Color(0x59C4F03B),
-    ok: Color(0xFF7BD389),
-    warn: Color(0xFFE6B454),
-    err: Color(0xFFE85C4A),
-    info: Color(0xFF6FB7DC),
-    idGtin: Color(0xFF6FB7DC),
-    idGln: Color(0xFFA89DDC),
-    idSgtin: Color(0xFF5BC2B5),
-    idSscc: Color(0xFFE0B070),
-    idEvent: Color(0xFFD080CB),
+  static Color _autoOn(Color color) =>
+      color.computeLuminance() > 0.55 ? const Color(0xFF111318) : Colors.white;
+
+  static Color _withOpacity(Color color, double opacity) =>
+      color.withAlpha((opacity.clamp(0, 1) * 255).round());
+
+  static final dark = EvotraqColors(
+    background: const Color(0xFF0D0E11),
+
+    surface: const Color(0xFF181A1E),
+    surfaceMuted: const Color(0xFF22252A),
+    surfaceElevated: const Color(0xFF2C3036),
+    inverseSurface: Color(0xFFF7F7F5),
+    border: Color(0xFF3D4047),
+    borderVariant: Color(0xFF4C5058),
+    borderStrong: Color(0xFF6A6F78),
+    textPrimary: Color(0xFFF7F7F5),
+    textSecondary: Color(0xFFCFCFCC),
+    textMuted: Color(0xFF8E939B),
+    textFaint: Color(0xFF666B73),
+    textOnInverse: Color(0xFF1A1B1E),
+    primary: Color(0xFF5F0F26),
+    onPrimary: _autoOn(const Color(0xFF5F0F26)),
+    primaryMuted: _withOpacity(const Color(0xFF5F0F26), 0.18),
+    primaryGlow: _withOpacity(const Color(0xFF5F0F26), 0.35),
+    secondary: Color(0xFF6FB7DC),
+    success: Color(0xFF7BD389),
+    warning: Color(0xFFE6B454),
+    error: Color(0xFFE85C4A),
+    identifierGtin: Color(0xFF6FB7DC),
+    identifierGln: Color(0xFFA89DDC),
+    identifierSgtin: Color(0xFF5BC2B5),
+    identifierSscc: Color(0xFFE0B070),
+    identifierEvent: Color(0xFFD080CB),
   );
 
-  static const light = EvotraqColors(
-    bg0: Color(0xFFFAFAF7),
-    bg1: Color(0xFFFFFFFF),
-    bg2: Color(0xFFF3F3F0),
-    bg3: Color(0xFFEAEAE7),
-    bgInv: Color(0xFF222428),
-    line1: Color(0xFFE2E2DF),
-    line2: Color(0xFFD3D3D0),
-    lineStrong: Color(0xFFA6A8AC),
-    fg0: Color(0xFF252830),
-    fg1: Color(0xFF464A52),
-    fg2: Color(0xFF6A6F78),
-    fg3: Color(0xFF8E939B),
-    fgInv: Color(0xFFF7F7F5),
-    sig: Color(0xFF7AAB14),
-    sigInk: Color(0xFF26321A),
-    sigSoft: Color(0x2EC4D844),
-    sigGlow: Color(0x4D7AAB14),
-    ok: Color(0xFF4F8B3E),
-    warn: Color(0xFFB07A1C),
-    err: Color(0xFFB6362B),
-    info: Color(0xFF3071A8),
-    idGtin: Color(0xFF3071A8),
-    idGln: Color(0xFF6A4FA0),
-    idSgtin: Color(0xFF2E7B70),
-    idSscc: Color(0xFFA06028),
-    idEvent: Color(0xFF99457E),
+  static final light = EvotraqColors(
+    background: const Color(0xFFF2F2EF),
+
+    surface: const Color(0xFFFFFFFF),
+    surfaceMuted: const Color(0xFFE3E3DE),
+    surfaceElevated: const Color(0xFFD8D8D2),
+    inverseSurface: Color(0xFF222428),
+    border: Color(0xFFE2E2DF),
+    borderVariant: Color(0xFFD3D3D0),
+    borderStrong: Color(0xFFA6A8AC),
+    textPrimary: Color(0xFF252830),
+    textSecondary: Color(0xFF464A52),
+    textMuted: Color(0xFF6A6F78),
+    textFaint: Color(0xFF8E939B),
+    textOnInverse: Color(0xFFF7F7F5),
+    primary: Color(0xFF3A0F19),
+    onPrimary: _autoOn(const Color(0xFF3A0F19)),
+    primaryMuted: _withOpacity(const Color(0xFF3A0F19), 0.14),
+    primaryGlow: _withOpacity(const Color(0xFF3A0F19), 0.28),
+    secondary: Color(0xFF3071A8),
+    success: Color(0xFF4F8B3E),
+    warning: Color(0xFFB07A1C),
+    error: Color(0xFFB6362B),
+    identifierGtin: Color(0xFF3071A8),
+    identifierGln: Color(0xFF6A4FA0),
+    identifierSgtin: Color(0xFF2E7B70),
+    identifierSscc: Color(0xFFA06028),
+    identifierEvent: Color(0xFF99457E),
   );
 
   static EvotraqColors of(BuildContext context) =>
@@ -139,60 +149,60 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
 
   @override
   EvotraqColors copyWith({
-    Color? bg0,
-    Color? bg1,
-    Color? bg2,
-    Color? bg3,
-    Color? bgInv,
-    Color? line1,
-    Color? line2,
-    Color? lineStrong,
-    Color? fg0,
-    Color? fg1,
-    Color? fg2,
-    Color? fg3,
-    Color? fgInv,
-    Color? sig,
-    Color? sigInk,
-    Color? sigSoft,
-    Color? sigGlow,
-    Color? ok,
-    Color? warn,
-    Color? err,
-    Color? info,
-    Color? idGtin,
-    Color? idGln,
-    Color? idSgtin,
-    Color? idSscc,
-    Color? idEvent,
+    Color? background,
+    Color? surface,
+    Color? surfaceMuted,
+    Color? surfaceElevated,
+    Color? inverseSurface,
+    Color? border,
+    Color? borderVariant,
+    Color? borderStrong,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textMuted,
+    Color? textFaint,
+    Color? textOnInverse,
+    Color? primary,
+    Color? onPrimary,
+    Color? primaryMuted,
+    Color? primaryGlow,
+    Color? secondary,
+    Color? success,
+    Color? warning,
+    Color? error,
+    Color? identifierGtin,
+    Color? identifierGln,
+    Color? identifierSgtin,
+    Color? identifierSscc,
+    Color? identifierEvent,
   }) =>
       EvotraqColors(
-        bg0: bg0 ?? this.bg0,
-        bg1: bg1 ?? this.bg1,
-        bg2: bg2 ?? this.bg2,
-        bg3: bg3 ?? this.bg3,
-        bgInv: bgInv ?? this.bgInv,
-        line1: line1 ?? this.line1,
-        line2: line2 ?? this.line2,
-        lineStrong: lineStrong ?? this.lineStrong,
-        fg0: fg0 ?? this.fg0,
-        fg1: fg1 ?? this.fg1,
-        fg2: fg2 ?? this.fg2,
-        fg3: fg3 ?? this.fg3,
-        fgInv: fgInv ?? this.fgInv,
-        sig: sig ?? this.sig,
-        sigInk: sigInk ?? this.sigInk,
-        sigSoft: sigSoft ?? this.sigSoft,
-        sigGlow: sigGlow ?? this.sigGlow,
-        ok: ok ?? this.ok,
-        warn: warn ?? this.warn,
-        err: err ?? this.err,
-        info: info ?? this.info,
-        idGtin: idGtin ?? this.idGtin,
-        idGln: idGln ?? this.idGln,
-        idSgtin: idSgtin ?? this.idSgtin,
-        idSscc: idSscc ?? this.idSscc,
-        idEvent: idEvent ?? this.idEvent,
+        background: background ?? this.background,
+        surface: surface ?? this.surface,
+        surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+        surfaceElevated: surfaceElevated ?? this.surfaceElevated,
+        inverseSurface: inverseSurface ?? this.inverseSurface,
+        border: border ?? this.border,
+        borderVariant: borderVariant ?? this.borderVariant,
+        borderStrong: borderStrong ?? this.borderStrong,
+        textPrimary: textPrimary ?? this.textPrimary,
+        textSecondary: textSecondary ?? this.textSecondary,
+        textMuted: textMuted ?? this.textMuted,
+        textFaint: textFaint ?? this.textFaint,
+        textOnInverse: textOnInverse ?? this.textOnInverse,
+        primary: primary ?? this.primary,
+        onPrimary: onPrimary ?? this.onPrimary,
+        primaryMuted: primaryMuted ?? this.primaryMuted,
+        primaryGlow: primaryGlow ?? this.primaryGlow,
+        secondary: secondary ?? this.secondary,
+        success: success ?? this.success,
+        warning: warning ?? this.warning,
+        error: error ?? this.error,
+        identifierGtin: identifierGtin ?? this.identifierGtin,
+        identifierGln: identifierGln ?? this.identifierGln,
+        identifierSgtin: identifierSgtin ?? this.identifierSgtin,
+        identifierSscc: identifierSscc ?? this.identifierSscc,
+        identifierEvent: identifierEvent ?? this.identifierEvent,
       );
 
   @override
@@ -200,32 +210,32 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
     if (other is! EvotraqColors) return this;
     Color l(Color a, Color b) => Color.lerp(a, b, t)!;
     return EvotraqColors(
-      bg0: l(bg0, other.bg0),
-      bg1: l(bg1, other.bg1),
-      bg2: l(bg2, other.bg2),
-      bg3: l(bg3, other.bg3),
-      bgInv: l(bgInv, other.bgInv),
-      line1: l(line1, other.line1),
-      line2: l(line2, other.line2),
-      lineStrong: l(lineStrong, other.lineStrong),
-      fg0: l(fg0, other.fg0),
-      fg1: l(fg1, other.fg1),
-      fg2: l(fg2, other.fg2),
-      fg3: l(fg3, other.fg3),
-      fgInv: l(fgInv, other.fgInv),
-      sig: l(sig, other.sig),
-      sigInk: l(sigInk, other.sigInk),
-      sigSoft: l(sigSoft, other.sigSoft),
-      sigGlow: l(sigGlow, other.sigGlow),
-      ok: l(ok, other.ok),
-      warn: l(warn, other.warn),
-      err: l(err, other.err),
-      info: l(info, other.info),
-      idGtin: l(idGtin, other.idGtin),
-      idGln: l(idGln, other.idGln),
-      idSgtin: l(idSgtin, other.idSgtin),
-      idSscc: l(idSscc, other.idSscc),
-      idEvent: l(idEvent, other.idEvent),
+      background: l(background, other.background),
+      surface: l(surface, other.surface),
+      surfaceMuted: l(surfaceMuted, other.surfaceMuted),
+      surfaceElevated: l(surfaceElevated, other.surfaceElevated),
+      inverseSurface: l(inverseSurface, other.inverseSurface),
+      border: l(border, other.border),
+      borderVariant: l(borderVariant, other.borderVariant),
+      borderStrong: l(borderStrong, other.borderStrong),
+      textPrimary: l(textPrimary, other.textPrimary),
+      textSecondary: l(textSecondary, other.textSecondary),
+      textMuted: l(textMuted, other.textMuted),
+      textFaint: l(textFaint, other.textFaint),
+      textOnInverse: l(textOnInverse, other.textOnInverse),
+      primary: l(primary, other.primary),
+      onPrimary: l(onPrimary, other.onPrimary),
+      primaryMuted: l(primaryMuted, other.primaryMuted),
+      primaryGlow: l(primaryGlow, other.primaryGlow),
+      secondary: l(secondary, other.secondary),
+      success: l(success, other.success),
+      warning: l(warning, other.warning),
+      error: l(error, other.error),
+      identifierGtin: l(identifierGtin, other.identifierGtin),
+      identifierGln: l(identifierGln, other.identifierGln),
+      identifierSgtin: l(identifierSgtin, other.identifierSgtin),
+      identifierSscc: l(identifierSscc, other.identifierSscc),
+      identifierEvent: l(identifierEvent, other.identifierEvent),
     );
   }
 }
@@ -260,9 +270,9 @@ class EvotraqText {
     final mono = GoogleFonts.getTextTheme('JetBrains Mono');
 
     TextStyle g(TextStyle? base) =>
-        (base ?? const TextStyle()).copyWith(color: c.fg0);
+        (base ?? const TextStyle()).copyWith(color: c.textPrimary);
     TextStyle m(TextStyle? base) =>
-        (base ?? const TextStyle()).copyWith(color: c.fg0);
+        (base ?? const TextStyle()).copyWith(color: c.textPrimary);
 
     final display = g(geist.displayLarge).copyWith(
       fontSize: 56,
@@ -299,11 +309,11 @@ class EvotraqText {
       fontWeight: FontWeight.w400,
     );
     final cap = g(geist.labelSmall).copyWith(
-      fontSize: 11,
+      fontSize: 14,
       height: 1.3,
       letterSpacing: 0.88,
       fontWeight: FontWeight.w500,
-      color: c.fg2,
+      color: c.textMuted,
     );
     final monoBase = m(mono.bodyMedium).copyWith(
       fontSize: 13,
@@ -422,8 +432,8 @@ class EvotraqShadows {
         ),
       ];
 
-  static List<BoxShadow> sigGlow(EvotraqColors c) => [
-        BoxShadow(color: c.sigGlow, blurRadius: 16, spreadRadius: -2),
+  static List<BoxShadow> primaryGlow(EvotraqColors c) => [
+        BoxShadow(color: c.primaryGlow, blurRadius: 16, spreadRadius: -2),
       ];
 }
 
@@ -433,61 +443,79 @@ class EvotraqTheme {
 
   static ThemeData _build(EvotraqColors c, Brightness b) {
     final text = EvotraqText.build(c);
+    // Ink on primary surfaces (buttons, app bars). Matches legacy filled-button styling.
+    final onPrimaryInk = b == Brightness.dark ? c.textSecondary : Colors.white;
+
+    final roundedMd = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(EvotraqRadius.md),
+    );
+
+    final roundedLg = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(EvotraqRadius.lg),
+    );
 
     return ThemeData(
       brightness: b,
       useMaterial3: true,
-      scaffoldBackgroundColor: c.bg0,
-      canvasColor: c.bg0,
-      dividerColor: c.line1,
-      hintColor: c.fg3,
+      scaffoldBackgroundColor: c.background,
+      canvasColor: c.background,
+      dividerColor: c.border,
+      hintColor: c.textFaint,
       colorScheme: ColorScheme(
         brightness: b,
-        primary: c.sig,
+        primary: c.primary,
         // For Evotraq filled buttons we want:
         // - light mode: white text/icons on green
         // - dark mode: slightly gray text/icons on lime
-        onPrimary: b == Brightness.dark ? c.fg1 : Colors.white,
-        secondary: c.fg1,
-        onSecondary: c.bg0,
-        error: c.err,
-        onError: c.fgInv,
-        surface: c.bg1,
-        onSurface: c.fg0,
-        surfaceContainerHighest: c.bg2,
-        outline: c.line2,
-        outlineVariant: c.line1,
+        onPrimary: onPrimaryInk,
+        secondary: c.secondary,
+        onSecondary: Colors.white,
+        error: c.error,
+        onError: c.textOnInverse,
+        surface: c.surface,
+        onSurface: c.textPrimary,
+        surfaceContainerHighest: c.surfaceMuted,
+        outline: c.borderVariant,
+        outlineVariant: c.border,
+      ),
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: c.primary,
+        foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
+        actionsIconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: text.body.copyWith(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 16),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: c.bg0,
+        fillColor: c.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        hintStyle: text.body.copyWith(color: c.fg3),
-        labelStyle: text.cap.copyWith(color: c.fg2),
+        hintStyle: text.body.copyWith(color: c.textFaint),
+        labelStyle: text.cap.copyWith(color: c.textMuted),
         border: OutlineInputBorder(
           borderRadius: EvotraqRadius.input,
-          borderSide: BorderSide(color: c.line1),
+          borderSide: BorderSide(color: c.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: EvotraqRadius.input,
-          borderSide: BorderSide(color: c.line1),
+          borderSide: BorderSide(color: c.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: EvotraqRadius.input,
-          borderSide: BorderSide(color: c.sig, width: 1.5),
+          borderSide: BorderSide(color: c.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: EvotraqRadius.input,
-          borderSide: BorderSide(color: c.err),
+          borderSide: BorderSide(color: c.error),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: c.sig,
-          // Handoff token `sigInk` is great for dark text, but for buttons we want:
-          // - light mode: white text on green
-          // - dark mode: slightly gray text on lime
-          foregroundColor: b == Brightness.dark ? c.fg1 : Colors.white,
+          backgroundColor: c.primary,
+          // `onPrimary` token is for ink on brand fills; buttons use white / muted text.
+          foregroundColor: onPrimaryInk,
           textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
@@ -496,8 +524,8 @@ class EvotraqTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: c.sig,
-          foregroundColor: b == Brightness.dark ? c.fg1 : Colors.white,
+          backgroundColor: c.primary,
+          foregroundColor: onPrimaryInk,
           textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
@@ -506,9 +534,9 @@ class EvotraqTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          backgroundColor: c.bg2,
-          foregroundColor: c.fg0,
-          side: BorderSide(color: c.line2),
+          backgroundColor: c.surfaceMuted,
+          foregroundColor: c.textPrimary,
+          side: BorderSide(color: c.borderVariant),
           textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w500),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
@@ -517,20 +545,65 @@ class EvotraqTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: c.fg0,
+          foregroundColor: c.textPrimary,
           textStyle: text.bodySm,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: const RoundedRectangleBorder(borderRadius: EvotraqRadius.button),
         ),
       ),
       cardTheme: CardThemeData(
-        color: c.bg1,
+        color: c.surface,
         surfaceTintColor: Colors.transparent,
-        elevation: 0,
+        elevation: 1,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: c.line1),
+          side: BorderSide(color: c.border),
           borderRadius: const BorderRadius.all(EvotraqRadius.md),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: c.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: roundedLg,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: c.surface,
+        surfaceTintColor: Colors.transparent,
+        modalBackgroundColor: c.surface,
+        modalBarrierColor: Colors.black.withOpacity(b == Brightness.dark ? 0.55 : 0.35),
+        shape: roundedLg,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: c.inverseSurface,
+        contentTextStyle: text.bodySm.copyWith(color: c.textOnInverse),
+        shape: roundedMd,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: c.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: roundedMd,
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(c.surface),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: WidgetStatePropertyAll(roundedMd),
+        ),
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(c.surface),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: WidgetStatePropertyAll(roundedMd),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: c.background,
+          border: OutlineInputBorder(
+            borderRadius: EvotraqRadius.input,
+            borderSide: BorderSide(color: c.border),
+          ),
         ),
       ),
       textTheme: TextTheme(
@@ -555,32 +628,9 @@ extension EvotraqContextX on BuildContext {
   EvotraqText get text => EvotraqText.of(this);
 }
 
-/// Convenience semantic aliases for handoff tokens.
-///
-/// This does **not** change any handoff constants; it only provides readable
-/// names (primary/secondary/background/etc.) that map onto Evotraq tokens.
 extension EvotraqSemanticColors on EvotraqColors {
-  Color get primary => sig;
-  Color get onPrimary => sigInk;
-  Color get primarySoft => sigSoft;
-  Color get primaryGlow => sigGlow;
-
-  Color get background => bg0;
-  Color get surface => bg1;
-  Color get surfaceAlt => bg2;
-  Color get border => line1;
-  Color get borderStrong => lineStrong;
-
-  Color get textPrimary => fg0;
-  Color get textSecondary => fg1;
-  Color get textMuted => fg2;
-  Color get textFaint => fg3;
-  Color get textOnInverse => fgInv;
-
-  Color get success => ok;
-  Color get warning => warn;
-  Color get danger => err;
-  Color get infoBlue => info;
+  /// Muted icon on dashboard stat tiles (replaces legacy `AppTheme.statsTiles`).
+  Color get statTileIcon => textMuted;
 }
 
 class EvotraqCard extends StatelessWidget {
@@ -601,8 +651,8 @@ class EvotraqCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: c.bg1,
-        border: Border.all(color: c.line1),
+        color: c.surface,
+        border: Border.all(color: c.border),
         borderRadius: EvotraqRadius.card,
       ),
       child: child,
@@ -626,54 +676,54 @@ class EvotraqChip extends StatelessWidget {
     Color bg;
     switch (tone) {
       case EvotraqChipTone.gtin:
-        fg = c.idGtin;
-        bd = c.idGtin.withOpacity(.4);
-        bg = c.idGtin.withOpacity(.1);
+        fg = c.identifierGtin;
+        bd = c.identifierGtin.withOpacity(.4);
+        bg = c.identifierGtin.withOpacity(.1);
         break;
       case EvotraqChipTone.gln:
-        fg = c.idGln;
-        bd = c.idGln.withOpacity(.4);
-        bg = c.idGln.withOpacity(.1);
+        fg = c.identifierGln;
+        bd = c.identifierGln.withOpacity(.4);
+        bg = c.identifierGln.withOpacity(.1);
         break;
       case EvotraqChipTone.sgtin:
-        fg = c.idSgtin;
-        bd = c.idSgtin.withOpacity(.4);
-        bg = c.idSgtin.withOpacity(.1);
+        fg = c.identifierSgtin;
+        bd = c.identifierSgtin.withOpacity(.4);
+        bg = c.identifierSgtin.withOpacity(.1);
         break;
       case EvotraqChipTone.sscc:
-        fg = c.idSscc;
-        bd = c.idSscc.withOpacity(.4);
-        bg = c.idSscc.withOpacity(.1);
+        fg = c.identifierSscc;
+        bd = c.identifierSscc.withOpacity(.4);
+        bg = c.identifierSscc.withOpacity(.1);
         break;
       case EvotraqChipTone.event:
-        fg = c.idEvent;
-        bd = c.idEvent.withOpacity(.4);
-        bg = c.idEvent.withOpacity(.1);
+        fg = c.identifierEvent;
+        bd = c.identifierEvent.withOpacity(.4);
+        bg = c.identifierEvent.withOpacity(.1);
         break;
       case EvotraqChipTone.ok:
-        fg = c.ok;
-        bd = c.ok.withOpacity(.4);
-        bg = c.ok.withOpacity(.1);
+        fg = c.success;
+        bd = c.success.withOpacity(.4);
+        bg = c.success.withOpacity(.1);
         break;
       case EvotraqChipTone.warn:
-        fg = c.warn;
-        bd = c.warn.withOpacity(.4);
-        bg = c.warn.withOpacity(.1);
+        fg = c.warning;
+        bd = c.warning.withOpacity(.4);
+        bg = c.warning.withOpacity(.1);
         break;
       case EvotraqChipTone.err:
-        fg = c.err;
-        bd = c.err.withOpacity(.4);
-        bg = c.err.withOpacity(.1);
+        fg = c.error;
+        bd = c.error.withOpacity(.4);
+        bg = c.error.withOpacity(.1);
         break;
       case EvotraqChipTone.live:
-        fg = c.sig;
-        bd = c.sig.withOpacity(.4);
-        bg = c.sigSoft;
+        fg = c.primary;
+        bd = c.primary.withOpacity(.4);
+        bg = c.primaryMuted;
         break;
       case EvotraqChipTone.muted:
-        fg = c.fg2;
-        bd = c.line1;
-        bg = c.bg2;
+        fg = c.textMuted;
+        bd = c.border;
+        bg = c.surfaceMuted;
         break;
     }
 

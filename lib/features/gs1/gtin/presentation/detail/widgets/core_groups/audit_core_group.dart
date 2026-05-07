@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class AuditCoreGroup extends StatefulWidget {
   const AuditCoreGroup({
@@ -56,7 +57,6 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GtinUiConstants.sectionAudit),
         GtinValidatedField(
           controller: _createdBy,
           fieldName: 'created_by',
@@ -77,18 +77,20 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionAudit,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GtinUiConstants.sectionAudit),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 
@@ -107,7 +106,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
         heroTag: widget.fabHeroTag,
         onPressed: _toggleFab,
         tooltip: _isCreateMode ? widget.fabCloseTooltip : widget.fabAddTooltip,
-        child: Icon(_isCreateMode ? Icons.close : Icons.add),
+        child: Icon(_isCreateMode ? Icons.close : Icons.add, color: Colors.white,),
       ),
       body: BlocListener<TCubit, TState>(
         listenWhen: widget.listenWhenListChanged,
@@ -153,11 +152,12 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
 
   Widget _buildRightPane() {
     if (_isCreateMode) {
+      final c = context.colors;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Material(
-            color: ColorManager.primary(context),
+            color: c.primary,
             child: Row(
               children: [
                 Expanded(

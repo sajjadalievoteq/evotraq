@@ -86,14 +86,18 @@ class Constants {
   static const String adminApiAccessRoute = '/admin/api-management/access';
 
   // gs1 routes
+  // GTIN routes
   static const String gs1GtinsRoute = '/gs1/gtins';
   static const String gs1GtinNewRoute = '/gs1/gtins/new';
   static const String gs1GtinDetailRoute = '/gs1/gtins/:gtinCode';
   static const String gs1GtinEditRoute = '/gs1/gtins/:gtinCode/edit';
+
+  // GLN routes
   static const String gs1GlnsRoute = GlnRouteConstants.base;
   static const String gs1GlnNewRoute = GlnRouteConstants.newGln;
   static const String gs1GlnDetailRoute = GlnRouteConstants.detail;
   static const String gs1GlnEditRoute = GlnRouteConstants.edit;
+
   static const String gs1SsccsRoute = '/gs1/ssccs';
   static const String gs1SsccNewRoute = '/gs1/ssccs/new';
   static const String gs1SsccDetailRoute = '/gs1/ssccs/:ssccId';

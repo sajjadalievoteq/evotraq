@@ -129,8 +129,9 @@ class ObjectEventService {
     eventData['eventTimeZoneOffset'] = timezoneOffset;
 
     if (readPointGLN != null) eventData['readPoint'] = readPointGLN;
-    if (businessLocationGLN != null)
+    if (businessLocationGLN != null) {
       eventData['businessLocation'] = businessLocationGLN;
+    }
 
     // Handle the schema's oneOf constraint: either epcList OR quantityList, not both
     if (epcs != null && epcs.isNotEmpty) {
@@ -159,11 +160,13 @@ class ObjectEventService {
           .map((d) => {'destinationType': d.type, 'destinationID': d.id})
           .toList();
     }
-    if (persistentDisposition != null)
+    if (persistentDisposition != null) {
       eventData['persistentDisposition'] = persistentDisposition;
+    }
     if (sensorElements != null) eventData['sensorElementList'] = sensorElements;
-    if (certificationInfo != null)
+    if (certificationInfo != null) {
       eventData['certificationInfo'] = certificationInfo;
+    }
 
     final response = await _dioService.post(
       _baseUrl,

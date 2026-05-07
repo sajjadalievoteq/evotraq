@@ -12,30 +12,43 @@ abstract final class GtinUiConstants {
       'Sort by $sortLabelProductName '
       '(${ascending ? sortAscendingLabel : sortDescendingLabel})';
 
+  // status (filter values)
+  static const statusActive = 'Active';
+  static const statusWithdrawn = 'Withdrawn';
+  static const statusSuspended = 'Suspended';
+  static const statusDiscontinued = 'Discontinued';
+
   static const List<String> statusOptions = [
     filterAll,
-    'Active',
-    'Withdrawn',
-    'Suspended',
-    'Discontinued',
+    statusActive,
+    statusWithdrawn,
+    statusSuspended,
+    statusDiscontinued,
   ];
+
+  // packaging level (filter + form values)
+  static const packagingLevelItem = 'ITEM';
+  static const packagingLevelInnerPack = 'INNER_PACK';
+  static const packagingLevelPack = 'PACK';
+  static const packagingLevelCase = 'CASE';
+  static const packagingLevelPallet = 'PALLET';
 
   static const List<String> packagingLevelOptions = [
     filterAll,
-    'ITEM',
-    'INNER_PACK',
-    'PACK',
-    'CASE',
-    'PALLET',
+    packagingLevelItem,
+    packagingLevelInnerPack,
+    packagingLevelPack,
+    packagingLevelCase,
+    packagingLevelPallet,
   ];
 
   /// Packaging levels for forms (no "All" sentinel).
   static const List<String> packagingLevelValues = [
-    'ITEM',
-    'INNER_PACK',
-    'PACK',
-    'CASE',
-    'PALLET',
+    packagingLevelItem,
+    packagingLevelInnerPack,
+    packagingLevelPack,
+    packagingLevelCase,
+    packagingLevelPallet,
   ];
 
   static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;

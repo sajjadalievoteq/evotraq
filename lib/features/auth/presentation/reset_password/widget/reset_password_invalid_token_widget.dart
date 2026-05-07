@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/color_manager.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_responsive_layout_widget.dart';
 
 import '../../../../../core/config/constants.dart';
 
@@ -13,10 +14,12 @@ class ResetPasswordInvalidTokenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = ColorManager.textPrimary(context);
-    final textSecondary = ColorManager.textSecondary(context);
+    final c = context.colors;
+    final textPrimary = c.textPrimary;
+    final textSecondary = c.textSecondary;
 
     return AuthResponsiveFormLayout(
+      header: AuthFormHeader.invalidResetLink,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -25,7 +28,7 @@ class ResetPasswordInvalidTokenWidget extends StatelessWidget {
             width: 80,
             height: 80,
             colorFilter: ColorFilter.mode(
-              ColorManager.error(context),
+              c.error,
               BlendMode.srcIn,
             ),
           ),

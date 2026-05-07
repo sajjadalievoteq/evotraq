@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 
 import '../../../data/services/event_generation_test_service.dart';
@@ -118,7 +118,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Successfully generated event: ${result['eventId']}'),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -158,7 +158,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Successfully generated ${result.generatedCount} events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
     } catch (e) {
@@ -192,7 +192,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Supply chain simulation started: ${session.sessionId}',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -229,7 +229,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Simulation stopped. Generated ${result.totalEvents} events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
     } catch (e) {
@@ -270,20 +270,21 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     }
   }
 
-  Color _getSimulationStatusColor() {
-    if (_simulationStatus == null) return AppTheme.primaryColor;
+  Color _getSimulationStatusColor(BuildContext context) {
+    final c = context.colors;
+    if (_simulationStatus == null) return c.primary;
 
     switch (_simulationStatus!.status) {
       case 'RUNNING':
-        return AppTheme.successColor;
+        return c.success;
       case 'COMPLETED':
         return Colors.blue;
       case 'ERROR':
-        return AppTheme.errorColor;
+        return c.error;
       case 'STOPPED':
         return Colors.orange;
       default:
-        return AppTheme.primaryColor;
+        return c.primary;
     }
   }
 
@@ -341,7 +342,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
             'Cleaned ${result.deletedEvents} events, '
             '${result.deletedGLNs} GLNs, ${result.deletedGTINs} GTINs',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -392,7 +393,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Cleaned ${result['deletedTransformationEvents']} transformation events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -444,7 +445,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Cleaned ${result['deletedTransactionEvents']} transaction events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -495,7 +496,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Cleaned ${result['deletedAggregationEvents']} aggregation events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -546,7 +547,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           content: Text(
             'Cleaned ${result['deletedObjectEvents']} object events',
           ),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -595,7 +596,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cleaned ${result['deletedGLNs']} test GLNs'),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -644,7 +645,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cleaned ${result['deletedGTINs']} test GTINs'),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -693,7 +694,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cleaned ${result['deletedSGTINs']} test SGTINs'),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -742,7 +743,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cleaned ${result['deletedSSCCs']} test SSCCs'),
-          backgroundColor: AppTheme.successColor,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -885,9 +886,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('Event Generation Test Tools'),
-        elevation: 0,
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -905,7 +903,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           if (_errorMessage != null)
             Container(
               width: double.infinity,
-              color: AppTheme.errorColor,
+              color: context.colors.error,
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 _errorMessage!,
@@ -1142,8 +1140,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: _getSimulationStatusColor().withOpacity(0.1),
-                        border: Border.all(color: _getSimulationStatusColor()),
+                        color: _getSimulationStatusColor(context).withOpacity(0.1),
+                        border: Border.all(color: _getSimulationStatusColor(context)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -1152,7 +1150,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                           Text(
                             _getSimulationStatusText(),
                             style: TextStyle(
-                              color: _getSimulationStatusColor(),
+                              color: _getSimulationStatusColor(context),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1190,7 +1188,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                           icon: const Icon(Icons.stop),
                           label: const Text('Stop Simulation'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.errorColor,
+                            backgroundColor: context.colors.error,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -1431,7 +1429,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.cleaning_services),
                         label: const Text('Clean Test Data'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1439,7 +1437,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.inventory_2_outlined),
                         label: const Text('Clean Object Events'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1447,7 +1445,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.location_on),
                         label: const Text('Clean GLN Test Data'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1455,7 +1453,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.qr_code),
                         label: const Text('Clean GTIN Test Data'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1463,7 +1461,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.qr_code_2),
                         label: const Text('Clean SGTIN Test Data'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1471,7 +1469,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.inventory),
                         label: const Text('Clean SSCC Test Data'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1487,7 +1485,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.group_work_outlined),
                         label: const Text('Clean Aggregation Events'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1495,7 +1493,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.swap_horiz),
                         label: const Text('Clean Transaction Events'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -1505,7 +1503,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: const Icon(Icons.transform_outlined),
                         label: const Text('Clean Transformation Events'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.warningColor,
+                          backgroundColor: context.colors.warning,
                         ),
                       ),
                     ],
@@ -1519,7 +1517,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           if (_activeEnvironment != null) ...[
             const SizedBox(height: 16),
             Card(
-              color: AppTheme.primaryColor.withOpacity(0.1),
+              color: context.colors.primary.withOpacity(0.1),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(

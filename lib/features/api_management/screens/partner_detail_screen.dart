@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/app_theme.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 
@@ -282,12 +282,12 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
             CircleAvatar(
               radius: 40,
               backgroundColor: _isActive 
-                  ? AppTheme.primaryColor.withOpacity(0.2)
+                  ? context.colors.primary.withOpacity(0.2)
                   : Colors.grey.shade200,
               child: Text(
                 _partner!.companyName.isNotEmpty ? _partner!.companyName[0].toUpperCase() : 'P',
                 style: TextStyle(
-                  color: _isActive ? AppTheme.primaryColor : Colors.grey,
+                  color: _isActive ? context.colors.primary : Colors.grey,
                   fontWeight: FontWeight.bold,
                   fontSize: 28,
                 ),

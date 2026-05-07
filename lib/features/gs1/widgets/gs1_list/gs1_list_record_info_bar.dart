@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
+import '../../../../core/theme/evotraq_theme.dart';
+
 /// “Showing N+ … / page size” row (GTIN/GLN list “information” tile).
 class Gs1ListRecordInfoBar extends StatelessWidget {
   const Gs1ListRecordInfoBar({
@@ -71,8 +73,8 @@ class Gs1ListRecordInfoBar extends StatelessWidget {
           padding: padding,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(Constants.cardRadius),
+            color: context.colors.surface,
+            borderRadius: EvotraqRadius.card,
             border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: layout.isCompact

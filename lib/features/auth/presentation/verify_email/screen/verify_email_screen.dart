@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/presentation/verify_email/widget/verify_email_content_widget.dart';
-import 'package:traqtrace_app/features/auth/presentation/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/auth_responsive_layout_widget.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
@@ -62,6 +63,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           }
         },
         child: AuthResponsiveFormLayout(
+          header: AuthFormHeader.verifyEmail,
           child: VerifyEmailContentWidget(
             isVerifying: _isVerifying,
             successMessage: _successMessage,

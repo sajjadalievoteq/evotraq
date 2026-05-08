@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
+import 'package:world_countries/helpers.dart';
 
 /// Shared GS1 desktop split-view scaffold (list left, detail right).
 ///
@@ -151,13 +154,44 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   }
 
   Widget _buildRightPane() {
-    if (_isCreateMode) {
-      final c = context.colors;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Material(
-            color: c.primary,
+    // Important: keep the "view" detail pane mounted while toggling create mode.
+    // This avoids re-building (and re-fetching) the detail form when the user cancels
+    // or completes a create flow.
+    final viewPane = BlocBuilder<TCubit, TState>(
+      builder: (context, state) {
+        if (widget.isEmptyNoMatch(state)) {
+          return Center(child: Text(widget.emptyNoMatchText));
+        }
+
+        final ids = widget.idsFromState(state)?.toList(growable: false);
+        final effective =
+            _selectedId ?? (ids != null && ids.isNotEmpty ? ids.first : null);
+        if (effective == null) {
+          return widget.detailAwaitBuilder(context);
+        }
+        return widget.detailViewBuilder(context, effective);
+      },
+    );
+
+    final c = context.colors;
+    final webTopInset = kIsWeb ? 12.0 : 0.0;
+    final createPane = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(2),
+            bottomRight: Radius.circular(2),
+          ),
+          color: c.primary,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: webTopInset,
+              left: 32,
+              right: 32,
+              bottom: 8,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -180,25 +214,20 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
               ],
             ),
           ),
-          const Divider(height: 1),
-          Expanded(child: widget.detailCreateBuilder(context, _onEmbeddedCreateSuccess)),
-        ],
-      );
-    }
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: widget.detailCreateBuilder(context, _onEmbeddedCreateSuccess),
+        ),
+      ],
+    );
 
-    return BlocBuilder<TCubit, TState>(
-      builder: (context, state) {
-        if (widget.isEmptyNoMatch(state)) {
-          return Center(child: Text(widget.emptyNoMatchText));
-        }
-
-        final ids = widget.idsFromState(state)?.toList(growable: false);
-        final effective = _selectedId ?? (ids != null && ids.isNotEmpty ? ids.first : null);
-        if (effective == null) {
-          return widget.detailAwaitBuilder(context);
-        }
-        return widget.detailViewBuilder(context, effective);
-      },
+    return IndexedStack(
+      index: _isCreateMode ? 1 : 0,
+      children: [
+        viewPane,
+        createPane,
+      ],
     );
   }
 }

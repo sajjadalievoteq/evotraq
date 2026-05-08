@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 /// Operating status, effective dates, non-reuse display.
 class GlnLifecycleStatusCoreGroup extends StatelessWidget {
@@ -34,7 +35,6 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GlnUiConstants.sectionLifecycleStatus),
         DropdownButtonFormField<String>(
           key: ValueKey(operatingStatus),
           initialValue: operatingStatus,
@@ -101,13 +101,14 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionLifecycleStatus,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GlnUiConstants.sectionLifecycleStatus),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           Row(
@@ -121,6 +122,7 @@ class GlnLifecycleStatusCoreGroup extends StatelessWidget {
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

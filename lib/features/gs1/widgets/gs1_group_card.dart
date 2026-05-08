@@ -12,7 +12,7 @@ class Gs1GroupCard extends StatelessWidget {
     this.showFieldSkeleton = false,
     this.skeletonFieldCount = 2,
     this.titlePadding = const EdgeInsets.only(top: 16, bottom: 12),
-    this.elevation = 0,
+    this.elevation = 2,
     this.margin = const EdgeInsets.only(bottom: 12),
     this.borderRadius = 8,
     this.skeletonBuilder,

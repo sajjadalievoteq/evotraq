@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 /// Registered name, trading name, LEI, tax ID, incorporation, website.
 class GlnLegalEntityCoreGroup extends StatelessWidget {
@@ -38,7 +39,6 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GlnUiConstants.sectionLegalEntity),
         GtinValidatedField(
           controller: registeredLegalNameController,
           fieldName: 'registeredLegalName',
@@ -111,13 +111,14 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionLegalEntity,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GlnUiConstants.sectionLegalEntity),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),
@@ -139,6 +140,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
           ),
         ],
       ),
+      child: body,
     );
   }
 }

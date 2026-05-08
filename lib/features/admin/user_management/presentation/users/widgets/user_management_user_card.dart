@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 
 import 'user_management_constants.dart';
-import 'user_status_toggle_button.dart';
 
 enum UserManagementUserCardVariant {
   listTile,
@@ -299,10 +298,11 @@ class _StatusChip extends StatelessWidget {
       label: Text(label),
       backgroundColor: backgroundColor,
       labelStyle: TextStyle(
-        color: foregroundColor,
+        color: Colors.white,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
-      visualDensity: VisualDensity.compact,
+
       side: BorderSide.none,
     );
   }
@@ -339,13 +339,19 @@ class _UserActions extends StatelessWidget {
             ),
           ),
           tooltip: 'Edit User',
-          onPressed: () => onEdit(user),
+          onPressed: () {
+            // On Flutter web/desktop, opening overlays during a mouse device update can
+            // trigger an assertion in MouseTracker. Schedule it after this frame.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              onEdit(user);
+            });
+          },
         ),
-        UserStatusToggleButton(
+        Switch.adaptive(
           value: user.enabled,
-          isLoading: isToggleLoading,
-          onChanged: (_) => onToggleStatus(user),
+          onChanged: isToggleLoading ? null : (_) => onToggleStatus(user),
         ),
+
       ],
     );
   }

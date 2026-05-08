@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class NetContentMeasurementsCoreGroup extends StatefulWidget {
   const NetContentMeasurementsCoreGroup({
@@ -97,7 +98,6 @@ class NetContentMeasurementsCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GtinUiConstants.sectionNetContentMeasurements),
         GtinValidatedField(
           controller: _netContent,
           fieldName: 'net_content_value',
@@ -190,13 +190,14 @@ class NetContentMeasurementsCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionNetContentMeasurements,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GtinUiConstants.sectionNetContentMeasurements),
+          const SizedBox(height: 4),
           for (var i = 0; i < 8; i++) ...[
             if (i > 0) const SizedBox(height: 12),
             GtinSkeletonOutlineField(
@@ -206,6 +207,7 @@ class NetContentMeasurementsCoreGroupState
           ],
         ],
       ),
+      child: body,
     );
   }
 }

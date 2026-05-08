@@ -126,112 +126,104 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
   @override
   Widget build(BuildContext context) {
     final dialogWidth = MediaQuery.sizeOf(context).width * 0.9;
+    final maxWidth = dialogWidth.clamp(320.0, Constants.dialogMaxWidth);
 
     return AlertDialog(
       title: Text(_title),
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: dialogWidth.clamp(
-            320.0,
-            Constants.dialogMaxWidth,
-          ),
+          maxWidth: maxWidth,
         ),
         child: SingleChildScrollView(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth;
-
-              return Form(
-                key: _formKey,
-                child: Wrap(
-                  spacing: Constants.spacing,
-                  runSpacing: Constants.spacing,
-                  children: [
-                    if (!widget.isEditing)
-                      SizedBox(
-                        width: _fieldWidth(maxWidth),
-                        child: UserManagementInputField(
-                          controller: _usernameController,
-                          label: 'Username',
-                          validator: _validateUsername,
-                        ),
-                      ),
-                    SizedBox(
-                      width: _fieldWidth(maxWidth),
-                      child: UserManagementInputField(
-                        controller: _firstNameController,
-                        label: 'First Name',
-                        validator: _validateRequired('Please enter first name'),
-                      ),
+          child: Form(
+            key: _formKey,
+            child: Wrap(
+              spacing: Constants.spacing,
+              runSpacing: Constants.spacing,
+              children: [
+                if (!widget.isEditing)
+                  SizedBox(
+                    width: _fieldWidth(maxWidth),
+                    child: UserManagementInputField(
+                      controller: _usernameController,
+                      label: 'Username',
+                      validator: _validateUsername,
                     ),
-                    SizedBox(
-                      width: _fieldWidth(maxWidth),
-                      child: UserManagementInputField(
-                        controller: _lastNameController,
-                        label: 'Last Name',
-                        validator: _validateRequired('Please enter last name'),
-                      ),
-                    ),
-                    SizedBox(
-                      width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
-                      child: UserManagementInputField(
-                        controller: _emailController,
-                        label: 'Email',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: _validateEmail,
-                      ),
-                    ),
-                    SizedBox(
-                      width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
-                      child: UserManagementInputField(
-                        controller: _passwordController,
-                        label: widget.isEditing
-                            ? 'Password (leave blank to keep unchanged)'
-                            : 'Password',
-                        obscureText: true,
-                        validator: widget.isEditing
-                            ? _validateOptionalPassword
-                            : _validateRequiredPassword,
-                      ),
-                    ),
-                    SizedBox(
-                      width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _selectedRole,
-                        decoration: const InputDecoration(
-                          labelText: 'Role',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: UserManagementConstants.assignableRoles
-                            .map(
-                              (role) => DropdownMenuItem<String>(
-                                value: role,
-                                child: Text(role),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value == null) return;
-                          setState(() => _selectedRole = value);
-                        },
-                      ),
-                    ),
-                    if (!widget.isEditing)
-                      SizedBox(
-                        width: maxWidth,
-                        child: SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Account Active'),
-                          value: _enabled,
-                          onChanged: (value) {
-                            setState(() => _enabled = value);
-                          },
-                        ),
-                      ),
-                  ],
+                  ),
+                SizedBox(
+                  width: _fieldWidth(maxWidth),
+                  child: UserManagementInputField(
+                    controller: _firstNameController,
+                    label: 'First Name',
+                    validator: _validateRequired('Please enter first name'),
+                  ),
                 ),
-              );
-            },
+                SizedBox(
+                  width: _fieldWidth(maxWidth),
+                  child: UserManagementInputField(
+                    controller: _lastNameController,
+                    label: 'Last Name',
+                    validator: _validateRequired('Please enter last name'),
+                  ),
+                ),
+                SizedBox(
+                  width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
+                  child: UserManagementInputField(
+                    controller: _emailController,
+                    label: 'Email',
+                    keyboardType: TextInputType.emailAddress,
+                    validator: _validateEmail,
+                  ),
+                ),
+                SizedBox(
+                  width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
+                  child: UserManagementInputField(
+                    controller: _passwordController,
+                    label: widget.isEditing
+                        ? 'Password (leave blank to keep unchanged)'
+                        : 'Password',
+                    obscureText: true,
+                    validator: widget.isEditing
+                        ? _validateOptionalPassword
+                        : _validateRequiredPassword,
+                  ),
+                ),
+                SizedBox(
+                  width: _fieldWidth(maxWidth, fullWidth: maxWidth < 560),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _selectedRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Role',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: UserManagementConstants.assignableRoles
+                        .map(
+                          (role) => DropdownMenuItem<String>(
+                            value: role,
+                            child: Text(role),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => _selectedRole = value);
+                    },
+                  ),
+                ),
+                if (!widget.isEditing)
+                  SizedBox(
+                    width: maxWidth,
+                    child: SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Account Active'),
+                      value: _enabled,
+                      onChanged: (value) {
+                        setState(() => _enabled = value);
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

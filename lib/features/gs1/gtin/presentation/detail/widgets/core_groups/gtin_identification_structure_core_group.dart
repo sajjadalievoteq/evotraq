@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class GtinIdentificationStructureCoreGroup extends StatefulWidget {
   const GtinIdentificationStructureCoreGroup({
@@ -210,11 +211,6 @@ class _GtinIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(
-          GtinUiConstants.sectionIdentificationStructure,
-          padding: EdgeInsets.only(top: 0,bottom: 12),
-
-        ),
         GtinValidatedField(
           focusNode: _focusNode,
           onEditingComplete: () {
@@ -340,16 +336,14 @@ class _GtinIdentificationStructureCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: fields,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionIdentificationStructure,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      titlePadding: const EdgeInsets.only(top: 0, bottom: 12),
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(
-            GtinUiConstants.sectionIdentificationStructure,
-            padding: EdgeInsets.only(top: 0, bottom: 8),
-          ),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 16),
           Row(
@@ -363,6 +357,7 @@ class _GtinIdentificationStructureCoreGroupState
           ),
         ],
       ),
+      child: fields,
     );
   }
 }

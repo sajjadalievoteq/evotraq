@@ -55,9 +55,16 @@ class UserManagementCubit extends Cubit<UserManagementState> {
   }
 
   Future<void> changeUserStatus(int userId, bool enabled) async {
+    // Optimistic update so the UI switch animates immediately on tap.
+    final previousUsers = state.users;
+    final optimisticUsers = previousUsers
+        .map((user) => user.id == userId ? user.copyWith(enabled: enabled) : user)
+        .toList();
+
     emit(
       state.copyWith(
         togglingUserId: userId,
+        users: optimisticUsers,
         clearError: true,
       ),
     );
@@ -82,6 +89,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       emit(
         state.copyWith(
           status: UserManagementStatus.error,
+          users: previousUsers,
           clearTogglingUserId: true,
           error: e.toString(),
         ),

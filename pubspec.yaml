@@ -30,7 +30,6 @@ dependencies:
   
   # UI components
   flutter_svg: ^2.2.1
-  google_fonts: ^8.1.0
   flutter_form_builder: ^10.2.0
   form_builder_validators: ^11.2.0
   
@@ -107,3 +106,13 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+  fonts:
+    - family: Nekst
+      fonts:
+        - asset: assets/fonts/nekst/Nekst-Light.ttf
+          weight: 300
+        - asset: assets/fonts/nekst/Nekst-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/nekst/Nekst-SemiBold.ttf
+          weight: 600

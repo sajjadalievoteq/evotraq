@@ -246,7 +246,7 @@ class _UserManagementContent extends StatelessWidget {
       );
     }
 
-    const tileMaxExtent = 340.0;
+    const tileMaxExtent = 240.0;
     const spacing = Constants.spacing;
 
     return GridView.builder(

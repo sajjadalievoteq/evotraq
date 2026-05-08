@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
   const ProductionBatchSerialDateAssociationsCoreGroup({
@@ -43,9 +44,6 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(
-          GtinUiConstants.sectionProductionBatchSerialDateAssociations,
-        ),
         DropdownButtonFormField<String>(
           initialValue: _hasBatchNumberIndicator,
           decoration: const InputDecoration(
@@ -108,20 +106,20 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionProductionBatchSerialDateAssociations,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(
-          GtinUiConstants.sectionProductionBatchSerialDateAssociations,
-        ),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 76),
         ],
       ),
+      child: body,
     );
   }
 }

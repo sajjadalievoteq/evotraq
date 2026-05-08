@@ -5,6 +5,8 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/exte
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_labeling_section.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_identifiers_section.dart';
 
+import '../../../../../../../../core/theme/evotraq_theme.dart';
+
 class RegulatoryAuthorityExtension extends StatefulWidget {
   const RegulatoryAuthorityExtension({
     super.key,
@@ -129,9 +131,9 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           GtinRegulatoryAuthorityExtensionUiConstants.expansionTitle,
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary,fontSize: 16),
           maxLines: 1,
 
           overflow: TextOverflow.ellipsis,

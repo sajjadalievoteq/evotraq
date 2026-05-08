@@ -41,7 +41,7 @@ class Gs1ListSearchBar extends StatelessWidget {
             ),
           ),
           decoration: BoxDecoration(
-            color: Color.fromRGBO(87,52,62,1),
+            color: c.primary,
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: [
               BoxShadow(
@@ -58,7 +58,7 @@ class Gs1ListSearchBar extends StatelessWidget {
               if (onRefresh != null || onQuickFilters != null)
                 Row(
                   children: [
-                    Text('Gtin Management', style: Theme.of(context).textTheme.titleMedium),
+
                     const Spacer(),
                     if (onRefresh != null)
                       IconButton(

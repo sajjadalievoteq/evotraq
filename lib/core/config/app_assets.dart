@@ -3,7 +3,7 @@ class AppAssets {
 
   //Logo
 
-  static const String logo = 'assets/images/logo-wordmark.svg';
+  static const String logo = 'assets/images/logo-mark.svg';
   // Evotraq (handoff) icons (complete set)
   static const String iconAggregate = '$_evotraqIcons/aggregate.svg';
   static const String iconAlert = '$_evotraqIcons/alert.svg';

@@ -40,6 +40,34 @@ class UserResponse {
       updatedAt: json['updatedAt'] ?? '',
     );
   }
+
+  UserResponse copyWith({
+    int? id,
+    String? username,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? role,
+    bool? enabled,
+    bool? emailVerified,
+    String? approvalStatus,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return UserResponse(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      role: role ?? this.role,
+      enabled: enabled ?? this.enabled,
+      emailVerified: emailVerified ?? this.emailVerified,
+      approvalStatus: approvalStatus ?? this.approvalStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
 
 class UserListResponse {

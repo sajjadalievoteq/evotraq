@@ -717,7 +717,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
                   },
                   isEditing: canEditMasterData,
                 ),
-                const SizedBox(height: 16),
                 GlnIndustryExtensionsSection(
                   glnCodeController: _glnCodeController,
                   gln: gln,

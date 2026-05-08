@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 /// GLN types (multi), industry, source, supply-chain / location roles.
 class GlnTypesClassificationCoreGroup extends StatelessWidget {
@@ -43,7 +44,6 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(GlnUiConstants.sectionGlnTypesClassification),
         GlnGlnTypeChipsField(
           selection: glnTypes,
           onChanged: onGlnTypesChanged,
@@ -141,13 +141,14 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionGlnTypesClassification,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionLabel(GlnUiConstants.sectionGlnTypesClassification),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 72),
           const SizedBox(height: 12),
           Row(
@@ -163,6 +164,7 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

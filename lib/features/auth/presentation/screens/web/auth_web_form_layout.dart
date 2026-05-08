@@ -74,46 +74,59 @@ class AuthWebFormLayout extends StatelessWidget {
             flex: 3,
             child: Container(
               color: c.surface,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: largeFormMaxWidth),
-                  child: Padding(
-                    padding: context.padding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 2,
-                          children: [
-                            Text(
-                              header.eyebrow,
-                              style: t.body
-                                  .copyWith(color: c.textMuted, fontSize: 12),
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              header.title,
-                              style: t.body.copyWith(
-                                color: c.textPrimary,
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      padding: context.padding,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: largeFormMaxWidth,
+                            minHeight: constraints.maxHeight - context.padding.vertical,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 2,
+                                children: [
+                                  Text(
+                                    header.eyebrow,
+                                    style: t.body.copyWith(
+                                      color: c.textMuted,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  Text(
+                                    header.title,
+                                    style: t.body.copyWith(
+                                      color: c.textPrimary,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    header.subtitle,
+                                    style: t.body.copyWith(
+                                      color: c.textMuted,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
                               ),
-                            ),
-                            Text(
-                              header.subtitle,
-                              style: t.body
-                                  .copyWith(color: c.textMuted, fontSize: 12),
-                              textAlign: TextAlign.left,
-                            ),
-                          ],
+                              const SizedBox(height: 40),
+                              buildSurface(child),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 40),
-                        buildSurface(child),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

@@ -7,6 +7,8 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {
   const PackagingHierarchyTradeItemRolesCoreGroup({
@@ -147,9 +149,6 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(
-          GtinUiConstants.sectionPackagingHierarchyTradeItemRoles,
-        ),
         GtinValidatedField(
           controller: _nextLowerLevelGtin,
           fieldName: 'next_lower_level_gtin',
@@ -221,7 +220,6 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           onPick: _pickLaunchDate,
         ),
         const SizedBox(height: 12),
-        const SectionLabel(GtinUiConstants.sectionTradeItemRoleFlags),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isBaseUnit,
@@ -291,15 +289,14 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionPackagingHierarchyTradeItemRoles,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(
-            GtinUiConstants.sectionPackagingHierarchyTradeItemRoles,
-          ),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 76),
@@ -310,7 +307,6 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           const SizedBox(height: 12),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
           const SizedBox(height: 12),
-          const SectionLabel(GtinUiConstants.sectionTradeItemRoleFlags),
           const SizedBox(height: 8),
           for (var i = 0; i < 6; i++) ...[
             if (i > 0) const SizedBox(height: 8),
@@ -318,6 +314,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
           ],
         ],
       ),
+      child: body,
     );
   }
 }

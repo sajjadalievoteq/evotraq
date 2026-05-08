@@ -131,13 +131,15 @@ class AuthBrandingSection extends StatelessWidget {
 
                 Row(
                   mainAxisSize: MainAxisSize.min,
+                  spacing: 5,
                   children: [
                     SvgPicture.asset(
-                      logoAssetPath,
+                      AppAssets.logo,
                       height: 30 ,
                       fit: BoxFit.contain,
                       colorFilter: ColorFilter.mode(c.textPrimary, BlendMode.srcIn),
                     ),
+                    Text('traqpharma',style: context.text.h2.copyWith(color: c.textPrimary,fontSize: 20),)
                   ],
                 ),
                 Column(

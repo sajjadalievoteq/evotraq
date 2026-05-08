@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart'
 import 'package:traqtrace_app/features/epcis/widgets/geospatial_coordinates_widget.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class GlnGeospatialCoreGroup extends StatelessWidget {
   const GlnGeospatialCoreGroup({
@@ -26,7 +27,6 @@ class GlnGeospatialCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GlnUiConstants.sectionGeospatial),
         GeospatialCoordinatesWidget(
           coordinates: displayCoordinates,
           onCoordinatesChanged: onCoordinatesChanged,
@@ -35,22 +35,18 @@ class GlnGeospatialCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
-      skeletonBuilder: (c) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SectionLabel(GlnUiConstants.sectionGeospatial),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 140,
-              child: GtinSkeletonOutlineField(color: c, height: 140),
-            ),
-          ),
-        ],
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionGeospatial,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
+      skeletonBuilder: (c) => ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          height: 140,
+          child: GtinSkeletonOutlineField(color: c, height: 140),
+        ),
       ),
+      child: body,
     );
   }
 }

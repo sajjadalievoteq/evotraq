@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
   const TradeItemDescriptiveAttributesCoreGroup({
@@ -77,7 +78,6 @@ class TradeItemDescriptiveAttributesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GtinUiConstants.sectionTradeItemDescriptiveAttributes),
         GtinValidatedField(
           controller: _functionalName,
           fieldName: 'functional_name',
@@ -120,13 +120,14 @@ class TradeItemDescriptiveAttributesCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionTradeItemDescriptiveAttributes,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GtinUiConstants.sectionTradeItemDescriptiveAttributes),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),
@@ -136,6 +137,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

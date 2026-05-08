@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class GlnLicenseCoreGroup extends StatelessWidget {
   const GlnLicenseCoreGroup({
@@ -37,7 +38,6 @@ class GlnLicenseCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GlnUiConstants.sectionLicense),
         Row(
           children: [
             Expanded(
@@ -86,13 +86,14 @@ class GlnLicenseCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionLicense,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GlnUiConstants.sectionLicense),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(child: GtinSkeletonOutlineField(color: c, height: 56)),
@@ -110,6 +111,7 @@ class GlnLicenseCoreGroup extends StatelessWidget {
           ),
         ],
       ),
+      child: body,
     );
   }
 }

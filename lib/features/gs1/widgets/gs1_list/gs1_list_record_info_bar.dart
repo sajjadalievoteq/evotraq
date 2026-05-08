@@ -73,6 +73,7 @@ class Gs1ListRecordInfoBar extends StatelessWidget {
           padding: padding,
           width: double.infinity,
           decoration: BoxDecoration(
+
             color: context.colors.surface,
             borderRadius: EvotraqRadius.card,
             border: Border(bottom: BorderSide(color: Colors.grey[300]!)),

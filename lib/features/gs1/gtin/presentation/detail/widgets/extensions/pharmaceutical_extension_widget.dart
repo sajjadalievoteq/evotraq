@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_extension_ui_constants.dart';
@@ -517,7 +518,7 @@ class PharmaceuticalExtensionWidgetState
       children: [
         Text(
           'Pharmaceutical Details',
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white,fontSize: 16),
+          style:  TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary,fontSize: 16),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

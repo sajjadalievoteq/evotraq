@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 /// Legacy operational subtype dropdown (warehouse, pharmacy, …).
 class GlnOperationalLocationTypeCoreGroup extends StatelessWidget {
@@ -24,7 +25,6 @@ class GlnOperationalLocationTypeCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GlnUiConstants.sectionOperationalLocationType),
         DropdownButtonFormField<String>(
           key: ValueKey(
             '${locationTypeLabel}_${items.contains(locationTypeLabel)}',
@@ -45,16 +45,18 @@ class GlnOperationalLocationTypeCoreGroup extends StatelessWidget {
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GlnUiConstants.sectionOperationalLocationType,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GlnUiConstants.sectionOperationalLocationType),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
+      child: body,
     );
   }
 }

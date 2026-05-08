@@ -4,6 +4,7 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class InformationProviderManufacturerCoreGroup extends StatefulWidget {
   const InformationProviderManufacturerCoreGroup({
@@ -67,9 +68,6 @@ class InformationProviderManufacturerCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(
-          GtinUiConstants.sectionInformationProviderManufacturer,
-        ),
         GtinValidatedField(
           controller: _informationProviderGln,
           fieldName: 'information_provider_gln',
@@ -109,15 +107,14 @@ class InformationProviderManufacturerCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionInformationProviderManufacturer,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(
-          GtinUiConstants.sectionInformationProviderManufacturer,
-        ),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 76),
           const SizedBox(height: 12),
           GtinSkeletonOutlineField(color: c, height: 56),
@@ -125,6 +122,7 @@ class InformationProviderManufacturerCoreGroupState
           GtinSkeletonOutlineField(color: c, height: 76),
         ],
       ),
+      child: body,
     );
   }
 }

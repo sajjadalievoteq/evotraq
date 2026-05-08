@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)
@@ -708,201 +708,187 @@ class GLNPharmaceuticalExtensionWidgetState
     }
 
     final scheme = Theme.of(context).colorScheme;
-    return Card(
-      margin: const EdgeInsets.only(top: 8),
-      elevation: 0,
-      color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(EvotraqRadius.sm.x),
-        side: BorderSide(color: scheme.outlineVariant),
-      ),
-      child: ExpansionTile(
-        collapsedBackgroundColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
-        collapsedIconColor: scheme.primary,
-        iconColor: scheme.primary,
-        collapsedTextColor: scheme.onSurface,
-        textColor: scheme.onSurface,
-        title: Row(
-          children: [
-            Icon(
-              Icons.local_pharmacy,
-              color: _hasExtension ? scheme.primary : scheme.outline,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              GlnPharmaceuticalExtensionUiConstants.expansionTitle,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: context.colors.textPrimary,
-              ),
-            ),
-            if (_hasExtension)
-              Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  GlnPharmaceuticalExtensionUiConstants.badgeSaved,
-                  style: TextStyle(fontSize: 12,
-                    color: context.colors.textMuted,),
-                ),
-              ),
-          ],
-        ),
-        initiallyExpanded: false,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRegistryAndSafetySection(),
-                const SizedBox(height: 16),
-                _buildFacilitySection(),
-                const SizedBox(height: 16),
-                _buildFdaSection(context),
-                const SizedBox(height: 16),
-                _buildDeaSection(context),
-                const SizedBox(height: 16),
-                _buildStateLicenseSection(),
-                const SizedBox(height: 16),
-                _buildWholesaleSection(),
-                const SizedBox(height: 16),
-                _buildColdChainSection(),
-                const SizedBox(height: 16),
-                _buildClinicalTrialSection(),
-                const SizedBox(height: 16),
-                _buildDscsaSection(),
-                const SizedBox(height: 16),
-                _buildHealthcareIdsSection(),
-                const SizedBox(height: 16),
-                _buildCertificationsSection(),
-                const SizedBox(height: 16),
-                _buildInternationalSection(),
-                const SizedBox(height: 16),
-                _buildOperationalSection(),
-                const SizedBox(height: 16),
-                _buildContactsSection(),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildRegistryAndSafetySection(),
+        const SizedBox(height: 16),
+        _buildFacilitySection(),
+        const SizedBox(height: 16),
+        _buildFdaSection(context),
+        const SizedBox(height: 16),
+        _buildDeaSection(context),
+        const SizedBox(height: 16),
+        _buildStateLicenseSection(),
+        const SizedBox(height: 16),
+        _buildWholesaleSection(),
+        const SizedBox(height: 16),
+        _buildColdChainSection(),
+        const SizedBox(height: 16),
+        _buildClinicalTrialSection(),
+        const SizedBox(height: 16),
+        _buildDscsaSection(),
+        const SizedBox(height: 16),
+        _buildHealthcareIdsSection(),
+        const SizedBox(height: 16),
+        _buildCertificationsSection(),
+        const SizedBox(height: 16),
+        _buildInternationalSection(),
+        const SizedBox(height: 16),
+        _buildOperationalSection(),
+        const SizedBox(height: 16),
+        _buildContactsSection(),
+      ],
     );
   }
 
   Widget _buildRegistryAndSafetySection() {
+    final outline = Theme.of(context).colorScheme.outlineVariant;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionUaeRegistry),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _brandsyncPartyIdController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelBrandSyncPartyId,
+        Text(
+          'Pharmaceutical Details',
+          style:  TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary,fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 16,),
+        Gs1GroupCard(
+          title: GlnPharmaceuticalExtensionUiConstants.sectionUaeRegistry,
+          outlineColor: outline,
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _brandsyncPartyIdController,
+                  label: GlnPharmaceuticalExtensionUiConstants.labelBrandSyncPartyId,
+                  enabled: widget.isEditing,
+                  maxLength: 50,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTextField(
+                  controller: _tatmeenPartyCodeController,
+                  label: GlnPharmaceuticalExtensionUiConstants.labelTatmeenPartyCode,
+                  enabled: widget.isEditing,
+                  maxLength: 50,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Gs1GroupCard(
+          title: GlnPharmaceuticalExtensionUiConstants.sectionMahTargetMarkets,
+          outlineColor: outline,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSwitch(
+                label: GlnPharmaceuticalExtensionUiConstants.labelMahQualificationIndicator,
+                value: _mahQualificationIndicator,
+                onChanged: widget.isEditing
+                    ? (value) => setState(() => _mahQualificationIndicator = value)
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _mahTargetMarketsController,
+                label: GlnPharmaceuticalExtensionUiConstants.labelMahTargetMarketsIso,
+                hint: GlnPharmaceuticalExtensionUiConstants.hintMahTargetMarketsIso,
+                enabled: widget.isEditing,
+                maxLength: 200,
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _mahRegulatoryRegistrationNumberController,
+                label: GlnPharmaceuticalExtensionUiConstants.labelMahRegulatoryRegistrationNumber,
                 enabled: widget.isEditing,
                 maxLength: 50,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                controller: _tatmeenPartyCodeController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelTatmeenPartyCode,
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Gs1GroupCard(
+          title: GlnPharmaceuticalExtensionUiConstants.sectionLicensedAgent,
+          outlineColor: outline,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextField(
+                controller: _licensedAgentAuthorisationController,
+                label: GlnPharmaceuticalExtensionUiConstants.labelLicensedAgentAuthorisationNumber,
                 enabled: widget.isEditing,
                 maxLength: 50,
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _authorisedPrincipalMahGlnsController,
+                label: GlnPharmaceuticalExtensionUiConstants.labelAuthorisedPrincipalMahGlns,
+                hint: GlnPharmaceuticalExtensionUiConstants.hintAuthorisedPrincipalMahGlns,
+                enabled: widget.isEditing,
+                maxLength: 500,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
-        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionMahTargetMarkets),
-        _buildSwitch(
-          label: GlnPharmaceuticalExtensionUiConstants.labelMahQualificationIndicator,
-          value: _mahQualificationIndicator,
-          onChanged: widget.isEditing
-              ? (value) => setState(() => _mahQualificationIndicator = value)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _mahTargetMarketsController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelMahTargetMarketsIso,
-          hint: GlnPharmaceuticalExtensionUiConstants.hintMahTargetMarketsIso,
-          enabled: widget.isEditing,
-          maxLength: 200,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _mahRegulatoryRegistrationNumberController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelMahRegulatoryRegistrationNumber,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 16),
-        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionLicensedAgent),
-        _buildTextField(
-          controller: _licensedAgentAuthorisationController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelLicensedAgentAuthorisationNumber,
-          enabled: widget.isEditing,
-          maxLength: 50,
-        ),
-        const SizedBox(height: 12),
-        _buildTextField(
-          controller: _authorisedPrincipalMahGlnsController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelAuthorisedPrincipalMahGlns,
-          hint: GlnPharmaceuticalExtensionUiConstants.hintAuthorisedPrincipalMahGlns,
-          enabled: widget.isEditing,
-          maxLength: 500,
-        ),
-        const SizedBox(height: 16),
-        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionPharmacovigilance),
-        _buildTextField(
-          controller: _pharmacovigilanceEmailController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelPharmacovigilanceEmail,
-          enabled: widget.isEditing,
-          keyboardType: TextInputType.emailAddress,
-          maxLength: 254,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: _recallContactEmailController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactEmail,
+        Gs1GroupCard(
+          title: GlnPharmaceuticalExtensionUiConstants.sectionPharmacovigilance,
+          outlineColor: outline,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextField(
+                controller: _pharmacovigilanceEmailController,
+                label: GlnPharmaceuticalExtensionUiConstants.labelPharmacovigilanceEmail,
                 enabled: widget.isEditing,
                 keyboardType: TextInputType.emailAddress,
                 maxLength: 254,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                controller: _recallContactPhoneController,
-                label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactPhone,
-                enabled: widget.isEditing,
-                keyboardType: TextInputType.phone,
-                maxLength: 20,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _recallContactEmailController,
+                      label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactEmail,
+                      enabled: widget.isEditing,
+                      keyboardType: TextInputType.emailAddress,
+                      maxLength: 254,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _recallContactPhoneController,
+                      label: GlnPharmaceuticalExtensionUiConstants.labelRecallContactPhone,
+                      enabled: widget.isEditing,
+                      keyboardType: TextInputType.phone,
+                      maxLength: 20,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 16),
-        const SectionLabel(GlnPharmaceuticalExtensionUiConstants.sectionEpicsDataExchange),
-        _buildTextField(
-          controller: _epcisCaptureEndpointUrlController,
-          label: GlnPharmaceuticalExtensionUiConstants.labelEpicsCaptureEndpointUrl,
-          hint: GlnPharmaceuticalExtensionUiConstants.hintHttpsUrl,
-          enabled: widget.isEditing,
-          keyboardType: TextInputType.url,
-          maxLength: 500,
+        Gs1GroupCard(
+          title: GlnPharmaceuticalExtensionUiConstants.sectionEpicsDataExchange,
+          outlineColor: outline,
+          child: _buildTextField(
+            controller: _epcisCaptureEndpointUrlController,
+            label: GlnPharmaceuticalExtensionUiConstants.labelEpicsCaptureEndpointUrl,
+            hint: GlnPharmaceuticalExtensionUiConstants.hintHttpsUrl,
+            enabled: widget.isEditing,
+            keyboardType: TextInputType.url,
+            maxLength: 500,
+          ),
         ),
       ],
     );

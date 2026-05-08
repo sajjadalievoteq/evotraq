@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
   const LifecycleAvailabilityStatusCoreGroup({
@@ -174,7 +175,6 @@ class LifecycleAvailabilityStatusCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel(GtinUiConstants.sectionLifecycleAvailabilityStatus),
         DropdownButtonFormField<String>(
           initialValue: _tradeItemStatus,
           decoration: const InputDecoration(
@@ -288,13 +288,14 @@ class LifecycleAvailabilityStatusCoreGroupState
       ],
     );
 
-    return GtinFieldSkeletonMask(
-      show: widget.showFieldSkeleton,
-      child: body,
+    return Gs1GroupCard(
+      title: GtinUiConstants.sectionLifecycleAvailabilityStatus,
+      outlineColor: Theme.of(context).colorScheme.outlineVariant,
+      showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionLabel(GtinUiConstants.sectionLifecycleAvailabilityStatus),
+          const SizedBox(height: 4),
           GtinSkeletonOutlineField(color: c, height: 56),
           const SizedBox(height: 12),
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
@@ -306,6 +307,7 @@ class LifecycleAvailabilityStatusCoreGroupState
           GtinSkeletonDateRow(color: c, fieldHeight: 56),
         ],
       ),
+      child: body,
     );
   }
 }

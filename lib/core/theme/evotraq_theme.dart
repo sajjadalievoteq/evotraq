@@ -4,7 +4,6 @@
 /// in [MaterialApp] and [EvotraqColors]/[EvotraqText] from [BuildContext] in widgets.
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 @immutable
 class EvotraqColors extends ThemeExtension<EvotraqColors> {
@@ -86,7 +85,6 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
 
   static final dark = EvotraqColors(
     background: const Color(0xFF0D0E11),
-
     surface: const Color(0xFF181A1E),
     surfaceMuted: const Color(0xFF22252A),
     surfaceElevated: const Color(0xFF2C3036),
@@ -99,7 +97,7 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
     textMuted: Color(0xFF8E939B),
     textFaint: Color(0xFF666B73),
     textOnInverse: Color(0xFF1A1B1E),
-    primary: Color(0xFF5F0F26),
+    primary: Color(0xFF1e675d),
     onPrimary: _autoOn(const Color(0xFF5F0F26)),
     primaryMuted: _withOpacity(const Color(0xFF5F0F26), 0.18),
     primaryGlow: _withOpacity(const Color(0xFF5F0F26), 0.35),
@@ -129,7 +127,7 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
     textMuted: Color(0xFF6A6F78),
     textFaint: Color(0xFF8E939B),
     textOnInverse: Color(0xFFF7F7F5),
-    primary: Color(0xFF3A0F19),
+    primary: Color(0xFF33ad9e ),
     onPrimary: _autoOn(const Color(0xFF3A0F19)),
     primaryMuted: _withOpacity(const Color(0xFF3A0F19), 0.14),
     primaryGlow: _withOpacity(const Color(0xFF3A0F19), 0.28),
@@ -241,6 +239,8 @@ class EvotraqColors extends ThemeExtension<EvotraqColors> {
 }
 
 class EvotraqText {
+  static const String fontFamily = 'Nekst';
+
   final TextStyle display;
   final TextStyle h1;
   final TextStyle h2;
@@ -264,58 +264,58 @@ class EvotraqText {
   });
 
   factory EvotraqText.build(EvotraqColors c) {
-    // `geistTextTheme` is not available in all google_fonts versions.
-    // Use the stable runtime API so this file works across versions.
-    final geist = GoogleFonts.getTextTheme('Geist');
-    final mono = GoogleFonts.getTextTheme('JetBrains Mono');
+    // Use ONLY local bundled font (see pubspec.yaml). Do not fall back to network fonts.
+    TextStyle base([double? size, FontWeight? weight, double? height]) =>
+        TextStyle(
+          fontFamily: fontFamily,
+          fontSize: size,
+          fontWeight: weight,
+          height: height,
+          color: c.textPrimary,
+        );
 
-    TextStyle g(TextStyle? base) =>
-        (base ?? const TextStyle()).copyWith(color: c.textPrimary);
-    TextStyle m(TextStyle? base) =>
-        (base ?? const TextStyle()).copyWith(color: c.textPrimary);
-
-    final display = g(geist.displayLarge).copyWith(
+    final display = base(56, FontWeight.w600, 1.0).copyWith(
       fontSize: 56,
       height: 1.0,
       letterSpacing: -1.68,
       fontWeight: FontWeight.w600,
     );
-    final h1 = g(geist.headlineLarge).copyWith(
+    final h1 = base(32, FontWeight.w600, 1.1).copyWith(
       fontSize: 32,
       height: 1.1,
       letterSpacing: -0.64,
       fontWeight: FontWeight.w600,
     );
-    final h2 = g(geist.headlineMedium).copyWith(
+    final h2 = base(22, FontWeight.w600, 1.2).copyWith(
       fontSize: 22,
       height: 1.2,
       letterSpacing: -0.33,
       fontWeight: FontWeight.w600,
     );
-    final h3 = g(geist.titleMedium).copyWith(
+    final h3 = base(16, FontWeight.w600, 1.3).copyWith(
       fontSize: 16,
       height: 1.3,
       letterSpacing: -0.08,
       fontWeight: FontWeight.w600,
     );
-    final body = g(geist.bodyMedium).copyWith(
+    final body = base(14, FontWeight.w400, 1.5).copyWith(
       fontSize: 14,
       height: 1.5,
       fontWeight: FontWeight.w400,
     );
-    final bodySm = g(geist.bodySmall).copyWith(
+    final bodySm = base(13, FontWeight.w400, 1.45).copyWith(
       fontSize: 13,
       height: 1.45,
       fontWeight: FontWeight.w400,
     );
-    final cap = g(geist.labelSmall).copyWith(
+    final cap = base(14, FontWeight.w500, 1.3).copyWith(
       fontSize: 14,
       height: 1.3,
       letterSpacing: 0.88,
       fontWeight: FontWeight.w500,
       color: c.textMuted,
     );
-    final monoBase = m(mono.bodyMedium).copyWith(
+    final monoBase = base(13, FontWeight.w400, 1.4).copyWith(
       fontSize: 13,
       height: 1.4,
       fontWeight: FontWeight.w400,
@@ -457,10 +457,47 @@ class EvotraqTheme {
     return ThemeData(
       brightness: b,
       useMaterial3: true,
+      fontFamily: EvotraqText.fontFamily,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
       dividerColor: c.border,
       hintColor: c.textFaint,
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return c.textFaint.withOpacity(0.6);
+          }
+          if (states.contains(WidgetState.selected)) {
+            return c.primary;
+          }
+
+          return  c.surfaceElevated;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return c.border.withOpacity(0.5);
+          }
+
+          return b == Brightness.light ? Colors.white : c.surfaceMuted;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return c.border.withOpacity(0.5);
+          }
+          return c.borderVariant;
+        }),
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          // Prevent hover overlay from visually washing out the thumb on web.
+          if (states.contains(WidgetState.hovered)) {
+            return Colors.transparent;
+          }
+          if (states.contains(WidgetState.focused) ||
+              states.contains(WidgetState.pressed)) {
+            return c.primary.withOpacity(0.12);
+          }
+          return null;
+        }),
+      ),
       colorScheme: ColorScheme(
         brightness: b,
         primary: c.primary,
@@ -490,7 +527,7 @@ class EvotraqTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: c.surface,
+        fillColor: c.background,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         hintStyle: text.body.copyWith(color: c.textFaint),
         labelStyle: text.cap.copyWith(color: c.textMuted),

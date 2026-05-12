@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
@@ -37,8 +37,10 @@ class CheckEmailContentWidget extends StatelessWidget {
           width: 96,
           height: 96,
           decoration: BoxDecoration(
-            color: primary.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12),
-            borderRadius: BorderRadius.circular(EvotraqRadius.lg.x),
+            color: primary.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12,
+            ),
+            borderRadius: BorderRadius.circular(TraqRadius.lg.x),
           ),
           child: Center(
             child: SvgPicture.asset(
@@ -64,11 +66,7 @@ class CheckEmailContentWidget extends StatelessWidget {
           emailText == null || emailText.isEmpty
               ? 'We sent a verification email to your inbox. Please check your inbox and spam folder, then verify your email before logging in.'
               : 'We sent a verification email to $emailText. Please check your inbox and spam folder, then verify your email before logging in.',
-          style: TextStyle(
-            fontSize: 16,
-            color: textSecondary,
-            height: 1.4,
-          ),
+          style: TextStyle(fontSize: 16, color: textSecondary, height: 1.4),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -76,9 +74,11 @@ class CheckEmailContentWidget extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(EvotraqRadius.md.x),
+            borderRadius: BorderRadius.circular(TraqRadius.md.x),
             border: Border.all(
-              color: primary.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.25),
+              color: primary.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.25,
+              ),
             ),
           ),
           child: Column(

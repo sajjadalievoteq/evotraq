@@ -5,7 +5,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 /// Prefer importing this library from `core/consts/app_consts.dart`.
 class Constants {
   // app branding
-  static const String appName = 'evotraq.io';
+  static const String appName = 'traq';
   static const String appTagline = 'GS1-compliant track and trace system';
 
   // layout
@@ -198,7 +198,7 @@ class Constants {
 
   // assets
   // images
-  static const String logoImage = 'assets/images/logo.png';
+  static const String logoImage = 'assets/logo/logo.png';
   static const String loginBackground = 'assets/images/background_image.png';
 
   // Icons

@@ -9,15 +9,15 @@ import 'user_management_input_field.dart';
 class UserManagementFormResult {
   UserManagementFormResult.create({
     required CreateUserRequest createUserRequest,
-  })  : createRequest = createUserRequest,
-        updateRequest = null,
-        selectedRole = createUserRequest.role;
+  }) : createRequest = createUserRequest,
+       updateRequest = null,
+       selectedRole = createUserRequest.role;
 
   UserManagementFormResult.edit({
     required UpdateUserRequest userUpdateRequest,
     required this.selectedRole,
-  })  : createRequest = null,
-        updateRequest = userUpdateRequest;
+  }) : createRequest = null,
+       updateRequest = userUpdateRequest;
 
   final CreateUserRequest? createRequest;
   final UpdateUserRequest? updateRequest;
@@ -25,10 +25,7 @@ class UserManagementFormResult {
 }
 
 class UserManagementFormDialog extends StatefulWidget {
-  const UserManagementFormDialog({
-    super.key,
-    this.user,
-  });
+  const UserManagementFormDialog({super.key, this.user});
 
   final UserResponse? user;
 
@@ -131,9 +128,7 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
     return AlertDialog(
       title: Text(_title),
       content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: maxWidth,
-        ),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -232,10 +227,7 @@ class _UserManagementFormDialogState extends State<UserManagementFormDialog> {
           title: 'Cancel',
           onTap: () => Navigator.of(context).pop(),
         ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: Text(_submitLabel),
-        ),
+        ElevatedButton(onPressed: _submit, child: Text(_submitLabel)),
       ],
     );
   }

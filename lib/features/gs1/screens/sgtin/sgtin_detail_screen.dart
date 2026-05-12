@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
@@ -285,7 +286,8 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
         }
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: TraqAppBar(
+          context,
           title: Text(widget.sgtin == null ? 'Create SGTIN' : 'SGTIN Details'),
           actions: [
             if (widget.sgtin != null && !_isEditing)
@@ -607,7 +609,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen> with GS1FormValid
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(4),
-              color: color != null ? color.withOpacity(0.1) : null,
+              color: color?.withOpacity(0.1),
             ),
             child: Text(
               value,

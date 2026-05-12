@@ -22,7 +22,8 @@ class PrescriptionRequirementsGroupWidget extends StatefulWidget {
   final void Function({
     required bool requiresPrescription,
     required String prescriptionType,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<PrescriptionRequirementsGroupWidget> createState() =>
@@ -38,15 +39,19 @@ class _PrescriptionRequirementsGroupWidgetState
   void initState() {
     super.initState();
     _requiresPrescription = widget.initialRequiresPrescription;
-    _prescriptionTypeController =
-        TextEditingController(text: widget.initialPrescriptionType);
+    _prescriptionTypeController = TextEditingController(
+      text: widget.initialPrescriptionType,
+    );
     _prescriptionTypeController.addListener(_emitChange);
   }
 
   @override
-  void didUpdateWidget(covariant PrescriptionRequirementsGroupWidget oldWidget) {
+  void didUpdateWidget(
+    covariant PrescriptionRequirementsGroupWidget oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialRequiresPrescription == oldWidget.initialRequiresPrescription &&
+    if (widget.initialRequiresPrescription ==
+            oldWidget.initialRequiresPrescription &&
         widget.initialPrescriptionType == oldWidget.initialPrescriptionType) {
       return;
     }
@@ -103,7 +108,7 @@ class _PrescriptionRequirementsGroupWidgetState
                 label: 'Prescription Type',
                 helperText: 'e.g., Standard, Special, Controlled',
                 maxLength: 50,
-                inputFormatters:  [LengthLimitingTextInputFormatter(50)],
+                inputFormatters: [LengthLimitingTextInputFormatter(50)],
                 readOnly: !widget.isEditing,
                 validator: PharmaFieldValidators.validatePrescriptionType,
               ),

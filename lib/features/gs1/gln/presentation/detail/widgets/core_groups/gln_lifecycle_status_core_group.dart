@@ -5,7 +5,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Operating status, effective dates, non-reuse display.
 class GlnLifecycleStatusCoreGroup extends StatelessWidget {
   const GlnLifecycleStatusCoreGroup({
     super.key,

@@ -1,5 +1,5 @@
 // ============================================================
-// EVOTRAQ — Animated Trace Network Background (handoff)
+// TRAQ — Animated Trace Network Background (handoff)
 // Flutter port of the canvas animation in the client handoff.
 // ============================================================
 //
@@ -12,12 +12,12 @@
 //     ],
 //   );
 //
-// Colors come from Evotraq tokens (see `core/theme/evotraq_theme.dart`).
+// Colors come from Traq tokens (see `core/theme/traq_theme.dart`).
 //
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class TraceNetworkBackground extends StatefulWidget {
   /// Multiplier on the auto-computed node count. 1.0 matches the handoff reference.
@@ -26,13 +26,13 @@ class TraceNetworkBackground extends StatefulWidget {
   /// How many glowing "signal" pulses travel along edges.
   final int travelerCount;
 
-  /// Override the line/dot color. Defaults to `EvotraqColors.textMuted`.
+  /// Override the line/dot color. Defaults to `TraqColors.textMuted`.
   final Color? lineColor;
 
-  /// Override the traveler core color. Defaults to `EvotraqColors.primary`.
+  /// Override the traveler core color. Defaults to `TraqColors.primary`.
   final Color? signalCoreColor;
 
-  /// Override the traveler glow color. Defaults to `EvotraqColors.primaryGlow`.
+  /// Override the traveler glow color. Defaults to `TraqColors.primaryGlow`.
   final Color? signalGlowColor;
 
   /// Random seed — pin this if you want a deterministic layout (tests, goldens).
@@ -98,7 +98,7 @@ class _TraceNetworkBackgroundState extends State<TraceNetworkBackground>
 
   @override
   Widget build(BuildContext context) {
-    final colors = EvotraqColors.of(context);
+    final colors = TraqColors.of(context);
     final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
     return LayoutBuilder(

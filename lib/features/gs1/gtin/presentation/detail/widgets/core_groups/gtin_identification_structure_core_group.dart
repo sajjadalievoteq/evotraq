@@ -74,13 +74,11 @@ class _GtinIdentificationStructureCoreGroupState
     _gs1CompanyPrefix = TextEditingController();
     _itemReference = TextEditingController();
 
-    // When opening an existing GTIN detail screen, show persisted chip values immediately.
     final initLen = widget.initialGs1CompanyPrefixLength;
     if (initLen != null) _companyPrefixLength.text = initLen.toString();
     _gs1CompanyPrefix.text = (widget.initialGs1CompanyPrefix ?? '').trim();
     _itemReference.text = (widget.initialItemReference ?? '').trim();
 
-    // Populate chips when user leaves the GTIN field (more reliable than only on "done").
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         _normalizeGtinIfPossible();
@@ -143,8 +141,6 @@ class _GtinIdentificationStructureCoreGroupState
       _gs1CompanyPrefix.text = pfx;
       _itemReference.text = itemRef;
     } catch (e) {
-      // Keep UI non-blocking: chips remain blank if derivation fails.
-      // But log so we can see auth/400/network failures during debugging.
       debugPrint('[GtinIdentification] derive-identification failed: $e');
     } finally {
       if (mounted) setState(() => _isDeriving = false);
@@ -154,7 +150,7 @@ class _GtinIdentificationStructureCoreGroupState
   void _deriveIdentificationDebounced() {
     _deriveDebounce?.cancel();
     if (!mounted) return;
-    // Immediately show shimmer while we wait for the backend response.
+
     setState(() => _isDeriving = true);
     _deriveDebounce = Timer(const Duration(milliseconds: 250), () {
       _deriveIdentificationFromBackend();
@@ -181,10 +177,7 @@ class _GtinIdentificationStructureCoreGroupState
     );
   }
 
-  Widget _shimmerChip({
-    required ThemeData theme,
-    required String label,
-  }) {
+  Widget _shimmerChip({required ThemeData theme, required String label}) {
     final isDark = theme.brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
 
@@ -243,22 +236,6 @@ class _GtinIdentificationStructureCoreGroupState
 
             final muted = theme.colorScheme.onSurfaceVariant;
 
-            if (_isDeriving) {
-              return Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  _shimmerChip(theme: theme, label: GtinUiConstants.labelGcpLengthChip),
-                  _shimmerChip(theme: theme, label: GtinUiConstants.labelGcpChip),
-                  _shimmerChip(
-                    theme: theme,
-                    label: GtinUiConstants.labelItemReferenceChip,
-                  ),
-                ],
-              );
-            }
-
             final chips = <Widget>[];
             if (_companyPrefixLength.text.trim().isNotEmpty) {
               chips.add(
@@ -305,9 +282,7 @@ class _GtinIdentificationStructureCoreGroupState
           },
         ),
         ListenableBuilder(
-          listenable: Listenable.merge([
-            widget.gtinCodeController,
-          ]),
+          listenable: Listenable.merge([widget.gtinCodeController]),
           builder: (context, _) {
             final raw = widget.gtinCodeController.text;
             final s = GtinFormat.stripGtinInput(raw);
@@ -321,7 +296,8 @@ class _GtinIdentificationStructureCoreGroupState
               );
             }
 
-            final structure = GtinFormat.structureLabelForStrippedInput(s) ?? '';
+            final structure =
+                GtinFormat.structureLabelForStrippedInput(s) ?? '';
             final canon = GtinFieldValidators.canonicalGtin14FromInput(raw);
             final indicator = GtinFormat.indicatorFromCanonical14(canon);
             final check = s.isNotEmpty ? s[s.length - 1] : '';
@@ -361,4 +337,3 @@ class _GtinIdentificationStructureCoreGroupState
     );
   }
 }
-

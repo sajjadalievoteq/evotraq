@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/shared/utils/email_provider_launch_utils.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
@@ -41,21 +41,21 @@ class VerifyEmailContentWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: isVerifying
                 ? primary.withOpacity(
-                    Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12,
+                    Theme.of(context).brightness == Brightness.dark
+                        ? 0.22
+                        : 0.12,
                   )
                 : (successMessage != null
                       ? success.withValues(alpha: 0.14)
                       : error.withValues(alpha: 0.14)),
-            borderRadius: BorderRadius.circular(EvotraqRadius.lg.x),
+            borderRadius: BorderRadius.circular(TraqRadius.lg.x),
           ),
           child: isVerifying
               ? Padding(
                   padding: const EdgeInsets.all(28),
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      primary,
-                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(primary),
                   ),
                 )
               : Center(
@@ -93,11 +93,7 @@ class VerifyEmailContentWidget extends StatelessWidget {
               : (successMessage ??
                     errorMessage ??
                     'An error occurred during email verification.'),
-          style: TextStyle(
-            fontSize: 16,
-            color: textSecondary,
-            height: 1.4,
-          ),
+          style: TextStyle(fontSize: 16, color: textSecondary, height: 1.4),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -106,7 +102,7 @@ class VerifyEmailContentWidget extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(EvotraqRadius.md.x),
+              borderRadius: BorderRadius.circular(TraqRadius.md.x),
               border: Border.all(
                 color: primary.withOpacity(
                   Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.25,
@@ -115,11 +111,7 @@ class VerifyEmailContentWidget extends StatelessWidget {
             ),
             child: Text(
               'You can now return to login. If your email is verified but your account is still not accessible, it may still be waiting for admin approval.',
-              style: TextStyle(
-                fontSize: 14,
-                color: textSecondary,
-                height: 1.5,
-              ),
+              style: TextStyle(fontSize: 14, color: textSecondary, height: 1.5),
               textAlign: TextAlign.center,
             ),
           ),

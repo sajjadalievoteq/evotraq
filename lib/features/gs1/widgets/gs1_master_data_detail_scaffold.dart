@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
 /// Shared shell for GTIN/GLN (and similar) master-data detail: optional [Scaffold] or body-only when [embedded].
 class Gs1MasterDataDetailScaffold extends StatelessWidget {
@@ -29,7 +30,8 @@ class Gs1MasterDataDetailScaffold extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: TraqAppBar(
+        context,
         title: title == null
             ? null
             : Text(

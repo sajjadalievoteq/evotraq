@@ -32,7 +32,8 @@ class WarningsPrecautionsGroupWidget extends StatefulWidget {
     required PregnancyCategory pregnancyCategory,
     required String contraindications,
     required String drugInteractions,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<WarningsPrecautionsGroupWidget> createState() =>
@@ -52,12 +53,15 @@ class _WarningsPrecautionsGroupWidgetState
     super.initState();
     _blackBoxWarning = widget.initialBlackBoxWarning;
     _pregnancyCategory = widget.initialPregnancyCategory;
-    _blackBoxWarningTextController =
-        TextEditingController(text: widget.initialBlackBoxWarningText);
-    _contraindicationsController =
-        TextEditingController(text: widget.initialContraindications);
-    _drugInteractionsController =
-        TextEditingController(text: widget.initialDrugInteractions);
+    _blackBoxWarningTextController = TextEditingController(
+      text: widget.initialBlackBoxWarningText,
+    );
+    _contraindicationsController = TextEditingController(
+      text: widget.initialContraindications,
+    );
+    _drugInteractionsController = TextEditingController(
+      text: widget.initialDrugInteractions,
+    );
     _blackBoxWarningTextController.addListener(_emitChange);
     _contraindicationsController.addListener(_emitChange);
     _drugInteractionsController.addListener(_emitChange);
@@ -68,7 +72,8 @@ class _WarningsPrecautionsGroupWidgetState
     super.didUpdateWidget(oldWidget);
     if (widget.initialBlackBoxWarning == oldWidget.initialBlackBoxWarning &&
         widget.initialPregnancyCategory == oldWidget.initialPregnancyCategory &&
-        widget.initialBlackBoxWarningText == oldWidget.initialBlackBoxWarningText &&
+        widget.initialBlackBoxWarningText ==
+            oldWidget.initialBlackBoxWarningText &&
         widget.initialContraindications == oldWidget.initialContraindications &&
         widget.initialDrugInteractions == oldWidget.initialDrugInteractions) {
       return;
@@ -79,12 +84,16 @@ class _WarningsPrecautionsGroupWidgetState
         _blackBoxWarning = widget.initialBlackBoxWarning;
         _pregnancyCategory = widget.initialPregnancyCategory;
       });
-      if (widget.initialBlackBoxWarningText != oldWidget.initialBlackBoxWarningText &&
-          widget.initialBlackBoxWarningText != _blackBoxWarningTextController.text) {
+      if (widget.initialBlackBoxWarningText !=
+              oldWidget.initialBlackBoxWarningText &&
+          widget.initialBlackBoxWarningText !=
+              _blackBoxWarningTextController.text) {
         _blackBoxWarningTextController.text = widget.initialBlackBoxWarningText;
       }
-      if (widget.initialContraindications != oldWidget.initialContraindications &&
-          widget.initialContraindications != _contraindicationsController.text) {
+      if (widget.initialContraindications !=
+              oldWidget.initialContraindications &&
+          widget.initialContraindications !=
+              _contraindicationsController.text) {
         _contraindicationsController.text = widget.initialContraindications;
       }
       if (widget.initialDrugInteractions != oldWidget.initialDrugInteractions &&
@@ -142,7 +151,7 @@ class _WarningsPrecautionsGroupWidgetState
                 label: 'Black Box Warning Text',
                 maxLines: 3,
                 maxLength: 1000,
-                inputFormatters:  [LengthLimitingTextInputFormatter(1000)],
+                inputFormatters: [LengthLimitingTextInputFormatter(1000)],
                 readOnly: !widget.isEditing,
                 validator: PharmaFieldValidators.validateBlackBoxWarningText,
               ),
@@ -154,12 +163,18 @@ class _WarningsPrecautionsGroupWidgetState
               border: OutlineInputBorder(),
             ),
             items: PregnancyCategory.values
-                .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.displayName)))
+                .map(
+                  (cat) => DropdownMenuItem(
+                    value: cat,
+                    child: Text(cat.displayName),
+                  ),
+                )
                 .toList(),
             onChanged: widget.isEditing
                 ? (value) {
                     setState(() {
-                      _pregnancyCategory = value ?? PregnancyCategory.notClassified;
+                      _pregnancyCategory =
+                          value ?? PregnancyCategory.notClassified;
                     });
                     _emitChange();
                   }
@@ -172,7 +187,7 @@ class _WarningsPrecautionsGroupWidgetState
             label: 'Contraindications',
             maxLines: 2,
             maxLength: 1000,
-            inputFormatters:  [LengthLimitingTextInputFormatter(1000)],
+            inputFormatters: [LengthLimitingTextInputFormatter(1000)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateContraindications,
           ),
@@ -182,7 +197,7 @@ class _WarningsPrecautionsGroupWidgetState
             label: 'Drug Interactions',
             maxLines: 2,
             maxLength: 1000,
-            inputFormatters:  [LengthLimitingTextInputFormatter(1000)],
+            inputFormatters: [LengthLimitingTextInputFormatter(1000)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateDrugInteractions,
           ),

@@ -7,9 +7,9 @@ import 'user_management_state.dart';
 
 class UserManagementCubit extends Cubit<UserManagementState> {
   UserManagementCubit({UserManagementService? userManagementService})
-      : _userManagementService =
-            userManagementService ?? getIt<UserManagementService>(),
-        super(const UserManagementState());
+    : _userManagementService =
+          userManagementService ?? getIt<UserManagementService>(),
+      super(const UserManagementState());
 
   final UserManagementService _userManagementService;
 
@@ -46,19 +46,17 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
 
   Future<void> changeUserStatus(int userId, bool enabled) async {
-    // Optimistic update so the UI switch animates immediately on tap.
     final previousUsers = state.users;
     final optimisticUsers = previousUsers
-        .map((user) => user.id == userId ? user.copyWith(enabled: enabled) : user)
+        .map(
+          (user) => user.id == userId ? user.copyWith(enabled: enabled) : user,
+        )
         .toList();
 
     emit(
@@ -110,10 +108,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
@@ -125,10 +120,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       await loadApprovals();
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
@@ -140,10 +132,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       await loadApprovals();
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
@@ -155,10 +144,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       await loadUsers(page: state.currentPage);
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
@@ -170,10 +156,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       await loadUsers(page: state.currentPage);
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }
@@ -185,10 +168,7 @@ class UserManagementCubit extends Cubit<UserManagementState> {
       await loadUsers(page: state.currentPage);
     } catch (e) {
       emit(
-        state.copyWith(
-          status: UserManagementStatus.error,
-          error: e.toString(),
-        ),
+        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
       );
     }
   }

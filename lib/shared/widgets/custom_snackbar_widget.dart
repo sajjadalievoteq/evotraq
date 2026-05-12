@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 enum CustomSnackBarVariant {
   success(Icons.check_circle_rounded),

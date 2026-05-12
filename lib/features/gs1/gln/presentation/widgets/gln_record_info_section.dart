@@ -19,7 +19,8 @@ class GlnRecordInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocSelector<GLNCubit, GLNState, ({int count, bool hasMore})>(
-      selector: (state) => (count: state.glns.length, hasMore: state.hasMoreData),
+      selector: (state) =>
+          (count: state.glns.length, hasMore: state.hasMoreData),
       builder: (context, selected) {
         if (selected.count == 0) return const SizedBox.shrink();
 

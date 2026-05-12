@@ -109,14 +109,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
         title: const Text('Product Journey Tracker'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        actions: [
-          if (_journey != null)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => _loadJourney(_journey!.identifier),
-              tooltip: 'Refresh',
-            ),
-        ],
+
       ),
       drawer: const AppDrawer(),
       body: Column(

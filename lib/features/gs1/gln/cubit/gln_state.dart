@@ -17,16 +17,12 @@ class GLNState extends Equatable {
   final bool hasMoreData;
   final bool isFetchingMore;
 
-  /// List reload (search, filters) without forcing [status] to loading (detail pane stays stable).
   final bool isGlnListLoading;
 
-  /// Set when [searchGLNsAdvanced] fails; separate from [error] so detail errors are not overwritten.
   final String? listFetchError;
 
-  /// Raw HTTP body for the last GLN list/search failure (debugging).
   final String? listFetchErrorBody;
 
-  /// HTTP status code for the last GLN list/search failure (debugging).
   final int? listFetchErrorStatusCode;
 
   const GLNState({
@@ -97,21 +93,21 @@ class GLNState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        glns,
-        childGLNs,
-        expiredLicenseGLNs,
-        selectedGLN,
-        error,
-        isValidGLN,
-        currentPage,
-        pageSize,
-        totalItems,
-        hasMoreData,
-        isFetchingMore,
-        isGlnListLoading,
-        listFetchError,
-        listFetchErrorBody,
-        listFetchErrorStatusCode,
-      ];
+    status,
+    glns,
+    childGLNs,
+    expiredLicenseGLNs,
+    selectedGLN,
+    error,
+    isValidGLN,
+    currentPage,
+    pageSize,
+    totalItems,
+    hasMoreData,
+    isFetchingMore,
+    isGlnListLoading,
+    listFetchError,
+    listFetchErrorBody,
+    listFetchErrorStatusCode,
+  ];
 }

@@ -28,7 +28,8 @@ class RegulatoryApprovalsGroupWidget extends StatefulWidget {
     required DateTime? fdaApprovalDate,
     required String emaProcedureNumber,
     required DateTime? emaApprovalDate,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<RegulatoryApprovalsGroupWidget> createState() =>
@@ -49,17 +50,23 @@ class _RegulatoryApprovalsGroupWidgetState
   @override
   void initState() {
     super.initState();
-    _fdaApplicationNumberController =
-        TextEditingController(text: widget.initialFdaApplicationNumber);
-    _emaProcedureNumberController =
-        TextEditingController(text: widget.initialEmaProcedureNumber);
+    _fdaApplicationNumberController = TextEditingController(
+      text: widget.initialFdaApplicationNumber,
+    );
+    _emaProcedureNumberController = TextEditingController(
+      text: widget.initialEmaProcedureNumber,
+    );
     _fdaApprovalDate = widget.initialFdaApprovalDate;
     _emaApprovalDate = widget.initialEmaApprovalDate;
     _fdaApprovalDateDisplay = TextEditingController(
-      text: _fdaApprovalDate != null ? _docDateFmt.format(_fdaApprovalDate!) : '',
+      text: _fdaApprovalDate != null
+          ? _docDateFmt.format(_fdaApprovalDate!)
+          : '',
     );
     _emaApprovalDateDisplay = TextEditingController(
-      text: _emaApprovalDate != null ? _docDateFmt.format(_emaApprovalDate!) : '',
+      text: _emaApprovalDate != null
+          ? _docDateFmt.format(_emaApprovalDate!)
+          : '',
     );
 
     _fdaApplicationNumberController.addListener(_emitChange);
@@ -69,28 +76,37 @@ class _RegulatoryApprovalsGroupWidgetState
   @override
   void didUpdateWidget(covariant RegulatoryApprovalsGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialFdaApplicationNumber == oldWidget.initialFdaApplicationNumber &&
-        widget.initialEmaProcedureNumber == oldWidget.initialEmaProcedureNumber &&
+    if (widget.initialFdaApplicationNumber ==
+            oldWidget.initialFdaApplicationNumber &&
+        widget.initialEmaProcedureNumber ==
+            oldWidget.initialEmaProcedureNumber &&
         widget.initialFdaApprovalDate == oldWidget.initialFdaApprovalDate &&
         widget.initialEmaApprovalDate == oldWidget.initialEmaApprovalDate) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.initialFdaApplicationNumber != oldWidget.initialFdaApplicationNumber &&
-          widget.initialFdaApplicationNumber != _fdaApplicationNumberController.text) {
-        _fdaApplicationNumberController.text = widget.initialFdaApplicationNumber;
+      if (widget.initialFdaApplicationNumber !=
+              oldWidget.initialFdaApplicationNumber &&
+          widget.initialFdaApplicationNumber !=
+              _fdaApplicationNumberController.text) {
+        _fdaApplicationNumberController.text =
+            widget.initialFdaApplicationNumber;
       }
-      if (widget.initialEmaProcedureNumber != oldWidget.initialEmaProcedureNumber &&
-          widget.initialEmaProcedureNumber != _emaProcedureNumberController.text) {
+      if (widget.initialEmaProcedureNumber !=
+              oldWidget.initialEmaProcedureNumber &&
+          widget.initialEmaProcedureNumber !=
+              _emaProcedureNumberController.text) {
         _emaProcedureNumberController.text = widget.initialEmaProcedureNumber;
       }
       _fdaApprovalDate = widget.initialFdaApprovalDate;
       _emaApprovalDate = widget.initialEmaApprovalDate;
-      _fdaApprovalDateDisplay.text =
-          _fdaApprovalDate != null ? _docDateFmt.format(_fdaApprovalDate!) : '';
-      _emaApprovalDateDisplay.text =
-          _emaApprovalDate != null ? _docDateFmt.format(_emaApprovalDate!) : '';
+      _fdaApprovalDateDisplay.text = _fdaApprovalDate != null
+          ? _docDateFmt.format(_fdaApprovalDate!)
+          : '';
+      _emaApprovalDateDisplay.text = _emaApprovalDate != null
+          ? _docDateFmt.format(_emaApprovalDate!)
+          : '';
     });
   }
 
@@ -174,10 +190,10 @@ class _RegulatoryApprovalsGroupWidgetState
             controller: _fdaApprovalDateDisplay,
             onTap: widget.isEditing
                 ? () => _pickDate(
-                      current: _fdaApprovalDate,
-                      setValue: (v) => _fdaApprovalDate = v,
-                      display: _fdaApprovalDateDisplay,
-                    )
+                    current: _fdaApprovalDate,
+                    setValue: (v) => _fdaApprovalDate = v,
+                    display: _fdaApprovalDateDisplay,
+                  )
                 : null,
           ),
           const SizedBox(height: 8),
@@ -194,10 +210,10 @@ class _RegulatoryApprovalsGroupWidgetState
             controller: _emaApprovalDateDisplay,
             onTap: widget.isEditing
                 ? () => _pickDate(
-                      current: _emaApprovalDate,
-                      setValue: (v) => _emaApprovalDate = v,
-                      display: _emaApprovalDateDisplay,
-                    )
+                    current: _emaApprovalDate,
+                    setValue: (v) => _emaApprovalDate = v,
+                    display: _emaApprovalDateDisplay,
+                  )
                 : null,
           ),
         ],

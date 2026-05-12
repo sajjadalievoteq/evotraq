@@ -1,6 +1,6 @@
 {
-    "name": "evotraq.io",
-    "short_name": "evotraq.io",
+    "name": "traq",
+    "short_name": "traq",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
@@ -10,23 +10,23 @@
     "prefer_related_applications": false,
     "icons": [
         {
-            "src": "icons/icon_app.png",
+            "src": "icons/app_icon_192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icons/icon_app.png",
+            "src": "icons/app_icon_512.png",
             "sizes": "512x512",
             "type": "image/png"
         },
         {
-            "src": "icons/icon_app.png",
+            "src": "icons/app_icon_192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "maskable"
         },
         {
-            "src": "icons/icon_app.png",
+            "src": "icons/app_icon_512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"

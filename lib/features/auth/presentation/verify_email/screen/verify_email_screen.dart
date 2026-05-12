@@ -37,7 +37,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       return;
     }
 
-    // Dispatch the email verification action
     context.read<AuthCubit>().verifyEmail(widget.token);
   }
 

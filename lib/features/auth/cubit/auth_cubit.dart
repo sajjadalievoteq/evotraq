@@ -288,7 +288,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // Email verification handler
   Future<void> verifyEmail(String token) async {
     emit(
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
@@ -324,7 +323,9 @@ class AuthCubit extends Cubit<AuthState> {
       ),
     );
     try {
-      final message = await _authService.resendVerificationEmail(normalizedEmail);
+      final message = await _authService.resendVerificationEmail(
+        normalizedEmail,
+      );
       emit(
         state.copyWith(
           status: AuthStatus.verificationEmailResent,

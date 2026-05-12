@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';
@@ -49,7 +49,7 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = EvotraqRadius.md.x.toDouble();
+    final r = TraqRadius.md.x.toDouble();
     return Card(
       elevation: 1,
       child: Padding(
@@ -71,13 +71,13 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
                   baseColor,
                   width: double.infinity,
                   height: 50,
-                  radius: EvotraqRadius.md.x.toDouble(),
+                  radius: TraqRadius.md.x.toDouble(),
                 );
                 final refresh = _skeletonBox(
                   baseColor,
                   width: 50,
                   height: 50,
-                  radius: EvotraqRadius.md.x.toDouble(),
+                  radius: TraqRadius.md.x.toDouble(),
                 );
 
                 if (isCompact) {
@@ -86,10 +86,7 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
                     children: [
                       search,
                       const SizedBox(height: Constants.spacing),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: refresh,
-                      ),
+                      Align(alignment: Alignment.centerRight, child: refresh),
                     ],
                   );
                 }
@@ -117,11 +114,10 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = EvotraqRadius.md.x.toDouble();
+    final r = TraqRadius.md.x.toDouble();
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        // Match `UserApprovalCardVariant.gridSquare`
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,9 +131,19 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _skeletonBox(baseColor, width: 160, height: 18, radius: r),
+                      _skeletonBox(
+                        baseColor,
+                        width: 160,
+                        height: 18,
+                        radius: r,
+                      ),
                       const SizedBox(height: 4),
-                      _skeletonBox(baseColor, width: 220, height: 14, radius: r),
+                      _skeletonBox(
+                        baseColor,
+                        width: 220,
+                        height: 14,
+                        radius: r,
+                      ),
                     ],
                   ),
                 ),
@@ -153,7 +159,7 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
                     baseColor,
                     width: double.infinity,
                     height: 40,
-                    radius: EvotraqRadius.md.x.toDouble(),
+                    radius: TraqRadius.md.x.toDouble(),
                   ),
                 ),
                 const SizedBox(width: Constants.spacing),
@@ -162,7 +168,7 @@ class _UserApprovalCardSkeleton extends StatelessWidget {
                     baseColor,
                     width: double.infinity,
                     height: 40,
-                    radius: EvotraqRadius.md.x.toDouble(),
+                    radius: TraqRadius.md.x.toDouble(),
                   ),
                 ),
               ],

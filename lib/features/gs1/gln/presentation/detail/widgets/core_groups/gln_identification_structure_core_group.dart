@@ -9,11 +9,11 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// GS1 identification: GLN field, structure chips, backend-derived GCP chips (same pattern as GTIN).
 class GlnIdentificationStructureCoreGroup extends StatefulWidget {
   const GlnIdentificationStructureCoreGroup({
     super.key,
@@ -39,7 +39,6 @@ class GlnIdentificationStructureCoreGroup extends StatefulWidget {
   final TextEditingController parentGlnCodeController;
   final TextEditingController glnExtensionComponentController;
 
-  /// From persisted GLN / GET — drives GCP length chip before first derive.
   final int? initialGs1CompanyPrefixLength;
 
   final bool showFieldSkeleton;
@@ -85,8 +84,8 @@ class _GlnIdentificationStructureCoreGroupState
             oldWidget.initialGs1CompanyPrefixLength &&
         widget.initialGs1CompanyPrefixLength != null &&
         _companyPrefixLength.text.trim().isEmpty) {
-      _companyPrefixLength.text =
-          widget.initialGs1CompanyPrefixLength!.toString();
+      _companyPrefixLength.text = widget.initialGs1CompanyPrefixLength!
+          .toString();
     }
   }
 
@@ -120,7 +119,9 @@ class _GlnIdentificationStructureCoreGroupState
       final pfxLen = res['gs1CompanyPrefixLength']?.toString() ?? '';
       final pfx = res['gs1CompanyPrefix']?.toString() ?? '';
       final locRef =
-          res['locationReference']?.toString() ?? res['locationReferenceDigits']?.toString() ?? '';
+          res['locationReference']?.toString() ??
+          res['locationReferenceDigits']?.toString() ??
+          '';
       final check = res['checkDigit']?.toString() ?? '';
 
       _companyPrefixLength.text = pfxLen;
@@ -253,7 +254,9 @@ class _GlnIdentificationStructureCoreGroupState
                 ),
               );
             }
-            if (widget.locationReferenceDigitsController.text.trim().isNotEmpty) {
+            if (widget.locationReferenceDigitsController.text
+                .trim()
+                .isNotEmpty) {
               chips.add(
                 _chip(
                   theme: t,

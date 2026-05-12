@@ -41,7 +41,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       context.read<AuthCubit>().requestPasswordReset(_emailController.text);
 
-      // We always show success regardless of actual success to prevent email enumeration
       setState(() {
         _isSubmitting = false;
         _isSubmitted = true;
@@ -60,36 +59,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return  BackgroundContainerWidget(
+    return BackgroundContainerWidget(
       child: BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
-            if (state.status == AuthStatus.error) {
-              context.showError(state.error ?? 'An error occurred');
-            }
-          },
-          child: AuthResponsiveFormLayout(
-            header: _isSubmitted
-                ? AuthFormHeader.checkEmail
-                : AuthFormHeader.forgotPassword,
-            child: _isSubmitted
-                ? BuildSuccessMessage(
-                    title: 'Check Your Email',
-                    message:
-                        'If an account exists with the email you provided, we have sent password reset instructions.',
-                    buttonLabel: 'BACK TO LOGIN',
-                    onButtonPressed: () {
-                      context.go(Constants.loginRoute);
-                    },
-                  )
-                : ForgotPasswordForm(
-                    formKey: _formKey,
-                    emailController: _emailController,
-                    isSubmitting: _isSubmitting,
-                    hasRequiredInput: _hasRequiredInput,
-                    onSubmit: _submitForm,
-                    onFormChanged: _updateButtonState,
-                  ),
-          ),
+        listener: (context, state) {
+          if (state.status == AuthStatus.error) {
+            context.showError(state.error ?? 'An error occurred');
+          }
+        },
+        child: AuthResponsiveFormLayout(
+          header: _isSubmitted
+              ? AuthFormHeader.checkEmail
+              : AuthFormHeader.forgotPassword,
+          child: _isSubmitted
+              ? BuildSuccessMessage(
+                  title: 'Check Your Email',
+                  message:
+                      'If an account exists with the email you provided, we have sent password reset instructions.',
+                  buttonLabel: 'BACK TO LOGIN',
+                  onButtonPressed: () {
+                    context.go(Constants.loginRoute);
+                  },
+                )
+              : ForgotPasswordForm(
+                  formKey: _formKey,
+                  emailController: _emailController,
+                  isSubmitting: _isSubmitting,
+                  hasRequiredInput: _hasRequiredInput,
+                  onSubmit: _submitForm,
+                  onFormChanged: _updateButtonState,
+                ),
+        ),
       ),
     );
   }

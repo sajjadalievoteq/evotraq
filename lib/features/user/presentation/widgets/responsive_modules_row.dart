@@ -11,43 +11,47 @@ class ResponsiveModulesRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = 16.0;
-        final availableWidth = constraints.maxWidth;
+
         final columns =
-            availableWidth >= UserUiConstants.threeColumnBreakpoint ? 3 : 2;
+            constraints.maxWidth >= UserUiConstants.threeColumnBreakpoint
+            ? 3
+            : 2;
+
         final rowCount = (children.length / columns).ceil();
-
-        Widget buildRow(int rowIndex) {
-          final start = rowIndex * columns;
-          final endExclusive = (start + columns).clamp(0, children.length);
-          final rowChildren = children.sublist(start, endExclusive);
-
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < columns; i++) ...[
-                  if (i < rowChildren.length)
-                    Expanded(child: rowChildren[i])
-                  else
-                    const Expanded(child: SizedBox.shrink()),
-                  if (i != columns - 1) const SizedBox(width: spacing),
-                ],
-              ],
-            ),
-          );
-        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var row = 0; row < rowCount; row++) ...[
-              buildRow(row),
-              if (row != rowCount - 1) const SizedBox(height: spacing),
-            ],
-          ],
+          children: List.generate(rowCount, (rowIndex) {
+            final start = rowIndex * columns;
+            final end = (start + columns).clamp(0, children.length);
+
+            final rowChildren = children.sublist(start, end);
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: rowIndex == rowCount - 1 ? 0 : spacing,
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List.generate(columns, (index) {
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: index == columns - 1 ? 0 : spacing,
+                        ),
+                        child: index < rowChildren.length
+                            ? rowChildren[index]
+                            : const SizedBox.shrink(),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            );
+          }),
         );
       },
     );
   }
 }
-

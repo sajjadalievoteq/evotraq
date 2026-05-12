@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 /// “Sort by … / direction” row (GTIN/GLN list “sort” tile). Build [label] in the parent.
@@ -33,37 +33,38 @@ class Gs1ListSortingControls extends StatelessWidget {
       icon: Icon(
         sortOrder == 'asc' ? Icons.arrow_upward : Icons.arrow_downward,
       ),
-      color: c.primary,
+      color: Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
       tooltip: sortOrder == 'asc' ? 'Ascending' : 'Descending',
     );
 
     return AppLayoutBuilder(
       builder: (context, layout) {
-        return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: layout.resolve(compact: 12.0, medium: 16.0),
-            vertical: layout.resolve(compact: 10.0, medium: 8.0),
+        return Card(
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: layout.resolve(compact: 12.0, medium: 16.0),
+              vertical: layout.resolve(compact: 10.0, medium: 8.0),
+            ),
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+
+            ),
+            child: layout.isCompact
+                ? Row(
+                    children: [
+                      Expanded(child: text),
+                      toggle,
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: text),
+                      const SizedBox(width: 16),
+                      toggle,
+                    ],
+                  ),
           ),
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: EvotraqRadius.card,
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-          ),
-          child: layout.isCompact
-              ? Row(
-                  children: [
-                    Expanded(child: text),
-                    toggle,
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: text),
-                    const SizedBox(width: 16),
-                    toggle,
-                  ],
-                ),
         );
       },
     );

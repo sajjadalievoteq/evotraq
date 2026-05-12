@@ -29,7 +29,7 @@ class LifecycleAvailabilityStatusCoreGroupState
   static final _dateFmt = DateFormat('yyyy-MM-dd');
   static final _dateTimeNoOffsetFmt = DateFormat('yyyy-MM-dd / HH:mm:ss');
 
-  String? _tradeItemStatus; // ADD / CHN / COR
+  String? _tradeItemStatus;
   DateTime? _effectiveDate;
   DateTime? _startAvailDate;
   DateTime? _endAvailDate;
@@ -48,11 +48,8 @@ class LifecycleAvailabilityStatusCoreGroupState
     _endAvailDateDisplay = TextEditingController();
     _publicationDateDisplay = TextEditingController();
 
-    // Doc: Auto-set ADD on first save, CHN on subsequent edits.
     _tradeItemStatus = widget.isUpdate ? 'CHN' : 'ADD';
 
-    // Doc: Effective Date / Time is mandatory (version effective instant).
-    // Default to "now" for new records and local-only UI.
     _effectiveDate = DateTime.now();
     _effectiveDateDisplay.text = _formatDateTimeWithOffset(_effectiveDate!);
   }
@@ -87,16 +84,19 @@ class LifecycleAvailabilityStatusCoreGroupState
     }
 
     _startAvailDate = startAvailDate;
-    _startAvailDateDisplay.text =
-        startAvailDate == null ? '' : _formatDateTimeWithOffset(startAvailDate);
+    _startAvailDateDisplay.text = startAvailDate == null
+        ? ''
+        : _formatDateTimeWithOffset(startAvailDate);
 
     _endAvailDate = endAvailDate;
-    _endAvailDateDisplay.text =
-        endAvailDate == null ? '' : _formatDateTimeWithOffset(endAvailDate);
+    _endAvailDateDisplay.text = endAvailDate == null
+        ? ''
+        : _formatDateTimeWithOffset(endAvailDate);
 
     _publicationDate = publicationDate;
-    _publicationDateDisplay.text =
-        publicationDate == null ? '' : _dateFmt.format(publicationDate);
+    _publicationDateDisplay.text = publicationDate == null
+        ? ''
+        : _dateFmt.format(publicationDate);
 
     if (mounted) setState(() {});
   }
@@ -197,7 +197,9 @@ class LifecycleAvailabilityStatusCoreGroupState
             ),
           ],
           validator: (v) => GtinFieldValidators.validateTradeItemStatus(v),
-          onChanged: widget.isReadOnly ? null : (v) => setState(() => _tradeItemStatus = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _tradeItemStatus = v),
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
@@ -207,8 +209,8 @@ class LifecycleAvailabilityStatusCoreGroupState
           validator: widget.isReadOnly
               ? null
               : (v) => (v == null || v.trim().isEmpty)
-                  ? GtinUiConstants.errorEffectiveDateRequired
-                  : null,
+                    ? GtinUiConstants.errorEffectiveDateRequired
+                    : null,
           onPick: () => _pickDateTime(
             current: _effectiveDate,
             setValue: (v) => _effectiveDate = v,
@@ -248,11 +250,17 @@ class LifecycleAvailabilityStatusCoreGroupState
                   final s = (v ?? '').trim();
                   if (s.isEmpty) return null;
                   final parsed = DateTime.tryParse(s);
-                  if (parsed == null) return 'publication_date must be YYYY-MM-DD';
+                  if (parsed == null)
+                    return 'publication_date must be YYYY-MM-DD';
                   final today = DateTime.now();
-                  final todayDate = DateTime(today.year, today.month, today.day);
+                  final todayDate = DateTime(
+                    today.year,
+                    today.month,
+                    today.day,
+                  );
                   final d = DateTime(parsed.year, parsed.month, parsed.day);
-                  if (d.isAfter(todayDate)) return 'publication_date must be <= today';
+                  if (d.isAfter(todayDate))
+                    return 'publication_date must be <= today';
                   return null;
                 },
           onPick: () => _pickDate(
@@ -311,4 +319,3 @@ class LifecycleAvailabilityStatusCoreGroupState
     );
   }
 }
-

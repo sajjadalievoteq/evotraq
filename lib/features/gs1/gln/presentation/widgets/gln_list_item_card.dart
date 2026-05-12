@@ -8,7 +8,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/widgets/gln_active_chip.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 
-/// List row card matching GTIN layout style for GLN master data.
 class GlnListItemCard extends StatelessWidget {
   const GlnListItemCard({
     super.key,
@@ -69,9 +68,8 @@ class GlnListItemCard extends StatelessWidget {
             child: Padding(
               padding: padding,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // 👈 TOP ALIGN FIX
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// LEFT SIDE (CONTENT)
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,12 +103,10 @@ class GlnListItemCard extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  /// RIGHT SIDE (ALWAYS TOP ALIGNED)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -155,8 +151,11 @@ class GlnListItemCard extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                const Icon(Icons.delete,
-                                    size: 20, color: Colors.red),
+                                const Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                  color: Colors.red,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   GlnUiConstants.menuDelete,

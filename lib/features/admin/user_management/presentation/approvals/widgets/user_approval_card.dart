@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
@@ -9,10 +9,7 @@ import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart'
 import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';
 
-enum UserApprovalCardVariant {
-  list,
-  gridSquare,
-}
+enum UserApprovalCardVariant { list, gridSquare }
 
 class UserApprovalCard extends StatelessWidget {
   const UserApprovalCard({
@@ -68,23 +65,20 @@ class UserApprovalCard extends StatelessWidget {
                         children: [
                           Text(
                             _displayName,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Username: ${user.username}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[700],
-                                ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey[700]),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Email: ${user.email}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[700],
-                                ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey[700]),
                           ),
                         ],
                       ),
@@ -95,9 +89,9 @@ class UserApprovalCard extends StatelessWidget {
                 if (compact) ...[
                   Text(
                     '${UserManagementConstants.registeredOnLabel}: ${_registeredDate}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[700],
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -139,12 +133,11 @@ class UserApprovalCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           '${UserManagementConstants.registeredOnLabel}: ${_registeredDate}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[700],
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[700]),
                         ),
                       ),
-                      const SizedBox(width:Constants.spacing),
+                      const SizedBox(width: Constants.spacing),
                       SizedBox(
                         width: 150,
                         child: CustomOutlinedButtonWidget(
@@ -250,7 +243,9 @@ class _GridSquareApprovalCard extends StatelessWidget {
                         _displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                        style: t.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(

@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 
-/// Client-side structure hints under the GLN field (parallel to [GtinStructureChips]).
 class GlnStructureChips extends StatelessWidget {
-  const GlnStructureChips({
-    super.key,
-    required this.glnCodeController,
-  });
+  const GlnStructureChips({super.key, required this.glnCodeController});
 
   final TextEditingController glnCodeController;
 
@@ -31,10 +27,7 @@ class GlnStructureChips extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Chip(
-                label: Text(
-                  '13-digit GLN',
-                  style: theme.textTheme.labelSmall,
-                ),
+                label: Text('13-digit GLN', style: theme.textTheme.labelSmall),
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),

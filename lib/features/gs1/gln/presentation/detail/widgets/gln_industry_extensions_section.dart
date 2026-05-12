@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_industry_mode_content.dar
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
 
-/// Industry-mode extension block (pharma or tobacco) below core GLN master fields.
 class GlnIndustryExtensionsSection extends StatelessWidget {
   const GlnIndustryExtensionsSection({
     super.key,
@@ -39,12 +38,11 @@ class GlnIndustryExtensionsSection extends StatelessWidget {
             settings.isPharmaceuticalMode || tobaccoUiAllowed;
 
         final fromPersisted = gln?.glnCode;
-        final fromField =
-            GlnFormat.stripGlnInput(glnCodeController.text);
+        final fromField = GlnFormat.stripGlnInput(glnCodeController.text);
         final currentGlnCode =
             (fromPersisted != null && fromPersisted.isNotEmpty)
-                ? fromPersisted
-                : (fromField.isNotEmpty ? fromField : null);
+            ? fromPersisted
+            : (fromField.isNotEmpty ? fromField : null);
 
         final scopeKey = currentGlnCode ?? '';
 

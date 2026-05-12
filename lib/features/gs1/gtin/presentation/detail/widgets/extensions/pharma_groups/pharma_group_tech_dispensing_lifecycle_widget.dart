@@ -44,7 +44,8 @@ class TechDispensingLifecycleGroupWidget extends StatefulWidget {
     required String countryOfManufacture,
     required String packSizeDescription,
     required String activePotencyAi7004,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<TechDispensingLifecycleGroupWidget> createState() =>
@@ -71,18 +72,23 @@ class _TechDispensingLifecycleGroupWidgetState
     _additionalMonitoring = widget.initialAdditionalMonitoring;
     _controlledSubstanceSchedule =
         widget.initialControlledSubstanceSchedule.trim().isEmpty
-            ? null
-            : widget.initialControlledSubstanceSchedule;
-    _shelfLifeMonthsController =
-        TextEditingController(text: widget.initialShelfLifeMonths);
-    _shelfLifeAfterOpenDaysController =
-        TextEditingController(text: widget.initialShelfLifeAfterOpenDays);
-    _countryOfManufactureController =
-        TextEditingController(text: widget.initialCountryOfManufacture);
-    _packSizeDescriptionController =
-        TextEditingController(text: widget.initialPackSizeDescription);
-    _activePotencyAi7004Controller =
-        TextEditingController(text: widget.initialActivePotencyAi7004);
+        ? null
+        : widget.initialControlledSubstanceSchedule;
+    _shelfLifeMonthsController = TextEditingController(
+      text: widget.initialShelfLifeMonths,
+    );
+    _shelfLifeAfterOpenDaysController = TextEditingController(
+      text: widget.initialShelfLifeAfterOpenDays,
+    );
+    _countryOfManufactureController = TextEditingController(
+      text: widget.initialCountryOfManufacture,
+    );
+    _packSizeDescriptionController = TextEditingController(
+      text: widget.initialPackSizeDescription,
+    );
+    _activePotencyAi7004Controller = TextEditingController(
+      text: widget.initialActivePotencyAi7004,
+    );
 
     _shelfLifeMonthsController.addListener(_emitChange);
     _shelfLifeAfterOpenDaysController.addListener(_emitChange);
@@ -94,11 +100,14 @@ class _TechDispensingLifecycleGroupWidgetState
   @override
   void didUpdateWidget(covariant TechDispensingLifecycleGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialPrescriptionStatus == oldWidget.initialPrescriptionStatus &&
-        widget.initialControlledSubstance == oldWidget.initialControlledSubstance &&
+    if (widget.initialPrescriptionStatus ==
+            oldWidget.initialPrescriptionStatus &&
+        widget.initialControlledSubstance ==
+            oldWidget.initialControlledSubstance &&
         widget.initialControlledSubstanceSchedule ==
             oldWidget.initialControlledSubstanceSchedule &&
-        widget.initialAdditionalMonitoring == oldWidget.initialAdditionalMonitoring &&
+        widget.initialAdditionalMonitoring ==
+            oldWidget.initialAdditionalMonitoring &&
         widget.initialShelfLifeMonths == oldWidget.initialShelfLifeMonths &&
         widget.initialShelfLifeAfterOpenDays ==
             oldWidget.initialShelfLifeAfterOpenDays &&
@@ -110,8 +119,7 @@ class _TechDispensingLifecycleGroupWidgetState
             oldWidget.initialActivePotencyAi7004) {
       return;
     }
-    // Defer controller writes (feeds [GtinCountryCodePickerField] and FormFields)
-    // so we never notify during layout when switching GTIN in split view.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() {
@@ -120,8 +128,8 @@ class _TechDispensingLifecycleGroupWidgetState
         _additionalMonitoring = widget.initialAdditionalMonitoring;
         _controlledSubstanceSchedule =
             widget.initialControlledSubstanceSchedule.trim().isEmpty
-                ? null
-                : widget.initialControlledSubstanceSchedule;
+            ? null
+            : widget.initialControlledSubstanceSchedule;
       });
       if (widget.initialShelfLifeMonths != oldWidget.initialShelfLifeMonths &&
           widget.initialShelfLifeMonths != _shelfLifeMonthsController.text) {
@@ -145,15 +153,13 @@ class _TechDispensingLifecycleGroupWidgetState
               oldWidget.initialPackSizeDescription &&
           widget.initialPackSizeDescription !=
               _packSizeDescriptionController.text) {
-        _packSizeDescriptionController.text =
-            widget.initialPackSizeDescription;
+        _packSizeDescriptionController.text = widget.initialPackSizeDescription;
       }
       if (widget.initialActivePotencyAi7004 !=
               oldWidget.initialActivePotencyAi7004 &&
           widget.initialActivePotencyAi7004 !=
               _activePotencyAi7004Controller.text) {
-        _activePotencyAi7004Controller.text =
-            widget.initialActivePotencyAi7004;
+        _activePotencyAi7004Controller.text = widget.initialActivePotencyAi7004;
       }
     });
   }
@@ -205,7 +211,9 @@ class _TechDispensingLifecycleGroupWidgetState
                     _emitChange();
                   }
                 : null,
-            validator: widget.isEditing ? PharmaFieldValidators.validatePrescriptionStatus : null,
+            validator: widget.isEditing
+                ? PharmaFieldValidators.validatePrescriptionStatus
+                : null,
           ),
           const SizedBox(height: 8),
           SwitchListTile(
@@ -235,14 +243,17 @@ class _TechDispensingLifecycleGroupWidgetState
                     _emitChange();
                   }
                 : null,
-            validator: (v) => PharmaFieldValidators.validateControlledSubstanceSchedule(
-              v,
-              controlled: _controlledSubstance,
-            ),
+            validator: (v) =>
+                PharmaFieldValidators.validateControlledSubstanceSchedule(
+                  v,
+                  controlled: _controlledSubstance,
+                ),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Black Triangle / Additional Monitoring Indicator'),
+            title: const Text(
+              'Black Triangle / Additional Monitoring Indicator',
+            ),
             value: _additionalMonitoring,
             onChanged: widget.isEditing
                 ? (v) {
@@ -259,7 +270,7 @@ class _TechDispensingLifecycleGroupWidgetState
             helperText: 'Numeric, 1–360',
             maxLength: 3,
             keyboardType: TextInputType.number,
-            inputFormatters:  [LengthLimitingTextInputFormatter(3)],
+            inputFormatters: [LengthLimitingTextInputFormatter(3)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateShelfLifeMonths,
           ),
@@ -269,7 +280,7 @@ class _TechDispensingLifecycleGroupWidgetState
             label: 'Shelf Life After Opening (days)',
             keyboardType: TextInputType.number,
             maxLength: 4,
-            inputFormatters:  [LengthLimitingTextInputFormatter(4)],
+            inputFormatters: [LengthLimitingTextInputFormatter(4)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateShelfLifeAfterOpenDays,
           ),
@@ -286,7 +297,7 @@ class _TechDispensingLifecycleGroupWidgetState
             label: 'Pack Size Description (free text)',
             helperText: 'Up to 100 chars',
             maxLength: 100,
-            inputFormatters:  [LengthLimitingTextInputFormatter(100)],
+            inputFormatters: [LengthLimitingTextInputFormatter(100)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validatePackSizeDescription,
           ),
@@ -297,7 +308,7 @@ class _TechDispensingLifecycleGroupWidgetState
             helperText: 'Optional master-data potency note',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             maxLength: 20,
-            inputFormatters:  [LengthLimitingTextInputFormatter(20)],
+            inputFormatters: [LengthLimitingTextInputFormatter(20)],
             readOnly: !widget.isEditing,
           ),
         ],

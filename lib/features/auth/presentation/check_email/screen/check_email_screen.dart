@@ -23,7 +23,9 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
   void _handleResend(String email) {
     final trimmedEmail = email.trim();
     if (trimmedEmail.isEmpty) {
-      context.showError('Email address is required to resend verification email.');
+      context.showError(
+        'Email address is required to resend verification email.',
+      );
       return;
     }
 
@@ -60,8 +62,7 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
           }
         },
         builder: (context, state) {
-          final resolvedEmail =
-              (widget.email?.trim().isNotEmpty ?? false)
+          final resolvedEmail = (widget.email?.trim().isNotEmpty ?? false)
               ? widget.email!.trim()
               : state.registeredEmail;
 

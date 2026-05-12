@@ -1,22 +1,20 @@
 class UserStrings {
-  // Screen / section titles
   static const profileManagementTitle = 'Profile Management';
   static const infoTitle = 'Profile';
   static const securityTitle = 'Security';
   static const preferencesTitle = 'Preferences';
 
-  // Snackbars
   static const profileUpdatedSuccessfully = 'Profile updated successfully';
   static const profilePictureUpdatedSuccessfully =
       'Profile picture updated successfully';
   static const profilePictureRemovedSuccessfully =
       'Profile picture removed successfully';
   static const passwordChangedSuccessfully = 'Password changed successfully';
-  static const preferencesUpdatedSuccessfully = 'Preferences updated successfully';
+  static const preferencesUpdatedSuccessfully =
+      'Preferences updated successfully';
   static const genericError = 'An error occurred';
   static const errorPrefix = 'Error: ';
 
-  // Profile info labels
   static const firstNameLabel = 'First Name';
   static const lastNameLabel = 'Last Name';
   static const emailLabel = 'Email';
@@ -25,12 +23,10 @@ class UserStrings {
   static const roleLabel = 'Role';
   static const roleHelper = 'Assigned by administrator';
 
-  // Buttons
   static const editProfile = 'Edit Profile';
   static const saveChanges = 'Save Changes';
   static const cancel = 'Cancel';
 
-  // Security section
   static const changePasswordTitle = 'Change Password';
   static const passwordHelpText =
       'Your password must be at least 8 characters long and include a mix of letters, numbers, and symbols.';
@@ -39,21 +35,18 @@ class UserStrings {
   static const confirmNewPasswordLabel = 'Confirm New Password';
   static const changePasswordButton = 'Change Password';
 
-  // Validation
   static const enterCurrentPassword = 'Please enter your current password';
   static const enterNewPassword = 'Please enter your new password';
   static const passwordAtLeast8Chars = 'Password must be at least 8 characters';
   static const confirmNewPassword = 'Please confirm your new password';
   static const passwordsDoNotMatch = 'Passwords do not match';
 
-  // Sessions
   static const sessionsTitle = 'Sessions';
   static const sessionsSubtitle = 'Manage your active sessions across devices.';
   static const currentSessionTitle = 'Current Session';
   static const currentSessionSubtitle = 'This device • Active now';
   static const logOut = 'Log Out';
 
-  // Preferences
   static const notificationPreferencesTitle = 'Notification Preferences';
   static const applicationPreferencesTitle = 'Application Preferences';
   static const emailNotificationsTitle = 'Email Notifications';
@@ -70,7 +63,6 @@ class UserStrings {
   static const languageSubtitlePrefix = 'Current: ';
   static const saveAppPreferences = 'Save App Preferences';
 
-  // Language options
   static const languageEnglish = 'English';
   static const languageSpanish = 'Spanish';
   static const languageFrench = 'French';
@@ -79,4 +71,3 @@ class UserStrings {
 
   const UserStrings._();
 }
-

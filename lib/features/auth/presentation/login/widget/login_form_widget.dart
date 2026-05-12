@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -12,10 +12,7 @@ import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 import 'package:world_countries/helpers.dart';
 
 class LoginFormWidget extends StatefulWidget {
-  const LoginFormWidget({
-    super.key,
-    required this.state,
-  });
+  const LoginFormWidget({super.key, required this.state});
 
   final AuthState state;
 
@@ -37,7 +34,6 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   }
 
   void _submitForm() {
-
     if (_formKey.currentState!.validate()) {
       final loginRequest = LoginRequest(
         username: _usernameController.text.trim(),

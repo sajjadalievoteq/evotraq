@@ -37,18 +37,20 @@ class RegulatoryAuthorityAuthorizationSection extends StatelessWidget {
           GtinValidatedField(
             controller: licensedAgentGlnsController,
             fieldName: 'licensedAgentGlns',
-            label: GtinRegulatoryAuthorityExtensionUiConstants.labelLicensedAgentGlns,
-            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperLicensedAgentGlns,
+            label: GtinRegulatoryAuthorityExtensionUiConstants
+                .labelLicensedAgentGlns,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants
+                .helperLicensedAgentGlns,
             maxLines: 3,
             maxLength: 500,
             inputFormatters: [LengthLimitingTextInputFormatter(500)],
             readOnly: isReadOnly,
             validator: (v) =>
                 RegulatoryAuthorityValidators.validateLicensedAgentForRegulatoryAuthority(
-              v,
-              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
-              isImportedProduct: isImportedProduct,
-            ),
+                  v,
+                  isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
+                  isImportedProduct: isImportedProduct,
+                ),
           ),
         ],
       ),
@@ -71,7 +73,8 @@ class RegulatoryAuthorityAuthorizationSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SectionLabel(
-                GtinRegulatoryAuthorityExtensionUiConstants.sectionAuthorization,
+                GtinRegulatoryAuthorityExtensionUiConstants
+                    .sectionAuthorization,
                 padding: EdgeInsets.only(bottom: 12),
               ),
               GtinSkeletonOutlineField(color: c, height: 72),

@@ -1,8 +1,6 @@
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 
-/// Filter, sort, pagination, and user-visible copy for GLN master data.
 abstract final class GlnUiConstants {
-  // --- Filter / sort ---
   static const filterAll = 'All';
   static const statusActive = 'Active';
   static const statusInactive = 'Inactive';
@@ -47,7 +45,6 @@ abstract final class GlnUiConstants {
     locationTypeOther,
   ];
 
-  /// [locationTypeOptions] without the "All" sentinel (detail form subtype dropdown).
   static const List<String> locationTypeDetailOptions = [
     locationTypeManufacturing,
     locationTypeWarehouse,
@@ -62,7 +59,6 @@ abstract final class GlnUiConstants {
 
   static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;
 
-  /// API [sortBy] values → short labels for the sort row.
   static const Map<String, String> sortFieldLabels = {
     'locationName': sortLabelLocationName,
     'glnCode': sortLabelGlnCode,
@@ -71,7 +67,6 @@ abstract final class GlnUiConstants {
     'licenseNumber': sortLabelLicenseNumber,
   };
 
-  // --- List & navigation ---
   static const appBarManagement = 'GLN Management';
   static const fabAddNew = 'Add New GLN';
   static const fabCloseCreate = 'Close create form';
@@ -129,7 +124,6 @@ abstract final class GlnUiConstants {
   static const advancedFiltersSuccessBanner =
       'Database-level filtering is now active! These filters are applied directly at the database for optimal performance with large datasets.';
 
-  // --- Detail scaffold ---
   static const detailSaveButton = 'SAVE GLN';
   static const detailTitleCreate = 'Create GLN';
   static const detailTitleEdit = 'Edit GLN';
@@ -141,7 +135,6 @@ abstract final class GlnUiConstants {
 
   static const errorDeleteGlnFailed = 'Failed to delete GLN';
 
-  // --- Detail form: sections ---
   static const sectionIdentificationStructure = 'Identification & Structure';
   static const sectionGlnTypesClassification = 'GLN Types * & Classification';
   static const sectionLegalEntity = 'Legal Entity Attributes';
@@ -153,7 +146,6 @@ abstract final class GlnUiConstants {
   static const sectionOperationalLocationType = 'Operational Location Type';
   static const sectionLifecycleStatus = 'Lifecycle & Status';
 
-  // --- Detail form: labels & helpers ---
   static const labelGlnThirteenDigits = 'GLN (13 digits) *';
   static const hintGlnThirteen = 'Enter 13-digit GLN';
   static const labelGcpLength = 'GCP length';
@@ -169,14 +161,12 @@ abstract final class GlnUiConstants {
   static const labelIndustryClassification = 'Industry classification';
   static const labelGlnSource = 'GLN source';
 
-  // values (industry)
   static const industryHealthcare = 'HEALTHCARE';
   static const industryCpg = 'CPG';
   static const industryApparel = 'APPAREL';
   static const industryFoodservice = 'FOODSERVICE';
   static const industryOther = 'OTHER';
 
-  // values (source)
   static const glnSourceSelfAllocatedValue = 'SELF_ALLOCATED';
   static const glnSourceSelfAllocatedLabel = 'Self allocated';
   static const glnSourcePartnerValue = 'PARTNER_PROVIDED';
@@ -255,7 +245,6 @@ abstract final class GlnUiConstants {
   static const operationalFallbackOther = 'Other';
 }
 
-/// GLN form validation messages ([GlnFieldValidators]).
 abstract final class GlnValidationConstants {
   static String invalidControlChars(String field) =>
       '$field contains invalid control characters';
@@ -282,7 +271,8 @@ abstract final class GlnValidationConstants {
   static const emailInvalidChars = 'Email contains invalid characters';
   static const emailInvalidFormat = 'Enter a valid email';
 
-  static const phoneInvalidControl = 'Phone contains invalid control characters';
+  static const phoneInvalidControl =
+      'Phone contains invalid control characters';
   static String phoneMaxLen(int max) => 'Phone must be at most $max characters';
   static const phoneTooShort = 'Phone number is too short';
   static const phoneFormatHint =

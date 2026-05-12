@@ -32,7 +32,9 @@ class RegulatoryAuthorityDistributionSection extends StatelessWidget {
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
             title: const Text(
-                GtinRegulatoryAuthorityExtensionUiConstants.checkboxRegulatoryAuthorityMarket),
+              GtinRegulatoryAuthorityExtensionUiConstants
+                  .checkboxRegulatoryAuthorityMarket,
+            ),
             value: isRegulatoryAuthorityMarket,
             onChanged: null,
           ),
@@ -40,9 +42,13 @@ class RegulatoryAuthorityDistributionSection extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text(GtinRegulatoryAuthorityExtensionUiConstants.checkboxImportedProduct),
+            title: const Text(
+              GtinRegulatoryAuthorityExtensionUiConstants
+                  .checkboxImportedProduct,
+            ),
             subtitle: const Text(
-              GtinRegulatoryAuthorityExtensionUiConstants.subtitleImportedProduct,
+              GtinRegulatoryAuthorityExtensionUiConstants
+                  .subtitleImportedProduct,
             ),
             value: isRegulatoryAuthorityMarket && isImportedProduct,
             onChanged: null,

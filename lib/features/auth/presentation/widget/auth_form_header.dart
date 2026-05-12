@@ -1,4 +1,3 @@
-/// Copy shown above auth forms (web right pane + mobile stack).
 class AuthFormHeader {
   const AuthFormHeader({
     required this.eyebrow,

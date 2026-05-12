@@ -66,7 +66,8 @@ class ProfileState extends Equatable {
       isSavingProfile: isSavingProfile ?? this.isSavingProfile,
       isChangingPassword: isChangingPassword ?? this.isChangingPassword,
       isSavingNotificationPreferences:
-          isSavingNotificationPreferences ?? this.isSavingNotificationPreferences,
+          isSavingNotificationPreferences ??
+          this.isSavingNotificationPreferences,
       isSavingAppPreferences:
           isSavingAppPreferences ?? this.isSavingAppPreferences,
       profilePictureBytes: (clearProfilePictureBytes ?? false)
@@ -83,18 +84,17 @@ class ProfileState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        user,
-        error,
-        preferences,
-        isSavingProfile,
-        isChangingPassword,
-        isSavingNotificationPreferences,
-        isSavingAppPreferences,
-        profilePictureBytes,
-        isLoadingProfilePicture,
-        isUploadingProfilePicture,
-        isRemovingProfilePicture,
-      ];
+    status,
+    user,
+    error,
+    preferences,
+    isSavingProfile,
+    isChangingPassword,
+    isSavingNotificationPreferences,
+    isSavingAppPreferences,
+    profilePictureBytes,
+    isLoadingProfilePicture,
+    isUploadingProfilePicture,
+    isRemovingProfilePicture,
+  ];
 }
-

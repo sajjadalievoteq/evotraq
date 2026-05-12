@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:traqtrace_app/core/widgets/profile_avatar.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
@@ -33,7 +33,6 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     _lastNameController = TextEditingController(text: widget.user.lastName);
     _emailController = TextEditingController(text: widget.user.email);
 
-    // Load avatar bytes (if any)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<ProfileCubit>().loadProfilePicture();
@@ -63,9 +62,9 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
       context.read<ProfileCubit>().updateProfile(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-          );
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+      );
     }
   }
 
@@ -87,10 +86,10 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     };
 
     await context.read<ProfileCubit>().uploadProfilePicture(
-          bytes: file.bytes!,
-          filename: name,
-          contentType: contentType,
-        );
+      bytes: file.bytes!,
+      filename: name,
+      contentType: contentType,
+    );
   }
 
   Future<void> _removeProfilePicture() async {
@@ -126,6 +125,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 16),
               ProfileAvatar(
@@ -206,12 +206,12 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                             child: SizedBox(
                               height: 50,
                               child: OutlinedButton.icon(
-
                                 onPressed: isSaving ? null : _toggleEdit,
-                                icon: const Icon(Icons.close_rounded,size: 16,),
-                                label: const Text(UserStrings.cancel,style: TextStyle(
-                                  fontSize: 16
-                                ),),
+                                icon: const Icon(Icons.close_rounded, size: 16),
+                                label: const Text(
+                                  UserStrings.cancel,
+                                  style: TextStyle(fontSize: 16),
+                                ),
                               ),
                             ),
                           ),
@@ -280,4 +280,3 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     );
   }
 }
-

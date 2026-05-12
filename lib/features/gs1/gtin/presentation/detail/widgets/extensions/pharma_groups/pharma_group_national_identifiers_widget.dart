@@ -40,7 +40,8 @@ class NationalIdentifiersGroupWidget extends StatefulWidget {
     required String nhmnUsaNdc,
     required String nhmnItalyAifa,
     required String localDrugCodeUaeGcc,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<NationalIdentifiersGroupWidget> createState() =>
@@ -61,15 +62,30 @@ class _NationalIdentifiersGroupWidgetState
   @override
   void initState() {
     super.initState();
-    _nhmnGermanyPznController = TextEditingController(text: widget.initialNhmnGermanyPzn);
-    _nhmnFranceCipController = TextEditingController(text: widget.initialNhmnFranceCip);
-    _nhmnSpainCnController = TextEditingController(text: widget.initialNhmnSpainCn);
-    _nhmnBrazilAnvisaController = TextEditingController(text: widget.initialNhmnBrazilAnvisa);
-    _nhmnPortugalAimController = TextEditingController(text: widget.initialNhmnPortugalAim);
-    _nhmnUsaNdcController = TextEditingController(text: widget.initialNhmnUsaNdc);
-    _nhmnItalyAifaController = TextEditingController(text: widget.initialNhmnItalyAifa);
-    _localDrugCodeUaeGccController =
-        TextEditingController(text: widget.initialLocalDrugCodeUaeGcc);
+    _nhmnGermanyPznController = TextEditingController(
+      text: widget.initialNhmnGermanyPzn,
+    );
+    _nhmnFranceCipController = TextEditingController(
+      text: widget.initialNhmnFranceCip,
+    );
+    _nhmnSpainCnController = TextEditingController(
+      text: widget.initialNhmnSpainCn,
+    );
+    _nhmnBrazilAnvisaController = TextEditingController(
+      text: widget.initialNhmnBrazilAnvisa,
+    );
+    _nhmnPortugalAimController = TextEditingController(
+      text: widget.initialNhmnPortugalAim,
+    );
+    _nhmnUsaNdcController = TextEditingController(
+      text: widget.initialNhmnUsaNdc,
+    );
+    _nhmnItalyAifaController = TextEditingController(
+      text: widget.initialNhmnItalyAifa,
+    );
+    _localDrugCodeUaeGccController = TextEditingController(
+      text: widget.initialLocalDrugCodeUaeGcc,
+    );
 
     _nhmnGermanyPznController.addListener(_emitChange);
     _nhmnFranceCipController.addListener(_emitChange);

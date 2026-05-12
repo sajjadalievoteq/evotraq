@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 /// Search field + optional refresh / quick-filters row (GTIN/GLN list “tile”).
@@ -33,91 +34,107 @@ class Gs1ListSearchBar extends StatelessWidget {
     return AppLayoutBuilder(
       builder: (context, layout) {
         final c = context.colors;
-        return Container(
-          padding: EdgeInsets.all(
-            layout.resolve(
-              compact: 12.0,
-              medium: Constants.spacing.toDouble(),
-            ),
-          ),
-          decoration: BoxDecoration(
-            color: c.primary,
-            borderRadius: BorderRadius.circular(12.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onRefresh != null || onQuickFilters != null)
-                Row(
-                  children: [
+        return Card(
+          child: DecoratedBox(
 
-                    const Spacer(),
-                    if (onRefresh != null)
-                      IconButton(
-                        onPressed: onRefresh,
-                        icon: const Icon(Icons.refresh),
-                        color: Colors.white,
-                        tooltip: 'Refresh',
-                      ),
-                    if (onQuickFilters != null)
-                      IconButton(
-                        onPressed: onQuickFilters,
-                        icon: const Icon(Icons.filter_list),
-                        color: Colors.white,
-                        tooltip: 'Quick Filters',
-                      ),
-                  ],
+            decoration: BoxDecoration(
+                color: context.colors.primary,
+                image: DecorationImage(
+                  image: AssetImage(AppAssets.traqBackgroundPng),
+                  fit: BoxFit.cover,
+                  opacity: 0.2,
+                )
+            ),
+            child:
+            Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.1),
+                  ),
                 ),
-              TextField(
-                controller: controller,
-                onChanged: onQueryChanged,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: Row(
+                Padding(
+                  padding: EdgeInsets.all(
+                    layout.resolve(
+                      compact: 12.0,
+                      medium: Constants.spacing.toDouble(),
+                    ),
+                  ),
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (controller.text.isNotEmpty)
-                        IconButton(
-                          onPressed: onClear,
-                          icon: const Icon(Icons.clear),
-                          color: c.primary,
-                          tooltip: 'Clear',
+                      if (onRefresh != null || onQuickFilters != null)
+                        Row(
+                          children: [
+
+                            const Spacer(),
+                            if (onRefresh != null)
+                              IconButton(
+                                onPressed: onRefresh,
+                                icon: const Icon(Icons.refresh),
+                                color: Colors.white,
+                                tooltip: 'Refresh',
+                              ),
+                            if (onQuickFilters != null)
+                              IconButton(
+                                onPressed: onQuickFilters,
+                                icon: const Icon(Icons.filter_list),
+                                color: Colors.white,
+                                tooltip: 'Quick Filters',
+                              ),
+                          ],
                         ),
-                      IconButton(
-                        onPressed: onToggleAdvancedFilters,
-                        icon: const Icon(Icons.tune),
-                        color: c.primary,
-                        tooltip: showAdvancedFilters
-                            ? 'Hide Advanced Filters'
-                            : 'Advanced Filters',
+                      TextField(
+                        controller: controller,
+                        onChanged: onQueryChanged,
+                        decoration: InputDecoration(
+                          hintText: hintText,
+                          prefixIcon: Icon(Icons.search,color: Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (controller.text.isNotEmpty)
+                                IconButton(
+                                  onPressed: onClear,
+                                  icon: const Icon(Icons.clear),
+                                  color:Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
+                                  tooltip: 'Clear',
+                                ),
+                              IconButton(
+                                onPressed: onToggleAdvancedFilters,
+                                icon: const Icon(Icons.tune),
+                                color:Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
+                                tooltip: showAdvancedFilters
+                                    ? 'Hide Advanced Filters'
+                                    : 'Advanced Filters',
+                              ),
+                            ],
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: c.primary, width: 2),
+                          ),
+                        ),
+                        onSubmitted: (_) => onSearch(),
                       ),
                     ],
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: c.primary, width: 2),
-                  ),
                 ),
-                onSubmitted: (_) => onSearch(),
-              ),
-            ],
+
+
+
+              ],
+            ),
+
+
           ),
         );
       },

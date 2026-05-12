@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
@@ -43,7 +43,6 @@ class ForgotPasswordForm extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
 
-          // Icon
           SvgPicture.asset(
             AppAssets.iconLock,
             width: 80,
@@ -53,7 +52,6 @@ class ForgotPasswordForm extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Title
           Text(
             'Reset Your Password',
             style: TextStyle(
@@ -66,7 +64,6 @@ class ForgotPasswordForm extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Description
           Text(
             'Enter your email address and we will send you instructions to reset your password.',
             style: TextStyle(fontSize: 16, color: textSecondary),
@@ -75,7 +72,6 @@ class ForgotPasswordForm extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          // Email Field
           AuthInputField(
             controller: emailController,
             labelText: 'Email',
@@ -86,7 +82,6 @@ class ForgotPasswordForm extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          // Submit Button
           AuthActionButton(
             label: 'SEND RESET INSTRUCTIONS',
             isLoading: isSubmitting,
@@ -96,7 +91,6 @@ class ForgotPasswordForm extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Back to Login Link
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

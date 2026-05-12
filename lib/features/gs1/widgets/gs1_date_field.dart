@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 /// Date-only picker row (InputDecorator + ink tap). Used by GLN-style forms.
 class Gs1DatePickerField extends StatelessWidget {

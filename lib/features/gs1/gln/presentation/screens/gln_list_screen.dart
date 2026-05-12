@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -22,7 +23,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_con
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 import 'package:world_countries/helpers.dart';
 
-/// Screen to display and manage GLNs — layout aligned with [GTINListScreen].
 class GLNListScreen extends StatefulWidget {
   const GLNListScreen({
     super.key,
@@ -138,24 +138,23 @@ class _GLNListScreenState extends State<GLNListScreen> {
 
   void _runSearch({required int page}) {
     context.read<GLNCubit>().searchGLNsAdvanced(
-          search:
-              _searchController.text.isEmpty ? null : _searchController.text,
-          glnCode: _getAdvancedFilterValue('glnCode'),
-          locationName: _getAdvancedFilterValue('locationName'),
-          address: _getAdvancedFilterValue('address'),
-          licenseNumber: _getAdvancedFilterValue('licenseNumber'),
-          contactEmail: _getAdvancedFilterValue('contactEmail'),
-          contactName: _getAdvancedFilterValue('contactName'),
-          active: _selectedStatus == null ||
-              _selectedStatus == GlnUiConstants.filterAll
-              ? null
-              : (_selectedStatus!.toLowerCase() == 'active'),
-          locationType: _locationTypeApiValue(),
-          page: page,
-          size: _pageSize,
-          sortBy: _sortBy,
-          direction: _sortOrder.toUpperCase(),
-        );
+      search: _searchController.text.isEmpty ? null : _searchController.text,
+      glnCode: _getAdvancedFilterValue('glnCode'),
+      locationName: _getAdvancedFilterValue('locationName'),
+      address: _getAdvancedFilterValue('address'),
+      licenseNumber: _getAdvancedFilterValue('licenseNumber'),
+      contactEmail: _getAdvancedFilterValue('contactEmail'),
+      contactName: _getAdvancedFilterValue('contactName'),
+      active:
+          _selectedStatus == null || _selectedStatus == GlnUiConstants.filterAll
+          ? null
+          : (_selectedStatus!.toLowerCase() == 'active'),
+      locationType: _locationTypeApiValue(),
+      page: page,
+      size: _pageSize,
+      sortBy: _sortBy,
+      direction: _sortOrder.toUpperCase(),
+    );
   }
 
   void _search() {
@@ -274,7 +273,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
       widget.onEmbeddedCreate!();
       return;
     }
-    context.push(Constants.gs1GlnNewRoute).then((_) => _searchImmediate());
+    context.go(Constants.gs1GlnNewRoute);
+    _searchImmediate();
   }
 
   void _openGlnDetail(String glnCode) {
@@ -282,15 +282,13 @@ class _GLNListScreenState extends State<GLNListScreen> {
       widget.onSelectGln!(glnCode);
       return;
     }
-    context
-        .push(GlnRouteConstants.pathForGlnCode(glnCode))
-        .then((_) => _searchImmediate());
+    context.go(GlnRouteConstants.pathForGlnCode(glnCode));
+    _searchImmediate();
   }
 
   void _openGlnEdit(String glnCode) {
-    context
-        .push(GlnRouteConstants.pathForGlnCodeEdit(glnCode))
-        .then((_) => _searchImmediate());
+    context.go(GlnRouteConstants.pathForGlnCodeEdit(glnCode));
+    _searchImmediate();
   }
 
   void _handleGlnRowMenu(GLN gln, String action) {
@@ -368,7 +366,11 @@ class _GLNListScreenState extends State<GLNListScreen> {
           toolbar: Column(
             children: [
               Padding(
-                padding:  EdgeInsets.only(left: context.horizontalPadding.left,right:  context.horizontalPadding.left,top:  context.horizontalPadding.left),
+                padding: EdgeInsets.only(
+                  left: context.horizontalPadding.left,
+                  right: context.horizontalPadding.left,
+                  top: context.horizontalPadding.left,
+                ),
                 child: Column(
                   children: [
                     ListenableBuilder(
@@ -414,7 +416,6 @@ class _GLNListScreenState extends State<GLNListScreen> {
                   ],
                 ),
               ),
-
             ],
           ),
           results: GlnResultsList(
@@ -434,7 +435,10 @@ class _GLNListScreenState extends State<GLNListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(GlnUiConstants.appBarManagement)),
+      appBar: TraqAppBar(
+        context,
+        title: Text(GlnUiConstants.appBarManagement),
+      ),
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(

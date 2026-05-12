@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -9,6 +9,8 @@ import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
 
 /// A reusable drawer component that can be used across all screens
 class AppDrawer extends StatelessWidget {
@@ -71,39 +73,7 @@ class AppDrawer extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isTobaccoMode
-                                    ? Colors.brown.shade700
-                                    : const Color(0xFF121F17),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isTobaccoMode
-                                        ? Icons.local_florist
-                                        : Icons.medical_services,
-                                    size: 12,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    settings.industryMode.displayName,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+
                           ],
                         ),
                         accountEmail: Text(
@@ -111,41 +81,31 @@ class AppDrawer extends StatelessWidget {
                           style: const TextStyle(fontSize: 14),
                         ),
                         currentAccountPicture: CircleAvatar(
-                          backgroundColor: context.colors.primary,
+                          backgroundColor: context.colors.background,
                           child: Text(
                             user.firstName.isNotEmpty
                                 ? user.firstName[0].toUpperCase()
                                 : 'U',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 40,
-                              color: Colors.white,
+                              color: context.colors.textPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         decoration: BoxDecoration(
                           color: context.colors.primary,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: isDarkMode
-                                ? [
-                                    context.colors.primary,
-                                    context.colors.background,
-                                  ]
-                                : isTobaccoMode
-                                ? [Colors.brown.shade800, Colors.brown.shade400]
-                                : [
-                                    const Color(0xFF121F17),
-                                    const Color(0xFF2D4A3E),
-                                  ],
+                          image: DecorationImage(
+                            image: AssetImage(AppAssets.traqBackgroundPng),
+                            fit: BoxFit.cover,
+                            opacity: 0.2,
                           ),
                         ),
                         otherAccountsPictures: [
                           IconButton(
                             icon: Icon(
                               isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                              color: Colors.white,
+                              color: context.colors.background,
                             ),
                             onPressed: () async {
                               await context.read<ThemeCubit>().toggleTheme();
@@ -836,14 +796,14 @@ class AppDrawer extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
+                leading: Icon(TraqThemeAppBar.logoutActionIcon, color: Colors.red),
                 title: const Text(
                   'Logout',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
-                  context.read<AuthCubit>().logout();
-                  context.go(Constants.loginRoute);
+                  Navigator.pop(context);
+                  showLogoutConfirmDialog(context);
                 },
               ),
             ],

@@ -1,8 +1,6 @@
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 
-/// Filter, sort, pagination, list navigation, and user-visible copy for GTIN master data.
 abstract final class GtinUiConstants {
-  // --- Filter / sort ---
   static const filterAll = 'All';
   static const sortAscendingLabel = 'A–Z';
   static const sortDescendingLabel = 'Z–A';
@@ -12,7 +10,6 @@ abstract final class GtinUiConstants {
       'Sort by $sortLabelProductName '
       '(${ascending ? sortAscendingLabel : sortDescendingLabel})';
 
-  // status (filter values)
   static const statusActive = 'Active';
   static const statusWithdrawn = 'Withdrawn';
   static const statusSuspended = 'Suspended';
@@ -26,7 +23,6 @@ abstract final class GtinUiConstants {
     statusDiscontinued,
   ];
 
-  // packaging level (filter + form values)
   static const packagingLevelItem = 'ITEM';
   static const packagingLevelInnerPack = 'INNER_PACK';
   static const packagingLevelPack = 'PACK';
@@ -42,7 +38,6 @@ abstract final class GtinUiConstants {
     packagingLevelPallet,
   ];
 
-  /// Packaging levels for forms (no "All" sentinel).
   static const List<String> packagingLevelValues = [
     packagingLevelItem,
     packagingLevelInnerPack,
@@ -56,7 +51,6 @@ abstract final class GtinUiConstants {
   static const String listSearchHint =
       'Search by GTIN code, product name, or manufacturer...';
 
-  // --- List & navigation ---
   static const appBarManagement = 'GTIN Management';
   static const fabAddNew = 'Add New GTIN';
   static const fabCloseCreate = 'Close create form';
@@ -114,7 +108,6 @@ abstract final class GtinUiConstants {
   static String chipProduct(String value) => 'Product: $value';
   static String chipGtinCode(String value) => 'GTIN: $value';
 
-  // --- Detail scaffold ---
   static const detailTitleView = 'GTIN Details';
   static const detailTitleEdit = 'Edit GTIN';
   static const detailTitleCreate = 'Create GTIN';
@@ -126,7 +119,6 @@ abstract final class GtinUiConstants {
   static String successGtinCreated(String gtinCode) =>
       'GTIN $gtinCode created successfully';
 
-  // --- Identification & structure ---
   static const sectionIdentificationStructure = 'Identification & Structure';
   static const labelGtinRequired = 'GTIN *';
   static const helperGtinDigits = '8, 12, 13, or 14 digits';
@@ -135,7 +127,6 @@ abstract final class GtinUiConstants {
   static const labelItemReferenceChip = 'Item reference';
   static const messageEnterValidGtin = 'Enter a valid GTIN';
 
-  // --- Packaging hierarchy & trade item roles ---
   static const sectionPackagingHierarchyTradeItemRoles =
       'Packaging Hierarchy & Trade Item Roles';
   static const labelNextLowerLevelGtin = 'Next Lower Level GTIN';
@@ -148,13 +139,13 @@ abstract final class GtinUiConstants {
   static const sectionTradeItemRoleFlags = 'Trade Item Role Flags';
   static const switchTradeItemBaseUnit = 'Is Trade Item a Base Unit?';
   static const switchTradeItemConsumerUnit = 'Is Trade Item a Consumer Unit?';
-  static const switchTradeItemOrderableUnit = 'Is Trade Item an Orderable Unit?';
+  static const switchTradeItemOrderableUnit =
+      'Is Trade Item an Orderable Unit?';
   static const switchTradeItemDespatchUnit =
       'Is Trade Item a Despatch (Shipping) Unit?';
   static const switchTradeItemInvoiceUnit = 'Is Trade Item an Invoice Unit?';
   static const switchTradeItemVariableUnit = 'Is Trade Item a Variable Unit?';
 
-  // --- Lifecycle, availability & status ---
   static const sectionLifecycleAvailabilityStatus =
       'Lifecycle, Availability & Status';
   static const labelTradeItemStatus = 'Trade Item Status';
@@ -169,7 +160,6 @@ abstract final class GtinUiConstants {
   static const labelPublicationDate = 'Publication Date';
   static const errorEffectiveDateRequired = 'effective_date is required';
 
-  // --- Production, batch, serial ---
   static const sectionProductionBatchSerialDateAssociations =
       'Production, Batch, Serial & Date Associations';
   static const labelHasBatchNumberIndicator = 'Has Batch Number Indicator';
@@ -187,7 +177,6 @@ abstract final class GtinUiConstants {
       'NOT_REQUESTED_BUT_ALLOCATED';
   static const batchSerialValueNotAllocated = 'NOT_ALLOCATED';
 
-  // --- Trade item descriptive ---
   static const sectionTradeItemDescriptiveAttributes =
       'Trade Item Descriptive Attributes';
   static const labelFunctionalName = 'Functional Name';
@@ -197,7 +186,6 @@ abstract final class GtinUiConstants {
   static const labelTargetMarketCountryCode = 'Target Market Country Code';
   static const helperIso3166Numeric3 = 'ISO 3166-1 numeric (3 digits)';
 
-  // --- Trade item masterdata (bound group) ---
   static const sectionTradeItemData = 'Trade Item Data';
   static const labelBrandNameRequired = 'Brand Name *';
   static const labelManufacturerRequired = 'Manufacturer *';
@@ -207,12 +195,10 @@ abstract final class GtinUiConstants {
   static const helperPackSizeExamples = 'e.g., 30, 100, 500';
   static const labelProductLifecycleStatus = 'Status';
 
-  // --- Classification, market & origin ---
   static const sectionClassificationMarketOrigin =
       'Classification, Market & Origin';
   static const labelCountryOfOrigin = 'Country of Origin';
 
-  // --- Information provider & manufacturer ---
   static const sectionInformationProviderManufacturer =
       'Information Provider & Manufacturer';
   static const labelInformationProviderGln = 'Information Provider GLN';
@@ -223,7 +209,6 @@ abstract final class GtinUiConstants {
   static const helperManufacturerGlnField =
       'Enter a 13-digit GLN (provided by your organization)';
 
-  // --- Net content & measurements ---
   static const sectionNetContentMeasurements = 'Net Content & Measurements';
   static const labelNetContentValue = 'Net Content Value';
   static const labelNetContentUom = 'Net Content UOM';
@@ -235,7 +220,6 @@ abstract final class GtinUiConstants {
   static const labelDepth = 'Depth';
   static const labelDimensionUom = 'Dimension UOM';
 
-  // --- Marketing authorization (bound group) ---
   static const sectionMarketingAuthorization = 'Marketing Authorization';
   static const labelMarketingAuthorizationNumber =
       'Marketing Authorization Number';
@@ -246,7 +230,6 @@ abstract final class GtinUiConstants {
   static const labelAuthorizationValidityToDate =
       'Authorization Validity To Date';
 
-  // --- Audit ---
   static const sectionAudit = 'Audit';
   static const labelCreatedBy = 'Created By';
   static const labelUpdatedBy = 'Updated By';

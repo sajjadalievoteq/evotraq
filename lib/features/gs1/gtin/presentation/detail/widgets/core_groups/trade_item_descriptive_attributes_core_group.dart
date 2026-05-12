@@ -52,13 +52,16 @@ class TradeItemDescriptiveAttributesCoreGroupState
   String? get tradeItemDescription => _tradeItemDescription.text.trim().isEmpty
       ? null
       : _tradeItemDescription.text.trim();
-  String? get gpcBrickCode =>
-      _gpcCategoryCode.text.trim().isEmpty ? null : _gpcCategoryCode.text.trim();
-  String? get targetMarketCountry => _targetMarketCountryCode.text.trim().isEmpty
+  String? get gpcBrickCode => _gpcCategoryCode.text.trim().isEmpty
+      ? null
+      : _gpcCategoryCode.text.trim();
+  String? get targetMarketCountry =>
+      _targetMarketCountryCode.text.trim().isEmpty
       ? null
       : _targetMarketCountryCode.text.trim();
 
-  TextEditingController get targetMarketCountryController => _targetMarketCountryCode;
+  TextEditingController get targetMarketCountryController =>
+      _targetMarketCountryCode;
 
   void setFromGtin({
     required String? functionalName,
@@ -141,4 +144,3 @@ class TradeItemDescriptiveAttributesCoreGroupState
     );
   }
 }
-

@@ -25,7 +25,8 @@ class DrugIdentificationGroupWidget extends StatefulWidget {
     required String ndcNumber,
     required String dinNumber,
     required String eanPharmaCode,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<DrugIdentificationGroupWidget> createState() =>
@@ -43,8 +44,9 @@ class _DrugIdentificationGroupWidgetState
     super.initState();
     _ndcNumberController = TextEditingController(text: widget.initialNdcNumber);
     _dinNumberController = TextEditingController(text: widget.initialDinNumber);
-    _eanPharmaCodeController =
-        TextEditingController(text: widget.initialEanPharmaCode);
+    _eanPharmaCodeController = TextEditingController(
+      text: widget.initialEanPharmaCode,
+    );
 
     _ndcNumberController.addListener(_emitChange);
     _dinNumberController.addListener(_emitChange);
@@ -126,20 +128,29 @@ class _DrugIdentificationGroupWidgetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildValidatedField(
-              _ndcNumberController, 'ndcNumber', 'NDC Number',
-              helperText: 'National Drug Code (US)',
-              maxLength: 20,
-              validator: PharmaFieldValidators.validateNdcNumber),
+            _ndcNumberController,
+            'ndcNumber',
+            'NDC Number',
+            helperText: 'National Drug Code (US)',
+            maxLength: 20,
+            validator: PharmaFieldValidators.validateNdcNumber,
+          ),
           _buildValidatedField(
-              _dinNumberController, 'dinNumber', 'DIN Number',
-              helperText: 'Drug Identification Number (Canada)',
-              maxLength: 8,
-              validator: PharmaFieldValidators.validateDinNumber),
+            _dinNumberController,
+            'dinNumber',
+            'DIN Number',
+            helperText: 'Drug Identification Number (Canada)',
+            maxLength: 8,
+            validator: PharmaFieldValidators.validateDinNumber,
+          ),
           _buildValidatedField(
-              _eanPharmaCodeController, 'eanPharmaCode', 'EAN Pharma Code',
-              helperText: 'European Pharmaceutical Code (GTIN-13)',
-              maxLength: 13,
-              validator: PharmaFieldValidators.validateEanPharmaCode),
+            _eanPharmaCodeController,
+            'eanPharmaCode',
+            'EAN Pharma Code',
+            helperText: 'European Pharmaceutical Code (GTIN-13)',
+            maxLength: 13,
+            validator: PharmaFieldValidators.validateEanPharmaCode,
+          ),
         ],
       ),
     );

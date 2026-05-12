@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
@@ -35,9 +34,9 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
   void _changePassword() {
     if (_formKey.currentState!.validate()) {
       context.read<ProfileCubit>().changePassword(
-            currentPassword: _currentPasswordController.text,
-            newPassword: _newPasswordController.text,
-          );
+        currentPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
+      );
 
       _currentPasswordController.clear();
       _newPasswordController.clear();
@@ -146,10 +145,7 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
                 title: const Text(UserStrings.currentSessionTitle),
                 subtitle: const Text(UserStrings.currentSessionSubtitle),
                 trailing: TextButton(
-                  onPressed: () {
-                    context.read<AuthCubit>().logout();
-                    context.go(Constants.loginRoute);
-                  },
+                  onPressed: () => showLogoutConfirmDialog(context),
                   child: const Text(UserStrings.logOut),
                 ),
               ),
@@ -160,4 +156,3 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
     );
   }
 }
-

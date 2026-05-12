@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/exte
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_labeling_section.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/regulatory_authority/widgets/regulatory_authority_identifiers_section.dart';
 
-import '../../../../../../../../core/theme/evotraq_theme.dart';
+import '../../../../../../../../core/theme/traq_theme.dart';
 
 class RegulatoryAuthorityExtension extends StatefulWidget {
   const RegulatoryAuthorityExtension({
@@ -34,14 +34,16 @@ class RegulatoryAuthorityExtension extends StatefulWidget {
     required String marketingAuthorizationNumber,
     required String licensedAgentGlns,
     required String regulatedProductName,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<RegulatoryAuthorityExtension> createState() =>
       RegulatoryAuthorityExtensionState();
 }
 
-class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtension> {
+class RegulatoryAuthorityExtensionState
+    extends State<RegulatoryAuthorityExtension> {
   late final TextEditingController _localDrugCodeController;
   late final TextEditingController _marketingAuthorizationNumberController;
   late final TextEditingController _licensedAgentGlnsController;
@@ -50,13 +52,18 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
   @override
   void initState() {
     super.initState();
-    _localDrugCodeController = TextEditingController(text: widget.initialLocalDrugCode);
-    _marketingAuthorizationNumberController =
-        TextEditingController(text: widget.initialMarketingAuthorizationNumber);
-    _licensedAgentGlnsController =
-        TextEditingController(text: widget.initialLicensedAgentGlns);
-    _regulatedProductNameController =
-        TextEditingController(text: widget.initialRegulatedProductName);
+    _localDrugCodeController = TextEditingController(
+      text: widget.initialLocalDrugCode,
+    );
+    _marketingAuthorizationNumberController = TextEditingController(
+      text: widget.initialMarketingAuthorizationNumber,
+    );
+    _licensedAgentGlnsController = TextEditingController(
+      text: widget.initialLicensedAgentGlns,
+    );
+    _regulatedProductNameController = TextEditingController(
+      text: widget.initialRegulatedProductName,
+    );
     _localDrugCodeController.addListener(_emitChange);
     _marketingAuthorizationNumberController.addListener(_emitChange);
     _licensedAgentGlnsController.addListener(_emitChange);
@@ -70,7 +77,8 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
         widget.initialMarketingAuthorizationNumber ==
             oldWidget.initialMarketingAuthorizationNumber &&
         widget.initialLicensedAgentGlns == oldWidget.initialLicensedAgentGlns &&
-        widget.initialRegulatedProductName == oldWidget.initialRegulatedProductName) {
+        widget.initialRegulatedProductName ==
+            oldWidget.initialRegulatedProductName) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -86,13 +94,18 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
         _marketingAuthorizationNumberController.text =
             widget.initialMarketingAuthorizationNumber;
       }
-      if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
-          widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
+      if (widget.initialLicensedAgentGlns !=
+              oldWidget.initialLicensedAgentGlns &&
+          widget.initialLicensedAgentGlns !=
+              _licensedAgentGlnsController.text) {
         _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
       }
-      if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
-          widget.initialRegulatedProductName != _regulatedProductNameController.text) {
-        _regulatedProductNameController.text = widget.initialRegulatedProductName;
+      if (widget.initialRegulatedProductName !=
+              oldWidget.initialRegulatedProductName &&
+          widget.initialRegulatedProductName !=
+              _regulatedProductNameController.text) {
+        _regulatedProductNameController.text =
+            widget.initialRegulatedProductName;
       }
     });
   }
@@ -109,7 +122,8 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
   void _emitChange() {
     widget.onChanged(
       localDrugCode: _localDrugCodeController.text,
-      marketingAuthorizationNumber: _marketingAuthorizationNumberController.text,
+      marketingAuthorizationNumber:
+          _marketingAuthorizationNumberController.text,
       licensedAgentGlns: _licensedAgentGlnsController.text,
       regulatedProductName: _regulatedProductNameController.text,
     );
@@ -122,7 +136,8 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
       _regulatedProductNameController.text.trim().isNotEmpty;
 
   String get localDrugCode => _localDrugCodeController.text;
-  String get marketingAuthorizationNumber => _marketingAuthorizationNumberController.text;
+  String get marketingAuthorizationNumber =>
+      _marketingAuthorizationNumberController.text;
   String get licensedAgentGlns => _licensedAgentGlnsController.text;
   String get regulatedProductName => _regulatedProductNameController.text;
 
@@ -133,20 +148,23 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
       children: [
         Text(
           GtinRegulatoryAuthorityExtensionUiConstants.expansionTitle,
-          style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textPrimary,fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: context.colors.textPrimary,
+            fontSize: 16,
+          ),
           maxLines: 1,
 
           overflow: TextOverflow.ellipsis,
-
         ),
-        SizedBox(height: 16,),
+        SizedBox(height: 16),
         RegulatoryAuthorityIdentifiersSection(
           isReadOnly: !widget.isEditing,
           showFieldSkeleton: widget.showFieldSkeleton,
           isRegulatoryAuthorityMarket: widget.isRegulatoryAuthorityMarket,
           localDrugCodeController: _localDrugCodeController,
           marketingAuthorizationNumberController:
-          _marketingAuthorizationNumberController,
+              _marketingAuthorizationNumberController,
         ),
         RegulatoryAuthorityAuthorizationSection(
           isReadOnly: !widget.isEditing,
@@ -170,4 +188,3 @@ class RegulatoryAuthorityExtensionState extends State<RegulatoryAuthorityExtensi
     );
   }
 }
-

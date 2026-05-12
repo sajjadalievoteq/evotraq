@@ -61,9 +61,12 @@ class MarketingAuthorizationBoundGroupState
     _number.text = number;
     _validFrom = validFrom;
     _validTo = validTo;
-    _validFromDisplay.text =
-        validFrom == null ? '' : _dateFmt.format(validFrom.toLocal());
-    _validToDisplay.text = validTo == null ? '' : _dateFmt.format(validTo.toLocal());
+    _validFromDisplay.text = validFrom == null
+        ? ''
+        : _dateFmt.format(validFrom.toLocal());
+    _validToDisplay.text = validTo == null
+        ? ''
+        : _dateFmt.format(validTo.toLocal());
     if (mounted) setState(() {});
   }
 
@@ -129,9 +132,9 @@ class MarketingAuthorizationBoundGroupState
           validator: widget.isReadOnly
               ? null
               : (v) => GtinFieldValidators.validateAuthorizationValidityToDate(
-                    v,
-                    fromValue: _validFromDisplay.text,
-                  ),
+                  v,
+                  fromValue: _validFromDisplay.text,
+                ),
         ),
       ],
     );
@@ -155,4 +158,3 @@ class MarketingAuthorizationBoundGroupState
     );
   }
 }
-

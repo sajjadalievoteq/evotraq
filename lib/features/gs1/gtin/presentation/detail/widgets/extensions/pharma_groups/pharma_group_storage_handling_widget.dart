@@ -42,13 +42,16 @@ class StorageHandlingGroupWidget extends StatefulWidget {
     required bool lightSensitive,
     required bool humiditySensitive,
     required bool coldChainRequired,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
-  State<StorageHandlingGroupWidget> createState() => _StorageHandlingGroupWidgetState();
+  State<StorageHandlingGroupWidget> createState() =>
+      _StorageHandlingGroupWidgetState();
 }
 
-class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget> {
+class _StorageHandlingGroupWidgetState
+    extends State<StorageHandlingGroupWidget> {
   late final TextEditingController _storageConditionsController;
   late final TextEditingController _minStorageTempController;
   late final TextEditingController _maxStorageTempController;
@@ -60,10 +63,15 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
   @override
   void initState() {
     super.initState();
-    _storageConditionsController =
-        TextEditingController(text: widget.initialStorageConditions);
-    _minStorageTempController = TextEditingController(text: widget.initialMinStorageTemp);
-    _maxStorageTempController = TextEditingController(text: widget.initialMaxStorageTemp);
+    _storageConditionsController = TextEditingController(
+      text: widget.initialStorageConditions,
+    );
+    _minStorageTempController = TextEditingController(
+      text: widget.initialMinStorageTemp,
+    );
+    _maxStorageTempController = TextEditingController(
+      text: widget.initialMaxStorageTemp,
+    );
     _requiresRefrigeration = widget.initialRequiresRefrigeration;
     _requiresFreezing = widget.initialRequiresFreezing;
     _lightSensitive = widget.initialLightSensitive;
@@ -80,7 +88,8 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
     if (widget.initialStorageConditions == oldWidget.initialStorageConditions &&
         widget.initialMinStorageTemp == oldWidget.initialMinStorageTemp &&
         widget.initialMaxStorageTemp == oldWidget.initialMaxStorageTemp &&
-        widget.initialRequiresRefrigeration == oldWidget.initialRequiresRefrigeration &&
+        widget.initialRequiresRefrigeration ==
+            oldWidget.initialRequiresRefrigeration &&
         widget.initialRequiresFreezing == oldWidget.initialRequiresFreezing &&
         widget.initialLightSensitive == oldWidget.initialLightSensitive &&
         widget.initialHumiditySensitive == oldWidget.initialHumiditySensitive) {
@@ -94,8 +103,10 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
         _lightSensitive = widget.initialLightSensitive;
         _humiditySensitive = widget.initialHumiditySensitive;
       });
-      if (widget.initialStorageConditions != oldWidget.initialStorageConditions &&
-          widget.initialStorageConditions != _storageConditionsController.text) {
+      if (widget.initialStorageConditions !=
+              oldWidget.initialStorageConditions &&
+          widget.initialStorageConditions !=
+              _storageConditionsController.text) {
         _storageConditionsController.text = widget.initialStorageConditions;
       }
       if (widget.initialMinStorageTemp != oldWidget.initialMinStorageTemp &&
@@ -153,7 +164,9 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
         helperText: helperText,
         maxLines: maxLines,
         maxLength: maxLength,
-        inputFormatters: maxLength != null ? [LengthLimitingTextInputFormatter(maxLength)] : null,
+        inputFormatters: maxLength != null
+            ? [LengthLimitingTextInputFormatter(maxLength)]
+            : null,
         readOnly: !widget.isEditing,
         validator: validator,
       ),
@@ -260,10 +273,7 @@ class _StorageHandlingGroupWidgetState extends State<StorageHandlingGroupWidget>
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
-    final content = Padding(
-      padding: EdgeInsets.zero,
-      child: _content(),
-    );
+    final content = Padding(padding: EdgeInsets.zero, child: _content());
     return Gs1GroupCard(
       title: 'Storage & handling',
       outlineColor: outline,

@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:world_countries/world_countries.dart';
 
@@ -73,7 +73,7 @@ void main() async {
         'API_BASE_URL',
         defaultValue: 'http://localhost:8080/api',
       ),
-      appName: 'evotraq.io',
+      appName: 'traq',
       appVersion: '1.0.0',
     );
 
@@ -217,9 +217,9 @@ class TraqTraceApp extends StatelessWidget {
             },
             child: MaterialApp.router(
               title: getIt<AppConfig>().appName,
-              theme: EvotraqTheme.light(),
+              theme: TraqTheme.light(),
               debugShowCheckedModeBanner: false,
-              darkTheme: EvotraqTheme.dark(),
+              darkTheme: TraqTheme.dark(),
               themeMode: themeState.themeMode,
               routerConfig: getIt<AppRouter>().router,
               localizationsDelegates: const [
@@ -228,19 +228,7 @@ class TraqTraceApp extends StatelessWidget {
               ],
               builder: (context, child) => AppScreenUtilInit(
                 child: AppLayoutBuilder(
-                  builder: (context, layout) => Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      const AppAnimatedBackgroundLayer(),
-                      Theme(
-                        data: Theme.of(context).copyWith(
-                          scaffoldBackgroundColor: Colors.transparent,
-                          canvasColor: Colors.transparent,
-                        ),
-                        child: child ?? const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
+                  builder: (context, layout) => child ?? const SizedBox.shrink(),
                 ),
               ),
             ),

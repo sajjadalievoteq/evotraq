@@ -43,10 +43,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
   String? get updatedBy =>
       _updatedBy.text.trim().isEmpty ? null : _updatedBy.text.trim();
 
-  void setFromGtin({
-    required String? createdBy,
-    required String? updatedBy,
-  }) {
+  void setFromGtin({required String? createdBy, required String? updatedBy}) {
     _createdBy.text = (createdBy ?? '').trim();
     _updatedBy.text = (updatedBy ?? '').trim();
     if (mounted) setState(() {});
@@ -94,4 +91,3 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
     );
   }
 }
-

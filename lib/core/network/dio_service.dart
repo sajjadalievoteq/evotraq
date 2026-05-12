@@ -19,7 +19,7 @@ class DioService {
           'API_BASE_URL',
           defaultValue: 'http://localhost:8080/api',
         ),
-        appName: 'evotraq.io',
+        appName: 'traq',
         appVersion: '1.0.0',
       ) {
     _dio = Dio(

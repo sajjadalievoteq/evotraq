@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 enum AuthInputFieldType { email, password, username, text }
 
@@ -66,8 +66,6 @@ class _AuthInputFieldState extends State<AuthInputField> {
   }
 
   Widget _svgIcon(String asset, {double size = 22}) {
-    // Be explicit: use Evotraq token so icons don't accidentally inherit a
-    // white IconTheme (and disappear on light surfaces).
     final themeColor = context.colors.textMuted;
     return SvgPicture.asset(
       asset,
@@ -81,7 +79,11 @@ class _AuthInputFieldState extends State<AuthInputField> {
         width: size,
         height: size,
         child: const Center(
-          child: SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+          child: SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       ),
     );
@@ -178,7 +180,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 8),
       child: widget.prefixAsset != null
-          ? _svgIcon(widget.prefixAsset!, size: 22,)
+          ? _svgIcon(widget.prefixAsset!, size: 22)
           : (widget.prefixIcon != null
                 ? Icon(widget.prefixIcon, size: 22)
                 : _svgIcon(_defaultPrefixAsset(), size: 22)),
@@ -201,9 +203,7 @@ class _AuthInputFieldState extends State<AuthInputField> {
       padding: const EdgeInsets.only(left: 8, right: 8),
       child: IconButton(
         icon: _svgIcon(
-          _obscureText
-              ? AppAssets.iconEyeOff
-              : AppAssets.iconEye,
+          _obscureText ? AppAssets.iconEyeOff : AppAssets.iconEye,
           size: 22,
         ),
         onPressed: () {

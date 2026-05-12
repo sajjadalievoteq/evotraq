@@ -68,8 +68,7 @@ class GlnResultsList extends StatelessWidget {
           previous.status != current.status,
       builder: (context, state) {
         if (state.glns.isEmpty &&
-            (state.isGlnListLoading ||
-                state.status == GLNStatus.initial)) {
+            (state.isGlnListLoading || state.status == GLNStatus.initial)) {
           return const Gs1ListLoadingShimmer();
         }
 
@@ -103,14 +102,17 @@ class GlnResultsList extends StatelessWidget {
             controller: scrollController,
             interactive: true,
             child: ListView.separated(
-              separatorBuilder: (BuildContext context, int index) { return const SizedBox(height: Constants.spacing); },
+              separatorBuilder: (BuildContext context, int index) {
+                return const SizedBox(height: Constants.spacing);
+              },
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: context.horizontalPadding,
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: true,
               cacheExtent: 400,
-              itemCount: glns.length +
+              itemCount:
+                  glns.length +
                   ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
                   1,
               itemBuilder: (context, index) {
@@ -129,15 +131,14 @@ class GlnResultsList extends StatelessWidget {
                 }
 
                 final loaderIndex = glns.length;
-                final spacerIndex = glns.length +
+                final spacerIndex =
+                    glns.length +
                     ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
 
                 if (index == loaderIndex &&
                     state.hasMoreData &&
                     state.isFetchingMore) {
-                  return _constrainedCenter(
-                    const Gs1ListLoadMoreIndicator(),
-                  );
+                  return _constrainedCenter(const Gs1ListLoadMoreIndicator());
                 }
 
                 if (index == spacerIndex) {

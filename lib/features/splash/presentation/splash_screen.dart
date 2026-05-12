@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
 import '../../../core/config/constants.dart';
 
@@ -57,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final c = context.colors;
     final primary = c.primary;
     final pendingLocation = _resolvePendingLocation(context);
-
+     final size = MediaQuery.sizeOf(context);
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
@@ -70,53 +72,56 @@ class _SplashScreenState extends State<SplashScreen> {
               _go(Constants.loginRoute);
             }
           },
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 84,
-                    height: 84,
-                    child: Image.asset(
-                      Constants.iconImage,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'evotraq.io',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.2,
-                      color: primary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Preparing your workspace...',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: c.textSecondary.withValues(alpha: 0.95),
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        minHeight: 6,
-                        backgroundColor: primary.withOpacity(
-                          Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.12,
-                        ),
-                        valueColor: AlwaysStoppedAnimation<Color>(primary),
+          child: CardWithBackgroundWidget(
+            isPrimary: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: size.height*0.2,
+                      height: size.height*0.2,
+                      child: Image.asset(
+                        AppAssets.logo,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                  ),
-                ],
+
+                    Text(
+                      'traq',
+                      style: TextStyle(
+                        fontSize: size.height*0.1,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                        color: primary,
+                      ),
+                    ),
+
+                    Text(
+                      'Preparing your workspace...',
+                      style: TextStyle(
+                        fontSize: size.height*0.016,
+                        color: c.textSecondary.withValues(alpha: 0.95),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          minHeight: 6,
+                          backgroundColor: primary.withOpacity(
+                            Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.12,
+                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

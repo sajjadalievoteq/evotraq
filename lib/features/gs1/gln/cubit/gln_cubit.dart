@@ -9,19 +9,21 @@ class GLNCubit extends Cubit<GLNState> {
   final GLNService _glnService;
 
   GLNCubit({required GLNService glnService})
-      : _glnService = glnService,
-        super(const GLNState());
+    : _glnService = glnService,
+      super(const GLNState());
 
   Future<void> fetchGLNs({int page = 0, int size = 20}) async {
     emit(state.copyWith(status: GLNStatus.loading, isFetchingMore: false));
     try {
       final glns = await _glnService.getAllGLNs(page: page, size: size);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        glns: glns,
-        currentPage: page,
-        pageSize: size,
-      ));
+      emit(
+        state.copyWith(
+          status: GLNStatus.success,
+          glns: glns,
+          currentPage: page,
+          pageSize: size,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -42,7 +44,6 @@ class GLNCubit extends Cubit<GLNState> {
     String sortBy = 'createdAt',
     String direction = 'DESC',
   }) async {
-    // Prevent overlapping "load more" requests (common source of scroll jank).
     if (page > 0 && state.isFetchingMore) {
       return;
     }
@@ -77,39 +78,46 @@ class GLNCubit extends Cubit<GLNState> {
       );
 
       final List<dynamic> contentList = result['content'] ?? [];
-      final List<GLN> glns = contentList.map((item) => GLN.fromJson(item)).toList();
+      final List<GLN> glns = contentList
+          .map((item) => GLN.fromJson(item))
+          .toList();
       final int totalElements = result['totalElements'] ?? 0;
       final bool hasMore = (page + 1) * size < totalElements;
 
       final bool detailLoading = state.status == GLNStatus.loading;
-      final GLNStatus nextStatus =
-          detailLoading ? GLNStatus.loading : GLNStatus.success;
+      final GLNStatus nextStatus = detailLoading
+          ? GLNStatus.loading
+          : GLNStatus.success;
 
       if (page == 0) {
-        emit(state.copyWith(
-          status: nextStatus,
-          isGlnListLoading: false,
-          glns: glns,
-          totalItems: totalElements,
-          currentPage: page,
-          pageSize: size,
-          hasMoreData: hasMore,
-          isFetchingMore: false,
-          clearListFetchError: true,
-        ));
+        emit(
+          state.copyWith(
+            status: nextStatus,
+            isGlnListLoading: false,
+            glns: glns,
+            totalItems: totalElements,
+            currentPage: page,
+            pageSize: size,
+            hasMoreData: hasMore,
+            isFetchingMore: false,
+            clearListFetchError: true,
+          ),
+        );
       } else {
         final List<GLN> updatedGlns = List.from(state.glns)..addAll(glns);
-        emit(state.copyWith(
-          status: nextStatus,
-          isGlnListLoading: false,
-          glns: updatedGlns,
-          totalItems: totalElements,
-          currentPage: page,
-          pageSize: size,
-          hasMoreData: hasMore,
-          isFetchingMore: false,
-          clearListFetchError: true,
-        ));
+        emit(
+          state.copyWith(
+            status: nextStatus,
+            isGlnListLoading: false,
+            glns: updatedGlns,
+            totalItems: totalElements,
+            currentPage: page,
+            pageSize: size,
+            hasMoreData: hasMore,
+            isFetchingMore: false,
+            clearListFetchError: true,
+          ),
+        );
       }
     } catch (e) {
       _handleListFetchError(e);
@@ -126,46 +134,46 @@ class GLNCubit extends Cubit<GLNState> {
     if (e is ApiException) {
       errorMessage = e.getUserFriendlyMessage();
     }
-    emit(state.copyWith(
-      isGlnListLoading: false,
-      isFetchingMore: false,
-      listFetchError: errorMessage,
-      listFetchErrorBody: e is ApiException ? e.responseBody : null,
-      listFetchErrorStatusCode: e is ApiException ? e.statusCode : null,
-    ));
+    emit(
+      state.copyWith(
+        isGlnListLoading: false,
+        isFetchingMore: false,
+        listFetchError: errorMessage,
+        listFetchErrorBody: e is ApiException ? e.responseBody : null,
+        listFetchErrorStatusCode: e is ApiException ? e.statusCode : null,
+      ),
+    );
   }
 
   Future<void> fetchGLNById(String id) async {
-    emit(state.copyWith(
-      status: GLNStatus.loading,
-      isFetchingMore: false,
-      clearSelectedGLN: true,
-      clearError: true,
-    ));
+    emit(
+      state.copyWith(
+        status: GLNStatus.loading,
+        isFetchingMore: false,
+        clearSelectedGLN: true,
+        clearError: true,
+      ),
+    );
     try {
       final gln = await _glnService.getGLNById(id);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        selectedGLN: gln,
-      ));
+      emit(state.copyWith(status: GLNStatus.success, selectedGLN: gln));
     } catch (e) {
       _handleError(e);
     }
   }
 
   Future<void> fetchGLNByCode(String glnCode) async {
-    emit(state.copyWith(
-      status: GLNStatus.loading,
-      isFetchingMore: false,
-      clearSelectedGLN: true,
-      clearError: true,
-    ));
+    emit(
+      state.copyWith(
+        status: GLNStatus.loading,
+        isFetchingMore: false,
+        clearSelectedGLN: true,
+        clearError: true,
+      ),
+    );
     try {
       final gln = await _glnService.getGLNByCode(glnCode);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        selectedGLN: gln,
-      ));
+      emit(state.copyWith(status: GLNStatus.success, selectedGLN: gln));
     } catch (e) {
       _handleError(e);
     }
@@ -176,11 +184,13 @@ class GLNCubit extends Cubit<GLNState> {
     try {
       final createdGLN = await _glnService.createGLN(gln);
       final updatedGLNs = List<GLN>.from(state.glns)..add(createdGLN);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        glns: updatedGLNs,
-        selectedGLN: createdGLN,
-      ));
+      emit(
+        state.copyWith(
+          status: GLNStatus.success,
+          glns: updatedGLNs,
+          selectedGLN: createdGLN,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -193,11 +203,13 @@ class GLNCubit extends Cubit<GLNState> {
       final updatedGLNs = state.glns.map((item) {
         return item.glnCode == updatedGLN.glnCode ? updatedGLN : item;
       }).toList();
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        glns: updatedGLNs,
-        selectedGLN: updatedGLN,
-      ));
+      emit(
+        state.copyWith(
+          status: GLNStatus.success,
+          glns: updatedGLNs,
+          selectedGLN: updatedGLN,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -208,17 +220,23 @@ class GLNCubit extends Cubit<GLNState> {
     try {
       final success = await _glnService.deleteGLN(id);
       if (success) {
-        final updatedGLNs = state.glns.where((gln) => gln.glnCode != id).toList();
-        emit(state.copyWith(
-          status: GLNStatus.success,
-          glns: updatedGLNs,
-          clearSelectedGLN: state.selectedGLN?.glnCode == id,
-        ));
+        final updatedGLNs = state.glns
+            .where((gln) => gln.glnCode != id)
+            .toList();
+        emit(
+          state.copyWith(
+            status: GLNStatus.success,
+            glns: updatedGLNs,
+            clearSelectedGLN: state.selectedGLN?.glnCode == id,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: GLNStatus.error,
-          error: GlnUiConstants.errorDeleteGlnFailed,
-        ));
+        emit(
+          state.copyWith(
+            status: GLNStatus.error,
+            error: GlnUiConstants.errorDeleteGlnFailed,
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -226,10 +244,7 @@ class GLNCubit extends Cubit<GLNState> {
   }
 
   void clearSelection() {
-    emit(state.copyWith(
-      clearSelectedGLN: true,
-      clearError: true,
-    ));
+    emit(state.copyWith(clearSelectedGLN: true, clearError: true));
   }
 
   Future<void> searchGLNs({
@@ -248,12 +263,14 @@ class GLNCubit extends Cubit<GLNState> {
         page: page,
         size: size,
       );
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        glns: glns,
-        currentPage: page,
-        pageSize: size,
-      ));
+      emit(
+        state.copyWith(
+          status: GLNStatus.success,
+          glns: glns,
+          currentPage: page,
+          pageSize: size,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -263,10 +280,12 @@ class GLNCubit extends Cubit<GLNState> {
     emit(state.copyWith(status: GLNStatus.loading));
     try {
       final expiredGLNs = await _glnService.getExpiredLicenseGLNs();
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        expiredLicenseGLNs: expiredGLNs,
-      ));
+      emit(
+        state.copyWith(
+          status: GLNStatus.success,
+          expiredLicenseGLNs: expiredGLNs,
+        ),
+      );
     } catch (e) {
       _handleError(e);
     }
@@ -276,10 +295,7 @@ class GLNCubit extends Cubit<GLNState> {
     emit(state.copyWith(status: GLNStatus.loading));
     try {
       final childGLNs = await _glnService.getChildGLNs(parentGlnCode);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        childGLNs: childGLNs,
-      ));
+      emit(state.copyWith(status: GLNStatus.success, childGLNs: childGLNs));
     } catch (e) {
       _handleError(e);
     }
@@ -289,20 +305,19 @@ class GLNCubit extends Cubit<GLNState> {
     emit(state.copyWith(status: GLNStatus.loading));
     try {
       final isValid = await _glnService.validateGLNCode(glnCode);
-      emit(state.copyWith(
-        status: GLNStatus.success,
-        isValidGLN: isValid,
-      ));
+      emit(state.copyWith(status: GLNStatus.success, isValidGLN: isValid));
     } catch (e) {
       _handleError(e);
     }
   }
 
   void _handleError(Object e) {
-    emit(state.copyWith(
-      status: GLNStatus.error,
-      error: e.toString(),
-      isFetchingMore: false,
-    ));
+    emit(
+      state.copyWith(
+        status: GLNStatus.error,
+        error: e.toString(),
+        isFetchingMore: false,
+      ),
+    );
   }
 }

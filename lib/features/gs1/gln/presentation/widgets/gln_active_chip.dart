@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Active / inactive pill matching [GtinStatusChip] placement on list rows.
 class GlnActiveChip extends StatelessWidget {
   const GlnActiveChip({super.key, required this.active});
 

@@ -43,8 +43,7 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locationTypeValue =
-        selectedLocationType ?? GlnUiConstants.filterAll;
+    final locationTypeValue = selectedLocationType ?? GlnUiConstants.filterAll;
     final statusValue = selectedStatus ?? GlnUiConstants.filterAll;
 
     return RepaintBoundary(
@@ -81,8 +80,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GlnUiConstants.labelLocationNameField,
                       hintText: GlnUiConstants.hintLocationNameExample,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -96,8 +97,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GlnUiConstants.labelGlnCode,
                       hintText: GlnUiConstants.hintGlnCodeExample,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -113,8 +116,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: GlnUiConstants.labelLocationType,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     items: GlnUiConstants.locationTypeOptions.map((type) {
                       return DropdownMenuItem(value: type, child: Text(type));
@@ -130,12 +135,16 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: GlnUiConstants.labelStatus,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     items: GlnUiConstants.statusOptions.map((status) {
                       return DropdownMenuItem(
-                          value: status, child: Text(status));
+                        value: status,
+                        child: Text(status),
+                      );
                     }).toList(),
                     onChanged: onStatusChanged,
                   ),
@@ -153,8 +162,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GlnUiConstants.labelAddress,
                       hintText: GlnUiConstants.hintAddress,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -167,8 +178,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GlnUiConstants.labelLicenseNumberField,
                       hintText: GlnUiConstants.hintLicenseNumber,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -185,8 +198,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: GlnUiConstants.labelContactEmail,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -198,8 +213,10 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: GlnUiConstants.labelContactNameField,
                       border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -212,15 +229,14 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: GlnUiConstants.labelSortResultsBy,
                 border: const OutlineInputBorder(),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               items: GlnUiConstants.sortFieldLabels.entries
                   .map(
-                    (e) => DropdownMenuItem(
-                      value: e.key,
-                      child: Text(e.value),
-                    ),
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                   )
                   .toList(),
               onChanged: onSortByChanged,

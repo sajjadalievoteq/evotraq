@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 
 class ResetPasswordFormWidget extends StatefulWidget {
-  const ResetPasswordFormWidget({
-    super.key,
-    required this.token,
-  });
+  const ResetPasswordFormWidget({super.key, required this.token});
 
   final String token;
 
@@ -38,10 +35,10 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthCubit>().completePasswordReset(
-            widget.token,
-            _passwordController.text,
-            _confirmPasswordController.text,
-          );
+        widget.token,
+        _passwordController.text,
+        _confirmPasswordController.text,
+      );
     }
   }
 
@@ -90,10 +87,7 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
           const SizedBox(height: 16),
           Text(
             'Your password must be at least 8 characters long and include a mix of letters, numbers, and symbols.',
-            style: TextStyle(
-              fontSize: 16,
-              color: textSecondary,
-            ),
+            style: TextStyle(fontSize: 16, color: textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -112,9 +106,7 @@ class _ResetPasswordFormWidgetState extends State<ResetPasswordFormWidget> {
               ),
               suffixIcon: IconButton(
                 icon: SvgPicture.asset(
-                  _obscurePassword
-                      ? AppAssets.iconEyeOff
-                      : AppAssets.iconEye,
+                  _obscurePassword ? AppAssets.iconEyeOff : AppAssets.iconEye,
                   width: 20,
                   height: 20,
                   colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),

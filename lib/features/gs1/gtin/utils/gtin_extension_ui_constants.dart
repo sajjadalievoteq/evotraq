@@ -1,18 +1,13 @@
-// User-visible copy for GTIN industry extensions (pharmaceutical tile, regulatory authority, etc.).
-
-/// Shared placeholders used by GTIN extension forms (avoid importing GLN-specific constants).
 abstract final class GtinExtensionSharedUiConstants {
   static const dateNotSet = 'Not set';
   static const selectState = 'Select State';
   static const selectCountry = 'Select Country';
 }
 
-/// [PharmaceuticalExtensionWidget] shell / expansion chrome only (group widgets own section copy).
 abstract final class GtinPharmaceuticalExtensionUiConstants {
   static const expansionTitle = 'Pharmaceutical Details';
 }
 
-/// Regulatory authority expansion + nested cards for GTIN pharmaceutical extension.
 abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
   static const expansionTitle = 'Regulatory Details';
 
@@ -20,7 +15,8 @@ abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
   static const labelLocalDrugCode = 'Local drug code (MoHAP) *';
   static const helperLocalDrugCode =
       'Required when regulatory authority applies; configurable MoHAP format';
-  static const labelMarketingAuthorizationNumber = 'Marketing authorization number *';
+  static const labelMarketingAuthorizationNumber =
+      'Marketing authorization number *';
   static const helperMarketingAuthorizationNumber =
       'Example format: MOHAP-12345-2026 (configurable)';
 

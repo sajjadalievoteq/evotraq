@@ -4,13 +4,8 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_status_chip.dart';
 
-/// List row card for a single GTIN (master data list).
 class GtinListItemCard extends StatelessWidget {
-  const GtinListItemCard({
-    super.key,
-    required this.gtin,
-    required this.onTap,
-  });
+  const GtinListItemCard({super.key, required this.gtin, required this.onTap});
 
   final GTIN gtin;
   final VoidCallback onTap;
@@ -54,9 +49,8 @@ class GtinListItemCard extends StatelessWidget {
             child: Padding(
               padding: padding,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // ✅ FIXED ALIGNMENT
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// LEFT SIDE
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +83,7 @@ class GtinListItemCard extends StatelessWidget {
                           infoRow(
                             Icons.calendar_today,
                             '${GtinUiConstants.listCardRegisteredPrefix}'
-                                '${DateFormat('MMM dd, yyyy').format(gtin.registrationDate!)}',
+                            '${DateFormat('MMM dd, yyyy').format(gtin.registrationDate!)}',
                           ),
                       ],
                     ),
@@ -97,7 +91,6 @@ class GtinListItemCard extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  /// RIGHT SIDE (TOP ALIGNED LIKE GLN)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.start,

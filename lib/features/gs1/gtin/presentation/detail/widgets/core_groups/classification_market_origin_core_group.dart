@@ -37,8 +37,9 @@ class ClassificationMarketOriginCoreGroupState
     super.dispose();
   }
 
-  String? get countryOfOrigin =>
-      _countryOfOrigin.text.trim().isEmpty ? null : _countryOfOrigin.text.trim();
+  String? get countryOfOrigin => _countryOfOrigin.text.trim().isEmpty
+      ? null
+      : _countryOfOrigin.text.trim();
 
   void setFromGtin({required String? countryOfOrigin}) {
     _countryOfOrigin.text = (countryOfOrigin ?? '').trim();
@@ -75,4 +76,3 @@ class ClassificationMarketOriginCoreGroupState
     );
   }
 }
-

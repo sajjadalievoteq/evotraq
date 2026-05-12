@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -34,7 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             final user = authState.user;
             if (user == null) {
               return Scaffold(
-                appBar: AppBar(
+                appBar: TraqAppBar(
+                  context,
                   title: const Text(UserStrings.profileManagementTitle),
                   centerTitle: true,
                 ),
@@ -59,24 +61,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ProfilePreferencesModule(),
             );
 
-            final modules = [
-              infoModule,
-              securityModule,
-              preferencesModule,
-            ];
+            final modules = [infoModule, securityModule, preferencesModule];
 
             return Scaffold(
-              appBar: AppBar(
+              appBar: TraqAppBar(
+                context,
                 title: const Text(UserStrings.profileManagementTitle),
-               centerTitle: false,
+                centerTitle: false,
               ),
               drawer: const AppDrawer(),
               body: isDesktopWide
-                  ? Align(
-                      alignment: Alignment.center,
-                      child: SingleChildScrollView(
-                        padding: padding,
-                        child: ResponsiveModulesRow(children: modules),
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      child: Padding(
+                        padding: ResponsiveUtils.paddingAll(context),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 16,
+                          children: [
+                            Expanded(
+                              child: UserSectionCard(
+                                title: UserStrings.infoTitle,
+                                child: ProfileInfoModule(user: user),
+                              ),
+                            ),
+
+                            Expanded(
+                              child: UserSectionCard(
+                                title: UserStrings.securityTitle,
+                                child: ProfileSecurityModule(),
+                              ),
+                            ),
+
+                            Expanded(
+                              child: UserSectionCard(
+                                title: UserStrings.preferencesTitle,
+                                child: ProfilePreferencesModule(),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : DefaultTabController(
@@ -94,17 +119,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           Expanded(
                             child: TabBarView(
+                              physics: NeverScrollableScrollPhysics(),
                               children: [
-                                SingleChildScrollView(
-                                  padding: padding,
+                                Padding(
+                                  padding: ResponsiveUtils.paddingAll(context),
                                   child: infoModule,
                                 ),
-                                SingleChildScrollView(
-                                  padding: padding,
+                                Padding(
+                                  padding: ResponsiveUtils.paddingAll(context),
                                   child: securityModule,
                                 ),
-                                SingleChildScrollView(
-                                  padding: padding,
+                                Padding(
+                                  padding: ResponsiveUtils.paddingAll(context),
                                   child: preferencesModule,
                                 ),
                               ],

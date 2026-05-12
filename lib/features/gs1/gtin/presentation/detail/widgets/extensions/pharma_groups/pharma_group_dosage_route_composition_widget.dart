@@ -35,7 +35,8 @@ class DosageRouteCompositionGroupWidget extends StatefulWidget {
     required String routeOfAdministration,
     required List<ActiveIngredient> activeIngredients,
     required String inactiveIngredients,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<DosageRouteCompositionGroupWidget> createState() =>
@@ -48,8 +49,9 @@ class _IngredientRow {
       name.text = initial.name;
       amount.text = initial.amount?.toString() ?? '';
       unit.text = initial.unit ?? '';
-      substanceRoleCode.text =
-          initial.substanceRoleCode.isEmpty ? 'ACTIVE' : initial.substanceRoleCode;
+      substanceRoleCode.text = initial.substanceRoleCode.isEmpty
+          ? 'ACTIVE'
+          : initial.substanceRoleCode;
       sequence.text = initial.sequence.toString();
       basisOfStrength.text = initial.basisOfStrength ?? '';
     }
@@ -66,7 +68,9 @@ class _IngredientRow {
   final TextEditingController name = TextEditingController();
   final TextEditingController amount = TextEditingController();
   final TextEditingController unit = TextEditingController();
-  final TextEditingController substanceRoleCode = TextEditingController(text: 'ACTIVE');
+  final TextEditingController substanceRoleCode = TextEditingController(
+    text: 'ACTIVE',
+  );
   final TextEditingController sequence = TextEditingController(text: '0');
   final TextEditingController basisOfStrength = TextEditingController();
 
@@ -85,13 +89,17 @@ class _IngredientRow {
     final seq = int.tryParse(sequence.text.trim());
     return ActiveIngredient(
       name: name.text.trim(),
-      amount: amount.text.trim().isEmpty ? null : double.tryParse(amount.text.trim()),
+      amount: amount.text.trim().isEmpty
+          ? null
+          : double.tryParse(amount.text.trim()),
       unit: unit.text.trim().isEmpty ? null : unit.text.trim(),
-      substanceRoleCode:
-          substanceRoleCode.text.trim().isEmpty ? 'ACTIVE' : substanceRoleCode.text.trim(),
+      substanceRoleCode: substanceRoleCode.text.trim().isEmpty
+          ? 'ACTIVE'
+          : substanceRoleCode.text.trim(),
       sequence: seq ?? 0,
-      basisOfStrength:
-          basisOfStrength.text.trim().isEmpty ? null : basisOfStrength.text.trim(),
+      basisOfStrength: basisOfStrength.text.trim().isEmpty
+          ? null
+          : basisOfStrength.text.trim(),
     );
   }
 }
@@ -146,16 +154,23 @@ class _DosageRouteCompositionGroupWidgetState
   @override
   void initState() {
     super.initState();
-    _dosageFormController = TextEditingController(text: widget.initialDosageForm);
+    _dosageFormController = TextEditingController(
+      text: widget.initialDosageForm,
+    );
     _strengthController = TextEditingController(text: widget.initialStrength);
-    _strengthUnitController = TextEditingController(text: widget.initialStrengthUnit);
-    _routeOfAdministrationController =
-        TextEditingController(text: widget.initialRouteOfAdministration);
-    _inactiveIngredientsController =
-        TextEditingController(text: widget.initialInactiveIngredients);
+    _strengthUnitController = TextEditingController(
+      text: widget.initialStrengthUnit,
+    );
+    _routeOfAdministrationController = TextEditingController(
+      text: widget.initialRouteOfAdministration,
+    );
+    _inactiveIngredientsController = TextEditingController(
+      text: widget.initialInactiveIngredients,
+    );
 
-    _activeIngredientRows =
-        widget.initialActiveIngredients.map((e) => _IngredientRow(initial: e, onChanged: _emitChange)).toList();
+    _activeIngredientRows = widget.initialActiveIngredients
+        .map((e) => _IngredientRow(initial: e, onChanged: _emitChange))
+        .toList();
 
     _dosageFormController.addListener(_emitChange);
     _strengthController.addListener(_emitChange);
@@ -170,9 +185,14 @@ class _DosageRouteCompositionGroupWidgetState
     if (widget.initialDosageForm == oldWidget.initialDosageForm &&
         widget.initialStrength == oldWidget.initialStrength &&
         widget.initialStrengthUnit == oldWidget.initialStrengthUnit &&
-        widget.initialRouteOfAdministration == oldWidget.initialRouteOfAdministration &&
-        widget.initialInactiveIngredients == oldWidget.initialInactiveIngredients &&
-        identical(widget.initialActiveIngredients, oldWidget.initialActiveIngredients)) {
+        widget.initialRouteOfAdministration ==
+            oldWidget.initialRouteOfAdministration &&
+        widget.initialInactiveIngredients ==
+            oldWidget.initialInactiveIngredients &&
+        identical(
+          widget.initialActiveIngredients,
+          oldWidget.initialActiveIngredients,
+        )) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -203,14 +223,15 @@ class _DosageRouteCompositionGroupWidgetState
         _inactiveIngredientsController.text = widget.initialInactiveIngredients;
       }
       if (!identical(
-          widget.initialActiveIngredients, oldWidget.initialActiveIngredients)) {
+        widget.initialActiveIngredients,
+        oldWidget.initialActiveIngredients,
+      )) {
         for (final row in _activeIngredientRows) {
           row.dispose();
         }
         setState(() {
           _activeIngredientRows = widget.initialActiveIngredients
-              .map((e) =>
-                  _IngredientRow(initial: e, onChanged: _emitChange))
+              .map((e) => _IngredientRow(initial: e, onChanged: _emitChange))
               .toList();
         });
       }
@@ -267,7 +288,9 @@ class _DosageRouteCompositionGroupWidgetState
         maxLines: maxLines,
         maxLength: maxLength,
         keyboardType: keyboardType,
-        inputFormatters: maxLength != null ? [LengthLimitingTextInputFormatter(maxLength)] : null,
+        inputFormatters: maxLength != null
+            ? [LengthLimitingTextInputFormatter(maxLength)]
+            : null,
         readOnly: !widget.isEditing,
       ),
     );
@@ -281,8 +304,8 @@ class _DosageRouteCompositionGroupWidgetState
           value: _dosageFormController.text.isEmpty
               ? null
               : _dosageFormOptions.contains(_dosageFormController.text)
-                  ? _dosageFormController.text
-                  : null,
+              ? _dosageFormController.text
+              : null,
           decoration: const InputDecoration(
             labelText: 'Dosage Form',
             border: OutlineInputBorder(),
@@ -325,14 +348,16 @@ class _DosageRouteCompositionGroupWidgetState
           value: _routeOfAdministrationController.text.isEmpty
               ? null
               : _routeOptions.contains(_routeOfAdministrationController.text)
-                  ? _routeOfAdministrationController.text
-                  : null,
+              ? _routeOfAdministrationController.text
+              : null,
           decoration: const InputDecoration(
             labelText: 'Route of Administration',
             border: OutlineInputBorder(),
           ),
           items: _routeOptions
-              .map((route) => DropdownMenuItem(value: route, child: Text(route)))
+              .map(
+                (route) => DropdownMenuItem(value: route, child: Text(route)),
+              )
               .toList(),
           onChanged: widget.isEditing
               ? (value) {
@@ -371,7 +396,8 @@ class _DosageRouteCompositionGroupWidgetState
                         onPressed: widget.isEditing
                             ? () {
                                 setState(() {
-                                  final removed = _activeIngredientRows.removeAt(index);
+                                  final removed = _activeIngredientRows
+                                      .removeAt(index);
                                   removed.dispose();
                                 });
                                 _emitChange();
@@ -388,7 +414,9 @@ class _DosageRouteCompositionGroupWidgetState
                           row.amount,
                           'activeIngredientAmount$index',
                           'Amount',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           maxLength: 24,
                         ),
                       ),
@@ -443,7 +471,9 @@ class _DosageRouteCompositionGroupWidgetState
             child: TextButton.icon(
               onPressed: () {
                 setState(() {
-                  _activeIngredientRows.add(_IngredientRow(onChanged: _emitChange));
+                  _activeIngredientRows.add(
+                    _IngredientRow(onChanged: _emitChange),
+                  );
                 });
                 _emitChange();
               },

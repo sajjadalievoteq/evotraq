@@ -25,14 +25,16 @@ class TechProductCodedGroupWidget extends StatefulWidget {
     required String regulatedProductName,
     required String dosageFormTypeCode,
     required String routeOfAdministrationCode,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<TechProductCodedGroupWidget> createState() =>
       _TechProductCodedGroupWidgetState();
 }
 
-class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidget> {
+class _TechProductCodedGroupWidgetState
+    extends State<TechProductCodedGroupWidget> {
   late final TextEditingController _regulatedProductNameController;
   late final TextEditingController _dosageFormTypeCodeController;
   late final TextEditingController _routeOfAdministrationCodeController;
@@ -40,12 +42,15 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
   @override
   void initState() {
     super.initState();
-    _regulatedProductNameController =
-        TextEditingController(text: widget.initialRegulatedProductName);
-    _dosageFormTypeCodeController =
-        TextEditingController(text: widget.initialDosageFormTypeCode);
-    _routeOfAdministrationCodeController =
-        TextEditingController(text: widget.initialRouteOfAdministrationCode);
+    _regulatedProductNameController = TextEditingController(
+      text: widget.initialRegulatedProductName,
+    );
+    _dosageFormTypeCodeController = TextEditingController(
+      text: widget.initialDosageFormTypeCode,
+    );
+    _routeOfAdministrationCodeController = TextEditingController(
+      text: widget.initialRouteOfAdministrationCode,
+    );
     _regulatedProductNameController.addListener(_emitChange);
     _dosageFormTypeCodeController.addListener(_emitChange);
     _routeOfAdministrationCodeController.addListener(_emitChange);
@@ -54,21 +59,27 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
   @override
   void didUpdateWidget(covariant TechProductCodedGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialRegulatedProductName == oldWidget.initialRegulatedProductName &&
-        widget.initialDosageFormTypeCode == oldWidget.initialDosageFormTypeCode &&
+    if (widget.initialRegulatedProductName ==
+            oldWidget.initialRegulatedProductName &&
+        widget.initialDosageFormTypeCode ==
+            oldWidget.initialDosageFormTypeCode &&
         widget.initialRouteOfAdministrationCode ==
             oldWidget.initialRouteOfAdministrationCode) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.initialRegulatedProductName != oldWidget.initialRegulatedProductName &&
+      if (widget.initialRegulatedProductName !=
+              oldWidget.initialRegulatedProductName &&
           widget.initialRegulatedProductName !=
               _regulatedProductNameController.text) {
-        _regulatedProductNameController.text = widget.initialRegulatedProductName;
+        _regulatedProductNameController.text =
+            widget.initialRegulatedProductName;
       }
-      if (widget.initialDosageFormTypeCode != oldWidget.initialDosageFormTypeCode &&
-          widget.initialDosageFormTypeCode != _dosageFormTypeCodeController.text) {
+      if (widget.initialDosageFormTypeCode !=
+              oldWidget.initialDosageFormTypeCode &&
+          widget.initialDosageFormTypeCode !=
+              _dosageFormTypeCodeController.text) {
         _dosageFormTypeCodeController.text = widget.initialDosageFormTypeCode;
       }
       if (widget.initialRouteOfAdministrationCode !=
@@ -115,7 +126,7 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
             fieldName: 'regulatedProductName',
             label: 'Regulated Product Name (Generic / INN) *',
             maxLength: 200,
-            inputFormatters:  [LengthLimitingTextInputFormatter(200)],
+            inputFormatters: [LengthLimitingTextInputFormatter(200)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateRegulatedProductName,
           ),
@@ -125,7 +136,7 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
             label: 'Dosage Form Type Code *',
             helperText: 'EDQM Standard Terms code (up to 30 chars)',
             maxLength: 30,
-            inputFormatters:  [LengthLimitingTextInputFormatter(30)],
+            inputFormatters: [LengthLimitingTextInputFormatter(30)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateDosageFormTypeCode,
           ),
@@ -135,7 +146,7 @@ class _TechProductCodedGroupWidgetState extends State<TechProductCodedGroupWidge
             label: 'Route of Administration Code *',
             helperText: 'EDQM Standard Terms code (up to 30 chars)',
             maxLength: 30,
-            inputFormatters:  [LengthLimitingTextInputFormatter(30)],
+            inputFormatters: [LengthLimitingTextInputFormatter(30)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateRouteOfAdministrationCode,
           ),

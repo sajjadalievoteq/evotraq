@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// Maps legacy operational location subtype ↔ dropdown labels / [LocationType].
 class GlnLocationTypeMapper {
   GlnLocationTypeMapper._();
 

@@ -37,31 +37,35 @@ class RegulatoryAuthorityIdentifiersSection extends StatelessWidget {
           GtinValidatedField(
             controller: localDrugCodeController,
             fieldName: 'localDrugCodeUaeGcc',
-            label: GtinRegulatoryAuthorityExtensionUiConstants.labelLocalDrugCode,
-            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperLocalDrugCode,
+            label:
+                GtinRegulatoryAuthorityExtensionUiConstants.labelLocalDrugCode,
+            helperText:
+                GtinRegulatoryAuthorityExtensionUiConstants.helperLocalDrugCode,
             maxLength: 50,
             inputFormatters: [LengthLimitingTextInputFormatter(50)],
             readOnly: isReadOnly,
             validator: (v) =>
                 RegulatoryAuthorityValidators.validateLocalDrugCodeForRegulatoryAuthority(
-              v,
-              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
-            ),
+                  v,
+                  isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
+                ),
           ),
           const SizedBox(height: 8),
           GtinValidatedField(
             controller: marketingAuthorizationNumberController,
             fieldName: 'marketingAuthorizationNumber',
-            label: GtinRegulatoryAuthorityExtensionUiConstants.labelMarketingAuthorizationNumber,
-            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperMarketingAuthorizationNumber,
+            label: GtinRegulatoryAuthorityExtensionUiConstants
+                .labelMarketingAuthorizationNumber,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants
+                .helperMarketingAuthorizationNumber,
             maxLength: 50,
             inputFormatters: [LengthLimitingTextInputFormatter(50)],
             readOnly: isReadOnly,
-            validator: (v) => RegulatoryAuthorityValidators
-                .validateMarketingAuthorizationForRegulatoryAuthority(
-              v,
-              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
-            ),
+            validator: (v) =>
+                RegulatoryAuthorityValidators.validateMarketingAuthorizationForRegulatoryAuthority(
+                  v,
+                  isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
+                ),
           ),
         ],
       ),

@@ -7,14 +7,16 @@ import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 @immutable
 class GlnQuickFilterResult {
   const GlnQuickFilterResult.cleared()
-      : cleared = true,
-        status = null,
-        locationType = null;
+    : cleared = true,
+      status = null,
+      locationType = null;
 
-  const GlnQuickFilterResult.applied(String statusValue, String locationTypeValue)
-      : cleared = false,
-        status = statusValue,
-        locationType = locationTypeValue;
+  const GlnQuickFilterResult.applied(
+    String statusValue,
+    String locationTypeValue,
+  ) : cleared = false,
+      status = statusValue,
+      locationType = locationTypeValue;
 
   final bool cleared;
   final String? status;
@@ -82,8 +84,10 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
                 decoration: InputDecoration(
                   hintText: GlnUiConstants.hintLocationNameExample,
                   border: const OutlineInputBorder(),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
@@ -95,15 +99,15 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
                 initialValue: _status,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 items: GlnUiConstants.statusOptions
                     .map(
-                      (option) => DropdownMenuItem(
-                        value: option,
-                        child: Text(option),
-                      ),
+                      (option) =>
+                          DropdownMenuItem(value: option, child: Text(option)),
                     )
                     .toList(),
                 onChanged: (value) {
@@ -118,15 +122,15 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
                 initialValue: _locationType,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 items: GlnUiConstants.locationTypeOptions
                     .map(
-                      (option) => DropdownMenuItem(
-                        value: option,
-                        child: Text(option),
-                      ),
+                      (option) =>
+                          DropdownMenuItem(value: option, child: Text(option)),
                     )
                     .toList(),
                 onChanged: (value) {
@@ -152,9 +156,9 @@ class _GlnQuickFilterDialogState extends State<GlnQuickFilterDialog> {
         CustomTextButtonWidget(
           title: GlnUiConstants.buttonApply,
           onTap: () {
-            Navigator.of(context).pop(
-              GlnQuickFilterResult.applied(_status, _locationType),
-            );
+            Navigator.of(
+              context,
+            ).pop(GlnQuickFilterResult.applied(_status, _locationType));
           },
         ),
         CustomOutlinedButtonWidget(

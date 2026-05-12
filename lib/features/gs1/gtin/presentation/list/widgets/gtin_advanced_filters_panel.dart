@@ -37,8 +37,6 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This panel contains multiple form fields; isolate repaints to avoid
-    // affecting list scroll performance when it's visible.
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.all(Constants.spacing),
@@ -73,8 +71,10 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GtinUiConstants.labelProductNameField,
                       hintText: GtinUiConstants.hintProductNameExample,
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -88,8 +88,10 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GtinUiConstants.labelGtinCodeField,
                       hintText: GtinUiConstants.hintGtinCodeExample,
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -105,8 +107,10 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                     decoration: const InputDecoration(
                       labelText: GtinUiConstants.labelPackagingLevelField,
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     items: GtinUiConstants.packagingLevelOptions
                         .map(
@@ -128,8 +132,10 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                       labelText: GtinUiConstants.labelManufacturerField,
                       hintText: GtinUiConstants.hintManufacturerExample,
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                   ),
                 ),
@@ -152,13 +158,13 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                               horizontal: 12,
                               vertical: 8,
                             ),
-                          suffixIcon: CustomButtonWidget(
-                            onTap: onPickFromDate,
-                            icon: Icons.calendar_today,
-                            iconOnly: true,
-                            tooltip: GtinUiConstants.tooltipPickFromDate,
-                            height: 40,
-                          ),
+                            suffixIcon: CustomButtonWidget(
+                              onTap: onPickFromDate,
+                              icon: Icons.calendar_today,
+                              iconOnly: true,
+                              tooltip: GtinUiConstants.tooltipPickFromDate,
+                              height: 40,
+                            ),
                           ),
                         ),
                       ),
@@ -174,13 +180,13 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                               horizontal: 12,
                               vertical: 8,
                             ),
-                          suffixIcon: CustomButtonWidget(
-                            onTap: onPickToDate,
-                            icon: Icons.calendar_today,
-                            iconOnly: true,
-                            tooltip: GtinUiConstants.tooltipPickToDate,
-                            height: 40,
-                          ),
+                            suffixIcon: CustomButtonWidget(
+                              onTap: onPickToDate,
+                              icon: Icons.calendar_today,
+                              iconOnly: true,
+                              tooltip: GtinUiConstants.tooltipPickToDate,
+                              height: 40,
+                            ),
                           ),
                         ),
                       ),
@@ -238,4 +244,3 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
     );
   }
 }
-

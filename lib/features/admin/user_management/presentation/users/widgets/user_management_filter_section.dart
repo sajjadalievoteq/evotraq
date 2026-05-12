@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
@@ -37,7 +37,7 @@ class UserManagementFilterSection extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(EvotraqRadius.sm.x),
+        borderRadius: BorderRadius.circular(TraqRadius.sm.x),
       ),
       child: Padding(
         padding: Constants.sectionPadding,
@@ -49,7 +49,6 @@ class UserManagementFilterSection extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Wrap(
                   spacing: Constants.spacing,
                   runSpacing: Constants.spacing,
@@ -137,8 +136,8 @@ class UserManagementFilterSection extends StatelessWidget {
                       Text(
                         '$totalItems Users Found',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[700],
-                            ),
+                          color: Colors.grey[700],
+                        ),
                       ),
                     Wrap(
                       spacing: Constants.spacing,
@@ -159,7 +158,7 @@ class UserManagementFilterSection extends StatelessWidget {
                             backgroundColor: context.colors.primary,
                             foregroundColor: Colors.white,
                           ),
-                          label:  Text(UserManagementConstants.refreshLabel),
+                          label: Text(UserManagementConstants.refreshLabel),
                         ),
                         ElevatedButton.icon(
                           onPressed: onAddUser,
@@ -172,7 +171,9 @@ class UserManagementFilterSection extends StatelessWidget {
                               BlendMode.srcIn,
                             ),
                           ),
-                          label: const Text(UserManagementConstants.addUserLabel),
+                          label: const Text(
+                            UserManagementConstants.addUserLabel,
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.colors.primary,
                             foregroundColor: Colors.white,
@@ -192,20 +193,14 @@ class UserManagementFilterSection extends StatelessWidget {
 }
 
 class _FieldWidths {
-  const _FieldWidths({
-    required this.searchWidth,
-    required this.filterWidth,
-  });
+  const _FieldWidths({required this.searchWidth, required this.filterWidth});
 
   final double searchWidth;
   final double filterWidth;
 
   factory _FieldWidths.fromWidth(double maxWidth) {
     if (maxWidth < 700) {
-      return _FieldWidths(
-        searchWidth: maxWidth,
-        filterWidth: maxWidth,
-      );
+      return _FieldWidths(searchWidth: maxWidth, filterWidth: maxWidth);
     }
 
     if (maxWidth < 1080) {
@@ -215,8 +210,7 @@ class _FieldWidths {
       );
     }
 
-    final filterWidth =
-        ((maxWidth * 0.42) - Constants.spacing) / 2;
+    final filterWidth = ((maxWidth * 0.42) - Constants.spacing) / 2;
 
     return _FieldWidths(
       searchWidth: maxWidth * 0.58 - Constants.spacing,

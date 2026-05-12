@@ -37,9 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             context.go(
               Uri(
                 path: Constants.checkEmailRoute,
-                queryParameters: {
-                  if (email.isNotEmpty) 'email': email,
-                },
+                queryParameters: {if (email.isNotEmpty) 'email': email},
               ).toString(),
             );
           }

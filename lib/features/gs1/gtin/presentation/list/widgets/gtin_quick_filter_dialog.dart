@@ -4,25 +4,23 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
-/// Result of [GtinQuickFilterDialog.open].
 @immutable
 class GtinQuickFilterResult {
   const GtinQuickFilterResult.cleared()
-      : cleared = true,
-        status = null,
-        packaging = null;
+    : cleared = true,
+      status = null,
+      packaging = null;
 
   const GtinQuickFilterResult.applied(String statusValue, String packagingValue)
-      : cleared = false,
-        status = statusValue,
-        packaging = packagingValue;
+    : cleared = false,
+      status = statusValue,
+      packaging = packagingValue;
 
   final bool cleared;
   final String? status;
   final String? packaging;
 }
 
-/// Quick filters dialog (manufacturer, status, packaging).
 class GtinQuickFilterDialog extends StatefulWidget {
   const GtinQuickFilterDialog({
     super.key,
@@ -84,7 +82,10 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
                 decoration: const InputDecoration(
                   hintText: GtinUiConstants.hintManufacturerExample,
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
@@ -96,14 +97,15 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
                 initialValue: _status,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 items: GtinUiConstants.statusOptions
                     .map(
-                      (option) => DropdownMenuItem(
-                        value: option,
-                        child: Text(option),
-                      ),
+                      (option) =>
+                          DropdownMenuItem(value: option, child: Text(option)),
                     )
                     .toList(),
                 onChanged: (value) {
@@ -118,14 +120,15 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
                 initialValue: _packaging,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 items: GtinUiConstants.packagingLevelOptions
                     .map(
-                      (option) => DropdownMenuItem(
-                        value: option,
-                        child: Text(option),
-                      ),
+                      (option) =>
+                          DropdownMenuItem(value: option, child: Text(option)),
                     )
                     .toList(),
                 onChanged: (value) {
@@ -151,9 +154,9 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
         CustomTextButtonWidget(
           title: GtinUiConstants.buttonApply,
           onTap: () {
-            Navigator.of(context).pop(
-              GtinQuickFilterResult.applied(_status, _packaging),
-            );
+            Navigator.of(
+              context,
+            ).pop(GtinQuickFilterResult.applied(_status, _packaging));
           },
         ),
         CustomOutlinedButtonWidget(
@@ -167,4 +170,3 @@ class _GtinQuickFilterDialogState extends State<GtinQuickFilterDialog> {
     );
   }
 }
-

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/trace_network_background.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
@@ -43,14 +44,22 @@ class AuthWebFormLayout extends StatelessWidget {
               color: c.background,
               child: Stack(
                 children: [
-                  const Positioned.fill(
-                    child: TraceNetworkBackground(density: 1.0),
-                  ),
-                  Positioned.fill(
-                    child: Container(
-                      color: c.background.withOpacity(0.06),
+                  Positioned.fill(child: Container(color: c.background)),
+                  Container(
+                    height: MediaQuery.sizeOf(context).height,
+                    width: MediaQuery.sizeOf(context).width,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(AppAssets.traqBackgroundPng),
+                        fit: BoxFit.cover,
+                        opacity: 0.2,
+                      ),
                     ),
                   ),
+                  Positioned.fill(
+                    child: Container(color: Colors.black.withOpacity(0.2)),
+                  ),
+
                   Padding(
                     padding: context.padding,
                     child: Align(
@@ -83,7 +92,9 @@ class AuthWebFormLayout extends StatelessWidget {
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             maxWidth: largeFormMaxWidth,
-                            minHeight: constraints.maxHeight - context.padding.vertical,
+                            minHeight:
+                                constraints.maxHeight -
+                                context.padding.vertical,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

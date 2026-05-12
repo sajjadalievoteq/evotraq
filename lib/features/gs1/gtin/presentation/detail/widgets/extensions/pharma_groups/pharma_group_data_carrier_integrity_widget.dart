@@ -21,7 +21,8 @@ class DataCarrierIntegrityGroupWidget extends StatefulWidget {
   final void Function({
     required String dataCarrierTypeCode,
     required bool antiTamperingIndicator,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<DataCarrierIntegrityGroupWidget> createState() =>
@@ -47,10 +48,12 @@ class _DataCarrierIntegrityGroupWidgetState
   @override
   void didUpdateWidget(covariant DataCarrierIntegrityGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialDataCarrierTypeCode == oldWidget.initialDataCarrierTypeCode &&
+    if (widget.initialDataCarrierTypeCode ==
+            oldWidget.initialDataCarrierTypeCode &&
         widget.initialAntiTamperingIndicator ==
             oldWidget.initialAntiTamperingIndicator &&
-        widget.initialPseudoGtinNtinFlag == oldWidget.initialPseudoGtinNtinFlag) {
+        widget.initialPseudoGtinNtinFlag ==
+            oldWidget.initialPseudoGtinNtinFlag) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -117,8 +117,6 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
             safeArea: false,
             scrollable: false,
             builder: (context, layout) {
-
-
               if (state.status == UserManagementStatus.loading &&
                   state.pendingApprovals.isEmpty) {
                 return const UserApprovalsLoadingView();
@@ -128,8 +126,8 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
               final filteredApprovals = query.isEmpty
                   ? state.pendingApprovals
                   : state.pendingApprovals
-                      .where((user) => _matchesSearch(user, query))
-                      .toList();
+                        .where((user) => _matchesSearch(user, query))
+                        .toList();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -174,9 +172,9 @@ class _ApprovalsContent extends StatelessWidget {
       return Center(
         child: Text(
           UserManagementConstants.noPendingApprovals,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[700],
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
       );

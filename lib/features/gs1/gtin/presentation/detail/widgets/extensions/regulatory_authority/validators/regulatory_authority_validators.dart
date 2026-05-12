@@ -1,13 +1,13 @@
 class RegulatoryAuthorityValidators {
   RegulatoryAuthorityValidators._();
 
-  // Configurable placeholder until exact MoHAP regex is finalized.
-  static final RegExp _defaultRegulatoryAuthorityMaNumberPattern =
-      RegExp(r'^[A-Z]+-\d{3,10}-\d{4}$');
+  static final RegExp _defaultRegulatoryAuthorityMaNumberPattern = RegExp(
+    r'^[A-Z]+-\d{3,10}-\d{4}$',
+  );
 
-  // Configurable placeholder until exact MoHAP regex is finalized.
-  static final RegExp _defaultRegulatoryAuthorityLocalDrugCodePattern =
-      RegExp(r'^[A-Z0-9][A-Z0-9\-\/]{2,49}$');
+  static final RegExp _defaultRegulatoryAuthorityLocalDrugCodePattern = RegExp(
+    r'^[A-Z0-9][A-Z0-9\-\/]{2,49}$',
+  );
 
   static String? validateLocalDrugCodeForRegulatoryAuthority(
     String? value, {

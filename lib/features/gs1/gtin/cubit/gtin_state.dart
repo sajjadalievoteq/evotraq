@@ -12,15 +12,10 @@ class GTINState extends Equatable {
   final int currentPage;
   final bool hasMoreData;
   final bool isFetchingMore;
-  /// List reload (search, filters) without affecting [status] so the detail pane does not flash loading.
   final bool isGtinListLoading;
-  /// Set when [fetchGTINList] fails; separate from [error] so a list search does not clobber detail state.
   final String? listFetchError;
-  /// Raw HTTP response body for the last GTIN list/search failure (debugging).
   final String? listFetchErrorBody;
-  /// HTTP status code for the last GTIN list/search failure (debugging).
   final int? listFetchErrorStatusCode;
-  /// Local list sort: ascending by [GTIN.productName] when true, descending when false.
   final bool gtinListSortAscending;
 
   const GTINState({
@@ -81,18 +76,18 @@ class GTINState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        gtins,
-        gtin,
-        isValidFormat,
-        error,
-        currentPage,
-        hasMoreData,
-        isFetchingMore,
-        isGtinListLoading,
-        listFetchError,
-        listFetchErrorBody,
-        listFetchErrorStatusCode,
-        gtinListSortAscending,
-      ];
+    status,
+    gtins,
+    gtin,
+    isValidFormat,
+    error,
+    currentPage,
+    hasMoreData,
+    isFetchingMore,
+    isGtinListLoading,
+    listFetchError,
+    listFetchErrorBody,
+    listFetchErrorStatusCode,
+    gtinListSortAscending,
+  ];
 }

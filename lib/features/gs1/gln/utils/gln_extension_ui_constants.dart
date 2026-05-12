@@ -1,13 +1,9 @@
-// GLN industry extensions (pharmaceutical & tobacco location widgets).
-
-/// Shared dropdown / date placeholder copy used by GLN extension forms.
 abstract final class GlnExtensionSharedUiConstants {
   static const selectState = 'Select State';
   static const selectCountry = 'Select Country';
   static const dateNotSet = 'Not set';
 }
 
-/// [GLNPharmaceuticalExtensionWidget] — strings only (location pharma extension).
 abstract final class GlnPharmaceuticalExtensionUiConstants {
   static const expansionTitle = 'Pharmaceutical Extension';
   static const badgeSaved = 'Saved';
@@ -26,7 +22,8 @@ abstract final class GlnPharmaceuticalExtensionUiConstants {
   static const sectionLicensedAgent = 'Licensed Agent (Import Markets)';
   static const labelLicensedAgentAuthorisationNumber =
       'Licensed Agent Authorisation Number';
-  static const labelAuthorisedPrincipalMahGlns = 'Authorised Principal MAH GLNs';
+  static const labelAuthorisedPrincipalMahGlns =
+      'Authorised Principal MAH GLNs';
   static const hintAuthorisedPrincipalMahGlns = 'Comma-Separated 13-digit GLNs';
 
   static const sectionPharmacovigilance = 'Pharmacovigilance & Recall';
@@ -64,7 +61,8 @@ abstract final class GlnPharmaceuticalExtensionUiConstants {
   static const cardWholesaleDistribution = 'Wholesale Distribution';
   static const labelWholesaleLicenseNumber = 'Wholesale License Number';
   static const labelWholesaleLicenseExpiry = 'Wholesale License Expiry';
-  static const labelAuthorizedTradingPartner = 'Authorized Trading Partner (ATP)';
+  static const labelAuthorizedTradingPartner =
+      'Authorized Trading Partner (ATP)';
   static const labelAtpVerificationDate = 'ATP Verification Date';
   static const labelVawdAccredited = 'VAWD Accredited';
   static const labelVawdAccreditationNumber = 'VAWD Accreditation Number';
@@ -108,7 +106,8 @@ abstract final class GlnPharmaceuticalExtensionUiConstants {
   static const labelMedicareProviderNumber = 'Medicare Provider Number';
   static const labelMedicaidProviderNumber = 'Medicaid Provider Number';
 
-  static const cardCertificationsAccreditations = 'Certifications & Accreditations';
+  static const cardCertificationsAccreditations =
+      'Certifications & Accreditations';
   static const labelIsoCertified = 'ISO Certified';
   static const labelIsoCertificationType = 'ISO Certification Type';
   static const hintIsoCertificationType = 'e.g., ISO 9001, ISO 13485';
@@ -142,18 +141,19 @@ abstract final class GlnPharmaceuticalExtensionUiConstants {
   static const labelPhone = 'Phone';
 }
 
-/// [GLNTobaccoExtensionWidget] — strings only (tobacco location extension).
 abstract final class GlnTobaccoExtensionUiConstants {
   static const expansionTitle = 'Tobacco Location Details';
 
   static const sectionEuTpd = 'EU Tobacco Products Directive (TPD)';
   static const switchEuTpdRegistered = 'EU TPD Registered';
   static const labelEuEconomicOperatorId = 'EU Economic Operator ID';
-  static const helperEuEconomicOperatorId = 'EU-TPD Economic Operator Identifier';
+  static const helperEuEconomicOperatorId =
+      'EU-TPD Economic Operator Identifier';
   static const labelEuFacilityId = 'EU Facility ID';
   static const labelTpdRegistrationDate = 'TPD Registration Date';
   static const switchFirstRetailOutlet = 'First Retail Outlet';
-  static const subtitleFirstRetailOutlet = 'Is this the first retail point of sale?';
+  static const subtitleFirstRetailOutlet =
+      'Is this the first retail point of sale?';
   static const labelEuImporterId = 'EU Importer ID';
 
   static const sectionTaxStampAuthority = 'Tax Stamp Authority';
@@ -193,7 +193,8 @@ abstract final class GlnTobaccoExtensionUiConstants {
   static const switchManufacturingFacility = 'Manufacturing Facility';
   static const labelManufacturingLicenseNumber = 'Manufacturing License Number';
   static const labelManufacturingLicenseExpiry = 'Manufacturing License Expiry';
-  static const labelManufacturingCapacity = 'Manufacturing Capacity (units/day)';
+  static const labelManufacturingCapacity =
+      'Manufacturing Capacity (units/day)';
   static const labelTobaccoTypesManufactured = 'Tobacco Types Manufactured';
   static const helperTobaccoTypesManufactured =
       'e.g., Cigarettes, Cigars, RYO, etc.';
@@ -203,15 +204,18 @@ abstract final class GlnTobaccoExtensionUiConstants {
   static const subtitleUiIssuer = 'Authorized to issue Unique Identifiers';
   static const labelUiIssuerRegistrationId = 'UI Issuer Registration ID';
   static const labelUiSystemProvider = 'UI System Provider';
-  static const labelAntiTamperingDeviceProvider = 'Anti-Tampering Device Provider';
+  static const labelAntiTamperingDeviceProvider =
+      'Anti-Tampering Device Provider';
 
   static const sectionImportExport = 'Import/Export';
   static const labelCustomsRegistrationNumber = 'Customs Registration Number';
-  static const switchAuthorizedEconomicOperator = 'Authorized Economic Operator (AEO)';
+  static const switchAuthorizedEconomicOperator =
+      'Authorized Economic Operator (AEO)';
   static const labelAeoCertificateNumber = 'AEO Certificate Number';
   static const labelAeoCertificateExpiry = 'AEO Certificate Expiry';
   static const switchBondedWarehouse = 'Bonded Warehouse';
-  static const labelBondedWarehouseLicenseNumber = 'Bonded Warehouse License Number';
+  static const labelBondedWarehouseLicenseNumber =
+      'Bonded Warehouse License Number';
 
   static const sectionSecurityCompliance = 'Security & Compliance';
   static const switchHasSecurityFeatures = 'Has Security Features';
@@ -242,11 +246,15 @@ abstract final class GlnTobaccoExtensionUiConstants {
   static const labelQualityManagerName = 'Quality Manager Name';
   static const labelQualityManagerEmail = 'Quality Manager Email';
   static const labelQualityManagerPhone = 'Quality Manager Phone';
-  static const labelRegulatoryAffairsContactName = 'Regulatory Affairs Contact Name';
-  static const labelRegulatoryAffairsContactEmail = 'Regulatory Affairs Contact Email';
-  static const labelRegulatoryAffairsContactPhone = 'Regulatory Affairs Contact Phone';
+  static const labelRegulatoryAffairsContactName =
+      'Regulatory Affairs Contact Name';
+  static const labelRegulatoryAffairsContactEmail =
+      'Regulatory Affairs Contact Email';
+  static const labelRegulatoryAffairsContactPhone =
+      'Regulatory Affairs Contact Phone';
 
-  static const sectionInternationalRegulatoryIds = 'International Regulatory IDs';
+  static const sectionInternationalRegulatoryIds =
+      'International Regulatory IDs';
   static const labelWhoFctcPartyCountry = 'WHO FCTC Party Country';
   static const labelUkTobaccoTraceabilityId = 'UK Tobacco Traceability ID';
   static const labelCanadaTobaccoLicenseId = 'Canada Tobacco License ID';

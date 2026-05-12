@@ -22,7 +22,6 @@ class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
 
 class ProductionBatchSerialDateAssociationsCoreGroupState
     extends State<ProductionBatchSerialDateAssociationsCoreGroup> {
-  // Store backend-compatible codes; display space-separated labels.
   String? _hasBatchNumberIndicator = 'REQUESTED_BY_LAW';
   String? _hasSerialNumberIndicator = 'REQUESTED_BY_LAW';
 
@@ -33,9 +32,10 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
     required String? hasBatchNumberIndicator,
     required String? hasSerialNumberIndicator,
   }) {
-    _hasBatchNumberIndicator = (hasBatchNumberIndicator ?? 'REQUESTED_BY_LAW').trim();
-    _hasSerialNumberIndicator =
-        (hasSerialNumberIndicator ?? 'REQUESTED_BY_LAW').trim();
+    _hasBatchNumberIndicator = (hasBatchNumberIndicator ?? 'REQUESTED_BY_LAW')
+        .trim();
+    _hasSerialNumberIndicator = (hasSerialNumberIndicator ?? 'REQUESTED_BY_LAW')
+        .trim();
     if (mounted) setState(() {});
   }
 
@@ -65,8 +65,9 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
               child: Text(GtinUiConstants.batchSerialNotAllocated),
             ),
           ],
-          validator:
-              widget.isReadOnly ? null : GtinFieldValidators.validateHasBatchNumberIndicator,
+          validator: widget.isReadOnly
+              ? null
+              : GtinFieldValidators.validateHasBatchNumberIndicator,
           onChanged: widget.isReadOnly
               ? null
               : (v) => setState(() => _hasBatchNumberIndicator = v),
@@ -96,9 +97,9 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
           validator: widget.isReadOnly
               ? null
               : (v) => GtinFieldValidators.validateHasSerialNumberIndicator(
-                    v,
-                    batchIndicator: _hasBatchNumberIndicator,
-                  ),
+                  v,
+                  batchIndicator: _hasBatchNumberIndicator,
+                ),
           onChanged: widget.isReadOnly
               ? null
               : (v) => setState(() => _hasSerialNumberIndicator = v),
@@ -123,4 +124,3 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
     );
   }
 }
-

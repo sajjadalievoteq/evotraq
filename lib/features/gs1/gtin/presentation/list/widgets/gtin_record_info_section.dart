@@ -19,16 +19,15 @@ class GtinRecordInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocSelector<GTINCubit, GTINState, ({int? count, bool hasMore})>(
-      selector: (state) => (count: state.gtins?.length, hasMore: state.hasMoreData),
+      selector: (state) =>
+          (count: state.gtins?.length, hasMore: state.hasMoreData),
       builder: (context, selected) {
         final count = selected.count;
         if (count == null) return const SizedBox.shrink();
 
         return Column(
           children: [
-            SizedBox(
-              height: Constants.spacing,
-            ),
+            SizedBox(height: Constants.spacing),
             Gs1ListRecordInfoBar(
               entityPlural: GtinUiConstants.entityPluralGtins,
               loadedRecords: count,

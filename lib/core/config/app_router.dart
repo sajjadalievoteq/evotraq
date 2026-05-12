@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
@@ -176,23 +177,23 @@ class AppRouter {
       GoRoute(
         path: Constants.splashRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const SplashScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const SplashScreen()),
       ),
       GoRoute(
         path: Constants.loginRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const LoginScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const LoginScreen()),
       ),
       GoRoute(
         path: Constants.registerRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const RegisterScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const RegisterScreen()),
       ),
       GoRoute(
         path: Constants.checkEmailRoute,
         pageBuilder: (context, state) {
           final email = state.uri.queryParameters['email'];
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: CheckEmailScreen(email: email),
           );
@@ -200,7 +201,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.forgotPasswordRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ForgotPasswordScreen(),
         ),
@@ -209,7 +210,7 @@ class AppRouter {
         path: Constants.resetPasswordRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ResetPasswordScreen(token: token),
           );
@@ -220,7 +221,7 @@ class AppRouter {
         path: Constants.authResetPasswordRoute,
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ResetPasswordScreen(token: token),
           );
@@ -231,7 +232,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
           final email = state.uri.queryParameters['email'];
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: VerifyEmailScreen(token: token, email: email),
           );
@@ -242,7 +243,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? '';
           final email = state.uri.queryParameters['email'];
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: VerifyEmailScreen(token: token, email: email),
           );
@@ -251,7 +252,7 @@ class AppRouter {
       GoRoute(
         path: Constants.homeRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const HomeScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const HomeScreen()),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -263,7 +264,7 @@ class AppRouter {
       GoRoute(
         path: Constants.profileRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const ProfileScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const ProfileScreen()),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -277,7 +278,7 @@ class AppRouter {
         path: Constants.journeyDashboardRoute,
         pageBuilder: (context, state) {
           final epc = state.uri.queryParameters['epc'];
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ProductJourneyScreen(initialEpc: epc),
           );
@@ -293,7 +294,7 @@ class AppRouter {
       // Admin routes
       GoRoute(
         path: Constants.adminUsersRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: BlocProvider(
             create: (context) => getIt<UserManagementCubit>(),
@@ -318,7 +319,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminApprovalsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: BlocProvider(
             create: (context) => getIt<UserManagementCubit>(),
@@ -343,7 +344,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminSettingsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SystemSettingsScreen(),
         ),
@@ -365,7 +366,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminGs1ValidationRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const GS1ValidationScreen(),
         ),
@@ -387,7 +388,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminPerformanceTestsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PerformanceTestScreen(),
         ),
@@ -409,7 +410,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminPerformanceOptimizationRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PerformanceOptimizationDashboard(),
         ),
@@ -431,7 +432,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminMonitoringRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const MonitoringDashboardScreen(),
         ),
@@ -453,7 +454,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminIntegrationValidationRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const IntegrationValidationScreen(),
         ),
@@ -475,7 +476,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminEventGenerationTestRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const EventGenerationTestScreen(),
         ),
@@ -497,7 +498,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminIndustryTestDataRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const IndustryTestDataScreen(),
         ),
@@ -519,7 +520,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminValidationRulesRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ValidationRuleManagementScreen(),
         ),
@@ -541,7 +542,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminValidationRulesHelpRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ValidationRulesHelpScreen(),
         ),
@@ -564,7 +565,7 @@ class AppRouter {
         path: Constants.adminValidationRulesNewRoute,
         pageBuilder: (context, state) {
           final ruleId = state.pathParameters['ruleId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: RuleEditorRouteScreen(
               ruleId: ruleId,
@@ -594,7 +595,7 @@ class AppRouter {
           final ruleId = state.pathParameters['ruleId'] ?? '';
           final isPredefined =
               state.uri.queryParameters['predefined'] == 'true';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: RuleEditorRouteScreen(
               ruleId: ruleId,
@@ -619,7 +620,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminDatabasePartitioningRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const DatabasePartitioningDashboard(),
         ),
@@ -641,7 +642,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminCacheRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const CacheManagementScreen(),
         ),
@@ -664,7 +665,7 @@ class AppRouter {
       // Phase 3.3 Batch Processing routes
       GoRoute(
         path: Constants.adminJobQueueRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const JobQueueManagementScreen(),
         ),
@@ -686,7 +687,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminEtlManagementRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ETLManagementScreen(),
         ),
@@ -708,7 +709,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminBulkExportRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const BulkExportManagementScreen(),
         ),
@@ -730,7 +731,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminDataConsistencyIntegrityRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const DataConsistencyIntegrityDashboard(),
         ),
@@ -753,7 +754,7 @@ class AppRouter {
       // API Management routes
       GoRoute(
         path: Constants.adminApiPartnersRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PartnerManagementScreen(),
         ),
@@ -777,7 +778,7 @@ class AppRouter {
         path: Constants.adminApiPartnerDetailRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: PartnerDetailScreen(partnerId: partnerId),
           );
@@ -802,7 +803,7 @@ class AppRouter {
         path: Constants.adminApiPartnerCredentialsRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: CredentialManagementScreen(partnerId: partnerId),
           );
@@ -827,7 +828,7 @@ class AppRouter {
         path: Constants.adminApiPartnerAnalyticsRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ApiAnalyticsScreen(partnerId: partnerId),
           );
@@ -850,7 +851,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminApiServiceAccountsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ServiceAccountManagementScreen(),
         ),
@@ -873,7 +874,7 @@ class AppRouter {
       // API Collections Management route
       GoRoute(
         path: Constants.adminApiCollectionsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ApiCollectionManagementScreen(),
         ),
@@ -898,7 +899,7 @@ class AppRouter {
         path: Constants.adminApiPartnerAccessRoute,
         pageBuilder: (context, state) {
           final partnerId = state.pathParameters['partnerId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: PartnerAccessManagementScreen(initialPartnerId: partnerId),
           );
@@ -922,7 +923,7 @@ class AppRouter {
       // Partner Access Management route (without partnerId)
       GoRoute(
         path: Constants.adminApiAccessRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PartnerAccessManagementScreen(),
         ),
@@ -946,7 +947,7 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1GtinsRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const GTINScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const GTINScreen()),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -957,7 +958,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GtinNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const GTINDetailScreen(isEditing: true),
         ),
@@ -973,7 +974,7 @@ class AppRouter {
         path: Constants.gs1GtinDetailRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
           );
@@ -990,7 +991,7 @@ class AppRouter {
         path: Constants.gs1GtinEditRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
           );
@@ -1007,7 +1008,7 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1GlnsRoute,
         pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const GLNScreen()),
+            TraqRouterTransitions.page(key: state.pageKey, child: const GLNScreen()),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -1018,7 +1019,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GlnNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const GLNDetailScreen(isEditing: true),
         ),
@@ -1035,7 +1036,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final glnId =
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: GLNDetailScreen(glnId: glnId, isEditing: false),
           );
@@ -1053,7 +1054,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final glnId =
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: GLNDetailScreen(glnId: glnId, isEditing: true),
           );
@@ -1069,7 +1070,7 @@ class AppRouter {
       // SSCC routes
       GoRoute(
         path: Constants.gs1SsccsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SSCCAdvancedListScreen(),
         ),
@@ -1083,7 +1084,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1SsccNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SSCCDetailScreen(mode: SSCCDetailMode.create),
         ),
@@ -1101,7 +1102,7 @@ class AppRouter {
           final ssccId = state.pathParameters['ssccId'] ?? '';
           final ssccCode =
               state.extra as String?; // Pass ssccCode as extra data
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SSCCDetailScreen(
               mode: SSCCDetailMode.view,
@@ -1122,7 +1123,7 @@ class AppRouter {
         path: Constants.gs1SsccEditRoute,
         pageBuilder: (context, state) {
           final ssccId = state.pathParameters['ssccId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SSCCDetailScreen(mode: SSCCDetailMode.edit, ssccId: ssccId),
           );
@@ -1139,7 +1140,7 @@ class AppRouter {
       // SGTIN routes
       GoRoute(
         path: Constants.gs1SgtinsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SGTINAdvancedListScreen(),
         ),
@@ -1153,7 +1154,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1SgtinNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SGTINDetailScreen(isEditing: true),
         ),
@@ -1169,7 +1170,7 @@ class AppRouter {
         path: Constants.gs1SgtinDetailRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SGTINDetailScreen(sgtinId: id, isEditing: false),
           );
@@ -1186,7 +1187,7 @@ class AppRouter {
         path: Constants.gs1SgtinEditRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SGTINDetailScreen(sgtinId: id, isEditing: true),
           );
@@ -1203,7 +1204,7 @@ class AppRouter {
       // EPC Conversion route
       GoRoute(
         path: Constants.gs1EpcConversionRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: EPCConversionScreen(
             epcConversionService: getIt<EPCConversionService>(),
@@ -1220,7 +1221,7 @@ class AppRouter {
       // GS1 Validation Demo route
       GoRoute(
         path: Constants.gs1ValidationDemoRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const GS1ValidationDemoScreen(),
         ),
@@ -1235,7 +1236,7 @@ class AppRouter {
       // EPCIS Event Routes with placeholder screens
       GoRoute(
         path: Constants.epcisEventsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const EPCISEventsListScreen(),
         ),
@@ -1249,7 +1250,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisObjectEventsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ObjectEventsListScreen(),
         ),
@@ -1263,7 +1264,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisAggregationEventsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const AggregationEventsListScreen(),
         ),
@@ -1277,7 +1278,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransactionEventsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransactionEventsListScreen(),
         ),
@@ -1291,7 +1292,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransformationEventsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransformationEventsListScreen(),
         ),
@@ -1307,7 +1308,7 @@ class AppRouter {
       // Advanced Query Interface Routes
       GoRoute(
         path: Constants.epcisAdvancedQueryRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const AdvancedQueryScreen(),
         ),
@@ -1323,7 +1324,7 @@ class AppRouter {
       // Supply Chain Traversal Query Routes
       GoRoute(
         path: Constants.epcisTraversalQueryRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TraversalQueryScreen(),
         ),
@@ -1339,7 +1340,7 @@ class AppRouter {
       // EPCIS Serialization & Format Conversion Routes
       GoRoute(
         path: Constants.epcisSerializationRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: EPCISSerializationScreen(appConfig: getIt<AppConfig>()),
         ),
@@ -1355,7 +1356,7 @@ class AppRouter {
       // Routes for creating new EPCIS events
       GoRoute(
         path: Constants.epcisObjectEventNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ObjectEventFormScreen(),
         ),
@@ -1369,7 +1370,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisObjectEventBatchImportRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ObjectEventBatchImportScreen(),
         ),
@@ -1383,7 +1384,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisAggregationEventNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const AggregationEventFormScreen(),
         ),
@@ -1397,7 +1398,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransactionEventNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransactionEventFormScreen(),
         ),
@@ -1411,7 +1412,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransactionEventHelpRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransactionEventsHelpScreen(),
         ),
@@ -1425,7 +1426,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransformationEventNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransformationEventFormScreen(),
         ),
@@ -1443,7 +1444,7 @@ class AppRouter {
         path: Constants.epcisEventDetailRoute,
         pageBuilder: (context, state) {
           final eventId = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             // Generic event detail view
             child: Scaffold(
@@ -1468,7 +1469,7 @@ class AppRouter {
 
           // If we received the event object directly via the extra parameter
           if (extra is ObjectEvent) {
-            return MaterialPage(
+            return TraqRouterTransitions.page(
               key: state.pageKey,
               child: ObjectEventFormScreen(
                 event: extra,
@@ -1477,7 +1478,7 @@ class AppRouter {
             );
           } else {
             // Otherwise we need to fetch it - the provider would handle this
-            return MaterialPage(
+            return TraqRouterTransitions.page(
               key: state.pageKey,
               child: Builder(
                 builder: (context) {
@@ -1508,7 +1509,7 @@ class AppRouter {
         path: Constants.epcisAggregationEventDetailRoute,
         pageBuilder: (context, state) {
           final aggregationEventId = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: AggregationEventFormScreen(
               aggregationEventId: aggregationEventId,
@@ -1527,7 +1528,7 @@ class AppRouter {
         path: Constants.epcisTransactionEventDetailRoute,
         pageBuilder: (context, state) {
           final transactionEventId = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: TransactionEventFormScreen(
               transactionEventId: transactionEventId,
@@ -1545,7 +1546,7 @@ class AppRouter {
       // Add route for Transaction Document operations
       GoRoute(
         path: Constants.epcisTransactionDocumentsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransactionDocumentScreen(),
         ),
@@ -1559,7 +1560,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.epcisTransactionDocumentHelpRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const TransactionDocumentHelpScreen(),
         ),
@@ -1575,7 +1576,7 @@ class AppRouter {
         path: Constants.epcisTransformationEventDetailRoute,
         pageBuilder: (context, state) {
           final transformationEventId = state.pathParameters['id'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: TransformationEventFormScreen(
               transformationEventId: transformationEventId,
@@ -1599,7 +1600,7 @@ class AppRouter {
               (state.extra as Map<String, dynamic>?) ?? {};
           final isParent = extra['isParent'] as bool? ?? true;
 
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: AggregationEventHierarchyScreen(
               epc: epc,
@@ -1619,7 +1620,7 @@ class AppRouter {
       // Operations routes
       GoRoute(
         path: Constants.opShippingRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ShippingOperationListScreen(),
         ),
@@ -1633,7 +1634,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opShippingCreateRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ShippingOperationScreen(),
         ),
@@ -1649,7 +1650,7 @@ class AppRouter {
         path: Constants.opShippingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ShippingOperationDetailScreen(operationId: operationId),
           );
@@ -1666,7 +1667,7 @@ class AppRouter {
       // Receiving Operations routes
       GoRoute(
         path: Constants.opReceivingRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ReceivingOperationListScreen(),
         ),
@@ -1680,7 +1681,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opReceivingCreateRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ReceivingOperationScreen(),
         ),
@@ -1696,7 +1697,7 @@ class AppRouter {
         path: Constants.opReceivingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: ReceivingOperationDetailScreen(operationId: operationId),
           );
@@ -1713,7 +1714,7 @@ class AppRouter {
       // Packing Operations routes
       GoRoute(
         path: Constants.opPackingRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PackingOperationListScreen(),
         ),
@@ -1727,7 +1728,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opPackingCreateRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const PackingOperationScreen(),
         ),
@@ -1743,7 +1744,7 @@ class AppRouter {
         path: Constants.opPackingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: PackingOperationDetailScreen(operationId: operationId),
           );
@@ -1760,7 +1761,7 @@ class AppRouter {
       // Commissioning Operations routes
       GoRoute(
         path: Constants.opCommissioningRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const CommissioningOperationListScreen(),
         ),
@@ -1774,7 +1775,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opCommissioningNewRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: BlocProvider(
             create: (_) => getIt<GTINCubit>(),
@@ -1793,7 +1794,7 @@ class AppRouter {
         path: Constants.opCommissioningDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId'] ?? '';
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: CommissioningOperationDetailScreen(operationId: operationId),
           );
@@ -1810,7 +1811,7 @@ class AppRouter {
       // Notification routes
       GoRoute(
         path: Constants.notificationsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const NotificationCenterScreen(),
         ),
@@ -1824,7 +1825,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.notificationSubscriptionsRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const SubscriptionManagementScreen(),
         ),
@@ -1840,7 +1841,7 @@ class AppRouter {
         path: Constants.notificationDetailRoute,
         pageBuilder: (context, state) {
           final subscriptionId = state.pathParameters['subscriptionId']!;
-          return MaterialPage(
+          return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SubscriptionDetailsScreen(subscriptionId: subscriptionId),
           );
@@ -1855,7 +1856,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.notificationWebhooksRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const WebhookConfigurationScreen(),
         ),
@@ -1871,7 +1872,7 @@ class AppRouter {
       // Barcode Routes - Using the new GS1 Barcode Scanner
       GoRoute(
         path: Constants.barcodeScanRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ApiEnabledBarcodeScannerScreen(
             title: 'GS1 Barcode Scanner',
@@ -1889,7 +1890,7 @@ class AppRouter {
       // Barcode generation route
       GoRoute(
         path: Constants.barcodeGenerateRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const BarcodeGenerationScreen(),
         ),
@@ -1903,7 +1904,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.barcodeVerifyRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: ApiEnabledBarcodeScannerScreen(
             title: 'Verify GS1 Barcode',
@@ -1925,13 +1926,13 @@ class AppRouter {
       TransactionEventValidationDemoRoute.getRoute(),
       GoRoute(
         path: Constants.demoValidationRulesRoute,
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const ValidationRuleManagementScreen(),
         ),
       ),
     ],
-    errorPageBuilder: (context, state) => MaterialPage(
+    errorPageBuilder: (context, state) => TraqRouterTransitions.page(
       key: state.pageKey,
       child: Scaffold(
         appBar: AppBar(title: const Text('Page Not Found')),

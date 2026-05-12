@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class AuthSurfaceCard extends StatelessWidget {
   const AuthSurfaceCard({
@@ -18,7 +18,7 @@ class AuthSurfaceCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: EvotraqRadius.card,
+        borderRadius: TraqRadius.card,
         border: Border.all(color: c.border),
       ),
       child: child,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 
 class BuildSuccessMessage extends StatelessWidget {
@@ -30,20 +30,15 @@ class BuildSuccessMessage extends StatelessWidget {
       children: [
         const SizedBox(height: 40),
 
-        // Success Icon
         SvgPicture.asset(
           AppAssets.iconCheck,
           width: 100,
           height: 100,
-          colorFilter: ColorFilter.mode(
-            c.success,
-            BlendMode.srcIn,
-          ),
+          colorFilter: ColorFilter.mode(c.success, BlendMode.srcIn),
         ),
 
         const SizedBox(height: 32),
 
-        // Success Message
         Text(
           title,
           style: TextStyle(
@@ -58,20 +53,13 @@ class BuildSuccessMessage extends StatelessWidget {
 
         Text(
           message,
-          style: TextStyle(
-            fontSize: 16,
-            color: textSecondary,
-          ),
+          style: TextStyle(fontSize: 16, color: textSecondary),
           textAlign: TextAlign.center,
         ),
 
         const SizedBox(height: 40),
 
-        // Action Button
-        AuthActionButton(
-          label: buttonLabel,
-          onPressed: onButtonPressed,
-        ),
+        AuthActionButton(label: buttonLabel, onPressed: onButtonPressed),
       ],
     );
   }

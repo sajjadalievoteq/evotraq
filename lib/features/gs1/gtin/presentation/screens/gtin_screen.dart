@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_c
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 
-/// Main screen for GTIN (Global Trade Item Number) functionality
 class GTINScreen extends StatefulWidget {
   const GTINScreen({super.key});
 
@@ -54,14 +53,13 @@ class _GTINScreenState extends State<GTINScreen> {
               s.gtins != null &&
               s.gtins!.isEmpty &&
               !s.isGtinListLoading,
-          listBuilder: (context,
-                  {required onSelect,
-                  required bindRefresh,
-                  required onRequestCreate}) =>
-              GTINListScreen(
-            embedded: true,
-            onSelectGtin: onSelect,
-          ),
+          listBuilder:
+              (
+                context, {
+                required onSelect,
+                required bindRefresh,
+                required onRequestCreate,
+              }) => GTINListScreen(embedded: true, onSelectGtin: onSelect),
           detailViewBuilder: (context, code) => GTINDetailScreen(
             key: ValueKey(code),
             gtinCode: code,

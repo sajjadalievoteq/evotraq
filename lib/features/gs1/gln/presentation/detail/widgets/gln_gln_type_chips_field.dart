@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Multi-select GS1 GLN types (spec §2.3).
 class GlnGlnTypeChipsField extends StatelessWidget {
   const GlnGlnTypeChipsField({
     super.key,
@@ -36,7 +35,6 @@ class GlnGlnTypeChipsField extends StatelessWidget {
           children: _options.map((o) {
             final selected = selection.contains(o.$1);
             return FilterChip(
-
               label: Text(o.$2),
               selected: selected,
               onSelected: enabled

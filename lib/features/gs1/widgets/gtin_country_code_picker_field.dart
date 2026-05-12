@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
-import '../../../core/theme/evotraq_theme.dart';
+import '../../../core/theme/traq_theme.dart';
 
 /// ISO 3166-1 numeric country picker (shared by GTIN and GLN).
 ///

@@ -12,7 +12,8 @@ abstract final class UserManagementConstants {
   static const String addUserLabel = 'Add User';
   static const String noUsersFound = 'No users found matching your criteria';
   static const String noPendingApprovals = 'No pending approvals';
-  static const String approvalsErrorMessage = 'Unable to load pending approvals';
+  static const String approvalsErrorMessage =
+      'Unable to load pending approvals';
   static const String createUserSuccess = 'User created successfully';
   static const String updateUserSuccess = 'User updated successfully';
   static const String activateUserSuccess = 'User activated successfully';
@@ -24,7 +25,8 @@ abstract final class UserManagementConstants {
   static const String rejectDialogActionSummary = 'This action will:';
   static const String rejectActionOne = 'Mark the registration as rejected';
   static const String rejectActionTwo = 'Send a rejection notification email';
-  static const String rejectActionThree = 'Remove the user from the pending list';
+  static const String rejectActionThree =
+      'Remove the user from the pending list';
   static const String rejectLabel = 'Reject';
   static const String approveLabel = 'Approve';
   static const String cancelLabel = 'Cancel';

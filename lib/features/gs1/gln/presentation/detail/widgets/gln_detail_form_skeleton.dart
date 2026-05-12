@@ -3,7 +3,6 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 
 import '../../../../../../core/consts/app_consts.dart';
 
-/// Placeholder column for [Gs1FormShimmerLayer] — approximates GLN detail sections.
 class GlnDetailFormSkeleton extends StatelessWidget {
   const GlnDetailFormSkeleton({super.key});
 

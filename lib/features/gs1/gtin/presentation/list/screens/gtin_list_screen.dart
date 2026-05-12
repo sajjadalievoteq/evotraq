@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
@@ -23,10 +24,8 @@ import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 class GTINListScreen extends StatefulWidget {
   const GTINListScreen({super.key, this.embedded = false, this.onSelectGtin});
 
-  /// When true, renders only the content (no Scaffold/AppDrawer/FAB).
   final bool embedded;
 
-  /// If provided, tapping an item will call this instead of navigating.
   final ValueChanged<String>? onSelectGtin;
 
   @override
@@ -49,7 +48,6 @@ class _GTINListScreenState extends State<GTINListScreen> {
   DateTime? _registrationDateTo;
   int _pageSize = 25;
 
-  /// Avoid duplicate list fetch: [SplitOrListIndexedStack] keeps split + list mounted.
   bool _didRunPrimaryInitialFetch = false;
 
   @override
@@ -146,7 +144,6 @@ class _GTINListScreenState extends State<GTINListScreen> {
     );
   }
 
-  /// Cancels pending debounce and runs search now (Enter, refresh, filters, clear).
   void _searchImmediate() {
     _searchDebouncer.cancel();
     _search();
@@ -233,13 +230,13 @@ class _GTINListScreenState extends State<GTINListScreen> {
       widget.onSelectGtin!(gtinCode);
       return;
     }
-    context
-        .push('${Constants.gs1GtinsRoute}/$gtinCode')
-        .then((_) => _searchImmediate());
+    context.go('${Constants.gs1GtinsRoute}/$gtinCode');
+    _searchImmediate();
   }
 
   void _navigateToCreateGTIN() {
-    context.push(Constants.gs1GtinNewRoute).then((_) => _searchImmediate());
+    context.go(Constants.gs1GtinNewRoute);
+    _searchImmediate();
   }
 
   @override
@@ -250,7 +247,11 @@ class _GTINListScreenState extends State<GTINListScreen> {
           toolbar: Column(
             children: [
               Padding(
-                padding: EdgeInsets.only(top:context.padding.left,right: context.padding.left,left: context.padding.left),
+                padding: EdgeInsets.only(
+                  top: context.padding.left,
+                  right: context.padding.left,
+                  left: context.padding.left,
+                ),
                 child: Column(
                   children: [
                     ListenableBuilder(
@@ -285,7 +286,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
                     SizedBox(height: Constants.spacing),
                     BlocBuilder<GTINCubit, GTINState>(
                       buildWhen: (prev, current) =>
-                      prev.gtinListSortAscending !=
+                          prev.gtinListSortAscending !=
                           current.gtinListSortAscending,
                       builder: (context, cubitState) {
                         return Gs1ListSortingControls(
@@ -304,7 +305,6 @@ class _GTINListScreenState extends State<GTINListScreen> {
                   ],
                 ),
               ),
-
             ],
           ),
           results: GtinResultsList(
@@ -326,7 +326,10 @@ class _GTINListScreenState extends State<GTINListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(GtinUiConstants.appBarManagement)),
+      appBar: TraqAppBar(
+        context,
+        title: const Text(GtinUiConstants.appBarManagement),
+      ),
       drawer: const AppDrawer(),
       body: content,
       floatingActionButton: FloatingActionButton(

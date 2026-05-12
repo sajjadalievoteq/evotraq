@@ -57,9 +57,7 @@ class GtinResultsList extends StatelessWidget {
           return;
         }
         if (state.status == GTINStatus.error) {
-          debugPrint(
-            '[GTIN UI] cubit error status (snackbar): ${state.error}',
-          );
+          debugPrint('[GTIN UI] cubit error status (snackbar): ${state.error}');
           context.showError(state.error ?? '');
         }
       },
@@ -101,9 +99,13 @@ class GtinResultsList extends StatelessWidget {
               onRefresh: onRefresh,
               child: ListView.separated(
                 controller: scrollController,
-                physics:  AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.only(right: context.padding.left,left: context.padding.left),
-                itemCount: gtins.length +
+                physics: AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  right: context.padding.left,
+                  left: context.padding.left,
+                ),
+                itemCount:
+                    gtins.length +
                     ((state.hasMoreData && state.isFetchingMore) ? 1 : 0) +
                     1,
                 itemBuilder: (context, index) {
@@ -120,15 +122,14 @@ class GtinResultsList extends StatelessWidget {
                   }
 
                   final loaderIndex = gtins.length;
-                  final spacerIndex = gtins.length +
+                  final spacerIndex =
+                      gtins.length +
                       ((state.hasMoreData && state.isFetchingMore) ? 1 : 0);
 
                   if (index == loaderIndex &&
                       state.hasMoreData &&
                       state.isFetchingMore) {
-                    return _constrainedCenter(
-                      const Gs1ListLoadMoreIndicator(),
-                    );
+                    return _constrainedCenter(const Gs1ListLoadMoreIndicator());
                   }
 
                   if (index == spacerIndex) {
@@ -136,7 +137,10 @@ class GtinResultsList extends StatelessWidget {
                   }
 
                   return const SizedBox.shrink();
-                }, separatorBuilder: (BuildContext context, int index) { return const SizedBox(height: Constants.spacing); },
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return const SizedBox(height: Constants.spacing);
+                },
               ),
             ),
           ),
@@ -145,4 +149,3 @@ class GtinResultsList extends StatelessWidget {
     );
   }
 }
-

@@ -42,7 +42,8 @@ class TechMahAuthorizationGroupWidget extends StatefulWidget {
     required DateTime? maValidFrom,
     required DateTime? maValidTo,
     required String regulatoryStatus,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<TechMahAuthorizationGroupWidget> createState() =>
@@ -69,9 +70,12 @@ class _TechMahAuthorizationGroupWidgetState
     super.initState();
     _mahGlnController = TextEditingController(text: widget.initialMahGln);
     _mahNameController = TextEditingController(text: widget.initialMahName);
-    _mahCountryController = TextEditingController(text: widget.initialMahCountry);
-    _licensedAgentGlnsController =
-        TextEditingController(text: widget.initialLicensedAgentGlns);
+    _mahCountryController = TextEditingController(
+      text: widget.initialMahCountry,
+    );
+    _licensedAgentGlnsController = TextEditingController(
+      text: widget.initialLicensedAgentGlns,
+    );
     _maNumberController = TextEditingController(text: widget.initialMaNumber);
     _regulatoryStatus = widget.initialRegulatoryStatus.trim().isEmpty
         ? null
@@ -105,8 +109,7 @@ class _TechMahAuthorizationGroupWidgetState
         widget.initialRegulatoryStatus == oldWidget.initialRegulatoryStatus) {
       return;
     }
-    // Defer controller writes: doing this synchronously during update can notify
-    // dependent fields (e.g. country display) and trigger Form.markNeedsBuild mid-build.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (widget.initialMahGln != oldWidget.initialMahGln &&
@@ -121,8 +124,10 @@ class _TechMahAuthorizationGroupWidgetState
           widget.initialMahCountry != _mahCountryController.text) {
         _mahCountryController.text = widget.initialMahCountry;
       }
-      if (widget.initialLicensedAgentGlns != oldWidget.initialLicensedAgentGlns &&
-          widget.initialLicensedAgentGlns != _licensedAgentGlnsController.text) {
+      if (widget.initialLicensedAgentGlns !=
+              oldWidget.initialLicensedAgentGlns &&
+          widget.initialLicensedAgentGlns !=
+              _licensedAgentGlnsController.text) {
         _licensedAgentGlnsController.text = widget.initialLicensedAgentGlns;
       }
       if (widget.initialMaNumber != oldWidget.initialMaNumber &&
@@ -136,10 +141,12 @@ class _TechMahAuthorizationGroupWidgetState
         _maValidFrom = widget.initialMaValidFrom;
         _maValidTo = widget.initialMaValidTo;
       });
-      _maValidFromDisplay.text =
-          _maValidFrom != null ? _docDateFmt.format(_maValidFrom!) : '';
-      _maValidToDisplay.text =
-          _maValidTo != null ? _docDateFmt.format(_maValidTo!) : '';
+      _maValidFromDisplay.text = _maValidFrom != null
+          ? _docDateFmt.format(_maValidFrom!)
+          : '';
+      _maValidToDisplay.text = _maValidTo != null
+          ? _docDateFmt.format(_maValidTo!)
+          : '';
     });
   }
 
@@ -203,7 +210,7 @@ class _TechMahAuthorizationGroupWidgetState
             helperText: '13 digits; Mod-10 check digit',
             maxLength: 13,
             keyboardType: TextInputType.number,
-            inputFormatters:  [LengthLimitingTextInputFormatter(13)],
+            inputFormatters: [LengthLimitingTextInputFormatter(13)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateMahGln,
           ),
@@ -212,7 +219,7 @@ class _TechMahAuthorizationGroupWidgetState
             fieldName: 'mahName',
             label: 'MAH Name *',
             maxLength: 200,
-            inputFormatters:  [LengthLimitingTextInputFormatter(200)],
+            inputFormatters: [LengthLimitingTextInputFormatter(200)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateMahName,
           ),
@@ -227,10 +234,11 @@ class _TechMahAuthorizationGroupWidgetState
             controller: _licensedAgentGlnsController,
             fieldName: 'licensedAgentGlns',
             label: 'Licensed Agent GLNs',
-            helperText: 'Comma, semicolon, or newline separated (13-digit GLNs)',
+            helperText:
+                'Comma, semicolon, or newline separated (13-digit GLNs)',
             maxLines: 3,
             maxLength: 500,
-            inputFormatters:  [LengthLimitingTextInputFormatter(500)],
+            inputFormatters: [LengthLimitingTextInputFormatter(500)],
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateLicensedAgentGlns,
           ),
@@ -246,10 +254,10 @@ class _TechMahAuthorizationGroupWidgetState
           GestureDetector(
             onTap: widget.isEditing
                 ? () => _pickDate(
-                      current: _maValidFrom,
-                      setValue: (v) => _maValidFrom = v,
-                      display: _maValidFromDisplay,
-                    )
+                    current: _maValidFrom,
+                    setValue: (v) => _maValidFrom = v,
+                    display: _maValidFromDisplay,
+                  )
                 : null,
             child: AbsorbPointer(
               child: TextFormField(
@@ -267,10 +275,10 @@ class _TechMahAuthorizationGroupWidgetState
           GestureDetector(
             onTap: widget.isEditing
                 ? () => _pickDate(
-                      current: _maValidTo,
-                      setValue: (v) => _maValidTo = v,
-                      display: _maValidToDisplay,
-                    )
+                    current: _maValidTo,
+                    setValue: (v) => _maValidTo = v,
+                    display: _maValidToDisplay,
+                  )
                 : null,
             child: AbsorbPointer(
               child: TextFormField(

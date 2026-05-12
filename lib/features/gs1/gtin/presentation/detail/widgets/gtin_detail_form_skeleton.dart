@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 
-/// Placeholder column for [Gs1FormShimmerLayer] — approximates GTIN detail length.
 class GtinDetailFormSkeleton extends StatelessWidget {
   const GtinDetailFormSkeleton({super.key});
 

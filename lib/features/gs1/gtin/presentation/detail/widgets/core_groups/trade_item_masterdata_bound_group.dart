@@ -51,13 +51,13 @@ class TradeItemMasterdataBoundGroupState
     super.dispose();
   }
 
-  // Values consumed by submit logic
   String get brandName => _brandName.text;
   String get manufacturer => _manufacturer.text;
   String get unitDescriptor => _unitDescriptor.text;
   TextEditingController get unitDescriptorController => _unitDescriptor;
   String get status => _status ?? 'ACTIVE';
-  int? get packSize => _packSize.text.isEmpty ? null : int.tryParse(_packSize.text);
+  int? get packSize =>
+      _packSize.text.isEmpty ? null : int.tryParse(_packSize.text);
 
   void setFromGtin({
     required String brandName,
@@ -101,21 +101,21 @@ class TradeItemMasterdataBoundGroupState
           key: ValueKey(
             'ud_${_unitDescriptor.text.isEmpty ? '' : _unitDescriptor.text}',
           ),
-          initialValue:
-              _unitDescriptor.text.isEmpty ? null : _unitDescriptor.text,
+          initialValue: _unitDescriptor.text.isEmpty
+              ? null
+              : _unitDescriptor.text,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelTradeItemUnitDescriptor,
             helperText: GtinUiConstants.helperGdsnUnitDescriptor,
           ),
           items: GtinDetailConstants.unitDescriptorOptions
               .map(
-                (level) => DropdownMenuItem(
-                  value: level,
-                  child: Text(level),
-                ),
+                (level) => DropdownMenuItem(value: level, child: Text(level)),
               )
               .toList(),
-          validator: widget.isReadOnly ? null : GtinFieldValidators.validateUnitDescriptor,
+          validator: widget.isReadOnly
+              ? null
+              : GtinFieldValidators.validateUnitDescriptor,
           onChanged: widget.isReadOnly
               ? null
               : (value) => setState(() => _unitDescriptor.text = value ?? ''),
@@ -137,15 +137,14 @@ class TradeItemMasterdataBoundGroupState
             labelText: GtinUiConstants.labelProductLifecycleStatus,
           ),
           items: GtinDetailConstants.statusOptions
-              .map(
-                (s) => DropdownMenuItem(
-                  value: s,
-                  child: Text(s),
-                ),
-              )
+              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
               .toList(),
-          validator: widget.isReadOnly ? null : GtinFieldValidators.validateProductStatus,
-          onChanged: widget.isReadOnly ? null : (value) => setState(() => _status = value),
+          validator: widget.isReadOnly
+              ? null
+              : GtinFieldValidators.validateProductStatus,
+          onChanged: widget.isReadOnly
+              ? null
+              : (value) => setState(() => _status = value),
         ),
       ],
     );
@@ -173,4 +172,3 @@ class TradeItemMasterdataBoundGroupState
     );
   }
 }
-

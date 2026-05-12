@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
@@ -15,6 +17,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
@@ -36,21 +39,19 @@ import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_i
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_location_type_mapper.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
-/// Screen for viewing and editing GLN details (same form pattern as GTIN: [Form] + controllers).
+import '../../../../../core/theme/traq_theme.dart';
+import '../../../../../core/utils/responsive_utils.dart';
+import '../../../widgets/card_with_background_widget.dart';
+
 class GLNDetailScreen extends StatefulWidget {
-  /// GLN ID for existing GLN, null for new GLN
   final String? glnId;
 
-  /// Whether we are editing an existing GLN or creating a new one
   final bool isEditing;
 
-  /// When true, renders form body only (no scaffold); used in desktop split view.
   final bool embedded;
 
-  /// When [embedded] is true, invoked after a successful save instead of [Navigator.pop].
   final VoidCallback? onEmbeddedActionSuccess;
 
-  /// Split view: list not ready yet — show the real form with skeletons; no fetch until [glnId] is set.
   final bool awaitingListSelection;
 
   const GLNDetailScreen({
@@ -69,7 +70,8 @@ class GLNDetailScreen extends StatefulWidget {
 class _GLNDetailScreenState extends State<GLNDetailScreen>
     with GS1FormValidationMixin<GLNDetailScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _pharmaExtensionKey = GlobalKey<GLNPharmaceuticalExtensionWidgetState>();
+  final _pharmaExtensionKey =
+      GlobalKey<GLNPharmaceuticalExtensionWidgetState>();
   final _tobaccoExtensionKey = GlobalKey<GLNTobaccoExtensionWidgetState>();
 
   late final TextEditingController _glnCodeController;
@@ -121,18 +123,15 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   bool _hasSubmittedForm = false;
   GeospatialCoordinates? _coordinates;
 
-  /// Cached in [didChangeDependencies] so we never call [context.read] in [dispose].
   GLNCubit? _glnCubit;
   bool _glnInitialLoadStarted = false;
 
-  /// After fetch, child groups hydrate from [GLN]; until then show field skeletons (same idea as GTIN detail).
   bool _formFieldsHydrated = true;
 
   @override
   void initState() {
     super.initState();
-    _formFieldsHydrated =
-        widget.glnId == null && !widget.awaitingListSelection;
+    _formFieldsHydrated = widget.glnId == null && !widget.awaitingListSelection;
     _glnCodeController = TextEditingController();
     _gs1CompanyPrefixController = TextEditingController();
     _locationReferenceDigitsController = TextEditingController();
@@ -186,7 +185,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       if (widget.glnId != null) {
         cubit.fetchGLNById(widget.glnId!);
       } else {
-        // Create GLN: hydrate defaults off the build phase (do not call from BlocBuilder.builder).
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _maybeHydrateFromGln(null);
@@ -325,7 +323,9 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     _mobility = g.mobility ?? 'FIXED';
     _digitalAddressType = g.digitalAddressType ?? 'URL';
     _locationTypeLabel = GlnLocationTypeMapper.toDropdownLabel(g.locationType);
-    _glnTypes = g.glnTypes.isEmpty ? ['FIXED_PHYSICAL'] : List<String>.from(g.glnTypes);
+    _glnTypes = g.glnTypes.isEmpty
+        ? ['FIXED_PHYSICAL']
+        : List<String>.from(g.glnTypes);
 
     _applyGlnToLocalState(g);
   }
@@ -353,7 +353,10 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
         .toList();
   }
 
-  Future<void> _pickDate(ValueChanged<DateTime?> onPick, DateTime? current) async {
+  Future<void> _pickDate(
+    ValueChanged<DateTime?> onPick,
+    DateTime? current,
+  ) async {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
@@ -391,7 +394,10 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     final country = _countryController.text;
 
     final isValid = validateAllFields({
-      'glnCode': {'value': glnCode, 'validator': GlnFieldValidators.validateGlnCode},
+      'glnCode': {
+        'value': glnCode,
+        'validator': GlnFieldValidators.validateGlnCode,
+      },
       'locationName': {
         'value': locationName,
         'validator': GlnFieldValidators.validateLocationNameRequired,
@@ -437,9 +443,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
 
     GLNTobaccoExtension? tobaccoExtension;
     final tobaccoSt = _tobaccoExtensionKey.currentState;
-    if (kTobaccoExtensionEnabled &&
-        tobaccoSt != null &&
-        tobaccoSt.hasData) {
+    if (kTobaccoExtensionEnabled && tobaccoSt != null && tobaccoSt.hasData) {
       tobaccoExtension = tobaccoSt.buildExtension(
         glnId: null,
         glnCode: glnCode,
@@ -471,26 +475,31 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       effectiveTo: _effectiveTo,
       nonReuseUntil: _nonReuseUntil,
       gs1CompanyPrefix: _nonEmptyOrNull(_gs1CompanyPrefixController.text),
-      locationReferenceDigits:
-          _nonEmptyOrNull(_locationReferenceDigitsController.text),
+      locationReferenceDigits: _nonEmptyOrNull(
+        _locationReferenceDigitsController.text,
+      ),
       checkDigit: _nonEmptyOrNull(_checkDigitController.text),
       registeredLegalName: _nonEmptyOrNull(_registeredLegalNameController.text),
       tradingName: _nonEmptyOrNull(_tradingNameController.text),
       leiCode: _nonEmptyOrNull(_leiCodeController.text),
-      taxRegistrationNumber:
-          _nonEmptyOrNull(_taxRegistrationNumberController.text),
-      countryOfIncorporationNumeric:
-          _nonEmptyOrNull(_countryOfIncorporationNumericController.text.trim()),
+      taxRegistrationNumber: _nonEmptyOrNull(
+        _taxRegistrationNumberController.text,
+      ),
+      countryOfIncorporationNumeric: _nonEmptyOrNull(
+        _countryOfIncorporationNumericController.text.trim(),
+      ),
       website: _nonEmptyOrNull(_websiteController.text),
       digitalAddressType: _digitalAddressType,
       digitalAddressValue: _nonEmptyOrNull(_digitalAddressValueController.text),
-      glnExtensionComponent:
-          _nonEmptyOrNull(_glnExtensionComponentController.text),
+      glnExtensionComponent: _nonEmptyOrNull(
+        _glnExtensionComponentController.text,
+      ),
       industryClassification: _industryClassification,
       glnSource: _glnSource,
       mobility: _mobility,
-      mobileLocationIdentifier:
-          _nonEmptyOrNull(_mobileLocationIdentifierController.text),
+      mobileLocationIdentifier: _nonEmptyOrNull(
+        _mobileLocationIdentifierController.text,
+      ),
       glnTypes: List<String>.from(_glnTypes),
       supplyChainRoles: _splitRoles(_supplyChainRolesController.text),
       locationRoles: _splitRoles(_locationRolesController.text),
@@ -516,7 +525,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     return t.isEmpty ? null : t;
   }
 
-  /// One rule for split-view placeholder, fetch, and post-fetch hydrate: skeleton until [ _formFieldsHydrated ] is true.
   bool _fieldSkeletonsActive(GLNState state) {
     if (state.status == GLNStatus.error) return false;
     return !_formFieldsHydrated;
@@ -525,16 +533,13 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   @override
   Widget build(BuildContext context) {
     final role = context.watch<AuthCubit>().state.user?.role;
-    final canEditMasterData =
-        role == 'ADMIN' || role == 'MANUFACTURER';
+    final canEditMasterData = role == 'ADMIN' || role == 'MANUFACTURER';
     final allowMasterDataActions =
         canEditMasterData && !widget.awaitingListSelection;
     final formReadOnly = !canEditMasterData;
 
     final body = BlocConsumer<GLNCubit, GLNState>(
       listener: (context, state) {
-        // BlocListener can run in the same scheduling phase as BlocBuilder.build; never
-        // call setState / hydrate during that synchronous window.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           if (state.status == GLNStatus.error) {
@@ -549,8 +554,13 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
 
             if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
               widget.onEmbeddedActionSuccess!();
-            } else {
-              Navigator.of(context).pop();
+            } else if (context.mounted) {
+              final code = state.selectedGLN?.glnCode ?? widget.glnId;
+              if (code != null && code.isNotEmpty) {
+                context.go(GlnRouteConstants.pathForGlnCode(code));
+              } else {
+                context.go(Constants.gs1GlnsRoute);
+              }
             }
             return;
           }
@@ -564,13 +574,16 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       builder: (context, state) {
         final gln = widget.glnId != null ? state.selectedGLN : null;
         final sk = _fieldSkeletonsActive(state);
-        // During any loading skeleton, lock identification/structure like an existing record (same masked layout as after fetch).
-        final idStructureReadOnly = !canEditMasterData ||
-            widget.glnId != null ||
-            sk;
+
+        final idStructureReadOnly =
+            !canEditMasterData || widget.glnId != null || sk;
 
         return SingleChildScrollView(
-    padding: EdgeInsets.only(top: context.horizontalPadding.left,right: context.horizontalPadding.left,left: context.horizontalPadding.left),
+          padding: EdgeInsets.only(
+            top: context.horizontalPadding.left,
+            right: context.horizontalPadding.left,
+            left: context.horizontalPadding.left,
+          ),
           child: Form(
             key: _formKey,
             child: Gs1FormShimmerLayer(
@@ -578,161 +591,201 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
               formColumn: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                GlnIdentificationStructureCoreGroup(
-                  setFieldError: setFieldError,
-                  readOnly: idStructureReadOnly,
-                  glnCodeController: _glnCodeController,
-                  gs1CompanyPrefixController: _gs1CompanyPrefixController,
-                  locationReferenceDigitsController:
-                      _locationReferenceDigitsController,
-                  checkDigitController: _checkDigitController,
-                  parentGlnCodeController: _parentGlnCodeController,
-                  glnExtensionComponentController:
-                      _glnExtensionComponentController,
-                  initialGs1CompanyPrefixLength: gln?.gs1CompanyPrefixLength,
-                  showFieldSkeleton: false,
-                ),
-                GlnLifecycleStatusCoreGroup(
-                  showFieldSkeleton: false,
-                  isEditing: canEditMasterData,
-                  operatingStatus: _operatingStatus,
-                  onOperatingStatusChanged: (v) {
-                    if (v != null) setState(() => _operatingStatus = v);
-                  },
-                  effectiveFrom: _effectiveFrom,
-                  effectiveTo: _effectiveTo,
-                  nonReuseUntil: _nonReuseUntil,
-                  onPickEffectiveFrom: () => _pickDate(
-                    (d) => setState(() => _effectiveFrom = d),
-                    _effectiveFrom,
+                  CardWithBackgroundWidget(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 3,
+                        children: [
+                          Text(
+                            _registeredLegalNameController.text ?? '',
+                            style: context.text.h1.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            _glnCodeController.text ?? '',
+                            style: context.text.h3.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              _locationNameController.text +
+                                      ", " +
+                                      _cityController.text ??
+                                  '',
+                              style: context.text.h3.copyWith(
+                                color: context.colors.textFaint,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  onPickEffectiveTo: () => _pickDate(
-                    (d) => setState(() => _effectiveTo = d),
-                    _effectiveTo,
+                  const SizedBox(height: 16),
+                  GlnIdentificationStructureCoreGroup(
+                    setFieldError: setFieldError,
+                    readOnly: idStructureReadOnly,
+                    glnCodeController: _glnCodeController,
+                    gs1CompanyPrefixController: _gs1CompanyPrefixController,
+                    locationReferenceDigitsController:
+                        _locationReferenceDigitsController,
+                    checkDigitController: _checkDigitController,
+                    parentGlnCodeController: _parentGlnCodeController,
+                    glnExtensionComponentController:
+                        _glnExtensionComponentController,
+                    initialGs1CompanyPrefixLength: gln?.gs1CompanyPrefixLength,
+                    showFieldSkeleton: false,
                   ),
-                ),
-                GlnTypesClassificationCoreGroup(
-                  showFieldSkeleton: false,
-                  isEditing: canEditMasterData,
-                  setFieldError: setFieldError,
-                  glnTypes: _glnTypes,
-                  onGlnTypesChanged: (next) {
-                    setState(() {
-                      _glnTypes = next;
-                      _glnTypesErrorText = null;
-                    });
-                  },
-                  glnTypesErrorText: _glnTypesErrorText,
-                  industryClassification: _industryClassification,
-                  onIndustryClassificationChanged: (v) {
-                    if (v != null) setState(() => _industryClassification = v);
-                  },
-                  glnSource: _glnSource,
-                  onGlnSourceChanged: (v) {
-                    if (v != null) setState(() => _glnSource = v);
-                  },
-                  supplyChainRolesController: _supplyChainRolesController,
-                  locationRolesController: _locationRolesController,
-                ),
-                GlnLegalEntityCoreGroup(
-                  showFieldSkeleton: false,
-                  setFieldError: setFieldError,
-                  readOnly: formReadOnly,
-                  registeredLegalNameController: _registeredLegalNameController,
-                  tradingNameController: _tradingNameController,
-                  leiCodeController: _leiCodeController,
-                  taxRegistrationNumberController:
-                      _taxRegistrationNumberController,
-                  countryOfIncorporationNumericController:
-                      _countryOfIncorporationNumericController,
-                  websiteController: _websiteController,
-                ),
-                GlnLocationAddressCoreGroup(
-                  showFieldSkeleton: false,
-                  setFieldError: setFieldError,
-                  readOnly: formReadOnly,
-                  locationNameController: _locationNameController,
-                  mobility: _mobility,
-                  onMobilityChanged: (v) {
-                    if (v != null) setState(() => _mobility = v);
-                  },
-                  mobileLocationIdentifierController:
-                      _mobileLocationIdentifierController,
-                  addressLine1Controller: _addressLine1Controller,
-                  addressLine2Controller: _addressLine2Controller,
-                  cityController: _cityController,
-                  stateProvinceController: _stateProvinceController,
-                  postalCodeController: _postalCodeController,
-                  countryController: _countryController,
-                ),
-                GlnDigitalLocationCoreGroup(
-                  showFieldSkeleton: false,
-                  setFieldError: setFieldError,
-                  readOnly: formReadOnly,
-                  digitalAddressType: _digitalAddressType,
-                  onDigitalAddressTypeChanged: (v) {
-                    if (v != null) setState(() => _digitalAddressType = v);
-                  },
-                  digitalAddressValueController: _digitalAddressValueController,
-                ),
-                GlnContactCoreGroup(
-                  showFieldSkeleton: false,
-                  setFieldError: setFieldError,
-                  readOnly: formReadOnly,
-                  contactNameController: _contactNameController,
-                  contactEmailController: _contactEmailController,
-                  contactPhoneController: _contactPhoneController,
-                ),
-                GlnOperationalLocationTypeCoreGroup(
-                  showFieldSkeleton: false,
-                  isEditing: canEditMasterData,
-                  locationTypeLabel: _locationTypeLabel,
-                  onLocationTypeChanged: (v) {
-                    if (v != null) setState(() => _locationTypeLabel = v);
-                  },
-                ),
-                GlnLicenseCoreGroup(
-                  showFieldSkeleton: false,
-                  setFieldError: setFieldError,
-                  readOnly: formReadOnly,
-                  isEditing: canEditMasterData,
-                  licenseValidFrom: _licenseValidFrom,
-                  licenseExpiry: _licenseExpiry,
-                  onPickLicenseValidFrom: () => _pickDate(
-                    (d) => setState(() => _licenseValidFrom = d),
-                    _licenseValidFrom,
+                  GlnLifecycleStatusCoreGroup(
+                    showFieldSkeleton: false,
+                    isEditing: canEditMasterData,
+                    operatingStatus: _operatingStatus,
+                    onOperatingStatusChanged: (v) {
+                      if (v != null) setState(() => _operatingStatus = v);
+                    },
+                    effectiveFrom: _effectiveFrom,
+                    effectiveTo: _effectiveTo,
+                    nonReuseUntil: _nonReuseUntil,
+                    onPickEffectiveFrom: () => _pickDate(
+                      (d) => setState(() => _effectiveFrom = d),
+                      _effectiveFrom,
+                    ),
+                    onPickEffectiveTo: () => _pickDate(
+                      (d) => setState(() => _effectiveTo = d),
+                      _effectiveTo,
+                    ),
                   ),
-                  onPickLicenseExpiry: () => _pickDate(
-                    (d) => setState(() => _licenseExpiry = d),
-                    _licenseExpiry,
+                  GlnTypesClassificationCoreGroup(
+                    showFieldSkeleton: false,
+                    isEditing: canEditMasterData,
+                    setFieldError: setFieldError,
+                    glnTypes: _glnTypes,
+                    onGlnTypesChanged: (next) {
+                      setState(() {
+                        _glnTypes = next;
+                        _glnTypesErrorText = null;
+                      });
+                    },
+                    glnTypesErrorText: _glnTypesErrorText,
+                    industryClassification: _industryClassification,
+                    onIndustryClassificationChanged: (v) {
+                      if (v != null)
+                        setState(() => _industryClassification = v);
+                    },
+                    glnSource: _glnSource,
+                    onGlnSourceChanged: (v) {
+                      if (v != null) setState(() => _glnSource = v);
+                    },
+                    supplyChainRolesController: _supplyChainRolesController,
+                    locationRolesController: _locationRolesController,
                   ),
-                  licenseNumberController: _licenseNumberController,
-                  licenseTypeController: _licenseTypeController,
-                ),
-                GlnGeospatialCoreGroup(
-                  showFieldSkeleton: false,
-                  displayCoordinates: _coordinates ?? gln?.coordinates,
-                  onCoordinatesChanged: (c) {
-                    setState(() => _coordinates = c);
-                  },
-                  isEditing: canEditMasterData,
-                ),
-                GlnIndustryExtensionsSection(
-                  glnCodeController: _glnCodeController,
-                  gln: gln,
-                  isEditing: canEditMasterData,
-                  showFieldSkeleton: false,
-                  pharmaExtensionKey: _pharmaExtensionKey,
-                  tobaccoExtensionKey: _tobaccoExtensionKey,
-                ),
-                const SizedBox(height: 32),
-                if ((MediaQuery.of(context).size.width < 600 || widget.embedded) &&
-                    allowMasterDataActions)
-                  CustomButtonWidget(
-                    onTap: _submitForm,
-                    title: GlnUiConstants.detailSaveButton,
+                  GlnLegalEntityCoreGroup(
+                    showFieldSkeleton: false,
+                    setFieldError: setFieldError,
+                    readOnly: formReadOnly,
+                    registeredLegalNameController:
+                        _registeredLegalNameController,
+                    tradingNameController: _tradingNameController,
+                    leiCodeController: _leiCodeController,
+                    taxRegistrationNumberController:
+                        _taxRegistrationNumberController,
+                    countryOfIncorporationNumericController:
+                        _countryOfIncorporationNumericController,
+                    websiteController: _websiteController,
                   ),
-                const SizedBox(height: 32),
+                  GlnLocationAddressCoreGroup(
+                    showFieldSkeleton: false,
+                    setFieldError: setFieldError,
+                    readOnly: formReadOnly,
+                    locationNameController: _locationNameController,
+                    mobility: _mobility,
+                    onMobilityChanged: (v) {
+                      if (v != null) setState(() => _mobility = v);
+                    },
+                    mobileLocationIdentifierController:
+                        _mobileLocationIdentifierController,
+                    addressLine1Controller: _addressLine1Controller,
+                    addressLine2Controller: _addressLine2Controller,
+                    cityController: _cityController,
+                    stateProvinceController: _stateProvinceController,
+                    postalCodeController: _postalCodeController,
+                    countryController: _countryController,
+                  ),
+                  GlnDigitalLocationCoreGroup(
+                    showFieldSkeleton: false,
+                    setFieldError: setFieldError,
+                    readOnly: formReadOnly,
+                    digitalAddressType: _digitalAddressType,
+                    onDigitalAddressTypeChanged: (v) {
+                      if (v != null) setState(() => _digitalAddressType = v);
+                    },
+                    digitalAddressValueController:
+                        _digitalAddressValueController,
+                  ),
+                  GlnContactCoreGroup(
+                    showFieldSkeleton: false,
+                    setFieldError: setFieldError,
+                    readOnly: formReadOnly,
+                    contactNameController: _contactNameController,
+                    contactEmailController: _contactEmailController,
+                    contactPhoneController: _contactPhoneController,
+                  ),
+                  GlnOperationalLocationTypeCoreGroup(
+                    showFieldSkeleton: false,
+                    isEditing: canEditMasterData,
+                    locationTypeLabel: _locationTypeLabel,
+                    onLocationTypeChanged: (v) {
+                      if (v != null) setState(() => _locationTypeLabel = v);
+                    },
+                  ),
+                  GlnLicenseCoreGroup(
+                    showFieldSkeleton: false,
+                    setFieldError: setFieldError,
+                    readOnly: formReadOnly,
+                    isEditing: canEditMasterData,
+                    licenseValidFrom: _licenseValidFrom,
+                    licenseExpiry: _licenseExpiry,
+                    onPickLicenseValidFrom: () => _pickDate(
+                      (d) => setState(() => _licenseValidFrom = d),
+                      _licenseValidFrom,
+                    ),
+                    onPickLicenseExpiry: () => _pickDate(
+                      (d) => setState(() => _licenseExpiry = d),
+                      _licenseExpiry,
+                    ),
+                    licenseNumberController: _licenseNumberController,
+                    licenseTypeController: _licenseTypeController,
+                  ),
+                  GlnGeospatialCoreGroup(
+                    showFieldSkeleton: false,
+                    displayCoordinates: _coordinates ?? gln?.coordinates,
+                    onCoordinatesChanged: (c) {
+                      setState(() => _coordinates = c);
+                    },
+                    isEditing: canEditMasterData,
+                  ),
+                  GlnIndustryExtensionsSection(
+                    glnCodeController: _glnCodeController,
+                    gln: gln,
+                    isEditing: canEditMasterData,
+                    showFieldSkeleton: false,
+                    pharmaExtensionKey: _pharmaExtensionKey,
+                    tobaccoExtensionKey: _tobaccoExtensionKey,
+                  ),
+                  const SizedBox(height: 32),
+                  if ((MediaQuery.of(context).size.width < 600 ||
+                          widget.embedded) &&
+                      allowMasterDataActions)
+                    CustomButtonWidget(
+                      onTap: _submitForm,
+                      title: GlnUiConstants.detailSaveButton,
+                    ),
+                  const SizedBox(height: 32),
                 ],
               ),
               skeleton: const GlnDetailFormSkeleton(),
@@ -746,8 +799,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       embedded: widget.embedded,
       title: widget.isEditing
           ? (widget.glnId != null
-              ? GlnUiConstants.detailTitleEdit
-              : GlnUiConstants.detailTitleCreate)
+                ? GlnUiConstants.detailTitleEdit
+                : GlnUiConstants.detailTitleCreate)
           : GlnUiConstants.detailTitleView,
       showSaveAction: allowMasterDataActions,
       onSave: _submitForm,
@@ -761,9 +814,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     if (cubit == null) {
       return scaffold;
     }
-    return BlocProvider<GLNCubit>.value(
-      value: cubit,
-      child: scaffold,
-    );
+    return BlocProvider<GLNCubit>.value(value: cubit, child: scaffold);
   }
 }

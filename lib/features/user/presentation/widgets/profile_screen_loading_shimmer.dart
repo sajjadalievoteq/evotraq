@@ -17,7 +17,10 @@ class ProfileScreenLoadingShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final modules = const [
-      UserSectionCard(title: UserStrings.infoTitle, child: _ProfileInfoSkeleton()),
+      UserSectionCard(
+        title: UserStrings.infoTitle,
+        child: _ProfileInfoSkeleton(),
+      ),
       UserSectionCard(
         title: UserStrings.securityTitle,
         child: _ProfileSecuritySkeleton(),
@@ -189,4 +192,3 @@ class _SkeletonPill extends StatelessWidget {
     return _SkeletonBox(width: width, height: height, radius: 999);
   }
 }
-

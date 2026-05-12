@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-import '../../../../core/theme/evotraq_theme.dart';
+import '../../../../core/theme/traq_theme.dart';
 
 /// “Showing N+ … / page size” row (GTIN/GLN list “information” tile).
 class Gs1ListRecordInfoBar extends StatelessWidget {
@@ -69,71 +69,71 @@ class Gs1ListRecordInfoBar extends StatelessWidget {
           vertical: layout.resolve(compact: 10.0, medium: 8.0),
         );
 
-        return Container(
-          padding: padding,
-          width: double.infinity,
-          decoration: BoxDecoration(
+        return Card(
+          child: Container(
+            padding: padding,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: context.colors.surface,
 
-            color: context.colors.surface,
-            borderRadius: EvotraqRadius.card,
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-          ),
-          child: layout.isCompact
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      showText,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          if (hasMoreData) buildLoadedBatches(),
-                          buildPageSizeDropdown(),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
+            ),
+            child: layout.isCompact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         showText,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (hasMoreData) ...[
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 240),
-                            child: buildLoadedBatches(),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            if (hasMoreData) buildLoadedBatches(),
+                            buildPageSizeDropdown(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          showText,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(width: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (hasMoreData) ...[
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 240),
+                              child: buildLoadedBatches(),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          buildPageSizeDropdown(),
                         ],
-                        buildPageSizeDropdown(),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+          ),
         );
       },
     );

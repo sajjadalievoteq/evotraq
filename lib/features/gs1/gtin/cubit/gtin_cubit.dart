@@ -9,12 +9,10 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 class GTINCubit extends Cubit<GTINState> {
   final GTINService _gtinService;
 
-  GTINCubit({
-    required GTINService gtinService,
-  })  : _gtinService = gtinService,
-        super(const GTINState());
+  GTINCubit({required GTINService gtinService})
+    : _gtinService = gtinService,
+      super(const GTINState());
 
-  /// Loads GTINs for pickers (e.g. commissioning) without mutating list-screen state.
   Future<List<GTIN>> fetchGtinsForPicker({int page = 0, int size = 500}) {
     return _gtinService.getGTINs(page: page, size: size);
   }
@@ -23,11 +21,7 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final gtin = await _gtinService.getGTIN(gtinCode);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        gtin: gtin,
-        error: null,
-      ));
+      emit(state.copyWith(status: GTINStatus.success, gtin: gtin, error: null));
     } catch (e, st) {
       _logGtinCubit('fetchGTIN', e, st, extra: 'gtinCode=$gtinCode');
       _handleError(e);
@@ -38,11 +32,7 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final gtin = await _gtinService.getGTIN(gtinCode);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        gtin: gtin,
-        error: null,
-      ));
+      emit(state.copyWith(status: GTINStatus.success, gtin: gtin, error: null));
     } catch (e, st) {
       _logGtinCubit('fetchGTINDetails', e, st, extra: 'gtinCode=$gtinCode');
       _handleError(e);
@@ -61,7 +51,6 @@ class GTINCubit extends Cubit<GTINState> {
     int page = 0,
     int size = 20,
   }) async {
-    // Prevent overlapping "load more" requests (common source of scroll jank).
     if (page > 0 && state.isFetchingMore) {
       return;
     }
@@ -75,17 +64,16 @@ class GTINCubit extends Cubit<GTINState> {
         ),
       );
     } else {
-      // Keep status as-is while appending; only show bottom spinner.
       emit(state.copyWith(isFetchingMore: true));
     }
 
     try {
-      // `GET /gtins` does not apply `search`; only `/gtins/search` does (see backend GTINController).
-      final String? effectiveSearch =
-          (search == null || search.trim().isEmpty) ? null : search.trim();
+      final String? effectiveSearch = (search == null || search.trim().isEmpty)
+          ? null
+          : search.trim();
 
-      // `/gtins` ignores search, status, and filters; use `/gtins/search` for any of these.
-      final bool needsAdvancedSearch = effectiveSearch != null ||
+      final bool needsAdvancedSearch =
+          effectiveSearch != null ||
           productName != null ||
           gtinCode != null ||
           manufacturer != null ||
@@ -124,39 +112,47 @@ class GTINCubit extends Cubit<GTINState> {
       }
 
       final bool ascending = state.gtinListSortAscending;
-      // If a detail request is in flight, do not clobber [status] with list success;
-      // the detail [BlocBuilder] would otherwise look out of sync.
+
       final bool detailLoading = state.status == GTINStatus.loading;
-      final GTINStatus nextStatus =
-          detailLoading ? GTINStatus.loading : GTINStatus.success;
+      final GTINStatus nextStatus = detailLoading
+          ? GTINStatus.loading
+          : GTINStatus.success;
       if (page == 0 || state.gtins == null) {
-        emit(state.copyWith(
-          status: nextStatus,
-          isGtinListLoading: false,
-          gtins: _sortGtinsByProductName(gtins, ascending: ascending),
-          currentPage: page,
-          hasMoreData: hasMoreData,
-          isFetchingMore: false,
-          error: null,
-          clearListFetchError: true,
-        ));
+        emit(
+          state.copyWith(
+            status: nextStatus,
+            isGtinListLoading: false,
+            gtins: _sortGtinsByProductName(gtins, ascending: ascending),
+            currentPage: page,
+            hasMoreData: hasMoreData,
+            isFetchingMore: false,
+            error: null,
+            clearListFetchError: true,
+          ),
+        );
       } else {
         final List<GTIN> updatedGtins = List.from(state.gtins!)..addAll(gtins);
-        emit(state.copyWith(
-          status: nextStatus,
-          isGtinListLoading: false,
-          gtins: _sortGtinsByProductName(updatedGtins, ascending: ascending),
-          currentPage: page,
-          hasMoreData: hasMoreData,
-          isFetchingMore: false,
-          error: null,
-          clearListFetchError: true,
-        ));
+        emit(
+          state.copyWith(
+            status: nextStatus,
+            isGtinListLoading: false,
+            gtins: _sortGtinsByProductName(updatedGtins, ascending: ascending),
+            currentPage: page,
+            hasMoreData: hasMoreData,
+            isFetchingMore: false,
+            error: null,
+            clearListFetchError: true,
+          ),
+        );
       }
     } catch (e, st) {
-      _logGtinCubit('fetchGTINList', e, st,
-          extra:
-              'page=$page search=$search productName=$productName gtinCode=$gtinCode');
+      _logGtinCubit(
+        'fetchGTINList',
+        e,
+        st,
+        extra:
+            'page=$page search=$search productName=$productName gtinCode=$gtinCode',
+      );
       _handleListFetchError(e);
     }
   }
@@ -165,11 +161,13 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final createdGtin = await _gtinService.createGTIN(gtin);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        gtin: createdGtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: GTINStatus.success,
+          gtin: createdGtin,
+          error: null,
+        ),
+      );
     } catch (e, st) {
       _logGtinCubit('createGTIN', e, st);
       _handleError(e);
@@ -180,11 +178,13 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final updatedGtin = await _gtinService.updateGTIN(gtin);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        gtin: updatedGtin,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: GTINStatus.success,
+          gtin: updatedGtin,
+          error: null,
+        ),
+      );
     } catch (e, st) {
       _logGtinCubit('updateGTIN', e, st, extra: 'code=${gtin.gtinCode}');
       _handleError(e);
@@ -196,11 +196,7 @@ class GTINCubit extends Cubit<GTINState> {
     try {
       await _gtinService.updateGTINStatus(gtinCode, status);
       final gtin = await _gtinService.getGTIN(gtinCode);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        gtin: gtin,
-        error: null,
-      ));
+      emit(state.copyWith(status: GTINStatus.success, gtin: gtin, error: null));
     } catch (e, st) {
       _logGtinCubit('updateGTINStatus', e, st, extra: 'gtinCode=$gtinCode');
       _handleError(e);
@@ -210,23 +206,26 @@ class GTINCubit extends Cubit<GTINState> {
   Future<void> validateGTIN(String gtinCode) async {
     final fieldError = GtinFieldValidators.validateGtinCode(gtinCode);
     if (fieldError != null) {
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        isValidFormat: false,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: GTINStatus.success,
+          isValidFormat: false,
+          error: null,
+        ),
+      );
       return;
     }
-    final normalized =
-        GtinFieldValidators.canonicalGtin14FromInput(gtinCode);
+    final normalized = GtinFieldValidators.canonicalGtin14FromInput(gtinCode);
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final isValid = await _gtinService.validateGTIN(normalized);
-      emit(state.copyWith(
-        status: GTINStatus.success,
-        isValidFormat: isValid,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          status: GTINStatus.success,
+          isValidFormat: isValid,
+          error: null,
+        ),
+      );
     } catch (e, st) {
       _logGtinCubit('validateGTIN', e, st, extra: 'gtinCode=$normalized');
       _handleError(e);
@@ -234,12 +233,14 @@ class GTINCubit extends Cubit<GTINState> {
   }
 
   void reset() {
-    emit(state.copyWith(
-      status: GTINStatus.initial,
-      error: null,
-      isGtinListLoading: false,
-      clearListFetchError: true,
-    ));
+    emit(
+      state.copyWith(
+        status: GTINStatus.initial,
+        error: null,
+        isGtinListLoading: false,
+        clearListFetchError: true,
+      ),
+    );
   }
 
   void clearGtinListError() {
@@ -247,17 +248,18 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(clearListFetchError: true));
   }
 
-  /// Re-orders the currently loaded list by [GTIN.productName] (case-insensitive), toggling A–Z / Z–A.
   void toggleGtinListProductNameSort() {
     final ascending = !state.gtinListSortAscending;
     if (state.gtins == null || state.gtins!.isEmpty) {
       emit(state.copyWith(gtinListSortAscending: ascending));
       return;
     }
-    emit(state.copyWith(
-      gtinListSortAscending: ascending,
-      gtins: _sortGtinsByProductName(state.gtins!, ascending: ascending),
-    ));
+    emit(
+      state.copyWith(
+        gtinListSortAscending: ascending,
+        gtins: _sortGtinsByProductName(state.gtins!, ascending: ascending),
+      ),
+    );
   }
 
   static List<GTIN> _sortGtinsByProductName(
@@ -266,9 +268,9 @@ class GTINCubit extends Cubit<GTINState> {
   }) {
     final out = List<GTIN>.from(input);
     out.sort((a, b) {
-      final c = a.productName
-          .toLowerCase()
-          .compareTo(b.productName.toLowerCase());
+      final c = a.productName.toLowerCase().compareTo(
+        b.productName.toLowerCase(),
+      );
       return ascending ? c : -c;
     });
     return out;
@@ -279,11 +281,13 @@ class GTINCubit extends Cubit<GTINState> {
     if (e is ApiException) {
       errorMessage = e.getUserFriendlyMessage();
     }
-    emit(state.copyWith(
-      status: GTINStatus.error,
-      error: errorMessage,
-      isFetchingMore: false,
-    ));
+    emit(
+      state.copyWith(
+        status: GTINStatus.error,
+        error: errorMessage,
+        isFetchingMore: false,
+      ),
+    );
   }
 
   void _handleListFetchError(Object e) {
@@ -291,13 +295,15 @@ class GTINCubit extends Cubit<GTINState> {
     if (e is ApiException) {
       errorMessage = e.getUserFriendlyMessage();
     }
-    emit(state.copyWith(
-      isGtinListLoading: false,
-      isFetchingMore: false,
-      listFetchError: errorMessage,
-      listFetchErrorBody: e is ApiException ? e.responseBody : null,
-      listFetchErrorStatusCode: e is ApiException ? e.statusCode : null,
-    ));
+    emit(
+      state.copyWith(
+        isGtinListLoading: false,
+        isFetchingMore: false,
+        listFetchError: errorMessage,
+        listFetchErrorBody: e is ApiException ? e.responseBody : null,
+        listFetchErrorStatusCode: e is ApiException ? e.statusCode : null,
+      ),
+    );
   }
 }
 

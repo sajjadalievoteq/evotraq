@@ -38,12 +38,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     _searchController.addListener(() {
       _searchDebounce?.cancel();
       if (mounted) {
-        // Local search first (filter current in-memory list).
         setState(() {});
       }
       _searchDebounce = Timer(const Duration(milliseconds: 450), () {
         if (mounted) {
-          // Then refresh results from API.
           _applyFilters();
         }
       });
@@ -59,16 +57,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   Future<void> _applyFilters() async {
     await context.read<UserManagementCubit>().loadUsers(
-          search: _searchController.text.trim().isEmpty
-              ? null
-              : _searchController.text.trim(),
-          role: _selectedRole != UserManagementConstants.allFilter
-              ? _selectedRole
-              : null,
-          status: _selectedStatus != UserManagementConstants.allFilter
-              ? _selectedStatus
-              : null,
-        );
+      search: _searchController.text.trim().isEmpty
+          ? null
+          : _searchController.text.trim(),
+      role: _selectedRole != UserManagementConstants.allFilter
+          ? _selectedRole
+          : null,
+      status: _selectedStatus != UserManagementConstants.allFilter
+          ? _selectedStatus
+          : null,
+    );
   }
 
   Future<void> _refreshUserList() async {
@@ -176,7 +174,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               final query = _searchController.text.trim();
               final filteredUsers = query.isEmpty
                   ? state.users
-                  : state.users.where((user) => _matchesSearch(user, query)).toList();
+                  : state.users
+                        .where((user) => _matchesSearch(user, query))
+                        .toList();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,9 +185,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     searchController: _searchController,
                     selectedRole: _selectedRole,
                     selectedStatus: _selectedStatus,
-                    totalItems:
-                        query.isEmpty ? state.totalItems : filteredUsers.length,
-                    showResultsCount: state.users.isNotEmpty || query.isNotEmpty,
+                    totalItems: query.isEmpty
+                        ? state.totalItems
+                        : filteredUsers.length,
+                    showResultsCount:
+                        state.users.isNotEmpty || query.isNotEmpty,
                     onApplyFilters: _applyFilters,
                     onRoleChanged: (value) {
                       setState(() => _selectedRole = value);
@@ -238,9 +240,9 @@ class _UserManagementContent extends StatelessWidget {
       return Center(
         child: Text(
           UserManagementConstants.noUsersFound,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[700],
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
       );

@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 import 'package:world_countries/helpers.dart';
 
@@ -103,7 +104,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.appBarTitle)),
+      appBar: TraqAppBar(context, title: Text(widget.appBarTitle)),
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton(
         heroTag: widget.fabHeroTag,

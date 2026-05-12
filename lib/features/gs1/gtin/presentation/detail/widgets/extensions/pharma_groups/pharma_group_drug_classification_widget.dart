@@ -31,7 +31,8 @@ class DrugClassificationGroupWidget extends StatefulWidget {
     required String pharmacologicalClass,
     required String atcCode,
     required String additionalAtcCodes,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<DrugClassificationGroupWidget> createState() =>
@@ -50,13 +51,16 @@ class _DrugClassificationGroupWidgetState
   void initState() {
     super.initState();
     _drugClassController = TextEditingController(text: widget.initialDrugClass);
-    _therapeuticClassController =
-        TextEditingController(text: widget.initialTherapeuticClass);
-    _pharmacologicalClassController =
-        TextEditingController(text: widget.initialPharmacologicalClass);
+    _therapeuticClassController = TextEditingController(
+      text: widget.initialTherapeuticClass,
+    );
+    _pharmacologicalClassController = TextEditingController(
+      text: widget.initialPharmacologicalClass,
+    );
     _atcCodeController = TextEditingController(text: widget.initialAtcCode);
-    _additionalAtcCodesController =
-        TextEditingController(text: widget.initialAdditionalAtcCodes);
+    _additionalAtcCodesController = TextEditingController(
+      text: widget.initialAdditionalAtcCodes,
+    );
 
     _drugClassController.addListener(_emitChange);
     _therapeuticClassController.addListener(_emitChange);
@@ -70,9 +74,11 @@ class _DrugClassificationGroupWidgetState
     super.didUpdateWidget(oldWidget);
     if (widget.initialDrugClass == oldWidget.initialDrugClass &&
         widget.initialTherapeuticClass == oldWidget.initialTherapeuticClass &&
-        widget.initialPharmacologicalClass == oldWidget.initialPharmacologicalClass &&
+        widget.initialPharmacologicalClass ==
+            oldWidget.initialPharmacologicalClass &&
         widget.initialAtcCode == oldWidget.initialAtcCode &&
-        widget.initialAdditionalAtcCodes == oldWidget.initialAdditionalAtcCodes) {
+        widget.initialAdditionalAtcCodes ==
+            oldWidget.initialAdditionalAtcCodes) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -85,16 +91,21 @@ class _DrugClassificationGroupWidgetState
           widget.initialTherapeuticClass != _therapeuticClassController.text) {
         _therapeuticClassController.text = widget.initialTherapeuticClass;
       }
-      if (widget.initialPharmacologicalClass != oldWidget.initialPharmacologicalClass &&
-          widget.initialPharmacologicalClass != _pharmacologicalClassController.text) {
-        _pharmacologicalClassController.text = widget.initialPharmacologicalClass;
+      if (widget.initialPharmacologicalClass !=
+              oldWidget.initialPharmacologicalClass &&
+          widget.initialPharmacologicalClass !=
+              _pharmacologicalClassController.text) {
+        _pharmacologicalClassController.text =
+            widget.initialPharmacologicalClass;
       }
       if (widget.initialAtcCode != oldWidget.initialAtcCode &&
           widget.initialAtcCode != _atcCodeController.text) {
         _atcCodeController.text = widget.initialAtcCode;
       }
-      if (widget.initialAdditionalAtcCodes != oldWidget.initialAdditionalAtcCodes &&
-          widget.initialAdditionalAtcCodes != _additionalAtcCodesController.text) {
+      if (widget.initialAdditionalAtcCodes !=
+              oldWidget.initialAdditionalAtcCodes &&
+          widget.initialAdditionalAtcCodes !=
+              _additionalAtcCodesController.text) {
         _additionalAtcCodesController.text = widget.initialAdditionalAtcCodes;
       }
     });

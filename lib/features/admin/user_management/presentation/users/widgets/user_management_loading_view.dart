@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import 'user_management_constants.dart';
@@ -55,8 +55,10 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
         padding: Constants.sectionPadding,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final widths = _FilterSkeletonWidths.fromWidth(constraints.maxWidth);
-            final r = EvotraqRadius.md.x.toDouble();
+            final widths = _FilterSkeletonWidths.fromWidth(
+              constraints.maxWidth,
+            );
+            final r = TraqRadius.md.x.toDouble();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +86,7 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height:Constants.spacing),
+                const SizedBox(height: Constants.spacing),
                 Wrap(
                   spacing: Constants.spacing,
                   runSpacing: Constants.spacing,
@@ -96,8 +98,18 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
                       spacing: Constants.spacing,
                       runSpacing: Constants.spacing,
                       children: [
-                        _skeletonBox(baseColor, width: 120, height: 36, radius: EvotraqRadius.sm.x.toDouble()),
-                        _skeletonBox(baseColor, width: 132, height: 36, radius: EvotraqRadius.sm.x.toDouble()),
+                        _skeletonBox(
+                          baseColor,
+                          width: 120,
+                          height: 36,
+                          radius: TraqRadius.sm.x.toDouble(),
+                        ),
+                        _skeletonBox(
+                          baseColor,
+                          width: 132,
+                          height: 36,
+                          radius: TraqRadius.sm.x.toDouble(),
+                        ),
                       ],
                     ),
                   ],
@@ -118,11 +130,10 @@ class _UserManagementCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = EvotraqRadius.md.x.toDouble();
+    final r = TraqRadius.md.x.toDouble();
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        // Match `UserManagementUserCardVariant.gridSquare`
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +157,12 @@ class _UserManagementCardSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _skeletonBox(baseColor, width: double.infinity, height: 14, radius: r),
+                  _skeletonBox(
+                    baseColor,
+                    width: double.infinity,
+                    height: 14,
+                    radius: r,
+                  ),
                   const SizedBox(height: 8),
                   _skeletonBox(baseColor, width: 220, height: 14, radius: r),
                   const SizedBox(height: 12),
@@ -154,9 +170,24 @@ class _UserManagementCardSkeleton extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _skeletonBox(baseColor, width: 72, height: 26, radius: 999),
-                      _skeletonBox(baseColor, width: 82, height: 26, radius: 999),
-                      _skeletonBox(baseColor, width: 90, height: 26, radius: 999),
+                      _skeletonBox(
+                        baseColor,
+                        width: 72,
+                        height: 26,
+                        radius: 999,
+                      ),
+                      _skeletonBox(
+                        baseColor,
+                        width: 82,
+                        height: 26,
+                        radius: 999,
+                      ),
+                      _skeletonBox(
+                        baseColor,
+                        width: 90,
+                        height: 26,
+                        radius: 999,
+                      ),
                     ],
                   ),
                 ],
@@ -221,8 +252,7 @@ class _FilterSkeletonWidths {
       );
     }
 
-    final filterWidth =
-        ((maxWidth * 0.42) - Constants.spacing) / 2;
+    final filterWidth = ((maxWidth * 0.42) - Constants.spacing) / 2;
 
     return _FilterSkeletonWidths(
       searchWidth: maxWidth * 0.58 - Constants.spacing,

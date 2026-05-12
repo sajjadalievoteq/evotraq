@@ -52,13 +52,13 @@ class UserManagementState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        users,
-        pendingApprovals,
-        togglingUserId,
-        currentPage,
-        totalItems,
-        totalPages,
-        error,
-      ];
+    status,
+    users,
+    pendingApprovals,
+    togglingUserId,
+    currentPage,
+    totalItems,
+    totalPages,
+    error,
+  ];
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
 /// Full-screen background (image + light overlay). Use behind the navigator in
 /// [MaterialApp.router] `builder` so every route shares the same backdrop.
@@ -44,14 +45,15 @@ class BackgroundContainerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+
       appBar: showAppBar
-          ? AppBar(
+          ? TraqAppBar(
+              context,
               title: Text(appBarTitle ?? ''),
               leading: Builder(
-                builder: (context) => IconButton(
+                builder: (ctx) => IconButton(
                   icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  onPressed: () => Scaffold.of(ctx).openDrawer(),
                 ),
               ),
             )

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 import '../../../data/services/epc_conversion_service.dart';
@@ -183,8 +184,10 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('EPC Conversion Tools'),        bottom: TabBar(
+      appBar: TraqAppBar(
+        context,
+        title: const Text('EPC Conversion Tools'),
+        bottom: TabBar(
           controller: _tabController,
           tabs: const [
             Tab(text: 'SGTIN to EPC'),

@@ -30,7 +30,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _validateToken() async {
-    // Call the cubit to validate the token
     context.read<AuthCubit>().validatePasswordResetToken(widget.token);
   }
 

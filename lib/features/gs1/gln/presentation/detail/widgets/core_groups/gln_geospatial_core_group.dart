@@ -17,7 +17,6 @@ class GlnGeospatialCoreGroup extends StatelessWidget {
 
   final bool showFieldSkeleton;
 
-  /// From persisted GLN until user edits (widget shows this baseline).
   final GeospatialCoordinates? displayCoordinates;
   final ValueChanged<GeospatialCoordinates?> onCoordinatesChanged;
   final bool isEditing;

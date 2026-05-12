@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
@@ -40,17 +40,17 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
 
   void _saveNotificationPreferences() {
     context.read<ProfileCubit>().updateNotificationPreferences(
-          emailNotifications: _emailNotifications,
-          appNotifications: _appNotifications,
-        );
+      emailNotifications: _emailNotifications,
+      appNotifications: _appNotifications,
+    );
   }
 
   void _saveAppPreferences() {
     final themeCubit = context.read<ThemeCubit>();
     context.read<ProfileCubit>().updateAppPreferences(
-          darkMode: themeCubit.isDarkMode,
-          language: _language,
-        );
+      darkMode: themeCubit.isDarkMode,
+      language: _language,
+    );
   }
 
   @override
@@ -85,25 +85,28 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                   children: [
                     SwitchListTile(
                       title: const Text(UserStrings.emailNotificationsTitle),
-                      subtitle:
-                          const Text(UserStrings.emailNotificationsSubtitle),
+                      subtitle: const Text(
+                        UserStrings.emailNotificationsSubtitle,
+                      ),
                       value: _emailNotifications,
                       onChanged: isSavingNotif
                           ? null
                           : (value) => setState(() {
-                                _emailNotifications = value;
-                              }),
+                              _emailNotifications = value;
+                            }),
                     ),
                     const Divider(),
                     SwitchListTile(
                       title: const Text(UserStrings.appNotificationsTitle),
-                      subtitle: const Text(UserStrings.appNotificationsSubtitle),
+                      subtitle: const Text(
+                        UserStrings.appNotificationsSubtitle,
+                      ),
                       value: _appNotifications,
                       onChanged: isSavingNotif
                           ? null
                           : (value) => setState(() {
-                                _appNotifications = value;
-                              }),
+                              _appNotifications = value;
+                            }),
                     ),
                     const SizedBox(height: 16),
                     CustomElevatedButton(
@@ -138,9 +141,9 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                           onChanged: isSavingApp
                               ? null
                               : (value) async {
-                                  await context
-                                      .read<ThemeCubit>()
-                                      .setDarkMode(value);
+                                  await context.read<ThemeCubit>().setDarkMode(
+                                    value,
+                                  );
                                 },
                         );
                       },
@@ -155,8 +158,7 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                     ),
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 16.0),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                         border: OutlineInputBorder(),
                       ),
                       value: _language,
@@ -193,4 +195,3 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
     );
   }
 }
-

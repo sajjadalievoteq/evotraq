@@ -4,4 +4,3 @@ class UserUiConstants {
 
   const UserUiConstants._();
 }
-

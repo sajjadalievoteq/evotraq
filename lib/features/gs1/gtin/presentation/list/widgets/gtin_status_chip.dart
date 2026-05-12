@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Status pill used on GTIN list rows.
 class GtinStatusChip extends StatelessWidget {
   const GtinStatusChip({super.key, required this.status});
 
@@ -25,4 +24,3 @@ class GtinStatusChip extends StatelessWidget {
     );
   }
 }
-

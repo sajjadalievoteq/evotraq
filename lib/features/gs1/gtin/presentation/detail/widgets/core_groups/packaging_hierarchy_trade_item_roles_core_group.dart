@@ -104,8 +104,9 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     _totalQtyNextLower.text = totalQtyNextLower?.toString() ?? '';
 
     _launchDate = launchDate;
-    _launchDateDisplay.text =
-        launchDate == null ? '' : _dateFmt.format(launchDate);
+    _launchDateDisplay.text = launchDate == null
+        ? ''
+        : _dateFmt.format(launchDate);
 
     _isBaseUnit = isBaseUnit ?? _isBaseUnit;
     _isConsumerUnit = isConsumerUnit ?? _isConsumerUnit;
@@ -159,11 +160,12 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
             decimal: false,
             signed: false,
           ),
-          validator: (v) => GtinFieldValidators.validateNextLowerLevelGtinConditional(
-            v,
-            isBaseUnit: _isBaseUnit,
-            currentGtinRaw: widget.gtinCodeController.text,
-          ),
+          validator: (v) =>
+              GtinFieldValidators.validateNextLowerLevelGtinConditional(
+                v,
+                isBaseUnit: _isBaseUnit,
+                currentGtinRaw: widget.gtinCodeController.text,
+              ),
         ),
         const SizedBox(height: 12),
         GtinValidatedField(
@@ -176,11 +178,12 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
             decimal: false,
             signed: false,
           ),
-          validator: (v) => GtinFieldValidators.validateNextLowerLevelQuantityConditional(
-            v,
-            isBaseUnit: _isBaseUnit,
-            nextLowerLevelGtin: _nextLowerLevelGtin.text,
-          ),
+          validator: (v) =>
+              GtinFieldValidators.validateNextLowerLevelQuantityConditional(
+                v,
+                isBaseUnit: _isBaseUnit,
+                nextLowerLevelGtin: _nextLowerLevelGtin.text,
+              ),
         ),
         const SizedBox(height: 12),
         GtinValidatedField(
@@ -192,10 +195,11 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
             decimal: false,
             signed: false,
           ),
-          validator: (v) => GtinFieldValidators.validateQuantityOfChildrenConditional(
-            v,
-            isBaseUnit: _isBaseUnit,
-          ),
+          validator: (v) =>
+              GtinFieldValidators.validateQuantityOfChildrenConditional(
+                v,
+                isBaseUnit: _isBaseUnit,
+              ),
         ),
         const SizedBox(height: 12),
         GtinValidatedField(
@@ -207,10 +211,11 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
             decimal: false,
             signed: false,
           ),
-          validator: (v) => GtinFieldValidators.validateTotalQtyNextLowerConditional(
-            v,
-            isBaseUnit: _isBaseUnit,
-          ),
+          validator: (v) =>
+              GtinFieldValidators.validateTotalQtyNextLowerConditional(
+                v,
+                isBaseUnit: _isBaseUnit,
+              ),
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
@@ -223,42 +228,49 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isBaseUnit,
-          onChanged: widget.isReadOnly ? null : (v) => setState(() => _isBaseUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isBaseUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemBaseUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isConsumerUnit,
-          onChanged:
-              widget.isReadOnly ? null : (v) => setState(() => _isConsumerUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isConsumerUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemConsumerUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isOrderableUnit,
-          onChanged:
-              widget.isReadOnly ? null : (v) => setState(() => _isOrderableUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isOrderableUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemOrderableUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isDespatchUnit,
-          onChanged:
-              widget.isReadOnly ? null : (v) => setState(() => _isDespatchUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isDespatchUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemDespatchUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isInvoiceUnit,
-          onChanged:
-              widget.isReadOnly ? null : (v) => setState(() => _isInvoiceUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isInvoiceUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemInvoiceUnit),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _isVariableUnit,
-          onChanged:
-              widget.isReadOnly ? null : (v) => setState(() => _isVariableUnit = v),
+          onChanged: widget.isReadOnly
+              ? null
+              : (v) => setState(() => _isVariableUnit = v),
           title: const Text(GtinUiConstants.switchTradeItemVariableUnit),
         ),
         FormField<void>(
@@ -318,4 +330,3 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     );
   }
 }
-

@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_industry_mode_content.dar
 import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
-/// Pharma or tobacco extension blocks driven by [SystemSettingsCubit] industry mode.
 class GtinIndustryExtensionsSection extends StatelessWidget {
   const GtinIndustryExtensionsSection({
     super.key,
@@ -35,7 +34,6 @@ class GtinIndustryExtensionsSection extends StatelessWidget {
   final GTINPharmaceuticalExtension? pharmaceuticalExtension;
   final GTINTobaccoExtension? tobaccoExtension;
 
-  /// When true, extensions come from master GET (see [pharmaceuticalExtension] / [tobaccoExtension]); no widget GET.
   final bool deferIndustryExtensionNetworkFetch;
   final bool industryExtensionFetchResolved;
 

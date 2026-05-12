@@ -35,16 +35,18 @@ class RegulatoryAuthorityLabelingSection extends StatelessWidget {
           GtinValidatedField(
             controller: regulatedProductNameController,
             fieldName: 'regulatedProductName',
-            label: GtinRegulatoryAuthorityExtensionUiConstants.labelRegulatedProductName,
-            helperText: GtinRegulatoryAuthorityExtensionUiConstants.helperRegulatedProductName,
+            label: GtinRegulatoryAuthorityExtensionUiConstants
+                .labelRegulatedProductName,
+            helperText: GtinRegulatoryAuthorityExtensionUiConstants
+                .helperRegulatedProductName,
             maxLength: 200,
             inputFormatters: [LengthLimitingTextInputFormatter(200)],
             readOnly: isReadOnly,
-            validator: (v) => RegulatoryAuthorityValidators
-                .validateEnglishRegulatedNameForRegulatoryAuthority(
-              v,
-              isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
-            ),
+            validator: (v) =>
+                RegulatoryAuthorityValidators.validateEnglishRegulatedNameForRegulatoryAuthority(
+                  v,
+                  isRegulatoryAuthorityMarket: isRegulatoryAuthorityMarket,
+                ),
           ),
         ],
       ),

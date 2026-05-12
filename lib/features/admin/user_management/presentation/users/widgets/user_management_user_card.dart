@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/theme/evotraq_theme.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 
 import 'user_management_constants.dart';
 
-enum UserManagementUserCardVariant {
-  listTile,
-  gridSquare,
-}
+enum UserManagementUserCardVariant { listTile, gridSquare }
 
 class UserManagementUserCard extends StatelessWidget {
   const UserManagementUserCard({
@@ -43,7 +40,10 @@ class UserManagementUserCard extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 760;
-            final details = _UserDetails(user: user, density: _UserDetailsDensity.comfy);
+            final details = _UserDetails(
+              user: user,
+              density: _UserDetailsDensity.comfy,
+            );
             final actions = _UserActions(
               user: user,
               isToggleLoading: isToggleLoading,
@@ -64,10 +64,7 @@ class UserManagementUserCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: actions,
-                  ),
+                  Align(alignment: Alignment.centerRight, child: actions),
                 ],
               );
             }
@@ -89,7 +86,10 @@ class UserManagementUserCard extends StatelessWidget {
   }
 
   Widget _buildGridSquareCard(BuildContext context) {
-    final details = _UserDetails(user: user, density: _UserDetailsDensity.compact);
+    final details = _UserDetails(
+      user: user,
+      density: _UserDetailsDensity.compact,
+    );
     final actions = _UserActions(
       user: user,
       isToggleLoading: isToggleLoading,
@@ -120,8 +120,8 @@ class UserManagementUserCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -129,10 +129,7 @@ class UserManagementUserCard extends StatelessWidget {
             const SizedBox(height: 10),
             Expanded(child: details),
             const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: actions,
-            ),
+            Align(alignment: Alignment.centerRight, child: actions),
           ],
         ),
       ),
@@ -148,10 +145,7 @@ class UserManagementUserCard extends StatelessWidget {
 }
 
 class _UserAvatar extends StatelessWidget {
-  const _UserAvatar({
-    required this.initial,
-    this.radius = 20,
-  });
+  const _UserAvatar({required this.initial, this.radius = 20});
 
   final String initial;
   final double radius;
@@ -161,24 +155,15 @@ class _UserAvatar extends StatelessWidget {
     return CircleAvatar(
       backgroundColor: context.colors.textSecondary,
       radius: radius,
-      child: Text(
-        initial,
-        style: const TextStyle(color: Colors.white),
-      ),
+      child: Text(initial, style: const TextStyle(color: Colors.white)),
     );
   }
 }
 
-enum _UserDetailsDensity {
-  comfy,
-  compact,
-}
+enum _UserDetailsDensity { comfy, compact }
 
 class _UserDetails extends StatelessWidget {
-  const _UserDetails({
-    required this.user,
-    required this.density,
-  });
+  const _UserDetails({required this.user, required this.density});
 
   final UserResponse user;
   final _UserDetailsDensity density;
@@ -195,25 +180,21 @@ class _UserDetails extends StatelessWidget {
         if (density == _UserDetailsDensity.comfy) ...[
           Text(
             name.isEmpty ? user.username : name,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           SizedBox(height: spacingSm),
-          Text(
-            user.email,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis),
           SizedBox(height: spacingSm),
           Text(
             'Username: ${user.username}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.primary,
-                ),
+              fontWeight: FontWeight.w700,
+              color: context.colors.primary,
+            ),
           ),
           SizedBox(height: spacingMd),
         ] else ...[
@@ -241,8 +222,9 @@ class _UserDetails extends StatelessWidget {
               backgroundColor: user.enabled
                   ? context.colors.success.withValues(alpha: 0.15)
                   : Colors.grey.withValues(alpha: 0.18),
-              foregroundColor:
-                  user.enabled ? context.colors.success : Colors.grey[800]!,
+              foregroundColor: user.enabled
+                  ? context.colors.success
+                  : Colors.grey[800]!,
             ),
             if (user.approvalStatus == UserManagementConstants.pendingStatus)
               _StatusChip(
@@ -340,8 +322,6 @@ class _UserActions extends StatelessWidget {
           ),
           tooltip: 'Edit User',
           onPressed: () {
-            // On Flutter web/desktop, opening overlays during a mouse device update can
-            // trigger an assertion in MouseTracker. Schedule it after this frame.
             WidgetsBinding.instance.addPostFrameCallback((_) {
               onEdit(user);
             });
@@ -351,7 +331,6 @@ class _UserActions extends StatelessWidget {
           value: user.enabled,
           onChanged: isToggleLoading ? null : (_) => onToggleStatus(user),
         ),
-
       ],
     );
   }

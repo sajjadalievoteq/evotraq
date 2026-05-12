@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/gs1/bloc/sgtin/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/models/sgtin_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 class SGTINListScreen extends StatefulWidget {
@@ -116,7 +117,8 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: TraqAppBar(
+          context,
           title: const Text('Serialized GTINs'),
           actions: [
             IconButton(

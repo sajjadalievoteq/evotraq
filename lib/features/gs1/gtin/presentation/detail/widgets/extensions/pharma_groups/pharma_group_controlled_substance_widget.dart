@@ -26,7 +26,8 @@ class ControlledSubstanceGroupWidget extends StatefulWidget {
     required bool isControlledSubstance,
     required DeaSchedule deaSchedule,
     required String controlClass,
-  }) onChanged;
+  })
+  onChanged;
 
   @override
   State<ControlledSubstanceGroupWidget> createState() =>
@@ -44,14 +45,17 @@ class _ControlledSubstanceGroupWidgetState
     super.initState();
     _isControlledSubstance = widget.initialIsControlledSubstance;
     _deaSchedule = widget.initialDeaSchedule;
-    _controlClassController = TextEditingController(text: widget.initialControlClass);
+    _controlClassController = TextEditingController(
+      text: widget.initialControlClass,
+    );
     _controlClassController.addListener(_emitChange);
   }
 
   @override
   void didUpdateWidget(covariant ControlledSubstanceGroupWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialIsControlledSubstance == oldWidget.initialIsControlledSubstance &&
+    if (widget.initialIsControlledSubstance ==
+            oldWidget.initialIsControlledSubstance &&
         widget.initialDeaSchedule == oldWidget.initialDeaSchedule &&
         widget.initialControlClass == oldWidget.initialControlClass) {
       return;

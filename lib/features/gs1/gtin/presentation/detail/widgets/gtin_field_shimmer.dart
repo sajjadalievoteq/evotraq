@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// [OutlineInputBorder] radius; matches M3 text fields.
 const double kGtinSkeletonInputRadius = 4;
 
-/// Keeps [child] mounted for keys/controllers while showing a static skeleton on top.
-///
-/// GLN/GTIN **full-screen** loading uses [Gs1FormShimmerLayer] (one [Shimmer] for
-/// the whole form). Use this for **section-level** masks (e.g. pharma subgroups) only.
-/// Do not wrap every field in this with [Shimmer] (see [Gs1FormShimmerLayer]).
 class GtinFieldSkeletonMask extends StatelessWidget {
   const GtinFieldSkeletonMask({
     super.key,
@@ -31,10 +25,7 @@ class GtinFieldSkeletonMask extends StatelessWidget {
       alignment: Alignment.topCenter,
       clipBehavior: Clip.hardEdge,
       children: [
-        Opacity(
-          opacity: 0,
-          child: IgnorePointer(child: child),
-        ),
+        Opacity(opacity: 0, child: IgnorePointer(child: child)),
         IgnorePointer(
           child: Align(
             alignment: Alignment.topCenter,
@@ -107,7 +98,6 @@ class GtinSkeletonDateRow extends StatelessWidget {
   }
 }
 
-/// Expansion-style tile placeholder for industry extensions.
 class GtinSkeletonExtensionTile extends StatelessWidget {
   const GtinSkeletonExtensionTile({super.key, required this.color});
 

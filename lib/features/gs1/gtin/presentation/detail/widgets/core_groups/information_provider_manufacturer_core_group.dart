@@ -43,14 +43,17 @@ class InformationProviderManufacturerCoreGroupState
     super.dispose();
   }
 
-  String? get informationProviderGln => _informationProviderGln.text.trim().isEmpty
+  String? get informationProviderGln =>
+      _informationProviderGln.text.trim().isEmpty
       ? null
       : _informationProviderGln.text.trim();
-  String? get informationProviderName => _informationProviderName.text.trim().isEmpty
+  String? get informationProviderName =>
+      _informationProviderName.text.trim().isEmpty
       ? null
       : _informationProviderName.text.trim();
-  String? get manufacturerGln =>
-      _manufacturerGln.text.trim().isEmpty ? null : _manufacturerGln.text.trim();
+  String? get manufacturerGln => _manufacturerGln.text.trim().isEmpty
+      ? null
+      : _manufacturerGln.text.trim();
 
   void setFromGtin({
     required String? informationProviderGln,
@@ -126,4 +129,3 @@ class InformationProviderManufacturerCoreGroupState
     );
   }
 }
-

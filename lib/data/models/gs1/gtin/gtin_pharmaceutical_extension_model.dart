@@ -1,5 +1,21 @@
 import 'package:equatable/equatable.dart';
 
+double? _jsonDouble(dynamic v) {
+  if (v == null) return null;
+  if (v is num) return v.toDouble();
+  final s = v.toString().trim();
+  if (s.isEmpty) return null;
+  return double.tryParse(s);
+}
+
+int? _jsonInt(dynamic v) {
+  if (v == null) return null;
+  if (v is num) return v.toInt();
+  final s = v.toString().trim();
+  if (s.isEmpty) return null;
+  return int.tryParse(s);
+}
+
 /// DEA Schedule enum for controlled substances
 enum DeaSchedule {
   scheduleI,
@@ -150,10 +166,10 @@ class ActiveIngredient extends Equatable {
   factory ActiveIngredient.fromJson(Map<String, dynamic> json) {
     return ActiveIngredient(
       name: json['name'] ?? '',
-      amount: (json['amount'] as num?)?.toDouble(),
+      amount: _jsonDouble(json['amount']),
       unit: json['unit'] as String?,
       substanceRoleCode: json['substanceRoleCode'] as String? ?? 'ACTIVE',
-      sequence: (json['sequence'] as num?)?.toInt() ?? 0,
+      sequence: _jsonInt(json['sequence']) ?? 0,
       basisOfStrength: json['basisOfStrength'] as String?,
     );
   }
@@ -358,8 +374,8 @@ class GTINPharmaceuticalExtension extends Equatable {
 
   factory GTINPharmaceuticalExtension.fromJson(Map<String, dynamic> json) {
     return GTINPharmaceuticalExtension(
-      id: json['id'],
-      gtinId: json['gtinId'] ?? 0,
+      id: _jsonInt(json['id']),
+      gtinId: _jsonInt(json['gtinId']) ?? 0,
       gtinCode: json['gtinCode'],
       ndcNumber: json['ndcNumber'],
       dinNumber: json['dinNumber'],
@@ -376,8 +392,8 @@ class GTINPharmaceuticalExtension extends Equatable {
       strengthUnit: json['strengthUnit'],
       routeOfAdministration: json['routeOfAdministration'],
       storageConditions: json['storageConditions'],
-      minStorageTempCelsius: (json['minStorageTempCelsius'] as num?)?.toDouble(),
-      maxStorageTempCelsius: (json['maxStorageTempCelsius'] as num?)?.toDouble(),
+      minStorageTempCelsius: _jsonDouble(json['minStorageTempCelsius']),
+      maxStorageTempCelsius: _jsonDouble(json['maxStorageTempCelsius']),
       requiresRefrigeration: json['requiresRefrigeration'] ?? false,
       requiresFreezing: json['requiresFreezing'] ?? false,
       lightSensitive: json['lightSensitive'] ?? false,
@@ -442,13 +458,12 @@ class GTINPharmaceuticalExtension extends Equatable {
           json['specControlledSubstanceSchedule'] as String?,
       additionalMonitoringIndicator:
           json['additionalMonitoringIndicator'] ?? false,
-      shelfLifeMonths: (json['shelfLifeMonths'] as num?)?.toInt(),
-      shelfLifeAfterOpeningDays:
-          (json['shelfLifeAfterOpeningDays'] as num?)?.toInt(),
+      shelfLifeMonths: _jsonInt(json['shelfLifeMonths']),
+      shelfLifeAfterOpeningDays: _jsonInt(json['shelfLifeAfterOpeningDays']),
       countryOfManufactureNumeric:
           json['countryOfManufactureNumeric'] as String?,
       packSizeDescription: json['packSizeDescription'] as String?,
-      activePotencyAi7004: (json['activePotencyAi7004'] as num?)?.toDouble(),
+      activePotencyAi7004: _jsonDouble(json['activePotencyAi7004']),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,

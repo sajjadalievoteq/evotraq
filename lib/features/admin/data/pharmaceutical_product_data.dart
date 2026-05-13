@@ -68,81 +68,81 @@ class PharmaceuticalProductData {
   static List<Map<String, dynamic>> getUAEPharmaceuticalProducts() {
     return [
       // Cardiovascular - Julphar
-      _product(_gtin('0629200010001'), 'Simvastatin 20mg Tablets', 'Julphar Gulf Pharmaceutical', 'Statins', 'Simvastatin', 20.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C001', 'C10AA01', 'Hyperlipidemia', 45.00),
-      _product(_gtin('0629200010002'), 'Atorvastatin 40mg Tablets', 'Julphar Gulf Pharmaceutical', 'Statins', 'Atorvastatin', 40.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C002', 'C10AA05', 'Hyperlipidemia', 85.00),
-      _product(_gtin('0629200010003'), 'Amlodipine 5mg Tablets', 'Julphar Gulf Pharmaceutical', 'Calcium Channel Blockers', 'Amlodipine', 5.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C003', 'C08CA01', 'Hypertension', 35.00),
-      _product(_gtin('0629200010004'), 'Losartan 50mg Tablets', 'Julphar Gulf Pharmaceutical', 'ARBs', 'Losartan', 50.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C004', 'C09CA01', 'Hypertension', 55.00),
-      _product(_gtin('0629200010005'), 'Bisoprolol 5mg Tablets', 'Julphar Gulf Pharmaceutical', 'Beta Blockers', 'Bisoprolol', 5.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C005', 'C07AB07', 'Hypertension', 40.00),
+      _product(_gtin('062920001000'), 'Simvastatin 20mg Tablets', 'Julphar Gulf Pharmaceutical', 'Statins', 'Simvastatin', 20.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C001', 'C10AA01', 'Hyperlipidemia', 45.00),
+      _product(_gtin('062920001001'), 'Atorvastatin 40mg Tablets', 'Julphar Gulf Pharmaceutical', 'Statins', 'Atorvastatin', 40.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C002', 'C10AA05', 'Hyperlipidemia', 85.00),
+      _product(_gtin('062920001002'), 'Amlodipine 5mg Tablets', 'Julphar Gulf Pharmaceutical', 'Calcium Channel Blockers', 'Amlodipine', 5.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C003', 'C08CA01', 'Hypertension', 35.00),
+      _product(_gtin('062920001003'), 'Losartan 50mg Tablets', 'Julphar Gulf Pharmaceutical', 'ARBs', 'Losartan', 50.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C004', 'C09CA01', 'Hypertension', 55.00),
+      _product(_gtin('062920001004'), 'Bisoprolol 5mg Tablets', 'Julphar Gulf Pharmaceutical', 'Beta Blockers', 'Bisoprolol', 5.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C005', 'C07AB07', 'Hypertension', 40.00),
 
       // Diabetes - Neopharma
-      _product(_gtin('0629200020001'), 'Metformin 500mg Tablets', 'Neopharma LLC', 'Antidiabetics', 'Metformin HCl', 500.0, 'mg', 'TABLET', 'BOTTLE', 60, 'AE', 'ARE-MOHAP-2024-A001', 'A10BA02', 'Type 2 Diabetes', 25.00),
-      _product(_gtin('0629200020002'), 'Metformin 850mg Tablets', 'Neopharma LLC', 'Antidiabetics', 'Metformin HCl', 850.0, 'mg', 'TABLET', 'BOTTLE', 60, 'AE', 'ARE-MOHAP-2024-A002', 'A10BA02', 'Type 2 Diabetes', 35.00),
-      _product(_gtin('0629200020003'), 'Glimepiride 2mg Tablets', 'Neopharma LLC', 'Sulfonylureas', 'Glimepiride', 2.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-A003', 'A10BB12', 'Type 2 Diabetes', 45.00),
-      _product(_gtin('0629200020004'), 'Gliclazide 80mg Tablets', 'Neopharma LLC', 'Sulfonylureas', 'Gliclazide', 80.0, 'mg', 'TABLET', 'BLISTER', 60, 'AE', 'ARE-MOHAP-2024-A004', 'A10BB09', 'Type 2 Diabetes', 50.00),
+      _product(_gtin('062920002000'), 'Metformin 500mg Tablets', 'Neopharma LLC', 'Antidiabetics', 'Metformin HCl', 500.0, 'mg', 'TABLET', 'BOTTLE', 60, 'AE', 'ARE-MOHAP-2024-A001', 'A10BA02', 'Type 2 Diabetes', 25.00),
+      _product(_gtin('062920002001'), 'Metformin 850mg Tablets', 'Neopharma LLC', 'Antidiabetics', 'Metformin HCl', 850.0, 'mg', 'TABLET', 'BOTTLE', 60, 'AE', 'ARE-MOHAP-2024-A002', 'A10BA02', 'Type 2 Diabetes', 35.00),
+      _product(_gtin('062920002002'), 'Glimepiride 2mg Tablets', 'Neopharma LLC', 'Sulfonylureas', 'Glimepiride', 2.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-A003', 'A10BB12', 'Type 2 Diabetes', 45.00),
+      _product(_gtin('062920002003'), 'Gliclazide 80mg Tablets', 'Neopharma LLC', 'Sulfonylureas', 'Gliclazide', 80.0, 'mg', 'TABLET', 'BLISTER', 60, 'AE', 'ARE-MOHAP-2024-A004', 'A10BB09', 'Type 2 Diabetes', 50.00),
 
       // Antibiotics - Global Pharma
-      _product(_gtin('0629200030001'), 'Amoxicillin 500mg Capsules', 'Global Pharma Healthcare', 'Penicillins', 'Amoxicillin', 500.0, 'mg', 'CAPSULE', 'BLISTER', 21, 'AE', 'ARE-MOHAP-2024-J001', 'J01CA04', 'Bacterial Infections', 30.00),
-      _product(_gtin('0629200030002'), 'Amoxicillin-Clavulanate 625mg', 'Global Pharma Healthcare', 'Penicillins', 'Amoxicillin + Clavulanic Acid', 625.0, 'mg', 'TABLET', 'BLISTER', 14, 'AE', 'ARE-MOHAP-2024-J002', 'J01CR02', 'Bacterial Infections', 55.00),
-      _product(_gtin('0629200030003'), 'Azithromycin 500mg Tablets', 'Global Pharma Healthcare', 'Macrolides', 'Azithromycin', 500.0, 'mg', 'TABLET', 'BLISTER', 3, 'AE', 'ARE-MOHAP-2024-J003', 'J01FA10', 'Respiratory Infections', 45.00),
-      _product(_gtin('0629200030004'), 'Cefuroxime 500mg Tablets', 'Global Pharma Healthcare', 'Cephalosporins', 'Cefuroxime Axetil', 500.0, 'mg', 'TABLET', 'BLISTER', 10, 'AE', 'ARE-MOHAP-2024-J004', 'J01DC02', 'Bacterial Infections', 65.00),
-      _product(_gtin('0629200030005'), 'Ciprofloxacin 500mg Tablets', 'Global Pharma Healthcare', 'Fluoroquinolones', 'Ciprofloxacin', 500.0, 'mg', 'TABLET', 'BLISTER', 10, 'AE', 'ARE-MOHAP-2024-J005', 'J01MA02', 'UTI/GI Infections', 40.00),
+      _product(_gtin('062920003000'), 'Amoxicillin 500mg Capsules', 'Global Pharma Healthcare', 'Penicillins', 'Amoxicillin', 500.0, 'mg', 'CAPSULE', 'BLISTER', 21, 'AE', 'ARE-MOHAP-2024-J001', 'J01CA04', 'Bacterial Infections', 30.00),
+      _product(_gtin('062920003001'), 'Amoxicillin-Clavulanate 625mg', 'Global Pharma Healthcare', 'Penicillins', 'Amoxicillin + Clavulanic Acid', 625.0, 'mg', 'TABLET', 'BLISTER', 14, 'AE', 'ARE-MOHAP-2024-J002', 'J01CR02', 'Bacterial Infections', 55.00),
+      _product(_gtin('062920003002'), 'Azithromycin 500mg Tablets', 'Global Pharma Healthcare', 'Macrolides', 'Azithromycin', 500.0, 'mg', 'TABLET', 'BLISTER', 3, 'AE', 'ARE-MOHAP-2024-J003', 'J01FA10', 'Respiratory Infections', 45.00),
+      _product(_gtin('062920003003'), 'Cefuroxime 500mg Tablets', 'Global Pharma Healthcare', 'Cephalosporins', 'Cefuroxime Axetil', 500.0, 'mg', 'TABLET', 'BLISTER', 10, 'AE', 'ARE-MOHAP-2024-J004', 'J01DC02', 'Bacterial Infections', 65.00),
+      _product(_gtin('062920003004'), 'Ciprofloxacin 500mg Tablets', 'Global Pharma Healthcare', 'Fluoroquinolones', 'Ciprofloxacin', 500.0, 'mg', 'TABLET', 'BLISTER', 10, 'AE', 'ARE-MOHAP-2024-J005', 'J01MA02', 'UTI/GI Infections', 40.00),
 
       // Pain/Anti-inflammatory - GSK UAE
-      _product(_gtin('0629200040001'), 'Paracetamol 500mg Tablets', 'GlaxoSmithKline UAE', 'Analgesics', 'Paracetamol', 500.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-N001', 'N02BE01', 'Pain & Fever', 15.00),
-      _product(_gtin('0629200040002'), 'Ibuprofen 400mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Ibuprofen', 400.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-M001', 'M01AE01', 'Pain & Inflammation', 20.00),
-      _product(_gtin('0629200040003'), 'Diclofenac 50mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Diclofenac Sodium', 50.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-M002', 'M01AB05', 'Pain & Inflammation', 25.00),
-      _product(_gtin('0629200040004'), 'Naproxen 500mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Naproxen', 500.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-M003', 'M01AE02', 'Pain & Inflammation', 30.00),
+      _product(_gtin('062920004000'), 'Paracetamol 500mg Tablets', 'GlaxoSmithKline UAE', 'Analgesics', 'Paracetamol', 500.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-N001', 'N02BE01', 'Pain & Fever', 15.00),
+      _product(_gtin('062920004001'), 'Ibuprofen 400mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Ibuprofen', 400.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-M001', 'M01AE01', 'Pain & Inflammation', 20.00),
+      _product(_gtin('062920004002'), 'Diclofenac 50mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Diclofenac Sodium', 50.0, 'mg', 'TABLET', 'BLISTER', 20, 'GB', 'ARE-MOHAP-2024-M002', 'M01AB05', 'Pain & Inflammation', 25.00),
+      _product(_gtin('062920004003'), 'Naproxen 500mg Tablets', 'GlaxoSmithKline UAE', 'NSAIDs', 'Naproxen', 500.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-M003', 'M01AE02', 'Pain & Inflammation', 30.00),
 
       // Respiratory - AstraZeneca
-      _product(_gtin('0629200070001'), 'Salbutamol 100mcg Inhaler', 'AstraZeneca Middle East', 'Bronchodilators', 'Salbutamol Sulfate', 100.0, 'mcg', 'INHALER', 'CANISTER', 200, 'GB', 'ARE-MOHAP-2024-R001', 'R03AC02', 'Asthma/COPD', 45.00),
-      _product(_gtin('0629200070002'), 'Budesonide 200mcg Inhaler', 'AstraZeneca Middle East', 'Corticosteroids', 'Budesonide', 200.0, 'mcg', 'INHALER', 'CANISTER', 120, 'GB', 'ARE-MOHAP-2024-R002', 'R03BA02', 'Asthma', 85.00),
-      _product(_gtin('0629200070003'), 'Montelukast 10mg Tablets', 'AstraZeneca Middle East', 'Leukotriene Antagonists', 'Montelukast', 10.0, 'mg', 'TABLET', 'BLISTER', 28, 'GB', 'ARE-MOHAP-2024-R003', 'R03DC03', 'Asthma', 95.00),
-      _product(_gtin('0629200070004'), 'Cetirizine 10mg Tablets', 'AstraZeneca Middle East', 'Antihistamines', 'Cetirizine HCl', 10.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-R004', 'R06AE07', 'Allergies', 25.00),
+      _product(_gtin('062920007000'), 'Salbutamol 100mcg Inhaler', 'AstraZeneca Middle East', 'Bronchodilators', 'Salbutamol Sulfate', 100.0, 'mcg', 'INHALER', 'CANISTER', 200, 'GB', 'ARE-MOHAP-2024-R001', 'R03AC02', 'Asthma/COPD', 45.00),
+      _product(_gtin('062920007001'), 'Budesonide 200mcg Inhaler', 'AstraZeneca Middle East', 'Corticosteroids', 'Budesonide', 200.0, 'mcg', 'INHALER', 'CANISTER', 120, 'GB', 'ARE-MOHAP-2024-R002', 'R03BA02', 'Asthma', 85.00),
+      _product(_gtin('062920007002'), 'Montelukast 10mg Tablets', 'AstraZeneca Middle East', 'Leukotriene Antagonists', 'Montelukast', 10.0, 'mg', 'TABLET', 'BLISTER', 28, 'GB', 'ARE-MOHAP-2024-R003', 'R03DC03', 'Asthma', 95.00),
+      _product(_gtin('062920007003'), 'Cetirizine 10mg Tablets', 'AstraZeneca Middle East', 'Antihistamines', 'Cetirizine HCl', 10.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-R004', 'R06AE07', 'Allergies', 25.00),
 
       // GI/Gastro - Pfizer Gulf
-      _product(_gtin('0629200050001'), 'Omeprazole 20mg Capsules', 'Pfizer Gulf FZ-LLC', 'Proton Pump Inhibitors', 'Omeprazole', 20.0, 'mg', 'CAPSULE', 'BLISTER', 28, 'US', 'ARE-MOHAP-2024-A101', 'A02BC01', 'GERD/Ulcers', 40.00),
-      _product(_gtin('0629200050002'), 'Pantoprazole 40mg Tablets', 'Pfizer Gulf FZ-LLC', 'Proton Pump Inhibitors', 'Pantoprazole', 40.0, 'mg', 'TABLET', 'BLISTER', 28, 'US', 'ARE-MOHAP-2024-A102', 'A02BC02', 'GERD/Ulcers', 50.00),
-      _product(_gtin('0629200050003'), 'Ranitidine 150mg Tablets', 'Pfizer Gulf FZ-LLC', 'H2 Blockers', 'Ranitidine HCl', 150.0, 'mg', 'TABLET', 'BLISTER', 30, 'US', 'ARE-MOHAP-2024-A103', 'A02BA02', 'Heartburn', 30.00),
-      _product(_gtin('0629200050004'), 'Loperamide 2mg Capsules', 'Pfizer Gulf FZ-LLC', 'Antidiarrheals', 'Loperamide HCl', 2.0, 'mg', 'CAPSULE', 'BLISTER', 12, 'US', 'ARE-MOHAP-2024-A104', 'A07DA03', 'Diarrhea', 20.00),
+      _product(_gtin('062920005000'), 'Omeprazole 20mg Capsules', 'Pfizer Gulf FZ-LLC', 'Proton Pump Inhibitors', 'Omeprazole', 20.0, 'mg', 'CAPSULE', 'BLISTER', 28, 'US', 'ARE-MOHAP-2024-A101', 'A02BC01', 'GERD/Ulcers', 40.00),
+      _product(_gtin('062920005001'), 'Pantoprazole 40mg Tablets', 'Pfizer Gulf FZ-LLC', 'Proton Pump Inhibitors', 'Pantoprazole', 40.0, 'mg', 'TABLET', 'BLISTER', 28, 'US', 'ARE-MOHAP-2024-A102', 'A02BC02', 'GERD/Ulcers', 50.00),
+      _product(_gtin('062920005002'), 'Ranitidine 150mg Tablets', 'Pfizer Gulf FZ-LLC', 'H2 Blockers', 'Ranitidine HCl', 150.0, 'mg', 'TABLET', 'BLISTER', 30, 'US', 'ARE-MOHAP-2024-A103', 'A02BA02', 'Heartburn', 30.00),
+      _product(_gtin('062920005003'), 'Loperamide 2mg Capsules', 'Pfizer Gulf FZ-LLC', 'Antidiarrheals', 'Loperamide HCl', 2.0, 'mg', 'CAPSULE', 'BLISTER', 12, 'US', 'ARE-MOHAP-2024-A104', 'A07DA03', 'Diarrhea', 20.00),
 
       // Vitamins/Supplements - Novartis
-      _product(_gtin('0629200060001'), 'Vitamin D3 50000 IU Capsules', 'Novartis UAE', 'Vitamins', 'Cholecalciferol', 50000.0, 'IU', 'CAPSULE', 'BOTTLE', 4, 'CH', 'ARE-MOHAP-2024-A201', 'A11CC05', 'Vitamin D Deficiency', 35.00),
-      _product(_gtin('0629200060002'), 'Calcium+D3 600mg Tablets', 'Novartis UAE', 'Minerals', 'Calcium Carbonate + Vit D3', 600.0, 'mg', 'TABLET', 'BOTTLE', 60, 'CH', 'ARE-MOHAP-2024-A202', 'A12AX', 'Osteoporosis Prevention', 40.00),
-      _product(_gtin('0629200060003'), 'Multivitamin Tablets', 'Novartis UAE', 'Multivitamins', 'Multivitamin Complex', 0.0, 'unit', 'TABLET', 'BOTTLE', 30, 'CH', 'ARE-MOHAP-2024-A203', 'A11AA', 'Nutritional Supplement', 45.00),
-      _product(_gtin('0629200060004'), 'Iron 65mg Tablets', 'Novartis UAE', 'Minerals', 'Ferrous Sulfate', 65.0, 'mg', 'TABLET', 'BOTTLE', 30, 'CH', 'ARE-MOHAP-2024-A204', 'B03AA07', 'Iron Deficiency Anemia', 25.00),
+      _product(_gtin('062920006000'), 'Vitamin D3 50000 IU Capsules', 'Novartis UAE', 'Vitamins', 'Cholecalciferol', 50000.0, 'IU', 'CAPSULE', 'BOTTLE', 4, 'CH', 'ARE-MOHAP-2024-A201', 'A11CC05', 'Vitamin D Deficiency', 35.00),
+      _product(_gtin('062920006001'), 'Calcium+D3 600mg Tablets', 'Novartis UAE', 'Minerals', 'Calcium Carbonate + Vit D3', 600.0, 'mg', 'TABLET', 'BOTTLE', 60, 'CH', 'ARE-MOHAP-2024-A202', 'A12AX', 'Osteoporosis Prevention', 40.00),
+      _product(_gtin('062920006002'), 'Multivitamin Tablets', 'Novartis UAE', 'Multivitamins', 'Multivitamin Complex', 0.0, 'unit', 'TABLET', 'BOTTLE', 30, 'CH', 'ARE-MOHAP-2024-A203', 'A11AA', 'Nutritional Supplement', 45.00),
+      _product(_gtin('062920006003'), 'Iron 65mg Tablets', 'Novartis UAE', 'Minerals', 'Ferrous Sulfate', 65.0, 'mg', 'TABLET', 'BOTTLE', 30, 'CH', 'ARE-MOHAP-2024-A204', 'B03AA07', 'Iron Deficiency Anemia', 25.00),
 
       // Anticoagulants/Cardiovascular - Sanofi
-      _product(_gtin('0629200080001'), 'Clopidogrel 75mg Tablets', 'Sanofi Gulf', 'Antiplatelets', 'Clopidogrel', 75.0, 'mg', 'TABLET', 'BLISTER', 28, 'FR', 'ARE-MOHAP-2024-B001', 'B01AC04', 'Cardiovascular Protection', 120.00),
-      _product(_gtin('0629200080002'), 'Warfarin 5mg Tablets', 'Sanofi Gulf', 'Anticoagulants', 'Warfarin Sodium', 5.0, 'mg', 'TABLET', 'BLISTER', 30, 'FR', 'ARE-MOHAP-2024-B002', 'B01AA03', 'Anticoagulation', 35.00),
-      _product(_gtin('0629200080003'), 'Enoxaparin 40mg Injection', 'Sanofi Gulf', 'Anticoagulants', 'Enoxaparin Sodium', 40.0, 'mg', 'INJECTION', 'PREFILLED_SYRINGE', 2, 'FR', 'ARE-MOHAP-2024-B003', 'B01AB05', 'DVT Prevention', 150.00),
+      _product(_gtin('062920008000'), 'Clopidogrel 75mg Tablets', 'Sanofi Gulf', 'Antiplatelets', 'Clopidogrel', 75.0, 'mg', 'TABLET', 'BLISTER', 28, 'FR', 'ARE-MOHAP-2024-B001', 'B01AC04', 'Cardiovascular Protection', 120.00),
+      _product(_gtin('062920008001'), 'Warfarin 5mg Tablets', 'Sanofi Gulf', 'Anticoagulants', 'Warfarin Sodium', 5.0, 'mg', 'TABLET', 'BLISTER', 30, 'FR', 'ARE-MOHAP-2024-B002', 'B01AA03', 'Anticoagulation', 35.00),
+      _product(_gtin('062920008002'), 'Enoxaparin 40mg Injection', 'Sanofi Gulf', 'Anticoagulants', 'Enoxaparin Sodium', 40.0, 'mg', 'INJECTION', 'PREFILLED_SYRINGE', 2, 'FR', 'ARE-MOHAP-2024-B003', 'B01AB05', 'DVT Prevention', 150.00),
 
       // Oncology Support - Pfizer
-      _product(_gtin('0629200050005'), 'Ondansetron 8mg Tablets', 'Pfizer Gulf FZ-LLC', 'Antiemetics', 'Ondansetron HCl', 8.0, 'mg', 'TABLET', 'BLISTER', 10, 'US', 'ARE-MOHAP-2024-A105', 'A04AA01', 'Chemotherapy Nausea', 85.00),
-      _product(_gtin('0629200050006'), 'Metoclopramide 10mg Tablets', 'Pfizer Gulf FZ-LLC', 'Antiemetics', 'Metoclopramide', 10.0, 'mg', 'TABLET', 'BLISTER', 30, 'US', 'ARE-MOHAP-2024-A106', 'A03FA01', 'Nausea/Vomiting', 20.00),
+      _product(_gtin('062920005004'), 'Ondansetron 8mg Tablets', 'Pfizer Gulf FZ-LLC', 'Antiemetics', 'Ondansetron HCl', 8.0, 'mg', 'TABLET', 'BLISTER', 10, 'US', 'ARE-MOHAP-2024-A105', 'A04AA01', 'Chemotherapy Nausea', 85.00),
+      _product(_gtin('062920005005'), 'Metoclopramide 10mg Tablets', 'Pfizer Gulf FZ-LLC', 'Antiemetics', 'Metoclopramide', 10.0, 'mg', 'TABLET', 'BLISTER', 30, 'US', 'ARE-MOHAP-2024-A106', 'A03FA01', 'Nausea/Vomiting', 20.00),
 
       // Hormones - Novartis
-      _product(_gtin('0629200060005'), 'Levothyroxine 100mcg Tablets', 'Novartis UAE', 'Thyroid Hormones', 'Levothyroxine Sodium', 100.0, 'mcg', 'TABLET', 'BLISTER', 30, 'CH', 'ARE-MOHAP-2024-H001', 'H03AA01', 'Hypothyroidism', 30.00),
-      _product(_gtin('0629200060006'), 'Insulin Glargine 100U/mL', 'Novartis UAE', 'Insulins', 'Insulin Glargine', 100.0, 'U/mL', 'INJECTION', 'VIAL', 1, 'CH', 'ARE-MOHAP-2024-A301', 'A10AE04', 'Diabetes', 180.00),
+      _product(_gtin('062920006004'), 'Levothyroxine 100mcg Tablets', 'Novartis UAE', 'Thyroid Hormones', 'Levothyroxine Sodium', 100.0, 'mcg', 'TABLET', 'BLISTER', 30, 'CH', 'ARE-MOHAP-2024-H001', 'H03AA01', 'Hypothyroidism', 30.00),
+      _product(_gtin('062920006005'), 'Insulin Glargine 100U/mL', 'Novartis UAE', 'Insulins', 'Insulin Glargine', 100.0, 'U/mL', 'INJECTION', 'VIAL', 1, 'CH', 'ARE-MOHAP-2024-A301', 'A10AE04', 'Diabetes', 180.00),
 
       // Antibiotics Injectable - Global Pharma
-      _product(_gtin('0629200030006'), 'Ceftriaxone 1g Injection', 'Global Pharma Healthcare', 'Cephalosporins', 'Ceftriaxone Sodium', 1000.0, 'mg', 'INJECTION', 'VIAL', 1, 'AE', 'ARE-MOHAP-2024-J006', 'J01DD04', 'Severe Infections', 25.00),
-      _product(_gtin('0629200030007'), 'Meropenem 1g Injection', 'Global Pharma Healthcare', 'Carbapenems', 'Meropenem', 1000.0, 'mg', 'INJECTION', 'VIAL', 1, 'AE', 'ARE-MOHAP-2024-J007', 'J01DH02', 'Severe Infections', 180.00),
+      _product(_gtin('062920003005'), 'Ceftriaxone 1g Injection', 'Global Pharma Healthcare', 'Cephalosporins', 'Ceftriaxone Sodium', 1000.0, 'mg', 'INJECTION', 'VIAL', 1, 'AE', 'ARE-MOHAP-2024-J006', 'J01DD04', 'Severe Infections', 25.00),
+      _product(_gtin('062920003006'), 'Meropenem 1g Injection', 'Global Pharma Healthcare', 'Carbapenems', 'Meropenem', 1000.0, 'mg', 'INJECTION', 'VIAL', 1, 'AE', 'ARE-MOHAP-2024-J007', 'J01DH02', 'Severe Infections', 180.00),
 
       // Antihypertensive Combinations - Julphar
-      _product(_gtin('0629200010006'), 'Amlodipine+Losartan 5/50mg', 'Julphar Gulf Pharmaceutical', 'Antihypertensive Combo', 'Amlodipine + Losartan', 5.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C006', 'C09DB01', 'Hypertension', 75.00),
-      _product(_gtin('0629200010007'), 'Hydrochlorothiazide 25mg Tablets', 'Julphar Gulf Pharmaceutical', 'Diuretics', 'Hydrochlorothiazide', 25.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C007', 'C03AA03', 'Hypertension/Edema', 20.00),
+      _product(_gtin('062920001005'), 'Amlodipine+Losartan 5/50mg', 'Julphar Gulf Pharmaceutical', 'Antihypertensive Combo', 'Amlodipine + Losartan', 5.0, 'mg', 'TABLET', 'BLISTER', 28, 'AE', 'ARE-MOHAP-2024-C006', 'C09DB01', 'Hypertension', 75.00),
+      _product(_gtin('062920001006'), 'Hydrochlorothiazide 25mg Tablets', 'Julphar Gulf Pharmaceutical', 'Diuretics', 'Hydrochlorothiazide', 25.0, 'mg', 'TABLET', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-C007', 'C03AA03', 'Hypertension/Edema', 20.00),
 
       // Mental Health - GSK
-      _product(_gtin('0629200040005'), 'Sertraline 50mg Tablets', 'GlaxoSmithKline UAE', 'SSRIs', 'Sertraline HCl', 50.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-N002', 'N06AB06', 'Depression/Anxiety', 65.00),
-      _product(_gtin('0629200040006'), 'Escitalopram 10mg Tablets', 'GlaxoSmithKline UAE', 'SSRIs', 'Escitalopram', 10.0, 'mg', 'TABLET', 'BLISTER', 28, 'GB', 'ARE-MOHAP-2024-N003', 'N06AB10', 'Depression/Anxiety', 75.00),
+      _product(_gtin('062920004004'), 'Sertraline 50mg Tablets', 'GlaxoSmithKline UAE', 'SSRIs', 'Sertraline HCl', 50.0, 'mg', 'TABLET', 'BLISTER', 30, 'GB', 'ARE-MOHAP-2024-N002', 'N06AB06', 'Depression/Anxiety', 65.00),
+      _product(_gtin('062920004005'), 'Escitalopram 10mg Tablets', 'GlaxoSmithKline UAE', 'SSRIs', 'Escitalopram', 10.0, 'mg', 'TABLET', 'BLISTER', 28, 'GB', 'ARE-MOHAP-2024-N003', 'N06AB10', 'Depression/Anxiety', 75.00),
 
       // Dermatology - Neopharma
-      _product(_gtin('0629200020005'), 'Isotretinoin 20mg Capsules', 'Neopharma LLC', 'Retinoids', 'Isotretinoin', 20.0, 'mg', 'CAPSULE', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-D001', 'D10BA01', 'Severe Acne', 250.00),
-      _product(_gtin('0629200020006'), 'Clotrimazole 1% Cream', 'Neopharma LLC', 'Antifungals', 'Clotrimazole', 10.0, 'mg/g', 'CREAM', 'TUBE', 1, 'AE', 'ARE-MOHAP-2024-D002', 'D01AC01', 'Fungal Infections', 15.00),
+      _product(_gtin('062920002004'), 'Isotretinoin 20mg Capsules', 'Neopharma LLC', 'Retinoids', 'Isotretinoin', 20.0, 'mg', 'CAPSULE', 'BLISTER', 30, 'AE', 'ARE-MOHAP-2024-D001', 'D10BA01', 'Severe Acne', 250.00),
+      _product(_gtin('062920002005'), 'Clotrimazole 1% Cream', 'Neopharma LLC', 'Antifungals', 'Clotrimazole', 10.0, 'mg/g', 'CREAM', 'TUBE', 1, 'AE', 'ARE-MOHAP-2024-D002', 'D01AC01', 'Fungal Infections', 15.00),
 
       // Pediatric - Julphar
-      _product(_gtin('0629200010008'), 'Paracetamol 120mg/5ml Syrup', 'Julphar Gulf Pharmaceutical', 'Analgesics', 'Paracetamol', 120.0, 'mg/5ml', 'SYRUP', 'BOTTLE', 1, 'AE', 'ARE-MOHAP-2024-N004', 'N02BE01', 'Pediatric Pain/Fever', 12.00),
-      _product(_gtin('0629200010009'), 'Amoxicillin 250mg/5ml Suspension', 'Julphar Gulf Pharmaceutical', 'Penicillins', 'Amoxicillin', 250.0, 'mg/5ml', 'SUSPENSION', 'BOTTLE', 1, 'AE', 'ARE-MOHAP-2024-J008', 'J01CA04', 'Pediatric Infections', 18.00),
+      _product(_gtin('062920001007'), 'Paracetamol 120mg/5ml Syrup', 'Julphar Gulf Pharmaceutical', 'Analgesics', 'Paracetamol', 120.0, 'mg/5ml', 'SYRUP', 'BOTTLE', 1, 'AE', 'ARE-MOHAP-2024-N004', 'N02BE01', 'Pediatric Pain/Fever', 12.00),
+      _product(_gtin('062920001008'), 'Amoxicillin 250mg/5ml Suspension', 'Julphar Gulf Pharmaceutical', 'Penicillins', 'Amoxicillin', 250.0, 'mg/5ml', 'SUSPENSION', 'BOTTLE', 1, 'AE', 'ARE-MOHAP-2024-J008', 'J01CA04', 'Pediatric Infections', 18.00),
     ];
   }
 

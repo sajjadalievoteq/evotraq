@@ -460,14 +460,16 @@ class GTIN extends Equatable {
 
     GTINPharmaceuticalExtension? pharmaceuticalExtension;
     final pharmaRaw = json['pharmaceuticalExtension'];
-    if (pharmaRaw is Map<String, dynamic>) {
-      pharmaceuticalExtension =
-          GTINPharmaceuticalExtension.fromJson(pharmaRaw);
+    if (pharmaRaw is Map) {
+      pharmaceuticalExtension = GTINPharmaceuticalExtension.fromJson(
+        Map<String, dynamic>.from(pharmaRaw),
+      );
     }
     GTINTobaccoExtension? tobaccoExtension;
     final tobaccoRaw = json['tobaccoExtension'];
-    if (tobaccoRaw is Map<String, dynamic>) {
-      tobaccoExtension = GTINTobaccoExtension.fromJson(tobaccoRaw);
+    if (tobaccoRaw is Map) {
+      tobaccoExtension =
+          GTINTobaccoExtension.fromJson(Map<String, dynamic>.from(tobaccoRaw));
     }
 
     return GTIN(

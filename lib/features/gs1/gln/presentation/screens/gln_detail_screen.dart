@@ -19,7 +19,6 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart'
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
@@ -41,6 +40,7 @@ import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 import '../../../../../core/theme/traq_theme.dart';
 import '../../../../../core/utils/responsive_utils.dart';
+import '../../../../epcis/models/geospatial_coordinates.dart';
 import '../../../widgets/card_with_background_widget.dart';
 
 class GLNDetailScreen extends StatefulWidget {

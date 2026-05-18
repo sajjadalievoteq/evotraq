@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/compliance_posture/widgets/system_health_card.dart';
-import 'package:traqtrace_app/features/home/presentation/widgets/shared/home_section_title.dart';
+import 'package:traqtrace_app/shared/widgets/traq_section_title.dart';
 
 class CompliancePostureSection extends StatelessWidget {
   const CompliancePostureSection({super.key});
@@ -10,7 +11,7 @@ class CompliancePostureSection extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeSectionTitle(label: 'COMPLIANCE POSTURE'),
+        TraqSectionTitle(label: HomeStrings.sectionCompliancePosture),
         SizedBox(height: 12),
         SystemHealthCard(),
       ],

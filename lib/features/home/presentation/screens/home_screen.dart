@@ -5,43 +5,51 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/services/dashboard_service.dart';
+import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
+import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/home/home_dashboard_cache.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_cubit.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_state.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/key_metrics/key_metrics_section.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/loading/dashboard_loader.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/operations_header/operations_header.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/quick_actions/quick_actions_and_compliance_row.dart';
-import 'package:traqtrace_app/features/home/presentation/widgets/shared/home_dashboard_error_view.dart';
+import 'package:traqtrace_app/features/home/presentation/widgets/shared/home_error_view.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/status_rail/status_rail.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/throughput_chart/throughput_and_events_row.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-import '../widgets/welcome/widgets/dashboard_welcome_card.dart';
-
+/// Authenticated home dashboard: KPIs, throughput placeholder, quick actions,
+/// and health. **Reusable pieces** used in this subtree include
+/// [TraqSectionTitle] (`shared/widgets/traq_section_title.dart`),
+/// [DashboardStatCard], [DashboardQuickActionCard], and
+/// [DashboardHealthStatusRow]; compositions such as [StatusRail] and
+/// [OperationsHeader] are tailored for this screen.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeDashboardCubit(getIt<DashboardService>()),
-      child: const _HomeDashboardShell(),
+      create: (_) => HomeCubit(
+            getIt<DashboardService>(),
+            getIt<HomeOverviewSessionStore>(),
+          ),
+      child: const _HomeShell(),
     );
   }
 }
 
-class _HomeDashboardShell extends StatefulWidget {
-  const _HomeDashboardShell();
+class _HomeShell extends StatefulWidget {
+  const _HomeShell();
 
   @override
-  State<_HomeDashboardShell> createState() => _HomeDashboardShellState();
+  State<_HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeDashboardShellState extends State<_HomeDashboardShell> {
+class _HomeShellState extends State<_HomeShell> {
   @override
   void initState() {
     super.initState();
@@ -52,16 +60,11 @@ class _HomeDashboardShellState extends State<_HomeDashboardShell> {
     if (!mounted) return;
     final auth = context.read<AuthCubit>();
     var user = auth.state.user;
-    if (user != null &&
-        HomeDashboardCache.ownerEmail != null &&
-        HomeDashboardCache.ownerEmail != user.email) {
-      HomeDashboardCache.clear();
-    }
     if (user == null) {
       auth.getCurrentUser();
     }
     user = auth.state.user;
-    context.read<HomeDashboardCubit>().load(ownerEmail: user?.email);
+    context.read<HomeCubit>().load(accountEmail: user?.email);
   }
 
   @override
@@ -69,7 +72,7 @@ class _HomeDashboardShellState extends State<_HomeDashboardShell> {
     return BlocListener<AuthCubit, AuthState>(
       listenWhen: (p, c) => p.user?.email != c.user?.email,
       listener: (context, state) {
-        context.read<HomeDashboardCubit>().load(ownerEmail: state.user?.email);
+        context.read<HomeCubit>().load(accountEmail: state.user?.email);
       },
       child: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, authState) {
@@ -86,7 +89,7 @@ class _HomeDashboardShellState extends State<_HomeDashboardShell> {
             appBar: TraqAppBar(
               context,
               title: Text(
-                'Home',
+                HomeStrings.appBarTitle,
                 style: context.text.body.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -95,22 +98,22 @@ class _HomeDashboardShellState extends State<_HomeDashboardShell> {
               ),
             ),
             drawer: const AppDrawer(),
-            body: BlocBuilder<HomeDashboardCubit, HomeDashboardState>(
-              builder: (context, dashState) {
+            body: BlocBuilder<HomeCubit, HomeState>(
+              builder: (context, homeState) {
                 return RefreshIndicator(
                   onRefresh: () {
-                    return context.read<HomeDashboardCubit>().refresh(
-                          ownerEmail:
-                              context.read<AuthCubit>().state.user?.email,
-                        );
+                    return context
+                        .read<HomeCubit>()
+                        .refresh(accountEmail: user.email);
                   },
-                  child: dashState.isLoading
+                  child: homeState.isLoading
                       ? const DashboardLoader()
-                      : dashState.hasError
-                          ? HomeDashboardErrorView(
-                              message: dashState.errorMessage ?? 'Unknown error',
+                      : homeState.hasError
+                          ? HomeErrorView(
+                              message: homeState.errorMessage ??
+                                  HomeStrings.unknownError,
                             )
-                          : const _DashboardScrollBody(),
+                          : const _HomeScrollBody(),
                 );
               },
             ),
@@ -121,8 +124,8 @@ class _HomeDashboardShellState extends State<_HomeDashboardShell> {
   }
 }
 
-class _DashboardScrollBody extends StatelessWidget {
-  const _DashboardScrollBody();
+class _HomeScrollBody extends StatelessWidget {
+  const _HomeScrollBody();
 
   @override
   Widget build(BuildContext context) {

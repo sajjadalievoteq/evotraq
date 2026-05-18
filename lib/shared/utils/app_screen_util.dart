@@ -40,12 +40,12 @@ class AppScreenUtil {
   static double get scaleLayout => math.min(scaleWidth, scaleHeight);
   static double get scaleText {
     switch (_deviceType) {
-      case AppScreenDeviceType.web:
-      case AppScreenDeviceType.desktop:
-        return scaleWidth;
       case AppScreenDeviceType.mobile:
       case AppScreenDeviceType.tablet:
-        return scaleLayout;
+        return scaleHeight;
+      case AppScreenDeviceType.desktop:
+      case AppScreenDeviceType.web:
+        return scaleWidth;
     }
   }
 
@@ -92,10 +92,6 @@ class AppScreenUtilInit extends StatelessWidget {
   AppScreenDeviceType _resolveDeviceType(Size size) {
     if (!autoDetectDeviceType) {
       return AppScreenDeviceType.mobile;
-    }
-
-    if (kIsWeb) {
-      return AppScreenDeviceType.web;
     }
 
     final longestSide = math.max(size.width, size.height);
@@ -145,7 +141,12 @@ class AppScreenUtilInit extends StatelessWidget {
           designSize: resolvedDesignSize,
           textScaleFactor: mediaQuery.textScaler.scale(1),
         );
-        return child;
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(AppScreenUtil.scaleText),
+          ),
+          child: child,
+        );
       },
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 class DashboardHealthStatusRow extends StatelessWidget {
   const DashboardHealthStatusRow({
@@ -33,7 +34,9 @@ class DashboardHealthStatusRow extends StatelessWidget {
             ),
           ),
           Text(
-            isHealthy ? 'Healthy' : 'Unhealthy',
+            isHealthy
+                ? HomeStrings.healthStatusHealthy
+                : HomeStrings.healthStatusUnhealthy,
             style: context.text.bodySm.copyWith(
               color: isHealthy ? context.colors.success : context.colors.error,
               fontWeight: FontWeight.w500,

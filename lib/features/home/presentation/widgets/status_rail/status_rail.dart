@@ -5,8 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_cubit.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_state.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 /// Status strip with health and a wall clock.
@@ -23,12 +24,12 @@ class StatusRail extends StatelessWidget {
   Widget build(BuildContext context) {
     return _WallClockTick(
       builder: (context, now) {
-        return BlocBuilder<HomeDashboardCubit, HomeDashboardState>(
+        return BlocBuilder<HomeCubit, HomeState>(
           buildWhen: (p, c) =>
               p.healthStatus != c.healthStatus ||
               p.stats != c.stats ||
               p.status != c.status ||
-              p.dashboardDataRefreshedAt != c.dashboardDataRefreshedAt,
+              p.lastDataRefreshAt != c.lastDataRefreshAt,
           builder: (context, state) {
             final health = state.healthStatus;
             final healthy = health?.backendHealthy == true &&
@@ -70,7 +71,7 @@ class StatusRail extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'SYSTEM',
+                  HomeStrings.statusRailSystem,
                   style: context.text.bodySm.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
@@ -90,7 +91,9 @@ class StatusRail extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      healthy ? 'HEALTHY' : 'DEGRADED',
+                      healthy
+                          ? HomeStrings.statusRailHealthy
+                          : HomeStrings.statusRailDegraded,
                       style: context.text.bodySm.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.6,
@@ -105,9 +108,9 @@ class StatusRail extends StatelessWidget {
               ],
             );
 
-            final refreshedAt = state.dashboardDataRefreshedAt;
+            final refreshedAt = state.lastDataRefreshAt;
             final version = state.healthStatus?.backendVersion?.trim();
-            final subtitle = _dashboardFreshnessAndVersionLine(
+            final subtitle = _homeFreshnessAndVersionLine(
               refreshedAt: refreshedAt,
               now: now,
               backendVersion: version,
@@ -237,11 +240,15 @@ String _utcOffsetLabel(Duration offset) {
   final total = offset.inMinutes.abs();
   final h = total ~/ 60;
   final m = total % 60;
-  return 'UTC$sign${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  return HomeStrings.utcOffsetLabel(
+    sign,
+    h.toString().padLeft(2, '0'),
+    m.toString().padLeft(2, '0'),
+  );
 }
 
 /// Data freshness (relative to [now]) and actuator build version when available.
-String? _dashboardFreshnessAndVersionLine({
+String? _homeFreshnessAndVersionLine({
   required DateTime? refreshedAt,
   required DateTime now,
   required String? backendVersion,
@@ -251,32 +258,36 @@ String? _dashboardFreshnessAndVersionLine({
   final parts = <String>[];
   if (refresh != null) {
     parts.add(
-      'Dashboard refreshed ${_relativeRefreshPhrase(refresh, now)}',
+      HomeStrings.dataRefreshed(_relativeRefreshPhrase(refresh, now)),
     );
   }
   if (ver != null && ver.isNotEmpty) {
-    parts.add(_formatBackendVersion(ver));
+    parts.add(_formatBackendVersionLine(ver));
   }
   if (parts.isEmpty) return null;
   return parts.join(' · ');
 }
 
-String _formatBackendVersion(String raw) {
+String _formatBackendVersionLine(String raw) {
   final t = raw.trim();
   if (t.isEmpty) return '';
   final withV = RegExp(r'^[vV](\d|\.)').hasMatch(t) ? t : 'v$t';
-  return 'Services $withV';
+  return HomeStrings.servicesVersion(withV);
 }
 
 String _relativeRefreshPhrase(DateTime refreshedAt, DateTime now) {
   var diff = now.difference(refreshedAt);
   if (diff.isNegative) diff = Duration.zero;
-  if (diff.inSeconds < 15) return 'just now';
-  if (diff.inMinutes < 1) return '< 1 min ago';
-  if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+  if (diff.inSeconds < 15) return HomeStrings.relativeJustNow;
+  if (diff.inMinutes < 1) return HomeStrings.relativeUnderOneMin;
+  if (diff.inMinutes < 60) {
+    return HomeStrings.relativeMinutesAgo(diff.inMinutes);
+  }
   if (diff.inHours < 24) {
     final h = diff.inHours;
-    return h == 1 ? '1 hr ago' : '$h hrs ago';
+    return h == 1
+        ? HomeStrings.relativeOneHourAgo
+        : HomeStrings.relativeHoursAgo(h);
   }
   return DateFormat.yMMMd().add_jm().format(refreshedAt);
 }
@@ -284,12 +295,12 @@ String _relativeRefreshPhrase(DateTime refreshedAt, DateTime now) {
 String _nominalStatusLine(bool healthy, DateTime now) {
   final h = now.hour;
   final greeting = h < 12
-      ? 'Good morning'
+      ? HomeStrings.greetingMorning
       : h < 17
-          ? 'Good afternoon'
-          : 'Good evening';
+          ? HomeStrings.greetingAfternoon
+          : HomeStrings.greetingEvening;
   if (!healthy) {
-    return '$greeting — attention required on one or more services.';
+    return HomeStrings.statusNominalDegraded(greeting);
   }
-  return '$greeting — supply chain is operating nominally.';
+  return HomeStrings.statusNominalHealthy(greeting);
 }

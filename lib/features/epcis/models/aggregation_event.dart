@@ -91,7 +91,7 @@ class AggregationEvent extends EPCISEvent {
     print('JSON contains businessLocation: ${json['businessLocation']}');
     print('JSON contains bizLocation: ${json['bizLocation']}');
     print('JSON contains locationGLN: ${json['locationGLN']}');
-    
+
     // Handle GLN objects for locations
     GLN? readPointGln;
     if (json['readPoint'] != null) {
@@ -128,7 +128,7 @@ class AggregationEvent extends EPCISEvent {
       eventTimeZone: json['eventTimeZone'] ?? json['eventTimeZoneOffset'] ?? '+00:00',
       epcisVersion: json['epcisVersion'] != null 
           ? EPCISVersion.values.firstWhere(
-              (e) => e.toString().split('.').last.toUpperCase() == 
+              (e) => e.toString().split('.').last.toUpperCase() ==
                     json['epcisVersion'].toString().toUpperCase(),
               orElse: () => EPCISVersion.v2_0)
           : EPCISVersion.v2_0,

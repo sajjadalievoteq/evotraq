@@ -100,6 +100,18 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
+flutter_native_splash:
+  color: "#F2F2EF"
+  background_image: assets/images/traq_background.png
+  image: assets/images/logo/logo.png
+  
+  color_dark: "#1c1c1b"
+  background_image_dark: assets/images/traq_background.png
+  image_dark: assets/images/logo/logo.png
+
+  web: true
+  fullscreen: true
+
 flutter:
   uses-material-design: true
   

@@ -10,6 +10,7 @@ import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
+import '../../../../../../core/utils/responsive_utils.dart';
 import '../widgets/user_management_constants.dart';
 import '../widgets/user_management_filter_section.dart';
 import '../widgets/user_management_form_dialog.dart';
@@ -249,14 +250,14 @@ class _UserManagementContent extends StatelessWidget {
     }
 
     const tileMaxExtent = 240.0;
-    const spacing = Constants.spacing;
+    final g = context.gutter;
 
     return GridView.builder(
-      padding: EdgeInsets.only(top: spacing),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      padding: EdgeInsets.all(g),
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: tileMaxExtent,
-        mainAxisSpacing: spacing,
-        crossAxisSpacing: spacing,
+        mainAxisSpacing: g,
+        crossAxisSpacing: g,
         childAspectRatio: 1,
       ),
       itemCount: users.length,

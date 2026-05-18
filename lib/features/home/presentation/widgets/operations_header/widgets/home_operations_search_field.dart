@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_navigation.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 class HomeOperationsSearchField extends StatelessWidget {
   const HomeOperationsSearchField({super.key});
@@ -13,7 +14,7 @@ class HomeOperationsSearchField extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return TextField(
       readOnly: true,
-      onTap: () => context.go(Constants.epcisEventsRoute),
+      onTap: () => context.go(HomeNavigation.epcisEvents),
       style: context.text.body.copyWith(
         color: context.colors.textPrimary,
       ),
@@ -33,11 +34,11 @@ class HomeOperationsSearchField extends StatelessWidget {
         ),
         prefixIconConstraints:
             const BoxConstraints(minWidth: 40, minHeight: 40),
-        hintText: 'Search',
+        hintText: HomeStrings.searchHint,
         hintStyle: context.text.body.copyWith(
           color: context.colors.textMuted,
         ),
-        suffixText: '⌘ K',
+        suffixText: HomeStrings.searchShortcutSuffix,
         suffixStyle: context.text.mono.copyWith(
           color: scheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,

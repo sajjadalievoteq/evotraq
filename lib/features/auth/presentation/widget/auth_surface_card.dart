@@ -21,7 +21,12 @@ class AuthSurfaceCard extends StatelessWidget {
         borderRadius: TraqRadius.card,
         border: Border.all(color: c.border),
       ),
-      child: child,
+      child: Column(
+        children: [
+
+          child,
+        ],
+      ),
     );
   }
 }

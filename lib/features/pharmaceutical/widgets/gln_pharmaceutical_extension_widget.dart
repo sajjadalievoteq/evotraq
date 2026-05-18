@@ -1741,26 +1741,31 @@ class GLNPharmaceuticalExtensionWidgetState
   }
 
   Widget _buildSection(String title, IconData icon, List<Widget> children,BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 20, color: context.colors.textPrimary),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: context.colors.textPrimary,
-              ),
+            Row(
+              children: [
+                Icon(icon, size: 20, color: context.colors.textPrimary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+              ],
             ),
+            const Divider(),
+            ...children,
           ],
         ),
-        const Divider(),
-        ...children,
-      ],
+      ),
     );
   }
 

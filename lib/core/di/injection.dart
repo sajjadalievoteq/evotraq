@@ -23,7 +23,8 @@ import '../../data/services/advanced_performance_service.dart';
 import '../../data/services/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
 import '../../data/services/commissioning_operation_service.dart';
-import '../../data/services/dashboard_service.dart';
+import '../../data/services/home/dashboard_service.dart';
+import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
 import '../../data/services/epc_conversion_service.dart';
 import '../../data/services/epcis_event_service.dart';
@@ -109,6 +110,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<DashboardService>(
     () => DashboardService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<HomeOverviewSessionStore>(
+    () => HomeOverviewSessionStore(),
   );
 
   getIt.registerLazySingleton<SGTINService>(

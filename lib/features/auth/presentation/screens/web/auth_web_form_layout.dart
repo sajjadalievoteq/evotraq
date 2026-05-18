@@ -102,7 +102,6 @@ class AuthWebFormLayout extends StatelessWidget {
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 2,
                                 children: [
                                   Text(
                                     header.eyebrow,
@@ -112,6 +111,7 @@ class AuthWebFormLayout extends StatelessWidget {
                                     ),
                                     textAlign: TextAlign.left,
                                   ),
+                                  const SizedBox(height: 2),
                                   Text(
                                     header.title,
                                     style: t.body.copyWith(
@@ -120,6 +120,7 @@ class AuthWebFormLayout extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  const SizedBox(height: 2),
                                   Text(
                                     header.subtitle,
                                     style: t.body.copyWith(

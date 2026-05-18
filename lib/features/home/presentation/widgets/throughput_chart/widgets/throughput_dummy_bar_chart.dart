@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 /// Placeholder commissioning throughput (24h bar chart). Replace with API data.
 class ThroughputDummyBarChart extends StatefulWidget {
@@ -24,16 +25,16 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
   static const int _dummyTotal = 1410;
 
   String _bottomLabel(int hourIndex) {
-    if (hourIndex == 23) return 'NOW';
+    if (hourIndex == 23) return HomeStrings.chartNow;
     switch (hourIndex) {
       case 0:
-        return '00:00';
+        return HomeStrings.chartAxis00;
       case 6:
-        return '06:00';
+        return HomeStrings.chartAxis06;
       case 12:
-        return '12:00';
+        return HomeStrings.chartAxis12;
       case 18:
-        return '18:00';
+        return HomeStrings.chartAxis18;
       default:
         return '';
     }
@@ -70,7 +71,7 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'units serialized',
+                    HomeStrings.chartUnitsSerialized,
                     style: context.text.bodySm.copyWith(
                       color: secondary,
                     ),
@@ -221,7 +222,7 @@ class _RangeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['1H', '24H', '7D'];
+    final labels = HomeStrings.chartRangeLabels;
     final c = context.colors;
 
     return DecoratedBox(

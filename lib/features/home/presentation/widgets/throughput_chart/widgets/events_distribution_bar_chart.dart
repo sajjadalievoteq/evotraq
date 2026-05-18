@@ -2,15 +2,16 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_cubit.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_state.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 
 class EventsDistributionBarChart extends StatelessWidget {
   const EventsDistributionBarChart({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeDashboardCubit, HomeDashboardState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       buildWhen: (p, c) => p.stats != c.stats,
       builder: (context, state) {
         final eventCounts = state.stats?.eventsByType ?? {};
@@ -24,7 +25,7 @@ class EventsDistributionBarChart extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No event data available',
+                  HomeStrings.chartNoEventData,
                   style: context.text.body.copyWith(
                     color: context.colors.textMuted,
                   ),

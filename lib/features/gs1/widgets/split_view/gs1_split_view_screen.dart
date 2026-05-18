@@ -189,8 +189,8 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
           child: Padding(
             padding: EdgeInsets.only(
               top: webTopInset,
-              left: 32,
-              right: 32,
+              left: context.gutter,
+              right: context.gutter,
               bottom: 8,
             ),
             child: Row(

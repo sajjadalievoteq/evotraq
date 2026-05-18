@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_cubit.dart';
-import 'package:traqtrace_app/features/home/presentation/cubit/home_dashboard_state.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_navigation.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
+import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/dashboard_recent_event_tile.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/stream_dummy_event_rows.dart';
 
@@ -15,7 +17,7 @@ class EpcisEventStreamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeDashboardCubit, HomeDashboardState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       buildWhen: (p, c) => p.recentEvents != c.recentEvents,
       builder: (context, state) {
         final recentEvents = state.recentEvents;
@@ -36,7 +38,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'EPCIS EVENT STREAM',
+                        HomeStrings.epcisStreamTitle,
                         style: context.text.h3.copyWith(
                           color: context.colors.textPrimary,
                         ),
@@ -53,7 +55,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        'LIVE',
+                        HomeStrings.epcisStreamLive,
                         style: context.text.cap.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -63,7 +65,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Open EPCIS filters',
+                      tooltip: HomeStrings.epcisStreamOpenFiltersTooltip,
                       icon: SvgPicture.asset(
                         AppAssets.iconFilter,
                         width: 20,
@@ -73,12 +75,12 @@ class EpcisEventStreamCard extends StatelessWidget {
                           BlendMode.srcIn,
                         ),
                       ),
-                      onPressed: () => context.go(Constants.epcisEventsRoute),
+                      onPressed: () => context.go(HomeNavigation.epcisEvents),
                     ),
                     TextButton(
-                      onPressed: () => context.go(Constants.epcisEventsRoute),
+                      onPressed: () => context.go(HomeNavigation.epcisEvents),
                       child: Text(
-                        'View All',
+                        HomeStrings.epcisStreamViewAll,
                         style: context.text.body.copyWith(
                           fontWeight: FontWeight.w600,
                           color: context.colors.secondary,

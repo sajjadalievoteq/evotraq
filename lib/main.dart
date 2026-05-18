@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -62,7 +63,8 @@ import 'core/widgets/app_animated_background_layer.dart';
 
 void main() async {
   try {
-    WidgetsFlutterBinding.ensureInitialized();
+    WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
     // Use path URL strategy for better web navigation
     configureUrlStrategy();
@@ -124,6 +126,9 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) =>
               TransactionEventsCubit(),
         ),
+        BlocProvider<ObjectEventsCubit>(
+          create: (context) => ObjectEventsCubit(),
+        ),
         BlocProvider<TransformationEventsCubit>(
           create: (context) =>
               TransformationEventsCubit(),
@@ -177,9 +182,7 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) =>
               ServiceAccountCubit(service: getIt<ServiceAccountService>()),
         ),
-        BlocProvider<ObjectEventsCubit>(
-          create: (context) => ObjectEventsCubit(),
-        ),
+
         BlocProvider<EPCISEventsCubit>(
           create: (context) => EPCISEventsCubit(getIt<EPCISEventService>()),
         ),

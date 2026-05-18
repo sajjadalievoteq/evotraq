@@ -124,7 +124,7 @@ class ObjectEvent extends EPCISEvent {
     if (sensorElementList != null && sensorElementList!.isNotEmpty) {
       json['sensorElementList'] = sensorElementList!.map((e) => e.toJson()).toList();
     }
-    
+
     // For certification info, ensure it's an array of objects (not a single object)
     // The backend expects an array of CertificationInfoDTO objects
     if (certificationInfo != null && certificationInfo!.isNotEmpty) {

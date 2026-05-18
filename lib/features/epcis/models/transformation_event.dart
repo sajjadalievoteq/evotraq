@@ -64,7 +64,7 @@ class TransformationEvent extends EPCISEvent {
         certInfo = [];
       }
     }
-    
+
     return TransformationEvent(
       id: json['id'],
       eventId: json['eventId'] ?? 'unknown',
@@ -74,14 +74,14 @@ class TransformationEvent extends EPCISEvent {
       bizStep: json['businessStep'] ?? json['bizStep'],
       disposition: json['disposition'],
       // Handle readPoint - can be string GLN code or GLN object
-      readPoint: json['readPoint'] != null 
-          ? (json['readPoint'] is String 
+      readPoint: json['readPoint'] != null
+          ? (json['readPoint'] is String
               ? GLN.fromCode(json['readPoint'])
               : GLN.fromJson(json['readPoint']))
           : null,
-      // Handle businessLocation - can be string GLN code or GLN object  
-      bizLocation: json['businessLocation'] != null 
-          ? (json['businessLocation'] is String 
+      // Handle businessLocation - can be string GLN code or GLN object
+      bizLocation: json['businessLocation'] != null
+          ? (json['businessLocation'] is String
               ? GLN.fromCode(json['businessLocation'])
               : GLN.fromJson(json['businessLocation']))
           : null,
@@ -110,7 +110,7 @@ class TransformationEvent extends EPCISEvent {
     
     // Add transformation-specific fields
     json['transformationID'] = transformationID;
-    
+
     // Schema validation requires EXACTLY ONE of inputEPCList OR inputQuantityList (not both, not neither)
     // and EXACTLY ONE of outputEPCList OR outputQuantityList (not both, not neither)
     // The fields not chosen must NOT be present in the JSON at all (not even as empty arrays)
@@ -127,7 +127,7 @@ class TransformationEvent extends EPCISEvent {
       json['inputEPCList'] = ['urn:epc:id:sgtin:0000000.000000.000000000000'];
     }
     
-    // Handle output: either outputEPCList OR outputQuantityList (not both, not neither)  
+    // Handle output: either outputEPCList OR outputQuantityList (not both, not neither)
     if (outputEPCList.isNotEmpty) {
       json['outputEPCList'] = outputEPCList;
       // Do NOT include outputQuantityList at all

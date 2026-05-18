@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/operations_header/widgets/home_operations_header_actions.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/operations_header/widgets/home_operations_search_field.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
@@ -26,7 +27,7 @@ class OperationsHeader extends StatelessWidget {
 
 
 
-    final title = Text('Dashboard', style: titleStyle);
+    final title = Text(HomeStrings.operationsHeaderTitle, style: titleStyle);
 
     final actions = HomeOperationsHeaderActions();
 

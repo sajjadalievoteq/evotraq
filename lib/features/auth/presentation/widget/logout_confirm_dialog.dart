@@ -5,10 +5,9 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/home/home_dashboard_cache.dart';
 
-/// Shows log-out confirmation (surface background, Traq tokens), then clears home cache,
-/// calls [AuthCubit.logout], and navigates to login if the user confirms.
+/// Shows log-out confirmation (surface background, Traq tokens), then
+/// calls [AuthCubit.logout] and navigates to login if the user confirms.
 Future<void> showLogoutConfirmDialog(BuildContext context) async {
   final confirmed = await showDialog<bool>(
     context: context,
@@ -49,7 +48,6 @@ Future<void> showLogoutConfirmDialog(BuildContext context) async {
     },
   );
   if (confirmed != true || !context.mounted) return;
-  HomeDashboardCache.clear();
   await context.read<AuthCubit>().logout();
   if (context.mounted) context.go(Constants.loginRoute);
 }

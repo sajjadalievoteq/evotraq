@@ -87,7 +87,7 @@ class EPCISEvent {
     if (json['certificationInfo'] != null) {
       try {
         print("Processing certification info in EPCISEvent: ${json['certificationInfo']}");
-        
+
         if (json['certificationInfo'] is List) {
           // Handle as array (expected format)
           certInfo = (json['certificationInfo'] as List)
@@ -111,7 +111,7 @@ class EPCISEvent {
           print("Unexpected certification info type: ${json['certificationInfo'].runtimeType}");
           certInfo = [];
         }
-        
+
         print("Created ${certInfo.length} certification info items");
       } catch (e) {
         print("Error parsing certification info: $e");
@@ -122,7 +122,7 @@ class EPCISEvent {
     return EPCISEvent(
       id: json['id'],
       // Ensure eventId is never null or empty
-      eventId: (json['eventId'] != null && json['eventId'].toString().isNotEmpty) 
+      eventId: (json['eventId'] != null && json['eventId'].toString().isNotEmpty)
             ? json['eventId'] 
             : 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}',
       eventTime: DateTime.parse(json['eventTime']),
@@ -156,7 +156,7 @@ class EPCISEvent {
   Map<String, dynamic> toJson() {
     // Format timezone for the backend - ensure it's never null
     final String formattedEventTimeZone = eventTimeZone.isNotEmpty ? eventTimeZone : '+00:00';
-      
+
     // Make sure dates have appropriate timezone information
     final String formattedEventTime = _formatDateWithTimezone(eventTime);
     final String formattedRecordTime = _formatDateWithTimezone(recordTime);
@@ -212,7 +212,7 @@ class EPCISEvent {
       data['readPoint'] = businessLocation!.glnCode;
     }
     // If neither readPoint nor businessLocation is available, don't include readPoint field
-    
+
     // Handle businessLocation properly - based on schema it should be a string
     if (businessLocation != null) {
       data['businessLocation'] = businessLocation!.glnCode; // Send just the GLN code as string

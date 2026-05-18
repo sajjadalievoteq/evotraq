@@ -319,7 +319,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             children: [
               Text(
                 'Already have an account?',
-                style: TextStyle(color: textPrimary),
+                style: context.text.body.copyWith(color: textPrimary),
               ),
               CustomTextButtonWidget(
                 title: 'Login',

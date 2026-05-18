@@ -1,109 +1,431 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 class DashboardLoader extends StatelessWidget {
   const DashboardLoader({super.key});
 
-  Widget _box({
-    double width = double.infinity,
-    double height = 80,
-    double radius = 12,
-  }) {
+  @override
+  Widget build(BuildContext context) {
+    return AppShimmer(
+      child: AppLayoutBuilder(
+        builder: (context, layout) {
+          return SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              ResponsiveUtils.gutter(context),
+              ResponsiveUtils.gutter(context) * 0.5,
+              ResponsiveUtils.gutter(context),
+              32,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _OperationsHeaderSkeleton(layout: layout),
+                SizedBox(height: layout.isCompact ? 16 : 24),
+                _StatusRailSkeleton(layout: layout),
+                SizedBox(height: layout.isCompact ? 18 : 26),
+                _KeyMetricsSectionSkeleton(layout: layout),
+                SizedBox(height: layout.isCompact ? 20 : 28),
+                _ThroughputAndEventsSkeleton(layout: layout),
+                SizedBox(height: layout.isCompact ? 20 : 28),
+                _QuickActionsAndComplianceSkeleton(layout: layout),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({
+    this.width = double.infinity,
+    this.height = 20,
+    this.radius = 8,
+  });
+
+  final double width;
+  final double height;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(radius),
       ),
     );
   }
+}
 
-  Widget _sectionTitle({double width = 180}) {
-    return _box(width: width, height: 20, radius: 8);
-  }
+class _OperationsHeaderSkeleton extends StatelessWidget {
+  const _OperationsHeaderSkeleton({required this.layout});
+  final AppLayoutData layout;
 
-  Widget _statsGrid(double maxWidth) {
-    double cardWidth;
-    if (maxWidth < 400) {
-      cardWidth = (maxWidth - 12) / 2;
-    } else if (maxWidth < 600) {
-      cardWidth = (maxWidth - 24) / 3;
-    } else if (maxWidth < 900) {
-      cardWidth = (maxWidth - 36) / 4;
-    } else {
-      cardWidth = (maxWidth - 48) / 5;
+  @override
+  Widget build(BuildContext context) {
+    if (layout.isTabletUp) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const _SkeletonBox(width: 200, height: 32),
+          const Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _SkeletonBox(width: 300, height: 40),
+                SizedBox(width: 8),
+                _SkeletonBox(width: 120, height: 40),
+              ],
+            ),
+          ),
+        ],
+      );
     }
-    cardWidth = cardWidth.clamp(100.0, 160.0);
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: List.generate(9, (_) => _box(width: cardWidth, height: 96)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _SkeletonBox(width: 180, height: 28),
+            _SkeletonBox(width: 100, height: 32),
+          ],
+        ),
+        const SizedBox(height: 12),
+        const _SkeletonBox(height: 44),
+      ],
     );
   }
+}
 
-  Widget _quickActions(double maxWidth) {
-    int crossAxisCount;
-    if (maxWidth < 600) {
-      crossAxisCount = 3;
-    } else if (maxWidth < 900) {
-      crossAxisCount = 4;
-    } else {
-      crossAxisCount = 6;
-    }
+class _StatusRailSkeleton extends StatelessWidget {
+  const _StatusRailSkeleton({required this.layout});
+  final AppLayoutData layout;
 
-    final spacing = 16.0;
-    final itemWidth =
-        (maxWidth - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
-
-    return Wrap(
-      spacing: spacing,
-      runSpacing: spacing,
-      children: List.generate(
-        maxWidth < 900 ? 6 : 8,
-        (_) => _box(width: itemWidth, height: itemWidth - 50),
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveUtils.gutter(context),
+          vertical: ResponsiveUtils.gutter(context) * 0.5,
+        ),
+        child: layout.isTabletUp
+            ? const Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SkeletonBox(width: 240, height: 24),
+                        SizedBox(height: 8),
+                        _SkeletonBox(width: 180, height: 16),
+                      ],
+                    ),
+                  ),
+                  _SkeletonBox(width: 60, height: 36),
+                  SizedBox(width: 20),
+                  _SkeletonBox(width: 100, height: 36),
+                ],
+              )
+            : const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SkeletonBox(width: 200, height: 24),
+                  SizedBox(height: 8),
+                  _SkeletonBox(width: 150, height: 16),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _SkeletonBox(width: 60, height: 32),
+                      _SkeletonBox(width: 100, height: 32),
+                    ],
+                  ),
+                ],
+              ),
       ),
     );
+  }
+}
+
+class _KeyMetricsSectionSkeleton extends StatelessWidget {
+  const _KeyMetricsSectionSkeleton({required this.layout});
+  final AppLayoutData layout;
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = 12.0;
+    final minTileWidth = layout.isCompact ? 188.0 : 200.0;
+    const maxCols = 7;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SkeletonBox(width: 140, height: 20),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final maxW = constraints.maxWidth;
+            var cols = ((maxW + gap) / (minTileWidth + gap)).floor();
+            if (cols < 1) cols = 1;
+            if (cols > maxCols) cols = maxCols;
+            final tileW = (maxW - gap * (cols - 1)) / cols;
+
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: List.generate(
+                9,
+                (index) => SizedBox(
+                  width: tileW,
+                  child: const AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Card(),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ThroughputAndEventsSkeleton extends StatelessWidget {
+  const _ThroughputAndEventsSkeleton({required this.layout});
+  final AppLayoutData layout;
+
+  static double _pairSectionHeight(double maxWidth) {
+    return (360 + maxWidth * 0.04).clamp(320.0, 460.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppShimmer(
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height,
-        child: SingleChildScrollView(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final horizontalPadding = constraints.maxWidth < 600 ? 12.0 : 16.0;
-              final verticalSpacing = constraints.maxWidth < 600 ? 16.0 : 24.0;
+    return LayoutBuilder(
+      builder: (context, c) {
+        final h = _pairSectionHeight(c.maxWidth);
+        if (layout.isTabletUp) {
+          return SizedBox(
+            height: h,
+            child: Row(
+              children: [
+                Expanded(flex: 3, child: _ThroughputChartSkeleton()),
+                SizedBox(width: layout.isCompact ? 12 : 20),
+                Expanded(flex: 2, child: _EpcisEventStreamSkeleton()),
+              ],
+            ),
+          );
+        }
+        return Column(
+          children: [
+            SizedBox(height: h, child: const _ThroughputChartSkeleton()),
+            SizedBox(height: layout.isCompact ? 16 : 20),
+            SizedBox(height: h, child: const _EpcisEventStreamSkeleton()),
+          ],
+        );
+      },
+    );
+  }
+}
 
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _box(height: 100, radius: 16),
-                    SizedBox(height: verticalSpacing),
-                    _sectionTitle(width: 170),
-                    const SizedBox(height: 12),
-                    _statsGrid(constraints.maxWidth - (horizontalPadding * 2)),
-                    SizedBox(height: verticalSpacing),
-                    _sectionTitle(width: 140),
-                    const SizedBox(height: 12),
-                    _quickActions(
-                      constraints.maxWidth - (horizontalPadding * 2),
+class _ThroughputChartSkeleton extends StatelessWidget {
+  const _ThroughputChartSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SkeletonBox(width: 180, height: 20),
+            const SizedBox(height: 24),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(
+                  12,
+                  (index) => Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: (index % 5 + 2) * 30.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _EpcisEventStreamSkeleton extends StatelessWidget {
+  const _EpcisEventStreamSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const _SkeletonBox(width: 120, height: 20),
+                Row(
+                  children: [
+                    const _SkeletonBox(width: 40, height: 16),
+                    const SizedBox(width: 8),
+                    const _SkeletonBox(width: 60, height: 20),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 5,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      const _SkeletonBox(width: 40, height: 40, radius: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const _SkeletonBox(width: 140, height: 16),
+                            const SizedBox(height: 8),
+                            const _SkeletonBox(width: 100, height: 12),
+                          ],
+                        ),
+                      ),
+                      const _SkeletonBox(width: 60, height: 14),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActionsAndComplianceSkeleton extends StatelessWidget {
+  const _QuickActionsAndComplianceSkeleton({required this.layout});
+  final AppLayoutData layout;
+
+  @override
+  Widget build(BuildContext context) {
+    if (layout.isTabletUp) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(flex: 3, child: _QuickActionsSkeleton()),
+          SizedBox(width: layout.isCompact ? 12 : 20),
+          const Expanded(flex: 2, child: _ComplianceSkeleton()),
+        ],
+      );
+    }
+    return Column(
+      children: [
+        const _QuickActionsSkeleton(),
+        SizedBox(height: layout.isCompact ? 16 : 20),
+        const _ComplianceSkeleton(),
+      ],
+    );
+  }
+}
+
+class _QuickActionsSkeleton extends StatelessWidget {
+  const _QuickActionsSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SkeletonBox(width: 150, height: 20),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = switch (constraints.maxWidth) {
+              < 360 => 2,
+              < 500 => 2,
+              < 700 => 2,
+              < 900 => 3,
+              _ => 4,
+            };
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: 18 / 6,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemCount: 8,
+              itemBuilder: (context, index) => const Card(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ComplianceSkeleton extends StatelessWidget {
+  const _ComplianceSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SkeletonBox(width: 180, height: 20),
+        SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _SkeletonBox(height: 24),
+                SizedBox(height: 12),
+                _SkeletonBox(height: 24),
+                SizedBox(height: 12),
+                _SkeletonBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

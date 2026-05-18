@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
@@ -65,6 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
+      _clearHomeOverviewSession();
       emit(
         state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -138,6 +141,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     await _authService.logout();
+    _clearHomeOverviewSession();
     emit(
       state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -162,6 +166,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
+      _clearHomeOverviewSession();
       emit(
         state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -343,6 +348,12 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: normalizedEmail,
         ),
       );
+    }
+  }
+
+  void _clearHomeOverviewSession() {
+    if (getIt.isRegistered<HomeOverviewSessionStore>()) {
+      getIt<HomeOverviewSessionStore>().clear();
     }
   }
 }

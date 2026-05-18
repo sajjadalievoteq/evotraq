@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 class DashboardWelcomeCard extends StatelessWidget {
   const DashboardWelcomeCard({super.key});
@@ -22,11 +22,11 @@ class DashboardWelcomeCard extends StatelessWidget {
         final String greeting;
 
         if (now.hour < 12) {
-          greeting = 'Good Morning';
+          greeting = HomeStrings.welcomeMorning;
         } else if (now.hour < 17) {
-          greeting = 'Good Afternoon';
+          greeting = HomeStrings.welcomeAfternoon;
         } else {
-          greeting = 'Good Evening';
+          greeting = HomeStrings.welcomeEvening;
         }
 
         return Card(
@@ -44,7 +44,7 @@ class DashboardWelcomeCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${user.firstName}!',
+                            HomeStrings.welcomeFirstNameLine(user.firstName),
                             style: context.text.h2.copyWith(
 
                               fontSize: isSmallScreen ? 18 : 24,
@@ -53,9 +53,7 @@ class DashboardWelcomeCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            isSmallScreen
-                                ? '$greeting'
-                                : '$greeting',
+                            greeting,
                             style: context.text.body.copyWith(
                               color: context.colors.primary,
                               fontSize: isSmallScreen ? 12 : 14,

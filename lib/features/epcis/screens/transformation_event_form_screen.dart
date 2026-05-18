@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
-import 'package:traqtrace_app/features/epcis/models/certification_info.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
@@ -15,6 +13,8 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
+import '../models/certification_info.dart';
+import '../models/transformation_event.dart';
 
 /// Screen for creating and editing Transformation Events with support for GS1 EPCIS 2.0
 /// Transformation Events represent a process that takes one set of objects (inputs) and 

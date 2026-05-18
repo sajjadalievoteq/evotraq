@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/services/dashboard_service.dart';
+import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 class DashboardRecentEventTile extends StatelessWidget {
   const DashboardRecentEventTile({super.key, required this.event});
@@ -49,7 +50,7 @@ class DashboardRecentEventTile extends StatelessWidget {
       subtitle: Text(
         event.action.isNotEmpty
             ? event.action
-            : (event.bizStep ?? 'No details'),
+            : (event.bizStep ?? HomeStrings.recentEventNoDetails),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.text.bodySm.copyWith(color: context.colors.textSecondary),
@@ -69,12 +70,12 @@ class DashboardRecentEventTile extends StatelessWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return HomeStrings.recentEventDaysAgo(difference.inDays);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return HomeStrings.recentEventHoursAgo(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return HomeStrings.recentEventMinutesAgo(difference.inMinutes);
     }
-    return 'Just now';
+    return HomeStrings.recentEventJustNow;
   }
 }

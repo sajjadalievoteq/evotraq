@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 /// Sample EPCIS stream rows (list, not a chart) until API wiring matches design.
 class StreamDummyEventRows extends StatelessWidget {
@@ -179,7 +180,7 @@ class StreamDummyEventRows extends StatelessWidget {
         ],
         const SizedBox(height: 4),
         Text(
-          'Sample rows — will show live EPCIS events when connected.',
+          HomeStrings.streamDummyFooter,
           style: context.text.bodySm.copyWith(
             color: context.colors.textMuted,
           ),

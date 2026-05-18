@@ -1,46 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
 
 /// Screen-width–based spacing. Use [gutter] as the single numeric token anywhere
 /// you need a consistent inset: `EdgeInsets.only(left: context.gutter)`, etc.
-///
-/// Banding matches [ResponsiveContext.isMobile] / [isTablet] / [isDesktop]:
-/// - **Mobile** (< 600): [Constants.mobilePadding]
-/// - **Tablet** (600–1199): [Constants.tabletPadding] (40)
-/// - **Desktop / web** (≥ 1200): [Constants.webPadding]
 class ResponsiveUtils {
-  /// Responsive page gutter / inset unit for the current width.
+  /// Responsive page gutter / inset unit for a specific width.
+  static double gutterForWidth(double width) {
+    // Completely fluid: 5% of screen width, clamped between 16 and 100.
+    return (width * 0.03).clamp(24.0, 100.0);
+  }
+
+  /// Responsive page gutter / inset unit for the current context.
   static double gutter(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    if (width < 600) {
-      return Constants.mobilePadding;
-    }
-    if (width < 1200) {
-      return Constants.tabletPadding;
-    }
-    return Constants.webPadding;
+    return gutterForWidth(MediaQuery.sizeOf(context).width);
   }
 
   /// Symmetric horizontal inset: left & right = [gutter].
   static EdgeInsets horizontalPadding(BuildContext context) {
-    final g = gutter(context);
-    return EdgeInsets.symmetric(horizontal: g);
+    return EdgeInsets.symmetric(horizontal: gutter(context));
   }
 
   /// Symmetric vertical inset: top & bottom = [gutter].
   static EdgeInsets verticalPadding(BuildContext context) {
-    final g = gutter(context);
-    return EdgeInsets.symmetric(vertical: g);
+    return EdgeInsets.symmetric(vertical: gutter(context));
   }
 
   /// Same inset on all sides = [gutter].
   static EdgeInsets paddingAll(BuildContext context) {
-    final g = gutter(context);
-    return EdgeInsets.all(g);
+    return EdgeInsets.all(gutter(context));
   }
 
   /// Per-edge inset using only [gutter] where a flag is true; others are 0.
-  /// Example: `gutterOnly(context, left: true, top: true)`
   static EdgeInsets gutterOnly(
     BuildContext context, {
     bool left = false,
@@ -57,7 +46,7 @@ class ResponsiveUtils {
     );
   }
 
-  /// Symmetric inset as multiples of [gutter], e.g. `horizontal: 2` → `2 * gutter` on left/right.
+  /// Symmetric inset as multiples of [gutter].
   static EdgeInsets symmetricMultiples(
     BuildContext context, {
     double horizontal = 0,
@@ -96,7 +85,7 @@ extension ResponsiveContext on BuildContext {
         bottom: bottom,
       );
 
-  /// [horizontal] / [vertical] are multiples of [gutter] (e.g. `2` → double inset).
+  /// [horizontal] / [vertical] are multiples of [gutter].
   EdgeInsets symmetricPaddingMultiples({
     double horizontal = 0,
     double vertical = 0,

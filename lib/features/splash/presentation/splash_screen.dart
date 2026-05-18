@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -18,14 +19,65 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool _navigated = false;
+  bool _initialized = false;
+  bool _canNavigate = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<AuthCubit>().checkAuth();
-    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      // Using microtask to ensure we don't trigger context lookups
+      // during the synchronous didChangeDependencies call
+      Future.microtask(() => _initializeApp());
+    }
+  }
+
+  Future<void> _initializeApp() async {
+    // Start auth check
+    final authCheck = context.read<AuthCubit>().checkAuth();
+
+    // We want a minimum delay of 2 seconds to show branding
+    final minDelay = Future.delayed(const Duration(seconds: 2));
+
+    // We want to ensure images are ready before removing splash
+    // but we don't want to block indefinitely if something fails
+    try {
+      await Future.wait([
+        authCheck,
+
+        precacheImage(const AssetImage(AppAssets.traqBackgroundPng), context),
+        precacheImage(const AssetImage(AppAssets.logo), context),
+        minDelay,
+      ]).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('Pre-caching or auth check took too long or failed: $e');
+    } finally {
+      if (mounted) {
+        FlutterNativeSplash.remove();
+        setState(() => _canNavigate = true);
+
+        // In case auth status already changed while we were waiting for minDelay
+        final authState = context.read<AuthCubit>().state;
+        _checkAndNavigate(authState);
+      }
+    }
+  }
+
+  void _checkAndNavigate(AuthState state) {
+    if (!_canNavigate || _navigated || !mounted) return;
+    
+    final pendingLocation = _resolvePendingLocation(context);
+    if (state.status == AuthStatus.authenticated) {
+      _go(pendingLocation ?? Constants.homeRoute);
+    } else if (state.status == AuthStatus.unauthenticated) {
+      _go(Constants.loginRoute);
+    }
   }
 
   void _go(String location) {
@@ -48,30 +100,20 @@ class _SplashScreenState extends State<SplashScreen> {
     return parsed.toString();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    precacheImage(const AssetImage(Constants.iconImage), context);
-  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final primary = c.primary;
-    final pendingLocation = _resolvePendingLocation(context);
      final size = MediaQuery.sizeOf(context);
+    final displayHeight = size.height > 0 ? size.height : 800.0;
+    
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
         child: BlocListener<AuthCubit, AuthState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
-          listener: (context, state) {
-            if (state.status == AuthStatus.authenticated) {
-              _go(pendingLocation ?? Constants.homeRoute);
-            } else if (state.status == AuthStatus.unauthenticated) {
-              _go(Constants.loginRoute);
-            }
-          },
+          listener: (context, state) => _checkAndNavigate(state),
           child: CardWithBackgroundWidget(
             isPrimary: false,
             child: Center(
@@ -81,18 +123,21 @@ class _SplashScreenState extends State<SplashScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      width: size.height*0.2,
-                      height: size.height*0.2,
+                      width: displayHeight * 0.15,
+                      height: displayHeight * 0.15,
                       child: Image.asset(
                         AppAssets.logo,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.broken_image, size: 64, color: primary);
+                        },
                       ),
                     ),
 
                     Text(
                       'traq',
                       style: TextStyle(
-                        fontSize: size.height*0.1,
+                        fontSize: displayHeight * 0.08,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.2,
                         color: primary,
@@ -102,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     Text(
                       'Preparing your workspace...',
                       style: TextStyle(
-                        fontSize: size.height*0.016,
+                        fontSize: 14,
                         color: c.textSecondary.withValues(alpha: 0.95),
                       ),
                     ),

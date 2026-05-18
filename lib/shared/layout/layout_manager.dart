@@ -29,18 +29,8 @@ class AppLayoutData {
       width: width,
       height: size.height,
       breakpoint: breakpoint,
-      horizontalPadding: switch (breakpoint) {
-        AppLayoutBreakpoint.compact => 16,
-        AppLayoutBreakpoint.medium => 24,
-        AppLayoutBreakpoint.expanded => 32,
-        AppLayoutBreakpoint.large => 40,
-      },
-      verticalPadding: switch (breakpoint) {
-        AppLayoutBreakpoint.compact => 16,
-        AppLayoutBreakpoint.medium => 24,
-        AppLayoutBreakpoint.expanded => 28,
-        AppLayoutBreakpoint.large => 32,
-      },
+      horizontalPadding: ResponsiveUtils.gutterForWidth(width),
+      verticalPadding: ResponsiveUtils.gutterForWidth(width) * 0.8,
       maxContentWidth: switch (breakpoint) {
         AppLayoutBreakpoint.compact => 600,
         AppLayoutBreakpoint.medium => 760,
@@ -165,19 +155,12 @@ class AppResponsiveBody extends StatelessWidget {
     Widget content = AppLayoutBuilder(
       builder: (context, layout) {
         final basePadding = ResponsiveUtils.paddingAll(context);
-
-        // Instead of clamping children with a maxWidth constraint, we compute
-        // additional horizontal "margin" when a maxContentWidth is provided.
-        // This keeps content visually centered while still allowing children
-        // to opt into full-width layouts (e.g., scrollbars on the screen edge).
         final targetWidth = maxContentWidth ?? layout.width;
         final extraHorizontalMargin =
             (layout.width - targetWidth) > 0 ? (layout.width - targetWidth) / 2 : 0.0;
-
         final resolvedPadding = basePadding.add(
           EdgeInsets.symmetric(horizontal: extraHorizontalMargin),
         );
-
         return Align(
           alignment: alignment,
           child: Padding(

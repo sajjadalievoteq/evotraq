@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_navigation.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/quick_actions/widgets/dashboard_quick_action_card.dart';
 
 class QuickActionsGrid extends StatelessWidget {
@@ -10,53 +11,53 @@ class QuickActionsGrid extends StatelessWidget {
     const actions = [
       DashboardQuickAction(
         icon: Icons.qr_code,
-        title: 'GTIN Management',
-        subtitle: 'GS1 identifiers',
+        title: HomeStrings.quickActionGtinTitle,
+        subtitle: HomeStrings.quickActionGtinSubtitle,
         color: Colors.blue,
-        route: Constants.gs1GtinsRoute,
+        route: HomeNavigation.gs1Gtins,
         isDisabled: false,
       ),
       DashboardQuickAction(
         icon: Icons.location_on,
-        title: 'GLN Management',
+        title: HomeStrings.quickActionGlnTitle,
         color: Colors.green,
-        route: Constants.gs1GlnsRoute,
+        route: HomeNavigation.gs1Glns,
       ),
       DashboardQuickAction(
         icon: Icons.qr_code_scanner,
-        title: 'SGTIN Management',
+        title: HomeStrings.quickActionSgtinTitle,
         color: Colors.orange,
-        route: Constants.gs1SgtinsRoute,
+        route: HomeNavigation.gs1Sgtins,
       ),
       DashboardQuickAction(
         icon: Icons.inventory,
-        title: 'SSCC Management',
+        title: HomeStrings.quickActionSsccTitle,
         color: Colors.purple,
-        route: Constants.gs1SsccsRoute,
+        route: HomeNavigation.gs1Ssccs,
       ),
       DashboardQuickAction(
         icon: Icons.local_shipping,
-        title: 'Create Shipment',
+        title: HomeStrings.quickActionCreateShipment,
         color: Colors.indigo,
-        route: Constants.opShippingCreateRoute,
+        route: HomeNavigation.opShippingCreate,
       ),
       DashboardQuickAction(
         icon: Icons.download,
-        title: 'Receive Shipment',
+        title: HomeStrings.quickActionReceiveShipment,
         color: Colors.teal,
-        route: Constants.opReceivingRoute,
+        route: HomeNavigation.opReceiving,
       ),
       DashboardQuickAction(
         icon: Icons.inventory_2,
-        title: 'Packing',
+        title: HomeStrings.quickActionPacking,
         color: Colors.deepOrange,
-        route: Constants.opPackingRoute,
+        route: HomeNavigation.opPacking,
       ),
       DashboardQuickAction(
         icon: Icons.play_for_work,
-        title: 'Commissioning',
+        title: HomeStrings.quickActionCommissioning,
         color: Colors.cyan,
-        route: Constants.opCommissioningRoute,
+        route: HomeNavigation.opCommissioning,
       ),
     ];
 
@@ -67,7 +68,7 @@ class QuickActionsGrid extends StatelessWidget {
           < 500 => 2,
           < 700 => 2,
           < 900 => 3,
-          _ => 4,
+          _ => 3,
         };
 
         // GridView childAspectRatio = width / height.

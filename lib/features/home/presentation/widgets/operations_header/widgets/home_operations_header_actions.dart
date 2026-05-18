@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/core/widgets/traq_elevated_icon_button.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_navigation.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
 class HomeOperationsHeaderActions extends StatelessWidget {
   const HomeOperationsHeaderActions({super.key});
@@ -24,7 +25,9 @@ class HomeOperationsHeaderActions extends StatelessWidget {
               previous.isDarkMode != current.isDarkMode,
           builder: (context, themeState) {
             return IconButton(
-              tooltip: themeState.isDarkMode ? 'Light mode' : 'Dark mode',
+              tooltip: themeState.isDarkMode
+                  ? HomeStrings.themeTooltipLight
+                  : HomeStrings.themeTooltipDark,
               onPressed: () async {
                 await context.read<ThemeCubit>().toggleTheme();
               },
@@ -38,8 +41,8 @@ class HomeOperationsHeaderActions extends StatelessWidget {
           },
         ),
         IconButton(
-          tooltip: 'Notifications',
-          onPressed: () => context.go(Constants.notificationsRoute),
+          tooltip: HomeStrings.notificationsTooltip,
+          onPressed: () => context.go(HomeNavigation.notifications),
           icon: SvgPicture.asset(
             AppAssets.iconAlert,
             width: 22,
@@ -48,14 +51,14 @@ class HomeOperationsHeaderActions extends StatelessWidget {
           ),
         ),
         TraqElevatedIconButton(
-          onPressed: () => context.go(Constants.epcisObjectEventNewRoute),
+          onPressed: () => context.go(HomeNavigation.epcisObjectEventNew),
           icon: SvgPicture.asset(
             AppAssets.iconPlus,
             width: 20,
             height: 20,
             colorFilter: ColorFilter.mode(scheme.onPrimary, BlendMode.srcIn),
           ),
-          label: 'New Event',
+          label: HomeStrings.newEventButton,
         ),
       ],
     );

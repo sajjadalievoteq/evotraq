@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
+import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
+/// Route tile used on the home quick-action grid; suitable for any icon + title
+/// + optional subtitle + [GoRouter.push] target.
 class DashboardQuickAction {
   const DashboardQuickAction({
     required this.icon,
@@ -31,23 +35,40 @@ class DashboardQuickActionCard extends StatelessWidget {
 
 
       child: InkWell(
-        onTap: action.isDisabled || action.route == null
-            ? null
-            : () => context.push(action.route!),
+        onTap: () {
+          if (action.isDisabled) {
+            context.showInfo(HomeStrings.quickActionUnavailable);
+            return;
+          }
+          final route = action.route;
+          if (route != null) {
+            context.push(route);
+          }
+        },
 
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isCompact = constraints.maxHeight < 120;
-            final iconSize = isCompact ? 18.0 : 22.0;
-            final iconPadding = isCompact ? 8.0 : 12.0;
-            final fontSize = isCompact ? 11.0 : 11.0;
-            final spacing = isCompact ? 16.0 : 18.0;
-            final padding = isCompact ? 12.0 : 16.0;
+            final width = constraints.maxWidth;
 
+            final isMobile = width < 420;
+            final isTablet = width >= 420 && width < 820;
+            final isDesktop = width >= 820;
+
+            final iconSize = isMobile ? 16.0 : isTablet ? 24.0 : 28.0;
+
+            final iconPadding = isMobile ? 4.0 : isTablet ? 12.0 : 14.0;
+
+            final titleFontSize = isMobile ? 8.0 : isTablet ? 16.0 : 18.0;
+
+            final subtitleFontSize = isMobile ? 6.0 : isTablet ? 13.0 : 14.0;
+
+            final spacing = isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
+
+            final padding = isMobile ? 12.0 : isTablet ? 16.0 : 20.0;
             return Padding(
               padding: EdgeInsets.all(padding),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 spacing: spacing,
                 children: [
                   Container(
@@ -63,41 +84,38 @@ class DashboardQuickActionCard extends StatelessWidget {
                     ),
                   ),
 
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
 
-                        Flexible(
-                          child: Text(
-                            action.title,
-                            style: context.text.bodySm.copyWith(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w600,
-                              color: action.isDisabled
-                                  ? context.colors.textMuted
-                                  : context.colors.textPrimary,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
+                      Text(
+                        action.title,
+                        style: context.text.bodySm.copyWith(
+                          fontSize:titleFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: action.isDisabled
+                              ? context.colors.textMuted
+                              : context.colors.textPrimary,
+                        ),
+                        textAlign: TextAlign.left,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (action.subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          action.subtitle!,
+                          style: context.text.cap.copyWith(
+                            fontSize: subtitleFontSize,
+                            color: context.colors.textMuted,
+                            fontStyle: FontStyle.italic,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (action.subtitle != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            action.subtitle!,
-                            style: context.text.cap.copyWith(
-                              fontSize: isCompact ? 8 : 10,
-                              color: context.colors.textMuted,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ],
               ),

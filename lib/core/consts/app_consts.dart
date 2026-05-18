@@ -198,8 +198,8 @@ class Constants {
 
   // assets
   // images
-  static const String logoImage = 'assets/logo/logo.png';
-  static const String loginBackground = 'assets/images/background_image.png';
+  static const String logoImage = 'assets/images/logo/logo.png';
+  static const String loginBackground = 'assets/images/traq_background.png';
 
   // Icons
   static const String iconImage = 'assets/icons/icon_app.png';

@@ -263,7 +263,7 @@ class _TechDispensingLifecycleGroupWidgetState
                 : null,
           ),
           const SizedBox(height: 12),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _shelfLifeMonthsController,
             fieldName: 'shelfLifeMonths',
             label: 'Shelf Life from Production (months) *',
@@ -274,7 +274,7 @@ class _TechDispensingLifecycleGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateShelfLifeMonths,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _shelfLifeAfterOpenDaysController,
             fieldName: 'shelfLifeAfterOpeningDays',
             label: 'Shelf Life After Opening (days)',
@@ -291,7 +291,7 @@ class _TechDispensingLifecycleGroupWidgetState
             enabled: widget.isEditing,
             validator: PharmaFieldValidators.validateCountryOfManufacture,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _packSizeDescriptionController,
             fieldName: 'packSizeDescription',
             label: 'Pack Size Description (free text)',
@@ -301,7 +301,7 @@ class _TechDispensingLifecycleGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validatePackSizeDescription,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _activePotencyAi7004Controller,
             fieldName: 'activePotencyAi7004',
             label: 'Active potency (AI 7004 context)',

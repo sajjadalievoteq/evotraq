@@ -29,8 +29,8 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_detail_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/sgtin/sgtin_list_screen_advanced.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/screens/sgtin_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/presentation/screens/sgtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
@@ -67,9 +67,9 @@ import 'package:traqtrace_app/features/epcis/screens/operations/receiving_operat
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/commissioning_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/commissioning_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/commissioning_operation_list_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list_screen.dart';
 // Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_management_screen.dart';
@@ -145,6 +145,15 @@ class AppRouter {
         path == Constants.verifyEmailAliasRoute;
   }
 
+  /// Auth-only screens that authenticated users must never land on
+  /// (e.g. via hardware back button or browser history).
+  bool _isAuthOnlyPath(String path) {
+    return path == Constants.loginRoute ||
+        path == Constants.registerRoute ||
+        path == Constants.checkEmailRoute ||
+        path == Constants.forgotPasswordRoute;
+  }
+
   String? _buildSplashRedirect(GoRouterState state) {
     final currentLocation = state.uri.toString();
     if (state.uri.path == Constants.splashRoute) {
@@ -168,6 +177,12 @@ class AppRouter {
       // instead of letting protected route guards send them to /login.
       if (_isAuthCheckPending() && !_isPublicPath(path)) {
         return _buildSplashRedirect(state);
+      }
+
+      // Prevent authenticated users from navigating back to auth-only screens
+      // (e.g. hardware back button or browser history).
+      if (authCubit.state.isAuthenticated && _isAuthOnlyPath(path)) {
+        return Constants.homeRoute;
       }
 
       return null;
@@ -1142,7 +1157,7 @@ class AppRouter {
         path: Constants.gs1SgtinsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const SGTINAdvancedListScreen(),
+          child: const SGTINScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;

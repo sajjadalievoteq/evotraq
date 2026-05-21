@@ -157,7 +157,7 @@ class _StorageHandlingGroupWidgetState
   }) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8),
-      child: GtinValidatedField(
+      child: Gs1ValidatedField(
         controller: controller,
         fieldName: fieldName,
         label: label,

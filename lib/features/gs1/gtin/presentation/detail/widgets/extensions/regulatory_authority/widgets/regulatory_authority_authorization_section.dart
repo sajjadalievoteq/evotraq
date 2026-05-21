@@ -34,7 +34,7 @@ class RegulatoryAuthorityAuthorizationSection extends StatelessWidget {
             GtinRegulatoryAuthorityExtensionUiConstants.sectionAuthorization,
             padding: EdgeInsets.only(bottom: 12),
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: licensedAgentGlnsController,
             fieldName: 'licensedAgentGlns',
             label: GtinRegulatoryAuthorityExtensionUiConstants

@@ -145,7 +145,7 @@ class _WarningsPrecautionsGroupWidgetState
           if (_blackBoxWarning)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: _blackBoxWarningTextController,
                 fieldName: 'blackBoxWarningText',
                 label: 'Black Box Warning Text',
@@ -181,7 +181,7 @@ class _WarningsPrecautionsGroupWidgetState
                 : null,
           ),
           const SizedBox(height: 8),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _contraindicationsController,
             fieldName: 'contraindications',
             label: 'Contraindications',
@@ -191,7 +191,7 @@ class _WarningsPrecautionsGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateContraindications,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _drugInteractionsController,
             fieldName: 'drugInteractions',
             label: 'Drug Interactions',

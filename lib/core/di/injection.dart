@@ -22,7 +22,8 @@ import 'package:traqtrace_app/data/services/user_management/user_management_serv
 import '../../data/services/advanced_performance_service.dart';
 import '../../data/services/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
-import '../../data/services/commissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
+import '../../features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
@@ -37,7 +38,7 @@ import '../../data/services/product_journey_service.dart';
 import '../../data/services/receiving_operation_service.dart';
 import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
-import '../../data/services/sgtin_service.dart';
+import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import '../../data/services/shipping_operation_service.dart';
 import '../../data/services/sscc_pharmaceutical_extension_service.dart';
 import '../../data/services/sscc_service.dart';
@@ -156,6 +157,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<CommissioningOperationService>(
     () => CommissioningOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerFactory<CommissioningOperationCubit>(
+    () => CommissioningOperationCubit(getIt<CommissioningOperationService>()),
   );
 
   getIt.registerLazySingleton<TransactionDocumentService>(

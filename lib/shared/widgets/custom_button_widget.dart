@@ -9,7 +9,7 @@ class CustomButtonWidget extends StatelessWidget {
     this.icon,
     this.iconWidget,
     this.iconOnly,
-    this.height = 50,
+    this.height = TraqSpacing.buttonH,
     this.backgroundColor,
     this.foregroundColor,
     this.minimumWidth,
@@ -30,6 +30,8 @@ class CustomButtonWidget extends StatelessWidget {
   final double? minimumWidth;
   final String? tooltip;
 
+  // height default matches TraqSpacing.buttonH = 36
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -49,7 +51,6 @@ class CustomButtonWidget extends StatelessWidget {
     final resolvedIconWidget = iconWidget ?? (icon != null ? Icon(icon) : null);
 
     final button = SizedBox(
-      height: height,
       width: buttonWidth,
       child: ElevatedButton(
         onPressed: onTap,
@@ -57,52 +58,42 @@ class CustomButtonWidget extends StatelessWidget {
           backgroundColor: resolvedBackgroundColor,
           foregroundColor: resolvedForegroundColor,
           minimumSize: Size(buttonWidth ?? 0, height),
-
-          // ✅ FIX: remove default padding & force perfect centering
-          padding: EdgeInsets.zero,
-          alignment: Alignment.center,
         ),
         child: resolvedIconOnly
             ? const SizedBox.expand(
-          child: Center(
-            child: Icon(Icons.circle), // placeholder, replaced below
-          ),
-        )
+                child: Center(
+                  child: Icon(Icons.circle), // placeholder, replaced below
+                ),
+              )
             : Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (hasIcon) ...[
-              resolvedIconWidget!,
-              const SizedBox(width: 8),
-            ],
-            Text(title!.trim()),
-          ],
-        ),
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (hasIcon) ...[
+                    resolvedIconWidget!,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(title!.trim()),
+                ],
+              ),
       ),
     );
 
-    // Replace placeholder icon safely (avoids const issues)
     final finalButton = resolvedIconOnly
         ? SizedBox(
-      height: height,
-      width: buttonWidth,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: resolvedBackgroundColor,
-          foregroundColor: resolvedForegroundColor,
-          minimumSize: Size(buttonWidth ?? 0, height),
-          padding: EdgeInsets.zero,
-          alignment: Alignment.center,
-        ),
-        child: SizedBox.expand(
-          child: Center(
-            child: resolvedIconWidget,
-          ),
-        ),
-      ),
-    )
+            width: buttonWidth,
+            child: ElevatedButton(
+              onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: resolvedBackgroundColor,
+                foregroundColor: resolvedForegroundColor,
+                minimumSize: Size(buttonWidth ?? 0, height),
+              ),
+              child: SizedBox.expand(
+                child: Center(child: resolvedIconWidget),
+              ),
+            ),
+          )
         : button;
 
     if (tooltip != null && tooltip!.trim().isNotEmpty) {

@@ -1,0 +1,299 @@
+
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+
+class CommissioningOperationService {
+  final DioService _dioService;
+
+  CommissioningOperationService({required DioService dioService})
+    : _dioService = dioService;
+
+  String get _baseUrl => _dioService.baseUrl;
+
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await _dioService.getAuthToken();
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+  Future<CommissioningResponse> createCommissioningOperation(
+    CommissioningRequest request,
+  ) async {
+    final startTime = DateTime.now();
+    final operationId = 'comm_${DateTime.now().millisecondsSinceEpoch}';
+
+    debugPrint(
+      'CommissioningService: Starting bulk commissioning for ${request.serialNumbers.length} items',
+    );
+
+    try {
+      final headers = await _getHeaders();
+
+      // Single POST /commissioning/bulk — replaces the per-serial N+1 loop
+      final response = await _dioService.post(
+        '$_baseUrl/commissioning/bulk',
+        headers: headers,
+        data: jsonEncode(request.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      final processingTimeMs =
+          DateTime.now().difference(startTime).inMilliseconds;
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.data) as Map<String, dynamic>;
+
+        final rawItems = data['itemResults'] as List<dynamic>? ?? [];
+        final itemResults = rawItems.map((item) {
+          final m = item as Map<String, dynamic>;
+          return CommissioningItemResult(
+            serialNumber: m['serialNumber'] as String? ?? '',
+            sgtinId: m['sgtinId']?.toString(),
+            epcUri: m['epcUri'] as String?,
+            success: m['success'] as bool? ?? false,
+            errorMessage: m['errorMessage'] as String?,
+          );
+        }).toList();
+
+        final epcisEventId = data['epcisEventId'] as String?;
+
+        CommissioningStatus status;
+        final rawStatus = data['status'] as String?;
+        switch (rawStatus) {
+          case 'SUCCESS':
+            status = CommissioningStatus.success;
+          case 'PARTIAL_SUCCESS':
+            status = CommissioningStatus.partialSuccess;
+          case 'FAILED':
+            status = CommissioningStatus.failed;
+          default:
+            status = CommissioningStatus.partialSuccess;
+        }
+
+        debugPrint(
+          'CommissioningService: Bulk commissioning complete — '
+          'event=$epcisEventId status=$rawStatus '
+          'commissioned=${data['totalCommissioned']} '
+          'failed=${data['totalFailed']}',
+        );
+
+        return CommissioningResponse(
+          commissioningOperationId:
+              data['batchId'] as String? ?? operationId,
+          commissioningReference:
+              data['commissioningReference'] as String?,
+          eventIds:
+              epcisEventId != null ? [epcisEventId] : const [],
+          createdSgtinIds: (data['commissionedEpcs'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
+          commissionedCount: data['totalCommissioned'] as int? ?? 0,
+          failedCount: data['totalFailed'] as int? ?? 0,
+          status: status,
+          processedAt: DateTime.now(),
+          gtinCode: data['gtinCode'] as String?,
+          batchLotNumber: data['batchLotNumber'] as String?,
+          commissioningLocationGLN:
+              data['commissioningLocationGLN'] as String?,
+          messages: (data['messages'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              const [],
+          itemResults: itemResults,
+          processingTimeMs: processingTimeMs,
+          metadata: {
+            'batch_id': data['batchId'],
+            'epcis_event_id': epcisEventId,
+            'total_items': request.serialNumbers.length,
+          },
+        );
+      } else {
+        // Non-2xx response — surface the backend error message
+        String errorMsg;
+        try {
+          final errorData = jsonDecode(response.data) as Map<String, dynamic>;
+          errorMsg = errorData['message'] as String? ??
+              errorData['error'] as String? ??
+              'Commissioning failed (HTTP ${response.statusCode})';
+        } catch (_) {
+          errorMsg = 'Commissioning failed (HTTP ${response.statusCode})';
+        }
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      debugPrint(
+        'CommissioningService: Critical error during commissioning: $e',
+      );
+      return CommissioningResponse(
+        commissioningOperationId: operationId,
+        commissioningReference: request.commissioningReference,
+        status: CommissioningStatus.failed,
+        processedAt: DateTime.now(),
+        messages: ['Commissioning failed: $e'],
+        commissionedCount: 0,
+        failedCount: request.serialNumbers.length,
+        itemResults: const [],
+      );
+    }
+  }
+
+  Future<List<CommissioningResponse>> getCommissioningOperations() async {
+    // For now, we'll fetch recent commissioning events from the events API
+    // In the future, this could be enhanced with a dedicated endpoint
+    try {
+      final headers = await _getHeaders();
+      final response = await _dioService.get(
+        '$_baseUrl/events/object',
+        queryParameters: {'bizStep': 'commissioning', 'size': '50'},
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.data);
+        final List<dynamic> content = data['content'] ?? data;
+
+        // Group events by commissioning reference if available
+        // For now, return each event as a separate operation
+        return content
+            .map((event) => _parseObjectEventToCommissioningResponse(event))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('CommissioningService: Error fetching operations: $e');
+      return [];
+    }
+  }
+
+  Future<CommissioningResponse?> getCommissioningOperation(
+    String operationId,
+  ) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _dioService.get(
+        '$_baseUrl/events/object/$operationId',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final event = jsonDecode(response.data);
+        return _parseObjectEventToCommissioningResponse(event);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('CommissioningService: Error fetching operation: $e');
+      return null;
+    }
+  }
+
+  /// Parse an ObjectEvent response to CommissioningResponse model
+  CommissioningResponse _parseObjectEventToCommissioningResponse(
+    Map<String, dynamic> event,
+  ) {
+    final epcList = event['epcList'] as List<dynamic>? ?? [];
+    final ilmd = event['ilmd'] as Map<String, dynamic>?;
+
+    // Parse ILMD (Instance/Lot Master Data) fields
+    String? gtinCode;
+    String? batchLotNumber;
+    String? itemDescription;
+    DateTime? productionDate;
+    DateTime? expiryDate;
+    DateTime? bestBeforeDate;
+
+    if (ilmd != null) {
+      // Phase 1: keys use cbvmda: namespace prefix per GS1 CBV 2.0
+      gtinCode = (ilmd['traqtrace:gtin'] ?? ilmd['gtin']) as String?;
+      batchLotNumber = (ilmd['cbvmda:lotNumber'] ?? ilmd['lotNumber']) as String?;
+      itemDescription = (ilmd['cbvmda:itemDescription'] ?? ilmd['itemDescription']) as String?;
+
+      if (ilmd['cbvmda:productionDate'] ?? ilmd['productionDate'] ?? ilmd['manufacturingDate'] != null) {
+        productionDate = _parseDate(
+            ilmd['cbvmda:productionDate'] ?? ilmd['productionDate'] ?? ilmd['manufacturingDate']);
+      }
+      if ((ilmd['cbvmda:itemExpirationDate'] ?? ilmd['itemExpirationDate']) != null) {
+        expiryDate = _parseDate(ilmd['cbvmda:itemExpirationDate'] ?? ilmd['itemExpirationDate']);
+      }
+      if ((ilmd['cbvmda:bestBeforeDate'] ?? ilmd['bestBeforeDate']) != null) {
+        bestBeforeDate = _parseDate(ilmd['cbvmda:bestBeforeDate'] ?? ilmd['bestBeforeDate']);
+      }
+    }
+
+    // Create item results from epcList
+    final itemResults = epcList.map((epc) {
+      final epcUri = epc.toString();
+      // Extract serial number from EPC URI: urn:epc:id:sgtin:6290000.50003.asdasdas123123123ddd
+      String serialNumber = epcUri;
+      if (epcUri.contains('sgtin:')) {
+        final parts = epcUri.split('.');
+        if (parts.length >= 3) {
+          serialNumber = parts.last;
+        }
+      }
+      return CommissioningItemResult(
+        serialNumber: serialNumber,
+        epcUri: epcUri,
+        success: true,
+      );
+    }).toList();
+
+    return CommissioningResponse(
+      commissioningOperationId: event['eventId'],
+      eventIds: [event['eventId']],
+      commissionedCount: epcList.length,
+      failedCount: 0,
+      status: CommissioningStatus.success,
+      eventTime: event['eventTime'] != null
+          ? DateTime.tryParse(event['eventTime'])
+          : null,
+      processedAt: event['recordTime'] != null
+          ? DateTime.tryParse(event['recordTime'])
+          : null,
+      commissioningLocationGLN: event['businessLocation']?.toString(),
+      readPointGLN: event['readPoint']?.toString(),
+      gtinCode: gtinCode,
+      batchLotNumber: batchLotNumber,
+      itemDescription: itemDescription,
+      productionDate: productionDate,
+      expiryDate: expiryDate,
+      bestBeforeDate: bestBeforeDate,
+      epcList: epcList.map((e) => e.toString()).toList(),
+      businessStep: event['businessStep']?.toString(),
+      disposition: event['disposition']?.toString(),
+      persistentDisposition: event['persistentDisposition']?.toString(),
+      bizTransactionList: event['bizTransactionList'] != null
+          ? (event['bizTransactionList'] as List)
+              .map((e) => Map<String, String>.from(e as Map))
+              .toList()
+          : null,
+      action: event['action']?.toString(),
+      itemResults: itemResults,
+    );
+  }
+
+  /// Parse date from various formats (ISO date, ISO datetime, etc.)
+  DateTime? _parseDate(dynamic dateValue) {
+    if (dateValue == null) return null;
+    final dateStr = dateValue.toString();
+    try {
+      // Try parsing as ISO date (YYYY-MM-DD)
+      if (dateStr.length == 10 && dateStr.contains('-')) {
+        return DateTime.parse('${dateStr}T00:00:00Z');
+      }
+      // Try parsing as full ISO datetime
+      return DateTime.parse(dateStr);
+    } catch (e) {
+      debugPrint('CommissioningService: Error parsing date $dateStr: $e');
+      return null;
+    }
+  }
+}

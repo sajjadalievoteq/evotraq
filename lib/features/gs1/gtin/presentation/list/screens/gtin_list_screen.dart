@@ -286,7 +286,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
                     SizedBox(height: Constants.spacing),
                     BlocBuilder<GTINCubit, GTINState>(
                       buildWhen: (prev, current) =>
-                          prev.gtinListSortAscending !=
+                      prev.gtinListSortAscending !=
                           current.gtinListSortAscending,
                       builder: (context, cubitState) {
                         return Gs1ListSortingControls(

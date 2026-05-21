@@ -39,19 +39,29 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Start auth check
+    // Start auth check immediately in the background
     final authCheck = context.read<AuthCubit>().checkAuth();
 
     // We want a minimum delay of 2 seconds to show branding
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
-    // We want to ensure images are ready before removing splash
-    // but we don't want to block indefinitely if something fails
+    // Precache the background image first so the custom splash is fully
+    // rendered before we remove the native overlay.
+    try {
+      await precacheImage(
+        const AssetImage(AppAssets.traqBackgroundPng),
+        context,
+      ).timeout(const Duration(seconds: 3));
+    } catch (_) {}
+
+    // Remove the native splash now — the custom splash (with background
+    // already loaded) becomes visible immediately.
+    FlutterNativeSplash.remove();
+
+    // Continue waiting for auth + logo + minimum display time.
     try {
       await Future.wait([
         authCheck,
-
-        precacheImage(const AssetImage(AppAssets.traqBackgroundPng), context),
         precacheImage(const AssetImage(AppAssets.logo), context),
         minDelay,
       ]).timeout(const Duration(seconds: 5));
@@ -59,7 +69,6 @@ class _SplashScreenState extends State<SplashScreen> {
       debugPrint('Pre-caching or auth check took too long or failed: $e');
     } finally {
       if (mounted) {
-        FlutterNativeSplash.remove();
         setState(() => _canNavigate = true);
 
         // In case auth status already changed while we were waiting for minDelay

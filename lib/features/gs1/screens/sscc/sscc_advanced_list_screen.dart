@@ -7,7 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
-import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
 
 class SSCCAdvancedListScreen extends StatefulWidget {
   const SSCCAdvancedListScreen({Key? key}) : super(key: key);
@@ -274,9 +274,12 @@ class _SSCCAdvancedListScreenState extends State<SSCCAdvancedListScreen> {
                   );
                 }
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _ssccs.length + (state.status == SSCCStatus.loading ? 1 : 0),
+                return RefreshIndicator(
+                  onRefresh: () async => _performSearch(reset: true),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: _ssccs.length + (state.status == SSCCStatus.loading ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= _ssccs.length) {
                       return const Padding(
@@ -288,6 +291,7 @@ class _SSCCAdvancedListScreenState extends State<SSCCAdvancedListScreen> {
                     final sscc = _ssccs[index];
                     return _buildSSCCCard(sscc);
                   },
+                  ),
                 );
               },
             ),

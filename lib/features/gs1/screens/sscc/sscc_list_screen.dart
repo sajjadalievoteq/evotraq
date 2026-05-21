@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
-import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
@@ -221,6 +221,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
     return RefreshIndicator(
       onRefresh: () async => _loadSSCCs(),
       child: ListView.builder(
+        physics: const ClampingScrollPhysics(),
         itemCount: ssccs.length,
         itemBuilder: (context, index) {
           final sscc = ssccs[index];

@@ -32,7 +32,7 @@ class RegulatoryAuthorityLabelingSection extends StatelessWidget {
             GtinRegulatoryAuthorityExtensionUiConstants.sectionLabeling,
             padding: EdgeInsets.only(bottom: 12),
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: regulatedProductNameController,
             fieldName: 'regulatedProductName',
             label: GtinRegulatoryAuthorityExtensionUiConstants

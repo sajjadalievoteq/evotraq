@@ -188,7 +188,7 @@ class _GlnIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           focusNode: _glnFocusNode,
           onEditingComplete: () {
             _deriveIdentificationDebounced();
@@ -279,7 +279,7 @@ class _GlnIdentificationStructureCoreGroupState
           },
         ),
         const SizedBox(height: 16),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: widget.parentGlnCodeController,
           fieldName: 'parentGlnCode',
           label: GlnUiConstants.labelParentGln,
@@ -292,7 +292,7 @@ class _GlnIdentificationStructureCoreGroupState
           validator: GlnFieldValidators.validateParentGlnOptional,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: widget.glnExtensionComponentController,
           fieldName: 'glnExtensionComponent',
           label: GlnUiConstants.labelGlnExtensionAi254,

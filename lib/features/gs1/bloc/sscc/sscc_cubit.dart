@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/sscc_service.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 

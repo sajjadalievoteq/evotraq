@@ -205,11 +205,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   ),
 
                   Expanded(
-                    child: _UserManagementContent(
-                      users: filteredUsers,
-                      togglingUserId: state.togglingUserId,
-                      onEditUser: _showEditUserDialog,
-                      onToggleStatus: _toggleUserStatus,
+                    child: RefreshIndicator(
+                      onRefresh: _refreshUserList,
+                      child: _UserManagementContent(
+                        users: filteredUsers,
+                        togglingUserId: state.togglingUserId,
+                        onEditUser: _showEditUserDialog,
+                        onToggleStatus: _toggleUserStatus,
+                      ),
                     ),
                   ),
                 ],
@@ -254,6 +257,7 @@ class _UserManagementContent extends StatelessWidget {
 
     return GridView.builder(
       padding: EdgeInsets.all(g),
+      physics: const ClampingScrollPhysics(),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: tileMaxExtent,
         mainAxisSpacing: g,

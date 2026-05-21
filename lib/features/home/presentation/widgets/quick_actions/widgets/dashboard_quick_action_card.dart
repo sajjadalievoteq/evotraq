@@ -54,13 +54,13 @@ class DashboardQuickActionCard extends StatelessWidget {
             final isTablet = width >= 420 && width < 820;
             final isDesktop = width >= 820;
 
-            final iconSize = isMobile ? 16.0 : isTablet ? 24.0 : 28.0;
+            final iconSize = isMobile ? 16.0 : isTablet ? 24.0 : 48.0;
 
             final iconPadding = isMobile ? 4.0 : isTablet ? 12.0 : 14.0;
 
-            final titleFontSize = isMobile ? 8.0 : isTablet ? 16.0 : 18.0;
+            final titleFontSize = isMobile ? 8.0 : isTablet ? 16.0 : 28.0;
 
-            final subtitleFontSize = isMobile ? 6.0 : isTablet ? 13.0 : 14.0;
+            final subtitleFontSize = isMobile ? 6.0 : isTablet ? 13.0 : 18.0;
 
             final spacing = isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
 

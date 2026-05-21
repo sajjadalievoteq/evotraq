@@ -34,7 +34,7 @@ class RegulatoryAuthorityIdentifiersSection extends StatelessWidget {
             GtinRegulatoryAuthorityExtensionUiConstants.sectionIdentifiers,
             padding: EdgeInsets.only(bottom: 12),
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: localDrugCodeController,
             fieldName: 'localDrugCodeUaeGcc',
             label:
@@ -51,7 +51,7 @@ class RegulatoryAuthorityIdentifiersSection extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 8),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: marketingAuthorizationNumberController,
             fieldName: 'marketingAuthorizationNumber',
             label: GtinRegulatoryAuthorityExtensionUiConstants

@@ -99,7 +99,7 @@ class GtinResultsList extends StatelessWidget {
               onRefresh: onRefresh,
               child: ListView.separated(
                 controller: scrollController,
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                 padding: EdgeInsets.only(
                   right: context.padding.left,
                   left: context.padding.left,

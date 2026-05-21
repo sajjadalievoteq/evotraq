@@ -231,6 +231,12 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
     super.dispose();
   }
 
+  Future<void> _refresh() async {
+    if (widget.glnId != null) {
+      _glnCubit?.fetchGLNById(widget.glnId!);
+    }
+  }
+
   void _applyGlnToLocalState(GLN g) {
     _licenseValidFrom = g.licenseValidFrom;
     _licenseExpiry = g.licenseExpiry;
@@ -578,13 +584,16 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
         final idStructureReadOnly =
             !canEditMasterData || widget.glnId != null || sk;
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(
-            top: context.horizontalPadding.left,
-            right: context.horizontalPadding.left,
-            left: context.horizontalPadding.left,
-          ),
-          child: Form(
+        return RefreshIndicator(
+          onRefresh: _refresh,
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.only(
+              top: context.horizontalPadding.left,
+              right: context.horizontalPadding.left,
+              left: context.horizontalPadding.left,
+            ),
+            child: Form(
             key: _formKey,
             child: Gs1FormShimmerLayer(
               show: sk,
@@ -791,6 +800,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
               skeleton: const GlnDetailFormSkeleton(),
             ),
           ),
+        ),
         );
       },
     );

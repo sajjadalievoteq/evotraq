@@ -95,7 +95,7 @@ class MarketingAuthorizationBoundGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _number,
           fieldName: 'registrationNumber',
           label: 'Marketing Authorization Number',

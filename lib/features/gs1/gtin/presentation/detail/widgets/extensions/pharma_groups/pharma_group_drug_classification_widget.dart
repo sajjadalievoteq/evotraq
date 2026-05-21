@@ -141,7 +141,7 @@ class _DrugClassificationGroupWidgetState
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: GtinValidatedField(
+      child: Gs1ValidatedField(
         controller: controller,
         fieldName: fieldName,
         label: label,

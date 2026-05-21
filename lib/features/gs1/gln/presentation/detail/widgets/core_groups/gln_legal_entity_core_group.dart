@@ -38,7 +38,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: registeredLegalNameController,
           fieldName: 'registeredLegalName',
           label: GlnUiConstants.labelRegisteredLegalName,
@@ -47,7 +47,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
           validator: GlnFieldValidators.validateRegisteredLegalNameOptional,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: tradingNameController,
           fieldName: 'tradingName',
           label: GlnUiConstants.labelTradingName,
@@ -59,7 +59,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: leiCodeController,
                 fieldName: 'leiCode',
                 label: GlnUiConstants.labelLei,
@@ -70,7 +70,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: taxRegistrationNumberController,
                 fieldName: 'taxRegistrationNumber',
                 label: GlnUiConstants.labelTaxVat,
@@ -97,7 +97,7 @@ class GlnLegalEntityCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: websiteController,
                 fieldName: 'website',
                 label: GlnUiConstants.labelWebsite,

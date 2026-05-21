@@ -70,7 +70,7 @@ class GlnDigitalLocationCoreGroup extends StatelessWidget {
           onChanged: isEditing ? onDigitalAddressTypeChanged : null,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: digitalAddressValueController,
           fieldName: 'digitalAddressValue',
           label: GlnUiConstants.labelDigitalAddressValue,

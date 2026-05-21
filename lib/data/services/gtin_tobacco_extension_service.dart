@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 
 /// Service for GTIN tobacco extension operations
 /// Provides CRUD operations for tobacco-specific product attributes

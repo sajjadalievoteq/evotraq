@@ -140,7 +140,7 @@ class _ControlledSubstanceGroupWidgetState
             ),
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: GtinValidatedField(
+            child: Gs1ValidatedField(
               controller: _controlClassController,
               fieldName: 'controlClass',
               label: 'Control class',

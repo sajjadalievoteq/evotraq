@@ -118,7 +118,7 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: supplyChainRolesController,
           fieldName: 'supplyChainRoles',
           label: GlnUiConstants.labelSupplyChainRoles,
@@ -128,7 +128,7 @@ class GlnTypesClassificationCoreGroup extends StatelessWidget {
           validator: GlnFieldValidators.validateCommaSeparatedRolesOptional,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: locationRolesController,
           fieldName: 'locationRoles',
           label: GlnUiConstants.labelLocationRoles,

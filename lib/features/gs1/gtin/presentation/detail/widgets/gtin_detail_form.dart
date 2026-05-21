@@ -48,6 +48,7 @@ class GtinDetailForm extends StatelessWidget {
     );
 
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.only(
         top: context.padding.left,
         right: context.padding.left,

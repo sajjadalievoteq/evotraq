@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 
 /// Widget that displays/edits tobacco extension data for a GTIN

@@ -54,7 +54,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _createdBy,
           fieldName: 'created_by',
           label: GtinUiConstants.labelCreatedBy,
@@ -63,7 +63,7 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
           validator: GtinFieldValidators.validateCreatedBy,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _updatedBy,
           fieldName: 'updated_by',
           label: GtinUiConstants.labelUpdatedBy,

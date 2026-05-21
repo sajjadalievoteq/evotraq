@@ -26,6 +26,14 @@ abstract final class TraqThemeMenus {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
+          labelStyle: TextStyle(
+              fontSize: 10,
+                  fontWeight: FontWeight.w400
+          ),
+          hintStyle: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w400
+          ),
           fillColor: c.background,
           border: OutlineInputBorder(
             borderRadius: TraqRadius.input,

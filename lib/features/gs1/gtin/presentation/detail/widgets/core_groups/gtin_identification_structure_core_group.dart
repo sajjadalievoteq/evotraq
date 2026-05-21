@@ -204,7 +204,7 @@ class _GtinIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           focusNode: _focusNode,
           onEditingComplete: () {
             _normalizeGtinIfPossible();

@@ -39,14 +39,19 @@ class AppScreenUtil {
   static double get scaleHeight => _screenSize.height / _designSize.height;
   static double get scaleLayout => math.min(scaleWidth, scaleHeight);
   static double get scaleText {
+    double scale;
     switch (_deviceType) {
       case AppScreenDeviceType.mobile:
       case AppScreenDeviceType.tablet:
-        return scaleHeight;
+        scale = scaleHeight;
+        break;
       case AppScreenDeviceType.desktop:
       case AppScreenDeviceType.web:
-        return scaleWidth;
+        scale = scaleWidth;
+        break;
     }
+    // Never scale fonts larger than their design size on bigger screens
+    return math.min(scale, 1.0);
   }
 
   static double setWidth(num width) => width.toDouble() * scaleWidth;

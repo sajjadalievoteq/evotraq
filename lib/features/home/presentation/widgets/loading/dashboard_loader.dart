@@ -164,13 +164,13 @@ class _KeyMetricsSectionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const gap = 12.0;
-    final minTileWidth = layout.isCompact ? 188.0 : 200.0;
+    final minTileWidth = layout.isCompact ? 158.0 : 200.0;
     const maxCols = 7;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SkeletonBox(width: 140, height: 20),
+        const _SkeletonBox(width: 140, height: 14),
         const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, constraints) {
@@ -187,9 +187,9 @@ class _KeyMetricsSectionSkeleton extends StatelessWidget {
                 9,
                 (index) => SizedBox(
                   width: tileW,
-                  child: const AspectRatio(
+                  child: AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Card(),
+                    child: _StatCardSkeleton(dense: layout.isCompact),
                   ),
                 ),
               ),
@@ -197,6 +197,52 @@ class _KeyMetricsSectionSkeleton extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _StatCardSkeleton extends StatelessWidget {
+  const _StatCardSkeleton({required this.dense});
+  final bool dense;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: EdgeInsets.all(dense ? 18 : 22),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _SkeletonBox(
+                        width: dense ? 18 : 24,
+                        height: dense ? 18 : 24,
+                        radius: 4,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _SkeletonBox(height: dense ? 12 : 16),
+                      ),
+                    ],
+                  ),
+                  _SkeletonBox(width: dense ? 48 : 64, height: dense ? 24 : 36),
+                ],
+              ),
+            ),
+            SizedBox(width: dense ? 12 : 20),
+            const Expanded(
+              child: _SkeletonBox(height: double.infinity, radius: 4),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

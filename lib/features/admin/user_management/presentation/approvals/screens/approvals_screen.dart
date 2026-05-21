@@ -139,10 +139,13 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
                     isRefreshing: _isRefreshing,
                   ),
                   Expanded(
-                    child: _ApprovalsContent(
-                      approvals: filteredApprovals,
-                      onApprove: _approveUser,
-                      onReject: _showRejectDialog,
+                    child: RefreshIndicator(
+                      onRefresh: _refreshApprovalsList,
+                      child: _ApprovalsContent(
+                        approvals: filteredApprovals,
+                        onApprove: _approveUser,
+                        onReject: _showRejectDialog,
+                      ),
                     ),
                   ),
                 ],
@@ -185,6 +188,7 @@ class _ApprovalsContent extends StatelessWidget {
 
     return GridView.builder(
       padding: const EdgeInsets.only(top: spacing),
+      physics: const ClampingScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: tileMaxExtent,
         mainAxisSpacing: spacing,

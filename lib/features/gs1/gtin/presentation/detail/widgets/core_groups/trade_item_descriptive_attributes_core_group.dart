@@ -81,7 +81,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _functionalName,
           fieldName: 'functional_name',
           label: GtinUiConstants.labelFunctionalName,
@@ -93,7 +93,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
           ),
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _tradeItemDescription,
           fieldName: 'trade_item_description',
           label: GtinUiConstants.labelTradeItemDescription,
@@ -102,7 +102,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
           validator: GtinFieldValidators.validateTradeItemDescription,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _gpcCategoryCode,
           fieldName: 'gpc_brick_code',
           label: GtinUiConstants.labelGpcBrickCode,

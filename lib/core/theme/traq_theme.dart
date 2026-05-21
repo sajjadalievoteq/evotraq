@@ -69,6 +69,7 @@ class TraqTheme {
       elevatedButtonTheme: TraqThemeButtons.elevated(c, text, onPrimaryInk),
       outlinedButtonTheme: TraqThemeButtons.outlined(c, text),
       textButtonTheme: TraqThemeButtons.text(c, text),
+      segmentedButtonTheme: TraqThemeButtons.segmented(c, text),
       cardTheme: TraqThemeCards.card(c),
       dialogTheme: TraqThemeCards.dialog(c, roundedLg),
       bottomSheetTheme: TraqThemeCards.bottomSheet(c, b, roundedLg),

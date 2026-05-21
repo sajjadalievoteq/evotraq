@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/gs1/widgets/validated_text_field_wrapper.dart';
 
 /// Shared GS1 validated text field (used by GTIN and GLN detail forms).
-class GtinValidatedField extends StatelessWidget {
-  const GtinValidatedField({
+class Gs1ValidatedField extends StatelessWidget {
+  const Gs1ValidatedField({
     super.key,
     required this.controller,
     required this.fieldName,

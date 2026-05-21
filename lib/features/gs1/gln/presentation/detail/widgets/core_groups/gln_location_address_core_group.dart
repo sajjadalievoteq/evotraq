@@ -45,7 +45,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: locationNameController,
           fieldName: 'locationName',
           label: GlnUiConstants.labelLocationNameRequired,
@@ -80,7 +80,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: mobileLocationIdentifierController,
                 fieldName: 'mobileLocationIdentifier',
                 label: GlnUiConstants.labelMobileLocationId,
@@ -93,7 +93,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: addressLine1Controller,
           fieldName: 'addressLine1',
           label: GlnUiConstants.labelAddressLine1,
@@ -102,7 +102,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           validator: GlnFieldValidators.validateAddressLine1Required,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: addressLine2Controller,
           fieldName: 'addressLine2',
           label: GlnUiConstants.labelAddressLine2,
@@ -114,7 +114,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: cityController,
                 fieldName: 'city',
                 label: GlnUiConstants.labelCityRequired,
@@ -125,7 +125,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: stateProvinceController,
                 fieldName: 'stateProvince',
                 label: GlnUiConstants.labelStateProvince,
@@ -141,7 +141,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
           children: [
             Expanded(
               flex: 1,
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: postalCodeController,
                 fieldName: 'postalCode',
                 label: GlnUiConstants.labelPostalCode,
@@ -153,7 +153,7 @@ class GlnLocationAddressCoreGroup extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               flex: 2,
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: countryController,
                 fieldName: 'country',
                 label: GlnUiConstants.labelCountryRequired,

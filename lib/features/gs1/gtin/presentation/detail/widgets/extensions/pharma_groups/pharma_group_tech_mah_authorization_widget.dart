@@ -203,7 +203,7 @@ class _TechMahAuthorizationGroupWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _mahGlnController,
             fieldName: 'mahGln',
             label: 'Marketing Authorization Holder (MAH) GLN *',
@@ -214,7 +214,7 @@ class _TechMahAuthorizationGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateMahGln,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _mahNameController,
             fieldName: 'mahName',
             label: 'MAH Name *',
@@ -230,7 +230,7 @@ class _TechMahAuthorizationGroupWidgetState
             enabled: widget.isEditing,
             validator: PharmaFieldValidators.validateMahCountry,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _licensedAgentGlnsController,
             fieldName: 'licensedAgentGlns',
             label: 'Licensed Agent GLNs',
@@ -242,7 +242,7 @@ class _TechMahAuthorizationGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateLicensedAgentGlns,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _maNumberController,
             fieldName: 'marketingAuthorizationNumber',
             label: 'Marketing Authorization Number',

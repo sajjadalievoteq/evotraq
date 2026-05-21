@@ -130,7 +130,7 @@ class _NationalIdentifiersGroupWidgetState
     required int maxLength,
     String? Function(String?)? validator,
   }) {
-    return GtinValidatedField(
+    return Gs1ValidatedField(
       controller: controller,
       fieldName: fieldName,
       label: label,

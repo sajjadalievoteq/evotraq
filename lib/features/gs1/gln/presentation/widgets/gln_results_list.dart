@@ -101,12 +101,14 @@ class GlnResultsList extends StatelessWidget {
           child: Scrollbar(
             controller: scrollController,
             interactive: true,
-            child: ListView.separated(
-              separatorBuilder: (BuildContext context, int index) {
-                return const SizedBox(height: Constants.spacing);
-              },
-              controller: scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
+            child: RefreshIndicator(
+              onRefresh: onRefresh,
+              child: ListView.separated(
+                separatorBuilder: (BuildContext context, int index) {
+                  return const SizedBox(height: Constants.spacing);
+                },
+                controller: scrollController,
+                physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
               padding: context.horizontalPadding,
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: true,
@@ -148,6 +150,7 @@ class GlnResultsList extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
+          ),
           ),
         );
       },

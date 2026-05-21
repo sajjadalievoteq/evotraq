@@ -132,7 +132,7 @@ class _HomeScrollBody extends StatelessWidget {
     return AppLayoutBuilder(
       builder: (context, layout) {
         return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
           padding: EdgeInsets.fromLTRB(
            ResponsiveUtils.gutter(context),
             ResponsiveUtils.gutter(context)*0.5,

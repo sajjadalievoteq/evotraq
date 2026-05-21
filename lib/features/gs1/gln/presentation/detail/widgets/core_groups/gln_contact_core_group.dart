@@ -29,7 +29,7 @@ class GlnContactCoreGroup extends StatelessWidget {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: contactNameController,
           fieldName: 'contactName',
           label: GlnUiConstants.labelContactName,
@@ -41,7 +41,7 @@ class GlnContactCoreGroup extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: contactEmailController,
                 fieldName: 'contactEmail',
                 label: GlnUiConstants.labelEmail,
@@ -53,7 +53,7 @@ class GlnContactCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: contactPhoneController,
                 fieldName: 'contactPhone',
                 label: GlnUiConstants.labelPhone,

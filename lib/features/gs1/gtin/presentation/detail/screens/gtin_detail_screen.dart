@@ -272,6 +272,12 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     super.dispose();
   }
 
+  Future<void> _refreshGtin() async {
+    if (widget.gtinCode != null) {
+      (_gtinCubit ?? context.read<GTINCubit>()).fetchGTINDetails(widget.gtinCode!);
+    }
+  }
+
   void _submitForm() {
     final isFormValid = _formKey.currentState?.validate() ?? false;
 
@@ -765,13 +771,15 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       },
     );
 
+    final bodyWithRefresh = RefreshIndicator(onRefresh: _refreshGtin, child: body);
+
     final scaffold = Gs1MasterDataDetailScaffold(
       embedded: widget.embedded,
       title: screenTitle,
       showSaveAction: allowMasterDataActions,
       onSave: _submitForm,
       saveEnabled: allowMasterDataActions && !_isSubmitting,
-      body: body,
+      body: bodyWithRefresh,
     );
 
     if (widget.embedded) {

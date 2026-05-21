@@ -163,10 +163,7 @@ class AppResponsiveBody extends StatelessWidget {
         );
         return Align(
           alignment: alignment,
-          child: Padding(
-            padding: resolvedPadding,
-            child: _buildChild(context, layout),
-          ),
+          child: _buildChild(context, layout),
         );
       },
     );

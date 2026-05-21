@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/extensions/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_industry_mode_content.dart';
-import 'package:traqtrace_app/features/tobacco/models/gtin_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
 class GtinIndustryExtensionsSection extends StatelessWidget {

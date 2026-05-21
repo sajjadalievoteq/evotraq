@@ -102,7 +102,7 @@ class _PrescriptionRequirementsGroupWidgetState
           if (_requiresPrescription)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: _prescriptionTypeController,
                 fieldName: 'prescriptionType',
                 label: 'Prescription Type',

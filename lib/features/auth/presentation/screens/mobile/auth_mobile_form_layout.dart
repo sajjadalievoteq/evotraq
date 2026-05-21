@@ -39,7 +39,7 @@ class AuthMobileFormLayout extends StatelessWidget {
       child: SizedBox(
         height:MediaQuery.sizeOf(context).height,
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: smallMaxWidth),
             child: Padding(

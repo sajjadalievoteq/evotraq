@@ -219,6 +219,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
               child: StatefulBuilder(
                 builder: (context, setLocalState) {
                   return GlnAdvancedFiltersPanel(

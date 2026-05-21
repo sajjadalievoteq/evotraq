@@ -177,7 +177,7 @@ class _RegulatoryApprovalsGroupWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _fdaApplicationNumberController,
             fieldName: 'fdaApplicationNumber',
             label: 'FDA Application Number',
@@ -197,7 +197,7 @@ class _RegulatoryApprovalsGroupWidgetState
                 : null,
           ),
           const SizedBox(height: 8),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _emaProcedureNumberController,
             fieldName: 'emaProcedureNumber',
             label: 'EMA Procedure Number',

@@ -12,7 +12,7 @@ import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/sscc_tobacco_extension_widget.dart';
@@ -716,9 +716,12 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     );
     final isReadOnly = widget.mode == SSCCDetailMode.view && !_isEditMode;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -841,6 +844,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
               ),
           ],
         ),
+      ),
       ),
     );
   }

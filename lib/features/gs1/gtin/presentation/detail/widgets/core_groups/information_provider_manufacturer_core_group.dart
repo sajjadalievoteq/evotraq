@@ -71,7 +71,7 @@ class InformationProviderManufacturerCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _informationProviderGln,
           fieldName: 'information_provider_gln',
           label: GtinUiConstants.labelInformationProviderGln,
@@ -85,7 +85,7 @@ class InformationProviderManufacturerCoreGroupState
           validator: GtinFieldValidators.validateInformationProviderGln,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _informationProviderName,
           fieldName: 'information_provider_name',
           label: 'Information Provider Name',
@@ -94,7 +94,7 @@ class InformationProviderManufacturerCoreGroupState
           validator: GtinFieldValidators.validateInformationProviderName,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _manufacturerGln,
           fieldName: 'manufacturer_gln',
           label: GtinUiConstants.labelManufacturerGlnField,

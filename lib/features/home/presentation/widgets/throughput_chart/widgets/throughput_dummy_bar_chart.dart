@@ -240,7 +240,7 @@ class _RangeToggle extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: selectedIndex == i
-                      ? c.surface
+                      ? c.primary
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -259,7 +259,7 @@ class _RangeToggle extends StatelessWidget {
                             ? FontWeight.w700
                             : FontWeight.w500,
                         color: selectedIndex == i
-                            ? c.textPrimary
+                            ? Colors.white
                             : c.textMuted,
                       ),
                     ),

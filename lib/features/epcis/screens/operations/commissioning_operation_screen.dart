@@ -5,14 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/features/epcis/models/operations/commissioning_models.dart';
-import 'package:traqtrace_app/data/services/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
 import 'package:traqtrace_app/shared/models/scan_result.dart';
+
+import '../../../../data/models/operations/commissioning/commissioning_models.dart';
+import '../../../operations/commissioning/cubit/commissioning_operation_cubit.dart';
 
 /// Scanning mode options for different input methods
 enum ScanningMode { camera, wired, manual }
@@ -210,7 +211,7 @@ class _CommissioningOperationScreenState
     setState(() => _isLoading = true);
 
     try {
-      final commissioningService = getIt<CommissioningOperationService>();
+      final cubit = getIt<CommissioningOperationCubit>();
 
       final gtinCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
 
@@ -237,9 +238,12 @@ class _CommissioningOperationScreenState
             : null,
       );
 
-      final response = await commissioningService.createCommissioningOperation(
-        request,
-      );
+      final response = await cubit.commissionBulk(request);
+
+      if (response == null) {
+        _showError(cubit.state.error ?? 'Failed to create commissioning operation');
+        return;
+      }
 
       if (response.status == CommissioningStatus.success) {
         _showSuccess(

@@ -79,7 +79,7 @@ class TradeItemMasterdataBoundGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _brandName,
           fieldName: 'brand_name',
           label: GtinUiConstants.labelBrandNameRequired,
@@ -88,7 +88,7 @@ class TradeItemMasterdataBoundGroupState
           validator: GtinFieldValidators.validateProductName,
         ),
         const SizedBox(height: 16),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _manufacturer,
           fieldName: 'manufacturer',
           label: GtinUiConstants.labelManufacturerRequired,
@@ -121,7 +121,7 @@ class TradeItemMasterdataBoundGroupState
               : (value) => setState(() => _unitDescriptor.text = value ?? ''),
         ),
         const SizedBox(height: 16),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _packSize,
           fieldName: 'packSize',
           label: GtinUiConstants.labelPackSize,

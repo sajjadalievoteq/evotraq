@@ -121,7 +121,7 @@ class _TechProductCodedGroupWidgetState
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _regulatedProductNameController,
             fieldName: 'regulatedProductName',
             label: 'Regulated Product Name (Generic / INN) *',
@@ -130,7 +130,7 @@ class _TechProductCodedGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateRegulatedProductName,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _dosageFormTypeCodeController,
             fieldName: 'dosageFormTypeCode',
             label: 'Dosage Form Type Code *',
@@ -140,7 +140,7 @@ class _TechProductCodedGroupWidgetState
             readOnly: !widget.isEditing,
             validator: PharmaFieldValidators.validateDosageFormTypeCode,
           ),
-          GtinValidatedField(
+          Gs1ValidatedField(
             controller: _routeOfAdministrationCodeController,
             fieldName: 'routeOfAdministrationEdqmCode',
             label: 'Route of Administration Code *',

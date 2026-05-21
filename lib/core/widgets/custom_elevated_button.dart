@@ -10,8 +10,8 @@ class CustomElevatedButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.isEnabled = true,
-    this.height = 50,
-    this.fontSize = 16,
+
+    this.fontSize = 16,  this.height=50,
   });
 
   final String label;
@@ -40,19 +40,27 @@ class CustomElevatedButton extends StatelessWidget {
           );
 
     return SizedBox(
-      height: height,
       width: double.infinity,
       child: isLoading
-          ? FilledButton(onPressed: null, child: child)
+          ? FilledButton(onPressed: null, child: Center(child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10),
+            child: child,
+          )))
           : (isEnabled
-              ? FilledButton(onPressed: onPressed, child: child)
+              ? FilledButton(onPressed: onPressed, child: Center(child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10),
+                child: child,
+              )))
               : OutlinedButton(
                   onPressed: null,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: c.primary.withOpacity(0.55)),
                     foregroundColor: c.primary.withOpacity(0.75),
                   ),
-                  child: Text(label, style: TextStyle(fontSize: fontSize)),
+                  child: Center(child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Text(label, style: TextStyle(fontSize: fontSize)),
+                  )),
                 )),
     );
   }

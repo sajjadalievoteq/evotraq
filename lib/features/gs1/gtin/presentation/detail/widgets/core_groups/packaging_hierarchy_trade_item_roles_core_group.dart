@@ -150,7 +150,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _nextLowerLevelGtin,
           fieldName: 'next_lower_level_gtin',
           label: GtinUiConstants.labelNextLowerLevelGtin,
@@ -168,7 +168,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
               ),
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _nextLowerLevelQuantity,
           fieldName: 'next_lower_level_quantity',
           label: GtinUiConstants.labelNextLowerLevelQuantity,
@@ -186,7 +186,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
               ),
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _quantityOfChildren,
           fieldName: 'quantity_of_children',
           label: GtinUiConstants.labelQuantityOfChildren,
@@ -202,7 +202,7 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
               ),
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _totalQtyNextLower,
           fieldName: 'total_qty_next_lower',
           label: GtinUiConstants.labelTotalQtyNextLower,

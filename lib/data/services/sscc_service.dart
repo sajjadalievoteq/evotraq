@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/gs1/models/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
 /// Implementation of the SSCCService interface that interacts with the backend API

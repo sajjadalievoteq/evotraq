@@ -98,7 +98,7 @@ class NetContentMeasurementsCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _netContent,
           fieldName: 'net_content_value',
           label: GtinUiConstants.labelNetContentValue,
@@ -110,7 +110,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateNetContentValueRequired,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _netContentUom,
           fieldName: 'net_content_uom',
           label: GtinUiConstants.labelNetContentUom,
@@ -120,7 +120,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateNetContentUomRequired,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _grossWeight,
           fieldName: 'gross_weight_value',
           label: GtinUiConstants.labelGrossWeightValue,
@@ -132,7 +132,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateGrossWeightValue,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _grossWeightUom,
           fieldName: 'gross_weight_uom',
           label: GtinUiConstants.labelGrossWeightUom,
@@ -142,7 +142,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateGrossWeightUom,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _height,
           fieldName: 'height_value',
           label: GtinUiConstants.labelHeight,
@@ -154,7 +154,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateHeightValue,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _width,
           fieldName: 'width_value',
           label: GtinUiConstants.labelWidth,
@@ -166,7 +166,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateWidthValue,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _depth,
           fieldName: 'depth_value',
           label: GtinUiConstants.labelDepth,
@@ -178,7 +178,7 @@ class NetContentMeasurementsCoreGroupState
           validator: GtinFieldValidators.validateDepthValue,
         ),
         const SizedBox(height: 12),
-        GtinValidatedField(
+        Gs1ValidatedField(
           controller: _dimensionUom,
           fieldName: 'dim_uom',
           label: GtinUiConstants.labelDimensionUom,

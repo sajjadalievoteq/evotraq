@@ -61,7 +61,7 @@ class GlnLicenseCoreGroup extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: licenseNumberController,
                 fieldName: 'licenseNumber',
                 label: GlnUiConstants.labelLicenseNumber,
@@ -72,7 +72,7 @@ class GlnLicenseCoreGroup extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: GtinValidatedField(
+              child: Gs1ValidatedField(
                 controller: licenseTypeController,
                 fieldName: 'licenseType',
                 label: GlnUiConstants.labelLicenseType,

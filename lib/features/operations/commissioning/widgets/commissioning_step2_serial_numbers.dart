@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/shared/models/scan_result.dart';
@@ -161,63 +162,66 @@ class _ScanInputCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SectionLabel('Add Serial Numbers', padding: EdgeInsets.only(bottom: 12)),
-            const SizedBox(height: 12),
-            SegmentedButton<ScanningMode>(
-              segments: [
-                if (!kIsWeb)
-                  const ButtonSegment(
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionLabel('Add Serial Numbers', padding: EdgeInsets.only(bottom: 12)),
+              const SizedBox(height: 12),
+              SegmentedButton<ScanningMode>(
+                segments: [
+                  if (!kIsWeb)
+                    const ButtonSegment(
 
-                    value: ScanningMode.camera,
-                    icon: Icon(Icons.camera_alt,size: 14,),
-                    label: Text('Camera'),
+                      value: ScanningMode.camera,
+                      icon: Icon(Icons.camera_alt,size: 14,),
+                      label: Text('Camera'),
+                    ),
+                  const ButtonSegment(
+                    value: ScanningMode.wired,
+                    icon: Icon(Icons.keyboard,size: 14,),
+                    label: Text('Scanner'),
                   ),
-                const ButtonSegment(
-                  value: ScanningMode.wired,
-                  icon: Icon(Icons.keyboard,size: 14,),
-                  label: Text('Scanner'),
-                ),
-                const ButtonSegment(
-                  value: ScanningMode.manual,
-                  icon: Icon(Icons.edit, size: 14),
-                  label: Text('Manual'),
-                ),
-              ],
-              selected: {scanningMode},
-              onSelectionChanged: (s) => onScanningModeChanged(s.first),
-            ),
-            const SizedBox(height: 16),
-            if (scanningMode == ScanningMode.camera && !kIsWeb)
-              SizedBox(
-                height: 200,
-                child: BarcodeScanner(onScanResult: onScanResult, height: 200),
-              )
-            else if (scanningMode == ScanningMode.wired)
-              _WiredScannerInput(
-                controller: wiredScannerController,
-                focusNode: wiredScannerFocusNode,
-                isActive: isWiredScannerActive,
-                onSubmitted: onAddSerial,
-              )
-            else
-              _ManualSerialInput(
-                controller: manualSerialController,
-                onAdd: onAddSerial,
+                  const ButtonSegment(
+                    value: ScanningMode.manual,
+                    icon: Icon(Icons.edit, size: 14),
+                    label: Text('Manual'),
+                  ),
+                ],
+                selected: {scanningMode},
+                onSelectionChanged: (s) => onScanningModeChanged(s.first),
               ),
-          ],
+              const SizedBox(height: 16),
+              if (scanningMode == ScanningMode.camera && !kIsWeb)
+                SizedBox(
+                  height: 200,
+                  child: BarcodeScanner(onScanResult: onScanResult, height: 200),
+                )
+              else if (scanningMode == ScanningMode.wired)
+                _WiredScannerInput(
+                  controller: wiredScannerController,
+                  focusNode: wiredScannerFocusNode,
+                  isActive: isWiredScannerActive,
+                  onSubmitted: onAddSerial,
+                )
+              else
+                _ManualSerialInput(
+                  controller: manualSerialController,
+                  onAdd: onAddSerial,
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _WiredScannerInput extends StatelessWidget {
+class _WiredScannerInput extends StatefulWidget {
   const _WiredScannerInput({
     required this.controller,
     required this.focusNode,
@@ -231,35 +235,40 @@ class _WiredScannerInput extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
 
   @override
+  State<_WiredScannerInput> createState() => _WiredScannerInputState();
+}
+
+class _WiredScannerInputState extends State<_WiredScannerInput> {
+  @override
+  void initState() {
+    super.initState();
+   widget.focusNode.requestFocus();
+  }
+  @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
-        TextField(
-          controller: controller,
-          focusNode: focusNode,
-          decoration: InputDecoration(
-            hintText: 'Scan serial number with barcode scanner',
-            border: const OutlineInputBorder(),
-            prefixIcon: Icon(
-              Icons.keyboard,
-              color: isActive ? Colors.green : null,
-            ),
-            suffixIcon: isActive
-                ? const Icon(Icons.sensors, color: Colors.green)
-                : null,
-          ),
-          onSubmitted: (value) {
-            if (value.isNotEmpty) onSubmitted(value);
+        // Invisible focus target — captures wired-scanner keystrokes
+        // without creating any HTML element (avoids visible input on web)
+        KeyboardListener(
+          focusNode: widget.focusNode,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.enter ||
+                  event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+                final value = widget.controller.text.trim();
+                if (value.isNotEmpty) {
+                  widget.onSubmitted(value);
+                  widget.controller.clear();
+                }
+              } else if (event.character != null &&
+                  event.character!.isNotEmpty) {
+                widget.controller.text += event.character!;
+              }
+            }
           },
-        ),
-        const SizedBox(height: 8),
-        Text(
-          isActive
-              ? '✓ Scanner active - scan barcode'
-              : 'Click the field to activate scanner input',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: isActive ? Colors.green : Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
-          ),
+          child: const SizedBox.shrink(),
         ),
       ],
     );
@@ -277,25 +286,28 @@ class _ManualSerialInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Enter serial number',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              if (value.isNotEmpty) onAdd(value);
-            },
+        TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter serial number',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) {
+            if (value.isNotEmpty) onAdd(value);
+          },
+        ),
+        SizedBox(height: 10,),
+        SizedBox(
+          width: double.infinity
+        ,
+          child: CustomButtonWidget(
+            onTap: () => onAdd(controller.text),
+            title: 'Add',
           ),
         ),
-        const SizedBox(width: 8),
-        CustomButtonWidget(
-          onTap: () => onAdd(controller.text),
-          title: 'Add',
-        ),
+
       ],
     );
   }
@@ -365,6 +377,7 @@ class _SerialList extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 4),
         child: ListTile(
           dense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
           leading: CircleAvatar(
             radius: 16,
             backgroundColor: Theme.of(context).primaryColor,

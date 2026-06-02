@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -477,6 +479,11 @@ class _CommissioningOperationScreenState
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (page) {
                   setState(() => _currentStep = page);
+                  if (page == 1 && _scanningMode == ScanningMode.wired) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _wiredScannerFocusNode.requestFocus();
+                    });
+                  }
                 },
                 children: [
                   _buildStep1ReferenceDetails(),
@@ -583,7 +590,16 @@ class _CommissioningOperationScreenState
                   ),
                   const SizedBox(height: 8),
                   if (_isLoadingGTINs)
-                    const Center(child: CircularProgressIndicator())
+                    AppShimmer(
+                      child: Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                      ),
+                    )
                   else if (_availableGTINs.isNotEmpty) ...[
                     DropdownButtonFormField<GTIN>(
                       value: _selectedGTIN,
@@ -882,6 +898,11 @@ class _CommissioningOperationScreenState
                       setState(() {
                         _scanningMode = selection.first;
                       });
+                      if (selection.first == ScanningMode.wired) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _wiredScannerFocusNode.requestFocus();
+                        });
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
@@ -898,38 +919,72 @@ class _CommissioningOperationScreenState
                   else if (_scanningMode == ScanningMode.wired)
                     Column(
                       children: [
-                        TextField(
-                          controller: _wiredScannerController,
+                        // Invisible focus target — captures wired-scanner keystrokes
+                        // without creating any HTML element (avoids visible input on web)
+                        KeyboardListener(
                           focusNode: _wiredScannerFocusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Scan serial number with barcode scanner',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: Icon(
-                              Icons.keyboard,
-                              color: _isWiredScannerActive
-                                  ? Colors.green
-                                  : null,
-                            ),
-                            suffixIcon: _isWiredScannerActive
-                                ? const Icon(Icons.sensors, color: Colors.green)
-                                : null,
-                          ),
-                          onSubmitted: (value) {
-                            if (value.isNotEmpty) {
-                              _addSerial(value);
+                          onKeyEvent: (event) {
+                            if (event is KeyDownEvent) {
+                              if (event.logicalKey == LogicalKeyboardKey.enter ||
+                                  event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+                                final value = _wiredScannerController.text.trim();
+                                if (value.isNotEmpty) {
+                                  _addSerial(value);
+                                  _wiredScannerController.clear();
+                                }
+                              } else if (event.character != null &&
+                                  event.character!.isNotEmpty) {
+                                _wiredScannerController.text +=
+                                    event.character!;
+                              }
                             }
                           },
+                          child: const SizedBox.shrink(),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _isWiredScannerActive
-                              ? '✓ Scanner active - scan barcode'
-                              : 'Click the field to activate scanner input',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _isWiredScannerActive
-                                ? Colors.green
-                                : Colors.grey,
+                        // Scanner status indicator
+                        GestureDetector(
+                          onTap: () => _wiredScannerFocusNode.requestFocus(),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 18),
+                            decoration: BoxDecoration(
+                              color: _isWiredScannerActive
+                                  ? Colors.green.withOpacity(0.08)
+                                  : Colors.grey.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: _isWiredScannerActive
+                                    ? Colors.green
+                                    : Colors.grey.shade400,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _isWiredScannerActive
+                                      ? Icons.sensors
+                                      : Icons.sensors_off,
+                                  color: _isWiredScannerActive
+                                      ? Colors.green
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  _isWiredScannerActive
+                                      ? 'Scanner active — ready to scan'
+                                      : 'Tap to activate scanner',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: _isWiredScannerActive
+                                        ? Colors.green
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

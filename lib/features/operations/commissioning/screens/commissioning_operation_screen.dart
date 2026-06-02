@@ -458,7 +458,13 @@ class _CommissioningOperationScreenState
         wiredScannerFocusNode: _wiredScannerFocusNode,
         manualSerialController: _manualSerialController,
         isWiredScannerActive: _isWiredScannerActive,
-        onScanningModeChanged: (mode) => setState(() => _scanningMode = mode),
+        onScanningModeChanged: (mode) {
+          setState(() => _scanningMode = mode);
+          if (mode == ScanningMode.wired) {
+            WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _wiredScannerFocusNode.requestFocus());
+          }
+        },
         onAddSerial: _addSerial,
         onRemoveSerial: _removeSerial,
         onClearAll: _clearAllSerials,
@@ -521,7 +527,13 @@ class _CommissioningOperationScreenState
           child: PageView(
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
-            onPageChanged: (page) => setState(() => _currentStep = page),
+            onPageChanged: (page) {
+              setState(() => _currentStep = page);
+              if (page == 1 && _scanningMode == ScanningMode.wired) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _wiredScannerFocusNode.requestFocus());
+              }
+            },
             children: [_step1Widget, _step2Widget, _step3Widget],
           ),
         ),

@@ -561,12 +561,11 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                           width: double.infinity,
                           child: CustomButtonWidget(
                             title: 'Decommission SGTIN',
-                            backgroundColor: Colors.red,
+
                             onTap: _decommission,
                           ),
                         ),
                       ),
-
                     if (_isEditing || widget.isCreating) ...[
                       const SizedBox(height: 24),
                       SizedBox(

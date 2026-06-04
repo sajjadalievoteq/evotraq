@@ -1,221 +1,499 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-// SSCC (Serial Shipping Container Code) model class
+/// SSCC (Serial Shipping Container Code) — spec-aligned logistic unit model.
 class SSCC {
-  final String? id; // Changed from int? to String? to match UUID in backend
+  final String? id;
   final String ssccCode;
-  final ContainerType containerType;
+  final String? ssccUri;
+  final String? gs1DigitalLinkUri;
+
+  final UnitType unitType;
+  final LogisticUnitStatus status;
+  final ContentHomogeneity contentHomogeneity;
+
+  final String? containedGtin;
+  final int? containedQuantity;
+  final String? containedBatch;
+  final DateTime? containedExpiry;
+
+  final DateTime? allocatedAt;
+  final DateTime? commissionedAt;
   final DateTime? packingDate;
-  final ContainerStatus containerStatus;
+  final DateTime? lastShipmentAt;
+  final DateTime? shippingDate;
+  final DateTime? receivingDate;
+  final DateTime? decommissionedAt;
+  final DateTime? nonReuseUntil;
   final DateTime? validFrom;
   final DateTime? validUntil;
-  final SSCC? parentSscc;
+  final DateTime? retentionExpiry;
+
   final String? gs1CompanyPrefix;
   final String? extensionDigit;
   final String? serialReference;
   final String? checkDigit;
-  final DateTime? shippingDate;
-  final DateTime? receivingDate;
+
+  final SSCC? parentSscc;
+  final String? parentSsccCode;
+  final String? scanVisibleSsccCode;
+  final int? childCount;
+  final int? totalLeafCount;
+
+  final String? shipFromGln;
+  final String? shipToGln;
+  final String? billToGln;
+  final String? shipForGln;
+  final String? currentLocationGln;
+  final String? currentReadpointGln;
+  final String? currentBizlocationGln;
+  final String? currentCustodianGln;
+
+  final String? purchaseOrderNumber;
+  final String? ginc;
+  final String? gsin;
+  final String? carrierRoutingCode;
+  final String? shipToPostalCode;
+
+  final String? aggregationEventId;
+  final String? commissioningEventId;
+  final List<String>? childSsccs;
+  final List<String>? childSgtins;
+
   final GLN? sourceLocation;
   final GLN? destinationLocation;
-  final GLN? issuingGLN; // The GLN of the location that created/issued this SSCC
+  final GLN? issuingGLN;
+
+  final List<String>? availableTransitions;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  SSCC({
+  const SSCC({
     this.id,
     required this.ssccCode,
-    required this.containerType,
+    this.ssccUri,
+    this.gs1DigitalLinkUri,
+    required this.unitType,
+    required this.status,
+    this.contentHomogeneity = ContentHomogeneity.UNKNOWN,
+    this.containedGtin,
+    this.containedQuantity,
+    this.containedBatch,
+    this.containedExpiry,
+    this.allocatedAt,
+    this.commissionedAt,
     this.packingDate,
-    required this.containerStatus,
+    this.lastShipmentAt,
+    this.shippingDate,
+    this.receivingDate,
+    this.decommissionedAt,
+    this.nonReuseUntil,
     this.validFrom,
     this.validUntil,
-    this.parentSscc,
+    this.retentionExpiry,
     this.gs1CompanyPrefix,
     this.extensionDigit,
     this.serialReference,
     this.checkDigit,
-    this.shippingDate,
-    this.receivingDate,
+    this.parentSscc,
+    this.parentSsccCode,
+    this.scanVisibleSsccCode,
+    this.childCount,
+    this.totalLeafCount,
+    this.shipFromGln,
+    this.shipToGln,
+    this.billToGln,
+    this.shipForGln,
+    this.currentLocationGln,
+    this.currentReadpointGln,
+    this.currentBizlocationGln,
+    this.currentCustodianGln,
+    this.purchaseOrderNumber,
+    this.ginc,
+    this.gsin,
+    this.carrierRoutingCode,
+    this.shipToPostalCode,
+    this.aggregationEventId,
+    this.commissioningEventId,
+    this.childSsccs,
+    this.childSgtins,
     this.sourceLocation,
     this.destinationLocation,
     this.issuingGLN,
+    this.availableTransitions,
     required this.createdAt,
     required this.updatedAt,
-  });  factory SSCC.fromJson(Map<String, dynamic> json) {
-    // Handle different field names for SSCC code (backend uses 'sscc' while frontend uses 'ssccCode')
-    final String ssccCode = json['sscc'] ?? json['ssccCode'] ?? '';
-    
-    // Get current timestamp for fallback
-    final DateTime now = DateTime.now();
-    
-    // Use statusDate as a fallback for timestamps if they're missing
-    final DateTime createdAt = json['createdAt'] != null
-        ? DateTime.parse(json['createdAt'])
-        : (json['statusDate'] != null ? DateTime.parse(json['statusDate']) : now);
-    
-    final DateTime updatedAt = json['updatedAt'] != null
-        ? DateTime.parse(json['updatedAt'])
-        : (json['statusDate'] != null ? DateTime.parse(json['statusDate']) : now);
-    
+  });
+
+  SSCC copyWith({
+    String? id,
+    String? ssccCode,
+    String? ssccUri,
+    String? gs1DigitalLinkUri,
+    UnitType? unitType,
+    LogisticUnitStatus? status,
+    ContentHomogeneity? contentHomogeneity,
+    String? containedGtin,
+    int? containedQuantity,
+    String? containedBatch,
+    DateTime? containedExpiry,
+    DateTime? allocatedAt,
+    DateTime? commissionedAt,
+    DateTime? packingDate,
+    DateTime? lastShipmentAt,
+    DateTime? shippingDate,
+    DateTime? receivingDate,
+    DateTime? decommissionedAt,
+    DateTime? nonReuseUntil,
+    DateTime? validFrom,
+    DateTime? validUntil,
+    DateTime? retentionExpiry,
+    String? gs1CompanyPrefix,
+    String? extensionDigit,
+    String? serialReference,
+    String? checkDigit,
+    SSCC? parentSscc,
+    String? parentSsccCode,
+    String? scanVisibleSsccCode,
+    int? childCount,
+    int? totalLeafCount,
+    String? shipFromGln,
+    String? shipToGln,
+    String? billToGln,
+    String? shipForGln,
+    String? currentLocationGln,
+    String? currentReadpointGln,
+    String? currentBizlocationGln,
+    String? currentCustodianGln,
+    String? purchaseOrderNumber,
+    String? ginc,
+    String? gsin,
+    String? carrierRoutingCode,
+    String? shipToPostalCode,
+    String? aggregationEventId,
+    String? commissioningEventId,
+    List<String>? childSsccs,
+    List<String>? childSgtins,
+    GLN? sourceLocation,
+    GLN? destinationLocation,
+    GLN? issuingGLN,
+    List<String>? availableTransitions,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
     return SSCC(
-      id: json['id'],
+      id: id ?? this.id,
+      ssccCode: ssccCode ?? this.ssccCode,
+      ssccUri: ssccUri ?? this.ssccUri,
+      gs1DigitalLinkUri: gs1DigitalLinkUri ?? this.gs1DigitalLinkUri,
+      unitType: unitType ?? this.unitType,
+      status: status ?? this.status,
+      contentHomogeneity: contentHomogeneity ?? this.contentHomogeneity,
+      containedGtin: containedGtin ?? this.containedGtin,
+      containedQuantity: containedQuantity ?? this.containedQuantity,
+      containedBatch: containedBatch ?? this.containedBatch,
+      containedExpiry: containedExpiry ?? this.containedExpiry,
+      allocatedAt: allocatedAt ?? this.allocatedAt,
+      commissionedAt: commissionedAt ?? this.commissionedAt,
+      packingDate: packingDate ?? this.packingDate,
+      lastShipmentAt: lastShipmentAt ?? this.lastShipmentAt,
+      shippingDate: shippingDate ?? this.shippingDate,
+      receivingDate: receivingDate ?? this.receivingDate,
+      decommissionedAt: decommissionedAt ?? this.decommissionedAt,
+      nonReuseUntil: nonReuseUntil ?? this.nonReuseUntil,
+      validFrom: validFrom ?? this.validFrom,
+      validUntil: validUntil ?? this.validUntil,
+      retentionExpiry: retentionExpiry ?? this.retentionExpiry,
+      gs1CompanyPrefix: gs1CompanyPrefix ?? this.gs1CompanyPrefix,
+      extensionDigit: extensionDigit ?? this.extensionDigit,
+      serialReference: serialReference ?? this.serialReference,
+      checkDigit: checkDigit ?? this.checkDigit,
+      parentSscc: parentSscc ?? this.parentSscc,
+      parentSsccCode: parentSsccCode ?? this.parentSsccCode,
+      scanVisibleSsccCode: scanVisibleSsccCode ?? this.scanVisibleSsccCode,
+      childCount: childCount ?? this.childCount,
+      totalLeafCount: totalLeafCount ?? this.totalLeafCount,
+      shipFromGln: shipFromGln ?? this.shipFromGln,
+      shipToGln: shipToGln ?? this.shipToGln,
+      billToGln: billToGln ?? this.billToGln,
+      shipForGln: shipForGln ?? this.shipForGln,
+      currentLocationGln: currentLocationGln ?? this.currentLocationGln,
+      currentReadpointGln: currentReadpointGln ?? this.currentReadpointGln,
+      currentBizlocationGln:
+          currentBizlocationGln ?? this.currentBizlocationGln,
+      currentCustodianGln: currentCustodianGln ?? this.currentCustodianGln,
+      purchaseOrderNumber: purchaseOrderNumber ?? this.purchaseOrderNumber,
+      ginc: ginc ?? this.ginc,
+      gsin: gsin ?? this.gsin,
+      carrierRoutingCode: carrierRoutingCode ?? this.carrierRoutingCode,
+      shipToPostalCode: shipToPostalCode ?? this.shipToPostalCode,
+      aggregationEventId: aggregationEventId ?? this.aggregationEventId,
+      commissioningEventId:
+          commissioningEventId ?? this.commissioningEventId,
+      childSsccs: childSsccs ?? this.childSsccs,
+      childSgtins: childSgtins ?? this.childSgtins,
+      sourceLocation: sourceLocation ?? this.sourceLocation,
+      destinationLocation: destinationLocation ?? this.destinationLocation,
+      issuingGLN: issuingGLN ?? this.issuingGLN,
+      availableTransitions: availableTransitions ?? this.availableTransitions,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  factory SSCC.fromJson(Map<String, dynamic> json) {
+    final String ssccCode = json['sscc'] ?? json['ssccCode'] ?? '';
+    final DateTime now = DateTime.now();
+    final DateTime createdAt = _parseDateTime(json['createdAt']) ??
+        _parseDateTime(json['statusDate']) ??
+        now;
+    final DateTime updatedAt =
+        _parseDateTime(json['updatedAt']) ?? createdAt;
+
+    List<String>? transitions;
+    final rawTransitions = json['availableTransitions'];
+    if (rawTransitions is List) {
+      transitions = rawTransitions.map((e) => e.toString()).toList();
+    }
+
+    return SSCC(
+      id: json['id']?.toString(),
       ssccCode: ssccCode,
-      containerType: _parseContainerType(json['containerType']),
-        packingDate: json['packingDate'] != null 
-            ? DateTime.parse(json['packingDate']) 
-            : null,
-      containerStatus: _parseContainerStatus(json['containerStatus']),
-      validFrom: json['validFrom'] != null 
-          ? DateTime.parse(json['validFrom']) 
+      ssccUri: json['ssccUri'] as String?,
+      gs1DigitalLinkUri: json['gs1DigitalLinkUri'] as String?,
+      unitType: parseUnitType(
+        json['unitType'] as String? ?? json['containerType'] as String?,
+      ),
+      status: parseStatus(
+        json['status'] as String? ?? json['containerStatus'] as String?,
+      ),
+      contentHomogeneity: parseContentHomogeneity(
+        json['contentHomogeneity'] as String?,
+      ),
+      containedGtin: json['containedGtin'] as String?,
+      containedQuantity: json['containedQuantity'] as int?,
+      containedBatch: json['containedBatch'] as String?,
+      containedExpiry: _parseDateOnly(json['containedExpiry']),
+      allocatedAt: _parseDateTime(json['allocatedAt']),
+      commissionedAt: _parseDateTime(json['commissionedAt']),
+      packingDate: _parseDateTime(json['packingDate']),
+      lastShipmentAt: _parseDateTime(json['lastShipmentAt']),
+      shippingDate: _parseDateTime(json['shippingDate']),
+      receivingDate: _parseDateTime(json['receivingDate']),
+      decommissionedAt: _parseDateTime(json['decommissionedAt']),
+      nonReuseUntil: _parseDateOnly(json['nonReuseUntil']),
+      validFrom: _parseDateTime(json['validFrom']),
+      validUntil: _parseDateTime(json['validUntil']),
+      retentionExpiry: _parseDateOnly(json['retentionExpiry']),
+      gs1CompanyPrefix:
+          json['companyPrefix'] as String? ?? json['gs1CompanyPrefix'] as String?,
+      extensionDigit: json['extensionDigit'] as String?,
+      serialReference: json['serialReference'] as String?,
+      checkDigit: json['checkDigit'] as String?,
+      parentSscc: json['parentSscc'] is Map<String, dynamic>
+          ? SSCC.fromJson(json['parentSscc'] as Map<String, dynamic>)
           : null,
-      validUntil: json['validUntil'] != null 
-          ? DateTime.parse(json['validUntil']) 
+      parentSsccCode: json['parentSSCC'] as String?,
+      scanVisibleSsccCode: json['scanVisibleSsccCode'] as String?,
+      childCount: json['childCount'] as int?,
+      totalLeafCount: json['totalLeafCount'] as int?,
+      shipFromGln: json['shipFromGLN'] as String?,
+      shipToGln: json['shipToGLN'] as String?,
+      billToGln: json['billToGLN'] as String?,
+      shipForGln: json['shipForGLN'] as String?,
+      currentLocationGln: json['currentLocationGLN'] as String?,
+      currentReadpointGln: json['currentReadpointGLN'] as String?,
+      currentBizlocationGln: json['currentBizlocationGLN'] as String?,
+      currentCustodianGln: json['currentCustodianGLN'] as String?,
+      purchaseOrderNumber: json['purchaseOrderNumber'] as String?,
+      ginc: json['ginc'] as String?,
+      gsin: json['gsin'] as String?,
+      carrierRoutingCode: json['carrierRoutingCode'] as String?,
+      shipToPostalCode: json['shipToPostalCode'] as String?,
+      aggregationEventId: json['aggregationEventId'] as String?,
+      commissioningEventId: json['commissioningEventId'] as String?,
+      childSsccs: _parseStringList(json['childSsccs']),
+      childSgtins: _parseStringList(json['childSgtins']),
+      sourceLocation: json['sourceLocation'] is Map<String, dynamic>
+          ? GLN.fromJson(json['sourceLocation'] as Map<String, dynamic>)
           : null,
-      parentSscc: json['parentSscc'] != null 
-          ? SSCC.fromJson(json['parentSscc']) 
+      destinationLocation: json['destinationLocation'] is Map<String, dynamic>
+          ? GLN.fromJson(json['destinationLocation'] as Map<String, dynamic>)
           : null,
-      gs1CompanyPrefix: json['companyPrefix'] ?? json['gs1CompanyPrefix'], // Try both field names
-      extensionDigit: json['extensionDigit'],
-      serialReference: json['serialReference'],
-      checkDigit: json['checkDigit'],
-      shippingDate: json['shippingDate'] != null 
-          ? DateTime.parse(json['shippingDate']) 
-          : null,
-      receivingDate: json['receivingDate'] != null 
-          ? DateTime.parse(json['receivingDate']) 
-          : null,
-      sourceLocation: json['sourceLocation'] != null 
-          ? GLN.fromJson(json['sourceLocation']) 
-          : null,
-      destinationLocation: json['destinationLocation'] != null 
-          ? GLN.fromJson(json['destinationLocation']) 
-          : null,
-      issuingGLN: json['issuingGLN'] != null 
-          ? _parseGLNFromJsonField(json['issuingGLN'])
-          : null,
-      // Use our pre-calculated timestamps that include fallbacks
+      issuingGLN: _parseGlnField(json['issuingGLN']),
+      availableTransitions: transitions,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
-  }  Map<String, dynamic> toJson() {
-    // IMPORTANT: After multiple testing attempts, we've discovered that the backend only accepts
-    // the absolute minimal set of fields. It rejects individual SSCC components, timestamps, etc.
-    
-    // Create the absolute minimal JSON object with only fields the backend accepts
-    final Map<String, dynamic> jsonData = {
-      // Only include ID if it's not null (for editing existing SSCCs)
-      if (id != null) 'id': id,
-      
-      // The SSCC code using the field name from the backend (sscc not ssccCode)
-      'sscc': ssccCode,
-      
-      // Only include these basic fields that we know the backend accepts
-      'containerType': containerType.name,
-      'containerStatus': containerStatus.name,
-      
-      // Only include packingDate if available - this appears to be accepted
-      if (packingDate != null) 'packingDate': _formatDateWithTimezone(packingDate!),
-      
-      // GS1 compliance: Include issuing GLN for proper supply chain traceability
-      if (issuingGLN != null) 'issuingGLN': issuingGLN!.glnCode,
-      
-      // DO NOT include createdAt/updatedAt timestamps - the backend will handle these
-    };
-    
-    // Print the final JSON for debugging
-    print('SSCC toJson output - minimal fields with GS1 compliance: $jsonData');
-    print('SSCC toJson field count: ${jsonData.length}');
-    print('Fields included: ${jsonData.keys.toList()}');
-    if (issuingGLN != null) {
-      print('Issuing GLN included for GS1 traceability: ${issuingGLN!.glnCode}');
-    }
-    
-    return jsonData;
   }
 
-  // Helper method to format dates with timezone information
-  String _formatDateWithTimezone(DateTime dateTime) {
-    // Convert to format that Java's ZonedDateTime can parse
-    final String iso8601String = dateTime.toIso8601String();
-    
-    // Check if the string already has timezone information
-    if (iso8601String.endsWith('Z') || iso8601String.contains('+')) {
-      return iso8601String;
-    }
-    
-    // Add UTC timezone marker if missing
-    return '${iso8601String}Z';
+  Map<String, dynamic> toJson() {
+    return {
+      if (id != null) 'id': id,
+      'sscc': ssccCode,
+      if (ssccUri != null) 'ssccUri': ssccUri,
+      if (gs1DigitalLinkUri != null) 'gs1DigitalLinkUri': gs1DigitalLinkUri,
+      'status': status.name,
+      'containerStatus': legacyContainerStatusName(status),
+      'unitType': unitType.name,
+      'containerType': unitType.name,
+      'contentHomogeneity': contentHomogeneity.name,
+      if (containedGtin != null) 'containedGtin': containedGtin,
+      if (containedQuantity != null) 'containedQuantity': containedQuantity,
+      if (containedBatch != null) 'containedBatch': containedBatch,
+      if (containedExpiry != null)
+        'containedExpiry': _formatDateOnly(containedExpiry!),
+      if (packingDate != null)
+        'packingDate': _formatDateWithTimezone(packingDate!),
+      if (parentSsccCode != null) 'parentSSCC': parentSsccCode,
+      if (scanVisibleSsccCode != null)
+        'scanVisibleSsccCode': scanVisibleSsccCode,
+      if (shipFromGln != null) 'shipFromGLN': shipFromGln,
+      if (shipToGln != null) 'shipToGLN': shipToGln,
+      if (billToGln != null) 'billToGLN': billToGln,
+      if (shipForGln != null) 'shipForGLN': shipForGln,
+      if (purchaseOrderNumber != null)
+        'purchaseOrderNumber': purchaseOrderNumber,
+      if (gsin != null) 'gsin': gsin,
+      if (ginc != null) 'ginc': ginc,
+      if (carrierRoutingCode != null)
+        'carrierRoutingCode': carrierRoutingCode,
+      if (shipToPostalCode != null) 'shipToPostalCode': shipToPostalCode,
+      if (aggregationEventId != null)
+        'aggregationEventId': aggregationEventId,
+      if (commissioningEventId != null)
+        'commissioningEventId': commissioningEventId,
+      if (currentReadpointGln != null)
+        'currentReadpointGLN': currentReadpointGln,
+      if (currentBizlocationGln != null)
+        'currentBizlocationGLN': currentBizlocationGln,
+      if (currentCustodianGln != null)
+        'currentCustodianGLN': currentCustodianGln,
+      if (issuingGLN != null) 'issuingGLN': issuingGLN!.glnCode,
+      if (gs1CompanyPrefix != null) 'gs1CompanyPrefix': gs1CompanyPrefix,
+      if (extensionDigit != null) 'extensionDigit': extensionDigit,
+      if (serialReference != null) 'serialReference': serialReference,
+      if (checkDigit != null) 'checkDigit': checkDigit,
+    };
   }
-  
-  
-  /// Helper method to parse GLN from JSON field that can be either a string (GLN code) or a full GLN object
-  static GLN? _parseGLNFromJsonField(dynamic glnField) {
-    if (glnField == null) {
-      return null;
+
+  static List<String>? _parseStringList(dynamic value) {
+    if (value is! List) return null;
+    return value.map((e) => e.toString()).toList();
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is String && value.isNotEmpty) {
+      return DateTime.tryParse(value);
     }
-    
-    // If it's a string, treat it as a GLN code and create a GLN using fromCode
-    if (glnField is String) {
-      return GLN.fromCode(glnField);
-    }
-    
-    // If it's a Map, parse it as a full GLN object
-    if (glnField is Map<String, dynamic>) {
-      return GLN.fromJson(glnField);
-    }
-    
-    // Unexpected format
-    print('Warning: Unexpected GLN field format: ${glnField.runtimeType}, value: $glnField');
     return null;
   }
 
-  static ContainerType _parseContainerType(String? value) {
-    if (value == null) return ContainerType.OTHER;
-    
-    try {
-      return ContainerType.values.firstWhere(
-        (type) => type.name == value,
-        orElse: () => ContainerType.OTHER,
-      );
-    } catch (_) {
-      return ContainerType.OTHER;
+  static DateTime? _parseDateOnly(dynamic value) {
+    if (value == null) return null;
+    if (value is String && value.isNotEmpty) {
+      return DateTime.tryParse(value);
     }
+    return null;
   }
-  
-  static ContainerStatus _parseContainerStatus(String? value) {
-    if (value == null) return ContainerStatus.CREATED;
-    
-    try {
-      return ContainerStatus.values.firstWhere(
-        (status) => status.name == value,
-        orElse: () => ContainerStatus.CREATED,
-      );
-    } catch (_) {
-      return ContainerStatus.CREATED;
+
+  static GLN? _parseGlnField(dynamic glnField) {
+    if (glnField == null) return null;
+    if (glnField is String) return GLN.fromCode(glnField);
+    if (glnField is Map<String, dynamic>) return GLN.fromJson(glnField);
+    return null;
+  }
+
+  static String _formatDateWithTimezone(DateTime dateTime) {
+    final iso = dateTime.toIso8601String();
+    if (iso.endsWith('Z') || iso.contains('+')) return iso;
+    return '${iso}Z';
+  }
+
+  static String _formatDateOnly(DateTime date) {
+    return date.toIso8601String().split('T').first;
+  }
+
+  static LogisticUnitStatus parseStatus(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return LogisticUnitStatus.DRAFT;
     }
+    final s = raw.trim().toUpperCase();
+    for (final v in LogisticUnitStatus.values) {
+      if (v.name == s) return v;
+    }
+    return switch (s) {
+      'CREATED' => LogisticUnitStatus.DRAFT,
+      'PACKED' => LogisticUnitStatus.ACTIVE,
+      'SHIPPED' => LogisticUnitStatus.IN_TRANSIT,
+      'UNPACKED' || 'DISPOSED' => LogisticUnitStatus.DECOMMISSIONED,
+      'DAMAGED' => LogisticUnitStatus.RECEIVED,
+      _ => LogisticUnitStatus.DRAFT,
+    };
+  }
+
+  static UnitType parseUnitType(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return UnitType.OTHER;
+    final s = raw.trim().toUpperCase();
+    for (final v in UnitType.values) {
+      if (v.name == s) return v;
+    }
+    return UnitType.OTHER;
+  }
+
+  static ContentHomogeneity parseContentHomogeneity(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return ContentHomogeneity.UNKNOWN;
+    }
+    final s = raw.trim().toUpperCase();
+    for (final v in ContentHomogeneity.values) {
+      if (v.name == s) return v;
+    }
+    return ContentHomogeneity.UNKNOWN;
+  }
+
+  /// Legacy container status name for API clients still using old enum.
+  static String legacyContainerStatusName(LogisticUnitStatus status) {
+    return switch (status) {
+      LogisticUnitStatus.DRAFT || LogisticUnitStatus.ALLOCATED => 'CREATED',
+      LogisticUnitStatus.ACTIVE => 'PACKED',
+      LogisticUnitStatus.IN_TRANSIT => 'IN_TRANSIT',
+      LogisticUnitStatus.RECEIVED => 'RECEIVED',
+      LogisticUnitStatus.DECOMMISSIONED => 'UNPACKED',
+      LogisticUnitStatus.VOIDED => 'DISPOSED',
+    };
   }
 }
 
-/// Container types for SSCC
-enum ContainerType {
+/// Spec §4.2 logistic unit types.
+enum UnitType {
   PALLET,
   CASE,
+  CARTON,
   TOTE,
   CONTAINER,
   DRUM,
-  CARTON,
-  OTHER
+  AIR_ULD,
+  PARCEL,
+  ROLL_CAGE,
+  OTHER,
 }
 
-/// Container status values for SSCC
-enum ContainerStatus {
-  CREATED,    // Container is created but not packed
-  PACKED,     // Container is packed with items
-  SHIPPED,    // Container is shipped
-  IN_TRANSIT, // Container is in transit
-  RECEIVED,   // Container is received at destination
-  UNPACKED,   // Container is unpacked
-  DAMAGED,    // Container is damaged
-  DISPOSED    // Container is disposed
+/// Spec §4.2 logistic unit lifecycle statuses.
+enum LogisticUnitStatus {
+  DRAFT,
+  ALLOCATED,
+  ACTIVE,
+  IN_TRANSIT,
+  RECEIVED,
+  DECOMMISSIONED,
+  VOIDED,
+}
+
+/// Content homogeneity (XSC-004 / XSC-005).
+enum ContentHomogeneity {
+  HOMOGENEOUS,
+  MIXED,
+  UNKNOWN,
 }

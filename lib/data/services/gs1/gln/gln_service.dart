@@ -4,6 +4,7 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 
 /// Implementation of GLNService interface for managing GLNs (Global Location Numbers)
 class GLNService {
@@ -37,21 +38,8 @@ class GLNService {
     );
     print('GLN list response status: ${response.statusCode}, body: ${response.data}');
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.data);
-      if (responseData.containsKey(GlnApiHttpConsts.jsonKeyContent) &&
-          responseData[GlnApiHttpConsts.jsonKeyContent] is List) {
-        final List<dynamic> data = responseData[GlnApiHttpConsts.jsonKeyContent];
-        return data.map((json) => GLN.fromJson(json)).toList();
-      } else {
-        if (responseData is List) {
-          return (responseData as List).map((json) => GLN.fromJson(json)).toList();
-        } else {
-          throw ApiException(
-            message: GlnApiMessages.unexpectedListFormat,
-            responseBody: response.data,
-          );
-        }
-      }
+      final decoded = json.decode(response.data);
+      return parseGlnListFromResponseData(decoded);
     } else if (response.statusCode == 403) {
       print(GlnApiMessages.authTokenInvalidOrExpired);
       throw ApiException(
@@ -256,21 +244,8 @@ class GLNService {
       acceptAllStatusCodes: true,
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.data);
-      if (responseData.containsKey(GlnApiHttpConsts.jsonKeyContent) &&
-          responseData[GlnApiHttpConsts.jsonKeyContent] is List) {
-        final List<dynamic> data = responseData[GlnApiHttpConsts.jsonKeyContent];
-        return data.map((json) => GLN.fromJson(json)).toList();
-      } else {
-        if (responseData is List) {
-          return (responseData as List).map((json) => GLN.fromJson(json)).toList();
-        } else {
-          throw ApiException(
-            message: GlnApiMessages.unexpectedSearchFormat,
-            responseBody: response.data,
-          );
-        }
-      }
+      final decoded = json.decode(response.data);
+      return parseGlnListFromResponseData(decoded);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
@@ -373,19 +348,7 @@ class GLNService {
     );
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
-      if (responseData is Map<String, dynamic> &&
-          responseData.containsKey(GlnApiHttpConsts.jsonKeyContent) &&
-          responseData[GlnApiHttpConsts.jsonKeyContent] is List) {
-        final List<dynamic> data = responseData[GlnApiHttpConsts.jsonKeyContent];
-        return data.map((json) => GLN.fromJson(json)).toList();
-      } else if (responseData is List) {
-        return responseData.map((json) => GLN.fromJson(json)).toList();
-      } else {
-        throw ApiException(
-          message: GlnApiMessages.unexpectedExpiredLicensesFormat,
-          responseBody: response.data,
-        );
-      }
+      return parseGlnListFromResponseData(responseData);
     } else {
       throw ApiException(
         statusCode: response.statusCode,
@@ -411,19 +374,7 @@ class GLNService {
     );
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
-      if (responseData is Map<String, dynamic> &&
-          responseData.containsKey(GlnApiHttpConsts.jsonKeyContent) &&
-          responseData[GlnApiHttpConsts.jsonKeyContent] is List) {
-        final List<dynamic> data = responseData[GlnApiHttpConsts.jsonKeyContent];
-        return data.map((json) => GLN.fromJson(json)).toList();
-      } else if (responseData is List) {
-        return responseData.map((json) => GLN.fromJson(json)).toList();
-      } else {
-        throw ApiException(
-          message: GlnApiMessages.unexpectedChildGlnsFormat,
-          responseBody: response.data,
-        );
-      }
+      return parseGlnListFromResponseData(responseData);
     } else {
       throw ApiException(
         statusCode: response.statusCode,

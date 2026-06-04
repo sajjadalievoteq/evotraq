@@ -40,9 +40,10 @@ import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import '../../data/services/shipping_operation_service.dart';
-import '../../data/services/sscc_pharmaceutical_extension_service.dart';
-import '../../data/services/sscc_service.dart';
-import '../../data/services/sscc_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
 import '../../data/services/system_settings_service.dart';
 import '../../data/services/transaction_document_service.dart';
 import '../../data/services/transformation_event_service.dart';
@@ -135,6 +136,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<SSCCService>(
     () => SSCCService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<SsccPharmaComplianceService>(
+    () => SsccPharmaComplianceService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<NotificationApiService>(

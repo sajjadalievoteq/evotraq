@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
 /// Implementation of the SSCCService interface that interacts with the backend API
@@ -29,52 +32,11 @@ class SSCCService {
     if (sscc.ssccCode.length != 18) {
       throw ApiException(message: 'SSCC code must be exactly 18 digits');
     }
-
-    // Create the JSON payload and log it for detailed debugging
     final Map<String, dynamic> jsonPayload = sscc.toJson();
     final String jsonBody = json.encode(jsonPayload);
-    print('SSCC Create request payload: $jsonBody');
-    print('SSCC Create request payload fields: ${jsonPayload.keys}');
-    print('SSCC API endpoint: ${_dioService.baseUrl}/identifiers/sscc');
-
-    // Verify that we're sending ONLY the exact fields the backend accepts
-    print('FINAL SSCC CREATE PAYLOAD VERIFICATION:');
-    print('Total fields in payload: ${jsonPayload.length}');
-    print('Fields included:');
-    jsonPayload.forEach((key, value) {
-      print(' - $key: $value');
-    });
-
-    print('Verifying required fields are present:');
-    print(' - Has "sscc" field: ${jsonPayload.containsKey('sscc')}');
-    print(
-      ' - Has "containerType" field: ${jsonPayload.containsKey('containerType')}',
-    );
-    print(
-      ' - Has "containerStatus" field: ${jsonPayload.containsKey('containerStatus')}',
-    );
-
-    print('Verifying problematic fields are NOT present:');
-    print(
-      ' - No "companyPrefix" field: ${!jsonPayload.containsKey('companyPrefix')}',
-    );
-    print(
-      ' - No "gs1CompanyPrefix" field: ${!jsonPayload.containsKey('gs1CompanyPrefix')}',
-    );
-    print(
-      ' - No "extensionDigit" field: ${!jsonPayload.containsKey('extensionDigit')}',
-    );
-    print(
-      ' - No "serialReference" field: ${!jsonPayload.containsKey('serialReference')}',
-    );
-    print(
-      ' - No "checkDigit" field: ${!jsonPayload.containsKey('checkDigit')}',
-    );
-    print(' - No "createdAt" field: ${!jsonPayload.containsKey('createdAt')}');
-    print(' - No "updatedAt" field: ${!jsonPayload.containsKey('updatedAt')}');
 
     final response = await _dioService.post(
-      '${_dioService.baseUrl}/identifiers/sscc',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -86,17 +48,14 @@ class SSCCService {
 
     if (response.statusCode == 201) {
       final responseData = json.decode(response.data);
-      print('SSCC Create success response: $responseData');
-      print('Response type: ${responseData.runtimeType}');
 
       // Handle case where backend returns just the SSCC code as a string
       if (responseData is String) {
-        print('Backend returned SSCC code as string: $responseData');
         // Create a minimal SSCC object with the returned code
         final Map<String, dynamic> ssccJson = {
           'sscc': responseData,
-          'containerType': sscc.containerType.name,
-          'containerStatus': sscc.containerStatus.name,
+          'unitType': sscc.unitType.name,
+          'status': sscc.status.name,
           'packingDate': sscc.packingDate?.toIso8601String(),
           'issuingGLN': sscc.issuingGLN?.glnCode,
           'createdAt': DateTime.now().toIso8601String(),
@@ -117,8 +76,6 @@ class SSCCService {
         );
       }
     } else {
-      print('SSCC Create error: ${response.statusCode} - ${response.data}');
-
       // Try to parse error details from response body
       String errorDetail = response.statusMessage ?? 'Unknown error';
       try {
@@ -139,15 +96,13 @@ class SSCCService {
   }
 
   Future<SSCC> getSSCCById(String id) async {
-    print('Fetching SSCC with ID: $id');
 
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final uri = Uri.parse('${_dioService.baseUrl}/identifiers/sscc/$id');
-    print('Request URI: $uri');
+    final uri = Uri.parse('${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id');
 
     final response = await _dioService.get(
       uri.toString(),
@@ -158,14 +113,10 @@ class SSCCService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-    print(
-      'SSCC by ID response status: ${response.statusCode}, body: ${response.data}',
-    );
 
     if (response.statusCode == 200) {
       try {
         final responseData = json.decode(response.data);
-        print('Response data: $responseData');
 
         // Make sure to handle the same field mappings as in the list
         if (responseData is Map<String, dynamic>) {
@@ -188,13 +139,9 @@ class SSCCService {
 
         return SSCC.fromJson(responseData);
       } catch (e) {
-        print('Error parsing SSCC response: $e');
         throw ApiException(message: 'Failed to parse SSCC from response: $e');
       }
     } else {
-      print(
-        'Failed to get SSCC by ID: ${response.statusCode} - ${response.statusMessage}',
-      );
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to get SSCC by ID: ${response.statusMessage}',
@@ -204,17 +151,14 @@ class SSCCService {
   }
 
   Future<SSCC> getSSCCByCode(String ssccCode) async {
-    print('Fetching SSCC with code: $ssccCode');
-
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final uri = Uri.parse(
-      '${_dioService.baseUrl}/identifiers/sscc/code/$ssccCode',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/code/$ssccCode',
     );
-    print('Request URI: $uri');
 
     final response = await _dioService.get(
       uri.toString(),
@@ -226,14 +170,9 @@ class SSCCService {
       acceptAllStatusCodes: true,
     );
 
-    print(
-      'SSCC by code response status: ${response.statusCode}, body: ${response.data}',
-    );
-
     if (response.statusCode == 200) {
       try {
         final responseData = json.decode(response.data);
-        print('Response data: $responseData');
 
         // Make sure to handle the same field mappings as in getSSCCById
         if (responseData is Map<String, dynamic>) {
@@ -256,13 +195,9 @@ class SSCCService {
 
         return SSCC.fromJson(responseData);
       } catch (e) {
-        print('Error parsing SSCC response: $e');
         throw ApiException(message: 'Failed to parse SSCC from response: $e');
       }
     } else {
-      print(
-        'Failed to get SSCC by code: ${response.statusCode} - ${response.statusMessage}',
-      );
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to get SSCC by code: ${response.statusMessage}',
@@ -271,15 +206,26 @@ class SSCCService {
     }
   }
 
-  Future<List<SSCC>> getAllSSCCs({int page = 0, int size = 20}) async {
+  /// Paginated list (GET /identifiers/ssccs) — default when opening the SSCC screen.
+  Future<Map<String, dynamic>> fetchSSCCListPage({
+    int page = 0,
+    int size = 20,
+    String sortBy = 'createdAt',
+    String direction = 'DESC',
+  }) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, dynamic>{'page': page, 'size': size};
+    final queryParams = <String, dynamic>{
+      'page': page.toString(),
+      'size': size.toString(),
+      'sortBy': sortBy,
+      'direction': direction,
+    };
     final uri = Uri.parse(
-      '${_dioService.baseUrl}/identifiers/sscc',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
 
     final response = await _dioService.get(
@@ -291,75 +237,36 @@ class SSCCService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-    print(
-      'SSCC list response status: ${response.statusCode}, body: ${response.data}',
-    );
+
     if (response.statusCode == 200) {
-      try {
-        final Map<String, dynamic> data = json.decode(response.data);
-        final List<dynamic> content = data['content'] ?? [];
-
-        // Add debugging to check structure
-        if (content.isNotEmpty) {
-          print('First SSCC item structure: ${content[0]}');
-          print('SSCC ID from response: ${content[0]['id']}');
-        }
-
-        // Map each item in content to an SSCC object
-        final results = content.map((item) {
-          try {
-            if (item is Map<String, dynamic>) {
-              // Handle 'sscc' vs 'ssccCode' field name discrepancy
-              if (item.containsKey('sscc') && !item.containsKey('ssccCode')) {
-                item['ssccCode'] = item['sscc'];
-              }
-
-              // Handle the statusDate field as a fallback for createdAt/updatedAt
-              if (!item.containsKey('createdAt') &&
-                  item.containsKey('statusDate')) {
-                item['createdAt'] = item['statusDate'];
-              }
-
-              if (!item.containsKey('updatedAt') &&
-                  item.containsKey('statusDate')) {
-                item['updatedAt'] = item['statusDate'];
-              }
-
-              return SSCC.fromJson(item);
-            } else {
-              throw FormatException('Expected Map but got ${item.runtimeType}');
-            }
-          } catch (e) {
-            print('Error parsing SSCC item: $e for item: $item');
-            // Use a default date for invalid items
-            return SSCC(
-              ssccCode: item is Map
-                  ? (item['sscc'] ?? 'Unknown SSCC')
-                  : 'Unknown SSCC',
-              containerType: ContainerType.OTHER,
-              containerStatus: ContainerStatus.CREATED,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            );
-          }
-        }).toList();
-
-        return results;
-      } catch (e) {
-        print('Error parsing SSCC list: $e');
-        throw ApiException(message: 'Failed to parse SSCC list: $e');
+      final decoded = json.decode(response.data);
+      if (decoded is! Map<String, dynamic>) {
+        throw ApiException(
+          message: 'Unexpected SSCC list response format',
+          responseBody: response.data is String ? response.data as String : null,
+        );
       }
+      final List<dynamic> contentList = decoded['content'] is List
+          ? decoded['content'] as List<dynamic>
+          : const [];
+      final List<SSCC> ssccs = parseSsccListFromContent(contentList);
+
+      return {
+        'content': ssccs,
+        'number': decoded['number'] ?? decoded['pageNumber'] ?? page,
+        'totalPages': decoded['totalPages'] ?? 1,
+        'totalElements': decoded['totalElements'] ?? ssccs.length,
+        'size': decoded['size'] ?? decoded['pageSize'] ?? size,
+        'first': decoded['first'] ?? true,
+        'last': decoded['last'] ?? true,
+      };
     } else if (response.statusCode == 403) {
-      print('Authentication error: Token might be invalid or expired');
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Authentication failed: Please log in again',
         responseBody: response.data,
       );
     } else {
-      print(
-        'SSCC list error: ${response.statusCode} - ${response.statusMessage}',
-      );
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to get all SSCCs: ${response.statusMessage}',
@@ -375,7 +282,7 @@ class SSCCService {
     }
 
     final response = await _dioService.put(
-      '${_dioService.baseUrl}/identifiers/sscc/$id',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -402,7 +309,7 @@ class SSCCService {
     }
 
     final response = await _dioService.delete(
-      '${_dioService.baseUrl}/identifiers/sscc/$id',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$id',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -419,16 +326,14 @@ class SSCCService {
     }
   }
 
-  Future<List<SSCC>> findSSCCsByContainerType(
-    ContainerType containerType,
-  ) async {
+  Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/container-type/${containerType.name}',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/container-type/${unitType.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -449,16 +354,14 @@ class SSCCService {
     }
   }
 
-  Future<List<SSCC>> findSSCCsByContainerStatus(
-    ContainerStatus containerStatus,
-  ) async {
+  Future<List<SSCC>> findSSCCsByStatus(LogisticUnitStatus status) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/status/${containerStatus.name}',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/status/${status.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -486,7 +389,7 @@ class SSCCService {
     }
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/source-location/$sourceGlnCode',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/source-location/$sourceGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -516,7 +419,7 @@ class SSCCService {
     }
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/destination-location/$destinationGlnCode',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/destination-location/$destinationGlnCode',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -552,7 +455,7 @@ class SSCCService {
     };
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/packed-between',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/packed-between',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -589,7 +492,7 @@ class SSCCService {
     };
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/shipped-between',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/shipped-between',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -618,7 +521,7 @@ class SSCCService {
     }
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/$parentSsccCode/hierarchy',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/$parentSsccCode/hierarchy',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -650,7 +553,7 @@ class SSCCService {
     final queryParams = <String, dynamic>{'companyPrefix': gs1CompanyPrefix};
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/company',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/company',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -673,8 +576,8 @@ class SSCCService {
   }
 
   Future<List<SSCC>> searchSSCCs({
-    ContainerType? containerType,
-    ContainerStatus? containerStatus,
+    UnitType? unitType,
+    LogisticUnitStatus? status,
     String? sourceLocationId,
     String? destinationLocationId,
   }) async {
@@ -684,15 +587,14 @@ class SSCCService {
     }
 
     final queryParams = <String, dynamic>{
-      if (containerType != null) 'containerType': containerType.name,
-      if (containerStatus != null) 'containerStatus': containerStatus.name,
-      if (sourceLocationId != null) 'sourceLocationId': sourceLocationId,
-      if (destinationLocationId != null)
-        'destinationLocationId': destinationLocationId,
+      if (unitType != null) 'containerType': unitType.name,
+      if (status != null) 'containerStatus': status.name,
+      ?'sourceLocationId': sourceLocationId,
+      ?'destinationLocationId': destinationLocationId,
     };
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/search',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/search',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -713,14 +615,14 @@ class SSCCService {
     }
   }
 
-  Future<SSCC> updateSSCCStatus(String id, ContainerStatus newStatus) async {
+  Future<SSCC> updateSSCCStatus(String id, LogisticUnitStatus newStatus) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
     final response = await _dioService.patch(
-      '${_dioService.baseUrl}/identifiers/sscc/$id/status?status=${newStatus.name}',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathStatus(id)}?status=${newStatus.name}',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -748,7 +650,7 @@ class SSCCService {
     final queryParams = <String, dynamic>{'ssccCode': ssccCode};
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/identifiers/sscc/validate',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/validate',
       queryParameters: queryParams,
       headers: {
         'Content-Type': 'application/json',
@@ -787,10 +689,8 @@ class SSCCService {
       requestBody['extensionDigit'] = extensionDigit;
     }
 
-    print('Sending SSCC generate request with: $requestBody');
-
     final response = await _dioService.post(
-      '${_dioService.baseUrl}/identifiers/sscc/generate',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/generate',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -805,28 +705,23 @@ class SSCCService {
       final Map<String, dynamic> responseData = json.decode(response.data);
 
       // Debug information
-      print('SSCC Generation Response: $responseData');
 
       String? ssccCode;
       // Check if the response contains the 'sscc' field directly (from backend standard)
       if (responseData.containsKey('sscc') && responseData['sscc'] != null) {
         ssccCode = responseData['sscc'].toString();
-        print('Using sscc field from response: $ssccCode');
       }
       // Check for ssccCode field (frontend convention)
       else if (responseData.containsKey('ssccCode') &&
           responseData['ssccCode'] != null) {
         ssccCode = responseData['ssccCode'].toString();
-        print('Using ssccCode field from response: $ssccCode');
       }
       // Try to parse as an SSCC object
       else if (responseData.containsKey('id')) {
         try {
           final SSCC generatedSscc = SSCC.fromJson(responseData);
           ssccCode = generatedSscc.ssccCode;
-          print('Parsed as SSCC object, got code: $ssccCode');
         } catch (e) {
-          print('Error parsing as SSCC object: $e');
           // Fall through to error message below
         }
       }
@@ -836,20 +731,16 @@ class SSCCService {
         final validatedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
 
         if (validatedSSCC != null) {
-          print('Validated SSCC: $validatedSSCC');
           return validatedSSCC;
         } else {
           // If we can't validate or fix the SSCC, try to generate one locally
           try {
-            print('Generating SSCC locally as a fallback');
             final localSSCC = GS1Utils.generateSSCC(
               gs1CompanyPrefix,
               extensionDigit,
             );
-            print('Generated local SSCC: $localSSCC');
             return localSSCC;
           } catch (e) {
-            print('Failed to generate SSCC locally: $e');
             throw ApiException(
               message:
                   'Invalid SSCC format from API and local generation failed: $e',
@@ -877,8 +768,6 @@ class SSCCService {
       throw ApiException(message: 'GLN input cannot be empty');
     }
 
-    print('Extracting company prefix from GLN input: $glnInput');
-
     // First, check if the input is in a special format (GS1 barcode or URN)
     // and extract the actual GLN code
     String? glnCode;
@@ -890,21 +779,17 @@ class SSCCService {
     if (urnPrefixMatch != null && urnPrefixMatch.group(1) != null) {
       // In URN format, we can directly extract the company prefix
       final companyPrefix = urnPrefixMatch.group(1);
-      print('Extracted company prefix directly from URN: $companyPrefix');
       return companyPrefix!;
     }
 
     // Check if it's already a plain 13-digit GLN
     if (glnInput.length == 13 && RegExp(r'^\d{13}$').hasMatch(glnInput)) {
       glnCode = glnInput;
-      print('Input is a plain 13-digit GLN');
     } else {
       // Try to parse from GS1 barcode or URN format using the GS1Utils class
       try {
         glnCode = await _parseGLNFromFormat(glnInput);
-        print('Parsed GLN from format: $glnCode');
       } catch (e) {
-        print('Error parsing GLN from input: ${e.toString()}');
         throw ApiException(
           message: 'Failed to parse GLN from input: ${e.toString()}',
         );
@@ -929,7 +814,6 @@ class SSCCService {
     // In a production environment, this should be based on the organization's
     // registered GS1 Company Prefix length
     final companyPrefix = glnCode.substring(0, 7);
-    print('Extracted company prefix: $companyPrefix');
     return companyPrefix;
   }
 
@@ -942,7 +826,6 @@ class SSCCService {
         return result;
       }
     } catch (e) {
-      print('Error using GS1Utils.extractGLNCode: $e');
       // Continue to fallback methods below
     }
 
@@ -1006,6 +889,12 @@ class SSCCService {
     String? sourceLocationName,
     String? destinationLocationName,
     String? gs1CompanyPrefix,
+    DateTime? packingDateFrom,
+    DateTime? packingDateTo,
+    DateTime? shippingDateFrom,
+    DateTime? shippingDateTo,
+    DateTime? receivingDateFrom,
+    DateTime? receivingDateTo,
     int page = 0,
     int size = 20,
     String sortBy = 'ssccCode',
@@ -1016,30 +905,38 @@ class SSCCService {
       throw ApiException(message: 'No authentication token found');
     }
 
-    final queryParams = <String, dynamic>{};
-
-    if (ssccCode?.isNotEmpty == true) queryParams['ssccCode'] = ssccCode!;
-    if (containerType?.isNotEmpty == true)
-      queryParams['containerType'] = containerType!;
-    if (containerStatus?.isNotEmpty == true)
-      queryParams['containerStatus'] = containerStatus!;
-    if (sourceLocationName?.isNotEmpty == true)
-      queryParams['sourceLocationName'] = sourceLocationName!;
-    if (destinationLocationName?.isNotEmpty == true)
-      queryParams['destinationLocationName'] = destinationLocationName!;
-    if (gs1CompanyPrefix?.isNotEmpty == true)
-      queryParams['gs1CompanyPrefix'] = gs1CompanyPrefix!;
-
-    queryParams['page'] = page.toString();
-    queryParams['size'] = size.toString();
-    queryParams['sortBy'] = sortBy;
-    queryParams['direction'] = direction;
+    final queryParams = <String, dynamic>{
+      if (ssccCode?.isNotEmpty == true) 'ssccCode': ssccCode!,
+      if (containerType?.isNotEmpty == true) 'containerType': containerType!,
+      if (containerStatus?.isNotEmpty == true)
+        'containerStatus': containerStatus!,
+      if (sourceLocationName?.isNotEmpty == true)
+        'sourceLocationName': sourceLocationName!,
+      if (destinationLocationName?.isNotEmpty == true)
+        'destinationLocationName': destinationLocationName!,
+      if (gs1CompanyPrefix?.isNotEmpty == true)
+        'gs1CompanyPrefix': gs1CompanyPrefix!,
+      if (packingDateFrom != null)
+        'packingDateFrom': packingDateFrom.toIso8601String(),
+      if (packingDateTo != null)
+        'packingDateTo': packingDateTo.toIso8601String(),
+      if (shippingDateFrom != null)
+        'shippingDateFrom': shippingDateFrom.toIso8601String(),
+      if (shippingDateTo != null)
+        'shippingDateTo': shippingDateTo.toIso8601String(),
+      if (receivingDateFrom != null)
+        'receivingDateFrom': receivingDateFrom.toIso8601String(),
+      if (receivingDateTo != null)
+        'receivingDateTo': receivingDateTo.toIso8601String(),
+      'page': page.toString(),
+      'size': size.toString(),
+      'sortBy': sortBy,
+      'direction': direction,
+    };
 
     final uri = Uri.parse(
-      '${_dioService.baseUrl}/identifiers/sscc/search/advanced',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/search/advanced',
     ).replace(queryParameters: queryParams.map((k, v) => MapEntry(k, '$v')));
-
-    print('SSCC Advanced Search request: $uri');
 
     try {
       final response = await _dioService.get(
@@ -1052,24 +949,26 @@ class SSCCService {
         acceptAllStatusCodes: true,
       );
 
-      print('SSCC Advanced Search response status: ${response.statusCode}');
-      print('SSCC Advanced Search response body: ${response.data}');
-
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.data);
-
-        // Convert content items to SSCC models
-        final List<dynamic> contentList = responseData['content'] ?? [];
-        final List<SSCC> ssccs = contentList
-            .map((item) => SSCC.fromJson(item))
-            .toList();
+        final decoded = json.decode(response.data);
+        if (decoded is! Map<String, dynamic>) {
+          throw ApiException(
+            message: 'Unexpected SSCC search response format',
+            responseBody: response.data is String ? response.data as String : null,
+          );
+        }
+        final responseData = decoded;
+        final List<dynamic> contentList = responseData['content'] is List
+            ? responseData['content'] as List<dynamic>
+            : const [];
+        final List<SSCC> ssccs = parseSsccListFromContent(contentList);
 
         return {
           'content': ssccs,
-          'number': responseData['number'] ?? 0,
+          'number': responseData['number'] ?? responseData['pageNumber'] ?? 0,
           'totalPages': responseData['totalPages'] ?? 1,
           'totalElements': responseData['totalElements'] ?? ssccs.length,
-          'size': responseData['size'] ?? size,
+          'size': responseData['size'] ?? responseData['pageSize'] ?? size,
           'first': responseData['first'] ?? true,
           'last': responseData['last'] ?? true,
         };
@@ -1086,5 +985,129 @@ class SSCCService {
       }
       throw ApiException(message: 'Failed to search SSCCs: ${e.toString()}');
     }
+  }
+
+  Future<List<String>> getAvailableTransitions(String id) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      throw ApiException(message: SsccServiceConstants.errNoToken);
+    }
+
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}${SsccServiceConstants.pathTransitions(id)}',
+      headers: SsccServiceConstants.authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SsccServiceConstants.statusOk) {
+      final data = json.decode(response.data) as Map<String, dynamic>;
+      final raw = data[SsccServiceConstants.rAvailableTransitions];
+      if (raw is List) {
+        return raw.map((e) => e.toString()).toList();
+      }
+      return const [];
+    }
+
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to load SSCC transitions: ${response.statusMessage}',
+    );
+  }
+
+  Future<List<SsccAggregationLink>> getAggregationLinksByCode(
+    String ssccCode,
+  ) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      throw ApiException(message: SsccServiceConstants.errNoToken);
+    }
+
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode(ssccCode)}',
+      headers: SsccServiceConstants.authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SsccServiceConstants.statusOk) {
+      final List<dynamic> data = json.decode(response.data);
+      return data
+          .map((item) =>
+              SsccAggregationLink.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to load aggregation links: ${response.statusMessage}',
+    );
+  }
+
+  Future<SsccAggregationLink> addAggregationLink(
+    String ssccId, {
+    required String childEpc,
+    required String childKind,
+    required String aggregationEventId,
+  }) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      throw ApiException(message: SsccServiceConstants.errNoToken);
+    }
+
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregation(ssccId)}',
+      headers: SsccServiceConstants.authHeaders(token),
+      data: json.encode({
+        'childEpc': childEpc,
+        'childKind': childKind,
+        'aggregationEventId': aggregationEventId,
+      }),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SsccServiceConstants.statusCreated ||
+        response.statusCode == SsccServiceConstants.statusOk) {
+      return SsccAggregationLink.fromJson(
+        json.decode(response.data) as Map<String, dynamic>,
+      );
+    }
+
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to add aggregation link: ${response.statusMessage}',
+      responseBody: response.data,
+    );
+  }
+
+  Future<SsccAggregationLink> disaggregateLink(
+    int linkId, {
+    required String disaggregationEventId,
+  }) async {
+    final token = await _dioService.getAuthToken();
+    if (token == null) {
+      throw ApiException(message: SsccServiceConstants.errNoToken);
+    }
+
+    final response = await _dioService.patch(
+      '${_dioService.baseUrl}${SsccServiceConstants.pathDisaggregate(linkId)}',
+      headers: SsccServiceConstants.authHeaders(token),
+      data: json.encode({'disaggregationEventId': disaggregationEventId}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SsccServiceConstants.statusOk) {
+      return SsccAggregationLink.fromJson(
+        json.decode(response.data) as Map<String, dynamic>,
+      );
+    }
+
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to disaggregate link: ${response.statusMessage}',
+      responseBody: response.data,
+    );
   }
 }

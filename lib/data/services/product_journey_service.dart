@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 
 class ProductJourneyService {
   final DioService _dioService;
@@ -143,7 +144,7 @@ class ProductJourneyService {
 
       // Search SSCCs
       final ssccResponse = await _dioService.get(
-        '$_baseUrl/identifiers/sscc',
+        '$_baseUrl${SsccServiceConstants.pathBase}',
         queryParameters: {'search': query, 'size': '5'},
         headers: headers,
         responseType: ResponseType.plain,

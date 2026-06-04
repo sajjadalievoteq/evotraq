@@ -211,15 +211,15 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                   ),
                 ),
                 children: [
-                  // Using standard OpenStreetMap tile layer (compatible with all platforms)
+                  // CARTO Voyager tile layer — no API key required.
+                  // Replaces OpenStreetMap which was returning 403 Access Blocked errors.
+                  // Terms: https://carto.com/legal/
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.traqtrace.app',
-                    // Add attribution required by OpenStreetMap
+                    urlTemplate:
+                        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                    subdomains: const ['a', 'b', 'c', 'd'],
                     tileProvider: NetworkTileProvider(),
-                    tileBuilder: (context, child, tile) {
-                      return child;
-                    },
+                    userAgentPackageName: 'com.traqtrace.app',
                   ),
                   // Add a circle for accuracy indication if available
                   if (_coordinates!.horizontalAccuracy != null)

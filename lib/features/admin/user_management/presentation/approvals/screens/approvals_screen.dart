@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
@@ -187,7 +188,7 @@ class _ApprovalsContent extends StatelessWidget {
     const spacing = Constants.spacing;
 
     return GridView.builder(
-      padding: const EdgeInsets.only(top: spacing),
+      padding: context.padding,
       physics: const ClampingScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: tileMaxExtent,

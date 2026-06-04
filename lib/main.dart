@@ -22,7 +22,6 @@ import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
-import 'package:traqtrace_app/features/gs1/bloc/sscc/sscc_cubit.dart';
 
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 
@@ -52,7 +51,6 @@ import 'package:traqtrace_app/data/services/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/sscc_service.dart';
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/user_service.dart';
@@ -158,9 +156,6 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<ThemeCubit>(
           create: (context) =>
               ThemeCubit(profileCubit: context.read<ProfileCubit>()),
-        ),
-        BlocProvider<SSCCCubit>(
-          create: (context) => SSCCCubit(ssccService: getIt<SSCCService>()),
         ),
         // Add SGTIN Cubit
         BlocProvider<SGTINCubit>(

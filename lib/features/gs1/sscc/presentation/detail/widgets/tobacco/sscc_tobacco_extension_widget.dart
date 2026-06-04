@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/services/sscc_tobacco_extension_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
 import 'package:traqtrace_app/data/models/gs1/sscc/sscc_tobacco_extension_model.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sscc/presentation/detail/widgets/sscc_detail_skeleton.dart';
 
 /// ISO 3166-1 alpha-3 country codes for dropdowns
 const Map<String, String> _countryOptions = {
@@ -469,7 +470,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
     }
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const SsccSectionLoadingSkeleton(fieldCount: 2);
     }
 
     return Card(

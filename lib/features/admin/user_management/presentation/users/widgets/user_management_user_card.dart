@@ -86,10 +86,6 @@ class UserManagementUserCard extends StatelessWidget {
   }
 
   Widget _buildGridSquareCard(BuildContext context) {
-    final details = _UserDetails(
-      user: user,
-      density: _UserDetailsDensity.compact,
-    );
     final actions = _UserActions(
       user: user,
       isToggleLoading: isToggleLoading,
@@ -104,6 +100,7 @@ class UserManagementUserCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -126,9 +123,12 @@ class UserManagementUserCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Expanded(child: details),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
+            _UserDetails(
+              user: user,
+              density: _UserDetailsDensity.compact,
+            ),
+            const SizedBox(height: 6),
             Align(alignment: Alignment.centerRight, child: actions),
           ],
         ),
@@ -137,12 +137,14 @@ class UserManagementUserCard extends StatelessWidget {
   }
 
   String _resolveInitial(String firstName) {
-    if (firstName.isEmpty) {
-      return 'U';
-    }
+    if (firstName.isEmpty) return 'U';
     return firstName.characters.first.toUpperCase();
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Avatar
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _UserAvatar extends StatelessWidget {
   const _UserAvatar({required this.initial, this.radius = 20});
@@ -160,6 +162,10 @@ class _UserAvatar extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Details block
+// ─────────────────────────────────────────────────────────────────────────────
+
 enum _UserDetailsDensity { comfy, compact }
 
 class _UserDetails extends StatelessWidget {
@@ -173,19 +179,36 @@ class _UserDetails extends StatelessWidget {
     final name = '${user.firstName} ${user.lastName}'.trim();
     final spacingSm = density == _UserDetailsDensity.compact ? 2.0 : 4.0;
     final spacingMd = density == _UserDetailsDensity.compact ? 8.0 : 12.0;
+    final colors = context.colors;
+
+    // Resolve role colour inline — no static helper needed.
+    final Color roleColor = switch (user.role) {
+      'ADMIN'  => Colors.purple,
+      'VIEWER' => colors.secondary,
+      _        => colors.success,
+    };
+
+    final Color statusColor =
+        user.enabled ? colors.success : colors.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (density == _UserDetailsDensity.comfy) ...[
           Text(
             name.isEmpty ? user.username : name,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           SizedBox(height: spacingSm),
-          Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(
+            user.email,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           SizedBox(height: spacingSm),
           Text(
             'Username: ${user.username}',
@@ -193,7 +216,7 @@ class _UserDetails extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
-              color: context.colors.primary,
+              color: colors.primary,
             ),
           ),
           SizedBox(height: spacingMd),
@@ -206,89 +229,92 @@ class _UserDetails extends StatelessWidget {
           ),
           SizedBox(height: spacingMd),
         ],
+
+        // ── Role / Status / Approval badges ──────────────────────────────
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 12,
+          runSpacing: 6,
           children: [
-            _StatusChip(
-              label: user.role,
-              backgroundColor: _roleBackgroundColor(context, user.role),
-              foregroundColor: _roleForegroundColor(context, user.role),
+            _InfoBadge(
+              label: 'Role',
+              value: user.role,
+              valueColor: roleColor,
             ),
-            _StatusChip(
-              label: user.enabled
+            _InfoBadge(
+              label: 'Status',
+              value: user.enabled
                   ? UserManagementConstants.activeStatus
                   : UserManagementConstants.inactiveStatus,
-              backgroundColor: user.enabled
-                  ? context.colors.success.withValues(alpha: 0.15)
-                  : Colors.grey.withValues(alpha: 0.18),
-              foregroundColor: user.enabled
-                  ? context.colors.success
-                  : Colors.grey[800]!,
+              valueColor: statusColor,
             ),
             if (user.approvalStatus == UserManagementConstants.pendingStatus)
-              _StatusChip(
-                label: UserManagementConstants.pendingStatus,
-                backgroundColor: context.colors.warning.withValues(alpha: 0.15),
-                foregroundColor: context.colors.warning,
+              _InfoBadge(
+                label: 'Approval',
+                value: UserManagementConstants.pendingStatus,
+                valueColor: Colors.orange.shade800,
               ),
           ],
         ),
       ],
     );
   }
-
-  static Color _roleBackgroundColor(BuildContext context, String role) {
-    final c = context.colors;
-    switch (role) {
-      case 'ADMIN':
-        return Colors.purple.withValues(alpha: 0.15);
-      case 'VIEWER':
-        return c.secondary.withValues(alpha: 0.15);
-      default:
-        return c.success.withValues(alpha: 0.15);
-    }
-  }
-
-  static Color _roleForegroundColor(BuildContext context, String role) {
-    final c = context.colors;
-    switch (role) {
-      case 'ADMIN':
-        return Colors.purple;
-      case 'VIEWER':
-        return c.secondary;
-      default:
-        return c.success;
-    }
-  }
 }
 
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({
+// ─────────────────────────────────────────────────────────────────────────────
+// Info badge  (dot + "Label: Value" — no Chip widget)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _InfoBadge extends StatelessWidget {
+  const _InfoBadge({
     required this.label,
-    required this.backgroundColor,
-    required this.foregroundColor,
+    required this.value,
+    required this.valueColor,
   });
 
   final String label;
-  final Color backgroundColor;
-  final Color foregroundColor;
+  final String value;
+  final Color valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: backgroundColor,
-      labelStyle: TextStyle(
-        color: Colors.white,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
+    final bodySmall = Theme.of(context).textTheme.bodySmall;
+    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
-      side: BorderSide.none,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Coloured status dot
+        Container(
+          width: 6,
+          height: 6,
+          margin: const EdgeInsets.only(right: 5, top: 1),
+          decoration: BoxDecoration(
+            color: valueColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        // Muted label
+        Text(
+          '$label: ',
+          style: bodySmall?.copyWith(color: mutedColor),
+        ),
+        // Coloured bold value
+        Text(
+          value,
+          style: bodySmall?.copyWith(
+            color: valueColor,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Actions (edit icon + status toggle)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _UserActions extends StatelessWidget {
   const _UserActions({
@@ -309,7 +335,7 @@ class _UserActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          padding: EdgeInsets.all(1),
+          padding: const EdgeInsets.all(1),
           icon: SvgPicture.asset(
             AppAssets.iconEdit,
             width: 18,

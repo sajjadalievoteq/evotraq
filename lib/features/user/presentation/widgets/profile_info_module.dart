@@ -197,41 +197,38 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                height: 50,
-                child: _isEditing
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 50,
-                              child: OutlinedButton.icon(
-                                onPressed: isSaving ? null : _toggleEdit,
-                                icon: const Icon(Icons.close_rounded, size: 16),
-                                label: const Text(
-                                  UserStrings.cancel,
-                                  style: TextStyle(fontSize: 16),
-                                ),
+              _isEditing
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 50,
+                            child: OutlinedButton.icon(
+                              onPressed: isSaving ? null : _toggleEdit,
+                              icon: const Icon(Icons.close_rounded, size: 16),
+                              label: const Text(
+                                UserStrings.cancel,
+                                style: TextStyle(fontSize: 16),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: CustomElevatedButton(
-                              label: UserStrings.saveChanges,
-                              onPressed: _saveProfile,
-                              isLoading: isSaving,
-                              isEnabled: !isSaving,
-                            ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomElevatedButton(
+                            label: UserStrings.saveChanges,
+                            onPressed: _saveProfile,
+                            isLoading: isSaving,
+                            isEnabled: !isSaving,
                           ),
-                        ],
-                      )
-                    : CustomElevatedButton(
-                        label: UserStrings.editProfile,
-                        onPressed: _toggleEdit,
-                        isEnabled: true,
-                      ),
-              ),
+                        ),
+                      ],
+                    )
+                  : CustomElevatedButton(
+                      label: UserStrings.editProfile,
+                      onPressed: _toggleEdit,
+                      isEnabled: true,
+                    ),
               const SizedBox(height: 24),
               AuthInputField(
                 controller: _firstNameController,

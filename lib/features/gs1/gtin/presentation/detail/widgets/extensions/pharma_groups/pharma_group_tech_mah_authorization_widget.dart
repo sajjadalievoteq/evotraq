@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
+import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 
 class TechMahAuthorizationGroupWidget extends StatefulWidget {
   const TechMahAuthorizationGroupWidget({
@@ -54,7 +60,7 @@ class _TechMahAuthorizationGroupWidgetState
     extends State<TechMahAuthorizationGroupWidget> {
   static final _docDateFmt = DateFormat('yyyy-MM-dd');
 
-  late final TextEditingController _mahGlnController;
+  GLN? _mahGln;
   late final TextEditingController _mahNameController;
   late final TextEditingController _mahCountryController;
   late final TextEditingController _licensedAgentGlnsController;
@@ -68,7 +74,7 @@ class _TechMahAuthorizationGroupWidgetState
   @override
   void initState() {
     super.initState();
-    _mahGlnController = TextEditingController(text: widget.initialMahGln);
+    _mahGln = _glnFromCode(widget.initialMahGln);
     _mahNameController = TextEditingController(text: widget.initialMahName);
     _mahCountryController = TextEditingController(
       text: widget.initialMahCountry,
@@ -89,11 +95,32 @@ class _TechMahAuthorizationGroupWidgetState
       text: _maValidTo != null ? _docDateFmt.format(_maValidTo!) : '',
     );
 
-    _mahGlnController.addListener(_emitChange);
     _mahNameController.addListener(_emitChange);
     _mahCountryController.addListener(_emitChange);
     _licensedAgentGlnsController.addListener(_emitChange);
     _maNumberController.addListener(_emitChange);
+    if (widget.initialMahGln.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _resolveMahGlnFromCatalog();
+      });
+    }
+  }
+
+  Future<void> _resolveMahGlnFromCatalog() async {
+    if (_mahGln == null) return;
+    try {
+      final catalog =
+          await getIt<GLNService>().getAllGLNs(page: 0, size: 500);
+      if (!mounted) return;
+      final resolved = resolveGlnForPicker(
+        code: _mahGln!.glnCode,
+        fallback: _mahGln,
+        catalog: catalog,
+      );
+      if (resolved != null && resolved.glnCode == _mahGln!.glnCode) {
+        setState(() => _mahGln = resolved);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -112,9 +139,11 @@ class _TechMahAuthorizationGroupWidgetState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.initialMahGln != oldWidget.initialMahGln &&
-          widget.initialMahGln != _mahGlnController.text) {
-        _mahGlnController.text = widget.initialMahGln;
+      if (widget.initialMahGln != oldWidget.initialMahGln) {
+        _mahGln = _glnFromCode(widget.initialMahGln);
+        if (widget.initialMahGln.trim().isNotEmpty) {
+          _resolveMahGlnFromCatalog();
+        }
       }
       if (widget.initialMahName != oldWidget.initialMahName &&
           widget.initialMahName != _mahNameController.text) {
@@ -152,7 +181,6 @@ class _TechMahAuthorizationGroupWidgetState
 
   @override
   void dispose() {
-    _mahGlnController.dispose();
     _mahNameController.dispose();
     _mahCountryController.dispose();
     _licensedAgentGlnsController.dispose();
@@ -162,9 +190,25 @@ class _TechMahAuthorizationGroupWidgetState
     super.dispose();
   }
 
+  GLN? _glnFromCode(String code) {
+    final trimmed = code.trim();
+    if (trimmed.isEmpty) return null;
+    return GLN.fromCode(trimmed);
+  }
+
+  void _onMahGlnChanged(GLN? gln) {
+    setState(() {
+      _mahGln = gln;
+      if (gln != null && _mahNameController.text.trim().isEmpty) {
+        _mahNameController.text = gln.locationName;
+      }
+    });
+    _emitChange();
+  }
+
   void _emitChange() {
     widget.onChanged(
-      mahGln: _mahGlnController.text,
+      mahGln: _mahGln?.glnCode ?? '',
       mahName: _mahNameController.text,
       mahCountry: _mahCountryController.text,
       licensedAgentGlns: _licensedAgentGlnsController.text,
@@ -203,17 +247,24 @@ class _TechMahAuthorizationGroupWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Gs1ValidatedField(
-            controller: _mahGlnController,
-            fieldName: 'mahGln',
-            label: 'Marketing Authorization Holder (MAH) GLN *',
-            helperText: '13 digits; Mod-10 check digit',
-            maxLength: 13,
-            keyboardType: TextInputType.number,
-            inputFormatters: [LengthLimitingTextInputFormatter(13)],
-            readOnly: !widget.isEditing,
-            validator: PharmaFieldValidators.validateMahGln,
-          ),
+          if (!widget.isEditing)
+            SgtinInfoRow(
+              'Marketing Authorization Holder (MAH) GLN',
+              _mahGln != null
+                  ? '${_mahGln!.glnCode} – ${_mahGln!.locationName}'
+                  : (widget.initialMahGln.trim().isEmpty
+                      ? null
+                      : widget.initialMahGln),
+            )
+          else
+            GLNSelector(
+              label: 'Marketing Authorization Holder (MAH) GLN',
+              hintText: 'Search and select MAH location',
+              initialValue: _mahGln,
+              isRequired: true,
+              onChanged: _onMahGlnChanged,
+            ),
+          const SizedBox(height: 12),
           Gs1ValidatedField(
             controller: _mahNameController,
             fieldName: 'mahName',

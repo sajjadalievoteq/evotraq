@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/models/gs1/sscc/sscc_pharmaceutical_extension_model.dart';
-import '../../../data/services/sscc_pharmaceutical_extension_service.dart';
-
+import 'package:traqtrace_app/data/models/gs1/sscc/sscc_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import '../../../core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/gs1/sscc/presentation/detail/widgets/sscc_detail_skeleton.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 /// DEA Schedule options for controlled substances
 const List<String> _deaScheduleOptions = [
@@ -39,6 +41,7 @@ class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? ssccId;
   final String? ssccCode;
   final bool isEditing;
+  final Color? borderColor;
   final Function(SSCCPharmaceuticalExtension?)? onSaved;
 
   const SSCCPharmaceuticalExtensionWidget({
@@ -46,6 +49,7 @@ class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
     this.ssccId,
     this.ssccCode,
     this.isEditing = false,
+    this.borderColor,
     this.onSaved,
   }) : super(key: key);
 
@@ -126,6 +130,15 @@ class SSCCPharmaceuticalExtensionWidgetState
   void initState() {
     super.initState();
     _loadExtension();
+  }
+
+  @override
+  void didUpdateWidget(covariant SSCCPharmaceuticalExtensionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.ssccId != oldWidget.ssccId ||
+        widget.ssccCode != oldWidget.ssccCode) {
+      _loadExtension();
+    }
   }
 
   @override
@@ -439,62 +452,62 @@ class SSCCPharmaceuticalExtensionWidgetState
     }
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const SsccSectionLoadingSkeleton(fieldCount: 3);
     }
 
-    return Card(
-      child: ExpansionTile(
-        collapsedBackgroundColor: const Color(0xFF121F17),
-        collapsedTextColor: Colors.white,
-        collapsedIconColor: Colors.white,
-        title: const Text('Pharmaceutical Extension'),
-        subtitle: Text(
-            _hasExtension ? 'Extension data loaded' : 'No extension data'),
-        leading: const Icon(Icons.medical_services),
-        initiallyExpanded: false,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildColdChainSection(),
-                const Divider(height: 32),
-                _buildGdpSection(),
-                const Divider(height: 32),
-                _buildControlledSubstancesSection(),
-                const Divider(height: 32),
-                _buildHazmatSection(),
-                const Divider(height: 32),
-                _buildEnvironmentalSection(),
-                const Divider(height: 32),
-                _buildChainOfCustodySection(),
-                const Divider(height: 32),
-                _buildCarrierSection(),
-                const Divider(height: 32),
-                _buildClinicalTrialSection(),
-                const Divider(height: 32),
-                _buildSpecialHandlingSection(),
-              ],
-            ),
+    final outline = _outlineColor(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Pharmaceutical Details',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: context.colors.textPrimary,
+            fontSize: 16,
           ),
-        ],
-      ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 16),
+        _buildColdChainSection(outline),
+        _buildGdpSection(outline),
+        _buildControlledSubstancesSection(outline),
+        _buildHazmatSection(outline),
+        _buildEnvironmentalSection(outline),
+        _buildChainOfCustodySection(outline),
+        _buildCarrierSection(outline),
+        _buildClinicalTrialSection(outline),
+        _buildSpecialHandlingSection(outline),
+      ],
     );
   }
 
-  Widget _buildColdChainSection() {
-    return Column(
+  Color _outlineColor(BuildContext context) =>
+      widget.borderColor ?? Theme.of(context).colorScheme.outlineVariant;
+
+  Widget _pharmaGroupCard({
+    required Color outlineColor,
+    required String title,
+    required Widget child,
+  }) {
+    return Gs1GroupCard(
+      title: title,
+      outlineColor: outlineColor,
+      child: child,
+    );
+  }
+
+  Widget _buildColdChainSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Cold Chain Requirements',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Cold Chain Requirements',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Cold Chain Required'),
           subtitle: const Text('Shipment requires temperature control'),
           value: _coldChainRequired,
@@ -535,6 +548,7 @@ class SSCCPharmaceuticalExtensionWidgetState
           ),
           const SizedBox(height: 12),
           SwitchListTile(
+            contentPadding: EdgeInsets.zero,
             title: const Text('Temperature Monitoring Required'),
             subtitle: const Text('Continuous monitoring during transport'),
             value: _temperatureMonitoringRequired,
@@ -570,21 +584,19 @@ class SSCCPharmaceuticalExtensionWidgetState
           ],
         ],
       ],
+      ),
     );
   }
 
-  Widget _buildGdpSection() {
-    return Column(
+  Widget _buildGdpSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'GDP (Good Distribution Practice) Compliance',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'GDP (Good Distribution Practice) Compliance',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('GDP Compliant'),
           subtitle: const Text('Shipment meets GDP requirements'),
           value: _gdpCompliant,
@@ -644,6 +656,7 @@ class SSCCPharmaceuticalExtensionWidgetState
         ),
         const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('WHO PQS Required'),
           subtitle: const Text('Prequalification Standard equipment required'),
           value: _whoPqsRequired,
@@ -666,21 +679,19 @@ class SSCCPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      ),
     );
   }
 
-  Widget _buildControlledSubstancesSection() {
-    return Column(
+  Widget _buildControlledSubstancesSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Controlled Substances (DEA/INCB)',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Controlled Substances (DEA/INCB)',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Contains Controlled Substance'),
           subtitle: const Text('Shipment contains DEA/INCB scheduled substances'),
           value: _containsControlledSubstance,
@@ -747,20 +758,17 @@ class SSCCPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      ),
     );
   }
 
-  Widget _buildHazmatSection() {
-    return Column(
+  Widget _buildHazmatSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Hazardous Materials',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Hazardous Materials',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -842,21 +850,19 @@ class SSCCPharmaceuticalExtensionWidgetState
           ],
         ),
       ],
+      ),
     );
   }
 
-  Widget _buildEnvironmentalSection() {
-    return Column(
+  Widget _buildEnvironmentalSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Environmental Controls',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Environmental Controls',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Humidity Controlled'),
           subtitle: const Text('Requires humidity control'),
           value: _humidityControlled,
@@ -896,6 +902,7 @@ class SSCCPharmaceuticalExtensionWidgetState
         ],
         const SizedBox(height: 8),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Light Sensitive'),
           subtitle: const Text('Protect from light'),
           value: _lightSensitive,
@@ -904,6 +911,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Orientation Sensitive'),
           subtitle: const Text('Must maintain specific orientation'),
           value: _orientationSensitive,
@@ -912,6 +920,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Shock Sensitive'),
           subtitle: const Text('Handle with care - shock sensitive'),
           value: _shockSensitive,
@@ -920,21 +929,19 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
       ],
+      ),
     );
   }
 
-  Widget _buildChainOfCustodySection() {
-    return Column(
+  Widget _buildChainOfCustodySection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Chain of Custody',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Chain of Custody',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Chain of Custody Required'),
           subtitle: const Text('Track full custody chain'),
           value: _chainOfCustodyRequired,
@@ -943,6 +950,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Requires Signature on Receipt'),
           subtitle: const Text('Must sign upon delivery'),
           value: _requiresSignatureOnReceipt,
@@ -951,6 +959,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Requires Pharmacist Verification'),
           subtitle: const Text('Pharmacist must verify receipt'),
           value: _requiresPharmacistVerification,
@@ -960,20 +969,17 @@ class SSCCPharmaceuticalExtensionWidgetState
               : null,
         ),
       ],
+      ),
     );
   }
 
-  Widget _buildCarrierSection() {
-    return Column(
+  Widget _buildCarrierSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Carrier/Transport Qualification',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Carrier/Transport Qualification',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -1056,21 +1062,19 @@ class SSCCPharmaceuticalExtensionWidgetState
           ],
         ),
       ],
+      ),
     );
   }
 
-  Widget _buildClinicalTrialSection() {
-    return Column(
+  Widget _buildClinicalTrialSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Clinical Trial Shipments',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Clinical Trial Shipments',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: const Text('Clinical Trial Shipment'),
           subtitle: const Text('Shipment for clinical trial'),
           value: _clinicalTrialShipment,
@@ -1104,20 +1108,17 @@ class SSCCPharmaceuticalExtensionWidgetState
           ),
         ],
       ],
+      ),
     );
   }
 
-  Widget _buildSpecialHandlingSection() {
-    return Column(
+  Widget _buildSpecialHandlingSection(Color outlineColor) {
+    return _pharmaGroupCard(
+      outlineColor: outlineColor,
+      title: 'Special Handling',
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Special Handling',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -1166,6 +1167,7 @@ class SSCCPharmaceuticalExtensionWidgetState
           inputFormatters: [LengthLimitingTextInputFormatter(1000)],
         ),
       ],
+      ),
     );
   }
 }

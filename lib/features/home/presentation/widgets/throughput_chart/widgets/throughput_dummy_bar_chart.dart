@@ -162,7 +162,9 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
                             if (idx < 0 || idx >= barCount) {
                               return const SizedBox.shrink();
                             }
-                            final label = barLabels[idx];
+                            final label = _rangeIndex == 1
+                                ? '${barLabels[idx]}:00'
+                                : barLabels[idx];
                             if (label.isEmpty) {
                               return const SizedBox.shrink();
                             }

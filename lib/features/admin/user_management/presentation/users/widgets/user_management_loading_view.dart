@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
@@ -13,7 +14,8 @@ class UserManagementLoadingView extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
-
+    const tileMaxExtent = 240.0;
+    final g = context.gutter;
     return AppShimmer(
       baseColor: baseColor,
       highlightColor: highlightColor,
@@ -23,13 +25,14 @@ class UserManagementLoadingView extends StatelessWidget {
           _UserManagementFilterSkeleton(baseColor: baseColor),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.only(top: Constants.spacing),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 340,
-                mainAxisSpacing: Constants.spacing,
-                crossAxisSpacing: Constants.spacing,
-                childAspectRatio: 1,
-              ),
+              padding: EdgeInsets.all(g),
+      physics: const ClampingScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: tileMaxExtent,
+        mainAxisSpacing: g,
+        crossAxisSpacing: g,
+        childAspectRatio: 1,
+      ),
               itemCount: 8,
               itemBuilder: (context, index) {
                 return _UserManagementCardSkeleton(baseColor: baseColor);

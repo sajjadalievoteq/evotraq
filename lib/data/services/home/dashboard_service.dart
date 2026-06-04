@@ -4,6 +4,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 
 class DashboardService {
   final DioService _dioService;
@@ -31,9 +32,9 @@ class DashboardService {
         headers,
       ), // Corrected endpoint
       _fetchCount(
-        '${_dioService.baseUrl}/identifiers/sscc',
+        '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
         headers,
-      ), // Corrected endpoint
+      ),
       _fetchEventCounts(headers),
     ]);
 

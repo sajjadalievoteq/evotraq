@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/web/auth_navigation_stub.dart'
+    if (dart.library.html) 'package:traqtrace_app/core/web/auth_navigation_web.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/shared/utils/email_provider_launch_utils.dart';
@@ -124,7 +124,7 @@ class VerifyEmailContentWidget extends StatelessWidget {
                   ? 'GO TO LOGIN'
                   : inboxDestination.label,
               onPressed: successMessage != null
-                  ? () => context.go(Constants.loginRoute)
+                  ? () => goToLogin(context)
                   : () => openInboxForEmail(email),
             ),
           ),
@@ -133,7 +133,7 @@ class VerifyEmailContentWidget extends StatelessWidget {
             width: double.infinity,
             child: CustomOutlinedButtonWidget(
               title: 'BACK TO LOGIN',
-              onTap: () => context.go(Constants.loginRoute),
+              onTap: () => goToLogin(context),
             ),
           ),
         ],

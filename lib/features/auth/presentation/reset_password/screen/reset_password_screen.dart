@@ -6,6 +6,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/presentation/reset_password/widget/reset_password_form_widget.dart';
 import 'package:traqtrace_app/features/auth/presentation/reset_password/widget/reset_password_invalid_token_widget.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
+import 'package:traqtrace_app/core/web/auth_navigation_stub.dart'
+    if (dart.library.html) 'package:traqtrace_app/core/web/auth_navigation_web.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_responsive_layout_widget.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/build_success_message_widget.dart';
@@ -59,9 +61,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 message:
                     'Your password has been reset successfully. You can now log in with your new password.',
                 buttonLabel: 'GO TO LOGIN',
-                onButtonPressed: () {
-                  context.go(Constants.loginRoute);
-                },
+                onButtonPressed: () => goToLogin(context),
               ),
             );
           }

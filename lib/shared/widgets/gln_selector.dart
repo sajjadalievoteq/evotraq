@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 /// A reusable widget for selecting GLNs from available system GLNs
 /// Provides a searchable dropdown interface with GLN code and location name
@@ -17,6 +18,9 @@ class GLNSelector extends StatelessWidget {
   final bool isRequired;
   final String? errorText;
 
+  /// When set, the selector uses this catalog instead of fetching GLNs again.
+  final List<GLN>? pickerCatalog;
+
   const GLNSelector({
     Key? key,
     required this.label,
@@ -25,6 +29,7 @@ class GLNSelector extends StatelessWidget {
     required this.onChanged,
     this.isRequired = false,
     this.errorText,
+    this.pickerCatalog,
   }) : super(key: key);
 
   @override
@@ -38,6 +43,7 @@ class GLNSelector extends StatelessWidget {
         onChanged: onChanged,
         isRequired: isRequired,
         errorText: errorText,
+        pickerCatalog: pickerCatalog,
       ),
     );
   }
@@ -50,6 +56,7 @@ class _GLNSelectorBody extends StatefulWidget {
   final Function(GLN?) onChanged;
   final bool isRequired;
   final String? errorText;
+  final List<GLN>? pickerCatalog;
 
   const _GLNSelectorBody({
     required this.label,
@@ -58,6 +65,7 @@ class _GLNSelectorBody extends StatefulWidget {
     required this.onChanged,
     this.isRequired = false,
     this.errorText,
+    this.pickerCatalog,
   });
 
   @override
@@ -75,11 +83,64 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
   @override
   void initState() {
     super.initState();
-    _selectedGLN = widget.initialValue;
+    _applyInitialValue(widget.initialValue);
+    if (widget.pickerCatalog != null && widget.pickerCatalog!.isNotEmpty) {
+      _applyPickerCatalog(widget.pickerCatalog);
+    } else {
+      _loadGLNs();
+    }
+  }
+
+  void _applyPickerCatalog(List<GLN>? catalog) {
+    if (catalog == null || catalog.isEmpty) return;
+    setState(() {
+      _allGLNs = catalog.where((gln) => gln.active).toList();
+      if (_filteredGLNs.isEmpty && _allGLNs.isNotEmpty) {
+        _filteredGLNs = _allGLNs;
+      }
+    });
+    _upgradeSelectedFromCatalog();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GLNSelectorBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue?.glnCode != oldWidget.initialValue?.glnCode) {
+      _applyInitialValue(widget.initialValue);
+    }
+    if (widget.pickerCatalog != oldWidget.pickerCatalog) {
+      _applyPickerCatalog(widget.pickerCatalog);
+    }
+  }
+
+  void _applyInitialValue(GLN? value) {
+    _selectedGLN = value;
     if (_selectedGLN != null) {
       _searchController.text = _getDisplayText(_selectedGLN!);
+    } else {
+      _searchController.clear();
     }
-    _loadGLNs();
+  }
+
+  void _upgradeSelectedFromCatalog() {
+    if (_selectedGLN == null || _allGLNs.isEmpty) return;
+    final resolved = resolveGlnForPicker(
+      code: _selectedGLN!.glnCode,
+      fallback: _selectedGLN,
+      catalog: _allGLNs,
+    );
+    if (resolved == null || resolved.glnCode != _selectedGLN!.glnCode) return;
+    if (resolved.locationName == _selectedGLN!.locationName &&
+        !isPlaceholderGlnLocation(_selectedGLN!)) {
+      return;
+    }
+    if (!isPlaceholderGlnLocation(resolved) ||
+        isPlaceholderGlnLocation(_selectedGLN!)) {
+      setState(() {
+        _selectedGLN = resolved;
+        _searchController.text = _getDisplayText(resolved);
+      });
+    }
   }
 
   @override
@@ -90,7 +151,24 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
   }
 
   void _loadGLNs() {
-    context.read<GLNCubit>().fetchGLNs();
+    context.read<GLNCubit>().fetchGlnsForPicker().then((glns) {
+      if (!mounted) return;
+      setState(() {
+        _allGLNs = glns.where((gln) => gln.active).toList();
+        if (_filteredGLNs.isEmpty && _allGLNs.isNotEmpty) {
+          _filteredGLNs = _allGLNs;
+        }
+      });
+      _upgradeSelectedFromCatalog();
+    }).catchError((_) {
+      // Keep failures local to this selector; do not surface raw API bodies.
+      if (mounted) {
+        setState(() {
+          _allGLNs = const [];
+          _filteredGLNs = const [];
+        });
+      }
+    });
   }
 
   String _getDisplayText(GLN gln) {
@@ -141,6 +219,7 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
           if (_filteredGLNs.isEmpty && _allGLNs.isNotEmpty) {
             _filteredGLNs = _allGLNs;
           }
+          _upgradeSelectedFromCatalog();
         }
       },
       builder: (context, state) {

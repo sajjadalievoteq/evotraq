@@ -25,22 +25,33 @@ fi
 # Extract configuration for the environment
 API_BASE_URL=$(jq -r ".environments.$ENVIRONMENT.API_BASE_URL" "$CONFIG_FILE")
 ENV_TYPE=$(jq -r ".environments.$ENVIRONMENT.ENVIRONMENT" "$CONFIG_FILE")
+FRONTEND_BASE_URL=$(jq -r ".environments.$ENVIRONMENT.FRONTEND_BASE_URL // empty" "$CONFIG_FILE")
 
 if [ "$API_BASE_URL" == "null" ]; then
     echo "❌ Environment '$ENVIRONMENT' not found in configuration"
     exit 1
 fi
 
+DART_DEFINES=(
+    "--dart-define=API_BASE_URL=$API_BASE_URL"
+    "--dart-define=ENVIRONMENT=$ENV_TYPE"
+)
+if [ -n "$FRONTEND_BASE_URL" ] && [ "$FRONTEND_BASE_URL" != "null" ]; then
+    DART_DEFINES+=("--dart-define=FRONTEND_BASE_URL=$FRONTEND_BASE_URL")
+fi
+
 echo "📋 Configuration:"
 echo "   Environment: $ENVIRONMENT"
 echo "   API Base URL: $API_BASE_URL"
+if [ -n "$FRONTEND_BASE_URL" ] && [ "$FRONTEND_BASE_URL" != "null" ]; then
+    echo "   Frontend Base URL: $FRONTEND_BASE_URL"
+fi
 echo "   Environment Type: $ENV_TYPE"
 
 # Build the Flutter web app with environment variables
 echo "🔨 Building Flutter web application..."
 flutter build web \
-    --dart-define=API_BASE_URL="$API_BASE_URL" \
-    --dart-define=ENVIRONMENT="$ENV_TYPE" \
+    "${DART_DEFINES[@]}" \
     --web-renderer html \
     --release
 

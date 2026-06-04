@@ -2,10 +2,11 @@
 class AppConfig {
   /// Base URL for API endpoints
   final String apiBaseUrl;
-  
+
   /// Application name
   final String appName;
-    /// Application version
+
+  /// Application version
   final String appVersion;
   
   /// Application title for UI display

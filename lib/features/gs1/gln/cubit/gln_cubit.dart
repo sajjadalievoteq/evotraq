@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 
 class GLNCubit extends Cubit<GLNState> {
@@ -11,6 +13,11 @@ class GLNCubit extends Cubit<GLNState> {
   GLNCubit({required GLNService glnService})
     : _glnService = glnService,
       super(const GLNState());
+
+  /// Loads GLNs for searchable pickers (larger page than default list view).
+  Future<List<GLN>> fetchGlnsForPicker({int page = 0, int size = 500}) {
+    return _glnService.getAllGLNs(page: page, size: size);
+  }
 
   Future<void> fetchGLNs({int page = 0, int size = 20}) async {
     emit(state.copyWith(status: GLNStatus.loading, isFetchingMore: false));
@@ -78,9 +85,9 @@ class GLNCubit extends Cubit<GLNState> {
       );
 
       final List<dynamic> contentList = result['content'] ?? [];
-      final List<GLN> glns = contentList
-          .map((item) => GLN.fromJson(item))
-          .toList();
+      final List<GLN> glns = parseGlnListFromResponseData({
+        GlnApiHttpConsts.jsonKeyContent: contentList,
+      });
       final int totalElements = result['totalElements'] ?? 0;
       final bool hasMore = (page + 1) * size < totalElements;
 
@@ -312,10 +319,14 @@ class GLNCubit extends Cubit<GLNState> {
   }
 
   void _handleError(Object e) {
+    String errorMessage = GlnUiConstants.errorGeneric;
+    if (e is ApiException) {
+      errorMessage = e.getUserFriendlyMessage();
+    }
     emit(
       state.copyWith(
         status: GLNStatus.error,
-        error: e.toString(),
+        error: errorMessage,
         isFetchingMore: false,
       ),
     );

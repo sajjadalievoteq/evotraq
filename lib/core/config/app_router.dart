@@ -31,8 +31,8 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/screens/sgtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/screens/sgtin_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_advanced_list_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/sscc/sscc_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/presentation/screens/sscc_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/presentation/detail/screens/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
 import 'package:traqtrace_app/features/home/presentation/screens/home_screen.dart';
@@ -1088,7 +1088,7 @@ class AppRouter {
         path: Constants.gs1SsccsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const SSCCAdvancedListScreen(),
+          child: const SSCCScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1102,7 +1102,7 @@ class AppRouter {
         path: Constants.gs1SsccNewRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const SSCCDetailScreen(mode: SSCCDetailMode.create),
+          child: const SSCCDetailScreen(isEditing: true),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1115,15 +1115,12 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1SsccDetailRoute,
         pageBuilder: (context, state) {
-          final ssccId = state.pathParameters['ssccId'] ?? '';
-          final ssccCode =
-              state.extra as String?; // Pass ssccCode as extra data
+          final ssccCode = state.pathParameters['ssccId'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
             child: SSCCDetailScreen(
-              mode: SSCCDetailMode.view,
-              ssccId: ssccId.isNotEmpty ? ssccId : null,
-              ssccCode: ssccCode,
+              isEditing: false,
+              ssccCode: ssccCode.isNotEmpty ? ssccCode : null,
             ),
           );
         },
@@ -1138,10 +1135,13 @@ class AppRouter {
       GoRoute(
         path: Constants.gs1SsccEditRoute,
         pageBuilder: (context, state) {
-          final ssccId = state.pathParameters['ssccId'] ?? '';
+          final ssccCode = state.pathParameters['ssccId'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: SSCCDetailScreen(mode: SSCCDetailMode.edit, ssccId: ssccId),
+            child: SSCCDetailScreen(
+              isEditing: true,
+              ssccCode: ssccCode.isNotEmpty ? ssccCode : null,
+            ),
           );
         },
         redirect: (context, state) {

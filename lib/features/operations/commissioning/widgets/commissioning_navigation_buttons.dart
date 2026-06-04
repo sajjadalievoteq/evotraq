@@ -51,7 +51,7 @@ class CommissioningNavigationButtons extends StatelessWidget {
                     onTap: onSubmit,
                     title: 'Commission $serialNumbersCount Items',
                     icon: Icons.check,
-                    backgroundColor: Colors.green,
+
                   ),
           ),
         ],

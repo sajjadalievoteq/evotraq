@@ -44,10 +44,10 @@ class AppConfig {
   static const String authTokenKey = 'auth_token';
   
   /// HTTP connection timeout in milliseconds
-  static const int connectTimeout = 30000;
+  static const int connectTimeout = 60000;
   
   /// HTTP receive timeout in milliseconds
-  static const int receiveTimeout = 30000;
+  static const int receiveTimeout = 60000;
   
   /// Constructor
   AppConfig({

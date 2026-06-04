@@ -26,12 +26,13 @@ abstract final class CommissioningFieldValidators {
   // Product Info fields
   // ---------------------------------------------------------------------------
 
-  /// Required. GS1 GTIN format check — must be 8, 12, 13, or 14 digits.
+  /// Required. GS1 EPCIS requires GTIN-14 (14 digits, zero-padded).
+  /// Shorter GTINs (8, 12, 13) must be padded to 14 digits before manual entry.
   static String? validateGtinRequired(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return 'GTIN is required';
-    if (!RegExp(r'^\d{8}$|^\d{12,14}$').hasMatch(v)) {
-      return 'Invalid GTIN format. Must be 8, 12, 13 or 14 digits.';
+    if (!RegExp(r'^\d{14}$').hasMatch(v)) {
+      return 'GTIN must be exactly 14 digits (GTIN-14 for EPCIS EPC URIs).';
     }
     return null;
   }

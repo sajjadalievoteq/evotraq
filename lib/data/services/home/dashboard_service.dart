@@ -40,6 +40,9 @@ class DashboardService {
     final eventCounts = results[4] as Map<String, int>;
     final totalEvents = eventCounts.values.fold(0, (sum, count) => sum + count);
 
+    // Fetch commissioning throughput (non-fatal — returns empty on error)
+    final throughput = await _fetchCommissioningThroughput(headers, 24);
+
     return DashboardStats(
       gtinCount: results[0] as int,
       glnCount: results[1] as int,
@@ -47,6 +50,8 @@ class DashboardService {
       ssccCount: results[3] as int,
       totalEvents: totalEvents,
       eventsByType: eventCounts,
+      throughputBuckets: throughput.buckets,
+      throughputTotal: throughput.total,
     );
   }
 
@@ -96,6 +101,37 @@ class DashboardService {
     );
 
     return counts;
+  }
+
+  Future<_ThroughputResult> _fetchCommissioningThroughput(
+    Map<String, String> headers,
+    int hours,
+  ) async {
+    try {
+      final url = '${_dioService.baseUrl}/commissioning/throughput?hours=$hours';
+      final response = await _dioService.get(
+        url,
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.data) as Map<String, dynamic>;
+        final rawBuckets = data['buckets'] as List<dynamic>? ?? [];
+        final buckets = <int, int>{};
+        for (final b in rawBuckets) {
+          final idx   = (b['hourIndex'] as num).toInt();
+          final count = (b['count']     as num).toInt();
+          buckets[idx] = count;
+        }
+        final total = (data['totalCount'] as num?)?.toInt() ?? 0;
+        return _ThroughputResult(buckets: buckets, total: total);
+      }
+    } catch (e) {
+      print('Error fetching commissioning throughput: $e');
+    }
+    return const _ThroughputResult(buckets: {}, total: 0);
   }
 
   Future<List<RecentEvent>> getRecentEvents({int limit = 5}) async {
@@ -240,4 +276,21 @@ class DashboardService {
       backendVersion: backendVersion,
     );
   }
+  /// Fetches commissioning throughput for the given [hours] window.
+  /// Non-fatal — returns empty buckets on network/parse error.
+  Future<({Map<int, int> buckets, int total})> fetchThroughput(
+    int hours,
+  ) async {
+    final token = await _dioService.getAuthToken();
+    final result = await _fetchCommissioningThroughput(_buildHeaders(token), hours);
+    return (buckets: result.buckets, total: result.total);
+  }
+}
+
+/// Private result holder for the commissioning throughput fetch.
+class _ThroughputResult {
+  final Map<int, int> buckets;
+  final int total;
+
+  const _ThroughputResult({required this.buckets, required this.total});
 }

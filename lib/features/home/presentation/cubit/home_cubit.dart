@@ -45,7 +45,7 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final results = await Future.wait([
         _dashboardService.getDashboardStats(),
-        _dashboardService.getRecentEvents(limit: 5),
+        _dashboardService.getRecentEvents(limit: 10),
         _dashboardService.getSystemHealth(),
       ]);
 
@@ -53,7 +53,6 @@ class HomeCubit extends Cubit<HomeState> {
       final recentEvents = results[1] as List<RecentEvent>;
       final healthStatus = results[2] as SystemHealthStatus;
       final refreshedAt = DateTime.now();
-
       _sessionStore.save(
         HomeOverviewBundle(
           stats: stats,
@@ -86,4 +85,26 @@ class HomeCubit extends Cubit<HomeState> {
   /// Pull-to-refresh: always hits the network.
   Future<void> refresh({String? accountEmail}) =>
       load(accountEmail: accountEmail, forceRefresh: true);
+
+  /// Fetches throughput data for [hours] and updates the current stats.
+  /// Does not reload the full dashboard — only the throughput buckets change.
+  Future<void> loadThroughput(int hours) async {
+    emit(state.copyWith(throughputHours: hours, throughputLoading: true));
+    try {
+      final result = await _dashboardService.fetchThroughput(hours);
+      if (state.stats == null) {
+        emit(state.copyWith(throughputLoading: false));
+        return;
+      }
+      emit(state.copyWith(
+        stats: state.stats!.copyWithThroughput(
+          buckets: result.buckets,
+          total: result.total,
+        ),
+        throughputLoading: false,
+      ));
+    } catch (_) {
+      emit(state.copyWith(throughputLoading: false));
+    }
+  }
 }

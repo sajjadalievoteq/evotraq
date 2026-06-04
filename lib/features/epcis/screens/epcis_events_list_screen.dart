@@ -78,6 +78,23 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
     // Using GoRouter navigation
     context.go('/epcis/events/${event.id}', extra: event);
   }
+
+  String _formatBizStep(String bizStep) {
+    final raw = bizStep.contains('BizStep-')
+        ? bizStep.split('BizStep-').last
+        : bizStep.split(':').last;
+    if (raw.isEmpty) return bizStep;
+    return raw[0].toUpperCase() + raw.substring(1).replaceAll('-', ' ');
+  }
+
+  String _formatDisposition(String disposition) {
+    final raw = disposition.contains('Disp-')
+        ? disposition.split('Disp-').last
+        : disposition.split(':').last;
+    if (raw.isEmpty) return disposition;
+    return raw[0].toUpperCase() + raw.substring(1).replaceAll('-', ' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,15 +176,27 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       child: ListTile(
-                        title: Text('Event ID: ${event.eventId}'),
+                        title: Text(
+                          'Event ID: ${event.eventId}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Time: ${_dateFormat.format(event.eventTime)}'),
                             if (event.businessStep != null)
-                              Text('Business Step: ${event.businessStep}'),
+                              Text(
+                                'Step: ${_formatBizStep(event.businessStep!)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             if (event.disposition != null)
-                              Text('Disposition: ${event.disposition}'),
+                              Text(
+                                'Disp: ${_formatDisposition(event.disposition!)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                           ],
                         ),
                         trailing: IconButton(

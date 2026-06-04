@@ -70,13 +70,14 @@ import 'package:traqtrace_app/features/epcis/screens/operations/packing_operatio
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_screen.dart';
 // Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_management_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_details_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
 // Barcode imports
-import 'package:traqtrace_app/features/barcode/screens/api_enabled_barcode_scanner_screen.dart';
+import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1778,7 +1779,7 @@ class AppRouter {
         path: Constants.opCommissioningRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const CommissioningOperationListScreen(),
+          child: const CommissioningScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1811,7 +1812,7 @@ class AppRouter {
           final operationId = state.pathParameters['operationId'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: CommissioningOperationDetailScreen(operationId: operationId),
+            child: CommissioningOperationDetailScreen(batchId: operationId),
           );
         },
         redirect: (context, state) {
@@ -1889,9 +1890,8 @@ class AppRouter {
         path: Constants.barcodeScanRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const ApiEnabledBarcodeScannerScreen(
+          child: const GS1BarcodeScannerScreen(
             title: 'GS1 Barcode Scanner',
-            locationGLN: '',
           ),
         ),
         redirect: (context, state) {
@@ -1921,12 +1921,9 @@ class AppRouter {
         path: Constants.barcodeVerifyRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: ApiEnabledBarcodeScannerScreen(
+          child: const GS1BarcodeScannerScreen(
             title: 'Verify GS1 Barcode',
-            businessStep: 'urn:epcglobal:cbv:bizstep:verifying',
-            disposition: 'urn:epcglobal:cbv:disp:in_progress',
-            locationGLN: '',
-            isVerificationMode: true,
+            verifyWithBackend: true,
           ),
         ),
         redirect: (context, state) {

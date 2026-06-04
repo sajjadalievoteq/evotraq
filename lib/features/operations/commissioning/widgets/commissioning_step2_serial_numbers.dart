@@ -113,12 +113,12 @@ class _ProductSummaryBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).primaryColor.withOpacity(0.1),
+      color: Theme.of(context).primaryColor,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            const Icon(Icons.inventory_2),
+            const Icon(Icons.inventory_2,color: Colors.white,),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -126,9 +126,9 @@ class _ProductSummaryBanner extends StatelessWidget {
                 children: [
                   Text(
                     'GTIN: ${selectedGTIN?.gtinCode ?? gtinController.text}',
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
                   ),
-                  Text('Batch: ${batchLotController.text}'),
+                  Text('Batch: ${batchLotController.text}',style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white.withValues(alpha: 0.8),fontSize: 12),),
                 ],
               ),
             ),
@@ -162,6 +162,10 @@ class _ScanInputCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isCameraActive = scanningMode == ScanningMode.camera && !kIsWeb;
+    final isWiredActive = scanningMode == ScanningMode.wired;
+
     return SizedBox(
       width: double.infinity,
       child: Card(
@@ -170,49 +174,97 @@ class _ScanInputCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionLabel('Add Serial Numbers', padding: EdgeInsets.only(bottom: 12)),
-              const SizedBox(height: 12),
-              SegmentedButton<ScanningMode>(
-                segments: [
-                  if (!kIsWeb)
-                    const ButtonSegment(
+              const SectionLabel(
+                'Add Serial Numbers',
+                padding: EdgeInsets.only(bottom: 12),
+              ),
 
-                      value: ScanningMode.camera,
-                      icon: Icon(Icons.camera_alt,size: 14,),
-                      label: Text('Camera'),
+              // ── Scanner activation buttons ──────────────────────────────
+              Row(
+                children: [
+                  if (!kIsWeb) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => onScanningModeChanged(
+                          isCameraActive
+                              ? ScanningMode.manual
+                              : ScanningMode.camera,
+                        ),
+                        icon: Icon(
+                          isCameraActive
+                              ? Icons.camera_alt
+                              : Icons.camera_alt_outlined,
+                          size: 16,
+                        ),
+                        label: Text(
+                          isCameraActive ? 'Stop Camera' : 'Scan with Camera',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: isCameraActive
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                                side: BorderSide(color: colorScheme.error),
+                              )
+                            : null,
+                      ),
                     ),
-                  const ButtonSegment(
-                    value: ScanningMode.wired,
-                    icon: Icon(Icons.keyboard,size: 14,),
-                    label: Text('Scanner'),
-                  ),
-                  const ButtonSegment(
-                    value: ScanningMode.manual,
-                    icon: Icon(Icons.edit, size: 14),
-                    label: Text('Manual'),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => onScanningModeChanged(
+                        isWiredActive
+                            ? ScanningMode.manual
+                            : ScanningMode.wired,
+                      ),
+                      icon: Icon(
+                        isWiredActive ? Icons.keyboard : Icons.keyboard_outlined,
+                        size: 16,
+                      ),
+                      label: Text(
+                        isWiredActive ? 'Disconnect' : 'Wired Scanner',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: isWiredActive
+                          ? OutlinedButton.styleFrom(
+                              foregroundColor: colorScheme.primary,
+                              side: BorderSide(color: colorScheme.primary),
+                            )
+                          : null,
+                    ),
                   ),
                 ],
-                selected: {scanningMode},
-                onSelectionChanged: (s) => onScanningModeChanged(s.first),
               ),
-              const SizedBox(height: 16),
-              if (scanningMode == ScanningMode.camera && !kIsWeb)
-                SizedBox(
-                  height: 200,
-                  child: BarcodeScanner(onScanResult: onScanResult, height: 200),
-                )
-              else if (scanningMode == ScanningMode.wired)
+
+              // ── Camera view (shown when camera mode active) ─────────────
+              if (isCameraActive) ...[
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    height: 200,
+                    child: BarcodeScanner(onScanResult: onScanResult, height: 200),
+                  ),
+                ),
+              ],
+
+              // ── Wired scanner listener (invisible focus target) ─────────
+              if (isWiredActive) ...[
+                const SizedBox(height: 8),
                 _WiredScannerInput(
                   controller: wiredScannerController,
                   focusNode: wiredScannerFocusNode,
                   isActive: isWiredScannerActive,
                   onSubmitted: onAddSerial,
-                )
-              else
-                _ManualSerialInput(
-                  controller: manualSerialController,
-                  onAdd: onAddSerial,
                 ),
+              ],
+
+              // ── Manual input — always visible ───────────────────────────
+              const SizedBox(height: 12),
+              _ManualSerialInput(
+                controller: manualSerialController,
+                onAdd: onAddSerial,
+              ),
             ],
           ),
         ),
@@ -221,7 +273,7 @@ class _ScanInputCard extends StatelessWidget {
   }
 }
 
-class _WiredScannerInput extends StatefulWidget {
+class _WiredScannerInput extends StatelessWidget {
   const _WiredScannerInput({
     required this.controller,
     required this.focusNode,
@@ -235,36 +287,29 @@ class _WiredScannerInput extends StatefulWidget {
   final ValueChanged<String> onSubmitted;
 
   @override
-  State<_WiredScannerInput> createState() => _WiredScannerInputState();
-}
-
-class _WiredScannerInputState extends State<_WiredScannerInput> {
-  @override
-  void initState() {
-    super.initState();
-   widget.focusNode.requestFocus();
-  }
-  @override
   Widget build(BuildContext context) {
+    // if(isActive==false){
+    //   focusNode.requestFocus();
+    // }
 
     return Column(
       children: [
         // Invisible focus target — captures wired-scanner keystrokes
         // without creating any HTML element (avoids visible input on web)
         KeyboardListener(
-          focusNode: widget.focusNode,
+          focusNode: focusNode,
           onKeyEvent: (event) {
             if (event is KeyDownEvent) {
               if (event.logicalKey == LogicalKeyboardKey.enter ||
                   event.logicalKey == LogicalKeyboardKey.numpadEnter) {
-                final value = widget.controller.text.trim();
+                final value = controller.text.trim();
                 if (value.isNotEmpty) {
-                  widget.onSubmitted(value);
-                  widget.controller.clear();
+                  onSubmitted(value);
+                  controller.clear();
                 }
               } else if (event.character != null &&
                   event.character!.isNotEmpty) {
-                widget.controller.text += event.character!;
+                controller.text += event.character!;
               }
             }
           },

@@ -18,6 +18,12 @@ class CommissioningStep3Review extends StatelessWidget {
     required this.expiryDate,
     required this.bestBeforeDate,
     required this.serialNumbers,
+    this.countryOfOrigin,
+    this.productionOrder,
+    this.productionLine,
+    this.regulatoryMarket,
+    this.regulatoryStatus,
+    this.operatorId,
   });
 
   final GTIN? selectedGTIN;
@@ -29,6 +35,12 @@ class CommissioningStep3Review extends StatelessWidget {
   final DateTime? expiryDate;
   final DateTime? bestBeforeDate;
   final List<String> serialNumbers;
+  final String? countryOfOrigin;
+  final String? productionOrder;
+  final String? productionLine;
+  final String? regulatoryMarket;
+  final String? regulatoryStatus;
+  final String? operatorId;
 
   String _formatDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
@@ -86,6 +98,42 @@ class CommissioningStep3Review extends StatelessWidget {
                       label: 'Best Before',
                       value: _formatDate(bestBeforeDate!),
                     ),
+                  ],
+                  if (countryOfOrigin != null &&
+                      countryOfOrigin!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(
+                        label: 'Country of Origin', value: countryOfOrigin!),
+                  ],
+                  if (productionOrder != null &&
+                      productionOrder!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(
+                        label: 'Production Order', value: productionOrder!),
+                  ],
+                  if (productionLine != null &&
+                      productionLine!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(
+                        label: 'Production Line', value: productionLine!),
+                  ],
+                  if (regulatoryMarket != null &&
+                      regulatoryMarket!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(
+                        label: 'Regulatory Market',
+                        value: regulatoryMarket!),
+                  ],
+                  if (regulatoryStatus != null &&
+                      regulatoryStatus!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(
+                        label: 'Regulatory Status',
+                        value: regulatoryStatus!),
+                  ],
+                  if (operatorId != null && operatorId!.isNotEmpty) ...[
+                    const Divider(),
+                    _ReviewRow(label: 'Operator ID', value: operatorId!),
                   ],
                 ],
               ),
@@ -181,12 +229,10 @@ class _ReviewRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
-              ),
+          Text(
+            "$label: ",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
             ),
           ),
           Expanded(

@@ -600,7 +600,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
               formColumn: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  CardWithBackgroundWidget(
+              if(_glnCodeController.text.isNotEmpty)    CardWithBackgroundWidget(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -635,7 +635,7 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  if(_glnCodeController.text.isNotEmpty)    const SizedBox(height: 16),
                   GlnIdentificationStructureCoreGroup(
                     setFieldError: setFieldError,
                     readOnly: idStructureReadOnly,

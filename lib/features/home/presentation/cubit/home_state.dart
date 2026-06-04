@@ -13,6 +13,8 @@ class HomeState extends Equatable {
     this.healthStatus,
     this.lastDataRefreshAt,
     this.errorMessage,
+    this.throughputHours = 24,
+    this.throughputLoading = false,
   });
 
   final HomeLoadStatus status;
@@ -22,6 +24,10 @@ class HomeState extends Equatable {
   /// When stats / events / health were last loaded successfully.
   final DateTime? lastDataRefreshAt;
   final String? errorMessage;
+  /// The hours window currently reflected in [DashboardStats.throughputBuckets].
+  final int throughputHours;
+  /// True while a [HomeCubit.loadThroughput] call is in-flight.
+  final bool throughputLoading;
 
   bool get isLoading => status == HomeLoadStatus.loading;
   bool get hasError => status == HomeLoadStatus.failure;
@@ -36,6 +42,8 @@ class HomeState extends Equatable {
     DateTime? lastDataRefreshAt,
     String? errorMessage,
     bool clearError = false,
+    int? throughputHours,
+    bool? throughputLoading,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -44,6 +52,8 @@ class HomeState extends Equatable {
       healthStatus: healthStatus ?? this.healthStatus,
       lastDataRefreshAt: lastDataRefreshAt ?? this.lastDataRefreshAt,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      throughputHours: throughputHours ?? this.throughputHours,
+      throughputLoading: throughputLoading ?? this.throughputLoading,
     );
   }
 
@@ -55,5 +65,7 @@ class HomeState extends Equatable {
         healthStatus,
         lastDataRefreshAt,
         errorMessage,
+        throughputHours,
+        throughputLoading,
       ];
 }

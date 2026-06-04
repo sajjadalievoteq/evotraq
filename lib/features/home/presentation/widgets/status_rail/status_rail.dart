@@ -40,7 +40,7 @@ class StatusRail extends StatelessWidget {
             final zoneText = _statusRailTimeZoneLabel(now);
 
             final clock = Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment:layout.isTabletUp? CrossAxisAlignment.end:CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(

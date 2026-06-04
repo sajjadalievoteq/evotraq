@@ -1,11 +1,14 @@
-﻿import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+﻿import 'package:flutter/foundation.dart' show debugPrint, kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
 import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -79,8 +82,7 @@ class _CommissioningOperationScreenState
 
   // Step 2 state
   final List<String> _serialNumbers = [];
-  ScanningMode _scanningMode =
-      kIsWeb ? ScanningMode.wired : ScanningMode.camera;
+  ScanningMode _scanningMode = ScanningMode.manual;
   bool _isWiredScannerActive = false;
 
   // Submission state
@@ -93,7 +95,8 @@ class _CommissioningOperationScreenState
   bool get _isStep1Valid =>
       (_selectedGTIN != null || _gtinController.text.trim().isNotEmpty) &&
       _batchLotController.text.trim().isNotEmpty &&
-      _commissioningLocationGLN != null;
+      _commissioningLocationGLN != null &&
+      _expiryDate != null;
 
   bool get _isStep2Valid => _serialNumbers.isNotEmpty;
 
@@ -194,6 +197,10 @@ class _CommissioningOperationScreenState
           setState(() => _locationError = 'Commissioning Location is required');
           isValid = false;
         }
+        if (_expiryDate == null) {
+          context.showError('Expiry Date is required for pharmaceutical commissioning');
+          isValid = false;
+        }
         return isValid;
       case 1:
         if (_serialNumbers.isEmpty) {
@@ -229,9 +236,32 @@ class _CommissioningOperationScreenState
   // Serial number management
   // ---------------------------------------------------------------------------
 
+  /// Extracts the serial number from a raw GS1 barcode string.
+  /// Always runs through [extractBarcodeDetails]; falls back to the raw
+  /// trimmed string when no AI-21 serial is present (plain manual entry).
+  String _extractSerial(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final details = extractBarcodeDetails(trimmed);
+    if (details.serial != null && details.serial!.isNotEmpty) {
+      return details.serial!;
+    }
+    return trimmed;
+  }
+
   void _onScanResult(ScanResult result) {
     if (result.isValid) _addSerial(result.data);
   }
+
+  /// Returns true when [scannedGtin] (14-digit) matches the selected GTIN.
+  /// Handles zero-padding differences (e.g. 13-digit vs 14-digit).
+  bool _gtinMatches(String scannedGtin) {
+    final selected = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
+    if (selected.isEmpty) return true; // no GTIN selected yet — allow
+    final normalise = (String v) => v.replaceAll(RegExp(r'\D'), '').padLeft(14, '0');
+    return normalise(scannedGtin) == normalise(selected);
+  }
+
 
   void _addSerial(String serial) {
     final trimmed = serial.trim();
@@ -239,11 +269,31 @@ class _CommissioningOperationScreenState
       context.showError('Please enter a serial number');
       return;
     }
-    if (_serialNumbers.contains(trimmed)) {
-      context.showError('Serial number already added: $trimmed');
+
+    // If the input is a GS1 barcode that contains an embedded GTIN (SGTIN),
+    // verify it matches the product selected in step 1.
+    final details = extractBarcodeDetails(trimmed);
+    if (details.gtin != null && details.gtin!.isNotEmpty) {
+      if (!_gtinMatches(details.gtin!)) {
+        final selectedCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
+        context.showError(
+          'GTIN mismatch: barcode contains ${details.gtin} '
+          'but selected product is $selectedCode',
+        );
+        return;
+      }
+    }
+
+    final extracted = _extractSerial(trimmed);
+    if (extracted.isEmpty) {
+      context.showError('Please enter a serial number');
       return;
     }
-    setState(() => _serialNumbers.add(trimmed));
+    if (_serialNumbers.contains(extracted)) {
+      context.showError('Serial number already added: $extracted');
+      return;
+    }
+    setState(() => _serialNumbers.add(extracted));
     _manualSerialController.clear();
     _wiredScannerController.clear();
   }
@@ -325,6 +375,121 @@ class _CommissioningOperationScreenState
           _bestBeforeDate = null;
       }
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Product barcode scanning (Step 1 auto-fill)
+  // ---------------------------------------------------------------------------
+
+  /// Opens a centered dialog with the camera scanner (mobile) or wired-scanner
+  /// prompt (web/desktop). On a successful scan, calls [_applyBarcodeDetails].
+  Future<void> _scanProductBarcode() async {
+    final bool useCameraScanner = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => _ProductBarcodeScannerDialog(
+        useCameraScanner: useCameraScanner,
+        onBarcodeDetected: (rawBarcode) {
+          Navigator.of(dialogCtx).pop();
+          _applyBarcodeDetails(rawBarcode);
+        },
+      ),
+    );
+  }
+
+  /// Parses [rawBarcode] via [extractBarcodeDetails], validates the GTIN
+  /// against the loaded list, then fills matching Step 1 form fields.
+  ///
+  /// If the GTIN is not found in the database, shows a dialog prompting
+  /// the user to register it before commissioning.
+  void _applyBarcodeDetails(String rawBarcode) {
+    final details = extractBarcodeDetails(rawBarcode);
+
+    if (!details.isValid) {
+      context.showError('Could not decode barcode — please enter details manually');
+      return;
+    }
+
+    // A commissioning barcode must carry a GTIN.
+    if (details.gtin == null) {
+      context.showError('Barcode does not contain a GTIN — please enter details manually');
+      return;
+    }
+
+    // Validate GTIN against the database list.
+    final matched = _availableGTINs.cast<GTIN?>().firstWhere(
+      (g) => g?.gtinCode == details.gtin,
+      orElse: () => null,
+    );
+
+    if (matched == null) {
+      // GTIN not registered — ask the user to add it first.
+      _showGtinNotFoundDialog(details.gtin!);
+      return;
+    }
+
+    // GTIN found — fill all available fields.
+    setState(() {
+      _selectedGTIN = matched;
+      _gtinController.text = matched.gtinCode;
+      _gtinError = null;
+
+      if (details.batchLot != null && details.batchLot!.isNotEmpty) {
+        _batchLotController.text = details.batchLot!;
+      }
+      if (details.expiry != null) _expiryDate = details.expiry;
+      if (details.productionDate != null) _productionDate = details.productionDate;
+      if (details.bestBeforeDate != null) _bestBeforeDate = details.bestBeforeDate;
+      if (details.countryOfOrigin != null && details.countryOfOrigin!.isNotEmpty) {
+        _countryOfOriginController.text = details.countryOfOrigin!;
+      }
+    });
+
+    context.showSuccess(
+      'Barcode scanned — ${details.displayRows.length} field(s) filled',
+    );
+  }
+
+  /// Shows a dialog when the scanned GTIN is not registered in the system.
+  void _showGtinNotFoundDialog(String gtinCode) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.qr_code, size: 40),
+        title: const Text('GTIN Not Registered'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'GTIN $gtinCode is not registered in the system.',
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'You must add this GTIN before commissioning products with it.',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.arrow_forward, size: 16),
+            label: const Text('Go to GTINs'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.go(Constants.gs1GtinsRoute);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -444,6 +609,7 @@ class _CommissioningOperationScreenState
         }),
         onSelectDate: _selectDate,
         onClearDate: _clearDate,
+        onScanProductBarcode: _scanProductBarcode,
       ),
     );
 
@@ -733,6 +899,214 @@ class _CommissioningStepPanel extends StatelessWidget {
         ),
 
         if (footer != null) footer!,
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// Product barcode scanner dialog
+// =============================================================================
+
+/// Centered dialog shown when the user taps "Scan Product Barcode" on Step 1.
+///
+/// On mobile / tablet it shows the live camera scanner (auto-starts).
+/// On web / desktop it shows a wired-scanner prompt with an auto-focused
+/// hidden capture field — no visible text input to click first.
+class _ProductBarcodeScannerDialog extends StatefulWidget {
+  const _ProductBarcodeScannerDialog({
+    required this.useCameraScanner,
+    required this.onBarcodeDetected,
+  });
+
+  final bool useCameraScanner;
+  final ValueChanged<String> onBarcodeDetected;
+
+  @override
+  State<_ProductBarcodeScannerDialog> createState() =>
+      _ProductBarcodeScannerDialogState();
+}
+
+class _ProductBarcodeScannerDialogState
+    extends State<_ProductBarcodeScannerDialog> {
+  bool _handled = false;
+
+  // Used only for wired-scanner mode
+  final _captureController = TextEditingController();
+  final _captureFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.useCameraScanner) {
+      // Immediately grab focus so the wired scanner doesn't need a tap.
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _captureFocusNode.requestFocus());
+    }
+  }
+
+  @override
+  void dispose() {
+    _captureController.dispose();
+    _captureFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onDetected(String rawBarcode) {
+    if (_handled) return;
+    _handled = true;
+    widget.onBarcodeDetected(rawBarcode);
+  }
+
+  void _onWiredSubmit(String value) {
+    final trimmed = value.trim();
+    _captureController.clear();
+    if (trimmed.isNotEmpty) _onDetected(trimmed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.sizeOf(context);
+    // Dialog takes 85 % of the shorter side so it's square-ish on all screens.
+    final dialogSize = Size(
+      (size.width * 0.85).clamp(300.0, 560.0),
+      (size.height * 0.72).clamp(360.0, 640.0),
+    );
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        width: dialogSize.width,
+        height: dialogSize.height,
+        child: Column(
+          children: [
+            // ── Header ──────────────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withOpacity(0.4),
+                border: Border(
+                  bottom: BorderSide(color: cs.outlineVariant),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.qr_code_scanner, color: cs.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Scan Product Barcode',
+                      style:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Close',
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Scanner content ──────────────────────────────────────
+            Expanded(
+              child: widget.useCameraScanner
+                  ? GS1BarcodeScannerWidget(
+                      scanMode: ScanMode.single,
+                      onGS1BarcodeDetected: _onDetected,
+                    )
+                  : _WiredScannerReadyPrompt(
+                      captureController: _captureController,
+                      captureFocusNode: _captureFocusNode,
+                      onSubmitted: _onWiredSubmit,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown on web / desktop inside the scanner sheet.
+///
+/// Displays a large "ready to scan" indicator while an invisible, auto-focused
+/// [TextField] silently captures wired-scanner keyboard output.
+/// The user never needs to tap anything.
+class _WiredScannerReadyPrompt extends StatelessWidget {
+  const _WiredScannerReadyPrompt({
+    required this.captureController,
+    required this.captureFocusNode,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController captureController;
+  final FocusNode captureFocusNode;
+  final ValueChanged<String> onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Stack(
+      children: [
+        // ── Visual prompt ────────────────────────────────────────────
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.document_scanner_outlined,
+                  size: 80,
+                  color: cs.primary.withOpacity(0.7),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Ready to scan',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Point your barcode scanner at the product label.\nThe barcode will be captured automatically.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // ── Hidden auto-focused capture field ────────────────────────
+        // Invisible but in the tree so it can hold focus and receive
+        // keyboard events from a wired / USB barcode scanner.
+        Positioned(
+          left: 0,
+          top: 0,
+          child: SizedBox(
+            width: 1,
+            height: 1,
+            child: Opacity(
+              opacity: 0,
+              child: TextField(
+                controller: captureController,
+                focusNode: captureFocusNode,
+                autofocus: true,
+                onSubmitted: onSubmitted,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

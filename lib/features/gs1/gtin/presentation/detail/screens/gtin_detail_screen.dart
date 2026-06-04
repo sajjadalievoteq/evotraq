@@ -524,7 +524,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       unboundSpecSection: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          CardWithBackgroundWidget(
+          if(_gtinCodeController.text.isNotEmpty) CardWithBackgroundWidget(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -552,7 +552,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          if(_gtinCodeController.text.isNotEmpty)  const SizedBox(height: 16),
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: _gtinCodeController,

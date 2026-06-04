@@ -120,7 +120,7 @@ class DashboardStatCard extends StatelessWidget {
                             child: Text(
                               title,
                               style: context.text.cap.copyWith(
-                                fontSize: dense ? 12 : 20,
+                                fontSize: dense ? 10 : 20,
                                 color: captionColor,
                               ),
                               maxLines: 2,
@@ -135,7 +135,7 @@ class DashboardStatCard extends StatelessWidget {
                         style: context.text.h2.copyWith(
                           fontWeight: FontWeight.bold,
                           color: valueColor,
-                          fontSize: dense ? 24 : 44,
+                          fontSize: dense ? 20 : 44,
                           height: dense ? 1.1 : 1.2,
                         ),
                       ),

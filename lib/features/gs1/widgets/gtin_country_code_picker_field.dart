@@ -104,6 +104,12 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
         chosen = c;
         Navigator.of(context).pop();
       },
+      itemBuilder: (props, defaultTile) => defaultTile?.copyWith(
+        subtitle: Text(
+          props.item.codeNumeric,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
 
     await showDialog<void>(
@@ -170,11 +176,7 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
                 errorText: fieldState.errorText,
               ),
               child: Text(
-                // formatted.isEmpty ?
-                ' '
-                //     :
-                // formatted,,
-                  ,
+                formatted.isEmpty ? ' ' : formatted,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: context.colors.textPrimary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

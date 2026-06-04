@@ -371,28 +371,28 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              ExpansionTile(
-                leading: const Icon(Icons.play_for_work),
+              ListTile(
+                leading: const Icon(Icons.list_alt),
                 title: const Text('Commissioning'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_circle_outline),
-                    title: const Text('Bulk Commission'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opCommissioningNewRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.list_alt),
-                    title: const Text('View Commissioning'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opCommissioningRoute);
-                    },
-                  ),
-                ],
+                onTap: () {
+                  context.go(Constants.opCommissioningRoute);
+                },
               ),
+              // ExpansionTile(
+              //   leading: const Icon(Icons.play_for_work),
+              //   title: const Text('Commissioning'),
+              //   children: [
+              //     // ListTile(
+              //     //   leading: const Icon(Icons.add_circle_outline),
+              //     //   title: const Text('Commission'),
+              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+              //     //   onTap: () {
+              //     //     context.go(Constants.opCommissioningNewRoute);
+              //     //   },
+              //     // ),
+              //
+              //   ],
+              // ),
               ExpansionTile(
                 leading: const Icon(Icons.inventory_2),
                 title: const Text('Packing Operations'),
@@ -473,38 +473,38 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
               ),
+              ListTile(
+                leading: const Icon(Icons.add_box),
+                title: const Text('Generate / Verify Barcode'),
 
-              // Barcode Menu
-              ExpansionTile(
-                leading: const Icon(Icons.qr_code_2),
-                title: const Text('Barcode'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_box),
-                    title: const Text('Generate Barcode'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.barcodeGenerateRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.document_scanner),
-                    title: const Text('Scan Barcode'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.barcodeScanRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.verified),
-                    title: const Text('Verify Barcode'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.barcodeVerifyRoute);
-                    },
-                  ),
-                ],
+                onTap: () {
+                  context.go(Constants.barcodeGenerateRoute);
+                },
               ),
+              // Barcode Menu
+              // ExpansionTile(
+              //   leading: const Icon(Icons.qr_code_2),
+              //   title: const Text('Barcode'),
+              //   children: [
+              //
+              //     // ListTile(
+              //     //   leading: const Icon(Icons.document_scanner),
+              //     //   title: const Text('Scan Barcode'),
+              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+              //     //   onTap: () {
+              //     //     context.go(Constants.barcodeScanRoute);
+              //     //   },
+              //     // ),
+              //     // ListTile(
+              //     //   leading: const Icon(Icons.verified),
+              //     //   title: const Text('Verify Barcode'),
+              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+              //     //   onTap: () {
+              //     //     context.go(Constants.barcodeVerifyRoute);
+              //     //   },
+              //     // ),
+              //   ],
+              // ),
 
               // Validation Menu
               ExpansionTile(

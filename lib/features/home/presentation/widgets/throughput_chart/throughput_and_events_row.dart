@@ -46,7 +46,9 @@ class ThroughputAndEventsRow extends StatelessWidget {
           children: [
             SizedBox(height: h, child: const ThroughputChartSection()),
             SizedBox(height: layout.isCompact ? 16 : 20),
-            SizedBox(height: h, child: const EpcisEventStreamSection()),
+            // No height constraint on mobile — the card sizes to its content
+            // and the parent SingleChildScrollView handles all scrolling.
+            const EpcisEventStreamSection(),
           ],
         );
       },

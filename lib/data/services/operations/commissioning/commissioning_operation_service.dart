@@ -142,14 +142,52 @@ class CommissioningOperationService {
     }
   }
 
+  Future<({List<CommissioningBatch> batches, bool isLast})> listBatches({
+    String? gtin,
+    int page = 0,
+    int size = 20,
+    String sortBy = 'createdAt',
+    String sortDir = 'desc',
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      final queryParameters = <String, dynamic>{
+        'page': page,
+        'size': size,
+        'sortBy': sortBy,
+        'sortDir': sortDir,
+        if (gtin != null) 'gtin': gtin,
+      };
+      final response = await _dioService.get(
+        '$_baseUrl/commissioning/batches',
+        queryParameters: queryParameters,
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.data) as Map<String, dynamic>;
+        final content = data['content'] as List<dynamic>? ?? [];
+        final isLast = data['last'] as bool? ?? true;
+        final batches = content
+            .map((e) => CommissioningBatch.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (batches: batches, isLast: isLast);
+      }
+      return (batches: <CommissioningBatch>[], isLast: true);
+    } catch (e) {
+      debugPrint('CommissioningService: Error fetching batches: $e');
+      return (batches: <CommissioningBatch>[], isLast: true);
+    }
+  }
+
   Future<List<CommissioningResponse>> getCommissioningOperations() async {
-    // For now, we'll fetch recent commissioning events from the events API
-    // In the future, this could be enhanced with a dedicated endpoint
+    // Uses GET /events/object/business-step/{bizStep} — path param, returns a plain List
+    const bizStep = 'urn:epcglobal:cbv:bizstep:commissioning';
     try {
       final headers = await _getHeaders();
       final response = await _dioService.get(
-        '$_baseUrl/events/object',
-        queryParameters: {'bizStep': 'commissioning', 'size': '50'},
+        '$_baseUrl/events/object/business-step/$bizStep',
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -157,10 +195,9 @@ class CommissioningOperationService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.data);
-        final List<dynamic> content = data['content'] ?? data;
+        // Endpoint returns a plain List (not a Page wrapper)
+        final List<dynamic> content = data is List ? data : (data['content'] ?? []);
 
-        // Group events by commissioning reference if available
-        // For now, return each event as a separate operation
         return content
             .map((event) => _parseObjectEventToCommissioningResponse(event))
             .toList();
@@ -278,6 +315,49 @@ class CommissioningOperationService {
       action: event['action']?.toString(),
       itemResults: itemResults,
     );
+  }
+
+  Future<CommissioningBatch?> getBatch(String batchId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _dioService.get(
+        '$_baseUrl/commissioning/batches/$batchId',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.data) as Map<String, dynamic>;
+        return CommissioningBatch.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('CommissioningService: Error fetching batch $batchId: $e');
+      return null;
+    }
+  }
+
+  /// Fetch per-item results (serial numbers, EPC URIs, success/failure) for a batch.
+  Future<List<CommissioningBatchItem>> getBatchItems(String batchId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _dioService.get(
+        '$_baseUrl/commissioning/batches/$batchId/items',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.data) as List<dynamic>;
+        return data
+            .map((e) => CommissioningBatchItem.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('CommissioningService: Error fetching batch items $batchId: $e');
+      return [];
+    }
   }
 
   /// Parse date from various formats (ISO date, ISO datetime, etc.)

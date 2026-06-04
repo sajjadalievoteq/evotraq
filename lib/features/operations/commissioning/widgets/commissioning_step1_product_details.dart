@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_country_code_picker_field.dart';
+
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
@@ -40,6 +40,7 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
     required this.onLocationChanged,
     required this.onSelectDate,
     required this.onClearDate,
+    this.onScanProductBarcode,
   });
 
   final List<GTIN> availableGTINs;
@@ -71,6 +72,10 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
   final ValueChanged<String> onSelectDate;
   final ValueChanged<String> onClearDate;
 
+  /// Called when the user taps the "Scan Barcode" button on Step 1.
+  /// The parent screen opens the scanner and applies the result.
+  final VoidCallback? onScanProductBarcode;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -88,6 +93,7 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
             batchLotController: batchLotController,
             referenceController: referenceController,
             onGtinChanged: onGtinChanged,
+            onScanProductBarcode: onScanProductBarcode,
           ),
           _LocationCard(
             commissioningLocationGLN: commissioningLocationGLN,
@@ -130,6 +136,7 @@ class _ProductInfoCard extends StatelessWidget {
     required this.batchLotController,
     required this.referenceController,
     required this.onGtinChanged,
+    this.onScanProductBarcode,
   });
 
   final List<GTIN> availableGTINs;
@@ -140,6 +147,7 @@ class _ProductInfoCard extends StatelessWidget {
   final TextEditingController batchLotController;
   final TextEditingController referenceController;
   final ValueChanged<GTIN?> onGtinChanged;
+  final VoidCallback? onScanProductBarcode;
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +157,33 @@ class _ProductInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (onScanProductBarcode != null) ...[
+            OutlinedButton.icon(
+              onPressed: onScanProductBarcode,
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Scan Product Barcode'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Expanded(child: Divider()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    'or enter manually',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                  ),
+                ),
+                const Expanded(child: Divider()),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           if (isLoadingGTINs)
             AppShimmer(
               child: Container(
@@ -185,7 +220,7 @@ class _ProductInfoCard extends StatelessWidget {
               controller: gtinController,
               fieldName: 'gtinCode',
               label: 'GTIN *',
-              hintText: 'Enter 8, 12, 13 or 14-digit GTIN',
+              hintText: 'Enter 14-digit GTIN',
               keyboardType: TextInputType.number,
               maxLength: 14,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -262,7 +297,7 @@ class _DatesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Gs1GroupCard(
-      title: 'Dates (Optional)',
+      title: 'Dates',
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       child: Column(
         children: [
@@ -278,7 +313,7 @@ class _DatesCard extends StatelessWidget {
           const Divider(),
           _DateRow(
             icon: Icons.event,
-            label: 'Expiry Date',
+            label: 'Expiry Date *',
             dateKey: 'expiry',
             date: expiryDate,
             onSelect: onSelectDate,
@@ -372,11 +407,14 @@ class _AdditionalInfoTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GtinCountryCodePickerField(
+          Gs1ValidatedField(
             controller: countryOfOriginController,
-            labelText: 'Country of Origin',
-            helperText: '',
-            enabled: true,
+            fieldName: 'countryOfOrigin',
+            label: 'Country of Origin',
+            hintText: 'e.g. AE, SA, GB',
+            maxLength: 2,
+            validator:
+                CommissioningFieldValidators.validateCountryOfOriginAlpha2,
           ),
 
           Gs1ValidatedField(

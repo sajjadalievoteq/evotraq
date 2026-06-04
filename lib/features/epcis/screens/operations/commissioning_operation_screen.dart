@@ -442,7 +442,7 @@ class _CommissioningOperationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bulk Commissioning'),
+        title: const Text('Commissioning'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

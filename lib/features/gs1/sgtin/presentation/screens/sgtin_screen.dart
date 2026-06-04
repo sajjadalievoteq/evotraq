@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/screens/sgtin_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/list/screens/sgtin_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/utilities/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
@@ -61,12 +64,23 @@ class SGTINScreen extends StatelessWidget {
                 ctx.read<SGTINCubit>().fetchSGTINList();
               },
             ),
-            detailAwaitBuilder: (context) => const SGTINDetailScreen(
-              key: ValueKey('__sgtin_split_await_list__'),
-              isEditing: false,
-              embedded: true,
-              awaitingListSelection: true,
-            ),
+            detailAwaitBuilder: (context) {
+              final status =
+                  context.read<SGTINCubit>().state.status;
+              if (status == SGTINStatus.loading ||
+                  status == SGTINStatus.initial) {
+                return SingleChildScrollView(
+                  padding: context.padding,
+                  child: AppShimmer(child: SgtinDetailSkeleton()),
+                );
+              }
+              return const SGTINDetailScreen(
+                key: ValueKey('__sgtin_split_await_list__'),
+                isEditing: false,
+                embedded: true,
+                awaitingListSelection: true,
+              );
+            },
           ),
           fallback: const SGTINListScreen(),
         ),

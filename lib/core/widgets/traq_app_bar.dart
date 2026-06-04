@@ -99,7 +99,7 @@ class TraqAppBar extends AppBar {
         tooltip: 'Notifications',
         onPressed: () => context.go(Constants.notificationsRoute),
         icon: SvgPicture.asset(
-          AppAssets.iconAlert,
+          AppAssets.iconNotification,
           width: 22,
           height: 22,
           colorFilter: const ColorFilter.mode(
@@ -110,6 +110,7 @@ class TraqAppBar extends AppBar {
       ),
       ...?actions,
     ];
+merged.add(    SizedBox(width: 20,),);
     if (showLogoutAction) {
       try {
         context.read<AuthCubit>();

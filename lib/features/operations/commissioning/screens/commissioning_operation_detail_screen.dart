@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
-import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 
-import '../../../../data/models/gs1/gln/gln_model.dart';
-
-/// Screen to display commissioning operation details
+/// Detail screen for a single commissioning operation (CommissioningBatch).
+///
+/// [embedded] = true  → rendered inside the split-view pane (no Scaffold/AppBar).
+/// [embedded] = false → full standalone screen with AppBar + Drawer.
 class CommissioningOperationDetailScreen extends StatefulWidget {
-  final String operationId;
+  final String? batchId;
+  final bool embedded;
+
+  /// Legacy alias kept for router compatibility — maps to [batchId].
+  final String? operationId;
+
+  /// Shown in split-view when nothing is selected yet.
+  final bool awaitingSelection;
+
+  /// When true the list pane is still loading — show a skeleton instead of
+  /// the "select an operation" placeholder.
+  final bool listLoading;
 
   const CommissioningOperationDetailScreen({
     Key? key,
-    required this.operationId,
+    this.batchId,
+    this.operationId,
+    this.embedded = false,
+    this.awaitingSelection = false,
+    this.listLoading = false,
   }) : super(key: key);
+
+  String? get _resolvedId => batchId ?? operationId;
 
   @override
   State<CommissioningOperationDetailScreen> createState() =>
@@ -28,226 +47,433 @@ class CommissioningOperationDetailScreen extends StatefulWidget {
 
 class _CommissioningOperationDetailScreenState
     extends State<CommissioningOperationDetailScreen> {
-  CommissioningResponse? _operation;
-  bool _isLoading = true;
+  CommissioningBatch? _batch;
+  List<CommissioningBatchItem> _items = [];
+  bool _isLoading = false;
   String? _errorMessage;
-  GLN? _locationGLNDetails;
+
+  /// How many items to show initially before "Show all".
+  static const int _initialItemDisplayCount = 50;
 
   @override
   void initState() {
     super.initState();
-    _loadOperationDetails();
+    if (!widget.awaitingSelection && widget._resolvedId != null) {
+      _load();
+    }
   }
 
-  Future<void> _loadOperationDetails() async {
+  @override
+  void didUpdateWidget(CommissioningOperationDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._resolvedId != widget._resolvedId &&
+        widget._resolvedId != null) {
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final id = widget._resolvedId;
+    if (id == null) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _batch = null;
+      _items = [];
     });
-
     try {
-      final commissioningService = getIt<CommissioningOperationService>();
-      final operation = await commissioningService.getCommissioningOperation(
-        widget.operationId,
-      );
+      final service = getIt<CommissioningOperationService>();
+      final results = await Future.wait([
+        service.getBatch(id),
+        service.getBatchItems(id),
+      ]);
       setState(() {
-        _operation = operation;
+        _batch = results[0] as CommissioningBatch?;
+        _items = (results[1] as List<CommissioningBatchItem>?) ?? [];
       });
-
-      // Load GLN details
-      await _loadGLNDetails();
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load commissioning operation: $e';
-      });
+      setState(() => _errorMessage = 'Failed to load operation: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _loadGLNDetails() async {
-    if (_operation == null) return;
-
-    try {
-      final glnService = getIt<GLNService>();
-
-      if (_operation!.commissioningLocationGLN != null) {
-        try {
-          final locationGLN = await glnService.getGLNByCode(
-            _operation!.commissioningLocationGLN!,
-          );
-          setState(() => _locationGLNDetails = locationGLN);
-        } catch (_) {
-          // GLN not found in master data
-        }
-      }
-    } catch (_) {
-      // Ignore GLN lookup errors
-    }
-  }
+  // -------------------------------------------------------------------------
+  // Build
+  // -------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
+    if (widget.embedded) {
+      return _buildContent();
+    }
     return Scaffold(
-      appBar: AppBar(
+      appBar: TraqAppBar(
+        context,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/operations/commissioning'),
         ),
         title: const Text('Commissioning Details'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            onPressed: _loadOperationDetails,
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
         ],
       ),
       drawer: const AppDrawer(),
-      body: _buildBody(),
+      body: _buildContent(),
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return AppShimmer(
-        child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
-          padding: ResponsiveUtils.paddingAll(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _skeletonBox(context, height: 24, width: 180),
-              const SizedBox(height: 16),
-              _skeletonBox(context, height: 120),
-              const SizedBox(height: 16),
-              _skeletonBox(context, height: 200),
-              const SizedBox(height: 16),
-              _skeletonBox(context, height: 160),
-              const SizedBox(height: 16),
-              _skeletonBox(context, height: 120),
-            ],
-          ),
-        ),
-      );
+  Widget _buildContent() {
+    if (widget.awaitingSelection) {
+      return widget.listLoading ? _buildSkeleton() : _buildPlaceholder();
     }
+    if (_isLoading) return _buildSkeleton();
+    if (_errorMessage != null) return _buildError();
+    if (_batch == null) return _buildPlaceholder();
+    return _buildDetail();
+  }
 
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadOperationDetails,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
+  // -------------------------------------------------------------------------
+  // States
+  // -------------------------------------------------------------------------
 
-    if (_operation == null) {
-      return const Center(child: Text('No commissioning operation found'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+  Widget _buildPlaceholder() {
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Status Card
-          _buildStatusCard(),
+          Icon(Icons.play_for_work_outlined, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
-
-          // Reference Details Card
-          _buildReferenceCard(),
-          const SizedBox(height: 16),
-
-          // Product Details Card
-          _buildProductCard(),
-          const SizedBox(height: 16),
-
-          // Dates Card (Production, Expiry, Best Before)
-          if (_hasDates()) _buildDatesCard(),
-          if (_hasDates()) const SizedBox(height: 16),
-
-          // Location Card
-          _buildLocationCard(),
-          const SizedBox(height: 16),
-
-          // Processing Info Card
-          _buildProcessingInfoCard(),
-          const SizedBox(height: 16),
-
-          // Commissioned Items Card
-          _buildCommissionedItemsCard(),
-          const SizedBox(height: 16),
-
-          // Messages Card
-          if (_operation!.messages != null && _operation!.messages!.isNotEmpty)
-            _buildMessagesCard(),
+          Text(
+            'Select an operation to view details',
+            style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusCard() {
+  Widget _buildError() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(onPressed: _load, child: const Text('Retry')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return AppShimmer(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(context.padding.left, 0, context.padding.left, context.padding.left),
+        child: Column(
+          children: [
+            _skelBox(100),
+            const SizedBox(height: 12),
+            _skelBox(160),
+            const SizedBox(height: 12),
+            _skelBox(180),
+            const SizedBox(height: 12),
+            _skelBox(140),
+            const SizedBox(height: 12),
+            _skelBox(120),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _skelBox(double height) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppShimmer.defaultBaseColor(context),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Detail body
+  // -------------------------------------------------------------------------
+
+  Widget _buildDetail() {
+    final b = _batch!;
+    return SingleChildScrollView(
+      padding:context.padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status banner
+          _buildStatusBanner(b),
+          const SizedBox(height: 14),
+
+          // Reference details
+          _buildCard(
+            icon: Icons.tag,
+            iconColor: Colors.blue,
+            title: 'Reference Details',
+            children: [
+              _rowCopy('Operation ID', b.batchId),
+              if (b.commissioningReference != null)
+                _row('Reference', b.commissioningReference!),
+              if (b.epcisEventId != null)
+                _rowCopy('EPCIS Event ID', b.epcisEventId!),
+              if (b.createdAt != null)
+                _row(
+                  'Created At',
+                  DateFormat('MMM dd, yyyy HH:mm:ss').format(b.createdAt!),
+                ),
+              if (b.completedAt != null)
+                _row(
+                  'Completed At',
+                  DateFormat('MMM dd, yyyy HH:mm:ss').format(b.completedAt!),
+                ),
+              if (b.createdBy != null) _row('Created By', b.createdBy!),
+              if (b.operatorId != null) _row('Operator ID', b.operatorId!),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Product details
+          _buildCard(
+            icon: Icons.inventory_2,
+            iconColor: Colors.orange,
+            title: 'Product Details',
+            children: [
+              if (b.gtinCode != null) _rowCopy('GTIN', b.gtinCode!),
+              if (b.batchLotNumber != null)
+                _row('Lot / Batch Number', b.batchLotNumber!),
+              if (b.productionDate != null)
+                _row(
+                  'Production Date',
+                  DateFormat('MMM dd, yyyy').format(b.productionDate!),
+                ),
+              if (b.expiryDate != null)
+                _row(
+                  'Expiry Date',
+                  DateFormat('MMM dd, yyyy').format(b.expiryDate!),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Location
+          if (b.commissioningLocationGLN != null) ...[
+            _buildCard(
+              icon: Icons.location_on,
+              iconColor: Colors.green,
+              title: 'Location',
+              children: [
+                _rowCopy('Location GLN', b.commissioningLocationGLN!),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Processing stats
+          _buildProcessingStatsCard(b),
+
+          // Serial numbers
+          if (_items.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildSerialNumbersCard(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Card widgets
+  // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Serial numbers card
+  // -------------------------------------------------------------------------
+
+  bool _showAllItems = false;
+
+  Widget _buildSerialNumbersCard() {
+    final successItems = _items.where((i) => i.success).toList();
+    final failedItems = _items.where((i) => !i.success).toList();
+    final displayItems = _showAllItems
+        ? _items
+        : _items.take(_initialItemDisplayCount).toList();
+
+    return _buildCard(
+      icon: Icons.qr_code,
+      iconColor: Colors.indigo,
+      title: 'Serial Numbers (${_items.length})',
+      children: [
+        if (failedItems.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle, size: 14, color: Colors.green[700]),
+                const SizedBox(width: 4),
+                Text('${successItems.length} succeeded',
+                    style: TextStyle(fontSize: 12, color: Colors.green[700])),
+                const SizedBox(width: 12),
+                Icon(Icons.cancel, size: 14, color: Colors.red[700]),
+                const SizedBox(width: 4),
+                Text('${failedItems.length} failed',
+                    style: TextStyle(fontSize: 12, color: Colors.red[700])),
+              ],
+            ),
+          ),
+        ...displayItems.map((item) => _buildItemRow(item)),
+        if (!_showAllItems && _items.length > _initialItemDisplayCount)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: TextButton.icon(
+              onPressed: () => setState(() => _showAllItems = true),
+              icon: const Icon(Icons.expand_more, size: 18),
+              label: Text(
+                'Show all ${_items.length} items',
+                style: const TextStyle(fontSize: 13),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildItemRow(CommissioningBatchItem item) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            item.success ? Icons.check_circle : Icons.cancel,
+            size: 16,
+            color: item.success ? Colors.green[600] : Colors.red[600],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.serialNumber,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (item.epcUri != null)
+                  Text(
+                    item.epcUri!,
+                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (!item.success && item.errorMessage != null)
+                  Text(
+                    item.errorMessage!,
+                    style: TextStyle(fontSize: 11, color: Colors.red[600]),
+                  ),
+              ],
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: item.serialNumber));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Copied: ${item.serialNumber}'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.copy, size: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Status banner
+  // -------------------------------------------------------------------------
+
+  Widget _buildStatusBanner(CommissioningBatch b) {
+    final statusColor = _statusColor(b.status);
     return Card(
+      elevation: 2,
+
+      color: context.colors.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
+            // Status pill
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: _getStatusColor(_operation!.status),
+                color: statusColor,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    _getStatusIcon(_operation!.status),
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
+                  Icon(_statusIcon(b.status), color: Colors.white, size: 16),
+                  const SizedBox(width: 6),
                   Text(
-                    _getStatusLabel(_operation!.status),
+                    _statusLabel(b.status),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
             const Spacer(),
+            // Count badges
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '${_operation!.commissionedCount ?? 0} Commissioned',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                _countBadge(
+                  '${b.totalCommissioned} Commissioned',
+                  Colors.green,
+                  Icons.check_circle,
+                ),
+                if (b.totalFailed > 0) ...[
+                  const SizedBox(height: 4),
+                  _countBadge(
+                    '${b.totalFailed} Failed',
+                    Colors.red,
+                    Icons.error,
                   ),
-                ),
-                if (_operation!.failedCount != null &&
-                    _operation!.failedCount! > 0)
-                  Text(
-                    '${_operation!.failedCount} Failed',
-                    style: TextStyle(color: Colors.red[700], fontSize: 12),
+                ],
+                if (b.totalRequested > 0) ...[
+                  const SizedBox(height: 4),
+                  _countBadge(
+                    '${b.totalRequested} Requested',
+                    Colors.grey,
+                    Icons.pending,
                   ),
+                ],
               ],
             ),
           ],
@@ -256,52 +482,84 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  Widget _buildReferenceCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _countBadge(String text, Color color, IconData icon) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProcessingStatsCard(CommissioningBatch b) {
+    final total = b.totalRequested > 0
+        ? b.totalRequested
+        : b.totalCommissioned + b.totalFailed;
+    final successRate = total > 0 ? b.totalCommissioned / total : 0.0;
+
+    return _buildCard(
+      icon: Icons.bar_chart,
+      iconColor: Colors.purple,
+      title: 'Processing Stats',
+      children: [
+        _row('Total Requested', '$total'),
+        _row('Total Commissioned', '${b.totalCommissioned}'),
+        if (b.totalFailed > 0)
+          _row('Total Failed', '${b.totalFailed}',
+              valueColor: Colors.red[700]),
+        const SizedBox(height: 8),
+        Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.tag, color: Colors.blue),
-                const SizedBox(width: 8),
-                const Text(
-                  'Reference Details',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            SizedBox(
+              width: 120,
+              child: Text(
+                'Success Rate',
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: successRate.clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: Colors.red[100],
+                  color: Colors.green,
                 ),
-              ],
-            ),
-            const Divider(),
-            _buildDetailRowWithCopy(
-              'Operation ID',
-              _operation!.commissioningOperationId ?? 'N/A',
-            ),
-            if (_operation!.commissioningReference != null)
-              _buildDetailRow('Reference', _operation!.commissioningReference!),
-            if (_operation!.eventTime != null)
-              _buildDetailRow(
-                'Event Time',
-                DateFormat(
-                  'MMM dd, yyyy HH:mm:ss',
-                ).format(_operation!.eventTime!),
               ),
-            if (_operation!.processedAt != null)
-              _buildDetailRow(
-                'Record Time',
-                DateFormat(
-                  'MMM dd, yyyy HH:mm:ss',
-                ).format(_operation!.processedAt!),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '${(successRate * 100).toStringAsFixed(1)}%',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
+            ),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildProductCard() {
+  Widget _buildCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required List<Widget> children,
+  }) {
     return Card(
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -309,362 +567,50 @@ class _CommissioningOperationDetailScreenState
           children: [
             Row(
               children: [
-                const Icon(Icons.inventory_2, color: Colors.orange),
-                const SizedBox(width: 8),
-                const Text(
-                  'Product Details',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(),
-            if (_operation!.itemDescription != null)
-              _buildDetailRow('Description', _operation!.itemDescription!),
-            if (_operation!.gtinCode != null)
-              _buildDetailRowWithCopy('GTIN', _operation!.gtinCode!),
-            if (_operation!.batchLotNumber != null)
-              _buildDetailRow('Batch/Lot Number', _operation!.batchLotNumber!),
-            if (_operation!.businessStep != null)
-              _buildDetailRow(
-                'Business Step',
-                _formatBusinessStep(_operation!.businessStep!),
-              ),
-            if (_operation!.disposition != null)
-              _buildDetailRow(
-                'Disposition',
-                _formatDisposition(_operation!.disposition!),
-              ),
-            if (_operation!.action != null)
-              _buildDetailRow('Action', _operation!.action!),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLocationCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.location_on, color: Colors.green),
-                const SizedBox(width: 8),
-                const Text(
-                  'Location Details',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(),
-            _buildGLNDetailRow(
-              'Commissioning Location',
-              _operation!.commissioningLocationGLN,
-              _locationGLNDetails,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProcessingInfoCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.timer, color: Colors.purple),
-                const SizedBox(width: 8),
-                const Text(
-                  'Processing Information',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(),
-            _buildDetailRow(
-              'Items Commissioned',
-              '${_operation!.commissionedCount ?? 0}',
-            ),
-            if (_operation!.failedCount != null && _operation!.failedCount! > 0)
-              _buildDetailRow('Items Failed', '${_operation!.failedCount}'),
-            if (_operation!.processingTimeMs != null)
-              _buildDetailRow(
-                'Processing Time',
-                '${_operation!.processingTimeMs} ms',
-              ),
-            if (_operation!.eventIds != null &&
-                _operation!.eventIds!.isNotEmpty)
-              _buildDetailRow(
-                'Events Generated',
-                '${_operation!.eventIds!.length}',
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCommissionedItemsCard() {
-    final itemCount =
-        _operation!.itemResults?.length ??
-        _operation!.epcList?.length ??
-        _operation!.createdSgtinIds?.length ??
-        0;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.qr_code_2, color: Colors.teal),
+                Icon(icon, color: iconColor, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Commissioned Items ($itemCount)',
+                  title,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            const Divider(),
-            if (_operation!.itemResults != null &&
-                _operation!.itemResults!.isNotEmpty)
-              ..._operation!.itemResults!.map(
-                (item) => _buildItemResultTile(item),
-              )
-            else if (_operation!.epcList != null &&
-                _operation!.epcList!.isNotEmpty)
-              ..._operation!.epcList!.asMap().entries.map(
-                (entry) => _buildEpcListTile(entry.key, entry.value),
-              )
-            else if (_operation!.createdSgtinIds != null &&
-                _operation!.createdSgtinIds!.isNotEmpty)
-              ..._operation!.createdSgtinIds!.asMap().entries.map(
-                (entry) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green,
-                    radius: 16,
-                    child: Text(
-                      '${entry.key + 1}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                  title: Text(entry.value),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.copy, size: 18),
-                    onPressed: () => _copyToClipboard(entry.value),
-                  ),
-                ),
-              )
-            else
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No item details available'),
-                ),
-              ),
+            const Divider(height: 20),
+            ...children,
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEpcListTile(int index, String epcUri) {
-    // Extract serial number from EPC URI
-    String displaySerial = epcUri;
-    if (epcUri.contains('sgtin:')) {
-      final parts = epcUri.split('.');
-      if (parts.length >= 3) {
-        displaySerial = parts.last;
-      }
-    }
+  // -------------------------------------------------------------------------
+  // Row helpers
+  // -------------------------------------------------------------------------
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: Colors.green,
-        radius: 16,
-        child: Text(
-          '${index + 1}',
-          style: const TextStyle(color: Colors.white, fontSize: 12),
-        ),
-      ),
-      title: Text(displaySerial),
-      subtitle: Text(
-        epcUri,
-        style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.copy, size: 18),
-        onPressed: () => _copyToClipboard(epcUri),
-      ),
-    );
-  }
-
-  Widget _buildItemResultTile(CommissioningItemResult item) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: item.success ? Colors.green : Colors.red,
-        radius: 16,
-        child: Icon(
-          item.success ? Icons.check : Icons.close,
-          color: Colors.white,
-          size: 16,
-        ),
-      ),
-      title: Text(item.serialNumber),
-      subtitle: item.success
-          ? (item.epcUri != null
-                ? Text(item.epcUri!, style: const TextStyle(fontSize: 12))
-                : null)
-          : Text(
-              item.errorMessage ?? 'Unknown error',
-              style: TextStyle(color: Colors.red[700], fontSize: 12),
-            ),
-      trailing: item.success
-          ? IconButton(
-              icon: const Icon(Icons.copy, size: 18),
-              onPressed: () =>
-                  _copyToClipboard(item.epcUri ?? item.serialNumber),
-            )
-          : null,
-    );
-  }
-
-  Widget _buildMessagesCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.message, color: Colors.blue),
-                const SizedBox(width: 8),
-                const Text(
-                  'Messages',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(),
-            ..._operation!.messages!.map(
-              (message) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(message)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  bool _hasDates() {
-    return _operation!.productionDate != null ||
-        _operation!.expiryDate != null ||
-        _operation!.bestBeforeDate != null;
-  }
-
-  Widget _buildDatesCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Colors.indigo),
-                const SizedBox(width: 8),
-                const Text(
-                  'Dates',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(),
-            if (_operation!.productionDate != null)
-              _buildDetailRow(
-                'Manufacturing Date',
-                DateFormat('MMM dd, yyyy').format(_operation!.productionDate!),
-              ),
-            if (_operation!.expiryDate != null)
-              _buildDetailRow(
-                'Expiry Date',
-                DateFormat('MMM dd, yyyy').format(_operation!.expiryDate!),
-              ),
-            if (_operation!.bestBeforeDate != null)
-              _buildDetailRow(
-                'Best Before Date',
-                DateFormat('MMM dd, yyyy').format(_operation!.bestBeforeDate!),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatBusinessStep(String bizStep) {
-    // Format urn:epcglobal:cbv:bizstep:commissioning to just "Commissioning"
-    if (bizStep.contains(':')) {
-      final parts = bizStep.split(':');
-      final name = parts.last;
-      return name[0].toUpperCase() + name.substring(1);
-    }
-    return bizStep;
-  }
-
-  String _formatDisposition(String disposition) {
-    // Format urn:epcglobal:cbv:disp:active to just "Active"
-    if (disposition.contains(':')) {
-      final parts = disposition.split(':');
-      final name = parts.last;
-      return name[0].toUpperCase() + name.substring(1);
-    }
-    return disposition;
-  }
-
-  Widget _buildDetailRow(String label, String value) {
+  Widget _row(String label, String value, {Color? valueColor}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 140,
-            child: Text(label, style: TextStyle(color: Colors.grey[600])),
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                color: valueColor,
+              ),
             ),
           ),
         ],
@@ -672,32 +618,44 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  Widget _buildDetailRowWithCopy(String label, String value) {
+  Widget _rowCopy(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 140,
-            child: Text(label, style: TextStyle(color: Colors.grey[600])),
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
           ),
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontFamily: 'monospace',
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Copied: $value'),
+                  duration: const Duration(seconds: 2),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
-                  onPressed: () => _copyToClipboard(value),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
+              );
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.copy, size: 14),
             ),
           ),
         ],
@@ -705,121 +663,53 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  Widget _buildGLNDetailRow(String label, String? glnCode, GLN? glnDetails) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey[600])),
-          const SizedBox(height: 4),
-          if (glnCode != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    glnCode,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
-                  onPressed: () => _copyToClipboard(glnCode),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            if (glnDetails != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                glnDetails.locationName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '${glnDetails.addressLine1}, ${glnDetails.city}',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-            ],
-          ] else
-            const Text('N/A'),
-        ],
-      ),
-    );
-  }
+  // -------------------------------------------------------------------------
+  // Status helpers
+  // -------------------------------------------------------------------------
 
-  void _copyToClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied: $text'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  Color _getStatusColor(CommissioningStatus? status) {
-    if (status == null) return Colors.grey;
-    switch (status) {
-      case CommissioningStatus.success:
+  Color _statusColor(CommissioningBatchStatus s) {
+    switch (s) {
+      case CommissioningBatchStatus.success:
         return Colors.green;
-      case CommissioningStatus.partialSuccess:
+      case CommissioningBatchStatus.partialSuccess:
         return Colors.orange;
-      case CommissioningStatus.failed:
+      case CommissioningBatchStatus.failed:
         return Colors.red;
-      case CommissioningStatus.validationError:
-        return Colors.red[700]!;
+      case CommissioningBatchStatus.pending:
+        return Colors.blue;
+      case CommissioningBatchStatus.inProgress:
+        return Colors.teal;
     }
   }
 
-  IconData _getStatusIcon(CommissioningStatus? status) {
-    if (status == null) return Icons.help_outline;
-    switch (status) {
-      case CommissioningStatus.success:
+  IconData _statusIcon(CommissioningBatchStatus s) {
+    switch (s) {
+      case CommissioningBatchStatus.success:
         return Icons.check_circle;
-      case CommissioningStatus.partialSuccess:
+      case CommissioningBatchStatus.partialSuccess:
         return Icons.warning;
-      case CommissioningStatus.failed:
+      case CommissioningBatchStatus.failed:
         return Icons.error;
-      case CommissioningStatus.validationError:
-        return Icons.error_outline;
+      case CommissioningBatchStatus.pending:
+        return Icons.schedule;
+      case CommissioningBatchStatus.inProgress:
+        return Icons.sync;
     }
   }
 
-  String _getStatusLabel(CommissioningStatus? status) {
-    if (status == null) return 'Unknown';
-    switch (status) {
-      case CommissioningStatus.success:
+  String _statusLabel(CommissioningBatchStatus s) {
+    switch (s) {
+      case CommissioningBatchStatus.success:
         return 'SUCCESS';
-      case CommissioningStatus.partialSuccess:
-        return 'PARTIAL';
-      case CommissioningStatus.failed:
+      case CommissioningBatchStatus.partialSuccess:
+        return 'PARTIAL SUCCESS';
+      case CommissioningBatchStatus.failed:
         return 'FAILED';
-      case CommissioningStatus.validationError:
-        return 'INVALID';
+      case CommissioningBatchStatus.pending:
+        return 'PENDING';
+      case CommissioningBatchStatus.inProgress:
+        return 'IN PROGRESS';
     }
   }
 }
 
-// ---------------------------------------------------------------------------
-// Skeleton helper (used while loading detail)
-// ---------------------------------------------------------------------------
-
-Widget _skeletonBox(
-  BuildContext context, {
-  required double height,
-  double width = double.infinity,
-  double radius = 12,
-}) {
-  return Container(
-    height: height,
-    width: width,
-    decoration: BoxDecoration(
-      color: AppShimmer.defaultBaseColor(context),
-      borderRadius: BorderRadius.circular(radius),
-    ),
-  );
-}

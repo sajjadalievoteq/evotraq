@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/dashboard_recent_event_tile.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/stream_dummy_event_rows.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 class EpcisEventStreamCard extends StatelessWidget {
   const EpcisEventStreamCard({super.key});
@@ -21,18 +22,37 @@ class EpcisEventStreamCard extends StatelessWidget {
       buildWhen: (p, c) => p.recentEvents != c.recentEvents,
       builder: (context, state) {
         final recentEvents = state.recentEvents;
+        final borderColor = context.colors.border.withValues(alpha: 0.6);
+        // On tablet/desktop the card has a bounded height (SizedBox from parent),
+        // so the list scrolls internally. On mobile the card grows to content
+        // height and the parent SingleChildScrollView handles all scrolling.
+        final isTabletUp = context.layout.isTabletUp;
 
-        final borderColor =
-            context.colors.border.withValues(alpha: 0.6);
+        Widget? eventList;
+        if (recentEvents != null && recentEvents.isNotEmpty) {
+          final listView = ListView.separated(
+            padding: EdgeInsets.zero,
+            shrinkWrap: !isTabletUp,
+            physics: isTabletUp
+                ? const ClampingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  )
+                : const NeverScrollableScrollPhysics(),
+            itemCount: recentEvents.length,
+            separatorBuilder: (_, __) => Divider(height: 1, color: borderColor),
+            itemBuilder: (context, i) =>
+                DashboardRecentEventTile(event: recentEvents[i]),
+          );
+          eventList = isTabletUp ? Expanded(child: listView) : listView;
+        }
 
         return Card(
           clipBehavior: Clip.antiAlias,
-
           child: Padding(
             padding: const EdgeInsets.all(Constants.spacing),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.max,
+              mainAxisSize: isTabletUp ? MainAxisSize.max : MainAxisSize.min,
               children: [
                 Row(
                   children: [
@@ -50,8 +70,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            context.colors.success.withValues(alpha: 0.12),
+                        color: context.colors.success.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -90,43 +109,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                   ],
                 ),
                 Divider(height: 1, color: borderColor),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      if (recentEvents != null && recentEvents.isNotEmpty) {
-                        return ListView.separated(
-                          padding: EdgeInsets.zero,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: recentEvents.length,
-                          separatorBuilder: (_, __) => Divider(
-                            height: 1,
-                            color: borderColor,
-                          ),
-                          itemBuilder: (context, i) {
-                            return DashboardRecentEventTile(
-                              event: recentEvents[i],
-                            );
-                          },
-                        );
-                      }
-                      final compact = c.maxHeight < 260;
-                      const footerReserve = 44.0;
-                      final approxRow = compact ? 50.0 : 68.0;
-                      final maxRows = (c.maxHeight - footerReserve) / approxRow;
-                      final n = maxRows.isFinite
-                          ? maxRows
-                              .floor()
-                              .clamp(3, StreamDummyEventRows.kMaxDummyRows)
-                          : StreamDummyEventRows.kMaxDummyRows;
-                      return SingleChildScrollView(
-                        child: StreamDummyEventRows(
-                          maxRows: n,
-                          compact: compact,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                if (eventList != null) eventList,
               ],
             ),
           ),

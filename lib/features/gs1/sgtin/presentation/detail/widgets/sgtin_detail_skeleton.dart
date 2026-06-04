@@ -28,13 +28,13 @@ class SgtinDetailSkeleton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(height: 28, width: double.infinity, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4))),
+              Container(height: 28, width: double.infinity, ),
               const SizedBox(height: 6),
-              Container(height: 16, width: 160, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4))),
+              Container(height: 16, width: 160, ),
               const Spacer(),
               Align(
                 alignment: Alignment.bottomRight,
-                child: Container(height: 14, width: 80, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4))),
+                child: Container(height: 14, width: 80, ),
               ),
             ],
           ),

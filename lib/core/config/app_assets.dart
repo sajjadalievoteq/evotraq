@@ -10,6 +10,7 @@ class AppAssets {
   // Traq (handoff) icons (complete set)
   static const String iconAggregate = '$_traqIcons/aggregate.svg';
   static const String iconAlert = '$_traqIcons/alert.svg';
+  static const String iconNotification = '$_traqIcons/notification.svg';
   static const String iconApproval = '$_traqIcons/approval.svg';
   static const String iconArrowR = '$_traqIcons/arrow-r.svg';
   static const String iconArrowUpR = '$_traqIcons/arrow-up-r.svg';

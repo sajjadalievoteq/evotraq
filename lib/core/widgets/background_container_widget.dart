@@ -59,6 +59,11 @@ class BackgroundContainerWidget extends StatelessWidget {
             )
           : null,
       drawer: showDrawer == true ? const AppDrawer() : null,
+      onDrawerChanged: showDrawer == true
+          ? (isOpen) {
+              if (isOpen) DrawerScrollMemory.notifyDrawerOpened();
+            }
+          : null,
       body: child,
     );
   }

@@ -80,6 +80,12 @@ class User {
   final bool enabled;
   final bool hasProfilePicture;
 
+  // Preferences — populated by GET /users/profile
+  final bool darkMode;
+  final String language;
+  final bool emailNotifications;
+  final bool appNotifications;
+
   User({
     required this.id,
     required this.username,
@@ -89,6 +95,10 @@ class User {
     required this.role,
     required this.enabled,
     this.hasProfilePicture = false,
+    this.darkMode = false,
+    this.language = 'English',
+    this.emailNotifications = true,
+    this.appNotifications = true,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -101,6 +111,10 @@ class User {
       role: json['role'] ?? 'USER',
       enabled: json['enabled'] ?? true,
       hasProfilePicture: json['hasProfilePicture'] ?? false,
+      darkMode: json['darkMode'] ?? false,
+      language: json['language'] ?? 'English',
+      emailNotifications: json['emailNotifications'] ?? true,
+      appNotifications: json['appNotifications'] ?? true,
     );
   }
 
@@ -113,5 +127,9 @@ class User {
     'role': role,
     'enabled': enabled,
     'hasProfilePicture': hasProfilePicture,
+    'darkMode': darkMode,
+    'language': language,
+    'emailNotifications': emailNotifications,
+    'appNotifications': appNotifications,
   };
 }

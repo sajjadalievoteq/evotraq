@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -45,23 +44,13 @@ class _SplashScreenState extends State<SplashScreen> {
     // We want a minimum delay of 2 seconds to show branding
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
-    // Precache the background image first so the custom splash is fully
-    // rendered before we remove the native overlay.
-    try {
-      await precacheImage(
-        const AssetImage(AppAssets.traqBackgroundPng),
-        context,
-      ).timeout(const Duration(seconds: 3));
-    } catch (_) {}
-
-    // Remove the native splash now — the custom splash (with background
-    // already loaded) becomes visible immediately.
-    FlutterNativeSplash.remove();
-
-    // Continue waiting for auth + logo + minimum display time.
     try {
       await Future.wait([
         authCheck,
+        precacheImage(
+          const AssetImage(AppAssets.traqBackgroundPng),
+          context,
+        ),
         precacheImage(const AssetImage(AppAssets.logo), context),
         minDelay,
       ]).timeout(const Duration(seconds: 5));

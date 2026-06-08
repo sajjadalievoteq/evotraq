@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
@@ -7,20 +8,24 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'sgtin_service_constants.dart';
 
 
-/// Implementation of SGTINService interface for managing SGTINs
+/// SGTIN API client.
+///
+/// Auth is handled transparently by [DioService]'s interceptor, which reads
+/// the stored Bearer token and attaches it to every request. No manual token
+/// handling is needed here.
 class SGTINService {
   final DioService _dioService;
 
-  /// Creates a new SGTINServiceImpl instance
   SGTINService({required DioService dioService}) : _dioService = dioService;
 
-  Future<SGTIN> getSGTINById(String id) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
+  static const _headers = {
+    SgtinServiceConstants.headerContentType: SgtinServiceConstants.contentTypeJson,
+  };
 
+  Future<SGTIN> getSGTINById(String id) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -31,16 +36,14 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errLoadById}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<SGTIN> getSGTINBySerialNumber(String serialNumber) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBySerial(serialNumber)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -51,6 +54,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errLoadBySerial}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -58,13 +62,10 @@ class SGTINService {
     int page = SgtinServiceConstants.defaultPage,
     int size = SgtinServiceConstants.defaultSize,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBase}',
       queryParameters: {SgtinServiceConstants.qPage: page, SgtinServiceConstants.qSize: size},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -81,21 +82,21 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errLoadAll}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<SGTIN> createSGTIN(SGTIN sgtin) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final jsonData = sgtin.toJson();
-    print('Creating SGTIN with JSON: $jsonData');
-    print('currentLocation in SGTIN object: ${sgtin.currentLocation}');
-    print('currentLocation GLN code: ${sgtin.currentLocation?.glnCode}');
+    if (kDebugMode) {
+      debugPrint('[SGTINService] createSGTIN json=$jsonData');
+      debugPrint('[SGTINService] currentLocation=${sgtin.currentLocation}');
+      debugPrint('[SGTINService] currentLocation.glnCode=${sgtin.currentLocation?.glnCode}');
+    }
 
     final response = await _dioService.post(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBase}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode(jsonData),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -114,30 +115,35 @@ class SGTINService {
         errorBody != null &&
         errorBody[SgtinServiceConstants.rMessage]?.toString().contains('GTIN not found') == true) {
       throw ApiException(
-          statusCode: response.statusCode, message: SgtinServiceConstants.errGtinNotFound);
+        statusCode: response.statusCode,
+        message: SgtinServiceConstants.errGtinNotFound,
+        responseBody: response.data is String ? response.data as String? : null,
+      );
     } else if (response.statusCode == SgtinServiceConstants.statusConflict) {
       throw ApiException(
-          statusCode: response.statusCode, message: SgtinServiceConstants.errDuplicateSerial);
+        statusCode: response.statusCode,
+        message: SgtinServiceConstants.errDuplicateSerial,
+        responseBody: response.data is String ? response.data as String? : null,
+      );
     } else if (response.statusCode == SgtinServiceConstants.statusBadRequest && errorBody != null) {
       throw ApiException(
         statusCode: response.statusCode,
         message: errorBody[SgtinServiceConstants.rMessage] ?? SgtinServiceConstants.errInvalidData,
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
     throw ApiException(
       statusCode: response.statusCode,
-      message:
-          errorBody?[SgtinServiceConstants.rMessage] ?? '${SgtinServiceConstants.errCreate}: ${response.statusMessage}',
+      message: errorBody?[SgtinServiceConstants.rMessage] ??
+          '${SgtinServiceConstants.errCreate}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<SGTIN> updateSGTIN(String id, SGTIN sgtin) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.put(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode(sgtin.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -149,35 +155,23 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errUpdate}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
-  Future<void> deleteSGTIN(String id) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
-    final response = await _dioService.delete(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathById(id)}',
-      headers: SgtinServiceConstants.authHeaders(token),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
+  /// Hard deletion of SGTINs is not permitted per GS1 audit trail requirements.
+  /// Use [decommissionSGTIN] to transition a SGTIN to a terminal lifecycle state.
+  Future<void> deleteSGTIN(String id) {
+    throw UnsupportedError(
+      'SGTIN hard-deletion is not permitted per GS1 audit trail requirements. '
+      'Use decommissionSGTIN to retire a serialised item.',
     );
-
-    if (response.statusCode != SgtinServiceConstants.statusNoContent) {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: '${SgtinServiceConstants.errDelete}: ${response.statusMessage}',
-      );
-    }
   }
 
   Future<List<SGTIN>> findSGTINsByGTIN(String gtinCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathByGtin(gtinCode)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -190,17 +184,15 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindByGtin}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<List<SGTIN>> findSGTINsByBatchLotNumber(String batchLotNumber) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBatch}',
       queryParameters: {SgtinServiceConstants.qBatchLotNumber: batchLotNumber},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -213,17 +205,15 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindByBatch}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<List<SGTIN>> findSGTINsByStatus(ItemStatus status) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathStatus}',
       queryParameters: {SgtinServiceConstants.qStatus: status.name},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -236,16 +226,14 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindByStatus}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<List<SGTIN>> findSGTINsByLocation(String glnCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathByLocation(glnCode)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -258,16 +246,14 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindByLocation}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<List<SGTIN>> findSGTINsBySSCC(String ssccCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBySscc(ssccCode)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -280,19 +266,17 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindBySscc}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<List<SGTIN>> findSGTINsExpiringBefore(DateTime date) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
 
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathExpiring}',
       queryParameters: {SgtinServiceConstants.qDate: dateStr},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -305,19 +289,15 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindExpiring}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
-  Future<List<SGTIN>> findSGTINsByRegulatoryMarket(
-    String regulatoryMarket,
-  ) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
+  Future<List<SGTIN>> findSGTINsByRegulatoryMarket(String regulatoryMarket) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathMarket}',
       queryParameters: {SgtinServiceConstants.qMarket: regulatoryMarket},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -330,6 +310,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errFindByMarket}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -341,9 +322,6 @@ class SGTINService {
     int page = SgtinServiceConstants.defaultPage,
     int size = SgtinServiceConstants.defaultSize,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final queryParams = <String, dynamic>{
       SgtinServiceConstants.qPage:           page,
       SgtinServiceConstants.qSize:           size,
@@ -356,7 +334,7 @@ class SGTINService {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathSearch}',
       queryParameters: queryParams,
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -373,6 +351,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errSearch}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -387,9 +366,6 @@ class SGTINService {
     String sortBy = SgtinServiceConstants.defaultSortBy,
     String sortDirection = SgtinServiceConstants.defaultSortDirection,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final queryParams = <String, dynamic>{
       SgtinServiceConstants.qPage:      page,
       SgtinServiceConstants.qSize:      size,
@@ -409,7 +385,7 @@ class SGTINService {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathSearchAdvanced}',
       queryParameters: queryParams,
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -432,6 +408,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errSearch}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -439,12 +416,9 @@ class SGTINService {
     String serialNumber,
     ItemStatus newStatus,
   ) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.put(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemStatus(serialNumber)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({SgtinServiceConstants.bStatus: newStatus.name}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -456,6 +430,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errUpdateStatus}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -463,12 +438,9 @@ class SGTINService {
     String serialNumber,
     String glnCode,
   ) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.put(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemLocation(serialNumber)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({SgtinServiceConstants.bGlnCode: glnCode}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -480,16 +452,14 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errAssignLocation}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<SGTIN> packSGTINIntoSSCC(String serialNumber, String ssccCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.put(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemPack(serialNumber)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({SgtinServiceConstants.bSsccCode: ssccCode}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -501,6 +471,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errPack}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -508,13 +479,10 @@ class SGTINService {
     String gtinCode, {
     bool randomized = true,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathGenerateSerial(gtinCode)}',
       queryParameters: {SgtinServiceConstants.qRandomized: randomized.toString()},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -526,16 +494,14 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errGenSerial}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
   Future<bool> validateSGTIN(String gtinCode, String serialNumber) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.post(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathValidate}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({
         SgtinServiceConstants.bGtinCode:    gtinCode,
         SgtinServiceConstants.bSerialNumber: serialNumber,
@@ -551,6 +517,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errValidate}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -558,13 +525,10 @@ class SGTINService {
     String gtinCode,
     ItemStatus status,
   ) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathCount(gtinCode)}',
       queryParameters: {SgtinServiceConstants.qStatus: status.name},
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -576,6 +540,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errCount}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -586,14 +551,11 @@ class SGTINService {
     required DateTime expiryDate,
     String? currentLocation,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final expiryDateStr = DateFormat('yyyy-MM-dd').format(expiryDate);
 
     final response = await _dioService.post(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathCommission}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({
         SgtinServiceConstants.bGtinCode:        gtinCode,
         SgtinServiceConstants.bQuantity:        quantity,
@@ -613,16 +575,16 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errCommission}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
+  /// Decommissions the SGTIN with the given [serialNumber], transitioning it
+  /// to the DESTROYED terminal state. Calls `POST /serial/{serialNumber}/decommission`.
   Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
-    final response = await _dioService.put(
+    final response = await _dioService.post(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission(serialNumber)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       data: json.encode({SgtinServiceConstants.bReason: reason}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -634,6 +596,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errDecommission}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 
@@ -642,12 +605,9 @@ class SGTINService {
   ///
   /// Calls `GET /identifiers/sgtins/{id}/transitions`.
   Future<List<String>> getAvailableTransitions(String id) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) throw ApiException(message: SgtinServiceConstants.errNoToken);
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemTransitions(id)}',
-      headers: SgtinServiceConstants.authHeaders(token),
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -659,6 +619,7 @@ class SGTINService {
     throw ApiException(
       statusCode: response.statusCode,
       message: '${SgtinServiceConstants.errGetTransitions}: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 }

@@ -22,10 +22,10 @@ abstract final class SgtinServiceConstants {
   static String pathBySscc(String sscc)             => '$pathBase/sscc/$sscc';
   static String pathCount(String gtin)              => '$pathBase/count/$gtin';
   static String pathGenerateSerial(String gtin)     => '$pathBase/generate-serial/$gtin';
-  static String pathItemStatus(String sn)           => '$pathBase/$sn/status';
+  static String pathItemStatus(String sn)           => '$pathBase/serial/$sn/status';
   static String pathItemLocation(String sn)         => '$pathBase/$sn/location';
   static String pathItemPack(String sn)             => '$pathBase/$sn/pack';
-  static String pathItemDecommission(String sn)     => '$pathBase/$sn/decommission';
+  static String pathItemDecommission(String sn)     => '$pathBase/serial/$sn/decommission';
   static String pathItemTransitions(String id)       => '$pathBase/$id/transitions';
 
   // ── HTTP headers ───────────────────────────────────────────────────────────

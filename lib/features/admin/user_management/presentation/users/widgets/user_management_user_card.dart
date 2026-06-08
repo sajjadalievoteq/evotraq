@@ -183,9 +183,11 @@ class _UserDetails extends StatelessWidget {
 
     // Resolve role colour inline — no static helper needed.
     final Color roleColor = switch (user.role) {
-      'ADMIN'  => Colors.purple,
-      'VIEWER' => colors.secondary,
-      _        => colors.success,
+      'ADMIN'        => Colors.purple,
+      'MANUFACTURER' => colors.primary,
+      'DISTRIBUTOR'  => Colors.orange,
+      'RETAILER'     => Colors.teal,
+      _              => colors.success, // USER and any unknown
     };
 
     final Color statusColor =

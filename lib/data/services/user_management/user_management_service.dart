@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
@@ -11,19 +11,54 @@ class UserManagementService {
   UserManagementService({
     DioService? dioService,
     TokenManager? tokenManager,
-  }) : _dioService = dioService ?? GetIt.instance<DioService>(),
-       _tokenManager = tokenManager ?? GetIt.instance<TokenManager>();
+  })  : _dioService = dioService ?? GetIt.instance<DioService>(),
+        _tokenManager = tokenManager ?? GetIt.instance<TokenManager>();
 
   final DioService _dioService;
   final TokenManager _tokenManager;
 
+  // ── Auth ─────────────────────────────────────────────────────────────────
+
   Future<String> _requireToken() async {
     final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found');
-    }
+    if (token == null) throw Exception('Authentication token not found');
     return token;
   }
+
+  Map<String, String> _authHeaders(String token) => {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+  // ── Error extraction ──────────────────────────────────────────────────────
+
+  /// Parses a structured error body from the backend and returns a readable
+  /// message. Falls back to a generic message if the body cannot be decoded.
+  ///
+  /// Backend returns: `{"error": "..."}`, `{"message": "..."}`,
+  /// or `{"errors": {"field": "msg"}}` depending on the handler.
+  String _errorMessage(String fallback, dynamic responseData) {
+    if (responseData == null) return fallback;
+    try {
+      final body = responseData is String
+          ? json.decode(responseData) as Map<String, dynamic>
+          : responseData as Map<String, dynamic>;
+
+      if (body['error'] is String) return body['error'] as String;
+      if (body['message'] is String) return body['message'] as String;
+      if (body['errors'] is Map) {
+        final errors = body['errors'] as Map;
+        return errors.values.first.toString();
+      }
+    } catch (_) {}
+    return fallback;
+  }
+
+  Never _throwOnError(String fallback, dynamic data, int? statusCode) {
+    throw Exception(_errorMessage('$fallback (HTTP $statusCode)', data));
+  }
+
+  // ── Users ─────────────────────────────────────────────────────────────────
 
   Future<UserListResponse> getUsers({
     String? search,
@@ -42,136 +77,55 @@ class UserManagementService {
       'sort': sort,
       'direction': direction,
     };
-
-    if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
-    }
-    if (role != null && role != 'All') {
-      queryParams['role'] = role;
-    }
-    if (status != null && status != 'All') {
-      queryParams['status'] = status;
-    }
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+    if (role != null && role != 'All') queryParams['role'] = role;
+    if (status != null && status != 'All') queryParams['status'] = status;
 
     final response = await _dioService.get(
       '${_dioService.baseUrl}${Constants.adminUsersEndpoint}',
       queryParameters: queryParams,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: _authHeaders(token),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserListResponse.fromJson(json.decode(response.data));
+      return UserListResponse.fromJson(json.decode(response.data as String));
     }
-
-    throw Exception('Failed to load users: ${response.statusCode}');
+    _throwOnError('Failed to load users', response.data, response.statusCode);
   }
 
-  Future<List<UserResponse>> getPendingApprovals() async {
+  Future<UserResponse> getUserById(int userId) async {
     final token = await _requireToken();
 
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId',
+      headers: _authHeaders(token),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.data);
-      return data.map((item) => UserResponse.fromJson(item)).toList();
+      return UserResponse.fromJson(json.decode(response.data as String));
     }
-
-    throw Exception('Failed to load pending approvals: ${response.statusCode}');
+    _throwOnError('Failed to load user', response.data, response.statusCode);
   }
 
-  Future<UserResponse> approveUser(int userId) async {
+  Future<UserResponse> createUser(CreateUserRequest createRequest) async {
     final token = await _requireToken();
 
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/approve',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.post(
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}',
+      data: jsonEncode(createRequest.toJson()),
+      headers: _authHeaders(token),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.data));
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return UserResponse.fromJson(json.decode(response.data as String));
     }
-
-    throw Exception('Failed to approve user: ${response.statusCode}');
-  }
-
-  Future<UserResponse> rejectUser(int userId) async {
-    final token = await _requireToken();
-
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/reject',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.data));
-    }
-
-    throw Exception('Failed to reject user: ${response.statusCode}');
-  }
-
-  Future<UserResponse> changeUserStatus(int userId, bool enabled) async {
-    final token = await _requireToken();
-
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/status',
-      queryParameters: {'enabled': enabled},
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.data));
-    }
-
-    throw Exception('Failed to change user status: ${response.statusCode}');
-  }
-
-  Future<UserResponse> changeUserRole(int userId, String role) async {
-    final token = await _requireToken();
-
-    final response = await _dioService.put(
-      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/roles',
-      queryParameters: {'role': role},
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.data));
-    }
-
-    throw Exception('Failed to change user role: ${response.statusCode}');
+    _throwOnError('Failed to create user', response.data, response.statusCode);
   }
 
   Future<UserResponse> updateUser(
@@ -183,39 +137,103 @@ class UserManagementService {
     final response = await _dioService.put(
       '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId',
       data: jsonEncode(updateRequest.toJson()),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: _authHeaders(token),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode == 200) {
-      return UserResponse.fromJson(json.decode(response.data));
+      return UserResponse.fromJson(json.decode(response.data as String));
     }
-
-    throw Exception('Failed to update user: ${response.statusCode}');
+    _throwOnError('Failed to update user', response.data, response.statusCode);
   }
 
-  Future<UserResponse> createUser(CreateUserRequest createRequest) async {
+  Future<UserResponse> changeUserStatus(int userId, bool enabled) async {
     final token = await _requireToken();
 
-    final response = await _dioService.post(
-      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}',
-      data: jsonEncode(createRequest.toJson()),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/status',
+      queryParameters: {'enabled': enabled},
+      headers: _authHeaders(token),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return UserResponse.fromJson(json.decode(response.data));
+    if (response.statusCode == 200) {
+      return UserResponse.fromJson(json.decode(response.data as String));
     }
+    _throwOnError(
+        'Failed to change user status', response.data, response.statusCode);
+  }
 
-    throw Exception('Failed to create user: ${response.statusCode}');
+  Future<UserResponse> changeUserRole(int userId, String role) async {
+    final token = await _requireToken();
+
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}${Constants.adminUsersEndpoint}/$userId/roles',
+      queryParameters: {'role': role},
+      headers: _authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return UserResponse.fromJson(json.decode(response.data as String));
+    }
+    _throwOnError(
+        'Failed to change user role', response.data, response.statusCode);
+  }
+
+  // ── Approvals ─────────────────────────────────────────────────────────────
+
+  Future<List<UserResponse>> getPendingApprovals() async {
+    final token = await _requireToken();
+
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}',
+      headers: _authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data =
+          json.decode(response.data as String) as List<dynamic>;
+      return data.map((item) => UserResponse.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    _throwOnError(
+        'Failed to load pending approvals', response.data, response.statusCode);
+  }
+
+  Future<UserResponse> approveUser(int userId) async {
+    final token = await _requireToken();
+
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/approve',
+      headers: _authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return UserResponse.fromJson(json.decode(response.data as String));
+    }
+    _throwOnError('Failed to approve user', response.data, response.statusCode);
+  }
+
+  Future<UserResponse> rejectUser(int userId) async {
+    final token = await _requireToken();
+
+    final response = await _dioService.put(
+      '${_dioService.baseUrl}${Constants.adminApprovalsEndpoint}/$userId/reject',
+      headers: _authHeaders(token),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return UserResponse.fromJson(json.decode(response.data as String));
+    }
+    _throwOnError('Failed to reject user', response.data, response.statusCode);
   }
 }

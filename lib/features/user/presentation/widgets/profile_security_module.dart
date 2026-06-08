@@ -37,11 +37,15 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
         currentPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
       );
-
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-      _confirmPasswordController.clear();
+      // Fields are cleared in the listener on success only,
+      // so the user keeps their input if the request fails.
     }
+  }
+
+  void _clearPasswordFields() {
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   @override
@@ -52,6 +56,7 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
           context.showError(state.error ?? UserStrings.genericError);
         } else if (state.status == ProfileStatus.passwordChanged) {
           context.showSuccess(UserStrings.passwordChangedSuccessfully);
+          _clearPasswordFields();
         }
       },
       builder: (context, state) {

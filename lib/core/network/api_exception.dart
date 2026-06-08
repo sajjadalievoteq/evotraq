@@ -35,18 +35,24 @@ class ApiException implements Exception {
       return 'Network error. Please check your connection and try again.';
     }
     
-    // Try to extract error message from response body for any error status
+    // Try to extract structured error from GlobalExceptionHandler's ApiErrorResponse shape:
+    // { status, code, message, errors: { field: msg, ... }, path, timestamp }
     if (responseBody != null) {
       try {
         final jsonBody = json.decode(responseBody!);
+        // Field-level validation errors (MethodArgumentNotValidException) — join them.
+        final errors = jsonBody['errors'];
+        if (errors is Map && errors.isNotEmpty) {
+          return errors.values.join(', ');
+        }
         if (jsonBody['message'] != null) {
-          return jsonBody['message'];
+          return jsonBody['message'] as String;
         }
         if (jsonBody['error'] != null) {
-          return jsonBody['error'];
+          return jsonBody['error'] as String;
         }
-      } catch (e) {
-        // Failed to parse response body, fall back to default message
+      } catch (_) {
+        // Failed to parse response body, fall back to status-based message.
       }
     }
     

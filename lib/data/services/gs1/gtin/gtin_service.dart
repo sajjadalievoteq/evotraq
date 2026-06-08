@@ -8,6 +8,10 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_api_consts.dart';
 
 /// GTIN (Global Trade Item Number) master-data API client.
+///
+/// Auth is handled transparently by [DioService]'s interceptor, which reads
+/// the stored Bearer token and attaches it to every request. No manual token
+/// handling is needed here.
 class GTINService {
   final DioService _dioService;
 
@@ -44,19 +48,9 @@ class GTINService {
   }
 
   Future<GTIN> getGTIN(String gtinCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('getGTIN', ex, path: '$_base/code/$gtinCode');
-      throw ex;
-    }
-
     final response = await _dioService.get(
       '$_base/code/$gtinCode',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -93,13 +87,6 @@ class GTINService {
     int page = 0,
     int size = 20,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('getGTINs', ex, path: _base);
-      throw ex;
-    }
-
     final queryParams = <String, dynamic>{
       'page': page,
       'size': size,
@@ -110,10 +97,7 @@ class GTINService {
     final response = await _dioService.get(
       _base,
       queryParameters: queryParams,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -137,14 +121,6 @@ class GTINService {
         _log('getGTINs:fromJson', ex, path: _base, body: ex.responseBody);
         throw ex;
       }
-    } else if (response.statusCode == 403) {
-      final ex = ApiException(
-        statusCode: response.statusCode,
-        message: 'Authentication failed: Please log in again',
-        responseBody: response.data is String ? response.data as String? : null,
-      );
-      _log('getGTINs', ex, path: _base, statusCode: 403, body: ex.responseBody);
-      throw ex;
     } else {
       final ex = ApiException(
         statusCode: response.statusCode,
@@ -169,13 +145,6 @@ class GTINService {
     int page = 0,
     int size = 20,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('searchGTINsAdvanced', ex, path: '$_base/search');
-      throw ex;
-    }
-
     final queryParams = <String, dynamic>{
       'page': page,
       'size': size,
@@ -202,10 +171,7 @@ class GTINService {
     final response = await _dioService.get(
       '$_base/search',
       queryParameters: queryParams,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -246,14 +212,6 @@ class GTINService {
             path: '$_base/search', body: ex.responseBody);
         throw ex;
       }
-    } else if (response.statusCode == 403) {
-      final ex = ApiException(
-        statusCode: response.statusCode,
-        message: 'Authentication failed: Please log in again',
-        responseBody: response.data is String ? response.data as String? : null,
-      );
-      _log('searchGTINsAdvanced', ex, path: '$_base/search', body: ex.responseBody);
-      throw ex;
     } else {
       final ex = ApiException(
         statusCode: response.statusCode,
@@ -267,13 +225,6 @@ class GTINService {
   }
 
   Future<GTIN> createGTIN(GTIN gtin) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('createGTIN', ex, path: _base);
-      throw ex;
-    }
-
     final jsonPayload = gtin.toJson();
     if (kDebugMode) {
       debugPrint('[GTINService] createGTIN request -> POST $_base');
@@ -282,10 +233,7 @@ class GTINService {
 
     final response = await _dioService.post(
       _base,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       data: json.encode(jsonPayload),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -317,19 +265,9 @@ class GTINService {
   }
 
   Future<GTIN> updateGTIN(GTIN gtin) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('updateGTIN', ex, path: '$_base/${gtin.gtinCode}');
-      throw ex;
-    }
-
     final response = await _dioService.put(
       '$_base/${gtin.gtinCode}',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       data: json.encode(gtin.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -364,19 +302,9 @@ class GTINService {
   }
 
   Future<void> updateGTINStatus(String gtinCode, String status) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('updateGTINStatus', ex, path: '$_base/$gtinCode/status');
-      throw ex;
-    }
-
     final response = await _dioService.put(
       '$_base/$gtinCode/status',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       data: json.encode({'status': status}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -397,20 +325,10 @@ class GTINService {
   }
 
   Future<bool> validateGTIN(String gtinCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('validateGTIN', ex, path: '$_base/validate?gtinCode=$gtinCode');
-      throw ex;
-    }
-
     final response = await _dioService.get(
       '$_base/validate',
       queryParameters: {'gtinCode': gtinCode},
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -451,19 +369,9 @@ class GTINService {
   /// Derive GS1 identification parts for chips:
   /// `gs1CompanyPrefixLength`, `gs1CompanyPrefix`, `itemReference`.
   Future<Map<String, dynamic>> deriveIdentification(String gtin) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      final ex = ApiException(message: 'No authentication token found');
-      _log('deriveIdentification', ex, path: '$_base${GtinApiConsts.deriveIdentificationPath}');
-      throw ex;
-    }
-
     final response = await _dioService.post(
       '$_base${GtinApiConsts.deriveIdentificationPath}',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Content-Type': 'application/json'},
       data: json.encode({'gtin': gtin}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

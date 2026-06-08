@@ -11,6 +11,7 @@ class AuthInputField extends StatefulWidget {
   final AuthInputFieldType type;
   final String? Function(String?)? validator;
   final bool enabled;
+  final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final void Function(String)? onFieldSubmitted;
   final ValueChanged<String>? onChanged;
@@ -28,6 +29,7 @@ class AuthInputField extends StatefulWidget {
     this.type = AuthInputFieldType.text,
     this.validator,
     this.enabled = true,
+    this.focusNode,
     this.textInputAction,
     this.onFieldSubmitted,
     this.onChanged,
@@ -219,14 +221,17 @@ class _AuthInputFieldState extends State<AuthInputField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
       obscureText: widget.type == AuthInputFieldType.password
           ? _obscureText
           : false,
       enabled: widget.enabled,
       keyboardType: _getKeyboardType(),
-      autofillHints: widget.type == AuthInputFieldType.email
-          ? const [AutofillHints.email]
-          : null,
+      autofillHints: switch (widget.type) {
+        AuthInputFieldType.email => const [AutofillHints.email],
+        AuthInputFieldType.username => const [AutofillHints.username],
+        _ => null,
+      },
       autocorrect: widget.type == AuthInputFieldType.email ? false : true,
       enableSuggestions: widget.type == AuthInputFieldType.email ? false : true,
       textCapitalization:

@@ -184,16 +184,16 @@ class _ApprovalsContent extends StatelessWidget {
       );
     }
 
-    const tileMaxExtent = 340.0;
-    const spacing = Constants.spacing;
+    const tileMaxExtent = 240.0;
+    final g = context.gutter;
 
     return GridView.builder(
-      padding: context.padding,
+      padding: EdgeInsets.all(g),
       physics: const ClampingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: tileMaxExtent,
-        mainAxisSpacing: spacing,
-        crossAxisSpacing: spacing,
+        mainAxisSpacing: g,
+        crossAxisSpacing: g,
         childAspectRatio: 1,
       ),
       itemCount: approvals.length,

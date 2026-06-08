@@ -1,7 +1,7 @@
-﻿// SGTIN (Serialized GTIN) model class
+// SGTIN (Serialized GTIN) model class
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_pharmaceutical_extension_model.dart';
 
 class SGTIN extends Equatable {
@@ -22,7 +22,7 @@ class SGTIN extends Equatable {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // â”€â”€ New GS1-spec fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── New GS1-spec fields ────────────────────────────────────────────────────
   final String? epcUri;
   final String? gs1DigitalLinkUri;
   final DateTime? commissionedAt;
@@ -310,7 +310,7 @@ class SGTIN extends Equatable {
         pharmaExtension,
       ];
 
-  // â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Private helpers ─────────────────────────────────────────────────────────
 
   static DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
@@ -360,7 +360,7 @@ class SGTIN extends Equatable {
   }
 }
 
-/// 13-value item status enum â€” mirrors backend XS-017 state machine.
+/// 13-value item status enum — mirrors backend XS-017 state machine.
 enum ItemStatus {
   RESERVED,
   ALLOCATED,

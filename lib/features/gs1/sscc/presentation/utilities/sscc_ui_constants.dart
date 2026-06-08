@@ -118,4 +118,7 @@ abstract final class SsccUiConstants {
 
   static String deleteSsccConfirm(String ssccCode) =>
       'Delete SSCC $ssccCode? This cannot be undone.';
+
+  static const deleteNotAllowedMessage =
+      'Only draft SSCC records can be deleted. Commissioned units remain for audit.';
 }

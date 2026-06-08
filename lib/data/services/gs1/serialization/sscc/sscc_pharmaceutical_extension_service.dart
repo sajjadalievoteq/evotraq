@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_pharmaceutical_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 
 /// Service for SSCC pharmaceutical extension operations
@@ -19,13 +20,10 @@ class SSCCPharmaceuticalExtensionService {
   /// Legacy query routes (cold-chain, GDP, etc.).
   String get _legacyQueryBase => '${_dioService.baseUrl}/pharmaceutical/sscc';
 
-  Future<Map<String, String>> get _headers async {
-    final token = await _dioService.getAuthToken();
-    return {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    };
-  }
+  /// Auth is handled transparently by [DioService]'s interceptor.
+  static const _headers = {
+    SsccServiceConstants.headerContentType: SsccServiceConstants.contentTypeJson,
+  };
 
   /// Create pharmaceutical extension for an SSCC by code
   Future<SSCCPharmaceuticalExtension> createBySsccCode(
@@ -34,7 +32,7 @@ class SSCCPharmaceuticalExtensionService {
   ) async {
     final response = await _dioService.post(
       '$_specCrudBase/code/$ssccCode/pharmaceutical-extension',
-      headers: await _headers,
+      headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -43,7 +41,7 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to create SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -56,7 +54,7 @@ class SSCCPharmaceuticalExtensionService {
   ) async {
     final response = await _dioService.post(
       '$_specCrudBase/$ssccId/pharmaceutical-extension',
-      headers: await _headers,
+      headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -65,7 +63,7 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCPharmaceuticalExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to save SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -75,7 +73,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<SSCCPharmaceuticalExtension?> getBySsccId(int ssccId) async {
     final response = await _dioService.get(
       '$_specCrudBase/$ssccId/pharmaceutical-extension',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -85,7 +83,7 @@ class SSCCPharmaceuticalExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -95,7 +93,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<SSCCPharmaceuticalExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
       '$_specCrudBase/code/$ssccCode/pharmaceutical-extension',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -105,7 +103,7 @@ class SSCCPharmaceuticalExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -115,13 +113,13 @@ class SSCCPharmaceuticalExtensionService {
   Future<void> delete(int ssccId) async {
     final response = await _dioService.delete(
       '$_specCrudBase/$ssccId/pharmaceutical-extension',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
-      throw Exception(
+      throw ApiException(message:
         'Failed to delete SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -131,7 +129,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<bool> hasPharmaceuticalExtension(int ssccId) async {
     final response = await _dioService.get(
       '$_legacyQueryBase/$ssccId/exists',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -139,7 +137,7 @@ class SSCCPharmaceuticalExtensionService {
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as bool;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to check SSCC pharmaceutical extension: ${response.statusCode}',
       );
     }
@@ -151,7 +149,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findColdChainShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/cold-chain',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -162,7 +160,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch cold chain shipments: ${response.statusCode}',
       );
     }
@@ -173,7 +171,7 @@ class SSCCPharmaceuticalExtensionService {
       findTemperatureMonitoredShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/temperature-monitored',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -184,7 +182,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch temperature monitored shipments: ${response.statusCode}',
       );
     }
@@ -196,7 +194,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findGdpCompliantShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/gdp-compliant',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -207,7 +205,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch GDP compliant shipments: ${response.statusCode}',
       );
     }
@@ -220,7 +218,7 @@ class SSCCPharmaceuticalExtensionService {
       findControlledSubstanceShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/controlled-substance',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -231,7 +229,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch controlled substance shipments: ${response.statusCode}',
       );
     }
@@ -242,7 +240,7 @@ class SSCCPharmaceuticalExtensionService {
       String deaSchedule) async {
     final response = await _dioService.get(
       '$_legacyQueryBase/dea-schedule/$deaSchedule',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -253,7 +251,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch DEA schedule shipments: ${response.statusCode}',
       );
     }
@@ -265,7 +263,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findHazmatShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/hazmat',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -276,7 +274,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch hazmat shipments: ${response.statusCode}',
       );
     }
@@ -288,7 +286,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findChainOfCustodyShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/chain-of-custody',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -299,7 +297,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch chain of custody shipments: ${response.statusCode}',
       );
     }
@@ -310,7 +308,7 @@ class SSCCPharmaceuticalExtensionService {
       findSignatureRequiredShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/signature-required',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -321,7 +319,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch signature required shipments: ${response.statusCode}',
       );
     }
@@ -333,7 +331,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findClinicalTrialShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/clinical-trial',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -344,7 +342,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch clinical trial shipments: ${response.statusCode}',
       );
     }
@@ -356,7 +354,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findFragileShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/fragile',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -367,7 +365,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch fragile shipments: ${response.statusCode}',
       );
     }
@@ -377,7 +375,7 @@ class SSCCPharmaceuticalExtensionService {
   Future<List<SSCCPharmaceuticalExtension>> findDoNotStackShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/do-not-stack',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -388,7 +386,7 @@ class SSCCPharmaceuticalExtensionService {
           .map((json) => SSCCPharmaceuticalExtension.fromJson(json))
           .toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch do-not-stack shipments: ${response.statusCode}',
       );
     }

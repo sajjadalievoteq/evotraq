@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:traqtrace_app/core/widgets/profile_avatar.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
@@ -13,7 +14,7 @@ import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 class ProfileInfoModule extends StatefulWidget {
   const ProfileInfoModule({super.key, required this.user});
 
-  final dynamic user;
+  final User user;
 
   @override
   State<ProfileInfoModule> createState() => _ProfileInfoModuleState();

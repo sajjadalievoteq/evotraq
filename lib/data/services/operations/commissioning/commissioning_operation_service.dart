@@ -1,7 +1,7 @@
-
-import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
@@ -13,13 +13,8 @@ class CommissioningOperationService {
 
   String get _baseUrl => _dioService.baseUrl;
 
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _dioService.getAuthToken();
-    return {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    };
-  }
+  static const _headers = {'Content-Type': 'application/json'};
+
   Future<CommissioningResponse> createCommissioningOperation(
     CommissioningRequest request,
   ) async {
@@ -31,12 +26,10 @@ class CommissioningOperationService {
     );
 
     try {
-      final headers = await _getHeaders();
-
       // Single POST /commissioning/bulk — replaces the per-serial N+1 loop
       final response = await _dioService.post(
         '$_baseUrl/commissioning/bulk',
-        headers: headers,
+        headers: _headers,
         data: jsonEncode(request.toJson()),
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -123,7 +116,11 @@ class CommissioningOperationService {
         } catch (_) {
           errorMsg = 'Commissioning failed (HTTP ${response.statusCode})';
         }
-        throw Exception(errorMsg);
+        throw ApiException(
+          message: errorMsg,
+          statusCode: response.statusCode,
+          responseBody: response.data is String ? response.data as String : null,
+        );
       }
     } catch (e) {
       debugPrint(
@@ -150,7 +147,6 @@ class CommissioningOperationService {
     String sortDir = 'desc',
   }) async {
     try {
-      final headers = await _getHeaders();
       final queryParameters = <String, dynamic>{
         'page': page,
         'size': size,
@@ -161,7 +157,7 @@ class CommissioningOperationService {
       final response = await _dioService.get(
         '$_baseUrl/commissioning/batches',
         queryParameters: queryParameters,
-        headers: headers,
+        headers: _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -185,10 +181,9 @@ class CommissioningOperationService {
     // Uses GET /events/object/business-step/{bizStep} — path param, returns a plain List
     const bizStep = 'urn:epcglobal:cbv:bizstep:commissioning';
     try {
-      final headers = await _getHeaders();
       final response = await _dioService.get(
         '$_baseUrl/events/object/business-step/$bizStep',
-        headers: headers,
+        headers: _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -213,10 +208,9 @@ class CommissioningOperationService {
     String operationId,
   ) async {
     try {
-      final headers = await _getHeaders();
       final response = await _dioService.get(
         '$_baseUrl/events/object/$operationId',
-        headers: headers,
+        headers: _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -319,10 +313,9 @@ class CommissioningOperationService {
 
   Future<CommissioningBatch?> getBatch(String batchId) async {
     try {
-      final headers = await _getHeaders();
       final response = await _dioService.get(
         '$_baseUrl/commissioning/batches/$batchId',
-        headers: headers,
+        headers: _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -340,10 +333,9 @@ class CommissioningOperationService {
   /// Fetch per-item results (serial numbers, EPC URIs, success/failure) for a batch.
   Future<List<CommissioningBatchItem>> getBatchItems(String batchId) async {
     try {
-      final headers = await _getHeaders();
       final response = await _dioService.get(
         '$_baseUrl/commissioning/batches/$batchId/items',
-        headers: headers,
+        headers: _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );

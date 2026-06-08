@@ -5,6 +5,8 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
+import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/presentation/widgets/responsive_modules_row.dart';
 import 'package:traqtrace_app/features/user/presentation/widgets/profile_info_module.dart';
 import 'package:traqtrace_app/features/user/presentation/widgets/profile_security_module.dart';
@@ -26,13 +28,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, authState) {
+        return BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, profileState) {
         return LayoutBuilder(
           builder: (context, constraints) {
             final isDesktopWide =
                 constraints.maxWidth >= UserUiConstants.desktopBreakpoint;
             final padding = ResponsiveUtils.paddingAll(context);
 
-            final user = authState.user;
+            // Prefer the ProfileCubit's user (refreshed after edits) over
+            // the AuthCubit's user (set at login time only).
+            final user = profileState.user ?? authState.user;
             if (user == null) {
               return Scaffold(
                 appBar: TraqAppBar(
@@ -140,6 +146,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
             );
+          },
+        );
           },
         );
       },

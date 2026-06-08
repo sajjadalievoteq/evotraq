@@ -32,7 +32,7 @@ import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/screens/sgtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/screens/sgtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/screens/sscc_screen.dart';
-import 'package:traqtrace_app/features/gs1/sscc/presentation/detail/screens/sscc_detail_screen.dart';
+import 'package:traqtrace_app/features/gs1/sscc/presentation/screens/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
 import 'package:traqtrace_app/features/home/presentation/screens/home_screen.dart';
@@ -67,10 +67,10 @@ import 'package:traqtrace_app/features/epcis/screens/operations/receiving_operat
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_screen.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list_screen.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_list_screen.dart';
+import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_screen.dart';
 // Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_management_screen.dart';
@@ -184,6 +184,13 @@ class AppRouter {
       // (e.g. hardware back button or browser history).
       if (authCubit.state.isAuthenticated && _isAuthOnlyPath(path)) {
         return Constants.homeRoute;
+      }
+
+      // After logout, leave protected routes (drawer / app bar sign-out).
+      if (!authCubit.state.isAuthenticated &&
+          !_isPublicPath(path) &&
+          !_isAuthCheckPending()) {
+        return Constants.loginRoute;
       }
 
       return null;

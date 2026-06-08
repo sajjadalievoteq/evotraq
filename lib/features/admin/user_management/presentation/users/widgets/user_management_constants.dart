@@ -40,14 +40,18 @@ abstract final class UserManagementConstants {
   static const List<String> filterRoles = <String>[
     allFilter,
     'ADMIN',
+    'MANUFACTURER',
+    'DISTRIBUTOR',
+    'RETAILER',
     'USER',
-    'VIEWER',
   ];
 
   static const List<String> assignableRoles = <String>[
     'ADMIN',
+    'MANUFACTURER',
+    'DISTRIBUTOR',
+    'RETAILER',
     'USER',
-    'VIEWER',
   ];
 
   static const List<String> filterStatuses = <String>[

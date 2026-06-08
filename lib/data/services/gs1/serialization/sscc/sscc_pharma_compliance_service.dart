@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_controlled_chain_audit_model.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_emvo_submission_model.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_reporting_regime_model.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_tatmeen_submission_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_controlled_chain_audit_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_emvo_submission_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_reporting_regime_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_tatmeen_submission_model.dart';
 
 abstract final class _Paths {
   static String base(String ssccId) => '/identifiers/ssccs/$ssccId/pharma';

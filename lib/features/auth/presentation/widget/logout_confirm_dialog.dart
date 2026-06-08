@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// Shows log-out confirmation (surface background, Traq tokens), then
-/// calls [AuthCubit.logout] and navigates to login if the user confirms.
+/// Shows log-out confirmation, then signs out and navigates to login.
+///
+/// Uses [getIt] for [AuthCubit] and [AppRouter] so logout still runs when the
+/// caller context is unmounted (e.g. drawer closed before the dialog returns).
 Future<void> showLogoutConfirmDialog(BuildContext context) async {
+  final dialogContext = _dialogHostContext(context);
+
   final confirmed = await showDialog<bool>(
-    context: context,
+    context: dialogContext,
     barrierDismissible: true,
     builder: (ctx) {
       final c = ctx.colors;
@@ -33,21 +36,28 @@ Future<void> showLogoutConfirmDialog(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Center(
-              child: Text(
-                'Cancel',
-                style: t.bodySm.copyWith(color: c.textPrimary),
-              ),
+            child: Text(
+              'Cancel',
+              style: t.bodySm.copyWith(color: c.textPrimary),
             ),
           ),
-          SizedBox(height: 10,),
-          CustomElevatedButton(label: 'Logout',  onPressed: () => Navigator.of(ctx).pop(true),),
-
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Log out'),
+          ),
         ],
       );
     },
   );
-  if (confirmed != true || !context.mounted) return;
-  await context.read<AuthCubit>().logout();
-  if (context.mounted) context.go(Constants.loginRoute);
+
+  if (confirmed != true) return;
+
+  await getIt<AuthCubit>().logout();
+  getIt<AppRouter>().router.go(Constants.loginRoute);
+}
+
+BuildContext _dialogHostContext(BuildContext context) {
+  final root = getIt<AppRouter>().router.routerDelegate.navigatorKey.currentContext;
+  if (root != null) return root;
+  return context;
 }

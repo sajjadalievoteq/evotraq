@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
+import '../../../data/models/profile/profile_models.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -15,7 +16,18 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(status: ProfileStatus.loading));
     try {
       final user = await _profileService.getCurrentUser();
-      emit(state.copyWith(status: ProfileStatus.success, user: user));
+      // Seed preferences from the server response so the UI reflects persisted values.
+      final prefs = ProfilePreferences(
+        darkMode: user.darkMode,
+        language: user.language,
+        emailNotifications: user.emailNotifications,
+        appNotifications: user.appNotifications,
+      );
+      emit(state.copyWith(
+        status: ProfileStatus.success,
+        user: user,
+        preferences: prefs,
+      ));
 
       await loadProfilePicture();
     } catch (e) {

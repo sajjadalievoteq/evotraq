@@ -94,21 +94,20 @@ class UserApprovalCard extends StatelessWidget {
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
+                 Column(
                     spacing: Constants.spacing,
-                    runSpacing: Constants.spacing,
                     children: [
                       SizedBox(
-                        width: 160,
-                        height: 50,
+
+                        width: double.infinity,
                         child: CustomOutlinedButtonWidget(
                           title: UserManagementConstants.rejectLabel,
                           onTap: () => onReject(user),
                         ),
                       ),
                       SizedBox(
-                        width: 160,
-                        height: 50,
+
+                        width: double.infinity,
                         child: CustomButtonWidget(
                           onTap: () => onApprove(user),
                           title: UserManagementConstants.approveLabel,
@@ -128,7 +127,7 @@ class UserApprovalCard extends StatelessWidget {
                     ],
                   ),
                 ] else
-                  Row(
+                  Column(
                     children: [
                       Expanded(
                         child: Text(
@@ -137,9 +136,9 @@ class UserApprovalCard extends StatelessWidget {
                               ?.copyWith(color: Colors.grey[700]),
                         ),
                       ),
-                      const SizedBox(width: Constants.spacing),
+                      const SizedBox(height: Constants.spacing),
                       SizedBox(
-                        width: 150,
+                        width: double.infinity,
                         child: CustomOutlinedButtonWidget(
                           title: UserManagementConstants.rejectLabel,
                           onTap: () => onReject(user),
@@ -147,7 +146,7 @@ class UserApprovalCard extends StatelessWidget {
                       ),
                       const SizedBox(width: Constants.spacing),
                       SizedBox(
-                        width: 150,
+                        width: double.infinity,
                         child: CustomButtonWidget(
                           onTap: () => onApprove(user),
                           title: UserManagementConstants.approveLabel,
@@ -216,13 +215,14 @@ class _GridSquareApprovalCard extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 18,
@@ -234,69 +234,60 @@ class _GridSquareApprovalCard extends StatelessWidget {
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.bodySmall?.copyWith(color: Colors.grey[700]),
-                      ),
-                    ],
+                  child: Text(
+                    _displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
-              '${UserManagementConstants.registeredOnLabel}: $_registeredDate',
+              user.email,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: t.bodySmall,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '$_registeredDate',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: t.bodySmall?.copyWith(color: Colors.grey[700]),
+              style: t.bodySmall?.copyWith(color: context.colors.textSecondary),
             ),
-            const Spacer(),
-            Row(
+            const SizedBox(height: 6),
+            Spacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: CustomOutlinedButtonWidget(
-                      title: UserManagementConstants.rejectLabel,
-                      onTap: () => onReject(user),
-                    ),
+                SizedBox(
+                  width: double.infinity,
+                  child: CustomOutlinedButtonWidget(
+                    title: UserManagementConstants.rejectLabel,
+                    onTap: () => onReject(user),
                   ),
                 ),
-                const SizedBox(width: Constants.spacing),
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: CustomButtonWidget(
-                      onTap: () => onApprove(user),
-                      title: UserManagementConstants.approveLabel,
-                      iconWidget: SvgPicture.asset(
-                        AppAssets.iconCheck,
-                        width: 18,
-                        height: 18,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: CustomButtonWidget(
+                    onTap: () => onApprove(user),
+                    title: UserManagementConstants.approveLabel,
+                    iconWidget: SvgPicture.asset(
+                      AppAssets.iconCheck,
+                      width: 18,
+                      height: 18,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
                       ),
-                      backgroundColor: context.colors.success,
-                      foregroundColor: Colors.white,
                     ),
+                    backgroundColor: context.colors.success,
+                    foregroundColor: Colors.white,
                   ),
                 ),
               ],

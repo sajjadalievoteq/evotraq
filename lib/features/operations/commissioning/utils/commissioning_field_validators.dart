@@ -1,4 +1,5 @@
-/// Field-level validators for the commissioning operation form.
+import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
+    as sgtin_validators;
 ///
 /// Follows the same abstract-final-class pattern used by [GtinFieldValidators]
 /// and [GlnFieldValidators] so validators can be referenced directly in
@@ -37,16 +38,16 @@ abstract final class CommissioningFieldValidators {
     return null;
   }
 
-  /// Required. GS1 batch/lot identifier (AI 10), max 50 chars.
+  /// Required. GS1 batch/lot identifier (AI 10), 1–20 chars, file-7 charset.
   static String? validateBatchLotNumberRequired(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return 'Batch/Lot Number is required';
-    if (v.length > 50) return 'Batch/Lot Number must be at most 50 characters';
-    if (_controlChars.hasMatch(v)) {
-      return 'Batch/Lot Number contains invalid control characters';
-    }
-    return null;
+    return sgtin_validators.validateBatchLotNumber(v);
   }
+
+  /// Required for commissioning. GS1 AI(21) serial — 1–20 chars, file-7 charset.
+  static String? validateSerialNumberRequired(String? value) =>
+      sgtin_validators.validateSerialNumber(value);
 
   /// Optional free-text commissioning reference, max 100 chars.
   static String? validateCommissioningReferenceOptional(String? value) =>

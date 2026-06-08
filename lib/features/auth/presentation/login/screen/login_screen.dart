@@ -18,6 +18,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _authCheckStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_authCheckStarted) return;
+    _authCheckStarted = true;
+
+    // Direct /login deep links skip SplashScreen, which normally runs checkAuth.
+    final authCubit = context.read<AuthCubit>();
+    if (authCubit.state.status == AuthStatus.initial) {
+      authCubit.checkAuth();
+    }
+  }
+
   bool _shouldRedirectToCheckEmail(AuthState state) {
     final error = state.error?.trim().toLowerCase() ?? '';
     return state.status == AuthStatus.error &&

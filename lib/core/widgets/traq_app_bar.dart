@@ -67,7 +67,7 @@ class TraqAppBar extends AppBar {
           forceMaterialTransparency: forceMaterialTransparency,
           useDefaultSemanticsOrder: useDefaultSemanticsOrder,
           animateColor: animateColor,
-          actions: TraqAppBar._mergeActions(context, actions, showLogoutAction),
+          // actions: TraqAppBar._mergeActions(context, actions, showLogoutAction),
         );
 
   static List<Widget>? _mergeActions(

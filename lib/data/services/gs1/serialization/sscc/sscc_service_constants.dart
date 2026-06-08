@@ -16,6 +16,9 @@ abstract final class SsccServiceConstants {
 
   static const String pathCompany = '$pathBase/company';
 
+  static String pathCompanyPrefix(String prefix) =>
+      '$pathBase/company-prefix/$prefix';
+
 
 
   static String pathById(String id) => '$pathBase/$id';
@@ -64,13 +67,10 @@ abstract final class SsccServiceConstants {
 
 
 
-  static Map<String, String> authHeaders(String token) => {
-
-        headerContentType: contentTypeJson,
-
-        headerAuthorization: 'Bearer $token',
-
-      };
+  /// Content-type-only header — auth is injected transparently by [DioService].
+  static const Map<String, String> jsonHeaders = {
+    headerContentType: contentTypeJson,
+  };
 
 
 

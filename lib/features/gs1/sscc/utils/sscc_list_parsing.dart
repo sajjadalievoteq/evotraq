@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 
 final RegExp _ssccCodePattern = RegExp(r'^\d{18}$');
 

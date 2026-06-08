@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_tobacco_extension_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_tobacco_extension_model.dart';
 
 /// Service for SSCC tobacco extension operations
 class SSCCTobaccoExtensionService {
@@ -12,13 +13,8 @@ class SSCCTobaccoExtensionService {
 
   String get _baseUrl => '${_dioService.baseUrl}/tobacco/sscc';
 
-  Future<Map<String, String>> get _headers async {
-    final token = await _dioService.getAuthToken();
-    return {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    };
-  }
+  /// Auth is handled transparently by [DioService]'s interceptor.
+  static const _headers = {'Content-Type': 'application/json'};
 
   /// Create tobacco extension for an SSCC by code
   Future<SSCCTobaccoExtension> createBySsccCode(
@@ -27,7 +23,7 @@ class SSCCTobaccoExtensionService {
   ) async {
     final response = await _dioService.post(
       '$_baseUrl/code/$ssccCode',
-      headers: await _headers,
+      headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -36,7 +32,7 @@ class SSCCTobaccoExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to create SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -49,7 +45,7 @@ class SSCCTobaccoExtensionService {
   ) async {
     final response = await _dioService.post(
       '$_baseUrl/$ssccId',
-      headers: await _headers,
+      headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -58,7 +54,7 @@ class SSCCTobaccoExtensionService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return SSCCTobaccoExtension.fromJson(jsonDecode(response.data));
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to save SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -68,7 +64,7 @@ class SSCCTobaccoExtensionService {
   Future<SSCCTobaccoExtension?> getBySsccId(int ssccId) async {
     final response = await _dioService.get(
       '$_baseUrl/$ssccId',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -78,7 +74,7 @@ class SSCCTobaccoExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -88,7 +84,7 @@ class SSCCTobaccoExtensionService {
   Future<SSCCTobaccoExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
       '$_baseUrl/code/$ssccCode',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -98,7 +94,7 @@ class SSCCTobaccoExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -108,13 +104,13 @@ class SSCCTobaccoExtensionService {
   Future<void> delete(int ssccId) async {
     final response = await _dioService.delete(
       '$_baseUrl/$ssccId',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
-      throw Exception(
+      throw ApiException(message:
         'Failed to delete SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -124,7 +120,7 @@ class SSCCTobaccoExtensionService {
   Future<bool> hasTobaccoExtension(int ssccId) async {
     final response = await _dioService.get(
       '$_baseUrl/$ssccId/exists',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -132,7 +128,7 @@ class SSCCTobaccoExtensionService {
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as bool;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to check SSCC tobacco extension: ${response.statusCode}',
       );
     }
@@ -143,7 +139,7 @@ class SSCCTobaccoExtensionService {
   findShipmentsToEuFirstRetailOutlets() async {
     final response = await _dioService.get(
       '$_baseUrl/eu-first-retail-outlets',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -152,7 +148,7 @@ class SSCCTobaccoExtensionService {
       final List<dynamic> data = jsonDecode(response.data);
       return data.map((json) => SSCCTobaccoExtension.fromJson(json)).toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch EU first retail outlet shipments: ${response.statusCode}',
       );
     }
@@ -164,7 +160,7 @@ class SSCCTobaccoExtensionService {
   ) async {
     final response = await _dioService.get(
       '$_baseUrl/destination/$countryCode',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -173,7 +169,7 @@ class SSCCTobaccoExtensionService {
       final List<dynamic> data = jsonDecode(response.data);
       return data.map((json) => SSCCTobaccoExtension.fromJson(json)).toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch shipments by destination: ${response.statusCode}',
       );
     }
@@ -183,7 +179,7 @@ class SSCCTobaccoExtensionService {
   Future<SSCCTobaccoExtension?> findBySealNumber(String sealNumber) async {
     final response = await _dioService.get(
       '$_baseUrl/seal/$sealNumber',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -193,7 +189,7 @@ class SSCCTobaccoExtensionService {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch SSCC by seal number: ${response.statusCode}',
       );
     }
@@ -205,7 +201,7 @@ class SSCCTobaccoExtensionService {
   ) async {
     final response = await _dioService.get(
       '$_baseUrl/carrier/$licenseNumber',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -214,7 +210,7 @@ class SSCCTobaccoExtensionService {
       final List<dynamic> data = jsonDecode(response.data);
       return data.map((json) => SSCCTobaccoExtension.fromJson(json)).toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch shipments by carrier: ${response.statusCode}',
       );
     }
@@ -224,7 +220,7 @@ class SSCCTobaccoExtensionService {
   Future<List<SSCCTobaccoExtension>> findContainersWithMultipleBatches() async {
     final response = await _dioService.get(
       '$_baseUrl/multiple-batches',
-      headers: await _headers,
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -233,7 +229,7 @@ class SSCCTobaccoExtensionService {
       final List<dynamic> data = jsonDecode(response.data);
       return data.map((json) => SSCCTobaccoExtension.fromJson(json)).toList();
     } else {
-      throw Exception(
+      throw ApiException(message:
         'Failed to fetch multi-batch containers: ${response.statusCode}',
       );
     }

@@ -3,7 +3,7 @@
 /// All validators follow the Flutter form-field convention: return `null` when
 /// the value is valid, or a non-null error message string when it is not.
 
-import 'package:traqtrace_app/data/models/gs1/sscc/sscc_model.dart';
+import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';

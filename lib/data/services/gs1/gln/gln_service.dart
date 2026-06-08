@@ -1,118 +1,92 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 
-/// Implementation of GLNService interface for managing GLNs (Global Location Numbers)
+/// GLN (Global Location Number) master-data API client.
+///
+/// Auth is handled transparently by [DioService]'s interceptor, which reads
+/// the stored Bearer token and attaches it to every request. No manual token
+/// handling is needed here.
 class GLNService {
   final DioService _dioService;
 
-  /// Creates a new GLNServiceImpl instance
   GLNService({
     required DioService dioService,
   }) : _dioService = dioService;
 
-  Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
+  String get _base => '${_dioService.baseUrl}${GlnMasterDataApiConsts.prefix}';
 
-    String url = '${_dioService.baseUrl}${GlnMasterDataApiConsts.prefix}';
+  static const _headers = {
+    GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
+  };
+
+  Future<List<GLN>> getAllGLNs({int? page, int? size}) async {
+    String url = _base;
     if (page != null && size != null) {
       url += '?page=$page&size=$size';
     }
 
     final response = await _dioService.get(
       url,
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
-    print('GLN list response status: ${response.statusCode}, body: ${response.data}');
+
+    if (kDebugMode) {
+      debugPrint('[GLNService] getAllGLNs status=${response.statusCode}');
+    }
+
     if (response.statusCode == 200) {
       final decoded = json.decode(response.data);
       return parseGlnListFromResponseData(decoded);
-    } else if (response.statusCode == 403) {
-      print(GlnApiMessages.authTokenInvalidOrExpired);
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: GlnApiMessages.authFailedLoginAgain,
-        responseBody: response.data,
-      );
     } else {
-      print(
-          'GLN list error: ${response.statusCode} - ${response.statusMessage}');
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToLoadGlns(response.statusMessage),
-        responseBody: response.data,
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<GLN> getGLNById(String id) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
+    final url = '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(id)}';
 
-    print('GLN Service: Fetching GLN with ID: $id');
-    final url =
-        '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(id)}';
-    print('GLN Service: Request URL: $url');
+    if (kDebugMode) {
+      debugPrint('[GLNService] getGLNById url=$url');
+    }
 
     final response = await _dioService.get(
       url,
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    print('GLN Service: Response status code: ${response.statusCode}');
+    if (kDebugMode) {
+      debugPrint('[GLNService] getGLNById status=${response.statusCode}');
+    }
 
     if (response.statusCode == 200) {
-      print('GLN Service: Raw API Response: ${response.data}');
-      final jsonData = json.decode(response.data);
-      print('GLN Service: Decoded API Response: $jsonData');
-      final gln = GLN.fromJson(jsonData);
-      print(
-          'GLN Service: Converted to GLN object: ${gln.glnCode}, ${gln.locationName}');
-      return gln;
+      return GLN.fromJson(json.decode(response.data));
     } else {
-      print('GLN Service: Error response: ${response.data}');
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToGetGln(response.statusMessage),
-        responseBody: response.data,
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<GLN> getGLNByCode(String glnCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(glnCode)}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -123,23 +97,15 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToGetGlnByCode(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<GLN> createGLN(GLN gln) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     final response = await _dioService.post(
-      '${_dioService.baseUrl}${GlnMasterDataApiConsts.prefix}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      _base,
+      headers: _headers,
       data: json.encode(gln.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -151,23 +117,15 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToCreateGln(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<GLN> updateGLN(String id, GLN gln) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     final response = await _dioService.put(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(id)}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       data: json.encode(gln.toJson()),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -179,28 +137,45 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToUpdateGln(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
+      );
+    }
+  }
+
+  Future<void> updateGLNStatus(String glnCode, String status) async {
+    final response = await _dioService.put(
+      '$_base/code/$glnCode/status',
+      headers: _headers,
+      data: json.encode({'status': status}),
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode != 200) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to update GLN status: ${response.statusMessage}',
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<bool> deleteGLN(String id) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     final response = await _dioService.delete(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.byCodePath(id)}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    return response.statusCode == 204;
+    if (response.statusCode == 204) {
+      return true;
+    }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to delete GLN: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
+    );
   }
 
   Future<List<GLN>> searchGLNs({
@@ -210,11 +185,6 @@ class GLNService {
     int? page,
     int? size,
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     var queryParams = <String, String>{};
     if (searchTerm != null && searchTerm.isNotEmpty) {
       queryParams['search'] = searchTerm;
@@ -235,14 +205,11 @@ class GLNService {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.search}',
       queryParameters: queryParams,
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
+
     if (response.statusCode == 200) {
       final decoded = json.decode(response.data);
       return parseGlnListFromResponseData(decoded);
@@ -250,6 +217,7 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToSearchGlns(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
@@ -269,11 +237,6 @@ class GLNService {
     String sortBy = 'name',
     String direction = 'ASC',
   }) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     var queryParams = <String, String>{
       'page': page.toString(),
       'size': size.toString(),
@@ -281,42 +244,20 @@ class GLNService {
       'direction': direction,
     };
 
-    if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
-    }
-    if (glnCode != null && glnCode.isNotEmpty) {
-      queryParams['glnCode'] = glnCode;
-    }
-    if (name != null && name.isNotEmpty) {
-      queryParams['name'] = name;
-    }
-    if (address != null && address.isNotEmpty) {
-      queryParams['address'] = address;
-    }
-    if (licenseNo != null && licenseNo.isNotEmpty) {
-      queryParams['licenseNo'] = licenseNo;
-    }
-    if (contactEmail != null && contactEmail.isNotEmpty) {
-      queryParams['contactEmail'] = contactEmail;
-    }
-    if (contactName != null && contactName.isNotEmpty) {
-      queryParams['contactName'] = contactName;
-    }
-    if (active != null) {
-      queryParams['active'] = active.toString();
-    }
-    if (locationType != null && locationType.isNotEmpty) {
-      queryParams['locationType'] = locationType;
-    }
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+    if (glnCode != null && glnCode.isNotEmpty) queryParams['glnCode'] = glnCode;
+    if (name != null && name.isNotEmpty) queryParams['name'] = name;
+    if (address != null && address.isNotEmpty) queryParams['address'] = address;
+    if (licenseNo != null && licenseNo.isNotEmpty) queryParams['licenseNo'] = licenseNo;
+    if (contactEmail != null && contactEmail.isNotEmpty) queryParams['contactEmail'] = contactEmail;
+    if (contactName != null && contactName.isNotEmpty) queryParams['contactName'] = contactName;
+    if (active != null) queryParams['active'] = active.toString();
+    if (locationType != null && locationType.isNotEmpty) queryParams['locationType'] = locationType;
 
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.searchAdvanced}',
       queryParameters: queryParams,
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -327,25 +268,19 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedToSearchGlns(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<List<GLN>> getExpiredLicenseGLNs() async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.expiredLicenses}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
+
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       return parseGlnListFromResponseData(responseData);
@@ -353,25 +288,19 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedExpiredLicenses(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<List<GLN>> getChildGLNs(String parentGlnCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.parentChildrenPath(parentGlnCode)}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
+
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
       return parseGlnListFromResponseData(responseData);
@@ -379,22 +308,15 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedChildGlns(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
   Future<bool> validateGLNCode(String glnCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.validatePath(glnCode)}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
@@ -410,24 +332,17 @@ class GLNService {
       throw ApiException(
         statusCode: response.statusCode,
         message: GlnApiMessages.failedValidateGln(response.statusMessage),
+        responseBody: response.data is String ? response.data as String? : null,
       );
     }
   }
 
-  /// Derive GS1 identification for chips: [gs1CompanyPrefixLength], [gs1CompanyPrefix], [locationReference], [checkDigit].
+  /// Derive GS1 identification for chips: [gs1CompanyPrefixLength], [gs1CompanyPrefix],
+  /// [locationReference], [checkDigit].
   Future<Map<String, dynamic>> deriveIdentification(String glnCode) async {
-    final token = await _dioService.getAuthToken();
-    if (token == null) {
-      throw ApiException(message: GlnApiMessages.noAuthToken);
-    }
-
     final response = await _dioService.post(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.deriveIdentification}',
-      headers: {
-        GlnApiHttpConsts.contentTypeHeader: GlnApiHttpConsts.contentTypeJson,
-        GlnApiHttpConsts.authorizationHeader:
-            '${GlnApiHttpConsts.bearerPrefix}$token',
-      },
+      headers: _headers,
       data: json.encode({GlnApiHttpConsts.jsonKeyGlnCode: glnCode}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -439,7 +354,7 @@ class GLNService {
     throw ApiException(
       statusCode: response.statusCode,
       message: GlnApiMessages.failedDeriveIdentification(response.statusMessage),
-      responseBody: response.data,
+      responseBody: response.data is String ? response.data as String? : null,
     );
   }
 }

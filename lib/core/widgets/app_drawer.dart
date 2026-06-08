@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
+import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
@@ -11,20 +13,28 @@ import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
+import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
-/// A reusable drawer component that can be used across all screens
+/// A reusable drawer component that can be used across all screens.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final layout = context.layout;
+    final drawerWidth = AppDrawerMetrics.widthFor(layout);
+    final drawerShape = AppDrawerMetrics.shape;
+
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         final user = state.user;
 
         if (user == null) {
-          return const Drawer(
-            child: Center(child: CircularProgressIndicator()),
+          return Drawer(
+            width: drawerWidth,
+            shape: drawerShape,
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -49,12 +59,14 @@ class AppDrawer extends StatelessWidget {
         // }
 
         return Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          width: drawerWidth,
+          elevation: 4,
+          shape: drawerShape,
+          child: Column(
             children: [
               BlocBuilder<ThemeCubit, ThemeState>(
                 buildWhen: (previous, current) =>
-                    previous.isDarkMode != current.isDarkMode,
+                previous.isDarkMode != current.isDarkMode,
                 builder: (context, themeState) {
                   return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
                     builder: (context, settingsState) {
@@ -117,694 +129,702 @@ class AppDrawer extends StatelessWidget {
                   );
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.dashboard),
-                title: const Text('Dashboard'),
-                onTap: () {
-                  context.go(Constants.homeRoute);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('My Profile'),
-                onTap: () {
-                  context.go(Constants.profileRoute);
-                },
-              ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                  ListTile(
+                    leading: const Icon(Icons.dashboard),
+                    title: const Text('Dashboard'),
+                    onTap: () {
+                      context.go(Constants.homeRoute);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.person),
+                    title: const Text('My Profile'),
+                    onTap: () {
+                      context.go(Constants.profileRoute);
+                    },
+                  ),
 
-              // Dashboards section
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-                child: Text(
-                  'DASHBOARDS',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                  // Dashboards section
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                    child: Text(
+                      'DASHBOARDS',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.timeline),
-                title: const Text('Product Journey'),
-                subtitle: const Text('Track supply chain flow'),
-                onTap: () {
-                  context.go(Constants.journeyDashboardRoute);
-                },
-              ),
+                  ListTile(
+                    leading: const Icon(Icons.timeline),
+                    title: const Text('Product Journey'),
+                    subtitle: const Text('Track supply chain flow'),
+                    onTap: () {
+                      context.go(Constants.journeyDashboardRoute);
+                    },
+                  ),
 
-              // Cockpit section
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-                child: Text(
-                  'COCKPIT',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                  // Cockpit section
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                    child: Text(
+                      'COCKPIT',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // Master Data Menu
-              ExpansionTile(
-                leading: const Icon(Icons.dataset),
-                title: const Text('Master Data'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.qr_code),
-                    title: const Text('GTIN Management'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1GtinsRoute);
-                    },
+                  // Master Data Menu
+                  ExpansionTile(
+                    leading: const Icon(Icons.dataset),
+                    title: const Text('Master Data'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.qr_code),
+                        title: const Text('GTIN Management'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1GtinsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: const Text('GLN Management'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1GlnsRoute);
+                        },
+                      ),
+                    ],
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: const Text('GLN Management'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1GlnsRoute);
-                    },
-                  ),
-                ],
-              ),
 
-              // Serialization Menu
-              ExpansionTile(
-                leading: const Icon(Icons.numbers),
-                title: const Text('Serialization'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.inventory),
-                    title: const Text('SSCC Management'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1SsccsRoute);
-                    },
+                  // Serialization Menu
+                  ExpansionTile(
+                    leading: const Icon(Icons.numbers),
+                    title: const Text('Serialization'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.inventory),
+                        title: const Text('SSCC Management'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1SsccsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.qr_code_scanner),
+                        title: const Text('SGTIN Management'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1SgtinsRoute);
+                        },
+                      ),
+                    ],
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.qr_code_scanner),
-                    title: const Text('SGTIN Management'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1SgtinsRoute);
-                    },
-                  ),
-                ],
-              ),
 
-              // EPCIS Events Menu
-              ExpansionTile(
-                leading: const Icon(Icons.event),
-                title: const Text('EPCIS Events'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.inventory_2),
-                    title: const Text('Object Events'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisObjectEventsRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.category),
-                    title: const Text('Aggregation Events'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisAggregationEventsRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.receipt),
-                    title: const Text('Transaction Events'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisTransactionEventsRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.transform),
-                    title: const Text('Transformation Events'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisTransformationEventsRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              // Event Queries Menu
-              ExpansionTile(
-                leading: const Icon(Icons.search),
-                title: const Text('Event Queries'),
-                children: [
-                  ListTile(
+                  // EPCIS Events Menu
+                  ExpansionTile(
                     leading: const Icon(Icons.event),
-                    title: const Text('All Events'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisEventsRoute);
-                    },
+                    title: const Text('EPCIS Events'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.inventory_2),
+                        title: const Text('Object Events'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisObjectEventsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.category),
+                        title: const Text('Aggregation Events'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisAggregationEventsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.receipt),
+                        title: const Text('Transaction Events'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisTransactionEventsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.transform),
+                        title: const Text('Transformation Events'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisTransformationEventsRoute);
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Event Queries Menu
+                  ExpansionTile(
+                    leading: const Icon(Icons.search),
+                    title: const Text('Event Queries'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.event),
+                        title: const Text('All Events'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisEventsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.account_tree),
+                        title: const Text('Aggregation Hierarchy'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          // Create a controller for the text field
+                          final TextEditingController controller =
+                              TextEditingController();
+
+                          // Show a dialog to enter the EPC
+                          showDialog(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const Text('Enter EPC'),
+                              content: TextField(
+                                controller: controller,
+                                decoration: const InputDecoration(
+                                  labelText: 'EPC',
+                                  hintText:
+                                      'Enter parent EPC to visualize its hierarchy',
+                                ),
+                                onSubmitted: (value) {
+                                  if (value.isNotEmpty) {
+                                    Navigator.pop(dialogContext); // Close dialog
+                                    context.go(
+                                      '/epcis/aggregation-events/hierarchy/$value',
+                                      extra: {'isParent': true},
+                                    );
+                                  }
+                                },
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: const Text('CANCEL'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    final value = controller.text;
+                                    if (value.isNotEmpty) {
+                                      Navigator.pop(dialogContext); // Close dialog
+                                      context.go(
+                                        '/epcis/aggregation-events/hierarchy/$value',
+                                        extra: {'isParent': true},
+                                      );
+                                    }
+                                  },
+                                  child: const Text('VIEW'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.description),
+                        title: const Text('Transaction Documents'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisTransactionDocumentsRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.manage_search),
+                        title: const Text('Advanced Query'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisAdvancedQueryRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.route),
+                        title: const Text('Supply Chain Traversal'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisTraversalQueryRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.sync_alt),
+                        title: const Text('Event Serialization'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.epcisSerializationRoute);
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Operations section
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                    child: Text(
+                      'OPERATIONS',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.account_tree),
-                    title: const Text('Aggregation Hierarchy'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
+                    leading: const Icon(Icons.list_alt),
+                    title: const Text('Commissioning'),
                     onTap: () {
-                      // Create a controller for the text field
-                      final TextEditingController controller =
-                          TextEditingController();
+                      context.go(Constants.opCommissioningRoute);
+                    },
+                  ),
+                  // ExpansionTile(
+                  //   leading: const Icon(Icons.play_for_work),
+                  //   title: const Text('Commissioning'),
+                  //   children: [
+                  //     // ListTile(
+                  //     //   leading: const Icon(Icons.add_circle_outline),
+                  //     //   title: const Text('Commission'),
+                  //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+                  //     //   onTap: () {
+                  //     //     context.go(Constants.opCommissioningNewRoute);
+                  //     //   },
+                  //     // ),
+                  //
+                  //   ],
+                  // ),
+                  ExpansionTile(
+                    leading: const Icon(Icons.inventory_2),
+                    title: const Text('Packing Operations'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.add_circle_outline),
+                        title: const Text('Create Packing'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opPackingCreateRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.list_alt),
+                        title: const Text('View Packing'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opPackingRoute);
+                        },
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
+                    leading: const Icon(Icons.local_shipping),
+                    title: const Text('Shipping Operations'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.add_circle_outline),
+                        title: const Text('Create Shipment'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opShippingCreateRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.list_alt),
+                        title: const Text('View Shipments'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opShippingRoute);
+                        },
+                      ),
+                    ],
+                  ),
+                  ExpansionTile(
+                    leading: const Icon(Icons.move_to_inbox),
+                    title: const Text('Receiving Operations'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.add_circle_outline),
+                        title: const Text('Create Receiving'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opReceivingCreateRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.list_alt),
+                        title: const Text('View Receiving'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.opReceivingRoute);
+                        },
+                      ),
+                    ],
+                  ),
 
-                      // Show a dialog to enter the EPC
-                      showDialog(
-                        context: context,
-                        builder: (dialogContext) => AlertDialog(
-                          title: const Text('Enter EPC'),
-                          content: TextField(
-                            controller: controller,
-                            decoration: const InputDecoration(
-                              labelText: 'EPC',
-                              hintText:
-                                  'Enter parent EPC to visualize its hierarchy',
-                            ),
-                            onSubmitted: (value) {
-                              if (value.isNotEmpty) {
-                                Navigator.pop(dialogContext); // Close dialog
-                                context.go(
-                                  '/epcis/aggregation-events/hierarchy/$value',
-                                  extra: {'isParent': true},
-                                );
-                              }
-                            },
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(dialogContext),
-                              child: const Text('CANCEL'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                final value = controller.text;
-                                if (value.isNotEmpty) {
-                                  Navigator.pop(dialogContext); // Close dialog
-                                  context.go(
-                                    '/epcis/aggregation-events/hierarchy/$value',
-                                    extra: {'isParent': true},
-                                  );
-                                }
-                              },
-                              child: const Text('VIEW'),
-                            ),
-                          ],
+                  // GS1 Tools section
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                    child: Text(
+                      'GS1 TOOLS',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.add_box),
+                    title: const Text('Generate / Verify Barcode'),
+
+                    onTap: () {
+                      context.go(Constants.barcodeGenerateRoute);
+                    },
+                  ),
+                  // Barcode Menu
+                  // ExpansionTile(
+                  //   leading: const Icon(Icons.qr_code_2),
+                  //   title: const Text('Barcode'),
+                  //   children: [
+                  //
+                  //     // ListTile(
+                  //     //   leading: const Icon(Icons.document_scanner),
+                  //     //   title: const Text('Scan Barcode'),
+                  //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+                  //     //   onTap: () {
+                  //     //     context.go(Constants.barcodeScanRoute);
+                  //     //   },
+                  //     // ),
+                  //     // ListTile(
+                  //     //   leading: const Icon(Icons.verified),
+                  //     //   title: const Text('Verify Barcode'),
+                  //     //   contentPadding: const EdgeInsets.only(left: 32.0),
+                  //     //   onTap: () {
+                  //     //     context.go(Constants.barcodeVerifyRoute);
+                  //     //   },
+                  //     // ),
+                  //   ],
+                  // ),
+
+                  // Validation Menu
+                  ExpansionTile(
+                    leading: const Icon(Icons.check_circle),
+                    title: const Text('Validation'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.rule),
+                        title: const Text('GS1 Validation Demo'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1ValidationDemoRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.fact_check),
+                        title: const Text('GS1 Validation Tests'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.adminGs1ValidationRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.integration_instructions),
+                        title: const Text('Integration Validation'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.adminIntegrationValidationRoute);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.rule_folder),
+                        title: const Text('Validation Rules'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.adminValidationRulesRoute);
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Conversion Menu
+                  ExpansionTile(
+                    leading: const Icon(Icons.compare_arrows),
+                    title: const Text('Conversion'),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.swap_horiz),
+                        title: const Text('EPC Conversion'),
+                        contentPadding: const EdgeInsets.only(left: 32.0),
+                        onTap: () {
+                          context.go(Constants.gs1EpcConversionRoute);
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Admin menu section
+                  if (isAdmin) ...[
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                      child: Text(
+                        'ADMIN',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.description),
-                    title: const Text('Transaction Documents'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisTransactionDocumentsRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.manage_search),
-                    title: const Text('Advanced Query'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisAdvancedQueryRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.route),
-                    title: const Text('Supply Chain Traversal'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisTraversalQueryRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.sync_alt),
-                    title: const Text('Event Serialization'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.epcisSerializationRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              // Operations section
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-                child: Text(
-                  'OPERATIONS',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.list_alt),
-                title: const Text('Commissioning'),
-                onTap: () {
-                  context.go(Constants.opCommissioningRoute);
-                },
-              ),
-              // ExpansionTile(
-              //   leading: const Icon(Icons.play_for_work),
-              //   title: const Text('Commissioning'),
-              //   children: [
-              //     // ListTile(
-              //     //   leading: const Icon(Icons.add_circle_outline),
-              //     //   title: const Text('Commission'),
-              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-              //     //   onTap: () {
-              //     //     context.go(Constants.opCommissioningNewRoute);
-              //     //   },
-              //     // ),
-              //
-              //   ],
-              // ),
-              ExpansionTile(
-                leading: const Icon(Icons.inventory_2),
-                title: const Text('Packing Operations'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_circle_outline),
-                    title: const Text('Create Packing'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opPackingCreateRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.list_alt),
-                    title: const Text('View Packing'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opPackingRoute);
-                    },
-                  ),
-                ],
-              ),
-              ExpansionTile(
-                leading: const Icon(Icons.local_shipping),
-                title: const Text('Shipping Operations'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_circle_outline),
-                    title: const Text('Create Shipment'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opShippingCreateRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.list_alt),
-                    title: const Text('View Shipments'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opShippingRoute);
-                    },
-                  ),
-                ],
-              ),
-              ExpansionTile(
-                leading: const Icon(Icons.move_to_inbox),
-                title: const Text('Receiving Operations'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_circle_outline),
-                    title: const Text('Create Receiving'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opReceivingCreateRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.list_alt),
-                    title: const Text('View Receiving'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.opReceivingRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              // GS1 Tools section
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-                child: Text(
-                  'GS1 TOOLS',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.add_box),
-                title: const Text('Generate / Verify Barcode'),
-
-                onTap: () {
-                  context.go(Constants.barcodeGenerateRoute);
-                },
-              ),
-              // Barcode Menu
-              // ExpansionTile(
-              //   leading: const Icon(Icons.qr_code_2),
-              //   title: const Text('Barcode'),
-              //   children: [
-              //
-              //     // ListTile(
-              //     //   leading: const Icon(Icons.document_scanner),
-              //     //   title: const Text('Scan Barcode'),
-              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-              //     //   onTap: () {
-              //     //     context.go(Constants.barcodeScanRoute);
-              //     //   },
-              //     // ),
-              //     // ListTile(
-              //     //   leading: const Icon(Icons.verified),
-              //     //   title: const Text('Verify Barcode'),
-              //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-              //     //   onTap: () {
-              //     //     context.go(Constants.barcodeVerifyRoute);
-              //     //   },
-              //     // ),
-              //   ],
-              // ),
-
-              // Validation Menu
-              ExpansionTile(
-                leading: const Icon(Icons.check_circle),
-                title: const Text('Validation'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.rule),
-                    title: const Text('GS1 Validation Demo'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1ValidationDemoRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.fact_check),
-                    title: const Text('GS1 Validation Tests'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.adminGs1ValidationRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.integration_instructions),
-                    title: const Text('Integration Validation'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.adminIntegrationValidationRoute);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.rule_folder),
-                    title: const Text('Validation Rules'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.adminValidationRulesRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              // Conversion Menu
-              ExpansionTile(
-                leading: const Icon(Icons.compare_arrows),
-                title: const Text('Conversion'),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.swap_horiz),
-                    title: const Text('EPC Conversion'),
-                    contentPadding: const EdgeInsets.only(left: 32.0),
-                    onTap: () {
-                      context.go(Constants.gs1EpcConversionRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              // Admin menu section
-              if (isAdmin) ...[
-                const Divider(),
-                const Padding(
-                  padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-                  child: Text(
-                    'ADMIN',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      ),
                     ),
-                  ),
-                ),
 
-                // User Management Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.people),
-                  title: const Text('User Management'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.group),
+                    // User Management Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.people),
                       title: const Text('User Management'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminUsersRoute);
-                      },
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.group),
+                          title: const Text('User Management'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminUsersRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.approval),
+                          title: const Text('Pending Approvals'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminApprovalsRoute);
+                          },
+                        ),
+                      ],
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.approval),
-                      title: const Text('Pending Approvals'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminApprovalsRoute);
-                      },
+
+                    // Notifications Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.notifications),
+                      title: const Text('Notifications'),
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.notification_important),
+                          title: const Text('Notification Center'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.notificationsRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.subscriptions),
+                          title: const Text('Manage Subscriptions'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.notificationSubscriptionsRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.webhook),
+                          title: const Text('Webhook Configuration'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.notificationWebhooksRoute);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // Batch Processing Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.batch_prediction),
+                      title: const Text('Batch Processing'),
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.queue),
+                          title: const Text('Job Queue Management'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminJobQueueRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.transform),
+                          title: const Text('ETL Management'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminEtlManagementRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.download),
+                          title: const Text('Bulk Export'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminBulkExportRoute);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // API Management Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.api),
+                      title: const Text('API Management'),
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.folder_special),
+                          title: const Text('API Collections'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminApiCollectionsRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.business),
+                          title: const Text('Partner Management'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminApiPartnersRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.vpn_key),
+                          title: const Text('Service Accounts'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminApiServiceAccountsRoute);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // System Tools Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.build),
+                      title: const Text('System Tools'),
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.settings),
+                          title: const Text('System Settings'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminSettingsRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.memory),
+                          title: const Text('Cache Management'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminCacheRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.speed),
+                          title: const Text('Performance Tests'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminPerformanceTestsRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.tune),
+                          title: const Text('Performance Optimization'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminPerformanceOptimizationRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.monitor_heart),
+                          title: const Text('System Monitoring'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminMonitoringRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.storage),
+                          title: const Text('Database Partitioning'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminDatabasePartitioningRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.security),
+                          title: const Text('Data Consistency & Integrity'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminDataConsistencyIntegrityRoute);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // Test Data Generation Menu
+                    ExpansionTile(
+                      leading: const Icon(Icons.science),
+                      title: const Text('Test Data Generation'),
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.build_circle),
+                          title: const Text('Event Generation Tests'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminEventGenerationTestRoute);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.factory),
+                          title: const Text('Industry Test Data'),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () {
+                            context.go(Constants.adminIndustryTestDataRoute);
+                          },
+                        ),
+                      ],
                     ),
                   ],
-                ),
 
-                // Notifications Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.notifications),
-                  title: const Text('Notifications'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.notification_important),
-                      title: const Text('Notification Center'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.notificationsRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.subscriptions),
-                      title: const Text('Manage Subscriptions'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.notificationSubscriptionsRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.webhook),
-                      title: const Text('Webhook Configuration'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.notificationWebhooksRoute);
-                      },
-                    ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.help),
+                    title: const Text('Help & Support'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Navigate to help page
+                    },
+                  ),
+                    const Divider(),
+                  ListTile(
+
+                    title:  CustomButtonWidget(onTap: (){
+                      Navigator.pop(context);
+                      final host = router.routerDelegate.navigatorKey.currentContext;
+                      showLogoutConfirmDialog(host ?? context);
+                    },title: 'Logout',icon:TraqThemeAppBar.logoutActionIcon,),
+
+                  ),
+
+                    SizedBox(height: 20,)
                   ],
                 ),
-
-                // Batch Processing Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.batch_prediction),
-                  title: const Text('Batch Processing'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.queue),
-                      title: const Text('Job Queue Management'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminJobQueueRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.transform),
-                      title: const Text('ETL Management'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminEtlManagementRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.download),
-                      title: const Text('Bulk Export'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminBulkExportRoute);
-                      },
-                    ),
-                  ],
-                ),
-
-                // API Management Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.api),
-                  title: const Text('API Management'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.folder_special),
-                      title: const Text('API Collections'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminApiCollectionsRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.business),
-                      title: const Text('Partner Management'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminApiPartnersRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.vpn_key),
-                      title: const Text('Service Accounts'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminApiServiceAccountsRoute);
-                      },
-                    ),
-                  ],
-                ),
-
-                // System Tools Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.build),
-                  title: const Text('System Tools'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.settings),
-                      title: const Text('System Settings'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminSettingsRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.memory),
-                      title: const Text('Cache Management'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminCacheRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.speed),
-                      title: const Text('Performance Tests'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminPerformanceTestsRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.tune),
-                      title: const Text('Performance Optimization'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminPerformanceOptimizationRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.monitor_heart),
-                      title: const Text('System Monitoring'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminMonitoringRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.storage),
-                      title: const Text('Database Partitioning'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminDatabasePartitioningRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.security),
-                      title: const Text('Data Consistency & Integrity'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminDataConsistencyIntegrityRoute);
-                      },
-                    ),
-                  ],
-                ),
-
-                // Test Data Generation Menu
-                ExpansionTile(
-                  leading: const Icon(Icons.science),
-                  title: const Text('Test Data Generation'),
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.build_circle),
-                      title: const Text('Event Generation Tests'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminEventGenerationTestRoute);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.factory),
-                      title: const Text('Industry Test Data'),
-                      contentPadding: const EdgeInsets.only(left: 32.0),
-                      onTap: () {
-                        context.go(Constants.adminIndustryTestDataRoute);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('Help & Support'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // Navigate to help page
-                },
-              ),
-              ListTile(
-                leading: Icon(TraqThemeAppBar.logoutActionIcon, color: Colors.red),
-                title: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  showLogoutConfirmDialog(context);
-                },
               ),
             ],
           ),
@@ -812,4 +832,25 @@ class AppDrawer extends StatelessWidget {
       },
     );
   }
+}
+
+/// Responsive drawer width and shape shared by [AppDrawer].
+abstract final class AppDrawerMetrics {
+  static double widthFor(AppLayoutData layout) {
+    return layout
+        .resolve<double>(
+      compact: (layout.width * 0.50).clamp(260.0, 300.0),
+      medium: 300.0,
+      expanded: 300.0,
+      large: (layout.width * 0.2).clamp(300.0, 350.0),
+    )
+        .clamp(0.0, 400.0);
+  }
+
+  static const ShapeBorder shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(
+      topRight: Radius.zero,
+      bottomRight: Radius.zero,
+    ),
+  );
 }

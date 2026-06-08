@@ -54,15 +54,18 @@ class _GLNScreenState extends State<GLNScreen> {
           listBuilder:
               (
                 context, {
+                required selectedId,
                 required onSelect,
                 required bindRefresh,
                 required onRequestCreate,
-              }) => GLNListScreen(
-                embedded: true,
-                onBindRefresh: bindRefresh,
-                onEmbeddedCreate: onRequestCreate,
-                onSelectGln: onSelect,
-              ),
+              }) =>
+                  GLNListScreen(
+                    embedded: true,
+                    selectedGlnCode: selectedId,
+                    onBindRefresh: bindRefresh,
+                    onEmbeddedCreate: onRequestCreate,
+                    onSelectGln: onSelect,
+                  ),
           detailViewBuilder: (context, code) => GLNDetailScreen(
             key: ValueKey(code),
             glnId: code,

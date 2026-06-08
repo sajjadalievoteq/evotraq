@@ -15,6 +15,7 @@ class SsccResultsList extends StatelessWidget {
   const SsccResultsList({
     super.key,
     required this.scrollController,
+    this.selectedSsccCode,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapSscc,
@@ -23,6 +24,7 @@ class SsccResultsList extends StatelessWidget {
   });
 
   final ScrollController scrollController;
+  final String? selectedSsccCode;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapSscc;
@@ -109,6 +111,7 @@ class SsccResultsList extends StatelessWidget {
                       RepaintBoundary(
                         child: SsccListItemCard(
                           sscc: sscc,
+                          isSelected: sscc.ssccCode == selectedSsccCode,
                           onTap: () => onTapSscc(sscc.ssccCode),
                           onMenuSelected: (action) =>
                               onRowMenuAction(sscc, action),

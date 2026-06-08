@@ -12,29 +12,20 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
     as status_rules;
-
-
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 
 class SsccListItemCard extends StatelessWidget {
-
   const SsccListItemCard({
-
     super.key,
-
     required this.sscc,
-
+    this.isSelected = false,
     required this.onTap,
-
     required this.onMenuSelected,
-
   });
 
-
-
   final SSCC sscc;
-
+  final bool isSelected;
   final VoidCallback onTap;
-
   final ValueChanged<String> onMenuSelected;
 
 
@@ -54,39 +45,25 @@ class SsccListItemCard extends StatelessWidget {
 
 
     Widget infoRow(IconData icon, String text) {
-
+      final rowColor =
+          Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
       return Padding(
-
         padding: const EdgeInsets.only(bottom: 4),
-
         child: Row(
-
           children: [
-
-            Icon(icon, size: 16, color: muted),
-
+            Icon(icon, size: 16, color: rowColor),
             const SizedBox(width: 6),
-
             Expanded(
-
               child: Text(
-
                 text,
-
                 maxLines: 1,
-
                 overflow: TextOverflow.ellipsis,
-
+                style: TextStyle(color: rowColor),
               ),
-
             ),
-
           ],
-
         ),
-
       );
-
     }
 
 
@@ -106,9 +83,8 @@ class SsccListItemCard extends StatelessWidget {
 
 
         return Card(
-
           elevation: 2,
-
+          color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
           child: InkWell(
 
             onTap: onTap,
@@ -132,13 +108,12 @@ class SsccListItemCard extends StatelessWidget {
                       children: [
 
                         Text(
-
                           sscc.ssccCode,
-
                           style: theme.textTheme.titleMedium?.copyWith(
-
                             fontWeight: FontWeight.bold,
-
+                            color: Gs1ListItemSelectionStyle.primaryTextColor(
+                              isSelected,
+                            ),
                           ),
 
                           maxLines: 1,
@@ -223,7 +198,13 @@ class SsccListItemCard extends StatelessWidget {
 
                         padding: EdgeInsets.zero,
 
-                        icon: Icon(Icons.more_vert, color: muted),
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: Gs1ListItemSelectionStyle.mutedColor(
+                            isSelected,
+                            muted,
+                          ),
+                        ),
 
                         onSelected: onMenuSelected,
 

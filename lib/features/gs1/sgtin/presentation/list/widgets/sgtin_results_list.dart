@@ -13,6 +13,7 @@ class SgtinResultsList extends StatelessWidget {
   const SgtinResultsList({
     super.key,
     required this.scrollController,
+    this.selectedSgtinId,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapSgtin,
@@ -20,6 +21,7 @@ class SgtinResultsList extends StatelessWidget {
   });
 
   final ScrollController scrollController;
+  final String? selectedSgtinId;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapSgtin;
@@ -106,6 +108,8 @@ class SgtinResultsList extends StatelessWidget {
                       RepaintBoundary(
                         child: SgtinListItemCard(
                           sgtin: sgtin,
+                          isSelected:
+                              (sgtin.id ?? sgtin.serialNumber) == selectedSgtinId,
                           onTap: () =>
                               onTapSgtin(sgtin.id ?? sgtin.serialNumber),
                         ),

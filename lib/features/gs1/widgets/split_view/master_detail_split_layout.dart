@@ -38,6 +38,7 @@ class MasterDetailSplitLayout extends StatelessWidget {
           children: [
             Flexible(
               flex: listFlex,
+              fit: FlexFit.tight,
               child: list,
             ),
             const VerticalDivider(width: 1),

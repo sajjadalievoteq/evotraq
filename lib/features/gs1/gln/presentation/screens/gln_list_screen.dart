@@ -27,12 +27,14 @@ class GLNListScreen extends StatefulWidget {
   const GLNListScreen({
     super.key,
     this.embedded = false,
+    this.selectedGlnCode,
     this.onSelectGln,
     this.onBindRefresh,
     this.onEmbeddedCreate,
   });
 
   final bool embedded;
+  final String? selectedGlnCode;
   final ValueChanged<String>? onSelectGln;
   final void Function(VoidCallback refresh)? onBindRefresh;
   final VoidCallback? onEmbeddedCreate;
@@ -421,6 +423,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
           ),
           results: GlnResultsList(
             scrollController: _scrollController,
+            selectedGlnCode: widget.selectedGlnCode,
             onRefresh: _refresh,
             onClearFilters: _clearAllFilters,
             onTapGln: _openGlnDetail,

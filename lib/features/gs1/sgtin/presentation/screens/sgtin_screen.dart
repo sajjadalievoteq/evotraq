@@ -41,12 +41,14 @@ class SGTINScreen extends StatelessWidget {
                 s.sgtins!.isEmpty,
             listBuilder: (
               context, {
+              required selectedId,
               required onSelect,
               required bindRefresh,
               required onRequestCreate,
             }) =>
                 SGTINListScreen(
               embedded: true,
+              selectedSgtinId: selectedId,
               onSelectSgtin: onSelect,
             ),
             detailViewBuilder: (context, id) => SGTINDetailScreen(

@@ -57,6 +57,7 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   /// - [onRequestCreate] should put the split view into create mode (used by GLN list "create" affordance).
   final Widget Function(
     BuildContext context, {
+    required String? selectedId,
     required ValueChanged<String> onSelect,
     required void Function(VoidCallback fn) bindRefresh,
     required VoidCallback onRequestCreate,
@@ -138,6 +139,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
         child: MasterDetailSplitLayout(
           list: widget.listBuilder(
             context,
+            selectedId: _selectedId,
             onSelect: (id) {
               if (id == _selectedId && !_isCreateMode) return;
               setState(() {

@@ -54,12 +54,14 @@ class _SSCCScreenState extends State<SSCCScreen> {
               s.status == SSCCStatus.success && s.ssccs.isEmpty,
           listBuilder: (
             context, {
+            required selectedId,
             required onSelect,
             required bindRefresh,
             required onRequestCreate,
           }) =>
               SSCCListScreen(
             embedded: true,
+            selectedSsccCode: selectedId,
             onBindRefresh: bindRefresh,
             onEmbeddedCreate: onRequestCreate,
             onSelectSscc: onSelect,

@@ -22,10 +22,15 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_con
 import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
 
 class GTINListScreen extends StatefulWidget {
-  const GTINListScreen({super.key, this.embedded = false, this.onSelectGtin});
+  const GTINListScreen({
+    super.key,
+    this.embedded = false,
+    this.selectedGtinCode,
+    this.onSelectGtin,
+  });
 
   final bool embedded;
-
+  final String? selectedGtinCode;
   final ValueChanged<String>? onSelectGtin;
 
   @override
@@ -309,6 +314,7 @@ class _GTINListScreenState extends State<GTINListScreen> {
           ),
           results: GtinResultsList(
             scrollController: _scrollController,
+            selectedGtinCode: widget.selectedGtinCode,
             onRefresh: _refresh,
             onClearFilters: () {
               _searchController.clear();

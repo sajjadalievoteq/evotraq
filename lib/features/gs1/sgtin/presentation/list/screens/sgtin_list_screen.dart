@@ -24,10 +24,12 @@ class SGTINListScreen extends StatefulWidget {
   const SGTINListScreen({
     super.key,
     this.embedded = false,
+    this.selectedSgtinId,
     this.onSelectSgtin,
   });
 
   final bool embedded;
+  final String? selectedSgtinId;
   final ValueChanged<String>? onSelectSgtin;
 
   @override
@@ -267,6 +269,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
           ),
           results: SgtinResultsList(
             scrollController: _scrollController,
+            selectedSgtinId: widget.selectedSgtinId,
             onRefresh: _refresh,
             onClearFilters: () {
               _searchController.clear();

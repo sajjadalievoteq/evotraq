@@ -1,6 +1,9 @@
+import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
+
 /// UI copy and filter options for commissioning list screens.
 abstract final class CommissioningUiConstants {
-  static const filterAll = 'ALL';
+  static const entityPluralOperations = 'operations';
+  static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;  static const filterAll = 'ALL';
 
   static const listSearchHint =
       'Search by reference, GTIN, lot number, location...';
@@ -37,4 +40,20 @@ abstract final class CommissioningUiConstants {
       _ => value,
     };
   }
+
+  static const sortAscendingLabel = 'Oldest';
+  static const sortDescendingLabel = 'Newest';
+  static const sortFieldFallback = 'date created';
+  static const labelSortResultsBy = 'Sort results by';
+
+  static const Map<String, String> sortFieldLabels = {
+    'createdAt': 'Date Created',
+    'batchLotNumber': 'Batch/Lot',
+    'gtinCode': 'GTIN',
+    'commissioningReference': 'Reference',
+    'status': 'Status',
+  };
+
+  static String sortByLine(String fieldLabel, String orderSpan) =>
+      'Sort by $fieldLabel ($orderSpan)';
 }

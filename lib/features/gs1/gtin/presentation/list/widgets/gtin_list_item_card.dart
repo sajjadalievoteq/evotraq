@@ -3,11 +3,18 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/list/widgets/gtin_status_chip.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 
 class GtinListItemCard extends StatelessWidget {
-  const GtinListItemCard({super.key, required this.gtin, required this.onTap});
+  const GtinListItemCard({
+    super.key,
+    required this.gtin,
+    this.isSelected = false,
+    required this.onTap,
+  });
 
   final GTIN gtin;
+  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -24,17 +31,20 @@ class GtinListItemCard extends StatelessWidget {
             : const EdgeInsets.all(16);
 
         Widget infoRow(IconData icon, String text) {
+          final rowColor =
+              Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: muted),
+                Icon(icon, size: 16, color: rowColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: rowColor),
                   ),
                 ),
               ],
@@ -44,6 +54,7 @@ class GtinListItemCard extends StatelessWidget {
 
         return Card(
           elevation: 2,
+          color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
           child: InkWell(
             onTap: onTap,
             child: Padding(
@@ -59,6 +70,9 @@ class GtinListItemCard extends StatelessWidget {
                           gtin.productName,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: Gs1ListItemSelectionStyle.primaryTextColor(
+                              isSelected,
+                            ),
                           ),
                           maxLines: isCompact ? 1 : 2,
                           overflow: TextOverflow.ellipsis,
@@ -102,7 +116,13 @@ class GtinListItemCard extends StatelessWidget {
                       if (gtin.packSize != null)
                         Text(
                           '${GtinUiConstants.listCardPackPrefix}${gtin.packSize}',
-                          style: TextStyle(fontSize: 10, color: muted),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Gs1ListItemSelectionStyle.mutedColor(
+                              isSelected,
+                              muted,
+                            ),
+                          ),
                           textAlign: TextAlign.end,
                         ),
                     ],

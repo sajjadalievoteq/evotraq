@@ -56,10 +56,16 @@ class _GTINScreenState extends State<GTINScreen> {
           listBuilder:
               (
                 context, {
+                required selectedId,
                 required onSelect,
                 required bindRefresh,
                 required onRequestCreate,
-              }) => GTINListScreen(embedded: true, onSelectGtin: onSelect),
+              }) =>
+                  GTINListScreen(
+                    embedded: true,
+                    selectedGtinCode: selectedId,
+                    onSelectGtin: onSelect,
+                  ),
           detailViewBuilder: (context, code) => GTINDetailScreen(
             key: ValueKey(code),
             gtinCode: code,

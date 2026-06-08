@@ -15,6 +15,7 @@ class GlnResultsList extends StatelessWidget {
   const GlnResultsList({
     super.key,
     required this.scrollController,
+    this.selectedGlnCode,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapGln,
@@ -23,6 +24,7 @@ class GlnResultsList extends StatelessWidget {
   });
 
   final ScrollController scrollController;
+  final String? selectedGlnCode;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapGln;
@@ -124,6 +126,7 @@ class GlnResultsList extends StatelessWidget {
                     RepaintBoundary(
                       child: GlnListItemCard(
                         gln: gln,
+                        isSelected: gln.glnCode == selectedGlnCode,
                         onTap: () => onTapGln(gln.glnCode),
                         onMenuSelected: (action) =>
                             onRowMenuAction(gln, action),

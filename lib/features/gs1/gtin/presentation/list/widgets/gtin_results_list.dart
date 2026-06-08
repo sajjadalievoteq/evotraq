@@ -15,6 +15,7 @@ class GtinResultsList extends StatelessWidget {
   const GtinResultsList({
     super.key,
     required this.scrollController,
+    this.selectedGtinCode,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapGtin,
@@ -22,6 +23,7 @@ class GtinResultsList extends StatelessWidget {
   });
 
   final ScrollController scrollController;
+  final String? selectedGtinCode;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapGtin;
@@ -115,6 +117,7 @@ class GtinResultsList extends StatelessWidget {
                       RepaintBoundary(
                         child: GtinListItemCard(
                           gtin: gtin,
+                          isSelected: gtin.gtinCode == selectedGtinCode,
                           onTap: () => onTapGtin(gtin.gtinCode),
                         ),
                       ),

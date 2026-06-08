@@ -3,15 +3,18 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/list/widgets/sgtin_status_chip.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/utilities/sgtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 
 class SgtinListItemCard extends StatelessWidget {
   const SgtinListItemCard({
     super.key,
     required this.sgtin,
+    this.isSelected = false,
     required this.onTap,
   });
 
   final SGTIN sgtin;
+  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -28,18 +31,20 @@ class SgtinListItemCard extends StatelessWidget {
             : const EdgeInsets.all(16);
 
         Widget infoRow(IconData icon, String text) {
+          final rowColor =
+              Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(
               children: [
-                Icon(icon, size: 14, color: muted),
+                Icon(icon, size: 14, color: rowColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    style: theme.textTheme.bodySmall?.copyWith(color: rowColor),
                   ),
                 ),
               ],
@@ -48,7 +53,7 @@ class SgtinListItemCard extends StatelessWidget {
         }
 
         return Card(
-
+          color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(2),
             side: BorderSide(
@@ -71,6 +76,9 @@ class SgtinListItemCard extends StatelessWidget {
                           '${SgtinUiConstants.listCardSerialPrefix}${sgtin.serialNumber}',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: Gs1ListItemSelectionStyle.primaryTextColor(
+                              isSelected,
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

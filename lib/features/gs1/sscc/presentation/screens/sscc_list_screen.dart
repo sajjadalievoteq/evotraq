@@ -27,12 +27,14 @@ class SSCCListScreen extends StatefulWidget {
   const SSCCListScreen({
     super.key,
     this.embedded = false,
+    this.selectedSsccCode,
     this.onSelectSscc,
     this.onBindRefresh,
     this.onEmbeddedCreate,
   });
 
   final bool embedded;
+  final String? selectedSsccCode;
   final ValueChanged<String>? onSelectSscc;
   final void Function(VoidCallback refresh)? onBindRefresh;
   final VoidCallback? onEmbeddedCreate;
@@ -417,6 +419,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
           ),
           results: SsccResultsList(
             scrollController: _scrollController,
+            selectedSsccCode: widget.selectedSsccCode,
             onRefresh: _refresh,
             onClearFilters: _clearAllFilters,
             onTapSscc: _navigateToDetails,

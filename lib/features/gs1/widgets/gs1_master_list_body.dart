@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 
-/// Top: toolbar column (search, record count, sort) with [Constants.sectionMaxWidth];
-/// bottom: [Expanded] results list. Used by GTIN and GLN list screens.
 class Gs1MasterListBody extends StatelessWidget {
   const Gs1MasterListBody({
     super.key,

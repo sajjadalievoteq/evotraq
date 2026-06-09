@@ -106,7 +106,6 @@ abstract final class HomeStrings {
   static const welcomeAfternoon = 'Good Afternoon';
   static const welcomeEvening = 'Good Evening';
 
-  /// `UTC±HH:MM` style offset when platform omits zone abbreviation.
   static String utcOffsetLabel(String sign, String hours, String minutes) =>
       'UTC$sign$hours:$minutes';
 

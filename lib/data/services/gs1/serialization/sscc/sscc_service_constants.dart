@@ -1,10 +1,7 @@
-/// API constants for [SSCCService].
 
 abstract final class SsccServiceConstants {
 
   static const String pathBase = '/identifiers/ssccs';
-
-
 
   static const String pathSearchAdvanced = '$pathBase/search/advanced';
 
@@ -18,8 +15,6 @@ abstract final class SsccServiceConstants {
 
   static String pathCompanyPrefix(String prefix) =>
       '$pathBase/company-prefix/$prefix';
-
-
 
   static String pathById(String id) => '$pathBase/$id';
 
@@ -57,30 +52,21 @@ abstract final class SsccServiceConstants {
 
   static const String pathShippedBetween = '$pathBase/shipped-between';
 
-
-
   static const String headerContentType = 'Content-Type';
 
   static const String headerAuthorization = 'Authorization';
 
   static const String contentTypeJson = 'application/json';
 
-
-
-  /// Content-type-only header — auth is injected transparently by [DioService].
   static const Map<String, String> jsonHeaders = {
     headerContentType: contentTypeJson,
   };
-
-
 
   static const int statusOk = 200;
 
   static const int statusCreated = 201;
 
   static const int statusNoContent = 204;
-
-
 
   static const int defaultPage = 0;
 
@@ -89,8 +75,6 @@ abstract final class SsccServiceConstants {
   static const String defaultSortBy = 'createdAt';
 
   static const String defaultSortDirection = 'DESC';
-
-
 
   static const String qPage = 'page';
 
@@ -112,8 +96,6 @@ abstract final class SsccServiceConstants {
 
   static const String qGs1CompanyPrefix = 'gs1CompanyPrefix';
 
-
-
   static const String rContent = 'content';
 
   static const String rTotalElements = 'totalElements';
@@ -128,9 +110,6 @@ abstract final class SsccServiceConstants {
 
   static const String rAvailableTransitions = 'availableTransitions';
 
-
-
   static const String errNoToken = 'No authentication token found';
 
 }
-

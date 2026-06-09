@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _recentLoginUsernamesKey = 'recent_login_usernames';
 const int _maxRecentLoginUsernames = 8;
 
-/// Persists recently used login identifiers on-device only (SharedPreferences).
 class RecentLoginUsernamesStore {
   const RecentLoginUsernamesStore();
 

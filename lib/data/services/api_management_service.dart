@@ -6,7 +6,6 @@ import 'package:traqtrace_app/features/api_management/models/partner_credential.
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
 import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 
-/// Service for managing B2B API partners and credentials
 class ApiManagementService {
   final String _integrationLayerUrl;
   final DioService _dioService;
@@ -16,7 +15,6 @@ class ApiManagementService {
   })  : _integrationLayerUrl = ApiConfig.fromCoreUrl(dioService.baseUrl),
         _dioService = dioService;
 
-  /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -25,9 +23,6 @@ class ApiManagementService {
     };
   }
 
-  // ==================== Partner Management ====================
-
-  /// List all partners
   Future<List<Partner>> listPartners({bool? active, int page = 0, int size = 20}) async {
     final queryParams = <String, dynamic>{
       'page': page,
@@ -53,7 +48,6 @@ class ApiManagementService {
     }
   }
 
-  /// Get a partner by ID
   Future<Partner> getPartner(String partnerId) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -70,7 +64,6 @@ class ApiManagementService {
     }
   }
 
-  /// Create a new partner
   Future<Partner> createPartner({
     required String partnerCode,
     required String companyName,
@@ -111,7 +104,6 @@ class ApiManagementService {
     }
   }
 
-  /// Update a partner
   Future<Partner> updatePartner(String partnerId, {
     String? companyName,
     String? gln,
@@ -149,7 +141,6 @@ class ApiManagementService {
     }
   }
 
-  /// Update a partner with full data map
   Future<Partner> updatePartnerFull(String partnerId, Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await _dioService.put(
@@ -170,7 +161,6 @@ class ApiManagementService {
     }
   }
 
-  /// Delete a partner
   Future<void> deletePartner(String partnerId) async {
     final headers = await _getHeaders();
     final response = await _dioService.delete(
@@ -185,9 +175,6 @@ class ApiManagementService {
     }
   }
 
-  // ==================== Credential Management ====================
-
-  /// List credentials for a partner
   Future<List<PartnerCredential>> listCredentials(String partnerId) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -208,7 +195,6 @@ class ApiManagementService {
     }
   }
 
-  /// Create an API key credential for a partner
   Future<ApiKeyCredentialResponse> createApiKeyCredential(String partnerId, {
     List<String>? allowedIps,
     int? rateLimitPerMinute,
@@ -238,7 +224,6 @@ class ApiManagementService {
     }
   }
 
-  /// Create OAuth2 credentials for a partner
   Future<OAuth2CredentialResponse> createOAuth2Credential(String partnerId, {
     List<String>? allowedIps,
     int? rateLimitPerMinute,
@@ -268,7 +253,6 @@ class ApiManagementService {
     }
   }
 
-  /// Revoke a credential
   Future<void> revokeCredential(String partnerId, String credentialId) async {
     final headers = await _getHeaders();
     final response = await _dioService.delete(
@@ -283,7 +267,6 @@ class ApiManagementService {
     }
   }
 
-  /// Update credential settings (scopes, rate limit)
   Future<Map<String, dynamic>> updateCredential(
     String partnerId, 
     String credentialId, {
@@ -310,9 +293,6 @@ class ApiManagementService {
     }
   }
 
-  // ==================== Audit & Analytics ====================
-
-  /// Get audit logs for a partner
   Future<List<ApiAuditLog>> getPartnerAuditLogs(String partnerId, {
     DateTime? from,
     DateTime? to,
@@ -341,7 +321,6 @@ class ApiManagementService {
     }
   }
 
-  /// Get usage statistics for a partner
   Future<ApiUsageStats> getPartnerStats(String partnerId, {
     DateTime? from,
     DateTime? to,
@@ -367,9 +346,6 @@ class ApiManagementService {
     }
   }
 
-  // ==================== Health Check ====================
-
-  /// Check Integration Layer health
   Future<Map<String, dynamic>> checkHealth() async {
     try {
       final response = await _dioService.get(

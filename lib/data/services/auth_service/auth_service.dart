@@ -372,8 +372,6 @@ class AuthService {
         acceptAllStatusCodes: true,
       );
 
-      // Always return true to prevent email enumeration
-      // The backend will always return 200 OK too
       return true;
     } catch (e) {
       return false;

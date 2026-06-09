@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
 import 'package:traqtrace_app/shared/widgets/gtin_selector.dart';
 
-/// GTIN, batch/lot, and reference fields for commissioning step 1.
 class CommissioningProductInfoCard extends StatelessWidget {
   const CommissioningProductInfoCard({
     super.key,

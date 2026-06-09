@@ -1,18 +1,15 @@
 class ProfileServiceConsts {
-  // **Headers**
   static const contentTypeHeaderKey = 'Content-Type';
   static const contentTypeHeaderValueJson = 'application/json';
   static const authHeaderKey = 'Authorization';
   static const authHeaderValuePrefix = 'Bearer ';
 
-  // **Endpoints**
   static const userProfilePath = '/users/profile';
   static const profilePicturePath = '/users/profile/picture';
   static const changePasswordPath = '/users/password';
   static const notificationPreferencesPath = '/users/preferences/notifications';
   static const appPreferencesPath = '/users/preferences/app';
 
-  // **Payload keys**
   static const firstNameKey = 'firstName';
   static const lastNameKey = 'lastName';
   static const emailKey = 'email';
@@ -23,7 +20,6 @@ class ProfileServiceConsts {
   static const darkModeKey = 'darkMode';
   static const languageKey = 'language';
 
-  // **Errors**
   static const noAuthTokenFound = 'No authentication token found';
   static const unexpectedResponseFormat = 'Unexpected response format';
   static const failedToFetchUserProfile = 'Failed to fetch user profile';
@@ -35,4 +31,3 @@ class ProfileServiceConsts {
 
   const ProfileServiceConsts._();
 }
-

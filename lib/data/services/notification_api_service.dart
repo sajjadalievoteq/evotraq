@@ -24,7 +24,6 @@ class NotificationApiService {
     };
   }
 
-  // Subscription Management
   Future<List<domain.NotificationSubscription>> getSubscriptions({
     int page = 0,
     int size = 20,
@@ -40,7 +39,6 @@ class NotificationApiService {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.data);
-        // Backend returns a direct list, not a paginated response
         if (responseData is List) {
           return responseData
               .map((json) => domain.NotificationSubscription.fromJson(json))
@@ -203,7 +201,6 @@ class NotificationApiService {
     }
   }
 
-  // Webhook Management
   Future<List<domain.WebhookNotification>> getWebhookHistory(
     String subscriptionId, {
     int page = 0,
@@ -220,7 +217,6 @@ class NotificationApiService {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.data);
-        // Backend returns a direct list, not a paginated response
         if (responseData is List) {
           return responseData
               .map((json) => domain.WebhookNotification.fromJson(json))
@@ -313,42 +309,6 @@ class NotificationApiService {
     }
   }
 
-  // Batch Management - TODO: Create NotificationBatch domain model
-  /*
-  Future<List<domain.NotificationBatch>> getBatchHistory(
-    String subscriptionId, {
-    int page = 0,
-    int size = 20,
-  }) async {
-    try {
-      final headers = await _getAuthHeaders();
-      final response = await _client.get(
-        Uri.parse('${_appConfig.apiBaseUrl}/notifications/subscriptions/$subscriptionId/batches?page=$page&size=$size'),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        if (responseData['content'] != null) {
-          return (responseData['content'] as List)
-              .map((json) => domain.NotificationBatch.fromJson(json))
-              .toList();
-        }
-        return [];
-      } else {
-        throw ApiException(
-          message: 'Failed to fetch batch history',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException(message: 'Failed to fetch batch history: $e');
-    }
-  }
-  */
-
-  // Statistics
   Future<domain.NotificationStats> getSubscriptionStats(String id) async {
     try {
       final headers = await _getAuthHeaders();

@@ -1,10 +1,6 @@
-/// All constants used by [SGTINService].
-/// No magic strings or numbers should appear in the service itself.
 abstract final class SgtinServiceConstants {
-  // ── Base path ──────────────────────────────────────────────────────────────
   static const String pathBase = '/identifiers/sgtins';
 
-  // ── Static endpoint paths ──────────────────────────────────────────────────
   static const String pathBatch          = '$pathBase/batch';
   static const String pathStatus         = '$pathBase/status';
   static const String pathExpiring       = '$pathBase/expiring';
@@ -14,7 +10,6 @@ abstract final class SgtinServiceConstants {
   static const String pathValidate       = '$pathBase/validate';
   static const String pathCommission     = '$pathBase/commission-multiple';
 
-  // ── Dynamic endpoint path builders ────────────────────────────────────────
   static String pathById(String id)                 => '$pathBase/$id';
   static String pathBySerial(String sn)             => '$pathBase/serial/$sn';
   static String pathByGtin(String gtin)             => '$pathBase/gtin/$gtin';
@@ -28,7 +23,6 @@ abstract final class SgtinServiceConstants {
   static String pathItemDecommission(String sn)     => '$pathBase/serial/$sn/decommission';
   static String pathItemTransitions(String id)       => '$pathBase/$id/transitions';
 
-  // ── HTTP headers ───────────────────────────────────────────────────────────
   static const String headerContentType    = 'Content-Type';
   static const String headerAuthorization  = 'Authorization';
   static const String contentTypeJson      = 'application/json';
@@ -38,7 +32,6 @@ abstract final class SgtinServiceConstants {
     headerAuthorization: 'Bearer $token',
   };
 
-  // ── HTTP status codes ──────────────────────────────────────────────────────
   static const int statusOk        = 200;
   static const int statusCreated   = 201;
   static const int statusNoContent = 204;
@@ -46,13 +39,11 @@ abstract final class SgtinServiceConstants {
   static const int statusNotFound  = 404;
   static const int statusConflict  = 409;
 
-  // ── Default pagination / sort ──────────────────────────────────────────────
   static const int    defaultPage          = 0;
   static const int    defaultSize          = 20;
   static const String defaultSortBy        = 'createdAt';
   static const String defaultSortDirection = 'DESC';
 
-  // ── Query parameter keys ───────────────────────────────────────────────────
   static const String qPage           = 'page';
   static const String qSize           = 'size';
   static const String qSortBy         = 'sortBy';
@@ -68,7 +59,6 @@ abstract final class SgtinServiceConstants {
   static const String qMarket         = 'market';
   static const String qRandomized     = 'randomized';
 
-  // ── Response JSON field keys ───────────────────────────────────────────────
   static const String rContent       = 'content';
   static const String rTotalElements = 'totalElements';
   static const String rTotalPages    = 'totalPages';
@@ -81,7 +71,6 @@ abstract final class SgtinServiceConstants {
   static const String rCount         = 'count';
   static const String rMessage       = 'message';
 
-  // ── Request body JSON field keys ───────────────────────────────────────────
   static const String bStatus          = 'status';
   static const String bGlnCode         = 'glnCode';
   static const String bSsccCode        = 'ssccCode';
@@ -93,7 +82,6 @@ abstract final class SgtinServiceConstants {
   static const String bCurrentLocation = 'currentLocation';
   static const String bReason          = 'reason';
 
-  // ── Error messages ─────────────────────────────────────────────────────────
   static const String errNoToken         = 'No authentication token found';
   static const String errLoadById        = 'Failed to load SGTIN';
   static const String errLoadBySerial    = 'Failed to load SGTIN by serial number';

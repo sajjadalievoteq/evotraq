@@ -4,7 +4,6 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/uti
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
-/// Server-side GTIN filter for the commissioning batches list.
 class CommissioningAdvancedFiltersPanel extends StatelessWidget {
   const CommissioningAdvancedFiltersPanel({
     super.key,

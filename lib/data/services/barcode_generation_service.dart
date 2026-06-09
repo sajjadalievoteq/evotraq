@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service for generating barcodes using the backend API
 class BarcodeGenerationService {
   final DioService _dioService;
 
@@ -49,7 +48,6 @@ class BarcodeGenerationService {
     );
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
@@ -78,7 +76,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Generate a GS1 DataMatrix barcode
   Future<Uint8List> generateDataMatrix({
     required String gs1ElementString,
     int width = 300,
@@ -115,7 +112,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Generate a GS1-128 linear barcode
   Future<Uint8List> generateGS1128({
     required String gs1ElementString,
     int width = 400,
@@ -152,7 +148,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Generate an SGTIN DataMatrix barcode with product information
   Future<Uint8List> generateSGTINDataMatrix({
     required String gtin,
     required String serialNumber,
@@ -163,7 +158,6 @@ class BarcodeGenerationService {
   }) async {
     final headers = await _getHeaders();
 
-    // Build query parameters
     final queryParams = {
       'gtin': gtin,
       'serialNumber': serialNumber,
@@ -171,7 +165,6 @@ class BarcodeGenerationService {
       'height': height.toString(),
     };
 
-    // Add optional parameters if provided
     if (expiryDate != null) {
       queryParams['expiryDate'] = expiryDate;
     }
@@ -204,7 +197,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Generate an SSCC barcode for shipping containers
   Future<Uint8List> generateSSCCBarcode({
     required String sscc,
     String format = 'gs1-128',
@@ -243,7 +235,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Generic barcode generation for multiple formats
   Future<Uint8List> generateGenericBarcode({
     required String data,
     required String format,
@@ -282,7 +273,6 @@ class BarcodeGenerationService {
     }
   }
 
-  /// Helper to parse error messages from API responses
   String? _parseErrorMessage(String responseBody) {
     try {
       final jsonBody = json.decode(responseBody);

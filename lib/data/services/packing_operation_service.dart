@@ -210,7 +210,6 @@ class PackingOperationService {
   }
 }
 
-/// Exception for packing operations
 class PackingOperationException implements Exception {
   final String message;
   final int? statusCode;

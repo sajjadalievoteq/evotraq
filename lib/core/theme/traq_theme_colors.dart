@@ -2,41 +2,33 @@ part of 'traq_theme.dart';
 
 @immutable
 class TraqColors extends ThemeExtension<TraqColors> {
-  // Surfaces
   final Color background;
   final Color surface;
   final Color surfaceMuted;
   final Color surfaceElevated;
   final Color inverseSurface;
 
-  // Borders
   final Color border;
   final Color borderVariant;
   final Color borderStrong;
 
-  // Text
   final Color textPrimary;
   final Color textSecondary;
   final Color textMuted;
   final Color textFaint;
   final Color textOnInverse;
 
-  // Brand
   final Color primary;
-  /// High-contrast ink on primary fills (handoff “sig ink”).
   final Color onPrimary;
   final Color primaryMuted;
   final Color primaryGlow;
 
-  /// Second accent (informational blue; links, info UI, GTIN chip base).
   final Color secondary;
 
-  // Status
   final Color success;
   final Color warning;
   final Color error;
 
-  // Identifier coding
   final Color identifierGtin;
   final Color identifierGln;
   final Color identifierSgtin;

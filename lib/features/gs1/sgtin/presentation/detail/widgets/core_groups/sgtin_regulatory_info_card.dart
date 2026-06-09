@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 
-/// Regulatory information card for the SGTIN detail / create form.
-///
-/// Contains the regulatory market and regulatory status fields. Both are
-/// editable when the form is in edit mode.
 class SgtinRegulatoryInfoCard extends StatelessWidget {
   const SgtinRegulatoryInfoCard({
     super.key,

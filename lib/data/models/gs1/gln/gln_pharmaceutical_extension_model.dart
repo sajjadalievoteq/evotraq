@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Healthcare facility type enum
 enum HealthcareFacilityType {
   hospital,
   pharmacy,
@@ -106,34 +105,28 @@ List<String>? _stringListFromJson(dynamic v) {
   return null;
 }
 
-/// GLN Pharmaceutical Extension model
-/// Based on GS1 Healthcare GLN Implementation Guideline
 class GLNPharmaceuticalExtension extends Equatable {
   final int? id;
   final int glnId;
   final String? glnCode;
   final String? locationName;
 
-  // FDA Establishment Data
   final String? fdaEstablishmentId;
   final String? fdaRegistrationNumber;
   final DateTime? fdaRegistrationDate;
   final DateTime? fdaRegistrationExpiry;
   final String? fdaEstablishmentType;
 
-  // DEA Registration
   final String? deaRegistrationNumber;
   final DateTime? deaRegistrationExpiry;
   final String? deaScheduleAuthorization;
   final String? deaBusinessActivity;
 
-  // State/Provincial Licensing
   final String? stateLicenseNumber;
   final String? stateLicenseType;
   final DateTime? stateLicenseExpiry;
   final String? stateLicenseState;
 
-  // Wholesale Distribution
   final String? wholesaleLicenseNumber;
   final DateTime? wholesaleLicenseExpiry;
   final bool isAuthorizedTradingPartner;
@@ -142,7 +135,6 @@ class GLNPharmaceuticalExtension extends Equatable {
   final String? vawdAccreditationNumber;
   final DateTime? vawdExpiryDate;
 
-  // Cold Chain & Storage Capabilities
   final bool hasColdChainCapability;
   final double? coldStorageMinTempCelsius;
   final double? coldStorageMaxTempCelsius;
@@ -159,27 +151,23 @@ class GLNPharmaceuticalExtension extends Equatable {
   final String? gdpCertificationNumber;
   final DateTime? gdpCertificationExpiry;
 
-  // Clinical Trial Site
   final bool isClinicalTrialSite;
   final String? clinicalTrialPhaseAuthorized;
   final String? irbApprovalNumber;
   final DateTime? irbApprovalExpiry;
 
-  // Serialization & DSCSA Compliance
   final bool isDscsaCompliant;
   final DateTime? dscsaComplianceDate;
   final bool hasSerializationCapability;
   final bool hasAggregationCapability;
   final String? interoperabilitySystem;
 
-  // Healthcare Facility Type
   final HealthcareFacilityType? healthcareFacilityType;
   final String? npiNumber;
   final String? ncpdpId;
   final String? medicareProviderNumber;
   final String? medicaidProviderNumber;
 
-  // Certifications
   final bool isIsoCertified;
   final String? isoCertificationType;
   final String? isoCertificationNumber;
@@ -188,13 +176,11 @@ class GLNPharmaceuticalExtension extends Equatable {
   final String? jcahoAccreditationNumber;
   final DateTime? jcahoAccreditationExpiry;
 
-  // International Regulatory
   final String? emaSiteId;
   final String? pmdaSiteId;
   final String? anvisaSiteId;
   final String? nmpaSiteId;
 
-  // Operational Details
   final String? receivingHours;
   final String? dispatchHours;
   final bool hasWeighbridge;
@@ -202,7 +188,6 @@ class GLNPharmaceuticalExtension extends Equatable {
   final bool hasForkliftCapability;
   final bool canReceiveHazmat;
 
-  // Contact Information
   final String? pharmacistInCharge;
   final String? picLicenseNumber;
   final String? responsiblePersonName;
@@ -215,39 +200,29 @@ class GLNPharmaceuticalExtension extends Equatable {
   final String? regulatoryContactEmail;
   final String? regulatoryContactPhone;
 
-  /// UAE BrandSync / Tatmeen (GS1 pharma party registry)
   final String? brandsyncPartyId;
   final String? tatmeenPartyCode;
 
-  /// Pharmacovigilance & recall readiness (spec §5.J)
   final String? pharmacovigilanceEmail;
   final String? recallContactEmail;
   final String? recallContactPhone;
 
-  /// EPCIS capture endpoint (HTTPS)
   final String? epcisCaptureEndpointUrl;
 
-  /// Licensed agent (UAE / import markets)
   final String? licensedAgentAuthorisationNumber;
 
-  /// Comma-separated principal MAH GLNs represented by this agent
   final String? authorisedPrincipalMahGlns;
 
-  /// MAH qualification flag (required for UAE-targeting MAHs when core GLN roles include MAH)
   final bool mahQualificationIndicator;
 
-  /// ISO 3166-1 numeric target markets for MAH qualification (e.g. 784 UAE)
   final List<String>? mahTargetMarkets;
 
-  /// Market-specific MAH regulatory registration identifier where applicable
   final String? mahRegulatoryRegistrationNumber;
 
-  // Additional Data
   final List<Map<String, dynamic>>? additionalLicenses;
   final List<Map<String, dynamic>>? certifications;
   final List<String>? serviceAreas;
 
-  // Audit Fields
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -886,23 +861,19 @@ class GLNPharmaceuticalExtension extends Equatable {
     );
   }
 
-  /// Check if FDA registration is valid
   bool get isFdaRegistrationValid {
     if (fdaRegistrationExpiry == null) return fdaRegistrationNumber != null;
     return fdaRegistrationExpiry!.isAfter(DateTime.now());
   }
 
-  /// Check if DEA registration is valid
   bool get isDeaRegistrationValid {
     if (deaRegistrationExpiry == null) return deaRegistrationNumber != null;
     return deaRegistrationExpiry!.isAfter(DateTime.now());
   }
 
-  /// Check if location has any cold chain capability
   bool get hasColdChain =>
       hasColdChainCapability || hasFreezerCapability || hasControlledRoomTemp;
 
-  /// Check if fully DSCSA compliant with serialization
   bool get isFullyDscsaCompliant =>
       isDscsaCompliant && hasSerializationCapability;
 

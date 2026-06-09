@@ -4,8 +4,6 @@ import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 
-/// A demo screen showcasing all GS1 validation capabilities.
-/// This screen can be used for testing and demonstrating various GS1 validations.
 class GS1ValidationDemoScreen extends StatefulWidget {
   const GS1ValidationDemoScreen({Key? key}) : super(key: key);
 
@@ -28,7 +26,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
   final _barcodeController = TextEditingController();
   final _gs1DateController = TextEditingController();
   
-  String _selectedAI = '01'; // Default to GTIN AI
+  String _selectedAI = '01';
   bool _validationPassed = false;
   
   final _aiOptions = [
@@ -95,7 +93,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
               ),
               const SizedBox(height: 20),
               
-              // GTIN Validation
               _buildSection(
                 'GTIN Validation',
                 'Enter a GTIN to validate (e.g., 12345678901231)',
@@ -103,7 +100,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'gtin',
               ),
               
-              // GLN Validation
               _buildSection(
                 'GLN Validation',
                 'Enter a GLN to validate (e.g., 1234567890128)',
@@ -111,7 +107,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'gln',
               ),
               
-              // SSCC Validation
               _buildSection(
                 'SSCC Validation', 
                 'Enter an SSCC to validate (e.g., 106141411234567895)',
@@ -119,7 +114,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'sscc',
               ),
               
-              // SGTIN Validation
               _buildSection(
                 'SGTIN Validation',
                 'Enter a SGTIN to validate (e.g., urn:epc:id:sgtin:...)',
@@ -127,7 +121,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'sgtin',
               ),
               
-              // GS1 Company Prefix Validation
               _buildSection(
                 'Company Prefix Validation',
                 'Enter a GS1 Company Prefix (e.g., 614141)',
@@ -135,7 +128,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'companyPrefix',
               ),
               
-              // Item Reference Validation
               _buildSection(
                 'Item Reference Validation',
                 'Enter an Item Reference (e.g., 12345)',
@@ -143,10 +135,8 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'itemReference',
               ),
               
-              // Application Identifier Validation
               _buildAISection(),
               
-              // GS1 Barcode Validation
               _buildSection(
                 'GS1 Barcode Validation',
                 'Enter a GS1 barcode (e.g., (01)12345678901231(10)ABC123)',
@@ -154,7 +144,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
                 'barcode',
               ),
               
-              // GS1 Date Validation
               _buildSection(
                 'GS1 Date Validation (YYMMDD)',
                 'Enter a date in YYMMDD format (e.g., 230531)',
@@ -164,7 +153,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
               
               const SizedBox(height: 20),
               
-              // Validate All Button
               Center(
                 child: ElevatedButton(
                   onPressed: _validateAll,
@@ -177,7 +165,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
               
               const SizedBox(height: 16),
               
-              // Overall validation result
               if (_validationPassed)
                 const Center(
                   child: Chip(
@@ -234,7 +221,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
             }
           },
           onChanged: (value) {
-            // Handle any specific logic on change if needed
           },
         ),
         if (getFieldError(fieldName) != null)
@@ -260,7 +246,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
         ),
         const SizedBox(height: 8),
         
-        // AI Selection
         DropdownButtonFormField<String>(
           value: _selectedAI,
           decoration: const InputDecoration(
@@ -282,7 +267,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
         ),
         const SizedBox(height: 16),
         
-        // AI Value
         ValidatedTextField(
           controller: _aiValueController,
           decoration: InputDecoration(
@@ -292,7 +276,6 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
           ),
           validator: (value) => validateGS1ApplicationIdentifier(value, _selectedAI),
           onChanged: (value) {
-            // Handle any specific logic on change if needed
           },
         ),
         

@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-/// “Sort by … / direction” row (GTIN/GLN list “sort” tile). Build [label] in the parent.
 class Gs1ListSortingControls extends StatelessWidget {
   const Gs1ListSortingControls({
     super.key,

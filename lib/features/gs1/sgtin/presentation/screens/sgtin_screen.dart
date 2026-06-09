@@ -15,9 +15,6 @@ class SGTINScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The SGTINCubit is provided globally in main.dart.
-    // Re-expose it via BlocProvider.value so child widgets can access it
-    // without the split-view creating a second instance.
     return BlocProvider.value(
       value: context.read<SGTINCubit>(),
       child: Builder(

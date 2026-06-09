@@ -16,7 +16,6 @@ int? _jsonInt(dynamic v) {
   return int.tryParse(s);
 }
 
-/// DEA Schedule enum for controlled substances
 enum DeaSchedule {
   scheduleI,
   scheduleII,
@@ -80,7 +79,6 @@ extension DeaScheduleExtension on DeaSchedule {
   }
 }
 
-/// Pregnancy category enum
 enum PregnancyCategory {
   categoryA,
   categoryB,
@@ -144,12 +142,10 @@ extension PregnancyCategoryExtension on PregnancyCategory {
   }
 }
 
-/// Active ingredient row (GDSN-style; aligns with pharma technical spec §B).
 class ActiveIngredient extends Equatable {
   final String name;
   final double? amount;
   final String? unit;
-  /// e.g. ACTIVE (default per GS1 substance role).
   final String substanceRoleCode;
   final int sequence;
   final String? basisOfStrength;
@@ -190,35 +186,29 @@ class ActiveIngredient extends Equatable {
       [name, amount, unit, substanceRoleCode, sequence, basisOfStrength];
 }
 
-/// GTIN Pharmaceutical Extension model
 class GTINPharmaceuticalExtension extends Equatable {
   final int? id;
   final int gtinId;
   final String? gtinCode;
 
-  // Drug Identification
   final String? ndcNumber;
   final String? dinNumber;
   final String? eanPharmaCode;
 
-  // Drug Classification
   final String? drugClass;
   final String? therapeuticClass;
   final String? pharmacologicalClass;
   final String? atcCode;
 
-  // Controlled Substance
   final bool isControlledSubstance;
   final DeaSchedule deaSchedule;
   final String? controlClass;
 
-  // Dosage Information
   final String? dosageForm;
   final String? strength;
   final String? strengthUnit;
   final String? routeOfAdministration;
 
-  // Storage Requirements
   final String? storageConditions;
   final double? minStorageTempCelsius;
   final double? maxStorageTempCelsius;
@@ -227,28 +217,23 @@ class GTINPharmaceuticalExtension extends Equatable {
   final bool lightSensitive;
   final bool humiditySensitive;
 
-  // Prescription Requirements
   final bool requiresPrescription;
   final String? prescriptionType;
 
-  // Regulatory
   final DateTime? fdaApprovalDate;
   final String? fdaApplicationNumber;
   final DateTime? emaApprovalDate;
   final String? emaProcedureNumber;
 
-  // Active Ingredients
   final List<ActiveIngredient> activeIngredients;
   final String? inactiveIngredients;
 
-  // Warnings and Precautions
   final bool blackBoxWarning;
   final String? blackBoxWarningText;
   final String? contraindications;
   final String? drugInteractions;
   final PregnancyCategory pregnancyCategory;
 
-  // Pharma technical specification (Section 5) — master-data extension
   final String? regulatedProductName;
   final String? dosageFormTypeCode;
   final String? routeOfAdministrationEdqmCode;
@@ -262,7 +247,6 @@ class GTINPharmaceuticalExtension extends Equatable {
   final DateTime? marketingAuthorizationValidTo;
   final String? regulatoryStatus;
 
-  /// Extra WHO ATC codes beyond [atcCode] (primary).
   final List<String> additionalAtcCodes;
 
   final String? nhmnGermanyPzn;
@@ -290,10 +274,8 @@ class GTINPharmaceuticalExtension extends Equatable {
   final String? countryOfManufactureNumeric;
   final String? packSizeDescription;
 
-  /// Batch-level potency hint (GS1 AI 7004 context); optional master-data note.
   final double? activePotencyAi7004;
 
-  // Timestamps
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -729,7 +711,6 @@ class GTINPharmaceuticalExtension extends Equatable {
     );
   }
 
-  /// Check if extension has special storage requirements
   bool get hasStorageRequirements =>
       requiresRefrigeration ||
       requiresFreezing ||
@@ -738,7 +719,6 @@ class GTINPharmaceuticalExtension extends Equatable {
       minStorageTempCelsius != null ||
       maxStorageTempCelsius != null;
 
-  /// Get storage requirements summary
   String get storageRequirementsSummary {
     List<String> requirements = [];
     if (requiresFreezing) requirements.add('Frozen');

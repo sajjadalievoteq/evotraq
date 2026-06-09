@@ -9,14 +9,9 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'dart:async';
 
-// Constants for storage keys
 const String DARK_MODE_KEY = 'dark_mode_preference';
 const String API_ENDPOINT_STATUS_KEY = 'api_endpoint_status';
 
-/// ThemeProvider manages the application's theme state
-///
-/// This provider listens to changes in the ProfileCubit to update
-/// the theme across the entire application when the user toggles dark mode
 class ThemeState extends Equatable {
   final bool isDarkMode;
 
@@ -41,9 +36,6 @@ class ThemeCubit extends Cubit<ThemeState> {
       super(const ThemeState(isDarkMode: false)) {
     _initThemePreference();
     _profileSubscription = _profileCubit.stream.listen((profileState) {
-      // Only trust server/user-preference updates when ProfileCubit explicitly reports
-      // preferences were updated. The profile endpoint does not include theme, so
-      // default `darkMode=false` would otherwise overwrite local preference on startup.
       if (profileState.status != ProfileStatus.preferencesUpdated) return;
 
       final newDarkMode = profileState.preferences.darkMode;
@@ -62,18 +54,16 @@ class ThemeCubit extends Cubit<ThemeState> {
     }
   }
 
-  // Get theme preference from local storage
   Future<bool> _getLocalThemePreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(DARK_MODE_KEY) ?? false; // Default to light theme
+      return prefs.getBool(DARK_MODE_KEY) ?? false;
     } catch (e) {
       print('Error reading theme preference from local storage: $e');
-      return false; // Default to light theme if there's an error
+      return false;
     }
   }
 
-  // Save theme preference to local storage
   Future<void> _saveLocalThemePreference(bool isDark) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -87,19 +77,13 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   ThemeMode get themeMode => state.themeMode;
 
-  /// Toggle theme method - updates locally first, then tries to sync with server
   Future<void> toggleTheme() async {
     final newDarkMode = !state.isDarkMode;
 
-    // Apply changes immediately in this order:
-    // 1. Save to local storage
     await _saveLocalThemePreference(newDarkMode);
 
-    // 2. Update the UI
     emit(state.copyWith(isDarkMode: newDarkMode));
 
-    // 3. Try to sync with server in the background (non-blocking)
-    // We're intentionally not awaiting this to avoid UI delays
     Future(() async {
       final success = await _syncThemeWithServer();
       if (!success) {
@@ -108,18 +92,12 @@ class ThemeCubit extends Cubit<ThemeState> {
     });
   }
 
-  /// Set theme directly
   Future<void> setDarkMode(bool isDark) async {
     if (state.isDarkMode != isDark) {
-      // Apply changes immediately in this order:
-      // 1. Save to local storage
       await _saveLocalThemePreference(isDark);
 
-      // 2. Update the UI
       emit(state.copyWith(isDarkMode: isDark));
 
-      // 3. Try to sync with server in the background (non-blocking)
-      // We're intentionally not awaiting this to avoid UI delays
       Future(() async {
         final success = await _syncThemeWithServer();
         if (!success) {
@@ -129,38 +107,26 @@ class ThemeCubit extends Cubit<ThemeState> {
     }
   }
 
-  /// Check if the API endpoint is available
   Future<bool> _isApiEndpointAvailable() async {
     try {
-      // Check if we already know the endpoint is unavailable
       final prefs = await SharedPreferences.getInstance();
-      // We're not checking the previous status anymore, always assuming it's available
 
-      // This bypasses the check for now, so we'll always try to update
-      // the theme on the server. Later, implement proper connectivity checks.
-
-      // Mark this endpoint as available
       await prefs.setBool(API_ENDPOINT_STATUS_KEY, true);
 
-      // Always return true to attempt the API call
       return true;
     } catch (e) {
       print('Error checking API endpoint: $e');
-      return true; // Still try to make the call
+      return true;
     }
   }
 
-  /// Improved method to sync with server
   Future<bool> _syncThemeWithServer() async {
     try {
-      // Check if API is available before attempting to sync
       if (!(await _isApiEndpointAvailable())) {
         print('API endpoint is unavailable, skipping theme sync');
         return false;
       }
 
-      // Attempt to update server without driving ProfileCubit UI loading state.
-      // Profile preference persistence should not block UI or show loaders on unrelated buttons.
       final profileService = getIt<ProfileService>();
       await profileService.updateAppPreferences(
         darkMode: state.isDarkMode,
@@ -171,7 +137,6 @@ class ThemeCubit extends Cubit<ThemeState> {
         'Sent theme preference update to server: darkMode=${state.isDarkMode}',
       );
 
-      // Best-effort: theme is already applied locally, so server failure is non-fatal.
       return true;
     } catch (e) {
       print('Error syncing theme with server: $e');
@@ -179,19 +144,14 @@ class ThemeCubit extends Cubit<ThemeState> {
     }
   }
 
-  /// Refresh theme from current profile state or local storage
-  /// Useful when profile is loaded after initial setup
   Future<void> refreshFromProfile() async {
-    // First get the local preference as the baseline
     final localPreference = await _getLocalThemePreference();
 
     bool shouldUpdate = false;
 
     try {
-      // Try to get from ProfileCubit
       final profileState = _profileCubit.state;
 
-      // If server and local disagree, prefer local but log the difference
       if (profileState.preferences.darkMode != localPreference) {
         print(
           'Theme mismatch: Server(${profileState.preferences.darkMode}) vs Local($localPreference)',
@@ -199,45 +159,36 @@ class ThemeCubit extends Cubit<ThemeState> {
         print('Using local preference as source of truth');
       }
 
-      // Only update if our current state differs from the local preference
       if (state.isDarkMode != localPreference) {
         shouldUpdate = true;
       }
     } catch (e) {
       print('ProfileCubit error during theme refresh: $e');
 
-      // If local differs from current, update to local
       if (state.isDarkMode != localPreference) {
         shouldUpdate = true;
       }
     }
 
-    // Notify listeners if there was a change
     if (shouldUpdate) {
       emit(state.copyWith(isDarkMode: localPreference));
     }
   }
 
-  /// Get the current theme preference - can be called from outside
-  /// Returns the current theme mode synchronously
   bool getCurrentThemePreference() {
     return state.isDarkMode;
   }
 
-  /// Load theme preference from shared preferences
   static Future<bool> loadThemePreference() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(DARK_MODE_KEY) ?? false;
   }
 
-  /// Save theme preference to shared preferences
   static Future<void> saveThemePreference(bool isDarkMode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(DARK_MODE_KEY, isDarkMode);
   }
 
-  /// Check API availability by sending a request to the server
-  /// Returns true if the API is reachable, false otherwise
   static Future<bool> checkApiAvailability() async {
     try {
       final dioService = getIt<DioService>();

@@ -4,11 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Read-only VRS verification card for the SGTIN detail screen.
-///
-/// Shows verification status, verification count, alert count (with warning
-/// colour), and retention expiry. Only rendered when viewing an existing
-/// SGTIN record.
 class SgtinVerificationCard extends StatelessWidget {
   const SgtinVerificationCard({
     super.key,

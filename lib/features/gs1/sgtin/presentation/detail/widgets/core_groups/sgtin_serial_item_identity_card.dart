@@ -6,11 +6,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/shared/widgets/gtin_selector.dart';
 
-/// Serial item identity card for the SGTIN detail / create form.
-///
-/// Contains the GTIN selector, serial number field, and batch/lot number field.
-/// The GTIN and serial number are locked once the SGTIN is commissioned;
-/// batch/lot is only editable on creation.
 class SgtinSerialItemIdentityCard extends StatelessWidget {
   const SgtinSerialItemIdentityCard({
     super.key,
@@ -66,8 +61,6 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
             controller: batchLotNumberController,
             fieldName: 'batchLotNumber',
             label: 'Batch / Lot Number',
-            // Spec: read-only on the instance once commissioned; only editable
-            // when creating a new SGTIN.
             readOnly: !isCreating,
             validator: sgtin_validators.validateBatchLotNumber,
             setFieldError: setFieldError,

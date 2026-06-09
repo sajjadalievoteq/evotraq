@@ -3,11 +3,6 @@ import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widge
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/operation/wired_scanner_ready_prompt.dart';
 import 'package:traqtrace_app/shared/models/scan_result.dart';
 
-/// Centered dialog shown when the user taps "Scan Product Barcode" on Step 1.
-///
-/// On mobile / tablet it shows the live camera scanner (auto-starts).
-/// On web / desktop it shows a wired-scanner prompt with an auto-focused
-/// hidden capture field — no visible text input to click first.
 class CommissioningProductBarcodeScannerDialog extends StatefulWidget {
   const CommissioningProductBarcodeScannerDialog({
     super.key,

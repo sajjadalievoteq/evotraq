@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// [ElevatedButton] with a leading [icon] and [label], laid out as a single
-/// centered row.
-///
-/// Prefer this over [ElevatedButton.icon] when the icon is a custom widget
-/// (e.g. [SvgPicture]) so icon and label stay vertically aligned. Themed
-/// [ElevatedButton] label styling applies when [labelStyle] is omitted.
 class TraqElevatedIconButton extends StatelessWidget {
   const TraqElevatedIconButton({
     super.key,

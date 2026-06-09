@@ -25,8 +25,6 @@ class OperationsHeader extends StatelessWidget {
             color: context.colors.textPrimary,
           );
 
-
-
     final title = Text(HomeStrings.operationsHeaderTitle, style: titleStyle);
 
     final actions = HomeOperationsHeaderActions();

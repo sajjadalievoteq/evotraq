@@ -1,4 +1,3 @@
-/// Recent EPCIS-style event row for dashboard lists.
 class RecentEvent {
   final String id;
   final String eventType;
@@ -6,22 +5,14 @@ class RecentEvent {
   final String? bizStep;
   final DateTime eventTime;
 
-  /// Normalised EPC list. Source field varies by event type:
-  /// - ObjectEvent / TransactionEvent → `epcList`
-  /// - AggregationEvent              → `childEPCs`
-  /// - TransformationEvent           → `outputEPCList`
   final List<String> epcList;
 
-  /// Number of input EPCs for TransformationEvent (`inputEPCList` length).
   final int inputEpcCount;
 
-  /// Parent EPC/SSCC for AggregationEvent and TransactionEvent (`parentID`).
   final String? parentId;
 
-  /// GTIN-14 from ILMD `traqtrace:gtin` (commissioning / transformation events).
   final String? gtinCode;
 
-  /// Lot/batch number from ILMD `cbvmda:lotNumber`.
   final String? batchLotNumber;
 
   RecentEvent({
@@ -55,7 +46,6 @@ class RecentEvent {
     );
   }
 
-  /// Returns the first non-empty EPC list found across the known field names.
   static List<String> _parseEpcList(Map<String, dynamic> json) {
     for (final key in const ['epcList', 'childEPCs', 'outputEPCList']) {
       if (json[key] is List && (json[key] as List).isNotEmpty) {

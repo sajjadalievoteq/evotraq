@@ -4,11 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Batch and date information card for the SGTIN detail / create form.
-///
-/// Expiry, production, and best-before dates are editable only when creating
-/// a new SGTIN (inherited from batch on existing instances). Extended expiry
-/// (AI 7003) is always read-only.
 class SgtinBatchDateCard extends StatelessWidget {
   const SgtinBatchDateCard({
     super.key,
@@ -31,7 +26,6 @@ class SgtinBatchDateCard extends StatelessWidget {
   final DateTime? expiryDate;
   final DateTime? productionDate;
   final DateTime? bestBeforeDate;
-  /// Extended expiry (AI 7003) from a loaded SGTIN record — always read-only.
   final DateTime? expiryDateTime;
 
   @override
@@ -45,7 +39,6 @@ class SgtinBatchDateCard extends StatelessWidget {
           Gs1DatePickerField(
             label: 'Expiry Date *',
             value: expiryDate,
-            // Spec: inherited from batch; read-only on existing instances.
             onTap: isCreating ? onPickExpiry : null,
           ),
           const SizedBox(height: 12),

@@ -51,7 +51,6 @@ class ValidationService {
     return _validateEventRequest('/validate/event', eventData);
   }
   
-  /// Helper method to make the validation request
   Future<Map<String, dynamic>> _validateEventRequest(String endpoint, Map<String, dynamic> eventData) async {
     try {
       final token = await _dioService.getAuthToken();
@@ -75,7 +74,6 @@ class ValidationService {
           );
         }
         
-        // Try to parse error response
         try {
           return jsonDecode(response.data) as Map<String, dynamic>;
         } catch (_) {

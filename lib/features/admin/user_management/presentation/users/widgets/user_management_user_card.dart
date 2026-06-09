@@ -142,10 +142,6 @@ class UserManagementUserCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Avatar
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _UserAvatar extends StatelessWidget {
   const _UserAvatar({required this.initial, this.radius = 20});
 
@@ -162,10 +158,6 @@ class _UserAvatar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Details block
-// ─────────────────────────────────────────────────────────────────────────────
-
 enum _UserDetailsDensity { comfy, compact }
 
 class _UserDetails extends StatelessWidget {
@@ -181,13 +173,12 @@ class _UserDetails extends StatelessWidget {
     final spacingMd = density == _UserDetailsDensity.compact ? 8.0 : 12.0;
     final colors = context.colors;
 
-    // Resolve role colour inline — no static helper needed.
     final Color roleColor = switch (user.role) {
       'ADMIN'        => Colors.purple,
       'MANUFACTURER' => colors.primary,
       'DISTRIBUTOR'  => Colors.orange,
       'RETAILER'     => Colors.teal,
-      _              => colors.success, // USER and any unknown
+      _              => colors.success,
     };
 
     final Color statusColor =
@@ -232,7 +223,6 @@ class _UserDetails extends StatelessWidget {
           SizedBox(height: spacingMd),
         ],
 
-        // ── Role / Status / Approval badges ──────────────────────────────
         Wrap(
           spacing: 12,
           runSpacing: 6,
@@ -262,10 +252,6 @@ class _UserDetails extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Info badge  (dot + "Label: Value" — no Chip widget)
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _InfoBadge extends StatelessWidget {
   const _InfoBadge({
     required this.label,
@@ -286,7 +272,6 @@ class _InfoBadge extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Coloured status dot
         Container(
           width: 6,
           height: 6,
@@ -296,12 +281,10 @@ class _InfoBadge extends StatelessWidget {
             shape: BoxShape.circle,
           ),
         ),
-        // Muted label
         Text(
           '$label: ',
           style: bodySmall?.copyWith(color: mutedColor),
         ),
-        // Coloured bold value
         Text(
           value,
           style: bodySmall?.copyWith(
@@ -313,10 +296,6 @@ class _InfoBadge extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Actions (edit icon + status toggle)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _UserActions extends StatelessWidget {
   const _UserActions({

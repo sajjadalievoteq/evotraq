@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Compact label-above-value read-only row used across SGTIN detail card
-/// sections.
 class SgtinInfoRow extends StatelessWidget {
   const SgtinInfoRow(
     this.label,

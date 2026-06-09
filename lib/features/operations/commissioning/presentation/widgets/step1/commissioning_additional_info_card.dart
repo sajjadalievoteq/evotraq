@@ -3,7 +3,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
 
-/// Optional ILMD and regulatory fields for commissioning step 1.
 class CommissioningAdditionalInfoCard extends StatelessWidget {
   const CommissioningAdditionalInfoCard({
     super.key,

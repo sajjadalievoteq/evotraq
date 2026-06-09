@@ -14,10 +14,8 @@ part 'traq_theme_menus.dart';
 part 'traq_theme_widgets.dart';
 
 class TraqTheme {
-  /// Same as [TraqThemeAppBar.backgroundAsset] (legacy name on [TraqTheme]).
   static String get appBarBackgroundAsset => TraqThemeAppBar.backgroundAsset;
 
-  /// Same as [TraqThemeAppBar.flexibleBackground] (legacy name on [TraqTheme]).
   static Widget appBarFlexibleBackground(TraqColors c) =>
       TraqThemeAppBar.flexibleBackground(c);
 
@@ -26,7 +24,6 @@ class TraqTheme {
 
   static ThemeData _build(TraqColors c, Brightness b) {
     final text = TraqText.build(c);
-    // Ink on primary surfaces (buttons, app bars). Matches legacy filled-button styling.
     final onPrimaryInk = b == Brightness.dark ? c.textSecondary : Colors.white;
 
     final roundedMd = const RoundedRectangleBorder(
@@ -49,9 +46,6 @@ class TraqTheme {
       colorScheme: ColorScheme(
         brightness: b,
         primary: c.primary,
-        // For Traq filled buttons we want:
-        // - light mode: white text/icons on green
-        // - dark mode: slightly gray text/icons on lime
         onPrimary: onPrimaryInk,
         secondary: c.secondary,
         onSecondary: Colors.white,
@@ -90,12 +84,10 @@ extension TraqContextX on BuildContext {
   TraqColors get colors => TraqColors.of(this);
   TraqText get text => TraqText.of(this);
 
-  /// Pass to [AppBar.flexibleSpace] for the Traq background (not themeable in SDK 3.33+).
   Widget get appBarFlexibleBackground =>
       TraqTheme.appBarFlexibleBackground(colors);
 }
 
 extension TraqSemanticColors on TraqColors {
-  /// Muted icon on dashboard stat tiles (replaces legacy `AppTheme.statsTiles`).
   Color get statTileIcon => textMuted;
 }

@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
 
-/// Service for GLN tobacco extension operations
 class GLNTobaccoExtensionService {
   final DioService _dioService;
 
@@ -24,7 +23,6 @@ class GLNTobaccoExtensionService {
     };
   }
 
-  /// Create tobacco extension for a GLN by code
   Future<GLNTobaccoExtension> createByGlnCode(
     String glnCode,
     GLNTobaccoExtension extension,
@@ -46,7 +44,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Save or update tobacco extension for a GLN
   Future<GLNTobaccoExtension> saveByGlnId(
     int glnId,
     GLNTobaccoExtension extension,
@@ -68,7 +65,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by GLN ID
   Future<GLNTobaccoExtension?> getByGlnId(int glnId) async {
     final response = await _dioService.get(
       '$_baseUrl/$glnId',
@@ -88,7 +84,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by GLN code
   Future<GLNTobaccoExtension?> getByGlnCode(String glnCode) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byGlnCodePath(glnCode)}',
@@ -108,7 +103,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Get extension by ID
   Future<GLNTobaccoExtension?> getById(int id) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byIdPath(id)}',
@@ -128,7 +122,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Create new extension (alias for createByGlnCode when glnCode is available)
   Future<GLNTobaccoExtension?> create(GLNTobaccoExtension extension) async {
     if (extension.glnCode != null) {
       return await createByGlnCode(extension.glnCode!, extension);
@@ -138,7 +131,6 @@ class GLNTobaccoExtensionService {
     throw Exception(GlnTobaccoExtensionMessages.createRequiresGlnCodeOrId);
   }
 
-  /// Update extension
   Future<GLNTobaccoExtension> update(
     int id,
     GLNTobaccoExtension extension,
@@ -160,7 +152,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Delete tobacco extension for a GLN
   Future<void> deleteByGlnId(int glnId) async {
     final response = await _dioService.delete(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.deleteByGlnIdPath(glnId)}',
@@ -176,7 +167,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Delete by extension ID
   Future<void> delete(int id) async {
     final response = await _dioService.delete(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.byIdPath(id)}',
@@ -192,7 +182,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Check if a GLN has tobacco extension
   Future<bool> exists(int glnId) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.existsPath(glnId)}',
@@ -210,7 +199,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find EU TPD registered locations
   Future<List<GLNTobaccoExtension>> findEuTpdRegistered() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.euTpdRegistered}',
@@ -229,7 +217,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find PACT Act registered locations
   Future<List<GLNTobaccoExtension>> findPactActRegistered() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.pactActRegistered}',
@@ -248,7 +235,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find UI issuers
   Future<List<GLNTobaccoExtension>> findUiIssuers() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.uiIssuers}',
@@ -267,7 +253,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find manufacturing facilities
   Future<List<GLNTobaccoExtension>> findManufacturingFacilities() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.manufacturingFacilities}',
@@ -286,7 +271,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find first retail outlets
   Future<List<GLNTobaccoExtension>> findFirstRetailOutlets() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.firstRetailOutlets}',
@@ -305,7 +289,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find bonded warehouses
   Future<List<GLNTobaccoExtension>> findBondedWarehouses() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.bondedWarehouses}',
@@ -324,7 +307,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find AEO certified locations
   Future<List<GLNTobaccoExtension>> findAeoCertified() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.aeoCertified}',
@@ -343,7 +325,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Find by EU Economic Operator ID
   Future<GLNTobaccoExtension?> findByEuEconomicOperatorId(String eoId) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${GlnTobaccoExtensionApiConsts.euEconomicOperatorPath(eoId)}',
@@ -363,7 +344,6 @@ class GLNTobaccoExtensionService {
     }
   }
 
-  /// Search tobacco extensions
   Future<List<GLNTobaccoExtension>> search({
     String? euEconomicOperatorId,
     String? fdaTobaccoEstablishmentId,

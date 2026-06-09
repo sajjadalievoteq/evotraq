@@ -6,7 +6,6 @@ import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// Service that integrates barcode detection with backend verification and EPCIS mapping
 class BarcodeScanProcessingService {
   final BarcodeApiService _barcodeApiService;
   
@@ -14,7 +13,6 @@ class BarcodeScanProcessingService {
     required DioService dioService,
   }) : _barcodeApiService = BarcodeApiService(dioService: dioService);
   
-  /// Process a detected barcode, verify it, and create an EPCIS event
   Future<Map<String, dynamic>> processBarcodeScan({
     required String barcodeData,
     required String locationGLN,
@@ -22,19 +20,15 @@ class BarcodeScanProcessingService {
     required String disposition,
   }) async {
     try {
-      // Step 1: Verify barcode structure and content
       final verificationResult = await _barcodeApiService.verifyBarcode(barcodeData);
       
-      // Step 2: Extract structured data from barcode
       Map<String, dynamic> extractedData = {};
       
-      // Only extract data if barcode is valid
       if (verificationResult['isValid'] == true) {
         extractedData = await _barcodeApiService.extractBarcodeData(barcodeData);
         
         debugPrint('Extracted GS1 data: $extractedData');
         
-        // Step 3: Create EPCIS object event from barcode
         final epcisEvent = await _barcodeApiService.createObjectEvent(
           gs1ElementString: barcodeData,
           locationGLN: locationGLN,
@@ -49,7 +43,6 @@ class BarcodeScanProcessingService {
           'barcodeType': extractedData['barcodeType'] ?? 'UNKNOWN',
         };
       } else {
-        // If barcode validation failed, create a basic result with error info
         return {
           'success': false,
           'message': 'Invalid barcode format: ${verificationResult['message'] ?? 'Unknown error'}',
@@ -59,15 +52,12 @@ class BarcodeScanProcessingService {
     } catch (e) {
       debugPrint('Error in processBarcodeScan: $e');
       
-      // Create a basic EPCIS event when API fails
       try {
-        // Use the simple factory constructor for GLN
         final readPoint = GLN.fromCode(locationGLN);
         final bizLocation = GLN.fromCode(locationGLN);
         
-        // Create a basic EPCIS Object event
         final now = DateTime.now();
-        final uuid = const Uuid().v4(); // Import uuid package
+        final uuid = const Uuid().v4();
         
         final epcisEvent = ObjectEvent(
           eventId: uuid, 
@@ -111,7 +101,6 @@ class BarcodeScanProcessingService {
     }
   }
   
-  /// Process a detected barcode for aggregation (parent containing children)
   Future<Map<String, dynamic>> processAggregationScan({
     required String parentBarcode,
     required List<String> childBarcodes,
@@ -120,7 +109,6 @@ class BarcodeScanProcessingService {
     required String disposition,
   }) async {
     try {
-      // Create EPCIS aggregation event
       final epcisEvent = await _barcodeApiService.createAggregationEvent(
         parentBarcode: parentBarcode,
         childBarcodes: childBarcodes,
@@ -140,7 +128,6 @@ class BarcodeScanProcessingService {
       };
     }
   }
-    /// Process a detected barcode for creating transaction events
   Future<Map<String, dynamic>> processTransactionScan({
     required List<String> barcodes,
     required String bizTransactionType,
@@ -150,7 +137,6 @@ class BarcodeScanProcessingService {
     required String disposition,
   }) async {
     try {
-      // Create EPCIS transaction event
       final epcisEvents = await _barcodeApiService.createTransactionEvent(
         gs1ElementStrings: barcodes,
         bizTransactionType: bizTransactionType,
@@ -172,12 +158,10 @@ class BarcodeScanProcessingService {
     }
   }
   
-  /// Parse GS1 barcode data into a human-readable format
   Map<String, String> parseGS1Data(Map<String, dynamic> extractedData) {
     final result = <String, String>{};
     
     try {
-      // Convert AI codes to human-readable labels
       if (extractedData.containsKey('GTIN')) {
         result['Product Code (GTIN)'] = extractedData['GTIN'].toString();
       }
@@ -200,7 +184,6 @@ class BarcodeScanProcessingService {
         result['Production Date'] = '${prodDate.year}-${prodDate.month.toString().padLeft(2, '0')}-${prodDate.day.toString().padLeft(2, '0')}';
       }
       
-      // Add any other GS1 elements that might be present
       extractedData.forEach((key, value) {
         if (!result.containsKey(key) && key != 'barcodeType' && key != 'rawData') {
           result[key] = value.toString();
@@ -215,7 +198,6 @@ class BarcodeScanProcessingService {
   }
 }
 
-/// Simple UUID implementation to avoid adding dependency
 class Uuid {
   const Uuid();
   

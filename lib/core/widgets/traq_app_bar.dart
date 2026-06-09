@@ -9,13 +9,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// [AppBar] that applies the Traq SVG [flexibleSpace] unless you pass your own.
-///
-/// Use this instead of raw [AppBar] when you want the branded background without
-/// repeating `flexibleSpace` at every call site ([AppBarThemeData] cannot set it).
-///
-/// By default a **Log out** action is appended (after any [actions]); set
-/// [showLogoutAction] to `false` to omit it.
 class TraqAppBar extends AppBar {
   TraqAppBar(
     BuildContext context, {
@@ -24,7 +17,6 @@ class TraqAppBar extends AppBar {
     bool automaticallyImplyLeading = true,
     super.title,
     List<Widget>? actions,
-    /// When `true` (default), appends a log-out icon that opens [showLogoutConfirmDialog].
     bool showLogoutAction = true,
     bool automaticallyImplyActions = true,
     Widget? flexibleSpace,
@@ -67,7 +59,6 @@ class TraqAppBar extends AppBar {
           forceMaterialTransparency: forceMaterialTransparency,
           useDefaultSemanticsOrder: useDefaultSemanticsOrder,
           animateColor: animateColor,
-          // actions: TraqAppBar._mergeActions(context, actions, showLogoutAction),
         );
 
   static List<Widget>? _mergeActions(
@@ -130,7 +121,6 @@ merged.add(    SizedBox(width: 20,),);
           ),
         );
       } catch (_) {
-        // No [AuthCubit] above this context (e.g. rare test / shell); skip action.
       }
     }
     if (merged.isEmpty) return null;

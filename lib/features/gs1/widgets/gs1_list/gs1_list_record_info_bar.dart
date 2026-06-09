@@ -5,7 +5,6 @@ import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
 import '../../../../core/theme/traq_theme.dart';
 
-/// “Showing N+ … / page size” row (GTIN/GLN list “information” tile).
 class Gs1ListRecordInfoBar extends StatelessWidget {
   const Gs1ListRecordInfoBar({
     super.key,
@@ -17,7 +16,6 @@ class Gs1ListRecordInfoBar extends StatelessWidget {
     this.pageSizeOptions = Gs1ListPageSizes.defaults,
   });
 
-  /// e.g. `"GTINs"` or `"GLNs"`.
   final String entityPlural;
   final int loadedRecords;
   final bool hasMoreData;

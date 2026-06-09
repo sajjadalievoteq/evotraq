@@ -8,7 +8,6 @@ import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/skeleton/sscc_section_loading_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 
-/// ISO 3166-1 alpha-3 country codes for dropdowns
 const Map<String, String> _countryOptions = {
   'USA': 'United States',
   'CAN': 'Canada',
@@ -56,7 +55,6 @@ const Map<String, String> _countryOptions = {
   'VNM': 'Vietnam',
 };
 
-/// US State codes for state transit permit dropdown
 const Map<String, String> _usStateOptions = {
   'AL': 'Alabama',
   'AK': 'Alaska',
@@ -112,7 +110,6 @@ const Map<String, String> _usStateOptions = {
   'PR': 'Puerto Rico',
 };
 
-/// Common seal types for tobacco transport
 const List<String> _sealTypeOptions = [
   'Bolt Seal',
   'Cable Seal',
@@ -126,8 +123,6 @@ const List<String> _sealTypeOptions = [
   'Shipper Seal',
 ];
 
-/// Widget that displays/edits tobacco extension data for a SSCC (shipping container)
-/// Can be embedded in SSCC detail screens or used standalone
 class SSCCTobaccoExtensionWidget extends StatefulWidget {
   final int? ssccId;
   final String? ssccCode;
@@ -147,25 +142,21 @@ class SSCCTobaccoExtensionWidget extends StatefulWidget {
       SSCCTobaccoExtensionWidgetState();
 }
 
-/// State class for SSCCTobaccoExtensionWidget
 class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> {
   SSCCTobaccoExtension? _extension;
   bool _isLoading = true;
   bool _hasExtension = false;
 
-  // EU TPD Transport Section
   final _euTransportUnitIdController = TextEditingController();
   final _euRouteAuthorizationNumberController = TextEditingController();
   DateTime? _euRouteAuthorizationDate;
   DateTime? _euRouteAuthorizationExpiry;
   bool _euFirstRetailOutlet = false;
 
-  // Tax Stamp Aggregation
   final _taxStampAggregationLevelController = TextEditingController();
   final _aggregatedStampCountController = TextEditingController();
   final _taxStampAuthorityIdController = TextEditingController();
 
-  // Export/Import Documentation
   final _customsDeclarationNumberController = TextEditingController();
   DateTime? _customsDeclarationDate;
   final _exportLicenseNumberController = TextEditingController();
@@ -173,27 +164,23 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
   DateTime? _exportLicenseExpiry;
   final _importPermitNumberController = TextEditingController();
   DateTime? _importPermitDate;
-  String? _countryOfOrigin; // Dropdown - ISO 3166-1 alpha-3
-  String? _countryOfDestination; // Dropdown - ISO 3166-1 alpha-3
+  String? _countryOfOrigin;
+  String? _countryOfDestination;
 
-  // Transport Security
   final _sealNumberController = TextEditingController();
-  String? _sealType; // Dropdown
+  String? _sealType;
   final _sealedByController = TextEditingController();
   DateTime? _sealedDate;
 
-  // Carrier Information
   final _carrierLicenseNumberController = TextEditingController();
   final _carrierTobaccoPermitNumberController = TextEditingController();
   final _driverIdController = TextEditingController();
   final _vehicleRegistrationController = TextEditingController();
 
-  // State/Regional Compliance (US)
   final _pactActManifestNumberController = TextEditingController();
   final _stateTransitPermitNumberController = TextEditingController();
-  String? _stateTransitPermitState; // Dropdown - US state code
+  String? _stateTransitPermitState;
 
-  // Manufacturing Batch Tracking
   bool _containsMultipleBatches = false;
   final _primaryBatchNumberController = TextEditingController();
 
@@ -226,9 +213,6 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
   }
 
   Future<void> _loadExtension() async {
-    // Load extension data if we have an ssccId OR ssccCode
-    // ssccId is preferred (from existing saved SSCC)
-    // ssccCode is used as fallback (when viewing by code)
     final hasValidSsccId = widget.ssccId != null;
     final hasValidSsccCode = widget.ssccCode != null && widget.ssccCode!.isNotEmpty;
 
@@ -246,7 +230,6 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
       final service = getIt<SSCCTobaccoExtensionService>();
       SSCCTobaccoExtension? extension;
 
-      // Prefer loading by ssccId, fallback to ssccCode
       if (hasValidSsccId) {
         extension = await service.getBySsccId(widget.ssccId!);
       } else if (hasValidSsccCode) {
@@ -312,7 +295,6 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
     _primaryBatchNumberController.text = ext.primaryBatchNumber ?? '';
   }
 
-  /// Check if user has entered any tobacco data
   bool get hasData =>
       _euTransportUnitIdController.text.isNotEmpty ||
       _euRouteAuthorizationNumberController.text.isNotEmpty ||
@@ -331,7 +313,6 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
       _sealType != null ||
       _stateTransitPermitState != null;
 
-  /// Build the extension object from form data for external use
   SSCCTobaccoExtension? buildExtension({int? ssccId, String? ssccCode}) {
     if (!hasData) return null;
 
@@ -413,7 +394,6 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
     );
   }
 
-  /// Save the extension - can be called from parent widget
   Future<SSCCTobaccoExtension?> saveExtension(int ssccId, String ssccCode) async {
     try {
       final service = getIt<SSCCTobaccoExtensionService>();
@@ -454,15 +434,11 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
 
   @override
   Widget build(BuildContext context) {
-    // Use listen: false to avoid rebuilding when provider changes and to prevent
-    // "Looking up a deactivated widget's ancestor" errors during navigation
-    // Wrap in try-catch to handle case when widget is deactivated during mode change
     bool isTobaccoMode = false;
     try {
       final settings = context.read<SystemSettingsCubit>().state.settings;
       isTobaccoMode = settings.isTobaccoMode;
     } catch (e) {
-      // Widget is deactivated, return empty
       return const SizedBox.shrink();
     }
 

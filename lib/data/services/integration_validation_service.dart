@@ -61,55 +61,46 @@ class IntegrationValidationService {
     }
   }
 
-  /// Run GS1 identifier generation validation test
   Future<ValidationResultDTO> validateGS1IdentifierGeneration() async {
     final json = await _getWithAuth('/admin/integration-validation/gs1-identifier-generation');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Validate barcode generation and reading
   Future<ValidationResultDTO> validateBarcodeGenerationAndReading() async {
     final json = await _getWithAuth('/admin/integration-validation/barcode-generation-reading');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Validate EPCIS event creation flows
   Future<ValidationResultDTO> validateEPCISEventCreation() async {
     final json = await _getWithAuth('/admin/integration-validation/epcis-event-creation');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Validate relationship mapping functionality
   Future<ValidationResultDTO> validateRelationshipMapping() async {
     final json = await _getWithAuth('/admin/integration-validation/relationship-mapping');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Validate API contracts
   Future<ValidationResultDTO> validateAPIContracts() async {
     final json = await _getWithAuth('/admin/integration-validation/api-contracts');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Test error handling scenarios
   Future<ValidationResultDTO> testErrorHandling() async {
     final json = await _getWithAuth('/admin/integration-validation/error-handling');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Validate response formats
   Future<ValidationResultDTO> validateResponseFormats() async {
     final json = await _getWithAuth('/admin/integration-validation/response-formats');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Check authorization controls
   Future<ValidationResultDTO> checkAuthorizationControls() async {
     final json = await _getWithAuth('/admin/integration-validation/authorization-controls');
     return ValidationResultDTO.fromJson(json);
   }
   
-  /// Run all integration validation tests
   Future<Map<String, ValidationResultDTO>> runAllValidationTests() async {
     final json = await _getWithAuth('/admin/integration-validation/run-all');
 

@@ -35,4 +35,3 @@ class ProfilePreferences extends Equatable {
         language,
       ];
 }
-

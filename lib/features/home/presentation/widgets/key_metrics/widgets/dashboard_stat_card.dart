@@ -35,19 +35,16 @@ class DashboardStatCard extends StatelessWidget {
   final Color? labelTextColor;
   final List<double>? sparkline;
   final Color? sparklineColor;
-  /// Tighter padding and sparkline for fixed-aspect tiles (e.g. 16:9 wrap).
   final bool dense;
 
   bool get _usesAsset => iconAsset != null;
 
-  /// Digits-only parse of the value shown on the card (e.g. counts).
   static int? _parseMetricValue(String value) {
     final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return null;
     return int.tryParse(digits);
   }
 
-  /// Sparkline Y samples (0 = bottom of track). Derived from [n] only; null for [n] <= 0.
   static List<double>? _sparklineFromMetric(int n) {
     if (n <= 0) return null;
     const points = 22;

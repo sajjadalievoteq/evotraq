@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service for generating industry-specific test data (server-side seeding; client calls admin APIs only).
 class IndustryTestDataService {
   final DioService _dioService;
 
@@ -120,7 +119,6 @@ class IndustryTestDataService {
     _throwIfErrors(errors, label: label);
   }
 
-  /// Generate tobacco GTINs with extensions (payloads built on the server).
   Future<void> generateTobaccoGTINs({
     required Function(int current, int total, String productName) onProgress,
   }) async {
@@ -130,7 +128,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE tobacco GTINs — done');
   }
 
-  /// Generate tobacco GLNs with extensions (payloads built on the server).
   Future<void> generateTobaccoGLNs({
     required Function(int current, int total, String locationName) onProgress,
   }) async {
@@ -140,7 +137,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE tobacco — done');
   }
 
-  /// Generate tobacco SGTINs (serialized items) from existing GTINs (server-side).
   Future<void> generateTobaccoSGTINs({
     required Function(int current, int total, String productInfo) onProgress,
   }) async {
@@ -150,7 +146,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE tobacco SGTINs — done');
   }
 
-  /// Generate tobacco SSCCs with tobacco extensions (server-side).
   Future<void> generateTobaccoSSCCs({
     required Function(int current, int total, String containerInfo) onProgress,
   }) async {
@@ -160,7 +155,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE tobacco SSCCs — done');
   }
 
-  /// Generate EPCIS events for the tobacco supply chain (server-side).
   Future<void> generateTobaccoEvents({
     required Function(int current, int total, String eventInfo) onProgress,
   }) async {
@@ -170,7 +164,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE tobacco EPCIS events — done');
   }
 
-  /// Generate pharmaceutical GTINs with extensions (payloads built on the server).
   Future<void> generatePharmaGTINs({
     required Function(int current, int total, String productName) onProgress,
   }) async {
@@ -180,7 +173,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE pharma GTINs — done');
   }
 
-  /// Generate pharmaceutical GLNs with extensions (payloads built on the server).
   Future<void> generatePharmaGLNs({
     required Function(int current, int total, String locationName) onProgress,
   }) async {
@@ -190,7 +182,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE pharma — done');
   }
 
-  /// Generate pharmaceutical SGTINs (server-side).
   Future<void> generatePharmaSGTINs({
     required Function(int current, int total, String productInfo) onProgress,
   }) async {
@@ -200,7 +191,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE pharma SGTINs — done');
   }
 
-  /// Generate pharmaceutical SSCCs with extensions (server-side).
   Future<void> generatePharmaSSCCs({
     required Function(int current, int total, String containerInfo) onProgress,
   }) async {
@@ -210,7 +200,6 @@ class IndustryTestDataService {
     onProgress(1, 1, 'UAE pharma SSCCs — done');
   }
 
-  /// Generate EPCIS events for the pharmaceutical supply chain (server-side).
   Future<void> generatePharmaEvents({
     required Function(int current, int total, String eventInfo) onProgress,
   }) async {

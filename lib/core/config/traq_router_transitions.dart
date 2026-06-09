@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Shared [Page] transitions for [GoRouter] routes.
 abstract final class TraqRouterTransitions {
   static const Duration _forward = Duration(milliseconds: 220);
   static const Duration _reverse = Duration(milliseconds: 200);
 
-  /// Light fade with a short vertical slide — keeps navigations readable on web.
   static Page<T> page<T extends Object?>({
     required LocalKey key,
     required Widget child,

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A column panel used in the desktop layout for each wizard step.
-///
-/// When [isLocked] is true, the content is covered by a semi-transparent
-/// overlay with a lock icon so the user cannot interact with it.
 class CommissioningStepPanel extends StatelessWidget {
   const CommissioningStepPanel({
     super.key,

@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Shimmer placeholder for GS1 master-data list rows (GLN / GTIN card layout).
 class Gs1ListLoadingShimmer extends StatelessWidget {
   const Gs1ListLoadingShimmer({
     super.key,

@@ -1,6 +1,5 @@
 part of 'traq_theme.dart';
 
-/// Switch and text field ([InputDecoration]) themes for Traq.
 abstract final class TraqThemeInputs {
   static SwitchThemeData switchTheme(TraqColors c, Brightness b) =>
       SwitchThemeData(
@@ -28,7 +27,6 @@ abstract final class TraqThemeInputs {
           return c.borderVariant;
         }),
         overlayColor: WidgetStateProperty.resolveWith((states) {
-          // Prevent hover overlay from visually washing out the thumb on web.
           if (states.contains(WidgetState.hovered)) {
             return Colors.transparent;
           }

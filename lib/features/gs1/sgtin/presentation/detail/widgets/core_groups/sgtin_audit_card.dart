@@ -4,10 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Read-only audit card for the SGTIN detail screen.
-///
-/// Shows created-at, created-by, and last-updated timestamps. Only rendered
-/// when viewing an existing SGTIN record.
 class SgtinAuditCard extends StatelessWidget {
   const SgtinAuditCard({
     super.key,

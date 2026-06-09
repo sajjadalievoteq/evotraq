@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 
-/// Service for pharmaceutical extension operations
 class PharmaceuticalService {
   final DioService _dioService;
 
@@ -20,7 +19,6 @@ class PharmaceuticalService {
     };
   }
 
-  /// Create pharmaceutical extension for a GTIN by code (used when creating new GTIN)
   Future<GTINPharmaceuticalExtension> createExtension(
     String gtinCode,
     GTINPharmaceuticalExtension extension,
@@ -42,7 +40,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Save or update pharmaceutical extension for a GTIN
   Future<GTINPharmaceuticalExtension> saveExtension(
     int gtinId,
     GTINPharmaceuticalExtension extension,
@@ -64,7 +61,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Get pharmaceutical extension by GTIN ID
   Future<GTINPharmaceuticalExtension?> getExtensionByGtinId(int gtinId) async {
     final response = await _dioService.get(
       '$_baseUrl/gtin/$gtinId',
@@ -84,7 +80,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Get pharmaceutical extension by GTIN code
   Future<GTINPharmaceuticalExtension?> getExtensionByGtinCode(
     String gtinCode,
   ) async {
@@ -106,7 +101,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Delete pharmaceutical extension for a GTIN
   Future<void> deleteExtension(int gtinId) async {
     final response = await _dioService.delete(
       '$_baseUrl/gtin/$gtinId',
@@ -122,7 +116,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Check if a GTIN has pharmaceutical extension
   Future<bool> hasPharmaceuticalExtension(int gtinId) async {
     final response = await _dioService.get(
       '$_baseUrl/gtin/$gtinId/exists',
@@ -140,7 +133,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find all controlled substances
   Future<List<GTINPharmaceuticalExtension>> findControlledSubstances() async {
     final response = await _dioService.get(
       '$_baseUrl/controlled-substances',
@@ -161,7 +153,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find by DEA schedule
   Future<List<GTINPharmaceuticalExtension>> findByDeaSchedule(
     String schedule,
   ) async {
@@ -184,7 +175,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find products requiring refrigeration
   Future<List<GTINPharmaceuticalExtension>> findRequiringRefrigeration() async {
     final response = await _dioService.get(
       '$_baseUrl/requiring-refrigeration',
@@ -205,7 +195,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find products requiring prescription
   Future<List<GTINPharmaceuticalExtension>> findRequiringPrescription() async {
     final response = await _dioService.get(
       '$_baseUrl/requiring-prescription',
@@ -226,7 +215,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find products with black box warning
   Future<List<GTINPharmaceuticalExtension>> findWithBlackBoxWarning() async {
     final response = await _dioService.get(
       '$_baseUrl/black-box-warning',
@@ -247,7 +235,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find by therapeutic class
   Future<List<GTINPharmaceuticalExtension>> findByTherapeuticClass(
     String therapeuticClass,
   ) async {
@@ -270,7 +257,6 @@ class PharmaceuticalService {
     }
   }
 
-  /// Find by ATC code
   Future<List<GTINPharmaceuticalExtension>> findByAtcCode(
     String atcCode,
   ) async {

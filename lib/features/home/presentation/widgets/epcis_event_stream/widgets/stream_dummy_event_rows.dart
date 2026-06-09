@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 
-/// Sample EPCIS stream rows (list, not a chart) until API wiring matches design.
 class StreamDummyEventRows extends StatelessWidget {
   const StreamDummyEventRows({
     super.key,
@@ -10,7 +9,6 @@ class StreamDummyEventRows extends StatelessWidget {
     this.compact = false,
   });
 
-  /// Cap for dummy rows; must not exceed [_rows].length.
   static const int kMaxDummyRows = 6;
 
   static const int _kDefaultDummyRows = kMaxDummyRows;

@@ -121,7 +121,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   SSCCCubit? _ssccCubit;
   SSCC? _sscc;
 
-  // Captured extension data - stored before save to ensure we have it when SSCCCreated is emitted
   dynamic _capturedTobaccoExtension;
   dynamic _capturedPharmaExtension;
   String? _capturedSsccCode;
@@ -130,7 +129,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   @override
   void initState() {
     super.initState();
-    // Awaiting pane never hydrates from an SSCC fetch; view pane starts unloaded.
     _formFieldsHydrated = widget.awaitingListSelection ||
         widget.isCreating ||
         widget.routeSsccCode == null ||
@@ -241,7 +239,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       setState(() => _glnPickerCatalog = catalog);
       _applyGlnCatalogToFields();
     } catch (_) {
-      // Pickers still work; names resolve when opened.
     }
   }
 
@@ -252,7 +249,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   bool _fieldSkeletonsActive(SSCCState state) {
     if (state.status == SSCCStatus.error) return false;
-    // Same full-detail skeleton while the list loads (await pane) or SSCC fetches.
     if (widget.awaitingListSelection) {
       return state.isListLoading || state.status == SSCCStatus.initial;
     }
@@ -282,7 +278,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   Future<void> _loadData() async => _startInitialLoad();
 
-  /// Save tobacco extension if the widget has data
   Future<void> _saveTobaccoExtensionIfNeeded(
     int? ssccId,
     String ssccCode,
@@ -297,12 +292,12 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       debugPrint(
         'Tobacco extension widget not in tree (probably not in tobacco mode)',
       );
-      return; // Widget not in tree
+      return;
     }
 
     if (!tobaccoState.hasData) {
       debugPrint('No tobacco extension data to save');
-      return; // No data to save
+      return;
     }
 
     try {
@@ -318,12 +313,9 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       }
     } catch (e) {
       debugPrint('Error saving SSCC tobacco extension: $e');
-      // Don't show error to user since SSCC was saved successfully
-      // The tobacco extension can be added later if needed
     }
   }
 
-  /// Save pharmaceutical extension if the widget has data
   Future<void> _savePharmaExtensionIfNeeded(
     int? ssccId,
     String ssccCode,
@@ -337,12 +329,12 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       debugPrint(
         'Pharma extension widget not in tree (probably not in pharmaceutical mode)',
       );
-      return; // Widget not in tree
+      return;
     }
 
     if (!pharmaState.hasData) {
       debugPrint('No pharmaceutical extension data to save');
-      return; // No data to save
+      return;
     }
 
     try {
@@ -358,8 +350,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       }
     } catch (e) {
       debugPrint('Error saving SSCC pharmaceutical extension: $e');
-      // Don't show error to user since SSCC was saved successfully
-      // The pharmaceutical extension can be added later if needed
     }
   }
 
@@ -518,7 +508,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   Future<void> _saveSSCC() async {
     if (widget.awaitingListSelection) return;
-    // Check if SSCC code has been generated
     if (_ssccCodeController.text.isEmpty &&
         widget.isCreating) {
       context.showWarning(
@@ -534,24 +523,19 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
         _isLoading = true;
         _hasSubmittedForm = true;
       });
-      // Extract the GS1 company prefix from SSCC (first 7-10 digits after extension digit)
-      // For a standard SSCC with format: Extension Digit (1) + GS1 Company Prefix (7-10) + Serial Reference (variable) + Check Digit (1)
       String gs1CompanyPrefix = '';
       String serialReference = '';
       String checkDigit = '';
       if (_ssccCodeController.text.isNotEmpty) {
         var ssccCode = _ssccCodeController.text;
 
-        // Validate and fix the SSCC code if needed
         if (ssccCode.length != 18) {
-          // Try to fix the SSCC code
           final fixedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
           if (fixedSSCC != null) {
             ssccCode = fixedSSCC;
             _ssccCodeController.text =
-                ssccCode; // Update the controller with the fixed code
+                ssccCode;
           } else {
-            // If we couldn't fix the SSCC, show an error
             context.showError(
               'Invalid SSCC code - must be 18 digits (current: ${ssccCode.length} digits)',
             );
@@ -562,24 +546,19 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
           }
         }
 
-        // SSCC must be 18 digits now
-        // First digit is extension digit, last digit is check digit
         gs1CompanyPrefix = ssccCode.substring(
           1,
           8,
-        ); // Using 7 digit company prefix as default
-        serialReference = ssccCode.substring(8, 17); // Rest is serial reference
-        checkDigit = ssccCode.substring(17); // Last digit is check digit
+        );
+        serialReference = ssccCode.substring(8, 17);
+        checkDigit = ssccCode.substring(17);
       } else {
-        // If no SSCC code available, we can't save
         context.showWarning('Please generate an SSCC code first');
         setState(() {
           _isLoading = false;
         });
         return;
       }
-      // Create an absolutely minimal SSCC object with ONLY the fields that the backend accepts
-      // After multiple test attempts, we've discovered the backend is very strict
 
       final containedQty = int.tryParse(_containedQuantityController.text.trim());
       final identityLocked = !widget.isCreating &&
@@ -644,7 +623,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   }
 
   void _generateSSCCCode() {
-    // Clear any previous errors
     context.dismissSnackBar();
 
     final issuingError = validateIssuingGlnRequired(_issuingGln?.glnCode);
@@ -666,12 +644,10 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       return;
     }
 
-    // Set state to loading
     setState(() {
       _isLoading = true;
     });
 
-    // Show loading indicator
     context.showInfo('Generating SSCC code...', duration: const Duration(seconds: 2));
 
     _cubit.generateSSCCFromGLN(
@@ -679,7 +655,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       _extensionDigitController.text,
     );
   }
-  // Using GS1Utils.validateAndFixSSCC instead of this method
 
   @override
   Widget build(BuildContext context) {
@@ -808,8 +783,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
             ),
           );
         }
-
-        // List loading (await) and SSCC fetch both use _buildForm + shimmer below.
 
         if (state.status == SSCCStatus.codeGenerated &&
             state.generatedCode != null) {
@@ -1076,7 +1049,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   );
                 }
 
-                // Tobacco Mode: Show tobacco extension (when feature enabled)
                 if (settings.isTobaccoMode && kTobaccoExtensionEnabled) {
                   return SSCCTobaccoExtensionWidget(
                     key: _tobaccoExtensionKey,
@@ -1188,7 +1160,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                               onPressed: _generateSSCCCode,
                             )
                           : null,
-                      // Add filled background to make it more visible
                       filled: true,
                       fillColor: _ssccCodeController.text.isEmpty
                           ? Colors.grey.shade100
@@ -1196,9 +1167,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                                 ? Colors.green.shade50
                                 : Colors.red.shade50),
                     ),
-                    // Always read-only since it's generated
                     readOnly: true,
-                    // Make validation require a value
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please generate an SSCC code';

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-/// Marks which branch of [SplitOrListIndexedStack] is visible so list screens can
-/// run a single initial fetch (the hidden branch stays mounted but must not duplicate
-/// the same network request).
 class PrimaryFetchScope extends InheritedWidget {
   const PrimaryFetchScope({
     super.key,
@@ -23,10 +20,6 @@ class PrimaryFetchScope extends InheritedWidget {
   }
 }
 
-/// On wide layouts ([AppLayout] `isDesktopUp`), shows [split]; otherwise [fallback]
-/// (typically a full-width list that navigates to detail).
-///
-/// Keeps both trees mounted in an [IndexedStack] so resizing and cubit state are stable.
 class SplitOrListIndexedStack extends StatelessWidget {
   const SplitOrListIndexedStack({
     super.key,

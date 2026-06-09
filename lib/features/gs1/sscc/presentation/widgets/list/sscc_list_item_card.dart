@@ -28,8 +28,6 @@ class SsccListItemCard extends StatelessWidget {
   final VoidCallback onTap;
   final ValueChanged<String> onMenuSelected;
 
-
-
   @override
 
   Widget build(BuildContext context) {
@@ -41,8 +39,6 @@ class SsccListItemCard extends StatelessWidget {
     final dateFormat = DateFormat('MMM dd, yyyy');
     final canEdit = edit_rules.canEditSsccRecord(sscc.status);
     final canDelete = edit_rules.canDeleteSscc(sscc.status);
-
-
 
     Widget infoRow(IconData icon, String text) {
       final rowColor =
@@ -66,8 +62,6 @@ class SsccListItemCard extends StatelessWidget {
       );
     }
 
-
-
     return LayoutBuilder(
 
       builder: (context, constraints) {
@@ -79,8 +73,6 @@ class SsccListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
 
             : const EdgeInsets.all(16);
-
-
 
         return Card(
           elevation: 2,
@@ -273,5 +265,3 @@ class SsccListItemCard extends StatelessWidget {
   }
 
 }
-
-

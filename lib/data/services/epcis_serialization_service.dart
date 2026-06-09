@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_document_dto.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters_dto.dart';
 
-/// Implementation of EPCIS Serialization Service
 class EPCISSerializationService {
   
   final DioService _dioService;
@@ -17,7 +16,6 @@ class EPCISSerializationService {
     _baseUrl = '${_dioService.baseUrl}/events/serialization';
   }
   
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders({String contentType = 'application/json'}) async {
     final token = await _dioService.getAuthToken();
     return {
@@ -353,10 +351,8 @@ class EPCISSerializationService {
   
   Future<Map<String, dynamic>> importEventsFromXml(String xmlContent) async {
     try {
-      // First deserialize XML to DTO
       final documentDto = await deserializeXml(xmlContent);
       
-      // Then import the events
       return await importEvents(documentDto);
     } catch (e) {
       throw Exception('Error importing events from XML: $e');
@@ -365,10 +361,8 @@ class EPCISSerializationService {
   
   Future<Map<String, dynamic>> importEventsFromJsonLd(Map<String, dynamic> jsonLdContent) async {
     try {
-      // First deserialize JSON-LD to DTO
       final documentDto = await deserializeJsonLd(jsonLdContent);
       
-      // Then import the events
       return await importEvents(documentDto);
     } catch (e) {
       throw Exception('Error importing events from JSON-LD: $e');

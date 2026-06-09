@@ -9,21 +9,14 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
-/// SSCC service. Auth is handled transparently by [DioService]'s interceptor —
-/// do not add manual token logic in this class.
 class SSCCService {
   final DioService _dioService;
 
   SSCCService({required DioService dioService}) : _dioService = dioService;
 
-  /// Content-type header. Authorization is injected by [DioService].
   static const _headers = {
     SsccServiceConstants.headerContentType: SsccServiceConstants.contentTypeJson,
   };
-
-  // ---------------------------------------------------------------------------
-  // CRUD
-  // ---------------------------------------------------------------------------
 
   Future<SSCC> createSSCC(SSCC sscc) async {
     if (sscc.ssccCode.isEmpty) {
@@ -119,7 +112,6 @@ class SSCCService {
     }
   }
 
-  /// Paginated list — default when opening the SSCC screen.
   Future<Map<String, dynamic>> fetchSSCCListPage({
     int page = 0,
     int size = 20,
@@ -211,11 +203,6 @@ class SSCCService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Status
-  // ---------------------------------------------------------------------------
-
-  /// Transitions the SSCC to [newStatus] via PUT /{id}/status with JSON body.
   Future<SSCC> updateSSCCStatus(String id, LogisticUnitStatus newStatus) async {
     final response = await _dioService.put(
       '${_dioService.baseUrl}${SsccServiceConstants.pathStatus(id)}',
@@ -259,10 +246,6 @@ class SSCCService {
       responseBody: response.data is String ? response.data as String : null,
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Queries
-  // ---------------------------------------------------------------------------
 
   Future<List<SSCC>> findSSCCsByUnitType(UnitType unitType) async {
     final response = await _dioService.get(
@@ -545,10 +528,6 @@ class SSCCService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Generation and validation
-  // ---------------------------------------------------------------------------
-
   Future<String> generateSSCCCode(String gs1CompanyPrefix, String extensionDigit) async {
     final Map<String, String> requestBody = {
       'companyPrefix': gs1CompanyPrefix,
@@ -625,10 +604,6 @@ class SSCCService {
       );
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Aggregation links
-  // ---------------------------------------------------------------------------
 
   Future<List<SsccAggregationLink>> getAggregationLinksByCode(String ssccCode) async {
     final response = await _dioService.get(
@@ -707,10 +682,6 @@ class SSCCService {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // GS1 utilities (GLN/company-prefix extraction)
-  // ---------------------------------------------------------------------------
-
   Future<String> extractCompanyPrefixFromGLN(String glnInput) async {
     if (glnInput.isEmpty) {
       throw ApiException(message: 'GLN input cannot be empty');
@@ -780,17 +751,10 @@ class SSCCService {
     return ((10 - (sum % 10)) % 10).toString();
   }
 
-  // ---------------------------------------------------------------------------
-  // Internal helpers
-  // ---------------------------------------------------------------------------
-
-  /// Normalises field names that differ between backend DTO and frontend model.
   static void _normalizeFields(Map<String, dynamic> data) {
-    // Handle 'sscc' vs 'ssccCode' field name discrepancy
     if (data.containsKey('sscc') && !data.containsKey('ssccCode')) {
       data['ssccCode'] = data['sscc'];
     }
-    // Fall back statusDate for createdAt / updatedAt when absent
     if (!data.containsKey('createdAt') && data.containsKey('statusDate')) {
       data['createdAt'] = data['statusDate'];
     }

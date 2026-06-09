@@ -7,12 +7,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'sgtin_service_constants.dart';
 
-
-/// SGTIN API client.
-///
-/// Auth is handled transparently by [DioService]'s interceptor, which reads
-/// the stored Bearer token and attaches it to every request. No manual token
-/// handling is needed here.
 class SGTINService {
   final DioService _dioService;
 
@@ -159,8 +153,6 @@ class SGTINService {
     );
   }
 
-  /// Hard deletion of SGTINs is not permitted per GS1 audit trail requirements.
-  /// Use [decommissionSGTIN] to transition a SGTIN to a terminal lifecycle state.
   Future<void> deleteSGTIN(String id) {
     throw UnsupportedError(
       'SGTIN hard-deletion is not permitted per GS1 audit trail requirements. '
@@ -579,8 +571,6 @@ class SGTINService {
     );
   }
 
-  /// Decommissions the SGTIN with the given [serialNumber], transitioning it
-  /// to the DESTROYED terminal state. Calls `POST /serial/{serialNumber}/decommission`.
   Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
     final response = await _dioService.post(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission(serialNumber)}',
@@ -600,10 +590,6 @@ class SGTINService {
     );
   }
 
-  /// Returns the list of status names that the SGTIN with the given [id] may
-  /// legally transition to from its current status.
-  ///
-  /// Calls `GET /identifiers/sgtins/{id}/transitions`.
   Future<List<String>> getAvailableTransitions(String id) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathItemTransitions(id)}',

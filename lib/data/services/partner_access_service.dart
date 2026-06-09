@@ -4,8 +4,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/api_collection.dart';
 import 'package:traqtrace_app/features/api_management/config/api_config.dart';
 
-/// Service for managing Partner API Access
-/// Supports both collection-level and individual API access control
 class PartnerAccessApiService {
   final String baseUrl;
   final DioService _dioService;
@@ -15,7 +13,6 @@ class PartnerAccessApiService {
   })  : baseUrl = ApiConfig.fromCoreUrl(dioService.baseUrl),
         _dioService = dioService;
 
-  /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -24,8 +21,6 @@ class PartnerAccessApiService {
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
-
-  // ==================== Access Summary ====================
 
   Future<PartnerAccessSummary> getAccessSummary(String partnerId) async {
     final response = await _dioService.get(
@@ -43,8 +38,6 @@ class PartnerAccessApiService {
       throw Exception('Failed to load access summary: ${response.statusCode}');
     }
   }
-
-  // ==================== Collection Access Operations ====================
 
   Future<List<PartnerCollectionAccess>> getCollectionAccess(String partnerId) async {
     final response = await _dioService.get(
@@ -106,8 +99,6 @@ class PartnerAccessApiService {
       throw Exception('Failed to revoke collection access: ${response.statusCode}');
     }
   }
-
-  // ==================== Individual API Access Operations ====================
 
   Future<List<PartnerApiAccess>> getApiAccess(String partnerId) async {
     final response = await _dioService.get(
@@ -199,8 +190,6 @@ class PartnerAccessApiService {
       throw Exception('Failed to revoke API access: ${response.statusCode}');
     }
   }
-
-  // ==================== Access Validation ====================
 
   Future<bool> checkApiAccess(String partnerId, String apiId) async {
     final response = await _dioService.get(

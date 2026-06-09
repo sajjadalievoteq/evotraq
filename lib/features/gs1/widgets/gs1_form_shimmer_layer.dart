@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// One shimmer over the entire form column while the real [formColumn] stays
-/// mounted (invisible) for controllers and hydration.
 class Gs1FormShimmerLayer extends StatelessWidget {
   const Gs1FormShimmerLayer({
     super.key,
@@ -13,7 +11,6 @@ class Gs1FormShimmerLayer extends StatelessWidget {
 
   final bool show;
   final Widget formColumn;
-  /// Typically a [Column] of placeholder blocks (same horizontal layout as the form).
   final Widget skeleton;
 
   @override

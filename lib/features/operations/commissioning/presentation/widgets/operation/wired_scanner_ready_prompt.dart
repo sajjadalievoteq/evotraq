@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Shown on web / desktop inside the scanner sheet.
-///
-/// Displays a large "ready to scan" indicator while an invisible, auto-focused
-/// [TextField] silently captures wired-scanner keyboard output.
-/// The user never needs to tap anything.
 class CommissioningWiredScannerReadyPrompt extends StatelessWidget {
   const CommissioningWiredScannerReadyPrompt({
     super.key,

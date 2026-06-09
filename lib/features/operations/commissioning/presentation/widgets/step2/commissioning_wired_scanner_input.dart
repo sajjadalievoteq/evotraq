@@ -19,8 +19,6 @@ class CommissioningWiredScannerInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Invisible focus target — captures wired-scanner keystrokes
-        // without creating any HTML element (avoids visible input on web)
         KeyboardListener(
           focusNode: focusNode,
           onKeyEvent: (event) {

@@ -14,7 +14,6 @@ class GLNCubit extends Cubit<GLNState> {
     : _glnService = glnService,
       super(const GLNState());
 
-  /// Loads GLNs for searchable pickers (larger page than default list view).
   Future<List<GLN>> fetchGlnsForPicker({int page = 0, int size = 500}) {
     return _glnService.getAllGLNs(page: page, size: size);
   }

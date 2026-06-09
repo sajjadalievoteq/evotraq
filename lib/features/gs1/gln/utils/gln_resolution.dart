@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// Resolves a stored GLN code to a full [GLN] from a picker catalog when possible.
 GLN? resolveGlnInCatalog(String? code, List<GLN> catalog) {
   if (code == null) return null;
   final trimmed = code.trim();
@@ -12,7 +11,6 @@ GLN? resolveGlnInCatalog(String? code, List<GLN> catalog) {
   return null;
 }
 
-/// Prefer a catalog match; otherwise keep [fallback] or build a code-only placeholder.
 GLN? resolveGlnForPicker({
   required String? code,
   GLN? fallback,

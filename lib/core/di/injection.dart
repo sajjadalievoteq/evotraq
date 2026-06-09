@@ -63,7 +63,6 @@ import '../../data/services/profile_service.dart';
 import '../../data/services/validation_service.dart';
 import '../../data/services/websocket_service.dart';
 
-
 final getIt = GetIt.instance;
 
 Future<void> initDependencies(AppConfig appConfig) async {
@@ -71,10 +70,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
     await getIt.reset();
   }
 
-  // Config
   getIt.registerSingleton<AppConfig>(appConfig);
 
-  // Core
   final dioService = DioService()..setBaseUrl(appConfig.apiBaseUrl);
   getIt.registerLazySingleton<DioService>(() => dioService);
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
@@ -89,7 +86,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     ),
   );
 
-  // Services
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(dioService: getIt<DioService>()),
   );
@@ -288,7 +284,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => PerformanceOptimizationService(dioService: getIt<DioService>()),
   );
 
-  // Cubits & Routers
   getIt.registerSingleton<AuthCubit>(
     AuthCubit(authService: getIt<AuthService>()),
   );

@@ -1,7 +1,3 @@
-/// Centralized SSCC validators mirroring backend GS1 / XSC rules.
-///
-/// All validators follow the Flutter form-field convention: return `null` when
-/// the value is valid, or a non-null error message string when it is not.
 
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
@@ -10,17 +6,14 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
     as status_rules;
 
-/// SSCC EPC URN — e.g. urn:epc:id:sscc:6291000.1000000123
 final RegExp _ssccEpcUrnRegex = RegExp(
   r'^urn:epc:id:sscc:([0-9]{4,12})\.([0-9]{1,13})$',
 );
 
-/// GS1 Digital Link URI for SSCC — https://id.gs1.org/00/<18digits>
 final RegExp _ssccGs1DlRegex = RegExp(
   r'^https://id\.gs1\.org/00/(\d{18})$',
 );
 
-/// Validates an 18-digit SSCC (AI 00) including Mod-10 check digit (XSC-001).
 String? validateSsccCode(String? value) {
   final s = SsccFormat.stripSsccInput(value);
   if (s.isEmpty) return 'SSCC is required';
@@ -33,14 +26,12 @@ String? validateSsccCode(String? value) {
   return null;
 }
 
-/// Optional SSCC validation (empty allowed).
 String? validateSsccCodeOptional(String? value) {
   final s = SsccFormat.stripSsccInput(value);
   if (s.isEmpty) return null;
   return validateSsccCode(s);
 }
 
-/// Validates extension digit (position 1 of SSCC).
 String? validateExtensionDigit(String? value) {
   if (value == null || value.isEmpty) {
     return 'Extension digit is required';
@@ -51,7 +42,6 @@ String? validateExtensionDigit(String? value) {
   return null;
 }
 
-/// Validates a GLN used for SSCC issuing / ship-from / ship-to (AI 410–413).
 String? validateGln(String? value, {String fieldName = 'GLN'}) {
   final err = GlnFieldValidators.validateGlnCodeOptional(value);
   if (err == null) return null;
@@ -65,7 +55,6 @@ String? validateIssuingGlnRequired(String? value) {
   return GlnFieldValidators.validateGlnCode(value);
 }
 
-/// Validates SSCC EPC URI (URN form, check digit omitted).
 String? validateEpcUri(String? value) {
   if (value == null || value.isEmpty) return null;
   if (!_ssccEpcUrnRegex.hasMatch(value)) {
@@ -74,7 +63,6 @@ String? validateEpcUri(String? value) {
   return null;
 }
 
-/// Validates GS1 Digital Link URI for SSCC.
 String? validateGs1DigitalLinkUri(String? value) {
   if (value == null || value.isEmpty) return null;
   if (!_ssccGs1DlRegex.hasMatch(value)) {
@@ -83,7 +71,6 @@ String? validateGs1DigitalLinkUri(String? value) {
   return null;
 }
 
-/// Parent SSCC must not equal own SSCC (XSC-007 partial).
 String? validateParentSscc(String? parentSscc, String? ownSsccCode) {
   if (parentSscc == null || parentSscc.isEmpty) return null;
   final parent = SsccFormat.stripSsccInput(parentSscc);
@@ -94,12 +81,10 @@ String? validateParentSscc(String? parentSscc, String? ownSsccCode) {
   return validateSsccCodeOptional(parent);
 }
 
-/// Validates logistic unit status transition (spec lifecycle).
 String? validateStatusTransition(LogisticUnitStatus from, LogisticUnitStatus to) {
   return status_rules.validateTransition(from, to);
 }
 
-/// Positive contained quantity for homogeneous units (AI 37).
 String? validateContainedQuantity(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   final n = int.tryParse(value.trim());
@@ -109,7 +94,6 @@ String? validateContainedQuantity(String? value) {
   return null;
 }
 
-/// Purchase order (AI 400) — up to 30 chars.
 String? validatePurchaseOrderNumber(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   if (value.length > 30) {
@@ -118,7 +102,6 @@ String? validatePurchaseOrderNumber(String? value) {
   return null;
 }
 
-/// GSIN (AI 402) — 17 digits with Mod-10 check digit.
 String? validateGsin(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   final s = value.replaceAll(RegExp(r'\s'), '');

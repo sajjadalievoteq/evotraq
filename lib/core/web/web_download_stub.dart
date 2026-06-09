@@ -5,4 +5,3 @@ void downloadBytes({
 }) {
   throw UnsupportedError('File download is only supported on web.');
 }
-

@@ -32,12 +32,6 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import '../../../../../core/theme/traq_theme.dart';
 import '../../../../../core/widgets/traq_app_bar.dart';
 
-/// Multi-step commissioning wizard.
-///
-/// - **Desktop (≥ 1200 px)**: all three steps displayed side-by-side;
-///   steps 2 and 3 are locked behind visual overlays until their prerequisites
-///   are met.
-/// - **Tablet / mobile**: one step at a time, navigated by [CommissioningNavigationButtons].
 class CommissioningOperationScreen extends StatefulWidget {
   const CommissioningOperationScreen({super.key});
 
@@ -51,12 +45,10 @@ class _CommissioningOperationScreenState
   final _pageController = PageController();
   int _currentStep = 0;
 
-  // Step 1 controllers
   final _gtinController = TextEditingController();
   final _batchLotController = TextEditingController();
   final _referenceController = TextEditingController();
 
-  // Step 1 optional / ILMD controllers
   final _countryOfOriginController = TextEditingController();
   final _productionOrderController = TextEditingController();
   final _productionLineController = TextEditingController();
@@ -65,15 +57,12 @@ class _CommissioningOperationScreenState
   final _operatorIdController = TextEditingController();
   final _notesController = TextEditingController();
 
-  // Form key for step 1 — enables inline validation on Gs1ValidatedField widgets.
   final _step1FormKey = GlobalKey<FormState>();
 
-  // Step 2 controllers
   final _manualSerialController = TextEditingController();
   final _wiredScannerController = TextEditingController();
   final _wiredScannerFocusNode = FocusNode();
 
-  // Step 1 state
   List<GTIN> _availableGTINs = [];
   GTIN? _selectedGTIN;
   bool _isLoadingGTINs = false;
@@ -84,17 +73,11 @@ class _CommissioningOperationScreenState
   DateTime? _productionDate;
   DateTime? _bestBeforeDate;
 
-  // Step 2 state
   final List<String> _serialNumbers = [];
   CommissioningScanningMode _scanningMode = CommissioningScanningMode.manual;
   bool _isWiredScannerActive = false;
 
-  // Submission state
   bool _isLoading = false;
-
-  // ---------------------------------------------------------------------------
-  // Step completion getters (used by desktop layout to unlock panels)
-  // ---------------------------------------------------------------------------
 
   bool get _isStep1Valid =>
       (_selectedGTIN != null || _gtinController.text.trim().isNotEmpty) &&
@@ -103,10 +86,6 @@ class _CommissioningOperationScreenState
       _expiryDate != null;
 
   bool get _isStep2Valid => _serialNumbers.isNotEmpty;
-
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
 
   @override
   void initState() {
@@ -136,10 +115,6 @@ class _CommissioningOperationScreenState
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Data loading
-  // ---------------------------------------------------------------------------
-
   Future<void> _loadGTINs() async {
     setState(() => _isLoadingGTINs = true);
     try {
@@ -153,10 +128,6 @@ class _CommissioningOperationScreenState
       setState(() => _isLoadingGTINs = false);
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Navigation (mobile only — desktop has no prev/next)
-  // ---------------------------------------------------------------------------
 
   Future<void> _nextStep() async {
     if (_currentStep < 2 && _validateCurrentStep()) {
@@ -184,7 +155,6 @@ class _CommissioningOperationScreenState
 
     switch (_currentStep) {
       case 0:
-        // Trigger inline validation on all Gs1ValidatedField / form fields.
         final formValid = _step1FormKey.currentState?.validate() ?? false;
         bool isValid = formValid;
         if (_selectedGTIN == null && _gtinController.text.trim().isEmpty) {
@@ -230,19 +200,11 @@ class _CommissioningOperationScreenState
       _bestBeforeDate = null;
       _serialNumbers.clear();
     });
-    // Only animate the PageView when in mobile/tablet mode.
     if (!context.layout.isDesktopUp) {
       _pageController.jumpToPage(0);
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Serial number management
-  // ---------------------------------------------------------------------------
-
-  /// Extracts the serial number from a raw GS1 barcode string.
-  /// Always runs through [extractBarcodeDetails]; falls back to the raw
-  /// trimmed string when no AI-21 serial is present (plain manual entry).
   String _extractSerial(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return trimmed;
@@ -257,15 +219,12 @@ class _CommissioningOperationScreenState
     if (result.isValid) _addSerial(result.data);
   }
 
-  /// Returns true when [scannedGtin] (14-digit) matches the selected GTIN.
-  /// Handles zero-padding differences (e.g. 13-digit vs 14-digit).
   bool _gtinMatches(String scannedGtin) {
     final selected = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
-    if (selected.isEmpty) return true; // no GTIN selected yet — allow
+    if (selected.isEmpty) return true;
     final normalise = (String v) => v.replaceAll(RegExp(r'\D'), '').padLeft(14, '0');
     return normalise(scannedGtin) == normalise(selected);
   }
-
 
   void _addSerial(String serial) {
     final trimmed = serial.trim();
@@ -274,8 +233,6 @@ class _CommissioningOperationScreenState
       return;
     }
 
-    // If the input is a GS1 barcode that contains an embedded GTIN (SGTIN),
-    // verify it matches the product selected in step 1.
     final details = extractBarcodeDetails(trimmed);
     if (details.gtin != null && details.gtin!.isNotEmpty) {
       if (!_gtinMatches(details.gtin!)) {
@@ -335,10 +292,6 @@ class _CommissioningOperationScreenState
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Date selection
-  // ---------------------------------------------------------------------------
-
   Future<void> _selectDate(String dateType) async {
     final now = DateTime.now();
     final initialDate = switch (dateType) {
@@ -387,12 +340,6 @@ class _CommissioningOperationScreenState
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Product barcode scanning (Step 1 auto-fill)
-  // ---------------------------------------------------------------------------
-
-  /// Opens a centered dialog with the camera scanner (mobile) or wired-scanner
-  /// prompt (web/desktop). On a successful scan, calls [_applyBarcodeDetails].
   Future<void> _scanProductBarcode() async {
     final bool useCameraScanner = !kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.android ||
@@ -411,11 +358,6 @@ class _CommissioningOperationScreenState
     );
   }
 
-  /// Parses [rawBarcode] via [extractBarcodeDetails], validates the GTIN
-  /// against the loaded list, then fills matching Step 1 form fields.
-  ///
-  /// If the GTIN is not found in the database, shows a dialog prompting
-  /// the user to register it before commissioning.
   void _applyBarcodeDetails(String rawBarcode) {
     final details = extractBarcodeDetails(rawBarcode);
 
@@ -424,25 +366,21 @@ class _CommissioningOperationScreenState
       return;
     }
 
-    // A commissioning barcode must carry a GTIN.
     if (details.gtin == null) {
       context.showError('Barcode does not contain a GTIN — please enter details manually');
       return;
     }
 
-    // Validate GTIN against the database list.
     final matched = _availableGTINs.cast<GTIN?>().firstWhere(
       (g) => g?.gtinCode == details.gtin,
       orElse: () => null,
     );
 
     if (matched == null) {
-      // GTIN not registered — ask the user to add it first.
       _showGtinNotFoundDialog(details.gtin!);
       return;
     }
 
-    // GTIN found — fill all available fields.
     setState(() {
       _selectedGTIN = matched;
       _gtinController.text = matched.gtinCode;
@@ -464,7 +402,6 @@ class _CommissioningOperationScreenState
     );
   }
 
-  /// Shows a dialog when the scanned GTIN is not registered in the system.
   void _showGtinNotFoundDialog(String gtinCode) {
     showDialog<void>(
       context: context,
@@ -501,10 +438,6 @@ class _CommissioningOperationScreenState
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Submission
-  // ---------------------------------------------------------------------------
 
   CommissioningRequest _buildCommissioningRequest() {
     final gtinCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
@@ -543,8 +476,6 @@ class _CommissioningOperationScreenState
     );
   }
 
-  /// Drops commissioned serials from the wizard and optionally removes failed
-  /// serials the user marked for removal.
   void _syncSerialListAfterPartialSuccess(
     CommissioningResponse response,
     CommissioningPartialSuccessResult dialogResult,
@@ -656,10 +587,6 @@ class _CommissioningOperationScreenState
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Step widget (shared between both layouts)
-  // ---------------------------------------------------------------------------
-
   Form get _step1Widget =>
       Form(
         key: _step1FormKey,
@@ -734,10 +661,6 @@ class _CommissioningOperationScreenState
         serialNumbers: _serialNumbers,
       );
 
-  // ---------------------------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -752,7 +675,6 @@ class _CommissioningOperationScreenState
           ),
         ),
 
-
       ),
       drawer: const AppDrawer(),
       body: LoadingOverlay(
@@ -765,10 +687,6 @@ class _CommissioningOperationScreenState
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Mobile / tablet layout — one step at a time with PageView
-  // ---------------------------------------------------------------------------
 
   Widget _buildMobileLayout(BuildContext context) {
     return Column(
@@ -799,10 +717,6 @@ class _CommissioningOperationScreenState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Desktop layout — three panels side by side
-  // ---------------------------------------------------------------------------
-
   Widget _buildDesktopLayout(BuildContext context) {
     final step2Locked = !_isStep1Valid;
     final step3Locked = !_isStep1Valid || !_isStep2Valid;
@@ -810,7 +724,6 @@ class _CommissioningOperationScreenState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Step 1: Product Details ──────────────────────────────────────────
         Expanded(
           child: CommissioningStepPanel(
             stepNumber: 1,
@@ -823,7 +736,6 @@ class _CommissioningOperationScreenState
         ),
         const VerticalDivider(width: 1, thickness: 1),
 
-        // ── Step 2: Serial Numbers ───────────────────────────────────────────
         Expanded(
           child: CommissioningStepPanel(
             stepNumber: 2,
@@ -836,7 +748,6 @@ class _CommissioningOperationScreenState
         ),
         const VerticalDivider(width: 1, thickness: 1),
 
-        // ── Step 3: Review & Submit ──────────────────────────────────────────
         Expanded(
           child: CommissioningStepPanel(
             stepNumber: 3,

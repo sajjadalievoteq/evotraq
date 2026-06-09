@@ -14,4 +14,3 @@ void downloadBytes({
 
   html.Url.revokeObjectUrl(url);
 }
-

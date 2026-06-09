@@ -23,9 +23,6 @@ class EpcisEventStreamCard extends StatelessWidget {
       builder: (context, state) {
         final recentEvents = state.recentEvents;
         final borderColor = context.colors.border.withValues(alpha: 0.6);
-        // On tablet/desktop the card has a bounded height (SizedBox from parent),
-        // so the list scrolls internally. On mobile the card grows to content
-        // height and the parent SingleChildScrollView handles all scrolling.
         final isTabletUp = context.layout.isTabletUp;
 
         Widget? eventList;

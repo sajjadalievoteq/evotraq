@@ -3,7 +3,6 @@ import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
 
 import '../../core/network/dio_service.dart';
 
-
 class ValidationRuleService {
   final DioService _dioService;
 

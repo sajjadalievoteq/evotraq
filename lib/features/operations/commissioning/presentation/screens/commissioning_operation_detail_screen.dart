@@ -16,22 +16,14 @@ import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 import '../../../../../core/config/app_assets.dart';
 
-/// Detail screen for a single commissioning operation (CommissioningBatch).
-///
-/// [embedded] = true  → rendered inside the split-view pane (no Scaffold/AppBar).
-/// [embedded] = false → full standalone screen with AppBar + Drawer.
 class CommissioningOperationDetailScreen extends StatefulWidget {
   final String? batchId;
   final bool embedded;
 
-  /// Legacy alias kept for router compatibility — maps to [batchId].
   final String? operationId;
 
-  /// Shown in split-view when nothing is selected yet.
   final bool awaitingSelection;
 
-  /// When true the list pane is still loading — show a skeleton instead of
-  /// the "select an operation" placeholder.
   final bool listLoading;
 
   const CommissioningOperationDetailScreen({
@@ -57,7 +49,6 @@ class _CommissioningOperationDetailScreenState
   bool _isLoading = false;
   String? _errorMessage;
 
-  /// How many items to show initially before "Show all".
   static const int _initialItemDisplayCount = 50;
 
   @override
@@ -103,10 +94,6 @@ class _CommissioningOperationDetailScreenState
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Build
-  // -------------------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     if (widget.embedded) {
@@ -138,10 +125,6 @@ class _CommissioningOperationDetailScreenState
     if (_batch == null) return _buildPlaceholder();
     return _buildDetail();
   }
-
-  // -------------------------------------------------------------------------
-  // States
-  // -------------------------------------------------------------------------
 
   Widget _buildPlaceholder() {
     return Center(
@@ -210,10 +193,6 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Detail body
-  // -------------------------------------------------------------------------
-
   Widget _buildDetail() {
     final b = _batch!;
     return SingleChildScrollView(
@@ -221,11 +200,9 @@ class _CommissioningOperationDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status banner
           _buildStatusBanner(b),
           const SizedBox(height: 14),
 
-          // Reference details
           _buildCard(
             title: 'Reference Details',
             children: [
@@ -250,7 +227,6 @@ class _CommissioningOperationDetailScreenState
           ),
           const SizedBox(height: 12),
 
-          // Product details
           _buildCard(
             title: 'Product Details',
             children: [
@@ -271,7 +247,6 @@ class _CommissioningOperationDetailScreenState
           ),
           const SizedBox(height: 12),
 
-          // Location
           if (b.commissioningLocationGLN != null) ...[
             _buildCard(
               title: 'Location',
@@ -282,10 +257,8 @@ class _CommissioningOperationDetailScreenState
             const SizedBox(height: 12),
           ],
 
-          // Processing stats
           _buildProcessingStatsCard(b),
 
-          // Serial numbers
           if (_items.isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildSerialNumbersCard(),
@@ -294,14 +267,6 @@ class _CommissioningOperationDetailScreenState
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Card widgets
-  // -------------------------------------------------------------------------
-
-  // -------------------------------------------------------------------------
-  // Serial numbers card
-  // -------------------------------------------------------------------------
 
   bool _showAllItems = false;
 
@@ -407,10 +372,6 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Status banner
-  // -------------------------------------------------------------------------
-
   Widget _buildStatusBanner(CommissioningBatch b) {
     final statusColor = _statusColor(b.status);
     return Card(
@@ -437,7 +398,6 @@ class _CommissioningOperationDetailScreenState
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                // Status pill
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -462,7 +422,6 @@ class _CommissioningOperationDetailScreenState
                   ),
                 ),
                 const Spacer(),
-                // Count badges
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -579,10 +538,6 @@ class _CommissioningOperationDetailScreenState
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Row helpers
-  // -------------------------------------------------------------------------
-
   Widget _row(String label, String value, {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -619,10 +574,6 @@ class _CommissioningOperationDetailScreenState
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Status helpers
-  // -------------------------------------------------------------------------
 
   Color _statusColor(CommissioningBatchStatus s) {
     switch (s) {
@@ -669,4 +620,3 @@ class _CommissioningOperationDetailScreenState
     }
   }
 }
-

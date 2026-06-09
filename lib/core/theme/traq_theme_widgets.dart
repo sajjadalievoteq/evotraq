@@ -27,7 +27,6 @@ class TraqCard extends StatelessWidget {
   }
 }
 
-/// Status / identifier chip — accepts a tone via [TraqChipTone].
 enum TraqChipTone { gtin, gln, sgtin, sscc, event, ok, warn, err, muted, live }
 
 class TraqChip extends StatelessWidget {

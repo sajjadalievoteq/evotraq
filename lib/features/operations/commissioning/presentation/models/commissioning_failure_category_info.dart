@@ -1,6 +1,5 @@
 import 'commissioning_failure_category.dart';
 
-/// User-facing explanation of why partial success occurred for a category.
 class CommissioningFailureCategoryInfo {
   const CommissioningFailureCategoryInfo({
     required this.category,
@@ -13,6 +12,5 @@ class CommissioningFailureCategoryInfo {
   final String title;
   final String explanation;
 
-  /// When true, failed serials in this category are pre-selected for removal.
   final bool defaultRemoveFromOperation;
 }

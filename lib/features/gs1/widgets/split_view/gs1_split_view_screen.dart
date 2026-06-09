@@ -8,12 +8,6 @@ import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 import 'package:world_countries/helpers.dart';
 
-/// Shared GS1 desktop split-view scaffold (list left, detail right).
-///
-/// GTIN/GLN have different list & detail screens, but the split-view behavior is identical:
-/// - Keep list mounted and selectable
-/// - Show an embedded "create" detail form
-/// - Auto-select first result after list refresh/search
 class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     extends StatefulWidget {
   const Gs1SplitViewScreen({
@@ -50,11 +44,6 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   final String? Function(TState state) createdIdFromState;
   final bool Function(TState state) isEmptyNoMatch;
 
-  /// Build the left list pane.
-  ///
-  /// - [onSelect] should be called with the chosen id (GTIN/GLN code).
-  /// - [bindRefresh] can be called by the list to give the split view a refresh callback.
-  /// - [onRequestCreate] should put the split view into create mode (used by GLN list "create" affordance).
   final Widget Function(
     BuildContext context, {
     required String? selectedId,
@@ -63,15 +52,11 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     required VoidCallback onRequestCreate,
   }) listBuilder;
 
-  /// Build the right detail pane when an id is selected.
   final Widget Function(BuildContext context, String id) detailViewBuilder;
 
-  /// Build the right detail pane in create mode.
-  /// Must call [onEmbeddedActionSuccess] after a successful create/save.
   final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)
       detailCreateBuilder;
 
-  /// Build the right detail pane placeholder when list has no selection yet.
   final WidgetBuilder detailAwaitBuilder;
 
   @override
@@ -157,9 +142,6 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   }
 
   Widget _buildRightPane() {
-    // Important: keep the "view" detail pane mounted while toggling create mode.
-    // This avoids re-building (and re-fetching) the detail form when the user cancels
-    // or completes a create flow.
     final viewPane = BlocBuilder<TCubit, TState>(
       builder: (context, state) {
         if (widget.isEmptyNoMatch(state)) {
@@ -234,4 +216,3 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
     );
   }
 }
-

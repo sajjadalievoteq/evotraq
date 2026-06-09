@@ -16,7 +16,6 @@ int? _jsonInt(dynamic v) {
   return int.tryParse(s);
 }
 
-/// Physical state of the tamper-evident seal (maps to backend AntiTamperStatus).
 enum SgtinAntiTamperStatus {
   intact,
   broken,
@@ -65,7 +64,6 @@ extension SgtinAntiTamperStatusExtension on SgtinAntiTamperStatus {
   }
 }
 
-/// Return workflow state for a dispensed item.
 enum SgtinReturnStatus {
   notReturned,
   returnPending,
@@ -114,7 +112,6 @@ extension SgtinReturnStatusExtension on SgtinReturnStatus {
   }
 }
 
-/// Parallel trade / repackaging state.
 enum SgtinParallelTradeStatus {
   none,
   repackaged,
@@ -163,60 +160,38 @@ extension SgtinParallelTradeStatusExtension on SgtinParallelTradeStatus {
   }
 }
 
-/// Pharmaceutical lifecycle extension for a serialised item (SGTIN).
-///
-/// Maps to [SGTINPharmaceuticalExtensionDTO] on the backend.
-/// Nested inside [SgtinModel.pharmaExtension].
 class SGTINPharmaceuticalExtensionModel extends Equatable {
   final int? id;
 
-  // Cold chain summary
   final bool coldChainExcursionFlag;
   final double? tempMinRecorded;
   final double? tempMaxRecorded;
-  /// RFC 6920 ni: URI of the last sensor EPCIS event.
   final String? lastSensorEventId;
 
-  // Anti-counterfeit
   final SgtinAntiTamperStatus antiTamperStatus;
-  /// Fraud probability [0.00, 1.00]; stored as NUMERIC(3,2) in DB.
   final double? fraudScore;
 
-  // Dispensing
-  /// RFC 6920 ni: URI of the EPCIS dispense event.
   final String? dispenseEventId;
-  /// GLN of the dispensing location (13 digits).
   final String? dispenseGln;
   final SgtinReturnStatus returnStatus;
 
-  // Clinical trial
-  /// ISO/ICH clinical trial protocol identifier (an..20).
   final String? protocolId;
-  /// Encrypted linkage token — treat as opaque string.
   final String? trialSubjectLinkage;
 
-  // Recall
   final bool recallAffectedFlag;
   final String? recallNotificationId;
 
-  // Parallel trade
   final SgtinParallelTradeStatus parallelTradeStatus;
   final String? newSerialLinkage;
-  /// Original SGTIN composite ref when this instance is the NEW repackaged serial.
-  /// Format: '<gtin>/<serialNumber>'
   final String? originalSgtinRef;
 
-  // Regulatory reporting
-  /// List of applicable regime codes, e.g. ['UAE_TATMEEN', 'EU_FMD'].
   final List<String> reportingRegimes;
   final String? emvoUploadStatus;
   final String? tatmeenSubmissionStatus;
   final String? dscsaTransactionHash;
 
-  // Anti-counterfeit — duplicate-detection evidence
   final int duplicateEvidenceCount;
 
-  // Controlled substance — simplified custody status
   final String? controlledCustodyRef;
 
   const SGTINPharmaceuticalExtensionModel({

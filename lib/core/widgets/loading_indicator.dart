@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// A custom loading indicator with the app's primary color
 class LoadingIndicator extends StatelessWidget {
-  /// Size of the loading indicator
   final double size;
 
-  /// Stroke width of the circular progress indicator
   final double strokeWidth;
 
-  /// Creates a new LoadingIndicator instance
   const LoadingIndicator({
     Key? key,
     this.size = 40,

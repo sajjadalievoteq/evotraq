@@ -4,11 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Read-only serial governance card for the SGTIN detail screen.
-///
-/// Shows the serial generation strategy, origin, range ID, guessing
-/// probability, and entropy seed. Only rendered when at least one of these
-/// fields is present on the loaded SGTIN record.
 class SgtinSerialGovernanceCard extends StatelessWidget {
   const SgtinSerialGovernanceCard({
     super.key,

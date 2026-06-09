@@ -26,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_authCheckStarted) return;
     _authCheckStarted = true;
 
-    // Direct /login deep links skip SplashScreen, which normally runs checkAuth.
     final authCubit = context.read<AuthCubit>();
     if (authCubit.state.status == AuthStatus.initial) {
       authCubit.checkAuth();

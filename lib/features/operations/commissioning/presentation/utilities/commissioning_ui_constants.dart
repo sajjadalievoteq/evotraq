@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 
-/// UI copy and filter options for commissioning list screens.
 abstract final class CommissioningUiConstants {
   static const entityPluralOperations = 'operations';
   static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;  static const filterAll = 'ALL';
@@ -19,7 +18,6 @@ abstract final class CommissioningUiConstants {
   static const quickFiltersFooterHint =
       'Status filters apply to loaded results. Use Advanced Filters to filter by GTIN on the server.';
 
-  /// Maps [filterAll] + [CommissioningBatchStatus.name] values.
   static const statusFilterOptions = <String>[
     filterAll,
     'success',

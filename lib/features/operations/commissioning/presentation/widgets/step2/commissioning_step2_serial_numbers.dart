@@ -10,7 +10,6 @@ import 'package:traqtrace_app/shared/models/scan_result.dart';
 
 import '../../../../../../core/utils/responsive_utils.dart';
 
-/// Step 2 of the commissioning wizard — scan or enter serial numbers.
 class CommissioningStep2SerialNumbers extends StatelessWidget {
   const CommissioningStep2SerialNumbers({
     super.key,

@@ -4,10 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 
-/// Service for managing Service Accounts in the Core System
-/// 
-/// Service accounts are used for internal M2M authentication between
-/// the Integration Layer and Core System.
 class ServiceAccountService {
   final DioService _dioService;
 
@@ -17,7 +13,6 @@ class ServiceAccountService {
 
   String get baseUrl => _dioService.baseUrl;
 
-  /// Get headers with authorization token from TokenManager
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     final headers = {
@@ -30,7 +25,6 @@ class ServiceAccountService {
     return headers;
   }
 
-  /// List all service accounts
   Future<List<ServiceAccount>> listServiceAccounts() async {
     try {
       final headers = await _getHeaders();
@@ -53,7 +47,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Get a single service account by ID
   Future<ServiceAccount> getServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
@@ -75,8 +68,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Create a new service account
-  /// Returns the credentials including the unhashed secret (shown only once)
   Future<ServiceAccountCredentials> createServiceAccount({
     required String name,
     String? description,
@@ -115,7 +106,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Update a service account
   Future<ServiceAccount> updateServiceAccount(
     String id, {
     String? name,
@@ -156,8 +146,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Rotate the client secret for a service account
-  /// Returns new credentials with the new secret
   Future<ServiceAccountCredentials> rotateSecret(String id) async {
     try {
       final headers = await _getHeaders();
@@ -179,7 +167,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Deactivate a service account
   Future<void> deactivateServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
@@ -199,7 +186,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Reactivate a service account
   Future<void> reactivateServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();
@@ -219,7 +205,6 @@ class ServiceAccountService {
     }
   }
 
-  /// Delete a service account permanently
   Future<void> deleteServiceAccount(String id) async {
     try {
       final headers = await _getHeaders();

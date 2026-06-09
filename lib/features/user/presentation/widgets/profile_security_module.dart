@@ -37,8 +37,6 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
         currentPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
       );
-      // Fields are cleared in the listener on success only,
-      // so the user keeps their input if the request fails.
     }
   }
 

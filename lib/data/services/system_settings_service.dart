@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service for managing system configuration and settings.
 class SystemSettingsService {
   final DioService _dioService;
 
@@ -36,7 +35,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Get current system settings.
   Future<SystemSettings> getSystemSettings() async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -55,7 +53,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Get current industry mode.
   Future<IndustryMode> getIndustryMode() async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -75,7 +72,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Get available industry modes for selection.
   Future<List<Map<String, String>>> getAvailableIndustryModes() async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -95,7 +91,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Get data statistics (before clearing).
   Future<DataClearStatistics> getDataStatistics() async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
@@ -114,7 +109,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Change industry mode (this will clear all data).
   Future<SystemSettings> changeIndustryMode({
     required IndustryMode newMode,
     required bool confirmDataClear,
@@ -145,7 +139,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Clear all transactional data.
   Future<DataClearStatistics> clearAllData() async {
     final headers = await _getHeaders();
     final response = await _dioService.post(
@@ -166,7 +159,6 @@ class SystemSettingsService {
     }
   }
 
-  /// Update a specific configuration.
   Future<void> updateConfiguration({
     required String key,
     required String value,

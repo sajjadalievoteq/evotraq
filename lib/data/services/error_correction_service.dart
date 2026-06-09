@@ -16,7 +16,6 @@ class ErrorCorrectionService {
     };
   }
 
-  /// Identify correctable errors in specified time range
   Future<List<dynamic>> identifyCorrectableErrors(
     DateTime startTime,
     DateTime endTime,
@@ -41,7 +40,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Initiate error correction workflow
   Future<Map<String, dynamic>> initiateErrorCorrectionWorkflow(
     String errorId,
     String correctionType,
@@ -71,7 +69,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Apply automatic error correction
   Future<Map<String, dynamic>> applyAutomaticErrorCorrection(
     String errorId,
     Map<String, dynamic> correctionRules,
@@ -94,7 +91,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Submit correction for approval
   Future<Map<String, dynamic>> submitCorrectionForApproval(
     String workflowId,
     Map<String, dynamic> correctionData,
@@ -123,7 +119,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Review and approve/reject error correction
   Future<Map<String, dynamic>> reviewErrorCorrection(
     String approvalRequestId,
     bool approved,
@@ -149,7 +144,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Execute approved error correction
   Future<Map<String, dynamic>> executeApprovedCorrection(String approvalRequestId) async {
     final response = await _dioService.post(
       '${_dioService.baseUrl}/data/correction/approvals/$approvalRequestId/execute',
@@ -165,7 +159,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Get correction workflow status
   Future<Map<String, dynamic>> getCorrectionWorkflowStatus(String workflowId) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}/data/correction/workflows/$workflowId/status',
@@ -181,7 +174,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Get correction audit trail for an event
   Future<List<dynamic>> getCorrectionAuditTrail(String eventId) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}/data/correction/audit-trail/$eventId',
@@ -197,7 +189,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Send correction notifications
   Future<Map<String, dynamic>> sendCorrectionNotification(
     String correctionId,
     String notificationType,
@@ -225,7 +216,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Rollback error correction
   Future<Map<String, dynamic>> rollbackErrorCorrection(
     String correctionId,
     String rollbackReason,
@@ -249,7 +239,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Get error correction statistics
   Future<Map<String, dynamic>> getErrorCorrectionStatistics(
     DateTime startTime,
     DateTime endTime,
@@ -272,7 +261,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Create correction audit trail entry
   Future<Map<String, dynamic>> createCorrectionAuditTrail(
     String eventId,
     String correctionType,
@@ -306,7 +294,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Register integrity violations as correctable error
   Future<Map<String, dynamic>> registerIntegrityViolations(
     String jobId,
     List<Map<String, Object>> violations,
@@ -334,7 +321,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Get all correction workflows
   Future<List<Map<String, dynamic>>> getAllCorrectionWorkflows() async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}/data/correction/workflows',
@@ -351,7 +337,6 @@ class ErrorCorrectionService {
     }
   }
 
-  /// Register a real error detected by the system
   Future<String> registerRealError(
     String errorType,
     String description,

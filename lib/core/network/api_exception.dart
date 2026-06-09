@@ -1,20 +1,14 @@
 import 'dart:convert';
 
-/// Exception thrown when an API request fails
 class ApiException implements Exception {
-  /// HTTP status code of the error response
   final int? statusCode;
   
-  /// Error message from the API
   final String message;
   
-  /// Original exception that caused the error, if any
   final dynamic originalException;
   
-  /// Original response body if available
   final String? responseBody;
 
-  /// Creates a new API exception
   ApiException({
     this.statusCode,
     required this.message,
@@ -29,18 +23,14 @@ class ApiException implements Exception {
     }
     return 'ApiException: $message';
   }
-    /// Returns a user-friendly error message based on status code
   String getUserFriendlyMessage() {
     if (statusCode == null) {
       return 'Network error. Please check your connection and try again.';
     }
     
-    // Try to extract structured error from GlobalExceptionHandler's ApiErrorResponse shape:
-    // { status, code, message, errors: { field: msg, ... }, path, timestamp }
     if (responseBody != null) {
       try {
         final jsonBody = json.decode(responseBody!);
-        // Field-level validation errors (MethodArgumentNotValidException) — join them.
         final errors = jsonBody['errors'];
         if (errors is Map && errors.isNotEmpty) {
           return errors.values.join(', ');
@@ -52,7 +42,6 @@ class ApiException implements Exception {
           return jsonBody['error'] as String;
         }
       } catch (_) {
-        // Failed to parse response body, fall back to status-based message.
       }
     }
     

@@ -7,8 +7,6 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step1/commissioning_location_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step1/commissioning_product_info_card.dart';
 
-/// Step 1 of the commissioning wizard — product info, location, dates and
-/// optional ILMD / regulatory fields.
 class CommissioningStep1ProductDetails extends StatelessWidget {
   const CommissioningStep1ProductDetails({
     super.key,
@@ -67,8 +65,6 @@ class CommissioningStep1ProductDetails extends StatelessWidget {
   final ValueChanged<String> onSelectDate;
   final ValueChanged<String> onClearDate;
 
-  /// Called when the user taps the "Scan Barcode" button on Step 1.
-  /// The parent screen opens the scanner and applies the result.
   final VoidCallback? onScanProductBarcode;
 
   @override

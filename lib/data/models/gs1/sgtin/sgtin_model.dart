@@ -1,4 +1,3 @@
-// SGTIN (Serialized GTIN) model class
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
@@ -22,7 +21,6 @@ class SGTIN extends Equatable {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // ── New GS1-spec fields ────────────────────────────────────────────────────
   final String? epcUri;
   final String? gs1DigitalLinkUri;
   final DateTime? commissionedAt;
@@ -43,15 +41,11 @@ class SGTIN extends Equatable {
   final DateTime? retentionExpiry;
   final int alertCount;
 
-  // Serial governance (EU FMD / audit)
   final double? serialGuessingProbability;
   final String? serialEntropySeed;
 
-  // Audit
   final String? createdBy;
 
-  // -- Pharmaceutical extension (OneToOne) --
-  /// Pharma lifecycle extension. Null for non-pharma items.
   final SGTINPharmaceuticalExtensionModel? pharmaExtension;
 
   const SGTIN({
@@ -71,7 +65,6 @@ class SGTIN extends Equatable {
     this.decommissionedDate,
     required this.createdAt,
     this.updatedAt,
-    // new fields
     this.epcUri,
     this.gs1DigitalLinkUri,
     this.commissionedAt,
@@ -94,7 +87,6 @@ class SGTIN extends Equatable {
     this.serialGuessingProbability,
     this.serialEntropySeed,
     this.createdBy,
-    // pharma extension
     this.pharmaExtension,
   });
 
@@ -123,7 +115,6 @@ class SGTIN extends Equatable {
       decommissionedDate: _parseDateTime(json['decommissionedDate']),
       createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _parseDateTime(json['updatedAt']),
-      // new fields
       epcUri: json['epcUri'],
       gs1DigitalLinkUri: json['gs1DigitalLinkUri'],
       commissionedAt: _parseDateTime(json['commissionedAt']),
@@ -146,7 +137,6 @@ class SGTIN extends Equatable {
       serialGuessingProbability: (json['serialGuessingProbability'] as num?)?.toDouble(),
       serialEntropySeed: json['serialEntropySeed'] as String?,
       createdBy: json['createdBy'] as String?,
-      // pharma extension
       pharmaExtension: json['pharmaExtension'] != null
           ? SGTINPharmaceuticalExtensionModel.fromJson(
               json['pharmaExtension'] as Map<String, dynamic>)
@@ -172,7 +162,6 @@ class SGTIN extends Equatable {
       if (decommissionedDate != null) 'decommissionedDate': _formatDateWithTimezone(decommissionedDate!),
       'createdAt': _formatDateWithTimezone(createdAt),
       if (updatedAt != null) 'updatedAt': _formatDateWithTimezone(updatedAt!),
-      // new fields
       if (epcUri != null) 'epcUri': epcUri,
       if (gs1DigitalLinkUri != null) 'gs1DigitalLinkUri': gs1DigitalLinkUri,
       if (commissionedAt != null) 'commissionedAt': _formatDateWithTimezone(commissionedAt!),
@@ -195,7 +184,6 @@ class SGTIN extends Equatable {
       if (serialGuessingProbability != null) 'serialGuessingProbability': serialGuessingProbability,
       if (serialEntropySeed != null) 'serialEntropySeed': serialEntropySeed,
       if (createdBy != null) 'createdBy': createdBy,
-      // pharma extension
       if (pharmaExtension != null) 'pharmaExtension': pharmaExtension!.toJson(),
     };
   }
@@ -239,7 +227,6 @@ class SGTIN extends Equatable {
     double? serialGuessingProbability,
     String? serialEntropySeed,
     String? createdBy,
-    // pharma extension
     SGTINPharmaceuticalExtensionModel? pharmaExtension,
   }) {
     return SGTIN(
@@ -285,7 +272,6 @@ class SGTIN extends Equatable {
     );
   }
 
-  /// Compute EPC URI from GTIN + serial (for legacy records with no stored epcUri).
   String get computedEpcUri {
     if (epcUri != null) return epcUri!;
     final String padded = gtinCode.padLeft(14, '0');
@@ -309,8 +295,6 @@ class SGTIN extends Equatable {
         alertCount, serialGuessingProbability, serialEntropySeed, createdBy,
         pharmaExtension,
       ];
-
-  // ── Private helpers ─────────────────────────────────────────────────────────
 
   static DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
@@ -360,7 +344,6 @@ class SGTIN extends Equatable {
   }
 }
 
-/// 13-value item status enum — mirrors backend XS-017 state machine.
 enum ItemStatus {
   RESERVED,
   ALLOCATED,
@@ -376,5 +359,3 @@ enum ItemStatus {
   EXPIRED,
   EXCEPTION,
 }
-
-

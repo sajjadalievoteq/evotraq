@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
-/// Empty state when no GS1 master-data rows match search or filters.
 class Gs1ListEmptyView extends StatelessWidget {
   const Gs1ListEmptyView({
     super.key,

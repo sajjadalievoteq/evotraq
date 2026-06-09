@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step1/commissioning_date_picker_row.dart';
 
-/// Production, expiry, and best-before date fields for commissioning step 1.
 class CommissioningDatesCard extends StatelessWidget {
   const CommissioningDatesCard({
     super.key,

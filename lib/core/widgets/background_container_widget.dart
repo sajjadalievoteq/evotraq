@@ -3,8 +3,6 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
-/// Full-screen background (image + light overlay). Use behind the navigator in
-/// [MaterialApp.router] `builder` so every route shares the same backdrop.
 class AppBackgroundLayer extends StatelessWidget {
   const AppBackgroundLayer({super.key});
 
@@ -26,8 +24,6 @@ class AppBackgroundLayer extends StatelessWidget {
   }
 }
 
-/// Optional scaffold shell (app bar / drawer) on top of the global background.
-/// The decorative image is provided by [AppBackgroundLayer] in `main.dart`.
 class BackgroundContainerWidget extends StatelessWidget {
   const BackgroundContainerWidget({
     super.key,

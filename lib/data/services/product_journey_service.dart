@@ -26,24 +26,20 @@ class ProductJourneyService {
     try {
       final headers = await _getHeaders();
 
-      // Fetch all events for this EPC
       final events = await _fetchEventsForEpc(epcUri, headers);
       
       if (events.isEmpty) {
         return null;
       }
 
-      // Sort by event time
       events.sort((a, b) {
         final timeA = DateTime.tryParse(a['eventTime'] ?? '') ?? DateTime.now();
         final timeB = DateTime.tryParse(b['eventTime'] ?? '') ?? DateTime.now();
         return timeA.compareTo(timeB);
       });
 
-      // Convert to journey steps
       final steps = events.map((e) => JourneyStep.fromEventJson(e)).toList();
 
-      // Extract product info from first commissioning event's ILMD
       ProductInfo? productInfo;
       for (final step in steps) {
         if (step.businessStep.contains('commissioning') && step.ilmd != null) {
@@ -52,7 +48,6 @@ class ProductJourneyService {
         }
       }
 
-      // Enrich steps with location names
       await _enrichStepsWithLocationData(steps, headers);
 
       return ProductJourney(
@@ -72,12 +67,9 @@ class ProductJourneyService {
   }
 
   Future<ProductJourney?> getJourneyByGtinSerial(String gtin, String serialNumber) async {
-    // Build EPC URI format: urn:epc:id:sgtin:CompanyPrefix.ItemRef.Serial
-    // For now, search by serial and filter by GTIN
     try {
       final headers = await _getHeaders();
 
-      // First, try to find SGTIN by GTIN and serial
       final sgtinResponse = await _dioService.get(
         '$_baseUrl/identifiers/sgtins/search',
         queryParameters: {'gtin': gtin, 'serialNumber': serialNumber},
@@ -98,7 +90,6 @@ class ProductJourneyService {
         }
       }
 
-      // Fallback: construct URI and search
       final epcUri = 'urn:epc:id:sgtin:${_formatGtinForEpc(gtin)}.$serialNumber';
       return getJourneyByEpc(epcUri);
     } catch (e) {
@@ -117,7 +108,6 @@ class ProductJourneyService {
       final headers = await _getHeaders();
       final results = <ProductSearchResult>[];
 
-      // Search SGTINs
       final sgtinResponse = await _dioService.get(
         '$_baseUrl/identifiers/sgtins',
         queryParameters: {'search': query, 'size': '10'},
@@ -142,7 +132,6 @@ class ProductJourneyService {
         }
       }
 
-      // Search SSCCs
       final ssccResponse = await _dioService.get(
         '$_baseUrl${SsccServiceConstants.pathBase}',
         queryParameters: {'search': query, 'size': '5'},
@@ -178,10 +167,8 @@ class ProductJourneyService {
   ) async {
     final allEvents = <Map<String, dynamic>>[];
 
-    // Encode the EPC URI for URL path (replace special chars)
     final encodedEpc = Uri.encodeComponent(epcUri);
 
-    // Fetch ObjectEvents by EPC - uses path parameter /events/object/epc/{epc}
     try {
       final objectResponse = await _dioService.get(
         '$_baseUrl/events/object/epc/$encodedEpc',
@@ -205,7 +192,6 @@ class ProductJourneyService {
       debugPrint('ProductJourneyService: Error fetching object events: $e');
     }
 
-    // Fetch AggregationEvents (where this EPC is a child) - uses path parameter /events/aggregation/child/{childEPC}
     try {
       final aggResponse = await _dioService.get(
         '$_baseUrl/events/aggregation/child/$encodedEpc',
@@ -221,7 +207,7 @@ class ProductJourneyService {
           if (event is Map) {
             final eventMap = Map<String, dynamic>.from(event);
             eventMap['_eventType'] = 'AggregationEvent';
-            eventMap['_role'] = 'child'; // This EPC was packed into a container
+            eventMap['_role'] = 'child';
             allEvents.add(eventMap);
           }
         }
@@ -230,8 +216,6 @@ class ProductJourneyService {
       debugPrint('ProductJourneyService: Error fetching aggregation events (as child): $e');
     }
 
-    // Fetch AggregationEvents (where this EPC is the parent/container) - for SSCC journey tracking
-    // Uses path parameter /events/aggregation/parent/{parentEPC}
     try {
       final aggParentResponse = await _dioService.get(
         '$_baseUrl/events/aggregation/parent/$encodedEpc',
@@ -247,7 +231,7 @@ class ProductJourneyService {
           if (event is Map) {
             final eventMap = Map<String, dynamic>.from(event);
             eventMap['_eventType'] = 'AggregationEvent';
-            eventMap['_role'] = 'parent'; // This EPC is a container holding items
+            eventMap['_role'] = 'parent';
             allEvents.add(eventMap);
           }
         }
@@ -256,7 +240,6 @@ class ProductJourneyService {
       debugPrint('ProductJourneyService: Error fetching aggregation events (as parent): $e');
     }
 
-    // Fetch TransactionEvents by EPC - uses path parameter /events/transaction/epc/{epc}
     try {
       final txnResponse = await _dioService.get(
         '$_baseUrl/events/transaction/epc/$encodedEpc',
@@ -309,12 +292,10 @@ class ProductJourneyService {
               };
             }
           } catch (e) {
-            // Ignore GLN lookup errors
           }
         }
 
         if (locationCache.containsKey(step.locationGLN)) {
-          // Create new step with enriched data (steps are immutable)
           steps[i] = JourneyStep(
             eventId: step.eventId,
             eventType: step.eventType,
@@ -346,13 +327,10 @@ class ProductJourneyService {
   }
 
   String _formatGtinForEpc(String gtin) {
-    // Remove leading zeros and format for EPC
-    // This is a simplified version - full GS1 formatting is more complex
     return gtin.replaceFirst(RegExp('^0+'), '');
   }
 }
 
-/// Search result for product lookup
 class ProductSearchResult {
   final String identifier;
   final String displayName;

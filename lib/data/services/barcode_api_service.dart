@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service for interacting with barcode verification and EPCIS mapping APIs
 class BarcodeApiService {
   final DioService _dioService;
   late final String _baseUrl;
@@ -13,14 +12,12 @@ class BarcodeApiService {
     _baseUrl = _dioService.baseUrl;
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
       throw ApiException(message: 'No authentication token found');
     }
 
-    // Include an accept header to allow all types for proper content negotiation
     return {
       'Content-Type': 'application/json',
       'Accept': '*/*',
@@ -28,7 +25,6 @@ class BarcodeApiService {
     };
   }
 
-  /// Verify a barcode's syntax and structure
   Future<Map<String, dynamic>> verifyBarcode(String barcodeData) async {
     final headers = await _getHeaders();
 
@@ -54,7 +50,6 @@ class BarcodeApiService {
       if (response.statusCode == 200) {
         return jsonDecode(response.data);
       } else if (response.statusCode == 404) {
-        // Try the alternative endpoint from BarcodeVerificationController if first one fails
         debugPrint('First endpoint not found, trying alternative GS1 validation endpoint');
         return _tryAlternativeGS1Validation(barcodeData, headers);
       } else {
@@ -71,9 +66,7 @@ class BarcodeApiService {
     }
   }
 
-  /// Try alternative GS1 validation endpoint if primary endpoint fails
   Future<Map<String, dynamic>> _tryAlternativeGS1Validation(String barcodeData, Map<String, String> headers) async {
-    // Try the /api/barcode/verify/gs1-element-string endpoint from BarcodeVerificationController
     debugPrint(
       'Trying alternative validation API: $_baseUrl/barcode/verify/gs1-element-string',
     );
@@ -91,7 +84,6 @@ class BarcodeApiService {
 
     if (response.statusCode == 200) {
       final result = jsonDecode(response.data);
-      // Convert to expected format
       return {
         'isValid': result['valid'] ?? false,
         'message': result['valid'] == true ? 'Valid GS1 barcode' : 'Invalid GS1 barcode format',
@@ -108,10 +100,8 @@ class BarcodeApiService {
     }
   }
 
-  /// Check barcode quality
   Future<Map<String, dynamic>> checkBarcodeQuality(List<int> barcodeImage) async {
     final headers = await _getHeaders();
-    // Remove Content-Type from headers for multipart request
     headers.remove('Content-Type');
 
     final formData = FormData.fromMap({
@@ -141,7 +131,6 @@ class BarcodeApiService {
     }
   }
 
-  /// Extract data content from a barcode
   Future<Map<String, dynamic>> extractBarcodeData(String barcodeData) async {
     final headers = await _getHeaders();
 
@@ -163,14 +152,11 @@ class BarcodeApiService {
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.data);
-        // Add barcodeType to standardize output format
         if (!result.containsKey('barcodeType')) {
           result['barcodeType'] = 'GS1';
         }
         return result;
       } else if (response.statusCode == 404) {
-        // Try alternative approach for parsing GS1 data
-        // This could be a manual parsing logic for common GS1 formats
         debugPrint('GS1 parse endpoint not found, trying alternative approach');
         return _extractBasicGS1Data(barcodeData);
       } else {
@@ -183,48 +169,39 @@ class BarcodeApiService {
       }
     } catch (e) {
       debugPrint('Error during barcode data extraction: $e');
-      // Return a fallback result with original barcode data
       return _extractBasicGS1Data(barcodeData);
     }
   }
 
-  /// Basic manual parsing of GS1 data when API fails
   Map<String, dynamic> _extractBasicGS1Data(String data) {
     final result = <String, dynamic>{
       'elementString': data,
       'barcodeType': 'GS1',
       'rawData': data,
-      'isValid': true, // Assume valid for now since we can't verify
+      'isValid': true,
     };
 
-    // Very basic GS1 parsing - look for common AI patterns
-    // This is fallback logic for when the backend API is unavailable
     Map<String, String> parsedData = {};
 
     try {
-      // Look for common GS1 Application Identifiers
-      // AI (01) - GTIN - 14 digits
       final gtinRegex = RegExp(r'\(01\)(\d{14})');
       final gtinMatch = gtinRegex.firstMatch(data);
       if (gtinMatch != null) {
         parsedData['GTIN'] = gtinMatch.group(1)!;
       }
 
-      // AI (21) - Serial Number - variable length
       final snRegex = RegExp(r'\(21\)([^\(]+)');
       final snMatch = snRegex.firstMatch(data);
       if (snMatch != null) {
         parsedData['serialNumber'] = snMatch.group(1)!;
       }
 
-      // AI (10) - Batch/Lot Number - variable length
       final lotRegex = RegExp(r'\(10\)([^\(]+)');
       final lotMatch = lotRegex.firstMatch(data);
       if (lotMatch != null) {
         parsedData['batchNumber'] = lotMatch.group(1)!;
       }
 
-      // AI (17) - Expiry Date - 6 digits YYMMDD
       final expRegex = RegExp(r'\(17\)(\d{6})');
       final expMatch = expRegex.firstMatch(data);
       if (expMatch != null) {
@@ -241,7 +218,6 @@ class BarcodeApiService {
     return result;
   }
 
-  /// Create an EPCIS object event from a barcode
   Future<Map<String, dynamic>> createObjectEvent({
     required String gs1ElementString,
     required String locationGLN,
@@ -276,7 +252,6 @@ class BarcodeApiService {
     }
   }
 
-  /// Create an EPCIS aggregation event from parent and child barcodes
   Future<Map<String, dynamic>> createAggregationEvent({
     required String parentBarcode,
     required List<String> childBarcodes,
@@ -319,7 +294,6 @@ class BarcodeApiService {
     }
   }
 
-  /// Create an EPCIS transaction event from barcodes and transaction info
   Future<List<Map<String, dynamic>>> createTransactionEvent({
     required List<String> gs1ElementStrings,
     required String bizTransactionType,
@@ -365,7 +339,6 @@ class BarcodeApiService {
     }
   }
 
-  /// Helper to parse error messages from API responses
   String? _parseErrorMessage(String responseBody) {
     try {
       final jsonBody = json.decode(responseBody);

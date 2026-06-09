@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/home/presentation/constants/home_strings.
 import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 
-/// Commissioning throughput bar chart — 24 h (real data) with 1H/7D placeholders.
 class ThroughputDummyBarChart extends StatefulWidget {
   const ThroughputDummyBarChart({super.key});
 
@@ -16,9 +15,8 @@ class ThroughputDummyBarChart extends StatefulWidget {
 }
 
 class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
-  int _rangeIndex = 1; // 0 = 1H, 1 = 24H, 2 = 7D
+  int _rangeIndex = 1;
 
-  /// Returns a "nice" y-axis interval that produces ~4 gridlines for [maxY].
   static double _niceInterval(double maxY) {
     if (maxY <= 0) return 10;
     const steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
@@ -38,17 +36,14 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
         final buckets   = state.stats?.throughputBuckets ?? {};
         final realTotal = state.stats?.throughputTotal   ?? 0;
 
-        // Compute bars and axis labels for the selected range
         final List<double> bars;
         final int barCount;
         final List<String> barLabels;
         if (_rangeIndex == 0) {
-          // 1H: single bucket (hourIndex 0 = most-recent hour)
           barCount = 1;
           bars = [(buckets[0] ?? 0).toDouble()];
           barLabels = [HomeStrings.chartNow];
         } else if (_rangeIndex == 2) {
-          // 7D: aggregate 168 hourly buckets into 7 daily totals
           barCount = 7;
           bars = List.generate(7, (day) {
             var sum = 0;
@@ -64,9 +59,6 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
                 .format(DateTime.now().subtract(Duration(days: daysAgo)));
           });
         } else {
-          // 24H (default): 24 hourly buckets.
-          // Bucket i: i=0 is the oldest hour (23h ago), i=23 is the current hour.
-          // Label each bar with the actual clock hour (0-23) it represents.
           final nowHour = DateTime.now().hour;
           barCount = 24;
           bars = List.generate(24, (i) => (buckets[i] ?? 0).toDouble());
@@ -168,7 +160,6 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
                             if (label.isEmpty) {
                               return const SizedBox.shrink();
                             }
-                            // For 24H: skip odd-numbered labels on narrow charts
                             if (_rangeIndex == 1 && isSmall && idx % 2 != 0) {
                               return const SizedBox.shrink();
                             }

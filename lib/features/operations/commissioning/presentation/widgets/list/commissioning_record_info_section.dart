@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_record_info_bar.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/utilities/commissioning_ui_constants.dart';
 
-/// Loaded-record count and page-size row for the commissioning batches list.
 class CommissioningRecordInfoSection extends StatelessWidget {
   const CommissioningRecordInfoSection({
     super.key,

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Two-pane master–detail row: list (left), divider, detail (right).
-/// Padding and flex follow the GS1 split-view spec used by GTIN and GLN.
 class MasterDetailSplitLayout extends StatelessWidget {
   const MasterDetailSplitLayout({
     super.key,
@@ -15,10 +13,8 @@ class MasterDetailSplitLayout extends StatelessWidget {
   final Widget list;
   final Widget detail;
 
-  /// [list] flex when the row is narrower than [narrowWidthBreakpoint].
   final int narrowListFlex;
 
-  /// [list] flex at wider widths; detail uses the remainder to 100.
   final int wideListFlex;
 
   final double narrowWidthBreakpoint;

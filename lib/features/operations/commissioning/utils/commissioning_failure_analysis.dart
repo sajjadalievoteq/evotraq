@@ -95,7 +95,6 @@ CommissioningFailureCategoryInfo categoryInfo(
   }
 }
 
-/// Groups failed [CommissioningItemResult] rows by [CommissioningFailureCategory].
 Map<CommissioningFailureCategory, List<CommissioningItemResult>>
 groupFailedCommissioningResults(List<CommissioningItemResult> results) {
   final failed = results.where((r) => !r.success).toList();

@@ -234,7 +234,6 @@ class SSCCCubit extends Cubit<SSCCState> {
     }
   }
 
-  /// Default paginated list (GET /identifiers/ssccs) when opening the screen.
   Future<void> loadSSCCList({
     int page = 0,
     int size = 20,
@@ -255,7 +254,6 @@ class SSCCCubit extends Cubit<SSCCState> {
     );
   }
 
-  /// Advanced search when the user applies filters or types in the search bar.
   Future<void> searchSSCCList({
     String? ssccCode,
     String? containerType,
@@ -300,7 +298,6 @@ class SSCCCubit extends Cubit<SSCCState> {
     );
   }
 
-  /// Routes to [loadSSCCList] or [searchSSCCList] based on active filters.
   Future<void> fetchSSCCList({
     String? ssccCode,
     String? containerType,

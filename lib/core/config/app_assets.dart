@@ -1,13 +1,9 @@
 class AppAssets {
   static const String _traqIcons = 'assets/icons';
 
-  // Logo (raster; lives under assets/logo/)
   static const String logo = 'assets/images/logo/logo.png';
-  /// Raster brand backdrop (shells, cards, app bar stack underlay).
   static const String traqBackgroundPng = 'assets/images/traq_background.png';
-  /// Vector brand backdrop (e.g. flexible-space SVG where used).
   static const String traqBackgroundSvg = 'assets/images/traq_background.svg';
-  // Traq (handoff) icons (complete set)
   static const String iconAggregate = '$_traqIcons/aggregate.svg';
   static const String iconAlert = '$_traqIcons/alert.svg';
   static const String iconNotification = '$_traqIcons/notification.svg';
@@ -61,4 +57,3 @@ class AppAssets {
   static const String iconUsers = '$_traqIcons/users.svg';
   static const String iconX = '$_traqIcons/x.svg';
 }
-

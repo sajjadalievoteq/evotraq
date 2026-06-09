@@ -14,11 +14,9 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_tatmeen_submission.dar
 abstract final class _P {
   static String base(String sgtinId) => '/identifiers/sgtins/$sgtinId/pharma';
 
-  // Regimes
   static String regimes(String id)                => '${base(id)}/regimes';
   static String regime(String id, String type)    => '${base(id)}/regimes/$type';
 
-  // EMVO
   static String emvo(String id)                   => '${base(id)}/emvo';
   static String emvoLatest(String id)             => '${base(id)}/emvo/latest';
   static String emvoInitiate(String id)           => '${base(id)}/emvo/initiate';
@@ -28,52 +26,39 @@ abstract final class _P {
   static String emvoFail(String uploadId)         => '/identifiers/sgtins/pharma/emvo/$uploadId/fail';
   static String emvoRetry(String uploadId)        => '/identifiers/sgtins/pharma/emvo/$uploadId/retry';
 
-  // Tatmeen
   static String tatmeen(String id)                => '${base(id)}/tatmeen';
   static String tatmeenAccept(String subId)       => '/identifiers/sgtins/pharma/tatmeen/$subId/accept';
   static String tatmeenReject(String subId)       => '/identifiers/sgtins/pharma/tatmeen/$subId/reject';
 
-  // DSCSA
   static String dscsa(String id)                  => '${base(id)}/dscsa';
 
-  // Cold chain
   static String coldChain(String id)              => '${base(id)}/cold-chain';
   static String coldChainReading(String id)       => '${base(id)}/cold-chain/reading';
 
-  // Duplicates
   static String duplicates(String id)             => '${base(id)}/duplicates';
   static String duplicateResolve(String evidId)   => '/identifiers/sgtins/pharma/duplicates/$evidId/resolve';
 
-  // Repackaging
   static String repackaging(String id)            => '${base(id)}/repackaging';
   static const String repackagingCreate           = '/identifiers/sgtins/pharma/repackaging';
 
-  // Alerts
   static String alerts(String id)                 => '${base(id)}/alerts';
   static String alertsOpen(String id)             => '${base(id)}/alerts/open';
   static String alertAck(String alertId)          => '/identifiers/sgtins/pharma/alerts/$alertId/acknowledge';
   static String alertResolve(String alertId)      => '/identifiers/sgtins/pharma/alerts/$alertId/resolve';
 
-  // Dispatch
   static String dispatchCommission(String id)       => '${base(id)}/dispatch/commission';
   static String dispatchDecommission(String id)     => '${base(id)}/dispatch/decommission';
   static String dispatchOwnershipTransfer(String id) => '${base(id)}/dispatch/ownership-transfer';
 
-  // Batches
   static String batches(String gtinId)              => '/identifiers/gtins/$gtinId/batches';
   static String batchByLot(String gtinId, String lot) => '/identifiers/gtins/$gtinId/batches/$lot';
   static String batchById(String gtinId, String batchId) => '/identifiers/gtins/$gtinId/batches/$batchId';
 }
 
-/// Pharma compliance HTTP service.
-/// Covers all SGTIN pharma extension endpoints (EMVO, Tatmeen, DSCSA,
-/// cold chain, duplicates, repackaging, alerts, batches).
 class PharmaService {
   final DioService _dio;
 
   PharmaService({required DioService dioService}) : _dio = dioService;
-
-  // ── private helpers ────────────────────────────────────────────────────────
 
   Future<String> _token() async {
     final t = await _dio.getAuthToken();
@@ -120,8 +105,6 @@ class PharmaService {
     }
   }
 
-  // ── Reporting Regimes ──────────────────────────────────────────────────────
-
   Future<List<SGTINReportingRegime>> getRegimes(String sgtinId) async {
     final t = await _token();
     final r = await _get(_P.regimes(sgtinId), t);
@@ -142,8 +125,6 @@ class PharmaService {
     _assertOk(r);
     return _decode(r.data, SGTINReportingRegime.fromJson);
   }
-
-  // ── EMVO ──────────────────────────────────────────────────────────────────
 
   Future<List<SGTINEmvoUpload>> getEmvoUploads(String sgtinId) async {
     final t = await _token();
@@ -206,8 +187,6 @@ class PharmaService {
     return _decode(r.data, SGTINEmvoUpload.fromJson);
   }
 
-  // ── Tatmeen ────────────────────────────────────────────────────────────────
-
   Future<List<SGTINTatmeenSubmission>> getTatmeenSubmissions(String sgtinId) async {
     final t = await _token();
     final r = await _get(_P.tatmeen(sgtinId), t);
@@ -239,8 +218,6 @@ class PharmaService {
     return _decode(r.data, SGTINTatmeenSubmission.fromJson);
   }
 
-  // ── DSCSA ─────────────────────────────────────────────────────────────────
-
   Future<List<SGTINDscsaOwnership>> getDscsaChain(String sgtinId) async {
     final t = await _token();
     final r = await _get(_P.dscsa(sgtinId), t);
@@ -255,8 +232,6 @@ class PharmaService {
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINDscsaOwnership.fromJson);
   }
-
-  // ── Cold Chain ────────────────────────────────────────────────────────────
 
   Future<List<SGTINControlledChain>> getColdChain(String sgtinId) async {
     final t = await _token();
@@ -276,8 +251,6 @@ class PharmaService {
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINControlledChain.fromJson);
   }
-
-  // ── Duplicate Evidence ────────────────────────────────────────────────────
 
   Future<List<SGTINDuplicateEvidence>> getDuplicateEvidence(String sgtinId) async {
     final t = await _token();
@@ -305,8 +278,6 @@ class PharmaService {
     return _decode(r.data, SGTINDuplicateEvidence.fromJson);
   }
 
-  // ── Repackaging ───────────────────────────────────────────────────────────
-
   Future<List<SGTINRepackagingLink>> getRepackagingLinks(String sgtinId) async {
     final t = await _token();
     final r = await _get(_P.repackaging(sgtinId), t);
@@ -320,8 +291,6 @@ class PharmaService {
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINRepackagingLink.fromJson);
   }
-
-  // ── Alerts ────────────────────────────────────────────────────────────────
 
   Future<List<SGTINAlert>> getAlerts(String sgtinId) async {
     final t = await _token();
@@ -376,8 +345,6 @@ class PharmaService {
     return _decode(r.data, SGTINAlert.fromJson);
   }
 
-  // ── Dispatch ──────────────────────────────────────────────────────────────
-
   Future<void> dispatchCommissioning(String sgtinId) async {
     final t = await _token();
     final r = await _post(_P.dispatchCommission(sgtinId), t);
@@ -402,8 +369,6 @@ class PharmaService {
         t);
     _assertOk(r);
   }
-
-  // ── GTIN Batches ──────────────────────────────────────────────────────────
 
   Future<List<GtinBatch>> getBatches(String gtinId) async {
     final t = await _token();

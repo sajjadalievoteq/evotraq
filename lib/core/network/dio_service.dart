@@ -9,7 +9,6 @@ class DioService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final AppConfig _appConfig;
 
-  // Singleton pattern
   static final DioService _instance = DioService._internal();
   factory DioService() => _instance;
 
@@ -59,7 +58,6 @@ class DioService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Add auth token to request if available
           if (!options.headers.containsKey('Authorization')) {
             final token = await _secureStorage.read(
               key: AppConfig.authTokenKey,
@@ -110,7 +108,6 @@ class DioService {
     );
   }
 
-  // GET request
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -134,7 +131,6 @@ class DioService {
     }
   }
 
-  // POST request
   Future<Response> post(
     String path, {
     dynamic data,
@@ -160,7 +156,6 @@ class DioService {
     }
   }
 
-  // PUT request
   Future<Response> put(
     String path, {
     dynamic data,
@@ -186,7 +181,6 @@ class DioService {
     }
   }
 
-  // PATCH request
   Future<Response> patch(
     String path, {
     dynamic data,
@@ -212,7 +206,6 @@ class DioService {
     }
   }
 
-  // DELETE request
   Future<Response> delete(
     String path, {
     dynamic data,
@@ -238,17 +231,14 @@ class DioService {
     }
   }
 
-  // Save auth token
   Future<void> saveAuthToken(String token) async {
     await _secureStorage.write(key: AppConfig.authTokenKey, value: token);
   }
 
-  // Get auth token
   Future<String?> getAuthToken() async {
     return await _secureStorage.read(key: AppConfig.authTokenKey);
   }
 
-  // Remove auth token
   Future<void> removeAuthToken() async {
     await _secureStorage.delete(key: AppConfig.authTokenKey);
   }

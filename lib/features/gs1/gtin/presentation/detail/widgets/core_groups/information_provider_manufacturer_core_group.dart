@@ -93,7 +93,6 @@ class InformationProviderManufacturerCoreGroupState
         );
       });
     } catch (_) {
-      // Picker will still resolve when editing.
     }
   }
 

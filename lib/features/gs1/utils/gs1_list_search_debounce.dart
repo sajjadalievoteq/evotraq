@@ -1,10 +1,7 @@
 import 'dart:async';
 
-/// Default delay for master-data list search-as-you-type (GTIN/GLN lists).
 const Duration kGs1MasterListSearchDebounce = Duration(milliseconds: 400);
 
-/// Cancels pending timer on [schedule]; use [cancel] (or [dispose]) before
-/// immediate search (refresh, submit, clear filters).
 class Gs1ListSearchDebouncer {
   Gs1ListSearchDebouncer({
     this.duration = kGs1MasterListSearchDebounce,

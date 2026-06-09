@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/stepper/commissioning_step_circle.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/stepper/commissioning_stepper_connector.dart';
 
-/// Displays the 3-step progress header for the commissioning workflow.
-///
-/// On mobile the connector between steps animates left-to-right (fill) when
-/// advancing and right-to-left (unfill) when going back.  The newly active
-/// circle scales in to reinforce the "thumb travels to next step" feel.
 class CommissioningStepperHeader extends StatefulWidget {
   const CommissioningStepperHeader({super.key, required this.currentStep});
 

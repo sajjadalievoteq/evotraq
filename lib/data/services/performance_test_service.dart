@@ -21,7 +21,6 @@ class PerformanceTestResult {
   });
 
   factory PerformanceTestResult.fromJson(Map<String, dynamic> json) {
-    // Handle "Infinity" strings in operationsPerSecond
     double parseOpsPerSecond(dynamic value) {
       if (value == null) return 0.0;
       if (value is double) return value;
@@ -78,31 +77,26 @@ class PerformanceTestService {
     }
   }
   
-  /// Run GS1 identifier validation performance test
   Future<PerformanceTestResult> runGS1ValidationPerformanceTest() async {
     final json = await _getWithAuth('/admin/performance-tests/gs1-validation');
     return PerformanceTestResult.fromJson(json);
   }
   
-  /// Run batch event insertion performance test
   Future<PerformanceTestResult> runBatchInsertionPerformanceTest() async {
     final json = await _getWithAuth('/admin/performance-tests/batch-insertion');
     return PerformanceTestResult.fromJson(json);
   }
   
-  /// Run query caching performance test
   Future<PerformanceTestResult> runQueryCachingPerformanceTest() async {
     final json = await _getWithAuth('/admin/performance-tests/query-caching');
     return PerformanceTestResult.fromJson(json);
   }
   
-  /// Run barcode parsing performance test
   Future<PerformanceTestResult> runBarcodeParsingPerformanceTest() async {
     final json = await _getWithAuth('/admin/performance-tests/barcode-parsing');
     return PerformanceTestResult.fromJson(json);
   }
   
-  /// Run all performance tests
   Future<Map<String, PerformanceTestResult>> runAllPerformanceTests() async {
     final json = await _getWithAuth('/admin/performance-tests/run-all');
 
@@ -112,20 +106,18 @@ class PerformanceTestService {
     ));
   }
   
-  /// Run frontend-only performance tests (for comparison with backend)
   Future<PerformanceTestResult> runFrontendGS1ValidationPerformanceTest() async {
     final Stopwatch stopwatch = Stopwatch()..start();
     const int iterations = 10000;
     
     for (int i = 0; i < iterations; i++) {
-      // Use the frontend GS1Validator
       await Future.microtask(() =>
         GS1Validator.isValidGTIN('12345678901231'));
     }
     
     stopwatch.stop();
     final double validationsPerSecond = iterations / (stopwatch.elapsedMilliseconds / 1000);
-    const double threshold = 3000.0; // Lower threshold for frontend
+    const double threshold = 3000.0;
     
     return PerformanceTestResult(
       testName: 'Frontend GS1 Validation Performance',
@@ -152,7 +144,7 @@ class PerformanceTestService {
     
     stopwatch.stop();
     final double validationsPerSecond = iterations / (stopwatch.elapsedMilliseconds / 1000);
-    const double threshold = 800.0; // Lower threshold for frontend
+    const double threshold = 800.0;
     
     return PerformanceTestResult(
       testName: 'Frontend Barcode Parsing Performance',

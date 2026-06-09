@@ -3,21 +3,17 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/sensor_element.dart';
 
-/// Implementation of the SensorElementService interface
 class SensorElementService {
   final DioService _dioService;
 
-  /// Base endpoint for sensor element API
   late final String _baseUrl;
   
-  /// Constructor
   SensorElementService({
     required DioService dioService,
   }) : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/sensor-elements';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -69,7 +65,6 @@ class SensorElementService {
   Future<SensorElement> getSensorElementById(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -109,7 +104,6 @@ class SensorElementService {
   Future<SensorElement> updateSensorElement(String id, SensorElement sensorElement) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -133,7 +127,6 @@ class SensorElementService {
   Future<void> deleteSensorElement(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -154,7 +147,6 @@ class SensorElementService {
   Future<List<SensorElement>> getSensorElementsByEventId(String eventId) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = eventId;
     if (eventId.contains(':')) {
       cleanId = eventId.split(':').last;

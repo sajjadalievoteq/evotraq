@@ -101,16 +101,7 @@ class DashboardRecentEventTile extends StatelessWidget {
     );
   }
 
-  /// Formats a compact identity string that works for every EPCIS event type.
-  ///
-  /// Priority:
-  /// 1. ILMD-based: GTIN · lot · N serials  (commissioning / transformation with ILMD)
-  /// 2. AggregationEvent: parentId (short) · N children
-  /// 3. TransformationEvent (no ILMD): N in → N out
-  /// 4. TransactionEvent / ObjectEvent: N items / EPCs
-  /// 5. Fallback to event.id
   String _identityText(RecentEvent event) {
-    // 1. ILMD-based identity
     if (event.gtinCode != null && event.gtinCode!.isNotEmpty) {
       final parts = [event.gtinCode!];
       if (event.batchLotNumber != null && event.batchLotNumber!.isNotEmpty) {
@@ -123,30 +114,23 @@ class DashboardRecentEventTile extends StatelessWidget {
 
     final epcCount = event.epcList.length;
 
-    // 2. Aggregation: parent + child count
     if (event.eventType.toLowerCase() == 'aggregationevent') {
       final parent = _shortId(event.parentId);
       if (epcCount > 0) return '$parent · $epcCount child${epcCount == 1 ? '' : 'ren'}';
       return parent;
     }
 
-    // 3. Transformation without ILMD: input → output
     if (event.eventType.toLowerCase() == 'transformationevent') {
       if (event.inputEpcCount > 0 || epcCount > 0) {
         return '${event.inputEpcCount} in → $epcCount out';
       }
     }
 
-    // 4. Generic EPC count (Transaction, Object without ILMD)
     if (epcCount > 0) return '$epcCount item${epcCount == 1 ? '' : 's'}';
 
-    // 5. Last resort
     return event.id;
   }
 
-  /// Returns a compact representation of an EPC/SSCC URN, e.g.
-  /// `urn:epc:id:sscc:0614141.8765432109` → `0614141.8765432109`
-  /// `urn:epc:id:sgtin:0614141.812345.SN` → `0614141.812345`
   String _shortId(String? epc) {
     if (epc == null || epc.isEmpty) return '–';
     if (epc.startsWith('urn:epc:id:')) {
@@ -160,10 +144,6 @@ class DashboardRecentEventTile extends StatelessWidget {
     return epc.length > 20 ? '…${epc.substring(epc.length - 16)}' : epc;
   }
 
-  /// Converts a CBV bizStep URI to a human-readable label.
-  /// Handles both URN and HTTPS forms:
-  ///   urn:epcglobal:cbv:bizstep:commissioning  → Commissioning
-  ///   https://ref.gs1.org/cbv/BizStep-shipping → Shipping
   String? _formatBizStep(String? bizStep) {
     if (bizStep == null || bizStep.isEmpty) return null;
     final raw = bizStep.contains('BizStep-')

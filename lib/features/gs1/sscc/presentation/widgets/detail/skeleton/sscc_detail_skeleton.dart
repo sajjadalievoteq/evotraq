@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/skeleton/sscc_skeleton_group_card.dart';
 
-/// Full-page skeleton for the SSCC detail screen — mirrors [SSCCDetailScreen] layout.
 class SsccDetailSkeleton extends StatelessWidget {
   const SsccDetailSkeleton({
     super.key,

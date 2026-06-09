@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 
-/// Outlined card + section title bar matching [Gs1GroupCard] spacing.
 class SsccSkeletonGroupCard extends StatelessWidget {
   const SsccSkeletonGroupCard({
     super.key,

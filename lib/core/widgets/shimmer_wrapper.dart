@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// App-wide shimmer wrapper with centralized defaults.
-///
-/// Wrap any skeleton layout with this widget. Keep the skeleton *shapes/layout*
-/// in feature code; this wrapper centralizes shimmer styling/behavior.
 class AppShimmer extends StatelessWidget {
   const AppShimmer({
     super.key,
@@ -46,4 +42,3 @@ class AppShimmer extends StatelessWidget {
     );
   }
 }
-

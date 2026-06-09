@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 
-/// Centralized application constants: routes, API paths, and assets.
-/// Prefer importing this library from `core/consts/app_consts.dart`.
 class Constants {
-  // app branding
   static const String appName = 'traq';
   static const String appTagline = 'GS1-compliant track and trace system';
 
-  // layout
-  /// Standard max width for primary screen content.
   static const double maxContentWidth = 800;
   static const double spacing = 16;
   static const double webPadding = 60;
@@ -20,8 +15,6 @@ class Constants {
   static const double dialogMaxWidth = 720;
   static const EdgeInsets sectionPadding = EdgeInsets.all(20);
 
-  // page routes
-  // auth routes
   static const String splashRoute = '/splash';
   static const String loginRoute = '/login';
   static const String registerRoute = '/register';
@@ -32,14 +25,11 @@ class Constants {
   static const String verifyEmailAliasRoute = '/verify-email';
   static const String checkEmailRoute = '/check-email';
 
-  // main routes
   static const String homeRoute = '/home';
   static const String profileRoute = '/profile';
 
-  // dashboard routes
   static const String journeyDashboardRoute = '/dashboards/journey';
 
-  // admin routes
   static const String adminUsersRoute = '/admin/users';
   static const String adminApprovalsRoute = '/admin/approvals';
   static const String adminSettingsRoute = '/admin/settings';
@@ -69,7 +59,6 @@ class Constants {
   static const String adminDataConsistencyIntegrityRoute =
       '/admin/data-consistency-integrity';
 
-  // admin api management routes
   static const String adminApiPartnersRoute = '/admin/api-management/partners';
   static const String adminApiPartnerDetailRoute =
       '/admin/api-management/partners/:partnerId';
@@ -85,14 +74,11 @@ class Constants {
       '/admin/api-management/partners/:partnerId/access';
   static const String adminApiAccessRoute = '/admin/api-management/access';
 
-  // gs1 routes
-  // GTIN routes
   static const String gs1GtinsRoute = '/gs1/gtins';
   static const String gs1GtinNewRoute = '/gs1/gtins/new';
   static const String gs1GtinDetailRoute = '/gs1/gtins/:gtinCode';
   static const String gs1GtinEditRoute = '/gs1/gtins/:gtinCode/edit';
 
-  // GLN routes
   static const String gs1GlnsRoute = GlnRouteConstants.base;
   static const String gs1GlnNewRoute = GlnRouteConstants.newGln;
   static const String gs1GlnDetailRoute = GlnRouteConstants.detail;
@@ -109,7 +95,6 @@ class Constants {
   static const String gs1EpcConversionRoute = '/gs1/epc-conversion';
   static const String gs1ValidationDemoRoute = '/gs1/validation-demo';
 
-  // epcis routes
   static const String epcisEventsRoute = '/epcis/events';
   static const String epcisObjectEventsRoute = '/epcis/object-events';
   static const String epcisAggregationEventsRoute = '/epcis/aggregation-events';
@@ -145,7 +130,6 @@ class Constants {
   static const String epcisAggregationEventHierarchyRoute =
       '/epcis/aggregation-events/hierarchy/:epc';
 
-  // operations routes
   static const String opShippingRoute = '/operations/shipping';
   static const String opShippingCreateRoute = '/operations/shipping/create';
   static const String opShippingDetailRoute =
@@ -163,7 +147,6 @@ class Constants {
   static const String opCommissioningDetailRoute =
       '/operations/commissioning/:operationId';
 
-  // notification routes
   static const String notificationsRoute = '/notifications';
   static const String notificationSubscriptionsRoute =
       '/notifications/subscriptions';
@@ -171,15 +154,12 @@ class Constants {
       '/notifications/:subscriptionId';
   static const String notificationWebhooksRoute = '/notifications/webhooks';
 
-  // barcode routes
   static const String barcodeScanRoute = '/barcode/scan';
   static const String barcodeGenerateRoute = '/barcode/generate';
   static const String barcodeVerifyRoute = '/barcode/verify';
 
-  // demo routes
   static const String demoValidationRulesRoute = '/demo/validation-rules';
 
-  // API endpoints
   static const String authLoginEndpoint = '/auth/login';
   static const String authRegisterEndpoint = '/auth/register';
   static const String authCheckUsernameEndpoint = '/auth/check-username';
@@ -196,11 +176,8 @@ class Constants {
   static const String adminUsersEndpoint = '/admin/users';
   static const String adminApprovalsEndpoint = '/admin/approvals';
 
-  // assets
-  // images
   static const String logoImage = 'assets/images/logo/logo.png';
   static const String loginBackground = 'assets/images/traq_background.png';
 
-  // Icons
   static const String iconImage = 'assets/icons/icon_app.png';
 }

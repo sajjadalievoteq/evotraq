@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Core filled/outlined action button with a fixed height.
-/// Keeps layout stable when showing a loading spinner.
 class CustomElevatedButton extends StatelessWidget {
   const CustomElevatedButton({
     super.key,
@@ -65,4 +63,3 @@ class CustomElevatedButton extends StatelessWidget {
     );
   }
 }
-

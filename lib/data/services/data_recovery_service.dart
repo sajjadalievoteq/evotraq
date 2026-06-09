@@ -17,7 +17,6 @@ class DataRecoveryService {
     };
   }
 
-  /// Initiate a data recovery operation
   Future<Map<String, dynamic>> initiateDataRecovery({
     required String recoveryType,
     required Map<String, dynamic> recoveryParameters,
@@ -48,7 +47,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Perform data backup
   Future<Map<String, dynamic>> performDataBackup({
     required List<String> eventIds,
     Map<String, dynamic>? backupOptions,
@@ -82,7 +80,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Restore data from backup
   Future<Map<String, dynamic>> restoreDataFromBackup({
     required String backupId,
     Map<String, dynamic>? restoreOptions,
@@ -117,7 +114,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Get recovery operation status
   Future<Map<String, dynamic>> getRecoveryOperationStatus(String operationId) async {
     final headers = await _getHeaders();
 
@@ -139,7 +135,6 @@ class DataRecoveryService {
     }
   }
 
-  /// List available backups
   Future<List<dynamic>> listAvailableBackups({
     Map<String, dynamic>? searchCriteria,
   }) async {
@@ -175,7 +170,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Validate backup integrity
   Future<Map<String, dynamic>> validateBackup({
     required String backupId,
     Map<String, dynamic>? validationOptions,
@@ -207,7 +201,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Schedule automatic backup
   Future<Map<String, dynamic>> scheduleAutomaticBackup({
     required Map<String, dynamic> scheduleConfig,
   }) async {
@@ -230,7 +223,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Cancel recovery operation
   Future<Map<String, dynamic>> cancelRecoveryOperation({
     required String operationId,
     String? reason,
@@ -263,7 +255,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Get recovery statistics
   Future<Map<String, dynamic>> getRecoveryStatistics({
     int days = 30,
   }) async {
@@ -287,7 +278,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Export backup data
   Future<Map<String, dynamic>> exportBackupData({
     required String backupId,
     String format = 'JSON',
@@ -324,7 +314,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Get backup details
   Future<Map<String, dynamic>> getBackupDetails(String backupId) async {
     final headers = await _getHeaders();
 
@@ -346,7 +335,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Delete backup
   Future<Map<String, dynamic>> deleteBackup({
     required String backupId,
     String? reason,
@@ -377,7 +365,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Test backup restore (dry run)
   Future<Map<String, dynamic>> testBackupRestore({
     required String backupId,
     Map<String, dynamic>? testOptions,
@@ -409,7 +396,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Get recovery operation logs
   Future<List<dynamic>> getRecoveryOperationLogs({
     required String operationId,
     int? limit,
@@ -444,7 +430,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Monitor recovery operation progress (polling)
   Stream<Map<String, dynamic>> monitorRecoveryOperationProgress(String operationId) async* {
     while (true) {
       try {
@@ -456,7 +441,7 @@ class DataRecoveryService {
           break;
         }
 
-        await Future.delayed(const Duration(seconds: 5)); // Poll every 5 seconds
+        await Future.delayed(const Duration(seconds: 5));
       } catch (e) {
         yield {'error': e.toString()};
         break;
@@ -464,7 +449,6 @@ class DataRecoveryService {
     }
   }
 
-  /// Estimate recovery time
   Future<Map<String, dynamic>> estimateRecoveryTime({
     required String recoveryType,
     required Map<String, dynamic> recoveryParameters,

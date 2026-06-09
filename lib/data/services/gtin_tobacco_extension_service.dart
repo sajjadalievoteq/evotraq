@@ -3,8 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 
-/// Service for GTIN tobacco extension operations
-/// Provides CRUD operations for tobacco-specific product attributes
 class GTINTobaccoExtensionService {
   final DioService _dioService;
 
@@ -22,7 +20,6 @@ class GTINTobaccoExtensionService {
     };
   }
 
-  /// Create tobacco extension for a GTIN by code
   Future<GTINTobaccoExtension> createByGtinCode(
     String gtinCode,
     GTINTobaccoExtension extension,
@@ -42,7 +39,6 @@ class GTINTobaccoExtensionService {
     }
   }
 
-  /// Save or update tobacco extension for a GTIN
   Future<GTINTobaccoExtension> saveByGtinId(
     int gtinId,
     GTINTobaccoExtension extension,
@@ -65,7 +61,6 @@ class GTINTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by GTIN ID
   Future<GTINTobaccoExtension?> getByGtinId(int gtinId) async {
     final response = await _dioService.get(
       '$_baseUrl/$gtinId',
@@ -83,7 +78,6 @@ class GTINTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by GTIN code
   Future<GTINTobaccoExtension?> getByGtinCode(String gtinCode) async {
     final response = await _dioService.get(
       '$_baseUrl/gtin/$gtinCode',
@@ -101,7 +95,6 @@ class GTINTobaccoExtensionService {
     }
   }
 
-  /// Update tobacco extension
   Future<GTINTobaccoExtension> update(
     int extensionId,
     GTINTobaccoExtension extension,
@@ -121,7 +114,6 @@ class GTINTobaccoExtensionService {
     }
   }
 
-  /// Delete tobacco extension
   Future<void> delete(int extensionId) async {
     final response = await _dioService.delete(
       '$_baseUrl/$extensionId',

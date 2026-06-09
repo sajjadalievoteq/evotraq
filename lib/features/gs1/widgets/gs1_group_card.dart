@@ -77,4 +77,3 @@ class Gs1GroupCard extends StatelessWidget {
     );
   }
 }
-

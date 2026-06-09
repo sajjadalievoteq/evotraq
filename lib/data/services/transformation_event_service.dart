@@ -3,11 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
 
-/// Implementation of the TransformationEventService interface
 class TransformationEventService {
   final DioService _dioService;
 
-  /// Base endpoint for transformation event API
   late final String _baseUrl;
   TransformationEventService({
     required DioService dioService,
@@ -15,7 +13,6 @@ class TransformationEventService {
     _baseUrl = '${_dioService.baseUrl}/transformation-events';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -46,7 +43,6 @@ class TransformationEventService {
     String eventId,
   ) async {
     final headers = await _getHeaders();
-    // Call the specific endpoint for getting event by eventId
     final response = await _dioService.get(
       '$_baseUrl/event/$eventId',
       headers: headers,
@@ -240,7 +236,6 @@ class TransformationEventService {
     String outputEPC,
   ) async {
     final headers = await _getHeaders();
-    // Use the new input-output endpoint with query parameters
     final response = await _dioService.get(
       '$_baseUrl/input-output',
       queryParameters: {'inputEPC': inputEPC, 'outputEPC': outputEPC},
@@ -264,7 +259,6 @@ class TransformationEventService {
     String paramValue,
   ) async {
     final headers = await _getHeaders();
-    // There's no direct endpoint for parameter search, so we'll get all events and filter client-side
     final response = await _dioService.get(
       _baseUrl,
       headers: headers,
@@ -278,7 +272,6 @@ class TransformationEventService {
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
 
-      // Filter events by parameter
       return allEvents.where((event) {
         final bizData = event.bizData ?? {};
         return bizData[paramName] == paramValue;
@@ -294,7 +287,6 @@ class TransformationEventService {
     String outputEPC,
   ) async {
     final headers = await _getHeaders();
-    // Use the product endpoint since there's no specific history endpoint
     final response = await _dioService.get(
       '$_baseUrl/product/$outputEPC',
       headers: headers,
@@ -308,7 +300,6 @@ class TransformationEventService {
           .map((json) => TransformationEvent.fromJson(json))
           .toList();
 
-      // Sort by event time to get history in chronological order
       events.sort((a, b) => a.eventTime.compareTo(b.eventTime));
       return events;
     } else {
@@ -324,10 +315,8 @@ class TransformationEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    // While there's no direct endpoint for this combined query, we can use pagination and filters more efficiently
     final headers = await _getHeaders();
 
-    // Use the pagination endpoint with a larger page size
     final response = await _dioService.get(
       _baseUrl,
       queryParameters: {
@@ -350,7 +339,6 @@ class TransformationEventService {
             .map((json) => TransformationEvent.fromJson(json))
             .toList();
 
-        // Filter by location and time window
         return allEvents
             .where(
               (event) =>
@@ -382,7 +370,6 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Build a transformation event DTO
     final transformationEventDto = {
       'transformationID': transformationId,
       'inputEPCList': inputEPCs.toList(),
@@ -391,7 +378,6 @@ class TransformationEventService {
       'businessStep': businessStep,
       'disposition': disposition,
       'bizData': bizData,
-      // Add any other required fields
       'eventTime': DateTime.now().toIso8601String(),
       'eventTimeZoneOffset': DateTime.now().timeZoneOffset.toString(),
     };

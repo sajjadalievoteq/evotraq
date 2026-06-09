@@ -36,8 +36,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 constraints.maxWidth >= UserUiConstants.desktopBreakpoint;
             final padding = ResponsiveUtils.paddingAll(context);
 
-            // Prefer the ProfileCubit's user (refreshed after edits) over
-            // the AuthCubit's user (set at login time only).
             final user = profileState.user ?? authState.user;
             if (user == null) {
               return Scaffold(

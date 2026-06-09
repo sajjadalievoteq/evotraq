@@ -17,7 +17,6 @@ class AdvancedPerformanceService {
        _tokenManager = tokenManager,
        _appConfig = appConfig;
 
-  // Query Plan Analysis Service
   Future<Map<String, dynamic>> analyzeQuery(String query) async {
     final token = await _tokenManager.getToken();
     if (token == null) {
@@ -113,7 +112,6 @@ class AdvancedPerformanceService {
     }
   }
 
-  // Connection Pool Monitoring Service
   Future<Map<String, dynamic>> getConnectionPoolStatus() async {
     final token = await _tokenManager.getToken();
     if (token == null) {
@@ -214,7 +212,6 @@ class AdvancedPerformanceService {
     }
   }
 
-  // Thread Pool Management Service
   Future<Map<String, dynamic>> getThreadPoolMetrics() async {
     final token = await _tokenManager.getToken();
     if (token == null) {
@@ -320,7 +317,6 @@ class AdvancedPerformanceService {
     }
   }
 
-  // Resource Management Service
   Future<Map<String, dynamic>> getSystemResourceMetrics() async {
     final token = await _tokenManager.getToken();
     if (token == null) {
@@ -444,7 +440,6 @@ class AdvancedPerformanceService {
     }
   }
 
-  // Comprehensive Performance Service
   Future<Map<String, dynamic>> getComprehensiveAnalysis() async {
     final token = await _tokenManager.getToken();
     if (token == null) {

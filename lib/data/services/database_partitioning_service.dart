@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/shared/models/partition_models.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service class for Database Partitioning API calls according to Phase 3.1 requirements
 class DatabasePartitioningService {
   final DioService _dioService;
   late final String _baseUrl;
@@ -13,7 +12,6 @@ class DatabasePartitioningService {
     _baseUrl = _dioService.baseUrl;
   }
 
-  /// Helper method to get headers with authentication
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
@@ -30,8 +28,6 @@ class DatabasePartitioningService {
     return data;
   }
 
-  /// Time-Based Partitioning Services
-  
   Future<Map<String, dynamic>> createMonthlyPartition({
     required String tableName,
     required int year,
@@ -114,8 +110,6 @@ class DatabasePartitioningService {
     }
   }
 
-  /// Event Type Partitioning Services
-
   Future<Map<String, dynamic>> createEventTypePartition({
     required String tableName,
     required String eventType,
@@ -189,8 +183,6 @@ class DatabasePartitioningService {
       throw _handleError(e);
     }
   }
-
-  /// Archive Strategy Services
 
   Future<Map<String, dynamic>> archiveOldPartitions({
     required DateTime cutoffDate,
@@ -273,8 +265,6 @@ class DatabasePartitioningService {
       throw _handleError(e);
     }
   }
-
-  /// Partition Management Services
 
   Future<Map<String, dynamic>> automatePartitionCreation() async {
     try {
@@ -395,8 +385,6 @@ class DatabasePartitioningService {
     }
   }
 
-  /// Dashboard Services
-
   Future<Map<String, dynamic>> getDashboardOverview() async {
     try {
       final response = await _dioService.get(
@@ -426,8 +414,6 @@ class DatabasePartitioningService {
       throw _handleError(e);
     }
   }
-
-  /// Data Migration Services
 
   Future<Map<String, dynamic>> migrateDataToPartitions() async {
     try {

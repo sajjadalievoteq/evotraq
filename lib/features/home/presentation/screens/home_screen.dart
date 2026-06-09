@@ -21,12 +21,6 @@ import 'package:traqtrace_app/features/home/presentation/widgets/status_rail/sta
 import 'package:traqtrace_app/features/home/presentation/widgets/throughput_chart/throughput_and_events_row.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-/// Authenticated home dashboard: KPIs, throughput placeholder, quick actions,
-/// and health. **Reusable pieces** used in this subtree include
-/// [TraqSectionTitle] (`shared/widgets/traq_section_title.dart`),
-/// [DashboardStatCard], [DashboardQuickActionCard], and
-/// [DashboardHealthStatusRow]; compositions such as [StatusRail] and
-/// [OperationsHeader] are tailored for this screen.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 

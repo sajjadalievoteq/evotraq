@@ -1,4 +1,3 @@
-/// Aggregated actuator health for dashboard compliance / posture UI.
 class SystemHealthStatus {
   final bool backendHealthy;
   final bool databaseHealthy;

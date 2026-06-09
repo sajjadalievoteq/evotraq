@@ -3,20 +3,16 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 
-/// Implementation of TransactionDocumentService
 class TransactionDocumentService {
   final DioService _dioService;
 
-  /// Base endpoint for transaction document API
   late final String _baseUrl;
 
-  /// Constructor
   TransactionDocumentService({required DioService dioService})
     : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/transaction-documents';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -29,7 +25,6 @@ class TransactionDocumentService {
     String type,
     String id,
   ) async {
-    // Ensure type and id are not empty to avoid double slashes
     if (type.isEmpty || id.isEmpty) {
       throw Exception('Document type and ID cannot be empty');
     }
@@ -75,7 +70,6 @@ class TransactionDocumentService {
   }
 
   Future<bool> isDocumentReferenceValid(String type, String id) async {
-    // Ensure type and id are not empty to avoid double slashes
     if (type.isEmpty || id.isEmpty) {
       throw Exception('Document type and ID cannot be empty');
     }
@@ -99,7 +93,6 @@ class TransactionDocumentService {
   }
 
   Future<Map<String, dynamic>> getDocumentStatus(String type, String id) async {
-    // Ensure type and id are not empty to avoid double slashes
     if (type.isEmpty || id.isEmpty) {
       throw Exception('Document type and ID cannot be empty');
     }
@@ -123,7 +116,6 @@ class TransactionDocumentService {
     String type,
     String id,
   ) async {
-    // Ensure type and id are not empty to avoid double slashes
     if (type.isEmpty || id.isEmpty) {
       throw Exception('Document type and ID cannot be empty');
     }
@@ -161,7 +153,6 @@ class TransactionDocumentService {
     String targetId,
     String relationshipType,
   ) async {
-    // Validate all parameters
     if (sourceType.isEmpty ||
         sourceId.isEmpty ||
         targetType.isEmpty ||
@@ -199,7 +190,6 @@ class TransactionDocumentService {
     String epc, {
     String? type,
   }) async {
-    // Ensure EPC is not empty
     if (epc.isEmpty) {
       throw Exception('EPC cannot be empty');
     }

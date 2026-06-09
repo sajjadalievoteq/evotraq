@@ -31,17 +31,13 @@ class _SplashScreenState extends State<SplashScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      // Using microtask to ensure we don't trigger context lookups
-      // during the synchronous didChangeDependencies call
       Future.microtask(() => _initializeApp());
     }
   }
 
   Future<void> _initializeApp() async {
-    // Start auth check immediately in the background
     final authCheck = context.read<AuthCubit>().checkAuth();
 
-    // We want a minimum delay of 2 seconds to show branding
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
@@ -60,7 +56,6 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         setState(() => _canNavigate = true);
 
-        // In case auth status already changed while we were waiting for minDelay
         final authState = context.read<AuthCubit>().state;
         _checkAndNavigate(authState);
       }
@@ -97,7 +92,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     return parsed.toString();
   }
-
 
   @override
   Widget build(BuildContext context) {

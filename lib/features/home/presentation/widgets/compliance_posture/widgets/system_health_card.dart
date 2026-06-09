@@ -19,7 +19,6 @@ class SystemHealthCard extends StatelessWidget {
 
         return Card(
 
-
           child: Padding(
             padding: const EdgeInsets.all(Constants.spacing),
             child: Column(

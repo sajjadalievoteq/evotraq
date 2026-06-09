@@ -36,7 +36,6 @@ class WebSocketService {
       throw Exception('WebSocket service not properly initialized');
     }
 
-    // Reset reconnect attempts when manually connecting
     _reconnectAttempts = 0;
 
     try {
@@ -53,7 +52,6 @@ class WebSocketService {
         onDone: _onDisconnect,
       );
 
-      // Send STOMP CONNECT frame
       _sendStompFrame('CONNECT', {
         'accept-version': '1.0,1.1,1.2',
         'heart-beat': '10000,10000',
@@ -62,7 +60,7 @@ class WebSocketService {
 
       _isConnected = true;
       _connectionController.add(true);
-      _reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+      _reconnectAttempts = 0;
       _startHeartbeat();
 
     } catch (e) {
@@ -136,13 +134,11 @@ class WebSocketService {
   }
 
   void _subscribeToNotifications() {
-    // Subscribe to general notifications
     _sendStompFrame('SUBSCRIBE', {
       'id': 'sub-1',
       'destination': '/topic/notifications',
     });
 
-    // Subscribe to user-specific notifications
     _sendStompFrame('SUBSCRIBE', {
       'id': 'sub-2',
       'destination': '/user/queue/notifications',
@@ -154,7 +150,6 @@ class WebSocketService {
       final lines = message.split('\n');
       String? body;
       
-      // Find the message body (after the empty line)
       bool foundEmptyLine = false;
       for (int i = 0; i < lines.length; i++) {
         if (lines[i].isEmpty) {
@@ -188,7 +183,6 @@ class WebSocketService {
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     
-    // Don't reconnect if we've exceeded max attempts
     if (_reconnectAttempts >= _maxReconnectAttempts) {
       print('Max reconnection attempts reached. Stopping reconnection.');
       return;

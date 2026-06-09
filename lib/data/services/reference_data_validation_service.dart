@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 
-/// Model for EPC validation result
 class EPCValidationResult {
   final String epc;
   final bool exists;
@@ -30,7 +29,6 @@ class EPCValidationResult {
   }
 }
 
-/// Model for batch EPC validation result
 class BatchEPCValidationResult {
   final List<EPCValidationResult> results;
   final int totalValidated;

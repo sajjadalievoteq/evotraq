@@ -1,7 +1,6 @@
 part of 'traq_theme.dart';
 
 class TraqSpacing {
-  // 4-pt scale used throughout the designs
   static const double xs = 4;
   static const double sm = 8;
   static const double md = 12;
@@ -10,13 +9,11 @@ class TraqSpacing {
   static const double xxl = 32;
   static const double xxxl = 48;
 
-  // Common paddings
   static const EdgeInsets cardPad = EdgeInsets.all(20);
   static const EdgeInsets surfacePad = EdgeInsets.all(16);
   static const EdgeInsets pagePad =
       EdgeInsets.symmetric(horizontal: 24, vertical: 24);
 
-  // Component heights
   static const double buttonH = 36;
   static const double buttonHLarge = 44;
   static const double inputH = 44;
@@ -26,7 +23,6 @@ class TraqSpacing {
 }
 
 class TraqRadius {
-  // Tight corners: 4px default
   static const Radius xs = Radius.circular(2);
   static const Radius sm = Radius.circular(3);
   static const Radius md = Radius.circular(4);

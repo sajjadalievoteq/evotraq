@@ -1,6 +1,5 @@
 part of 'traq_theme.dart';
 
-/// Filled, elevated, outlined, and text button themes for Traq.
 abstract final class TraqThemeButtons {
   static FilledButtonThemeData filled(
     TraqColors c,
@@ -10,7 +9,6 @@ abstract final class TraqThemeButtons {
       FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: c.primary,
-          // `onPrimary` token is for ink on brand fills; buttons use white / muted text.
           foregroundColor: onPrimaryInk,
           textStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600, height: 1.0),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -64,7 +62,6 @@ abstract final class TraqThemeButtons {
           textStyle: WidgetStatePropertyAll(
             text.bodySm.copyWith(fontWeight: FontWeight.w500, height: 1.0),
           ),
-          // Selected segment
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) return c.primary;
             return c.surfaceMuted;

@@ -4,32 +4,6 @@ import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart'
 
 export 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 
-/// Parses [rawBarcode] and returns a fully-typed [BarcodeDetails].
-///
-/// Automatically detects whether the barcode encodes an **SGTIN**,
-/// **GTIN**, or **SSCC** and populates the corresponding fields. Dates
-/// are parsed into [DateTime] objects, with the GS1 "day-00 = last day
-/// of month" rule applied (GS1 General Specifications §7.12).
-///
-/// ```dart
-/// import 'package:traqtrace_app/core/utils/barcode_utils.dart';
-///
-/// final details = extractBarcodeDetails(scannedString);
-///
-/// if (details.isSgtin) {
-///   print('GTIN: ${details.gtin}');
-///   print('S/N:  ${details.serial}');
-///   print('Lot:  ${details.batchLot}');
-///   print('Exp:  ${details.expiry}');
-/// } else if (details.isSscc) {
-///   print('SSCC: ${details.sscc}');
-/// }
-///
-/// // Ready-made rows for a widget:
-/// for (final row in details.displayRows) {
-///   print('${row.key}: ${row.value}');
-/// }
-/// ```
 BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   final parsed = GS1BarcodeParser.parseGS1Barcode(rawBarcode);
 
@@ -37,7 +11,6 @@ BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   final String gs1String =
       (parsed['gs1ElementString'] as String?) ?? rawBarcode;
 
-  // Build a flat Map<String,String> from parsedData (AI code → value)
   final rawMap = parsed['parsedData'];
   final Map<String, String> allFields = rawMap is Map
       ? Map<String, String>.fromEntries(
@@ -46,7 +19,6 @@ BarcodeDetails extractBarcodeDetails(String rawBarcode) {
         )
       : const {};
 
-  // Top-level fields surfaced by GS1BarcodeParser
   final String? gtin        = parsed['GTIN']         as String?;
   final String? serial      = parsed['SERIAL']       as String?;
   final String? sscc        = parsed['SSCC']         as String?;
@@ -55,12 +27,10 @@ BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   final String? gln         = parsed['GLN']          as String?;
   final String? expiryRaw   = parsed['EXPIRY']       as String?;
 
-  // AIs not exposed as top-level keys
   final String? prodDateRaw     = allFields['11'];
   final String? bestBeforeRaw   = allFields['15'];
   final String? countryOfOrigin = allFields['422'];
 
-  // ── Type detection (SSCC > SGTIN > GTIN > unknown) ──────────────────
   final Gs1BarcodeType type;
   if (sscc != null && sscc.isNotEmpty) {
     type = Gs1BarcodeType.sscc;
@@ -98,10 +68,6 @@ BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   );
 }
 
-/// Parses a GS1 YYMMDD string to [DateTime].
-///
-/// Per GS1 General Specifications §7.12: when DD == `00`, the date refers
-/// to the last day of the specified month.
 DateTime? _parseGs1Date(String? yymmdd) {
   if (yymmdd == null || yymmdd.length != 6) return null;
   try {
@@ -111,7 +77,6 @@ DateTime? _parseGs1Date(String? yymmdd) {
 
     if (month < 1 || month > 12) return null;
 
-    // Day == 0 → last day of the month (GS1 rule)
     if (day == 0) {
       return DateTime(year, month + 1, 0);
     }

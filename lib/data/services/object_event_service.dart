@@ -4,12 +4,9 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_types.dart';
 
-/// Enhanced implementation of ObjectEventService for Phase 3 capabilities
-/// Supports comprehensive Object Event management with validation and advanced querying
 class ObjectEventService {
   final DioService _dioService;
 
-  /// Base endpoint for object event API
   late final String _baseUrl;
 
   ObjectEventService({required DioService dioService})
@@ -17,7 +14,6 @@ class ObjectEventService {
     _baseUrl = '${_dioService.baseUrl}/events/object';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -109,17 +105,16 @@ class ObjectEventService {
     final now = DateTime.now();
     final eventData = <String, dynamic>{
       'eventId':
-          'event_${now.millisecondsSinceEpoch}_${(now.microsecond % 1000).toString().padLeft(3, '0')}', // Generate unique event ID
-      'eventType': 'ObjectEvent', // Required by schema
+          'event_${now.millisecondsSinceEpoch}_${(now.microsecond % 1000).toString().padLeft(3, '0')}',
+      'eventType': 'ObjectEvent',
       'action': action,
       'businessStep': businessStep,
       'disposition': disposition,
       'eventTime': now.toUtc().toIso8601String(),
-      'recordTime': now.toUtc().toIso8601String(), // Required by schema
+      'recordTime': now.toUtc().toIso8601String(),
       'epcisVersion': epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3',
     };
 
-    // Add timezone offset in ISO format
     final offset = now.timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
@@ -133,17 +128,12 @@ class ObjectEventService {
       eventData['businessLocation'] = businessLocationGLN;
     }
 
-    // Handle the schema's oneOf constraint: either epcList OR quantityList, not both
     if (epcs != null && epcs.isNotEmpty) {
       eventData['epcList'] = epcs;
-      // For schema compliance, ensure quantityList is either null or empty array when epcList is present
       eventData['quantityList'] = [];
     } else if (quantities != null && quantities.isNotEmpty) {
       eventData['quantityList'] = quantities.map((q) => q.toJson()).toList();
-      // For schema compliance, ensure epcList is null when quantityList is present
-      // Don't include epcList field at all in this case
     } else {
-      // If neither is provided, default to empty epcList to satisfy schema requirements
       eventData['epcList'] = [];
       eventData['quantityList'] = [];
     }
@@ -516,7 +506,6 @@ class ObjectEventService {
   }) async {
     final headers = await _getHeaders();
 
-    // Build query parameters
     final queryParams = <String, String>{};
     if (startTime != null) {
       queryParams['startTime'] = startTime.toIso8601String();
@@ -538,23 +527,19 @@ class ObjectEventService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.data);
 
-      // Transform backend response to match frontend expectations
       Map<String, dynamic> transformedData = {
         'totalEvents': data['totalEvents'] ?? 0,
         'recentEvents': data['recentEvents'] ?? 0,
       };
 
-      // Transform eventsByAction to actionCounts
       if (data['eventsByAction'] != null) {
         transformedData['actionCounts'] = data['eventsByAction'];
       }
 
-      // Transform topBusinessSteps to businessStepCounts
       if (data['topBusinessSteps'] != null) {
         transformedData['businessStepCounts'] = data['topBusinessSteps'];
       }
 
-      // Transform topDispositions to dispositionCounts
       if (data['topDispositions'] != null) {
         transformedData['dispositionCounts'] = data['topDispositions'];
       } else {
@@ -589,7 +574,6 @@ class ObjectEventService {
     if (history.isEmpty) {
       throw Exception('No events found for EPC: $epc');
     }
-    // Return the most recent event (assuming they're sorted by time)
     return history.first;
   }
 
@@ -700,10 +684,9 @@ class ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsWithSensorData(
     Map<String, dynamic> sensorCriteria,
   ) async {
-    // For EPCIS 2.0 sensor data queries
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      _baseUrl, // Would filter events with sensor data
+      _baseUrl,
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -728,7 +711,6 @@ class ObjectEventService {
   }
 
   Future<bool> validateEPC(String epc) async {
-    // GS1 EPC validation using regex patterns
     final RegExp sgtin = RegExp(
       r'^urn:epc:id:sgtin:(\d+)\.(\d+)\.(\w+)$',
       caseSensitive: false,
@@ -748,7 +730,6 @@ class ObjectEventService {
   }
 
   Future<String> convertGS1ElementStringToEPC(String gs1ElementString) async {
-    // Convert GS1 Element String to EPC URI format
     if (gs1ElementString.startsWith('01') && gs1ElementString.contains('21')) {
       final gtin = gs1ElementString.substring(2, 16);
       final serial = gs1ElementString.substring(

@@ -1,4 +1,3 @@
-/// True when any SSCC list filter or search text is active (use advanced search API).
 bool ssccListHasSearchCriteria({
   String? ssccCode,
   String? containerType,

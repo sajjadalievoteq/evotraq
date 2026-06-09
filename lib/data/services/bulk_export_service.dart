@@ -1,6 +1,5 @@
 import '../../core/network/dio_service.dart';
 
-
 class BulkExportService {
   final DioService _dioService;
 

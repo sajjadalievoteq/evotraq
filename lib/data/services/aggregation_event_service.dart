@@ -3,20 +3,15 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
 
-/// Implementation of the AggregationEventService interface
 class AggregationEventService {
   final DioService _dioService;
 
-  /// Base endpoint for aggregation event API
   late final String _baseUrl;
   AggregationEventService({required DioService dioService})
     : _dioService = dioService {
-    // Use the base URL and append the endpoint for aggregation events
-    // Make sure the backend's context path (/api) is correctly handled
     _baseUrl = '${_dioService.baseUrl}/events/aggregation';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -27,8 +22,6 @@ class AggregationEventService {
 
   Future<AggregationEvent> getAggregationEventById(String id) async {
     final headers = await _getHeaders();
-    // Use the event-id endpoint instead of the ID endpoint
-    // This matches how the backend is currently implementing the lookup
     final response = await _dioService.get(
       '$_baseUrl/event-id/$id',
       headers: headers,
@@ -37,11 +30,9 @@ class AggregationEventService {
     );
 
     if (response.statusCode == 200) {
-      // Debug: print the raw response to check GLN fields
       print('Raw API response for event ID $id: ${response.data}');
 
       final jsonData = json.decode(response.data);
-      // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
       print(
         'API response contains businessLocation: ${jsonData['businessLocation']}',
@@ -49,7 +40,6 @@ class AggregationEventService {
       print('API response contains bizLocation: ${jsonData['bizLocation']}');
       print('API response contains locationGLN: ${jsonData['locationGLN']}');
 
-      // Check for source list and destination list
       print('API response contains sourceList: ${jsonData['sourceList']}');
       print(
         'API response contains destinationList: ${jsonData['destinationList']}',
@@ -74,12 +64,10 @@ class AggregationEventService {
     );
 
     if (response.statusCode == 200) {
-      // Debug: print the raw response to check GLN fields
       print('Raw API response for event ID $eventId: ${response.data}');
 
       final jsonData = json.decode(response.data);
 
-      // Check if GLN fields are present
       print('API response contains readPoint: ${jsonData['readPoint']}');
       print(
         'API response contains businessLocation: ${jsonData['businessLocation']}',
@@ -101,54 +89,46 @@ class AggregationEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Format timezone offset in the ISO 8601 format to ensure consistency
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
 
-    // Format as +/-HH:MM
     final String eventTimeZone =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
-    // Get current date time in ISO format with timezone offset
     final eventTime =
         '${event.eventTime.toIso8601String().split('.')[0]}$eventTimeZone';
 
-    // Get the base JSON from the event
     Map<String, dynamic> jsonData = event.toJson();
 
-    // Add required fields for enhanced validation
     jsonData['eventType'] =
-        'AggregationEvent'; // Required by enhanced validation schema
+        'AggregationEvent';
     jsonData['eventId'] = event.eventId.isNotEmpty
         ? event.eventId
-        : 'event-${DateTime.now().millisecondsSinceEpoch}'; // Ensure eventId is present
+        : 'event-${DateTime.now().millisecondsSinceEpoch}';
     jsonData['recordTime'] = DateTime.now()
-        .toIso8601String(); // Record time in ISO format
-    jsonData['epcisVersion'] = '2.0'; // Required EPCIS version
-    jsonData['certificationInfo'] = []; // Required empty array
+        .toIso8601String();
+    jsonData['epcisVersion'] = '2.0';
+    jsonData['certificationInfo'] = [];
     if (jsonData['childQuantityList'] == null) {
       jsonData['childQuantityList'] =
-          []; // Required empty array if not using quantities
+          [];
     }
-    // Ensure all timezone variants are included
     jsonData['eventTimeZoneOffset'] =
-        eventTimeZone; // This is the field name expected by the backend DTO
-    jsonData['eventTimeZone'] = eventTimeZone; // For frontend model consistency
-    jsonData['eventTime'] = eventTime; // Add explicit event time with timezone
-    // Handle GLN fields explicitly to ensure they're properly sent to the backend
+        eventTimeZone;
+    jsonData['eventTimeZone'] = eventTimeZone;
+    jsonData['eventTime'] = eventTime;
     if (event.readPoint != null) {
       jsonData['readPoint'] =
-          event.readPoint!.glnCode; // Send just the GLN code as a string
+          event.readPoint!.glnCode;
     }
 
     if (event.businessLocation != null) {
       jsonData['businessLocation'] =
-          event.businessLocation!.glnCode; // Send just the GLN code as a string
+          event.businessLocation!.glnCode;
     }
 
-    // Debug: Print the full JSON payload being sent
     final jsonPayload = jsonEncode(jsonData);
     print('Aggregation event payload: $jsonPayload');
     final response = await _dioService.post(
@@ -172,17 +152,15 @@ class AggregationEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Get the base JSON from the event
     Map<String, dynamic> jsonData = event.toJson();
-    // Handle GLN fields explicitly to ensure they're properly sent to the backend
     if (event.readPoint != null) {
       jsonData['readPoint'] =
-          event.readPoint!.glnCode; // Send just the GLN code as a string
+          event.readPoint!.glnCode;
     }
 
     if (event.businessLocation != null) {
       jsonData['businessLocation'] =
-          event.businessLocation!.glnCode; // Send just the GLN code as a string
+          event.businessLocation!.glnCode;
     }
 
     final response = await _dioService.put(
@@ -237,7 +215,6 @@ class AggregationEventService {
       if (data['content'] != null && data['content'] is List) {
         final List<dynamic> eventList = data['content'];
 
-        // Debug: Check for source and destination lists in the first event if available
         if (eventList.isNotEmpty) {
           print('First event sourceList: ${eventList[0]['sourceList']}');
           print(
@@ -249,7 +226,6 @@ class AggregationEventService {
             .map((json) => AggregationEvent.fromJson(json))
             .toList();
       } else {
-        // If the response is an array directly (not wrapped in a PageResponse object)
         if (data is List) {
           return data.map((json) => AggregationEvent.fromJson(json)).toList();
         }
@@ -331,7 +307,6 @@ class AggregationEventService {
     String parentEPC,
     String action,
   ) async {
-    // Retrieve events by parent EPC and filter by action in client
     final parentEvents = await findAggregationEventsByParentEPC(parentEPC);
     return parentEvents.where((event) => event.action == action).toList();
   }
@@ -340,7 +315,6 @@ class AggregationEventService {
     String childEPC,
     String action,
   ) async {
-    // Retrieve events by child EPC and filter by action in client
     final childEvents = await findAggregationEventsByChildEPC(childEPC);
     return childEvents.where((event) => event.action == action).toList();
   }
@@ -359,17 +333,13 @@ class AggregationEventService {
       );
 
       if (response.statusCode == 200) {
-        // This endpoint returns a list of EPCs, not events
         final List<String> childEPCs = List<String>.from(
           json.decode(response.data),
         );
 
-        // Since we need to return AggregationEvents, we need to find the most recent
-        // ADD event for each child EPC with this parent
         List<AggregationEvent> events =
             await findAggregationEventsByParentEPCAndAction(parentEPC, 'ADD');
 
-        // Filter events to only include those with the childEPCs from the response
         return events.where((event) {
           return event.childEPCs.any(
             (childEPC) => childEPCs.contains(childEPC),
@@ -396,10 +366,8 @@ class AggregationEventService {
       );
 
       if (response.statusCode == 200) {
-        // This endpoint returns the parent EPC as a string
         final String parentEPC = json.decode(response.data);
 
-        // Get the most recent ADD event for this child with this parent
         List<AggregationEvent> events =
             await findAggregationEventsByChildEPCAndAction(childEPC, 'ADD');
         return events.firstWhere(
@@ -409,7 +377,6 @@ class AggregationEventService {
           ),
         );
       } else if (response.statusCode == 404) {
-        // Child is not currently in any container
         throw Exception("Child $childEPC is not currently in any container");
       } else {
         throw Exception(_getDetailedErrorMessage(response));
@@ -421,12 +388,10 @@ class AggregationEventService {
   }
 
   Future<List<AggregationEvent>> trackParentHistory(String parentEPC) async {
-    // This returns all events where the EPC was a parent
     return findAggregationEventsByParentEPC(parentEPC);
   }
 
   Future<List<AggregationEvent>> trackChildHistory(String childEPC) async {
-    // This returns all events where the EPC was a child
     return findAggregationEventsByChildEPC(childEPC);
   }
 
@@ -438,8 +403,6 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      // The backend doesn't have a direct endpoint for this query,
-      // so we'll get all events for the parent EPC and filter by business step
       final response = await _dioService.get(
         '$_baseUrl/parent/$parentEPC',
         headers: headers,
@@ -473,7 +436,6 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      // Format dates as ISO8601 strings
       final String start = startTime.toIso8601String();
       final String end = endTime.toIso8601String();
 
@@ -488,7 +450,6 @@ class AggregationEventService {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.data);
 
-        // Filter by location GLN
         List<AggregationEvent> events = jsonData
             .map((data) => AggregationEvent.fromJson(data))
             .where(
@@ -520,54 +481,48 @@ class AggregationEventService {
   }) async {
     final headers = await _getHeaders();
 
-    // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
 
-    // Format as +/-HH:MM
     final String eventTimeZone =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    // Get current date time in ISO format with timezone offset
     final now = DateTime.now();
     final eventTime = '${now.toIso8601String().split('.')[0]}$eventTimeZone';
 
     final Map<String, dynamic> requestData = {
-      'eventType': 'AggregationEvent', // Required by enhanced validation schema
-      'action': 'ADD', // Pack events are ADD actions
+      'eventType': 'AggregationEvent',
+      'action': 'ADD',
       'eventId':
-          'pack-${DateTime.now().millisecondsSinceEpoch}', // Generate unique event ID
-      'recordTime': now.toIso8601String(), // Record time in ISO format
-      'epcisVersion': '2.0', // Required EPCIS version
-      'certificationInfo': [], // Required empty array
+          'pack-${DateTime.now().millisecondsSinceEpoch}',
+      'recordTime': now.toIso8601String(),
+      'epcisVersion': '2.0',
+      'certificationInfo': [],
       'parentID': parentEPC,
       'childEPCs': childEPCs,
-      'childQuantityList': [], // Required empty array if not using quantities
-      'readPoint': locationGLN, // Send as string
-      'businessLocation': locationGLN, // Send as string
+      'childQuantityList': [],
+      'readPoint': locationGLN,
+      'businessLocation': locationGLN,
       'businessStep': businessStep,
       'disposition': disposition,
       'bizData': bizData,
       'eventTimeZoneOffset':
-          eventTimeZone, // This is the field name expected by the backend DTO
-      'eventTimeZone': eventTimeZone, // For frontend model consistency
-      'eventTime': eventTime, // Add explicit event time
+          eventTimeZone,
+      'eventTimeZone': eventTimeZone,
+      'eventTime': eventTime,
     };
 
-    // Add source list if provided
     if (sourceList != null && sourceList.isNotEmpty) {
       requestData['sourceList'] = sourceList;
     }
 
-    // Add destination list if provided
     if (destinationList != null && destinationList.isNotEmpty) {
       requestData['destinationList'] = destinationList;
     }
 
     final body = json.encode(requestData);
 
-    // Debug: Print the actual JSON payload being sent
     print('Pack event payload: $body');
     final response = await _dioService.post(
       '$_baseUrl/pack',
@@ -596,54 +551,48 @@ class AggregationEventService {
   }) async {
     final headers = await _getHeaders();
 
-    // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
 
-    // Format as +/-HH:MM
     final String eventTimeZone =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    // Get current date time in ISO format with timezone offset
     final now = DateTime.now();
     final eventTime = '${now.toIso8601String().split('.')[0]}$eventTimeZone';
 
     final Map<String, dynamic> requestData = {
-      'eventType': 'AggregationEvent', // Required by enhanced validation schema
-      'action': 'DELETE', // Unpack events are DELETE actions
+      'eventType': 'AggregationEvent',
+      'action': 'DELETE',
       'eventId':
-          'unpack-${DateTime.now().millisecondsSinceEpoch}', // Generate unique event ID
-      'recordTime': now.toIso8601String(), // Record time in ISO format
-      'epcisVersion': '2.0', // Required EPCIS version
-      'certificationInfo': [], // Required empty array
+          'unpack-${DateTime.now().millisecondsSinceEpoch}',
+      'recordTime': now.toIso8601String(),
+      'epcisVersion': '2.0',
+      'certificationInfo': [],
       'parentID': parentEPC,
       'childEPCs': childEPCs,
-      'childQuantityList': [], // Required empty array if not using quantities
-      'readPoint': locationGLN, // Send as string
-      'businessLocation': locationGLN, // Send as string
+      'childQuantityList': [],
+      'readPoint': locationGLN,
+      'businessLocation': locationGLN,
       'businessStep': businessStep,
       'disposition': disposition,
       'bizData': bizData,
       'eventTimeZoneOffset':
-          eventTimeZone, // This is the field name expected by the backend DTO
-      'eventTimeZone': eventTimeZone, // For frontend model consistency
-      'eventTime': eventTime, // Add explicit event time
+          eventTimeZone,
+      'eventTimeZone': eventTimeZone,
+      'eventTime': eventTime,
     };
 
-    // Add source list if provided
     if (sourceList != null && sourceList.isNotEmpty) {
       requestData['sourceList'] = sourceList;
     }
 
-    // Add destination list if provided
     if (destinationList != null && destinationList.isNotEmpty) {
       requestData['destinationList'] = destinationList;
     }
 
     final body = json.encode(requestData);
 
-    // Debug: Print the actual JSON payload being sent
     print('Unpack event payload: $body');
     final response = await _dioService.post(
       '$_baseUrl/unpack',
@@ -660,19 +609,15 @@ class AggregationEventService {
     }
   }
 
-  // Helper method to handle API errors and provide more detailed error messages
   String _getDetailedErrorMessage(Response response) {
     try {
       final Map<String, dynamic> errorData = json.decode(response.data);
       final String message = errorData['message'] ?? 'Unknown error';
 
-      // Check if this is a validation error with specific error messages
       if (errorData.containsKey('errors') && errorData['errors'] is List) {
         List<dynamic> errors = errorData['errors'];
 
-        // Format validation errors for better readability
         if (errors.isNotEmpty) {
-          // Group errors by type
           List<String> parentErrors = [];
           List<String> childErrors = [];
           List<String> otherErrors = [];
@@ -691,7 +636,6 @@ class AggregationEventService {
             }
           }
 
-          // Build a user-friendly message
           StringBuffer friendlyMessage = StringBuffer('Validation Error:\n');
 
           if (parentErrors.isNotEmpty) {
@@ -720,10 +664,8 @@ class AggregationEventService {
         }
       }
 
-      // If not a validation error or no specific errors provided
       return 'Error: $message';
     } catch (e) {
-      // If we can't parse the error JSON, return a more user-friendly message
       print('Error parsing error response: $e');
       print('Raw response: ${response.data}');
       return 'Error: Unable to process the request. Please check your input and try again.';
@@ -742,7 +684,6 @@ class AggregationEventService {
       );
 
       if (response.statusCode == 200) {
-        // The endpoint returns a list of child EPCs as strings
         final List<dynamic> jsonData = json.decode(response.data);
         return List<String>.from(jsonData);
       } else {
@@ -758,7 +699,6 @@ class AggregationEventService {
     final headers = await _getHeaders();
 
     try {
-      // Get container contents for the given parent EPC
       final response = await _dioService.get(
         '$_baseUrl/parent/$epc/contents',
         headers: headers,
@@ -767,11 +707,8 @@ class AggregationEventService {
       );
 
       if (response.statusCode == 200) {
-        // If we can get contents without error, the parent EPC is valid
         return true;
       } else if (response.statusCode == 404) {
-        // No contents found, but that doesn't necessarily mean an invalid hierarchy
-        // Let's check if it's a child EPC in another container
         try {
           final containerResponse = await _dioService.get(
             '$_baseUrl/child/$epc/container',

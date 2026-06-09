@@ -16,7 +16,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(status: ProfileStatus.loading));
     try {
       final user = await _profileService.getCurrentUser();
-      // Seed preferences from the server response so the UI reflects persisted values.
       final prefs = ProfilePreferences(
         darkMode: user.darkMode,
         language: user.language,

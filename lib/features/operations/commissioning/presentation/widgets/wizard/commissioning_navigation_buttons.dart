@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
 
-/// Bottom navigation bar shared across all steps of the commissioning wizard.
 class CommissioningNavigationButtons extends StatelessWidget {
   const CommissioningNavigationButtons({
     super.key,

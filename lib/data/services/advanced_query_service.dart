@@ -112,7 +112,6 @@ class AdvancedQueryService {
         'radiusKm': radiusKm.toString(),
       };
 
-      // For GET with body, we'll use POST instead as Dio doesn't support GET with body well
       final response = await _dioService.post(
         '/events/query/geospatial?${Uri(queryParameters: queryParams).query}',
         data: additionalParams?.toJson() ?? {},
@@ -272,8 +271,6 @@ class AdvancedQueryService {
       );
 
       if (response.statusCode == 200) {
-        // In a real implementation, this would handle file download
-        // For now, we'll just log success
         print('Export completed successfully');
       } else {
         throw Exception('Failed to export results: ${response.statusCode}');
@@ -325,7 +322,6 @@ class AdvancedQueryService {
     }
   }
 
-  // Traversal Query Methods
   Future<Map<String, dynamic>> getSupplyChainPath({
     required String epc,
     String direction = 'both',

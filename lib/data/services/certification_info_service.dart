@@ -3,21 +3,17 @@ import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/certification_info.dart';
 
-/// Implementation of the CertificationInfoService interface
 class CertificationInfoService {
   final DioService _dioService;
 
-  /// Base endpoint for certification info API
   late final String _baseUrl;
 
-  /// Constructor
   CertificationInfoService({
     required DioService dioService,
   }) : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/certifications';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -77,7 +73,6 @@ class CertificationInfoService {
   Future<CertificationInfo> getCertificationById(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -122,7 +117,6 @@ class CertificationInfoService {
   ) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -146,7 +140,6 @@ class CertificationInfoService {
   Future<void> deleteCertification(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -169,7 +162,6 @@ class CertificationInfoService {
   ) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = eventId;
     if (eventId.contains(':')) {
       cleanId = eventId.split(':').last;
@@ -241,7 +233,6 @@ class CertificationInfoService {
   Future<Map<String, dynamic>> verifyCertification(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;

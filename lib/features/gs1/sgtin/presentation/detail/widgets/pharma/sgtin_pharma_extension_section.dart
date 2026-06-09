@@ -3,9 +3,6 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_pharmaceutical_extensi
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
-/// Read-only display of all fields in [SGTINPharmaceuticalExtensionModel].
-///
-/// Shown on the SGTIN detail screen when [SGTIN.pharmaExtension] is not null.
 class SgtinPharmaExtensionSection extends StatelessWidget {
   const SgtinPharmaExtensionSection({
     super.key,
@@ -27,7 +24,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Regulatory Reporting ───────────────────────────────────────────
           if (ext.reportingRegimes.isNotEmpty ||
               ext.emvoUploadStatus != null ||
               ext.tatmeenSubmissionStatus != null ||
@@ -60,7 +56,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // ── Cold Chain ────────────────────────────────────────────────────
           SectionLabel(
             'Cold Chain Monitoring',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -85,7 +80,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ],
           const SizedBox(height: 16),
 
-          // ── Anti-Tamper / Fraud ───────────────────────────────────────────
           SectionLabel(
             'Anti-Counterfeit & Tamper Evidence',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -107,7 +101,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ],
           const SizedBox(height: 16),
 
-          // ── Controlled Substances ─────────────────────────────────────────
           if (ext.controlledCustodyRef != null) ...[
             SectionLabel(
               'Controlled Substances',
@@ -119,7 +112,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // ── Dispensing & Returns ──────────────────────────────────────────
           SectionLabel(
             'Dispensing & Returns',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -139,7 +131,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ],
           const SizedBox(height: 16),
 
-          // ── Recall ────────────────────────────────────────────────────────
           SectionLabel(
             'Recall Status',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -154,7 +145,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ],
           const SizedBox(height: 16),
 
-          // ── Parallel Trade ────────────────────────────────────────────────
           SectionLabel(
             'Parallel Trade / Repackaging',
             padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -174,7 +164,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
                 monospace: true),
           ],
 
-          // ── Clinical Trial (conditional) ──────────────────────────────────
           if (ext.protocolId != null || ext.trialSubjectLinkage != null) ...[
             const SizedBox(height: 16),
             SectionLabel(
@@ -292,7 +281,6 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
     }
   }
 
-  /// Colour for submission-status strings shared by EMVO and Tatmeen.
   Color? _submissionColor(String? status) {
     switch (status?.toUpperCase()) {
       case 'ACKNOWLEDGED':

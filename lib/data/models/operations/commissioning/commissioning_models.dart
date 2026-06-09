@@ -1,46 +1,29 @@
-// Models for commissioning operations.
-// Commissioning is the process of introducing items into the supply chain.
-// GS1 Business Step: urn:epcglobal:cbv:bizstep:commissioning
-// Uses ObjectEvent with action ADD
 
-/// Request model for bulk commissioning operation
 class CommissioningRequest {
-  /// Unique reference for this commissioning batch (optional)
   String? commissioningReference;
   
-  /// GTIN code for the product being commissioned
   String gtinCode;
   
-  /// List of serial numbers to commission
   List<String> serialNumbers;
   
-  /// Batch/Lot number for all items
   String batchLotNumber;
   
-  /// Commissioning location GLN
   String commissioningLocationGLN;
   
-  /// Production/Expiry dates
   DateTime? productionDate;
   DateTime? expiryDate;
   DateTime? bestBeforeDate;
   
-  /// Optional metadata
   String? productionOrder;
   String? productionLine;
   String? operatorId;
   String? comments;
   
-  /// Regulatory information
   String? regulatoryMarket;
   String? regulatoryStatus;
 
-  /// Country of manufacture — ISO 3166-1 alpha-2 (e.g. "AE").
-  /// Required for Tatmeen / UAE regulatory submissions (cbvmda:countryOfOrigin).
   String? countryOfOrigin;
 
-  /// Read-point GLN — the GLN of the scan point within the commissioning location.
-  /// Defaults to the commissioning location GLN if omitted.
   String? readPointGLN;
 
   CommissioningRequest({
@@ -118,7 +101,6 @@ enum CommissioningStatus {
   validationError,
 }
 
-/// Response model for commissioning operation
 class CommissioningResponse {
   String? commissioningOperationId;
   String? commissioningReference;
@@ -135,29 +117,23 @@ class CommissioningResponse {
   String? readPointGLN;
   List<String>? messages;
   
-  // ILMD (Instance/Lot Master Data) fields
   DateTime? productionDate;
   DateTime? expiryDate;
   DateTime? bestBeforeDate;
   String? itemDescription;
   
-  // Event data
   List<String>? epcList;
   String? businessStep;
   String? disposition;
   String? action;
   
-  // Additional metadata from request
   String? operatorId;
   String? comments;
   String? productionOrder;
   String? productionLine;
 
-  /// EPCIS 2.0 §7.4.2: long-term item state set at commissioning (always 'active').
   String? persistentDisposition;
 
-  /// Business transaction references attached to the EPCIS event.
-  /// Each entry has keys 'type' (CBV BTT URN) and 'bizTransaction' (the ID).
   List<Map<String, String>>? bizTransactionList;
 
   List<CommissioningItemResult>? itemResults;
@@ -318,7 +294,6 @@ class CommissioningResponse {
   }
 }
 
-/// Result for individual item commissioning
 class CommissioningItemResult {
   String serialNumber;
   String? sgtinId;
@@ -359,7 +334,6 @@ class CommissioningItemResult {
   }
 }
 
-/// Batch status values returned by GET /commissioning/batches
 enum CommissioningBatchStatus {
   pending,
   inProgress,
@@ -368,7 +342,6 @@ enum CommissioningBatchStatus {
   failed,
 }
 
-/// Maps to CommissioningBatchDTO — returned by GET /commissioning/batches
 class CommissioningBatch {
   final String batchId;
   final String? commissioningReference;
@@ -453,7 +426,6 @@ class CommissioningBatch {
   }
 }
 
-/// Per-item result returned by GET /commissioning/batches/{batchId}/items
 class CommissioningBatchItem {
   final String serialNumber;
   final String? epcUri;

@@ -23,14 +23,13 @@ class DashboardService {
     final token = await _dioService.getAuthToken();
     final headers = _buildHeaders(token);
 
-    // Fetch counts from different endpoints in parallel
     final results = await Future.wait([
       _fetchCount('${_dioService.baseUrl}/master-data/gtins', headers),
       _fetchCount('${_dioService.baseUrl}/master-data/glns', headers),
       _fetchCount(
         '${_dioService.baseUrl}/identifiers/sgtins',
         headers,
-      ), // Corrected endpoint
+      ),
       _fetchCount(
         '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
         headers,
@@ -41,7 +40,6 @@ class DashboardService {
     final eventCounts = results[4] as Map<String, int>;
     final totalEvents = eventCounts.values.fold(0, (sum, count) => sum + count);
 
-    // Fetch commissioning throughput (non-fatal — returns empty on error)
     final throughput = await _fetchCommissioningThroughput(headers, 24);
 
     return DashboardStats(
@@ -67,7 +65,6 @@ class DashboardService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.data);
-        // Handle both PageResponse format and direct array format
         if (data is Map) {
           return data['totalElements'] ?? data['total'] ?? 0;
         }
@@ -90,7 +87,7 @@ class DashboardService {
       'Aggregation': '${_dioService.baseUrl}/events/aggregation',
       'Transaction': '${_dioService.baseUrl}/events/transaction',
       'Transformation':
-          '${_dioService.baseUrl}/transformation-events', // Corrected endpoint
+          '${_dioService.baseUrl}/transformation-events',
     };
 
     final counts = <String, int>{};
@@ -140,7 +137,6 @@ class DashboardService {
     final headers = _buildHeaders(token);
 
     try {
-      // Fetch recent events from multiple event types in parallel
       final eventEndpoints = [
         '${_dioService.baseUrl}/events/object?page=0&size=$limit&sortBy=eventTime&direction=DESC',
         '${_dioService.baseUrl}/events/aggregation?page=0&size=$limit&sortBy=eventTime&direction=DESC',
@@ -192,13 +188,12 @@ class DashboardService {
 
           for (var e in events) {
             final map = e as Map<String, dynamic>;
-            map['eventType'] = eventTypes[i]; // Add event type
+            map['eventType'] = eventTypes[i];
             allEvents.add(RecentEvent.fromJson(map));
           }
         }
       }
 
-      // Sort by event time descending and take the most recent
       allEvents.sort((a, b) => b.eventTime.compareTo(a.eventTime));
       return allEvents.take(limit).toList();
     } catch (e) {
@@ -218,7 +213,6 @@ class DashboardService {
     String? backendVersion;
 
     try {
-      // Check backend health
       final healthResponse = await _dioService
           .get(
             '$actuatorBaseUrl/health',
@@ -232,7 +226,6 @@ class DashboardService {
         backendHealthy = true;
         final healthData = json.decode(healthResponse.data);
 
-        // Check component health if available
         if (healthData is Map && healthData['components'] != null) {
           final components = healthData['components'] as Map<String, dynamic>;
           databaseHealthy = components['db']?['status'] == 'UP';
@@ -242,7 +235,6 @@ class DashboardService {
           cacheHealthy =
               redisStatus == 'UP' || cacheComponentStatus == 'UP';
         } else {
-          // If no components, assume healthy if main status is UP
           databaseHealthy = healthData['status'] == 'UP';
           cacheHealthy = true;
         }
@@ -252,7 +244,6 @@ class DashboardService {
     }
 
     try {
-      // Get version info
       final infoResponse = await _dioService
           .get(
             '$actuatorBaseUrl/info',
@@ -277,8 +268,6 @@ class DashboardService {
       backendVersion: backendVersion,
     );
   }
-  /// Fetches commissioning throughput for the given [hours] window.
-  /// Non-fatal — returns empty buckets on network/parse error.
   Future<({Map<int, int> buckets, int total})> fetchThroughput(
     int hours,
   ) async {
@@ -288,7 +277,6 @@ class DashboardService {
   }
 }
 
-/// Private result holder for the commissioning throughput fetch.
 class _ThroughputResult {
   final Map<int, int> buckets;
   final int total;

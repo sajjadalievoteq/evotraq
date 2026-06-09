@@ -486,7 +486,6 @@ class EPCConversionService {
     }
   }
 
-  // Helper method to parse error messages from API responses
   String? _parseErrorMessage(dynamic responseData) {
     try {
       if (responseData is String) {

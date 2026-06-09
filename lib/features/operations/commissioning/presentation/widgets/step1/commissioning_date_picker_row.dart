@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 
-/// Date picker row with optional clear action for commissioning step 1.
 class CommissioningDatePickerRow extends StatelessWidget {
   const CommissioningDatePickerRow({
     super.key,

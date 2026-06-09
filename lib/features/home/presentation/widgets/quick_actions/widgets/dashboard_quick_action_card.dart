@@ -4,8 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
-/// Route tile used on the home quick-action grid; suitable for any icon + title
-/// + optional subtitle + [GoRouter.push] target.
 class DashboardQuickAction {
   const DashboardQuickAction({
     required this.icon,
@@ -32,7 +30,6 @@ class DashboardQuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-
 
       child: InkWell(
         onTap: () {

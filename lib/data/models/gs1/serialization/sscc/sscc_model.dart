@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// SSCC (Serial Shipping Container Code) — spec-aligned logistic unit model.
 class SSCC {
   final String? id;
   final String ssccCode;
@@ -453,7 +452,6 @@ class SSCC {
     return ContentHomogeneity.UNKNOWN;
   }
 
-  /// Legacy container status name for API clients still using old enum.
   static String legacyContainerStatusName(LogisticUnitStatus status) {
     return switch (status) {
       LogisticUnitStatus.DRAFT || LogisticUnitStatus.ALLOCATED => 'CREATED',
@@ -466,7 +464,6 @@ class SSCC {
   }
 }
 
-/// Spec §4.2 logistic unit types.
 enum UnitType {
   PALLET,
   CASE,
@@ -480,7 +477,6 @@ enum UnitType {
   OTHER,
 }
 
-/// Spec §4.2 logistic unit lifecycle statuses.
 enum LogisticUnitStatus {
   DRAFT,
   ALLOCATED,
@@ -491,7 +487,6 @@ enum LogisticUnitStatus {
   VOIDED,
 }
 
-/// Content homogeneity (XSC-004 / XSC-005).
 enum ContentHomogeneity {
   HOMOGENEOUS,
   MIXED,

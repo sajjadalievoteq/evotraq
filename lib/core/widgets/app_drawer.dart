@@ -12,61 +12,38 @@ import 'package:traqtrace_app/core/models/system_settings_model.dart';
 
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Scroll memory
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Static memory that persists across [AppDrawer] widget lifecycle events.
-///
-/// Rules enforced by [_AppDrawerState]:
-/// - Navigate from drawer           → restore saved offset on the next screen.
-/// - Dashboard navigation           → always open from the top.
-/// - Dismiss without nav (same scr) → reset to top on next open.
-///   Requires the host [Scaffold] to call [notifyDrawerOpened] via its
-///   `onDrawerChanged` callback. [BackgroundContainerWidget] does this.
 class DrawerScrollMemory {
   DrawerScrollMemory._();
 
   static double _savedOffset = 0.0;
   static bool _pendingRestore = false;
 
-  /// Incremented each time the drawer is opened.
-  /// Screens that wire [Scaffold.onDrawerChanged] must call
-  /// [notifyDrawerOpened] so that same-screen dismiss→reset works.
   static final openNotifier = ValueNotifier<int>(0);
 
-  /// Save [offset] so the next [AppDrawer] restores to it.
   static void saveForRestore(double offset) {
     _savedOffset = offset;
     _pendingRestore = true;
   }
 
-  /// Clear any pending restore (dashboard navigation).
   static void clearRestore() {
     _savedOffset = 0.0;
     _pendingRestore = false;
   }
 
-  /// Consumed once in [_AppDrawerState.initState].
   static double consumeOffset() {
     final offset = _pendingRestore ? _savedOffset : 0.0;
     _pendingRestore = false;
     return offset;
   }
 
-  /// Call from `Scaffold.onDrawerChanged(isOpen)` when [isOpen] is true.
   static void notifyDrawerOpened() => openNotifier.value++;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AppDrawer
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// A reusable drawer component that can be used across all screens.
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
 
@@ -77,12 +54,8 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   late final ScrollController _scrollController;
 
-  /// True after the first [DrawerScrollMemory.openNotifier] signal on this
-  /// instance — prevents the initial restored offset being reset to 0.
   bool _hasOpenedOnce = false;
 
-  /// Set true by [_navigate] when the user taps a nav item.
-  /// Cleared in [_onDrawerOpened] so dismiss-without-navigate is detected.
   bool _didNavigate = false;
 
   @override
@@ -101,18 +74,12 @@ class _AppDrawerState extends State<AppDrawer> {
     super.dispose();
   }
 
-  /// Fired each time [DrawerScrollMemory.notifyDrawerOpened] is called by the
-  /// host Scaffold (e.g. [BackgroundContainerWidget]).
   void _onDrawerOpened() {
     if (!_hasOpenedOnce) {
-      // First open on this widget instance — initialScrollOffset already
-      // positions the list correctly, nothing to do.
       _hasOpenedOnce = true;
       return;
     }
-    // Subsequent open on the same screen instance.
     if (!_didNavigate) {
-      // Dismissed without navigating — animate back to top.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _scrollController.hasClients) {
           _scrollController.animateTo(
@@ -126,11 +93,6 @@ class _AppDrawerState extends State<AppDrawer> {
     _didNavigate = false;
   }
 
-  /// Navigate from a drawer item, persisting the scroll offset so the next
-  /// screen can restore it.
-  ///
-  /// Pass [isDashboard: true] for the Dashboard item so the drawer always
-  /// reopens from the top on the home screen.
   void _navigate(String route, {bool isDashboard = false, Object? extra}) {
     final offset =
         _scrollController.hasClients ? _scrollController.offset : 0.0;
@@ -161,7 +123,6 @@ class _AppDrawerState extends State<AppDrawer> {
           );
         }
 
-        // Check if user has admin role
         final bool isAdmin = user.role == 'ADMIN';
         final router = GoRouter.of(context);
 
@@ -254,7 +215,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       onTap: () => _navigate(Constants.profileRoute),
                     ),
 
-                    // Dashboards section
                     const Divider(),
                     const Padding(
                       padding:
@@ -276,7 +236,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           _navigate(Constants.journeyDashboardRoute),
                     ),
 
-                    // Cockpit section
                     const Divider(),
                     const Padding(
                       padding:
@@ -291,7 +250,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
 
-                    // Master Data Menu
                     ExpansionTile(
                       leading: const Icon(Icons.dataset),
                       title: const Text('Master Data'),
@@ -313,7 +271,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // Serialization Menu
                     ExpansionTile(
                       leading: const Icon(Icons.numbers),
                       title: const Text('Serialization'),
@@ -337,7 +294,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // EPCIS Events Menu
                     ExpansionTile(
                       leading: const Icon(Icons.event),
                       title: const Text('EPCIS Events'),
@@ -377,7 +333,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // Event Queries Menu
                     ExpansionTile(
                       leading: const Icon(Icons.search),
                       title: const Text('Event Queries'),
@@ -396,11 +351,9 @@ class _AppDrawerState extends State<AppDrawer> {
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
                           onTap: () {
-                            // Create a controller for the text field
                             final TextEditingController controller =
                                 TextEditingController();
 
-                            // Show a dialog to enter the EPC
                             showDialog(
                               context: context,
                               builder: (dialogContext) => AlertDialog(
@@ -414,7 +367,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                   ),
                                   onSubmitted: (value) {
                                     if (value.isNotEmpty) {
-                                      Navigator.pop(dialogContext); // Close dialog
+                                      Navigator.pop(dialogContext);
                                       _navigate(
                                         '/epcis/aggregation-events/hierarchy/$value',
                                         extra: {'isParent': true},
@@ -432,7 +385,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                     onPressed: () {
                                       final value = controller.text;
                                       if (value.isNotEmpty) {
-                                        Navigator.pop(dialogContext); // Close dialog
+                                        Navigator.pop(dialogContext);
                                         _navigate(
                                           '/epcis/aggregation-events/hierarchy/$value',
                                           extra: {'isParent': true},
@@ -481,7 +434,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // Operations section
                     const Divider(),
                     const Padding(
                       padding:
@@ -501,21 +453,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       onTap: () =>
                           _navigate(Constants.opCommissioningRoute),
                     ),
-                    // ExpansionTile(
-                    //   leading: const Icon(Icons.play_for_work),
-                    //   title: const Text('Commissioning'),
-                    //   children: [
-                    //     // ListTile(
-                    //     //   leading: const Icon(Icons.add_circle_outline),
-                    //     //   title: const Text('Commission'),
-                    //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-                    //     //   onTap: () {
-                    //     //     _navigate(Constants.opCommissioningNewRoute);
-                    //     //   },
-                    //     // ),
-                    //
-                    //   ],
-                    // ),
                     ExpansionTile(
                       leading: const Icon(Icons.inventory_2),
                       title: const Text('Packing Operations'),
@@ -583,7 +520,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // GS1 Tools section
                     const Divider(),
                     const Padding(
                       padding:
@@ -603,32 +539,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       onTap: () =>
                           _navigate(Constants.barcodeGenerateRoute),
                     ),
-                    // Barcode Menu
-                    // ExpansionTile(
-                    //   leading: const Icon(Icons.qr_code_2),
-                    //   title: const Text('Barcode'),
-                    //   children: [
-                    //
-                    //     // ListTile(
-                    //     //   leading: const Icon(Icons.document_scanner),
-                    //     //   title: const Text('Scan Barcode'),
-                    //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-                    //     //   onTap: () {
-                    //     //     _navigate(Constants.barcodeScanRoute);
-                    //     //   },
-                    //     // ),
-                    //     // ListTile(
-                    //     //   leading: const Icon(Icons.verified),
-                    //     //   title: const Text('Verify Barcode'),
-                    //     //   contentPadding: const EdgeInsets.only(left: 32.0),
-                    //     //   onTap: () {
-                    //     //     _navigate(Constants.barcodeVerifyRoute);
-                    //     //   },
-                    //     // ),
-                    //   ],
-                    // ),
 
-                    // Validation Menu
                     ExpansionTile(
                       leading: const Icon(Icons.check_circle),
                       title: const Text('Validation'),
@@ -669,7 +580,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // Conversion Menu
                     ExpansionTile(
                       leading: const Icon(Icons.compare_arrows),
                       title: const Text('Conversion'),
@@ -685,7 +595,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    // Admin menu section
                     if (isAdmin) ...[
                       const Divider(),
                       const Padding(
@@ -701,7 +610,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ),
 
-                      // User Management Menu
                       ExpansionTile(
                         leading: const Icon(Icons.people),
                         title: const Text('User Management'),
@@ -725,7 +633,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      // Notifications Menu
                       ExpansionTile(
                         leading: const Icon(Icons.notifications),
                         title: const Text('Notifications'),
@@ -758,7 +665,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      // Batch Processing Menu
                       ExpansionTile(
                         leading: const Icon(Icons.batch_prediction),
                         title: const Text('Batch Processing'),
@@ -790,7 +696,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      // API Management Menu
                       ExpansionTile(
                         leading: const Icon(Icons.api),
                         title: const Text('API Management'),
@@ -822,7 +727,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      // System Tools Menu
                       ExpansionTile(
                         leading: const Icon(Icons.build),
                         title: const Text('System Tools'),
@@ -887,7 +791,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      // Test Data Generation Menu
                       ExpansionTile(
                         leading: const Icon(Icons.science),
                         title: const Text('Test Data Generation'),
@@ -914,11 +817,33 @@ class _AppDrawerState extends State<AppDrawer> {
 
                     const Divider(),
                     ListTile(
+                      leading: const Icon(Icons.api_rounded),
+                      title: const Text('Postman Collection'),
+                      subtitle: Text(
+                        isAdmin ? 'Download or update the API collection' : 'Download the API collection',
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      trailing: isAdmin
+                          ? Tooltip(
+                              message: 'Admin: download or upload',
+                              child: Icon(
+                                Icons.admin_panel_settings_outlined,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                              ),
+                            )
+                          : null,
+                      onTap: () => PostmanCollectionDialog.show(
+                        context,
+                        isAdmin: isAdmin,
+                      ),
+                    ),
+                    const Divider(),
+                    ListTile(
                       leading: const Icon(Icons.help),
                       title: const Text('Help & Support'),
                       onTap: () {
                         Navigator.pop(context);
-                        // Navigate to help page
                       },
                     ),
                     const Divider(),
@@ -946,11 +871,6 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Metrics
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Responsive drawer width and shape shared by [AppDrawer].
 abstract final class AppDrawerMetrics {
   static double widthFor(AppLayoutData layout) {
     return layout

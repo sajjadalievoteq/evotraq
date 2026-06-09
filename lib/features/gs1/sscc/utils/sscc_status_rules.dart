@@ -1,4 +1,3 @@
-/// Spec-aligned SSCC lifecycle state machine (mirrors [SsccStateMachine.java]).
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';

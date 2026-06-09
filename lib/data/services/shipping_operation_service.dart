@@ -246,7 +246,6 @@ class ShippingOperationService {
   }
 }
 
-/// Exception thrown by shipping operations
 class ShippingOperationException implements Exception {
   final String message;
   final int? statusCode;

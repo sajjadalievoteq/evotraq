@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Singleton service to persist dashboard data across navigation
 class DataConsistencyPersistenceService {
   static final DataConsistencyPersistenceService _instance = 
       DataConsistencyPersistenceService._internal();
@@ -9,17 +8,14 @@ class DataConsistencyPersistenceService {
   
   DataConsistencyPersistenceService._internal();
   
-  // Persisted data
   List<dynamic> _integrityJobs = [];
   List<Map<String, dynamic>> _correctionWorkflows = [];
   
-  // Data accessors
   List<dynamic> get integrityJobs => List.from(_integrityJobs);
   List<Map<String, dynamic>> get correctionWorkflows => List.from(_correctionWorkflows);
   
   List<Map<String, dynamic>> getCorrectionWorkflows() => List.from(_correctionWorkflows);
   
-  // Data mutators
   void addIntegrityJob(Map<String, dynamic> job) {
     _integrityJobs.insert(0, job);
     _notifyListeners();
@@ -38,10 +34,8 @@ class DataConsistencyPersistenceService {
     final existingIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
     
     if (existingIndex >= 0) {
-      // Update existing workflow
       _correctionWorkflows[existingIndex] = workflow;
     } else {
-      // Add new workflow
       _correctionWorkflows.insert(0, workflow);
     }
     _notifyListeners();
@@ -66,7 +60,6 @@ class DataConsistencyPersistenceService {
     _notifyListeners();
   }
   
-  // Simple notification system
   final List<VoidCallback> _listeners = [];
   
   void addListener(VoidCallback listener) {

@@ -1,14 +1,11 @@
 import 'package:equatable/equatable.dart';
 
-/// GLN Tobacco Extension model
-/// Based on EU TPD, FDA PMTA, WHO FCTC, and PACT Act requirements
 class GLNTobaccoExtension extends Equatable {
   final int? id;
   final int glnId;
   final String? glnCode;
   final String? locationName;
 
-  // EU Tobacco Products Directive (TPD)
   final String? euEconomicOperatorId;
   final String? euFacilityId;
   final bool euTpdRegistered;
@@ -16,52 +13,44 @@ class GLNTobaccoExtension extends Equatable {
   final bool euFirstRetailOutlet;
   final String? euImporterId;
 
-  // Tax Stamp Authority
   final String? taxStampAuthorityId;
   final String? taxStampAuthorityName;
   final DateTime? taxStampAuthorizationDate;
   final DateTime? taxStampAuthorizationExpiry;
   final String? authorizedTaxStampTypes;
 
-  // FDA/US Tobacco Regulation
   final String? fdaTobaccoEstablishmentId;
   final DateTime? fdaTobaccoRegistrationDate;
   final DateTime? fdaTobaccoRegistrationExpiry;
   final String? fdaPmtaSiteListing;
   final String? fdaSeSiteListing;
 
-  // PACT Act Compliance (US)
   final bool pactActRegistered;
   final String? pactActRegistrationNumber;
   final DateTime? pactActRegistrationDate;
   final String? pactAtfLicenseNumber;
 
-  // State/Regional Tobacco Licensing
   final String? stateTobaccoLicenseNumber;
   final String? stateTobaccoLicenseType;
   final DateTime? stateTobaccoLicenseExpiry;
   final String? stateTobaccoLicenseState;
 
-  // Wholesale/Distribution
   final String? tobaccoWholesaleLicenseNumber;
   final DateTime? tobaccoWholesaleLicenseExpiry;
   final bool masterSettlementAgreementParticipant;
   final String? msaEscrowAccountStatus;
 
-  // Manufacturing Capabilities
   final bool isManufacturingFacility;
   final String? manufacturingLicenseNumber;
   final DateTime? manufacturingLicenseExpiry;
   final int? manufacturingCapacityUnitsPerDay;
   final String? tobaccoTypesManufactured;
 
-  // Unique Identifier (UI) Issuance
   final bool isUiIssuer;
   final String? uiIssuerRegistrationId;
   final String? uiSystemProvider;
   final String? antiTamperingDeviceProvider;
 
-  // Import/Export
   final String? customsRegistrationNumber;
   final bool authorizedEconomicOperator;
   final String? aeoCertificateNumber;
@@ -69,19 +58,16 @@ class GLNTobaccoExtension extends Equatable {
   final bool bondedWarehouse;
   final String? bondedWarehouseLicenseNumber;
 
-  // Security & Compliance
   final bool hasSecurityFeatures;
   final bool videoSurveillance;
   final bool accessControlSystem;
   final String? inventoryTrackingSystem;
 
-  // Retailer-Specific
   final bool isRetailLocation;
   final String? ageVerificationSystem;
   final String? tobaccoSalesPermitNumber;
   final DateTime? tobaccoSalesPermitExpiry;
 
-  // Operational Details
   final String? receivingHours;
   final String? dispatchHours;
   final int? storageCapacityPallets;
@@ -91,7 +77,6 @@ class GLNTobaccoExtension extends Equatable {
   final double? climateControlHumidityMin;
   final double? climateControlHumidityMax;
 
-  // Responsible Persons (TPD requirement)
   final String? responsiblePersonName;
   final String? responsiblePersonEmail;
   final String? responsiblePersonPhone;
@@ -102,18 +87,15 @@ class GLNTobaccoExtension extends Equatable {
   final String? regulatoryAffairsContactEmail;
   final String? regulatoryAffairsContactPhone;
 
-  // International Regulatory IDs
   final String? whoFctcPartyCountry;
   final String? ukTobaccoTraceabilityId;
   final String? canadaTobaccoLicenseId;
   final String? australiaTobaccoLicenseId;
 
-  // Additional Data
   final List<Map<String, dynamic>>? additionalLicenses;
   final List<String>? authorizedBrands;
   final List<Map<String, dynamic>>? inspectionHistory;
 
-  // Audit Fields
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -692,19 +674,16 @@ class GLNTobaccoExtension extends Equatable {
     );
   }
 
-  /// Check if this location is EU TPD compliant
   bool get isEuCompliant =>
       euTpdRegistered &&
       euEconomicOperatorId != null &&
       euEconomicOperatorId!.isNotEmpty;
 
-  /// Check if PACT Act compliant
   bool get isPactActCompliant =>
       pactActRegistered &&
       pactActRegistrationNumber != null &&
       pactActRegistrationNumber!.isNotEmpty;
 
-  /// Check if FDA tobacco registration is valid
   bool get isFdaTobaccoRegistrationValid {
     if (fdaTobaccoRegistrationExpiry == null) {
       return fdaTobaccoEstablishmentId != null;
@@ -712,21 +691,17 @@ class GLNTobaccoExtension extends Equatable {
     return fdaTobaccoRegistrationExpiry!.isAfter(DateTime.now());
   }
 
-  /// Check if tax stamp authorization is valid
   bool get isTaxStampAuthorizationValid {
     if (taxStampAuthorizationExpiry == null) return taxStampAuthorityId != null;
     return taxStampAuthorizationExpiry!.isAfter(DateTime.now());
   }
 
-  /// Check if can issue unique identifiers
   bool get canIssueUniqueIdentifiers =>
       isUiIssuer && uiIssuerRegistrationId != null;
 
-  /// Check if has secure facility
   bool get hasSecureFacility =>
       hasSecurityFeatures || (videoSurveillance && accessControlSystem);
 
-  /// Check if AEO certification is valid
   bool get isAeoValid {
     if (!authorizedEconomicOperator) return false;
     if (aeoCertificateExpiry == null) return aeoCertificateNumber != null;

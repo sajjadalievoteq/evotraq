@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-/// Search field + optional refresh / quick-filters row (GTIN/GLN list “tile”).
 class Gs1ListSearchBar extends StatelessWidget {
   const Gs1ListSearchBar({
     super.key,
@@ -129,11 +128,8 @@ class Gs1ListSearchBar extends StatelessWidget {
                   ),
                 ),
 
-
-
               ],
             ),
-
 
           ),
         );

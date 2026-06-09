@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
 
-/// Parses a paginated or raw GLN list API payload without failing the whole batch.
 List<GLN> parseGlnListFromResponseData(dynamic responseData) {
   if (responseData == null) return const [];
 
@@ -29,7 +28,6 @@ List<GLN> _parseGlnMaps(List<dynamic> raw) {
     try {
       glns.add(GLN.fromJson(item));
     } catch (_) {
-      // Skip malformed rows; keep the rest of the catalog usable.
     }
   }
   return glns;

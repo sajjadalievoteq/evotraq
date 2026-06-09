@@ -8,11 +8,6 @@ class ThroughputAndEventsRow extends StatelessWidget {
 
   final AppLayoutData layout;
 
-  /// Shared height for throughput + EPCIS pair (stacked and tablet row).
-  ///
-  /// A [Row] inside [SingleChildScrollView] gets an unbounded max height; without
-  /// an explicit height, nested [Expanded] + [LayoutBuilder] (chart / stream)
-  /// can fail layout or hit-testing ("Cannot hit test a render box with no size").
   static double _pairSectionHeight(double maxWidth) {
     return (360 + maxWidth * 0.04).clamp(320.0, 460.0);
   }
@@ -46,8 +41,6 @@ class ThroughputAndEventsRow extends StatelessWidget {
           children: [
             SizedBox(height: h, child: const ThroughputChartSection()),
             SizedBox(height: layout.isCompact ? 16 : 20),
-            // No height constraint on mobile — the card sizes to its content
-            // and the parent SingleChildScrollView handles all scrolling.
             const EpcisEventStreamSection(),
           ],
         );

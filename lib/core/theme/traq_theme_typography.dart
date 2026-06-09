@@ -26,7 +26,6 @@ class TraqText {
   });
 
   factory TraqText.build(TraqColors c) {
-    // Use ONLY local bundled font (see pubspec.yaml). Do not fall back to network fonts.
     TextStyle base([double? size, FontWeight? weight, double? height]) =>
         TextStyle(
           fontFamily: fontFamily,
@@ -99,7 +98,6 @@ class TraqText {
     );
   }
 
-  /// Pull from context — we stash it on the theme via an extension.
   static TraqText of(BuildContext context) =>
       Theme.of(context).extension<_TraqTextExt>()!.text;
 

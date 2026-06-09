@@ -5,10 +5,6 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// Shows log-out confirmation, then signs out and navigates to login.
-///
-/// Uses [getIt] for [AuthCubit] and [AppRouter] so logout still runs when the
-/// caller context is unmounted (e.g. drawer closed before the dialog returns).
 Future<void> showLogoutConfirmDialog(BuildContext context) async {
   final dialogContext = _dialogHostContext(context);
 

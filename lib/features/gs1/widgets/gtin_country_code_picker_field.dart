@@ -3,12 +3,6 @@ import 'package:world_countries/world_countries.dart';
 
 import '../../../core/theme/traq_theme.dart';
 
-/// ISO 3166-1 numeric country picker (shared by GTIN and GLN).
-///
-/// Display text is derived from [controller] in [build]; there is no second
-/// [TextEditingController], so parent updates to the numeric code do not notify
-/// a nested [TextFormField] during the same layout/build phase (split-view GTIN
-/// switches).
 class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
     super.key,
@@ -60,8 +54,6 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
     _scheduleSync();
   }
 
-  /// Never call [setState] synchronously from [TextEditingController] listeners:
-  /// parents often assign [.text] during [didUpdateWidget], which overlaps layout.
   void _scheduleSync() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

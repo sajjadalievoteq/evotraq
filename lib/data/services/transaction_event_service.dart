@@ -5,11 +5,9 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
 import 'package:uuid/uuid.dart';
 
-/// Implementation of the TransactionEventService interface
 class TransactionEventService {
   final DioService _dioService;
 
-  /// Base endpoint for transaction event API
   late final String _baseUrl;
 
   TransactionEventService({required DioService dioService})
@@ -17,7 +15,6 @@ class TransactionEventService {
     _baseUrl = '${_dioService.baseUrl}/events/transaction';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -29,7 +26,6 @@ class TransactionEventService {
   Future<TransactionEvent> getTransactionEventById(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -301,7 +297,6 @@ class TransactionEventService {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    // Since there's no direct endpoint for this combined query, we'll get events by time and then filter by location
     final headers = await _getHeaders();
     final startTimeStr = startTime.toIso8601String();
     final endTimeStr = endTime.toIso8601String();
@@ -319,7 +314,6 @@ class TransactionEventService {
           .map((json) => TransactionEvent.fromJson(json))
           .toList();
 
-      // Filter by location
       return allEvents
           .where(
             (event) =>
@@ -388,18 +382,14 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
     ];
-    // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
 
-    // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
-    // Ensure GLN codes are sent correctly for lookup on the backend
     final Map<String, dynamic> requestData = {
       'eventId': eventId,
       'eventTime': formattedEventTime,
@@ -411,7 +401,7 @@ class TransactionEventService {
       'bizTransactionList': bizTransactionList,
       'epcList': epcs,
       'businessStep':
-          businessStep, // Send businessStep field as expected by the backend
+          businessStep,
       'disposition': disposition,
       'bizData': bizData,
       'action': 'ADD',
@@ -420,10 +410,9 @@ class TransactionEventService {
       'quantityList': <Map<String, dynamic>>[],
     };
 
-    // Only add GLN codes if they are not empty
     if (locationGLN.isNotEmpty) {
       requestData['businessLocation'] =
-          locationGLN; // Use businessLocation instead of bizLocation as field name
+          locationGLN;
       requestData['readPoint'] = locationGLN;
     }
 
@@ -466,18 +455,14 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
     ];
-    // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
 
-    // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
-    // Ensure GLN codes are sent correctly for lookup on the backend
     final Map<String, dynamic> requestData = {
       'eventId': eventId,
       'eventTime': formattedEventTime,
@@ -489,7 +474,7 @@ class TransactionEventService {
       'bizTransactionList': bizTransactionList,
       'epcList': epcs,
       'businessStep':
-          businessStep, // Send businessStep field as expected by the backend
+          businessStep,
       'disposition': disposition,
       'bizData': bizData,
       'action': 'DELETE',
@@ -498,10 +483,9 @@ class TransactionEventService {
       'quantityList': <Map<String, dynamic>>[],
     };
 
-    // Only add GLN codes if they are not empty
     if (locationGLN.isNotEmpty) {
       requestData['businessLocation'] =
-          locationGLN; // Use businessLocation instead of bizLocation as field name
+          locationGLN;
       requestData['readPoint'] = locationGLN;
     }
 
@@ -544,19 +528,15 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
 
-    // Build bizTransactionList in the format expected by the backend
     final bizTransactionList = [
       {'type': bizTransactionType, 'id': bizTransactionId},
     ];
-    // Format date with timezone information for Java ZonedDateTime compatibility
     final formattedEventTime = _formatDateForBackend(eventTime);
     final eventTimeZoneOffset = _getTimezoneOffset();
 
-    // Generate a unique event ID using the UUID package
     final uuid = Uuid();
     final eventId = 'urn:epcglobal:cbv:epcis:event:${uuid.v4()}';
 
-    // Ensure GLN codes are sent correctly for lookup on the backend
     final Map<String, dynamic> requestData = {
       'eventId': eventId,
       'eventTime': formattedEventTime,
@@ -568,7 +548,7 @@ class TransactionEventService {
       'bizTransactionList': bizTransactionList,
       'epcList': epcs,
       'businessStep':
-          businessStep, // Send businessStep field as expected by the backend
+          businessStep,
       'disposition': disposition,
       'bizData': bizData,
       'action': 'OBSERVE',
@@ -577,16 +557,14 @@ class TransactionEventService {
       'quantityList': <Map<String, dynamic>>[],
     };
 
-    // Only add GLN codes if they are not empty
     if (locationGLN.isNotEmpty) {
       requestData['businessLocation'] =
-          locationGLN; // Use businessLocation instead of bizLocation as field name
+          locationGLN;
       requestData['readPoint'] = locationGLN;
     }
 
     final body = json.encode(requestData);
 
-    // Since we might not have a dedicated endpoint for OBSERVE, we'll use the general create endpoint
     final response = await _dioService.post(
       _baseUrl,
       headers: headers,
@@ -613,24 +591,19 @@ class TransactionEventService {
     }
   }
 
-  /// Helper method to format date with proper timezone for Java ZonedDateTime
   String _formatDateForBackend(DateTime dateTime) {
-    // Ensure we're working with UTC time and add extra buffer for safety
     final utcDateTime = dateTime.toUtc().subtract(const Duration(seconds: 30));
     String isoString = utcDateTime.toIso8601String();
 
-    // Check if it already has timezone information
     if (isoString.endsWith('Z') ||
         isoString.contains('+') ||
         isoString.contains('-', isoString.length - 6)) {
       return isoString;
     }
 
-    // Add timezone offset
-    return '${isoString}Z'; // Use Z for UTC
+    return '${isoString}Z';
   }
 
-  /// Get timezone offset string for backend
   String _getTimezoneOffset() {
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();

@@ -21,7 +21,6 @@ class EPCConversionScreen extends StatefulWidget {
 class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   
-  // Text controllers for the conversion forms
   final _gtinController = TextEditingController();
   final _serialController = TextEditingController();
   final _sgtinEpcResultController = TextEditingController();
@@ -41,7 +40,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
 
   bool _isLoading = false;
   String? _errorMessage;
-  String _selectedEpcType = 'SGTIN'; // Default conversion type
+  String _selectedEpcType = 'SGTIN';
   final List<String> _epcTypes = ['SGTIN', 'SSCC', 'GLN'];
 
   @override
@@ -74,7 +73,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     super.dispose();
   }
 
-  // Convert GS1 identifier to EPC URI
   Future<void> _convertToEPC(int tabIndex) async {
     setState(() {
       _isLoading = true;
@@ -83,20 +81,20 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
 
     try {
       switch (tabIndex) {
-        case 0: // SGTIN to EPC
+        case 0:
           final epcUri = await widget.epcConversionService.convertSGTINToEPC(
             _gtinController.text,
             _serialController.text,
           );
           _sgtinEpcResultController.text = epcUri;
           break;
-        case 1: // SSCC to EPC
+        case 1:
           final epcUri = await widget.epcConversionService.convertSSCCToEPC(
             _ssccController.text,
           );
           _ssccEpcResultController.text = epcUri;
           break;
-        case 2: // GLN to EPC
+        case 2:
           final String? extension = _glnExtensionController.text.isEmpty 
               ? null 
               : _glnExtensionController.text;
@@ -118,7 +116,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     }
   }
 
-  // Convert EPC URI to GS1 identifier
   Future<void> _convertFromEPC() async {
     setState(() {
       _isLoading = true;
@@ -153,7 +150,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     }
   }
 
-  // Convert between GS1 Element String and EPC URI
   Future<void> _convertGS1ElementString() async {
     setState(() {
       _isLoading = true;
@@ -176,7 +172,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     }
   }
 
-  // Copy result to clipboard
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     context.showInfo('Copied to clipboard', duration: const Duration(seconds: 1));
@@ -202,19 +197,14 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
       body: TabBarView(
         controller: _tabController,
         children: [
-          // SGTIN to EPC Tab
           _buildSGTINToEPCForm(),
           
-          // SSCC to EPC Tab
           _buildSSCCToEPCForm(),
           
-          // GLN to EPC Tab
           _buildGLNToEPCForm(),
           
-          // EPC to GS1 Tab
           _buildEPCToGS1Form(),
           
-          // GS1 Element String to EPC Tab
           _buildGS1ElementStringToEPCForm(),
         ],
       ),
@@ -233,7 +223,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // GTIN Input
           TextFormField(
             controller: _gtinController,
             decoration: const InputDecoration(
@@ -245,7 +234,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // Serial Number Input
           TextFormField(
             controller: _serialController,
             decoration: const InputDecoration(
@@ -256,7 +244,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Convert Button
           ElevatedButton(
             onPressed: _isLoading ? null : () => _convertToEPC(0),
             child: _isLoading
@@ -265,7 +252,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Result
           if (_sgtinEpcResultController.text.isNotEmpty) ...[
             const Text(
               'EPC URI Result:',
@@ -288,7 +274,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             ),
           ],
           
-          // Error Message
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -313,7 +298,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // SSCC Input
           TextFormField(
             controller: _ssccController,
             decoration: const InputDecoration(
@@ -325,7 +309,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Convert Button
           ElevatedButton(
             onPressed: _isLoading ? null : () => _convertToEPC(1),
             child: _isLoading
@@ -334,7 +317,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Result
           if (_ssccEpcResultController.text.isNotEmpty) ...[
             const Text(
               'EPC URI Result:',
@@ -357,7 +339,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             ),
           ],
           
-          // Error Message
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -382,7 +363,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // GLN Input
           TextFormField(
             controller: _glnController,
             decoration: const InputDecoration(
@@ -394,7 +374,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // GLN Extension Input
           TextFormField(
             controller: _glnExtensionController,
             decoration: const InputDecoration(
@@ -405,7 +384,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Convert Button
           ElevatedButton(
             onPressed: _isLoading ? null : () => _convertToEPC(2),
             child: _isLoading
@@ -414,7 +392,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Result
           if (_glnEpcResultController.text.isNotEmpty) ...[
             const Text(
               'EPC URI Result:',
@@ -437,7 +414,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             ),
           ],
           
-          // Error Message
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -462,7 +438,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // EPC Type Selector
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'EPC Type',
@@ -483,7 +458,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // EPC URI Input
           TextFormField(
             controller: _epcUriController,
             decoration: const InputDecoration(
@@ -495,7 +469,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Convert Button
           ElevatedButton(
             onPressed: _isLoading ? null : _convertFromEPC,
             child: _isLoading
@@ -504,7 +477,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Result
           if (_epcConversionResultController.text.isNotEmpty) ...[
             const Text(
               'GS1 Identifier Result:',
@@ -527,7 +499,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             ),
           ],
           
-          // Error Message
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -552,7 +523,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          // GS1 Element String Input
           TextFormField(
             controller: _gs1ElementStringController,
             decoration: const InputDecoration(
@@ -564,7 +534,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Convert Button
           ElevatedButton(
             onPressed: _isLoading ? null : _convertGS1ElementString,
             child: _isLoading
@@ -573,7 +542,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 24),
           
-          // Result
           if (_gs1ToEpcResultController.text.isNotEmpty) ...[
             const Text(
               'EPC URI Result:',
@@ -596,7 +564,6 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             ),
           ],
           
-          // Error Message
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(

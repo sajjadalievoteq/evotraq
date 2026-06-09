@@ -1,4 +1,3 @@
-/// Dashboard statistics for home / operations overview.
 class DashboardStats {
   final int gtinCount;
   final int glnCount;
@@ -7,11 +6,8 @@ class DashboardStats {
   final int totalEvents;
   final Map<String, int> eventsByType;
 
-  /// Per-hour commissioning throughput for the last 24 h.
-  /// Key = hourIndex (0 = oldest, 23 = current hour), value = items commissioned.
   final Map<int, int> throughputBuckets;
 
-  /// Total items commissioned in the last 24 h.
   final int throughputTotal;
 
   DashboardStats({

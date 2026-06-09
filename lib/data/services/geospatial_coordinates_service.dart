@@ -4,24 +4,19 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// Implementation of the GeospatialCoordinatesService interface
 class GeospatialCoordinatesService {
   final DioService _dioService;
 
-  /// Base endpoint for geospatial coordinates API
   late final String _baseUrl;
 
-  /// Base endpoint for GLN API
   late final String _glnBaseUrl;
 
-  /// Constructor
   GeospatialCoordinatesService({required DioService dioService})
     : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/geospatial';
     _glnBaseUrl = '${_dioService.baseUrl}/identifiers/gln';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {
@@ -83,7 +78,6 @@ class GeospatialCoordinatesService {
   Future<GeospatialCoordinates> getGeospatialCoordinatesById(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -132,7 +126,6 @@ class GeospatialCoordinatesService {
   ) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -158,7 +151,6 @@ class GeospatialCoordinatesService {
   Future<void> deleteGeospatialCoordinates(String id) async {
     final headers = await _getHeaders();
 
-    // Extract UUID if the ID is in URN format
     String cleanId = id;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
@@ -196,7 +188,6 @@ class GeospatialCoordinatesService {
       }
       return null;
     } else if (response.statusCode == 404) {
-      // No coordinates found for this GLN
       return null;
     } else {
       throw Exception(

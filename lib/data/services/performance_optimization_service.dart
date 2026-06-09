@@ -1,15 +1,12 @@
 
-
 import '../../core/network/dio_service.dart';
 
-/// Service for Performance Optimization API calls
 class PerformanceOptimizationService {
   final DioService _dioService;
 
   PerformanceOptimizationService({required DioService dioService})
       : _dioService = dioService;
 
-  // Query Optimization Methods
   Future<Map<String, dynamic>> analyzeQueryExecutionPlan(String query) async {
     try {
       final response = await _dioService.post(
@@ -56,7 +53,6 @@ class PerformanceOptimizationService {
     }
   }
 
-  // Connection Pool Management Methods
   Future<Map<String, dynamic>> getOptimizedConnectionPoolConfig() async {
     try {
       final response = await _dioService.get(
@@ -101,7 +97,6 @@ class PerformanceOptimizationService {
     }
   }
 
-  // Thread Management Methods
   Future<Map<String, dynamic>> configureOptimalThreadPool({
     required String poolName,
     required int coreSize,
@@ -161,7 +156,6 @@ class PerformanceOptimizationService {
     }
   }
 
-  // Resource Management Methods
   Future<Map<String, dynamic>> optimizeMemoryUsage() async {
     try {
       final response = await _dioService.post(
@@ -206,7 +200,6 @@ class PerformanceOptimizationService {
     }
   }
 
-  // Comprehensive Performance Analytics Methods
   Future<Map<String, dynamic>> getPerformanceReport() async {
     try {
       final response = await _dioService.get(

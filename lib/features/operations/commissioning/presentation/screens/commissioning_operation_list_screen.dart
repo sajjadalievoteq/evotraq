@@ -20,11 +20,6 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 import 'package:world_countries/helpers.dart';
 
-/// Screen to list all commissioning operations with search and infinite scroll.
-///
-/// [embedded] = true  → no Scaffold/AppBar/Drawer/FAB; used inside the split-view.
-/// [onSelectOperation] → called when a card is tapped in embedded mode.
-/// [selectedBatchId]   → highlights the currently-selected card.
 class CommissioningOperationListScreen extends StatefulWidget {
   const CommissioningOperationListScreen({
     Key? key,
@@ -38,7 +33,6 @@ class CommissioningOperationListScreen extends StatefulWidget {
   final ValueChanged<String>? onSelectOperation;
   final String? selectedBatchId;
 
-  /// Called whenever the list loading state changes (true = started, false = done).
   final ValueChanged<bool>? onLoadingChanged;
 
   @override
@@ -182,7 +176,6 @@ class _CommissioningOperationListScreenState
         _currentPage = 0;
       });
       _filterOperations();
-      // Auto-select the first item on initial load in embedded/split-view mode.
       if (widget.embedded &&
           widget.selectedBatchId == null &&
           result.batches.isNotEmpty) {

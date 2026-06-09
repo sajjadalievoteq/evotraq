@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Tobacco product category enum
 enum TobaccoProductCategory {
   cigarette,
   cigar,
@@ -14,7 +13,6 @@ enum TobaccoProductCategory {
   other,
 }
 
-/// Extension to handle TobaccoProductCategory serialization
 extension TobaccoProductCategoryExtension on TobaccoProductCategory {
   String get value {
     switch (this) {
@@ -92,7 +90,6 @@ extension TobaccoProductCategoryExtension on TobaccoProductCategory {
   }
 }
 
-/// Tobacco curing method enum
 enum TobaccoCuringMethod {
   flueCured,
   airCured,
@@ -143,7 +140,6 @@ extension TobaccoCuringMethodExtension on TobaccoCuringMethod {
   }
 }
 
-/// GTIN Tobacco Extension model for tobacco-specific product attributes
 class GTINTobaccoExtension extends Equatable {
   final int? id;
   final int gtinId;

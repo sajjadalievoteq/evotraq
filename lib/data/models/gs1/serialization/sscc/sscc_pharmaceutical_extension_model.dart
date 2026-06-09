@@ -1,14 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-/// SSCC Pharmaceutical Extension model
-/// Based on GDP, cold chain, controlled substances, and
-/// pharmaceutical logistics regulatory compliance
 class SSCCPharmaceuticalExtension extends Equatable {
   final int? id;
   final int? ssccId;
   final String? ssccCode;
 
-  // Cold Chain Requirements
   final bool coldChainRequired;
   final double? minTemperatureCelsius;
   final double? maxTemperatureCelsius;
@@ -16,30 +12,25 @@ class SSCCPharmaceuticalExtension extends Equatable {
   final String? temperatureMonitoringDeviceId;
   final int? temperatureExcursionLimitMinutes;
 
-  // GDP (Good Distribution Practice) Compliance
   final bool gdpCompliant;
   final String? gdpCertificateNumber;
   final DateTime? gdpCertificateExpiry;
   final String? gdpIssuingAuthority;
 
-  // WHO PQS (Prequalified) Requirements
   final bool whoPqsRequired;
   final String? whoPqsEquipmentCode;
 
-  // Controlled Substances (DEA/INCB)
   final bool containsControlledSubstance;
   final String? deaSchedule;
   final String? deaOrderFormNumber;
   final String? incbAuthorizationNumber;
   final String? narcoticTransitPermit;
 
-  // Hazardous Materials
   final String? hazmatClass;
   final String? hazmatUnNumber;
   final String? hazmatPackingGroup;
   final String? hazmatSpecialProvisions;
 
-  // Environmental Controls
   final bool humidityControlled;
   final int? minHumidityPercent;
   final int? maxHumidityPercent;
@@ -47,29 +38,24 @@ class SSCCPharmaceuticalExtension extends Equatable {
   final bool orientationSensitive;
   final bool shockSensitive;
 
-  // Chain of Custody
   final bool chainOfCustodyRequired;
   final bool requiresSignatureOnReceipt;
   final bool requiresPharmacistVerification;
 
-  // Carrier/Transport Qualification
   final String? carrierGdpQualificationNumber;
   final DateTime? carrierGdpQualificationExpiry;
   final String? vehicleQualificationNumber;
   final DateTime? vehicleLastQualificationDate;
 
-  // Clinical Trial Shipments
   final bool clinicalTrialShipment;
   final String? clinicalTrialProtocolNumber;
   final String? irbApprovalNumber;
 
-  // Special Handling
   final String? specialHandlingInstructions;
   final bool fragile;
   final bool doNotStack;
   final bool thisSideUp;
 
-  // Audit Fields
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -426,7 +412,6 @@ class SSCCPharmaceuticalExtension extends Equatable {
       ];
 }
 
-/// DEA schedule types
 enum DEASchedule {
   scheduleI('I'),
   scheduleII('II'),
@@ -438,7 +423,6 @@ enum DEASchedule {
   final String code;
 }
 
-/// Hazmat class types
 enum HazmatClass {
   class1('1', 'Explosives'),
   class2('2', 'Gases'),

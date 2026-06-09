@@ -1,4 +1,3 @@
-// Models for authentication
 
 class LoginRequest {
   final String username;
@@ -80,7 +79,6 @@ class User {
   final bool enabled;
   final bool hasProfilePicture;
 
-  // Preferences — populated by GET /users/profile
   final bool darkMode;
   final String language;
   final bool emailNotifications;

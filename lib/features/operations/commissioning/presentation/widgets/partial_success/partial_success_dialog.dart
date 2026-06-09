@@ -7,8 +7,6 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import 'package:traqtrace_app/features/operations/commissioning/presentation/models/commissioning_failure_category.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_failure_analysis.dart';
 
-/// Shows a dialog describing partial-success results with categorized reasons
-/// and options to remove problematic serials before retry.
 Future<CommissioningPartialSuccessResult?> showPartialSuccessDialog(
   BuildContext context,
   CommissioningResponse response,

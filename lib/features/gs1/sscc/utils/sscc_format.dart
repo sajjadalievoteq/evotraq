@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 
-/// SSCC (AI 00) formatting helpers — 18-digit numeric identifier.
 abstract final class SsccFormat {
   static final RegExp _numeric18 = RegExp(r'^\d{18}$');
 

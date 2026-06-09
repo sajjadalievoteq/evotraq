@@ -9,7 +9,6 @@ class DataConsistencyService {
     required DioService dioService,
   }) : _dioService = dioService;
 
-  /// Perform consistency validation for a list of events
   Future<Map<String, dynamic>> performConsistencyValidation(List<String> eventIds) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.post(
@@ -30,7 +29,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Validate supply chain consistency for a specific EPC
   Future<Map<String, dynamic>> validateSupplyChainConsistency(
     String epc,
     DateTime startTime,
@@ -57,7 +55,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Run data integrity verification job
   Future<Map<String, dynamic>> runDataIntegrityVerificationJob(Map<String, dynamic> jobParams) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.post(
@@ -78,7 +75,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Get data integrity verification job status
   Future<Map<String, dynamic>> getIntegrityJobStatus(String jobId) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.get(
@@ -97,7 +93,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Get detailed integrity verification results for completed job
   Future<Map<String, dynamic>> getIntegrityJobResults(String jobId) async {
     final status = await getIntegrityJobStatus(jobId);
     if (status['status'] == 'COMPLETED' && status.containsKey('results')) {
@@ -107,7 +102,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Detect data anomalies in event patterns
   Future<List<dynamic>> detectDataAnomalies(
     Map<String, DateTime> timeRange,
     List<String> eventTypes,
@@ -137,7 +131,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Generate comprehensive consistency report
   Future<Map<String, dynamic>> generateConsistencyReport(
     DateTime startTime,
     DateTime endTime,
@@ -165,7 +158,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Validate business logic consistency
   Future<Map<String, dynamic>> validateBusinessLogicConsistency(List<Map<String, dynamic>> events) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.post(
@@ -186,7 +178,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Check for missing events in expected sequence
   Future<Map<String, dynamic>> checkMissingEvents(
     String epc,
     List<String> expectedSequence,
@@ -211,7 +202,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Validate event timing consistency
   Future<Map<String, dynamic>> validateEventTimingConsistency(List<Map<String, dynamic>> events) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.post(
@@ -232,7 +222,6 @@ class DataConsistencyService {
     }
   }
 
-  /// Cross-validate events against external data sources
   Future<Map<String, dynamic>> crossValidateWithExternalSources(
     List<Map<String, dynamic>> events,
     List<String> externalSources,

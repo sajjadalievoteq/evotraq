@@ -1,6 +1,4 @@
-// API paths, query keys, JSON keys, and user-facing error copy for GLN-related services.
 
-/// Master-data GLN REST API (prefix after [DioService.baseUrl]).
 abstract final class GlnMasterDataApiConsts {
   static const String prefix = '/master-data/glns';
   static const String search = '$prefix/search';
@@ -15,7 +13,6 @@ abstract final class GlnMasterDataApiConsts {
   static String validatePath(String glnCode) => '$prefix/validate/$glnCode';
 }
 
-/// GLN tobacco extension API (`/tobacco/gln`).
 abstract final class GlnTobaccoExtensionApiConsts {
   static const String prefix = '/tobacco/gln';
   static const String search = '$prefix/search';
@@ -37,7 +34,6 @@ abstract final class GlnTobaccoExtensionApiConsts {
       '$prefix/eu-economic-operator/$eoId';
 }
 
-/// Shared HTTP / JSON keys for GLN services.
 abstract final class GlnApiHttpConsts {
   static const String contentTypeJson = 'application/json';
   static const String bearerPrefix = 'Bearer ';
@@ -49,7 +45,6 @@ abstract final class GlnApiHttpConsts {
   static const String jsonKeyGlnCode = 'glnCode';
 }
 
-/// Exception and log messages for [GLNService] and extension clients.
 abstract final class GlnApiMessages {
   static const String noAuthToken = 'No authentication token found';
   static const String unexpectedListFormat =

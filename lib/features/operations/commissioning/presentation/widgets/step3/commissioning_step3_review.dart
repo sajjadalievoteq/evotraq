@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
-/// Step 3 of the commissioning wizard — review all entered data before submit.
 class CommissioningStep3Review extends StatelessWidget {
   const CommissioningStep3Review({
     super.key,

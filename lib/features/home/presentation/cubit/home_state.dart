@@ -21,12 +21,9 @@ class HomeState extends Equatable {
   final DashboardStats? stats;
   final List<RecentEvent>? recentEvents;
   final SystemHealthStatus? healthStatus;
-  /// When stats / events / health were last loaded successfully.
   final DateTime? lastDataRefreshAt;
   final String? errorMessage;
-  /// The hours window currently reflected in [DashboardStats.throughputBuckets].
   final int throughputHours;
-  /// True while a [HomeCubit.loadThroughput] call is in-flight.
   final bool throughputLoading;
 
   bool get isLoading => status == HomeLoadStatus.loading;

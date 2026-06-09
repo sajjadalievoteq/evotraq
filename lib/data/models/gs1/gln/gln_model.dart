@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_m
 import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
 
-/// Enum representing the type of location (legacy operational subtype).
 enum LocationType {
   manufacturing_site,
   warehouse,
@@ -16,66 +15,45 @@ enum LocationType {
   other
 }
 
-/// Model class representing a GLN (Global Location Number)
 class GLN extends Equatable {
-  /// The actual GLN code (13 digits) - primary identifier
   final String glnCode;
 
-  /// Name of the location
   final String locationName;
 
-  /// First line of the address
   final String addressLine1;
 
-  /// Second line of the address (optional)
   final String? addressLine2;
 
-  /// City
   final String city;
 
-  /// State or province
   final String stateProvince;
 
-  /// Postal code
   final String postalCode;
 
-  /// Country
   final String country;
 
-  /// Name of the contact person for this location
   final String? contactName;
 
-  /// Email address of the contact person
   final String? contactEmail;
 
-  /// Phone number of the contact person
   final String? contactPhone;
 
-  /// Type of location (manufacturing, warehouse, etc.)
   final LocationType locationType;
 
-  /// Parent GLN (if this is a child location)
   final GLN? parentGln;
 
-  /// License number (if applicable)
   final String? licenseNumber;
 
-  /// Type of license (if applicable)
   final String? licenseType;
 
-  /// License valid-from (if applicable)
   final DateTime? licenseValidFrom;
 
-  /// License expiry date (if applicable)
   final DateTime? licenseExpiry;
 
-  /// Whether this GLN is active (legacy; prefer [operatingStatus])
   final bool active;
 
-  /// EPCIS 2.0: Precise geospatial coordinates of the location
   final GeospatialCoordinates? coordinates;
 
-  /// GS1 operating status: DRAFT, ACTIVE, INACTIVE, DISCONTINUED
   final String? operatingStatus;
 
   final DateTime? effectiveFrom;
@@ -86,7 +64,6 @@ class GLN extends Equatable {
   final String? locationReferenceDigits;
   final String? checkDigit;
 
-  /// Resolved GCP length from backend (GS1 Company Prefix length table).
   final int? gs1CompanyPrefixLength;
 
   final String? registeredLegalName;
@@ -99,29 +76,23 @@ class GLN extends Equatable {
   final String? digitalAddressType;
   final String? digitalAddressValue;
 
-  /// AI (254) internal sub-location extension (paired with physical GLN / AI 414)
   final String? glnExtensionComponent;
 
   final String? industryClassification;
   final String? glnSource;
 
-  /// FIXED or MOBILE (physical locations)
   final String? mobility;
   final String? mobileLocationIdentifier;
 
-  /// GS1 GLN types (multi-valued): LEGAL_ENTITY, FUNCTION, FIXED_PHYSICAL, MOBILE_PHYSICAL, DIGITAL
   final List<String> glnTypes;
 
   final List<String> supplyChainRoles;
   final List<String> locationRoles;
 
-  /// Nested pharmaceutical extension (loaded/saved with master-data GLN).
   final GLNPharmaceuticalExtension? pharmaceuticalExtension;
 
-  /// Nested tobacco extension (loaded/saved with master-data GLN).
   final GLNTobaccoExtension? tobaccoExtension;
 
-  /// Creates a new GLN instance
   const GLN({
     required this.glnCode,
     required this.locationName,
@@ -170,7 +141,6 @@ class GLN extends Equatable {
     this.tobaccoExtension,
   });
 
-  /// Simple constructor that creates a GLN with only the code
   factory GLN.fromCode(String code) {
     return GLN(
       glnCode: code,

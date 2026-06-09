@@ -2,11 +2,9 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart
 
 final RegExp _ssccCodePattern = RegExp(r'^\d{18}$');
 
-/// True when [json] looks like an SSCC row (not a GLN or other master-data shape).
 bool isLikelySsccRecord(Map<String, dynamic> json) {
   final code = (json['sscc'] ?? json['ssccCode'] ?? '').toString().trim();
   if (!_ssccCodePattern.hasMatch(code)) return false;
-  // GLN payloads also use 13-digit codes in glnCode — never treat those as SSCC.
   if (json.containsKey('glnCode') && !json.containsKey('sscc') && !json.containsKey('ssccCode')) {
     return false;
   }
@@ -21,7 +19,6 @@ List<SSCC> parseSsccListFromContent(List<dynamic> contentList) {
     try {
       ssccs.add(SSCC.fromJson(item));
     } catch (_) {
-      // Skip malformed rows.
     }
   }
   return ssccs;

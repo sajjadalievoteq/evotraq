@@ -1,14 +1,11 @@
 part of 'traq_theme.dart';
 
-/// Card, dialog, bottom sheet, and snack bar themes for Traq.
 abstract final class TraqThemeCards {
   static CardThemeData card(TraqColors c) => CardThemeData(
         color: c.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 1,
         margin: EdgeInsets.zero,
-        // Default was Clip.none: children (gradients, charts, ink) paint past
-        // rounded [shape] corners ("bleeding"). Clip to the card outline.
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           side: BorderSide(color: c.border),

@@ -10,7 +10,6 @@ import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/skel
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// DEA Schedule options for controlled substances
 const List<String> _deaScheduleOptions = [
   'Schedule I',
   'Schedule II',
@@ -19,14 +18,12 @@ const List<String> _deaScheduleOptions = [
   'Schedule V',
 ];
 
-/// Hazmat packing group options
 const List<String> _hazmatPackingGroupOptions = [
-  'I',   // Great danger
-  'II',  // Medium danger
-  'III', // Minor danger
+  'I',
+  'II',
+  'III',
 ];
 
-/// Hazmat class options for pharmaceutical transport
 const Map<String, String> _hazmatClassOptions = {
   '2.2': 'Non-flammable Gas',
   '3': 'Flammable Liquid',
@@ -36,8 +33,6 @@ const Map<String, String> _hazmatClassOptions = {
   '9': 'Miscellaneous Dangerous Goods',
 };
 
-/// Widget that displays/edits pharmaceutical extension data for a SSCC (shipping container)
-/// Can be embedded in SSCC detail screens or used standalone
 class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? ssccId;
   final String? ssccCode;
@@ -59,14 +54,12 @@ class SSCCPharmaceuticalExtensionWidget extends StatefulWidget {
       SSCCPharmaceuticalExtensionWidgetState();
 }
 
-/// State class for SSCCPharmaceuticalExtensionWidget
 class SSCCPharmaceuticalExtensionWidgetState
     extends State<SSCCPharmaceuticalExtensionWidget> {
   SSCCPharmaceuticalExtension? _extension;
   bool _isLoading = true;
   bool _hasExtension = false;
 
-  // Cold Chain Requirements
   bool _coldChainRequired = false;
   final _minTemperatureCelsiusController = TextEditingController();
   final _maxTemperatureCelsiusController = TextEditingController();
@@ -74,30 +67,25 @@ class SSCCPharmaceuticalExtensionWidgetState
   final _temperatureMonitoringDeviceIdController = TextEditingController();
   final _temperatureExcursionLimitMinutesController = TextEditingController();
 
-  // GDP (Good Distribution Practice) Compliance
   bool _gdpCompliant = true;
   final _gdpCertificateNumberController = TextEditingController();
   DateTime? _gdpCertificateExpiry;
   final _gdpIssuingAuthorityController = TextEditingController();
 
-  // WHO PQS Requirements
   bool _whoPqsRequired = false;
   final _whoPqsEquipmentCodeController = TextEditingController();
 
-  // Controlled Substances (DEA/INCB)
   bool _containsControlledSubstance = false;
-  String? _deaSchedule; // Dropdown
+  String? _deaSchedule;
   final _deaOrderFormNumberController = TextEditingController();
   final _incbAuthorizationNumberController = TextEditingController();
   final _narcoticTransitPermitController = TextEditingController();
 
-  // Hazardous Materials
-  String? _hazmatClass; // Dropdown
+  String? _hazmatClass;
   final _hazmatUnNumberController = TextEditingController();
-  String? _hazmatPackingGroup; // Dropdown
+  String? _hazmatPackingGroup;
   final _hazmatSpecialProvisionsController = TextEditingController();
 
-  // Environmental Controls
   bool _humidityControlled = false;
   final _minHumidityPercentController = TextEditingController();
   final _maxHumidityPercentController = TextEditingController();
@@ -105,23 +93,19 @@ class SSCCPharmaceuticalExtensionWidgetState
   bool _orientationSensitive = false;
   bool _shockSensitive = false;
 
-  // Chain of Custody
   bool _chainOfCustodyRequired = false;
   bool _requiresSignatureOnReceipt = false;
   bool _requiresPharmacistVerification = false;
 
-  // Carrier/Transport Qualification
   final _carrierGdpQualificationNumberController = TextEditingController();
   DateTime? _carrierGdpQualificationExpiry;
   final _vehicleQualificationNumberController = TextEditingController();
   DateTime? _vehicleLastQualificationDate;
 
-  // Clinical Trial Shipments
   bool _clinicalTrialShipment = false;
   final _clinicalTrialProtocolNumberController = TextEditingController();
   final _irbApprovalNumberController = TextEditingController();
 
-  // Special Handling
   final _specialHandlingInstructionsController = TextEditingController();
   bool _fragile = false;
   bool _doNotStack = false;
@@ -167,9 +151,6 @@ class SSCCPharmaceuticalExtensionWidgetState
   }
 
   Future<void> _loadExtension() async {
-    // Load extension data if we have an ssccId OR ssccCode
-    // ssccId is preferred (from existing saved SSCC)
-    // ssccCode is used as fallback (when viewing by code)
     final hasValidSsccId = widget.ssccId != null;
     final hasValidSsccCode = widget.ssccCode != null && widget.ssccCode!.isNotEmpty;
 
@@ -187,7 +168,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       final service = getIt<SSCCPharmaceuticalExtensionService>();
       SSCCPharmaceuticalExtension? extension;
 
-      // Prefer loading by ssccId, fallback to ssccCode
       if (hasValidSsccId) {
         extension = await service.getBySsccId(widget.ssccId!);
       } else if (hasValidSsccCode) {
@@ -277,7 +257,6 @@ class SSCCPharmaceuticalExtensionWidgetState
     _thisSideUp = ext.thisSideUp;
   }
 
-  /// Check if user has entered any pharmaceutical data
   bool get hasData =>
       _coldChainRequired ||
       _minTemperatureCelsiusController.text.isNotEmpty ||
@@ -291,7 +270,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       _hazmatClass != null ||
       _clinicalTrialShipment;
 
-  /// Build the extension object from form data for external use
   SSCCPharmaceuticalExtension? buildExtension({int? ssccId, String? ssccCode}) {
     if (!hasData) return null;
 
@@ -394,7 +372,6 @@ class SSCCPharmaceuticalExtensionWidgetState
     );
   }
 
-  /// Save the extension - can be called from parent widget
   Future<SSCCPharmaceuticalExtension?> saveExtension(
       int ssccId, String ssccCode) async {
     try {
@@ -436,15 +413,11 @@ class SSCCPharmaceuticalExtensionWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Use listen: false to avoid rebuilding when provider changes and to prevent
-    // "Looking up a deactivated widget's ancestor" errors during navigation
-    // Wrap in try-catch to handle case when widget is deactivated during mode change
     bool isPharmaceuticalMode = false;
     try {
       final settings = context.read<SystemSettingsCubit>().state.settings;
       isPharmaceuticalMode = settings.isPharmaceuticalMode;
     } catch (e) {
-      // Widget is deactivated, return empty
       return const SizedBox.shrink();
     }
 

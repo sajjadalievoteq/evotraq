@@ -71,7 +71,6 @@ class QuickActionsGrid extends StatelessWidget {
           _ => 3,
         };
 
-        // GridView childAspectRatio = width / height.
         const childAspectRatio = 18 / 6;
 
         return GridView.builder(

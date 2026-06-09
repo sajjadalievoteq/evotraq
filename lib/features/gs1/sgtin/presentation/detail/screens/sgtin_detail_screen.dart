@@ -46,19 +46,14 @@ class SGTINDetailScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
   });
 
-  /// The ID of the SGTIN to load. Null when creating a new SGTIN.
   final String? sgtinId;
 
-  /// True when the form is in edit/create mode.
   final bool isEditing;
 
-  /// When true, no Scaffold is rendered (used in split-view).
   final bool embedded;
 
-  /// When true, renders a "select an item" placeholder (split-view idle state).
   final bool awaitingListSelection;
 
-  /// Called after a successful create/update when [embedded] is true.
   final VoidCallback? onEmbeddedActionSuccess;
 
   bool get isCreating => sgtinId == null;
@@ -91,8 +86,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
 
   String? _loadedSgtinId;
 
-  /// The full SGTIN model most recently loaded from the backend.
-  /// Used to display read-only sections not covered by form controllers.
   SGTIN? _loadedSgtin;
 
   @override
@@ -183,7 +176,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       _bestBeforeDate = sgtin.bestBeforeDate;
       _selectedStatus = sgtin.status;
       _selectedLocation = sgtin.currentLocation;
-      _selectedGtin = null; // read-only on existing — code shown via _gtinController
+      _selectedGtin = null;
       _loadedSgtinId = sgtin.id;
       _loadedSgtin = sgtin;
       _isLocalLoading = false;
@@ -312,7 +305,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
         }
 
         if (state.status == SGTINStatus.success && state.sgtin != null) {
-          // Populate form when the loaded ID matches what we requested
           if (widget.sgtinId != null &&
               state.sgtin!.id == widget.sgtinId &&
               state.sgtin!.id != _loadedSgtinId) {
@@ -397,7 +389,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                 formColumn: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── EPC Identity ───────────────────────────────────────
                     if (_loadedSgtin != null && !widget.isCreating) ...[
                       CardWithBackgroundWidget(
                         child: Padding(
@@ -434,7 +425,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                       ),
                     ],
 
-                    // ── Serial Item Identity ───────────────────────────────
                     SgtinSerialItemIdentityCard(
                       borderColor: borderColor,
                       isEditing: _isEditing,
@@ -452,7 +442,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                       setFieldError: setFieldError,
                     ),
 
-                    // ── Batch & Date Information ───────────────────────────
                     SgtinBatchDateCard(
                       borderColor: borderColor,
                       isCreating: widget.isCreating,
@@ -468,7 +457,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                           _pickDate((d) => setState(() => _bestBeforeDate = d)),
                     ),
 
-                    // ── Lifecycle Status ───────────────────────────────────
                     SgtinLifecycleStatusCard(
                       borderColor: borderColor,
                       isEditing: _isEditing,
@@ -479,7 +467,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                       onTransitionError: (msg) => context.showError(msg),
                     ),
 
-                    // ── Commissioning ──────────────────────────────────────
                     SgtinCommissioningCard(
                       borderColor: borderColor,
                       isEditing: _isEditing,
@@ -490,14 +477,12 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                           setState(() => _selectedLocation = gln),
                     ),
 
-                    // ── Current Location & Custody ─────────────────────────
                     if (_loadedSgtin != null && !widget.isCreating)
                       SgtinLocationCustodyCard(
                         sgtin: _loadedSgtin!,
                         borderColor: borderColor,
                       ),
 
-                    // ── Regulatory Information ─────────────────────────────
                     SgtinRegulatoryInfoCard(
                       borderColor: borderColor,
                       isEditing: _isEditing,
@@ -506,21 +491,18 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                       setFieldError: setFieldError,
                     ),
 
-                    // ── EPCIS Event Snapshot ───────────────────────────────
                     if (_loadedSgtin != null && !widget.isCreating)
                       SgtinEpcisSnapshotCard(
                         sgtin: _loadedSgtin!,
                         borderColor: borderColor,
                       ),
 
-                    // ── Verification (VRS) ─────────────────────────────────
                     if (_loadedSgtin != null && !widget.isCreating)
                       SgtinVerificationCard(
                         sgtin: _loadedSgtin!,
                         borderColor: borderColor,
                       ),
 
-                    // ── Serial Governance ──────────────────────────────────
                     if (_loadedSgtin != null &&
                         !widget.isCreating &&
                         (_loadedSgtin!.serialGenerationStrategy != null ||
@@ -533,14 +515,12 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                         borderColor: borderColor,
                       ),
 
-                    // ── Audit ──────────────────────────────────────────────
                     if (_loadedSgtin != null && !widget.isCreating)
                       SgtinAuditCard(
                         sgtin: _loadedSgtin!,
                         borderColor: borderColor,
                       ),
 
-                    // ── Pharmaceutical Extension ───────────────────────────
                     if (_loadedSgtin?.pharmaExtension != null &&
                         !widget.isCreating)
                       SgtinPharmaExtensionSection(
@@ -548,7 +528,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
                         borderColor: borderColor,
                       ),
 
-                    // ── Actions ────────────────────────────────────────────
                     if (!widget.isCreating &&
                         !_isEditing &&
                         _loadedSgtin != null &&
@@ -622,8 +601,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
     return widget.embedded ? body : Scaffold(body: body);
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
   String get _appBarTitle {
     if (widget.isCreating) return SgtinUiConstants.detailTitleCreate;
     if (_isEditing) return SgtinUiConstants.detailTitleEdit;
@@ -631,4 +608,3 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
   }
 
 }
-

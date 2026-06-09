@@ -4,11 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Read-only current location and custody card for the SGTIN detail screen.
-///
-/// Shows the current location GLN, location name, custodian GLN, SSCC
-/// container, parent EPC, and aggregation timestamp. Only rendered when
-/// viewing an existing SGTIN record.
 class SgtinLocationCustodyCard extends StatelessWidget {
   const SgtinLocationCustodyCard({
     super.key,

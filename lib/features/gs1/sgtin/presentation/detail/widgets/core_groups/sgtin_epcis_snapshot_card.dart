@@ -3,10 +3,6 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Read-only EPCIS event snapshot card for the SGTIN detail screen.
-///
-/// Shows the latest business step, disposition, and event ID from the EPCIS
-/// record. Only rendered when viewing an existing SGTIN record.
 class SgtinEpcisSnapshotCard extends StatelessWidget {
   const SgtinEpcisSnapshotCard({
     super.key,

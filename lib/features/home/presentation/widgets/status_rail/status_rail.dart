@@ -10,11 +10,6 @@ import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 
-/// Status strip with health and a wall clock.
-///
-/// The clock uses [Stream.periodic] (via [_WallClockTick]) so the time updates
-/// without waiting on [BlocBuilder]. There is no special “live clock” package:
-/// anything that updates on a schedule still uses a timer/stream under the hood.
 class StatusRail extends StatelessWidget {
   const StatusRail({super.key, required this.layout});
 
@@ -186,9 +181,6 @@ class StatusRail extends StatelessWidget {
   }
 }
 
-/// Emits [DateTime.now] once per second so descendants can show a live clock.
-/// [StreamBuilder] cancels the subscription when disposed (same lifecycle as a
-/// periodic [Timer], without manual [cancel]).
 class _WallClockTick extends StatefulWidget {
   const _WallClockTick({required this.builder});
 
@@ -223,8 +215,6 @@ class _WallClockTickState extends State<_WallClockTick> {
   }
 }
 
-/// Time zone for the clock: abbreviation when [DateFormat] provides it, else
-/// `timeZoneName`, else a UTC offset label (some web targets omit `z`).
 String _statusRailTimeZoneLabel(DateTime now) {
   final abbr = DateFormat('z').format(now).trim();
   if (abbr.isNotEmpty) return abbr;
@@ -247,7 +237,6 @@ String _utcOffsetLabel(Duration offset) {
   );
 }
 
-/// Data freshness (relative to [now]) and actuator build version when available.
 String? _homeFreshnessAndVersionLine({
   required DateTime? refreshedAt,
   required DateTime now,

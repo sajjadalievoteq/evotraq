@@ -3,15 +3,11 @@ import 'package:traqtrace_app/features/cache/models/cache_health.dart';
 
 import '../../core/network/dio_service.dart';
 
-
-/// Cache Service for managing caching operations in the TraqTrace system
-/// Provides interface to backend Phase 3.2 Caching Layer
 class CacheService {
   final DioService _dioService;
 
   CacheService({required DioService dioService}) : _dioService = dioService;
 
-  /// Get all cache statistics
   Future<CacheStatistics?> getAllCacheStatistics() async {
     try {
       final response = await _dioService.get('/cache/statistics');
@@ -22,7 +18,6 @@ class CacheService {
     }
   }
 
-  /// Get query result cache statistics
   Future<Map<String, dynamic>?> getQueryCacheStatistics() async {
     try {
       final response = await _dioService.get(
@@ -35,7 +30,6 @@ class CacheService {
     }
   }
 
-  /// Check cache health
   Future<CacheHealth?> getCacheHealth() async {
     try {
       final response = await _dioService.get('/cache/health');
@@ -46,7 +40,6 @@ class CacheService {
     }
   }
 
-  /// Get distributed cache health
   Future<Map<String, dynamic>?> getDistributedCacheHealth() async {
     try {
       final response = await _dioService.get('/cache/distributed/health');
@@ -57,7 +50,6 @@ class CacheService {
     }
   }
 
-  /// Warm up cache
   Future<bool> warmUpCache() async {
     try {
       await _dioService.post('/cache/warm-up', data: {});
@@ -69,7 +61,6 @@ class CacheService {
     }
   }
 
-  /// Clear query result cache
   Future<bool> clearQueryResultCache() async {
     try {
       await _dioService.delete('/cache/query-results');
@@ -81,7 +72,6 @@ class CacheService {
     }
   }
 
-  /// Evict specific query result
   Future<bool> evictQueryResult(String queryKey) async {
     try {
       await _dioService.delete('/cache/query-results/$queryKey');
@@ -93,7 +83,6 @@ class CacheService {
     }
   }
 
-  /// Clear master data cache for specific type
   Future<bool> clearMasterDataCache(String dataType) async {
     try {
       await _dioService.delete('/cache/master-data/$dataType');
@@ -105,7 +94,6 @@ class CacheService {
     }
   }
 
-  /// Clear all master data cache
   Future<bool> clearAllMasterDataCache() async {
     try {
       await _dioService.delete('/cache/master-data');
@@ -117,7 +105,6 @@ class CacheService {
     }
   }
 
-  /// Evict specific master data entry
   Future<bool> evictMasterData(String dataType, String key) async {
     try {
       await _dioService.delete('/cache/master-data/$dataType/$key');
@@ -129,7 +116,6 @@ class CacheService {
     }
   }
 
-  /// Refresh master data cache
   Future<bool> refreshMasterDataCache() async {
     try {
       await _dioService.post('/cache/master-data/refresh', data: {});
@@ -141,7 +127,6 @@ class CacheService {
     }
   }
 
-  /// Clear hot data cache
   Future<bool> clearHotDataCache() async {
     try {
       await _dioService.delete('/cache/hot-data');
@@ -153,7 +138,6 @@ class CacheService {
     }
   }
 
-  /// Identify and cache hot data
   Future<bool> identifyAndCacheHotData() async {
     try {
       await _dioService.post('/cache/hot-data/identify', data: {});
@@ -165,7 +149,6 @@ class CacheService {
     }
   }
 
-  /// Synchronize distributed cache
   Future<bool> synchronizeCache() async {
     try {
       await _dioService.post('/cache/synchronize', data: {});
@@ -177,7 +160,6 @@ class CacheService {
     }
   }
 
-  /// Clear all caches
   Future<bool> clearAllCaches() async {
     try {
       await _dioService.delete('/cache/all');

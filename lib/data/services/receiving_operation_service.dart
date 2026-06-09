@@ -225,7 +225,6 @@ class ReceivingOperationService {
   }
 }
 
-/// Exception class for receiving operation errors
 class ReceivingOperationException implements Exception {
   final String message;
   final int? statusCode;

@@ -26,7 +26,6 @@ class CommissioningOperationService {
     );
 
     try {
-      // Single POST /commissioning/bulk — replaces the per-serial N+1 loop
       final response = await _dioService.post(
         '$_baseUrl/commissioning/bulk',
         headers: _headers,
@@ -106,7 +105,6 @@ class CommissioningOperationService {
           },
         );
       } else {
-        // Non-2xx response — surface the backend error message
         String errorMsg;
         try {
           final errorData = jsonDecode(response.data) as Map<String, dynamic>;
@@ -178,7 +176,6 @@ class CommissioningOperationService {
   }
 
   Future<List<CommissioningResponse>> getCommissioningOperations() async {
-    // Uses GET /events/object/business-step/{bizStep} — path param, returns a plain List
     const bizStep = 'urn:epcglobal:cbv:bizstep:commissioning';
     try {
       final response = await _dioService.get(
@@ -190,7 +187,6 @@ class CommissioningOperationService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.data);
-        // Endpoint returns a plain List (not a Page wrapper)
         final List<dynamic> content = data is List ? data : (data['content'] ?? []);
 
         return content
@@ -226,14 +222,12 @@ class CommissioningOperationService {
     }
   }
 
-  /// Parse an ObjectEvent response to CommissioningResponse model
   CommissioningResponse _parseObjectEventToCommissioningResponse(
     Map<String, dynamic> event,
   ) {
     final epcList = event['epcList'] as List<dynamic>? ?? [];
     final ilmd = event['ilmd'] as Map<String, dynamic>?;
 
-    // Parse ILMD (Instance/Lot Master Data) fields
     String? gtinCode;
     String? batchLotNumber;
     String? itemDescription;
@@ -242,7 +236,6 @@ class CommissioningOperationService {
     DateTime? bestBeforeDate;
 
     if (ilmd != null) {
-      // Phase 1: keys use cbvmda: namespace prefix per GS1 CBV 2.0
       gtinCode = (ilmd['traqtrace:gtin'] ?? ilmd['gtin']) as String?;
       batchLotNumber = (ilmd['cbvmda:lotNumber'] ?? ilmd['lotNumber']) as String?;
       itemDescription = (ilmd['cbvmda:itemDescription'] ?? ilmd['itemDescription']) as String?;
@@ -259,10 +252,8 @@ class CommissioningOperationService {
       }
     }
 
-    // Create item results from epcList
     final itemResults = epcList.map((epc) {
       final epcUri = epc.toString();
-      // Extract serial number from EPC URI: urn:epc:id:sgtin:6290000.50003.asdasdas123123123ddd
       String serialNumber = epcUri;
       if (epcUri.contains('sgtin:')) {
         final parts = epcUri.split('.');
@@ -330,7 +321,6 @@ class CommissioningOperationService {
     }
   }
 
-  /// Fetch per-item results (serial numbers, EPC URIs, success/failure) for a batch.
   Future<List<CommissioningBatchItem>> getBatchItems(String batchId) async {
     try {
       final response = await _dioService.get(
@@ -352,16 +342,13 @@ class CommissioningOperationService {
     }
   }
 
-  /// Parse date from various formats (ISO date, ISO datetime, etc.)
   DateTime? _parseDate(dynamic dateValue) {
     if (dateValue == null) return null;
     final dateStr = dateValue.toString();
     try {
-      // Try parsing as ISO date (YYYY-MM-DD)
       if (dateStr.length == 10 && dateStr.contains('-')) {
         return DateTime.parse('${dateStr}T00:00:00Z');
       }
-      // Try parsing as full ISO datetime
       return DateTime.parse(dateStr);
     } catch (e) {
       debugPrint('CommissioningService: Error parsing date $dateStr: $e');

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Section heading used across GS1 (GTIN / GLN) detail forms.
 class SectionLabel extends StatelessWidget {
   const SectionLabel(
     this.text, {
@@ -17,7 +16,6 @@ class SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // Capitalize first word
     final String capitalizedText = text.isEmpty 
         ? text 
         : text[0].toUpperCase() + text.substring(1);

@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_tobacco_extension_model.dart';
 
-/// Service for SSCC tobacco extension operations
 class SSCCTobaccoExtensionService {
   final DioService _dioService;
 
@@ -13,10 +12,8 @@ class SSCCTobaccoExtensionService {
 
   String get _baseUrl => '${_dioService.baseUrl}/tobacco/sscc';
 
-  /// Auth is handled transparently by [DioService]'s interceptor.
   static const _headers = {'Content-Type': 'application/json'};
 
-  /// Create tobacco extension for an SSCC by code
   Future<SSCCTobaccoExtension> createBySsccCode(
     String ssccCode,
     SSCCTobaccoExtension extension,
@@ -38,7 +35,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Save or update tobacco extension for an SSCC
   Future<SSCCTobaccoExtension> saveBySsccId(
     int ssccId,
     SSCCTobaccoExtension extension,
@@ -60,7 +56,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by SSCC ID
   Future<SSCCTobaccoExtension?> getBySsccId(int ssccId) async {
     final response = await _dioService.get(
       '$_baseUrl/$ssccId',
@@ -80,7 +75,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Get tobacco extension by SSCC code
   Future<SSCCTobaccoExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
       '$_baseUrl/code/$ssccCode',
@@ -100,7 +94,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Delete tobacco extension for an SSCC
   Future<void> delete(int ssccId) async {
     final response = await _dioService.delete(
       '$_baseUrl/$ssccId',
@@ -116,7 +109,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Check if an SSCC has tobacco extension
   Future<bool> hasTobaccoExtension(int ssccId) async {
     final response = await _dioService.get(
       '$_baseUrl/$ssccId/exists',
@@ -134,7 +126,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Find shipments to EU first retail outlets
   Future<List<SSCCTobaccoExtension>>
   findShipmentsToEuFirstRetailOutlets() async {
     final response = await _dioService.get(
@@ -154,7 +145,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Find by country of destination
   Future<List<SSCCTobaccoExtension>> findByCountryOfDestination(
     String countryCode,
   ) async {
@@ -175,7 +165,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Find by seal number
   Future<SSCCTobaccoExtension?> findBySealNumber(String sealNumber) async {
     final response = await _dioService.get(
       '$_baseUrl/seal/$sealNumber',
@@ -195,7 +184,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Find by carrier license number
   Future<List<SSCCTobaccoExtension>> findByCarrierLicenseNumber(
     String licenseNumber,
   ) async {
@@ -216,7 +204,6 @@ class SSCCTobaccoExtensionService {
     }
   }
 
-  /// Find containers with multiple batches
   Future<List<SSCCTobaccoExtension>> findContainersWithMultipleBatches() async {
     final response = await _dioService.get(
       '$_baseUrl/multiple-batches',

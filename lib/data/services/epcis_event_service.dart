@@ -5,18 +5,14 @@ import 'package:traqtrace_app/features/epcis/models/epcis_document_dto.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/models/epcis_query_parameters_dto.dart';
 
-
-/// Implementation of the EPCIS Event Service using HTTP
 class EPCISEventService {
   final DioService _dioService;
   
-  /// Base endpoint for EPCIS events API
   late final String _baseUrl;
   EPCISEventService({required DioService dioService}) : _dioService = dioService {
     _baseUrl = '${_dioService.baseUrl}/events';
   }
 
-  /// Get authorization headers for API requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _dioService.getAuthToken();
     return {

@@ -1,6 +1,5 @@
 part of 'traq_theme.dart';
 
-/// Popup menu, menu, and dropdown menu themes for Traq.
 abstract final class TraqThemeMenus {
   static PopupMenuThemeData popupMenu(TraqColors c, ShapeBorder shape) =>
       PopupMenuThemeData(

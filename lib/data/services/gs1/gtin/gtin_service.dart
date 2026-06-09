@@ -7,11 +7,6 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_api_consts.dart';
 
-/// GTIN (Global Trade Item Number) master-data API client.
-///
-/// Auth is handled transparently by [DioService]'s interceptor, which reads
-/// the stored Bearer token and attaches it to every request. No manual token
-/// handling is needed here.
 class GTINService {
   final DioService _dioService;
 
@@ -179,8 +174,6 @@ class GTINService {
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.data);
-        // Backend may respond either with Spring's Page JSON (number/size/last)
-        // or our `PageResponse` DTO (pageNumber/pageSize/last). Support both.
         final content = data is Map<String, dynamic> ? data['content'] : null;
         final gtins = (content as List?)
                 ?.map((item) => GTIN.fromJson(item))
@@ -366,8 +359,6 @@ class GTINService {
     throw FormatException('Expected JSON object, got: ${v.runtimeType}');
   }
 
-  /// Derive GS1 identification parts for chips:
-  /// `gs1CompanyPrefixLength`, `gs1CompanyPrefix`, `itemReference`.
   Future<Map<String, dynamic>> deriveIdentification(String gtin) async {
     final response = await _dioService.post(
       '$_base${GtinApiConsts.deriveIdentificationPath}',
@@ -379,7 +370,6 @@ class GTINService {
 
     if (response.statusCode == 200) {
       try {
-        // Parse JSON in an isolate to keep UI smooth.
         return compute(_decodeJsonObject, response.data as String);
       } catch (e) {
         final ex = ApiException(

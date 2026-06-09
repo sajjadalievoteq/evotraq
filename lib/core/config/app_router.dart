@@ -19,7 +19,7 @@ import 'package:traqtrace_app/features/admin/screens/job_queue_management_screen
 import 'package:traqtrace_app/features/admin/screens/etl_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/bulk_export_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity_dashboard.dart';
-import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart'; // Added import
+import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/validation_rules_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
@@ -39,7 +39,6 @@ import 'package:traqtrace_app/features/home/presentation/screens/home_screen.dar
 import 'package:traqtrace_app/features/user/presentation/screens/profile_screen.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart';
-// EPCIS imports
 import 'package:traqtrace_app/features/epcis/screens/epcis_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/object_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/object_event_form_screen.dart';
@@ -57,7 +56,6 @@ import 'package:traqtrace_app/features/epcis/screens/transformation_event_form_s
 import 'package:traqtrace_app/features/epcis/screens/advanced_query_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/traversal_query_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/epcis_serialization_screen.dart';
-// Operations imports
 import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_detail_screen.dart';
@@ -71,20 +69,16 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/scr
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_list_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_screen.dart';
-// Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/screens/notification_center_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_management_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_details_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
-// Barcode imports
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
-// Dashboard imports
 import 'package:traqtrace_app/features/dashboards/screens/product_journey_screen.dart';
-// API Management imports
 import 'package:traqtrace_app/features/api_management/screens/partner_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_detail_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/credential_management_screen.dart';
@@ -146,8 +140,6 @@ class AppRouter {
         path == Constants.verifyEmailAliasRoute;
   }
 
-  /// Auth-only screens that authenticated users must never land on
-  /// (e.g. via hardware back button or browser history).
   bool _isAuthOnlyPath(String path) {
     return path == Constants.loginRoute ||
         path == Constants.registerRoute ||
@@ -174,19 +166,14 @@ class AppRouter {
     redirect: (context, state) {
       final path = state.uri.path;
 
-      // While auth is being restored, keep users on the splash screen
-      // instead of letting protected route guards send them to /login.
       if (_isAuthCheckPending() && !_isPublicPath(path)) {
         return _buildSplashRedirect(state);
       }
 
-      // Prevent authenticated users from navigating back to auth-only screens
-      // (e.g. hardware back button or browser history).
       if (authCubit.state.isAuthenticated && _isAuthOnlyPath(path)) {
         return Constants.homeRoute;
       }
 
-      // After logout, leave protected routes (drawer / app bar sign-out).
       if (!authCubit.state.isAuthenticated &&
           !_isPublicPath(path) &&
           !_isAuthCheckPending()) {
@@ -195,7 +182,6 @@ class AppRouter {
 
       return null;
     },
-    // Using modern GoRouter configuration
     routes: [
       GoRoute(
         path: Constants.splashRoute,
@@ -239,7 +225,6 @@ class AppRouter {
           );
         },
       ),
-      // Same screen as /reset-password — backend/email links often use /auth/...
       GoRoute(
         path: Constants.authResetPasswordRoute,
         pageBuilder: (context, state) {
@@ -296,7 +281,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Dashboard routes
       GoRoute(
         path: Constants.journeyDashboardRoute,
         pageBuilder: (context, state) {
@@ -314,7 +298,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Admin routes
       GoRoute(
         path: Constants.adminUsersRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -332,7 +315,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -357,7 +339,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -379,7 +360,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -401,7 +381,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.loginRoute;
           }
@@ -423,7 +402,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -445,7 +423,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -467,7 +444,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -489,7 +465,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -511,7 +486,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -533,7 +507,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -555,7 +528,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -655,7 +627,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -677,7 +648,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -685,7 +655,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Phase 3.3 Batch Processing routes
       GoRoute(
         path: Constants.adminJobQueueRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -700,7 +669,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -722,7 +690,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -744,7 +711,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -766,7 +732,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -774,7 +739,6 @@ class AppRouter {
           return null;
         },
       ),
-      // API Management routes
       GoRoute(
         path: Constants.adminApiPartnersRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -789,7 +753,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -814,7 +777,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -839,7 +801,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -864,7 +825,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -886,7 +846,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -894,7 +853,6 @@ class AppRouter {
           return null;
         },
       ),
-      // API Collections Management route
       GoRoute(
         path: Constants.adminApiCollectionsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -909,7 +867,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -917,7 +874,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Partner Access Management route
       GoRoute(
         path: Constants.adminApiPartnerAccessRoute,
         pageBuilder: (context, state) {
@@ -935,7 +891,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -943,7 +898,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Partner Access Management route (without partnerId)
       GoRoute(
         path: Constants.adminApiAccessRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -958,7 +912,6 @@ class AppRouter {
             return Constants.loginRoute;
           }
 
-          // Check if user has admin role
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
           }
@@ -966,7 +919,6 @@ class AppRouter {
           return null;
         },
       ),
-      // GTIN routes
       GoRoute(
         path: Constants.gs1GtinsRoute,
         pageBuilder: (context, state) =>
@@ -1027,7 +979,6 @@ class AppRouter {
           return null;
         },
       ),
-      // GLN routes
       GoRoute(
         path: Constants.gs1GlnsRoute,
         pageBuilder: (context, state) =>
@@ -1090,7 +1041,6 @@ class AppRouter {
           return null;
         },
       ),
-      // SSCC routes
       GoRoute(
         path: Constants.gs1SsccsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1160,7 +1110,6 @@ class AppRouter {
         },
       ),
 
-      // SGTIN routes
       GoRoute(
         path: Constants.gs1SgtinsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1224,7 +1173,6 @@ class AppRouter {
         },
       ),
 
-      // EPC Conversion route
       GoRoute(
         path: Constants.gs1EpcConversionRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1241,7 +1189,6 @@ class AppRouter {
           return null;
         },
       ),
-      // GS1 Validation Demo route
       GoRoute(
         path: Constants.gs1ValidationDemoRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1256,7 +1203,6 @@ class AppRouter {
           return null;
         },
       ),
-      // EPCIS Event Routes with placeholder screens
       GoRoute(
         path: Constants.epcisEventsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1328,7 +1274,6 @@ class AppRouter {
         },
       ),
 
-      // Advanced Query Interface Routes
       GoRoute(
         path: Constants.epcisAdvancedQueryRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1344,7 +1289,6 @@ class AppRouter {
         },
       ),
 
-      // Supply Chain Traversal Query Routes
       GoRoute(
         path: Constants.epcisTraversalQueryRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1360,7 +1304,6 @@ class AppRouter {
         },
       ),
 
-      // EPCIS Serialization & Format Conversion Routes
       GoRoute(
         path: Constants.epcisSerializationRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1376,7 +1319,6 @@ class AppRouter {
         },
       ),
 
-      // Routes for creating new EPCIS events
       GoRoute(
         path: Constants.epcisObjectEventNewRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1462,14 +1404,12 @@ class AppRouter {
         },
       ),
 
-      // Routes for viewing and editing existing EPCIS events
       GoRoute(
         path: Constants.epcisEventDetailRoute,
         pageBuilder: (context, state) {
           final eventId = state.pathParameters['id'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            // Generic event detail view
             child: Scaffold(
               appBar: AppBar(title: const Text('Event Details')),
               body: Center(child: Text('Viewing event ID: $eventId')),
@@ -1490,30 +1430,26 @@ class AppRouter {
           final id = state.pathParameters['id'] ?? '';
           final extra = state.extra;
 
-          // If we received the event object directly via the extra parameter
           if (extra is ObjectEvent) {
             return TraqRouterTransitions.page(
               key: state.pageKey,
               child: ObjectEventFormScreen(
                 event: extra,
-                isViewOnly: true, // Set to view mode
+                isViewOnly: true,
               ),
             );
           } else {
-            // Otherwise we need to fetch it - the provider would handle this
             return TraqRouterTransitions.page(
               key: state.pageKey,
               child: Builder(
                 builder: (context) {
-                  // Trigger loading of the event data
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     final cubit = context.read<ObjectEventsCubit>();
                     cubit.getObjectEvent(id);
                   });
 
-                  // Return the form screen that will display the event once loaded
                   return const ObjectEventFormScreen(
-                    isViewOnly: true, // Set to view mode
+                    isViewOnly: true,
                   );
                 },
               ),
@@ -1566,7 +1502,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Add route for Transaction Document operations
       GoRoute(
         path: Constants.epcisTransactionDocumentsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1614,7 +1549,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Aggregation Event Hierarchy Screen
       GoRoute(
         path: Constants.epcisAggregationEventHierarchyRoute,
         pageBuilder: (context, state) {
@@ -1640,7 +1574,6 @@ class AppRouter {
         },
       ),
 
-      // Operations routes
       GoRoute(
         path: Constants.opShippingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1687,7 +1620,6 @@ class AppRouter {
         },
       ),
 
-      // Receiving Operations routes
       GoRoute(
         path: Constants.opReceivingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1734,7 +1666,6 @@ class AppRouter {
         },
       ),
 
-      // Packing Operations routes
       GoRoute(
         path: Constants.opPackingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1781,7 +1712,6 @@ class AppRouter {
         },
       ),
 
-      // Commissioning Operations routes
       GoRoute(
         path: Constants.opCommissioningRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1831,7 +1761,6 @@ class AppRouter {
         },
       ),
 
-      // Notification routes
       GoRoute(
         path: Constants.notificationsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1892,7 +1821,6 @@ class AppRouter {
         },
       ),
 
-      // Barcode Routes - Using the new GS1 Barcode Scanner
       GoRoute(
         path: Constants.barcodeScanRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1909,7 +1837,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Barcode generation route
       GoRoute(
         path: Constants.barcodeGenerateRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
@@ -1941,7 +1868,6 @@ class AppRouter {
           return null;
         },
       ),
-      // Demo routes for showcasing validation
       TransactionEventValidationDemoRoute.getRoute(),
       GoRoute(
         path: Constants.demoValidationRulesRoute,

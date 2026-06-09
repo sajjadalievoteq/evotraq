@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 
-/// Service for SSCC pharmaceutical extension operations
 class SSCCPharmaceuticalExtensionService {
   final DioService _dioService;
 
@@ -13,19 +12,15 @@ class SSCCPharmaceuticalExtensionService {
     required DioService dioService,
   }) : _dioService = dioService;
 
-  /// Spec-aligned CRUD routes under `/identifiers/ssccs`.
   String get _specCrudBase =>
       '${_dioService.baseUrl}${SsccServiceConstants.pathBase}';
 
-  /// Legacy query routes (cold-chain, GDP, etc.).
   String get _legacyQueryBase => '${_dioService.baseUrl}/pharmaceutical/sscc';
 
-  /// Auth is handled transparently by [DioService]'s interceptor.
   static const _headers = {
     SsccServiceConstants.headerContentType: SsccServiceConstants.contentTypeJson,
   };
 
-  /// Create pharmaceutical extension for an SSCC by code
   Future<SSCCPharmaceuticalExtension> createBySsccCode(
     String ssccCode,
     SSCCPharmaceuticalExtension extension,
@@ -47,7 +42,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Save or update pharmaceutical extension for an SSCC
   Future<SSCCPharmaceuticalExtension> saveBySsccId(
     int ssccId,
     SSCCPharmaceuticalExtension extension,
@@ -69,7 +63,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Get pharmaceutical extension by SSCC ID
   Future<SSCCPharmaceuticalExtension?> getBySsccId(int ssccId) async {
     final response = await _dioService.get(
       '$_specCrudBase/$ssccId/pharmaceutical-extension',
@@ -89,7 +82,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Get pharmaceutical extension by SSCC code
   Future<SSCCPharmaceuticalExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
       '$_specCrudBase/code/$ssccCode/pharmaceutical-extension',
@@ -109,7 +101,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Delete pharmaceutical extension for an SSCC
   Future<void> delete(int ssccId) async {
     final response = await _dioService.delete(
       '$_specCrudBase/$ssccId/pharmaceutical-extension',
@@ -125,7 +116,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Check if an SSCC has pharmaceutical extension
   Future<bool> hasPharmaceuticalExtension(int ssccId) async {
     final response = await _dioService.get(
       '$_legacyQueryBase/$ssccId/exists',
@@ -143,9 +133,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Cold Chain Queries =====
-
-  /// Find all cold chain required shipments
   Future<List<SSCCPharmaceuticalExtension>> findColdChainShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/cold-chain',
@@ -166,7 +153,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Find shipments requiring temperature monitoring
   Future<List<SSCCPharmaceuticalExtension>>
       findTemperatureMonitoredShipments() async {
     final response = await _dioService.get(
@@ -188,9 +174,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== GDP Compliance Queries =====
-
-  /// Find GDP compliant shipments
   Future<List<SSCCPharmaceuticalExtension>> findGdpCompliantShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/gdp-compliant',
@@ -211,9 +194,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Controlled Substance Queries =====
-
-  /// Find controlled substance shipments
   Future<List<SSCCPharmaceuticalExtension>>
       findControlledSubstanceShipments() async {
     final response = await _dioService.get(
@@ -235,7 +215,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Find by DEA schedule
   Future<List<SSCCPharmaceuticalExtension>> findByDeaSchedule(
       String deaSchedule) async {
     final response = await _dioService.get(
@@ -257,9 +236,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Hazmat Queries =====
-
-  /// Find all hazmat shipments
   Future<List<SSCCPharmaceuticalExtension>> findHazmatShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/hazmat',
@@ -280,9 +256,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Chain of Custody Queries =====
-
-  /// Find shipments requiring chain of custody
   Future<List<SSCCPharmaceuticalExtension>> findChainOfCustodyShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/chain-of-custody',
@@ -303,7 +276,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Find shipments requiring signature on receipt
   Future<List<SSCCPharmaceuticalExtension>>
       findSignatureRequiredShipments() async {
     final response = await _dioService.get(
@@ -325,9 +297,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Clinical Trial Queries =====
-
-  /// Find clinical trial shipments
   Future<List<SSCCPharmaceuticalExtension>> findClinicalTrialShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/clinical-trial',
@@ -348,9 +317,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  // ===== Special Handling Queries =====
-
-  /// Find fragile shipments
   Future<List<SSCCPharmaceuticalExtension>> findFragileShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/fragile',
@@ -371,7 +337,6 @@ class SSCCPharmaceuticalExtensionService {
     }
   }
 
-  /// Find do-not-stack shipments
   Future<List<SSCCPharmaceuticalExtension>> findDoNotStackShipments() async {
     final response = await _dioService.get(
       '$_legacyQueryBase/do-not-stack',

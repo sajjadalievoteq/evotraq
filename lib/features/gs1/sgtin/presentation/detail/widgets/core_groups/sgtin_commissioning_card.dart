@@ -5,10 +5,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 
-/// Commissioning card for the SGTIN detail / create form.
-///
-/// Shows a [GLNSelector] when editing or creating, and read-only rows when
-/// viewing. The commissioning location is required when creating.
 class SgtinCommissioningCard extends StatelessWidget {
   const SgtinCommissioningCard({
     super.key,
@@ -24,9 +20,7 @@ class SgtinCommissioningCard extends StatelessWidget {
   final bool isEditing;
   final bool isCreating;
   final ValueChanged<GLN?> onLocationChanged;
-  /// The most recently loaded SGTIN (null when creating).
   final SGTIN? sgtin;
-  /// The GLN currently selected in state (may differ from [sgtin.currentLocation]).
   final GLN? selectedLocation;
 
   @override

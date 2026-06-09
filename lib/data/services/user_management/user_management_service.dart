@@ -17,8 +17,6 @@ class UserManagementService {
   final DioService _dioService;
   final TokenManager _tokenManager;
 
-  // ── Auth ─────────────────────────────────────────────────────────────────
-
   Future<String> _requireToken() async {
     final token = await _tokenManager.getToken();
     if (token == null) throw Exception('Authentication token not found');
@@ -30,13 +28,6 @@ class UserManagementService {
         'Authorization': 'Bearer $token',
       };
 
-  // ── Error extraction ──────────────────────────────────────────────────────
-
-  /// Parses a structured error body from the backend and returns a readable
-  /// message. Falls back to a generic message if the body cannot be decoded.
-  ///
-  /// Backend returns: `{"error": "..."}`, `{"message": "..."}`,
-  /// or `{"errors": {"field": "msg"}}` depending on the handler.
   String _errorMessage(String fallback, dynamic responseData) {
     if (responseData == null) return fallback;
     try {
@@ -57,8 +48,6 @@ class UserManagementService {
   Never _throwOnError(String fallback, dynamic data, int? statusCode) {
     throw Exception(_errorMessage('$fallback (HTTP $statusCode)', data));
   }
-
-  // ── Users ─────────────────────────────────────────────────────────────────
 
   Future<UserListResponse> getUsers({
     String? search,
@@ -183,8 +172,6 @@ class UserManagementService {
     _throwOnError(
         'Failed to change user role', response.data, response.statusCode);
   }
-
-  // ── Approvals ─────────────────────────────────────────────────────────────
 
   Future<List<UserResponse>> getPendingApprovals() async {
     final token = await _requireToken();

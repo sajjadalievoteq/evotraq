@@ -9,13 +9,11 @@ class MonitoringService {
   late final String _baseUrl;
   Timer? _realTimeTimer;
 
-  // Stream controllers for real-time updates
   final _performanceController = StreamController<PerformanceMetrics>.broadcast();
   final _storageController = StreamController<StorageStatistics>.broadcast();
   final _integrityController = StreamController<IntegrityStatistics>.broadcast();
   final _alertsController = StreamController<List<PerformanceAlert>>.broadcast();
 
-  // Getters for streams
   Stream<PerformanceMetrics> get performanceStream => _performanceController.stream;
   Stream<StorageStatistics> get storageStream => _storageController.stream;
   Stream<IntegrityStatistics> get integrityStream => _integrityController.stream;
@@ -25,7 +23,6 @@ class MonitoringService {
     _baseUrl = '${_dioService.baseUrl}/events/persistence';
   }
 
-  // Start real-time monitoring with configurable interval
   void startRealTimeMonitoring({Duration interval = const Duration(seconds: 5)}) {
     _realTimeTimer?.cancel();
     _realTimeTimer = Timer.periodic(interval, (_) async {
@@ -37,12 +34,10 @@ class MonitoringService {
     });
   }
 
-  // Stop real-time monitoring
   void stopRealTimeMonitoring() {
     _realTimeTimer?.cancel();
   }
 
-  // Fetch all metrics and update streams
   Future<void> _fetchAllMetrics() async {
     try {
       final futures = await Future.wait([
@@ -55,7 +50,6 @@ class MonitoringService {
       _storageController.add(futures[1] as StorageStatistics);
       _integrityController.add(futures[2] as IntegrityStatistics);
       
-      // Extract alerts from performance metrics
       final performance = futures[0] as PerformanceMetrics;
       _alertsController.add(performance.activeAlerts);
     } catch (e) {
@@ -63,7 +57,6 @@ class MonitoringService {
     }
   }
 
-  // Get headers with authentication
   Future<Map<String, String>> get _headers async {
     final token = await _dioService.getAuthToken();
     return {
@@ -72,7 +65,6 @@ class MonitoringService {
     };
   }
 
-  // Performance Metrics
   Future<PerformanceMetrics> getPerformanceMetrics() async {
     try {
       final response = await _dioService.get(
@@ -93,7 +85,6 @@ class MonitoringService {
     }
   }
 
-  // Storage Statistics
   Future<StorageStatistics> getStorageStatistics() async {
     try {
       final response = await _dioService.get(
@@ -114,7 +105,6 @@ class MonitoringService {
     }
   }
 
-  // Integrity Statistics
   Future<IntegrityStatistics> getIntegrityStatistics() async {
     try {
       final response = await _dioService.get(
@@ -135,7 +125,6 @@ class MonitoringService {
     }
   }
 
-  // Get bulk job progress
   Future<BulkJobStatus> getBulkJobProgress(String jobId) async {
     try {
       final response = await _dioService.get(
@@ -156,7 +145,6 @@ class MonitoringService {
     }
   }
 
-  // Create background job for bulk processing
   Future<String> createBulkJob(String jobType, Map<String, dynamic> parameters) async {
     try {
       final response = await _dioService.post(
@@ -181,7 +169,6 @@ class MonitoringService {
     }
   }
 
-  // Archive old events
   Future<Map<String, dynamic>> archiveEvents(DateTime cutoffDate) async {
     try {
       final response = await _dioService.post(
@@ -204,7 +191,6 @@ class MonitoringService {
     }
   }
 
-  // Compress event data
   Future<Map<String, dynamic>> compressEvents(List<String> eventIds) async {
     try {
       final response = await _dioService.post(
@@ -227,7 +213,6 @@ class MonitoringService {
     }
   }
 
-  // Verify event integrity
   Future<Map<String, dynamic>> verifyEventIntegrity(String eventId) async {
     try {
       final response = await _dioService.get(
@@ -247,7 +232,6 @@ class MonitoringService {
     }
   }
 
-  // Configure transaction isolation
   Future<bool> configureTransactionIsolation(String isolationLevel) async {
     try {
       final response = await _dioService.post(
@@ -266,7 +250,6 @@ class MonitoringService {
     }
   }
 
-  // Resolve deadlocks
   Future<Map<String, dynamic>> resolveDeadlocks() async {
     try {
       final response = await _dioService.post(
@@ -286,7 +269,6 @@ class MonitoringService {
     }
   }
 
-  // Get historical performance data
   Future<List<PerformanceMetrics>> getHistoricalPerformance({
     required DateTime startDate,
     required DateTime endDate,
@@ -316,7 +298,6 @@ class MonitoringService {
     }
   }
 
-  // Acknowledge alert
   Future<bool> acknowledgeAlert(String alertId) async {
     try {
       final response = await _dioService.post(
@@ -332,7 +313,6 @@ class MonitoringService {
     }
   }
 
-  // Cleanup resources
   void dispose() {
     _realTimeTimer?.cancel();
     _performanceController.close();
@@ -342,7 +322,6 @@ class MonitoringService {
   }
 }
 
-// Monitoring service singleton
 class MonitoringServiceProvider {
   static MonitoringService? _instance;
 

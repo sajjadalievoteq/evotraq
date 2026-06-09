@@ -1,26 +1,20 @@
 import 'package:equatable/equatable.dart';
 
-/// SSCC Tobacco Extension model
-/// Based on EU TPD transport requirements, tax stamp aggregation,
-/// and tobacco logistics regulatory compliance
 class SSCCTobaccoExtension extends Equatable {
   final int? id;
   final int? ssccId;
   final String? ssccCode;
 
-  // EU TPD (Tobacco Products Directive) Transport Compliance
   final String? euTransportUnitId;
   final String? euRouteAuthorizationNumber;
   final DateTime? euRouteAuthorizationDate;
   final DateTime? euRouteAuthorizationExpiry;
   final bool euFirstRetailOutlet;
 
-  // Tax Stamp Aggregation
   final String? taxStampAggregationLevel;
   final int? aggregatedStampCount;
   final String? taxStampAuthorityId;
 
-  // Export/Import Documentation
   final String? customsDeclarationNumber;
   final DateTime? customsDeclarationDate;
   final String? exportLicenseNumber;
@@ -31,28 +25,23 @@ class SSCCTobaccoExtension extends Equatable {
   final String? countryOfOrigin;
   final String? countryOfDestination;
 
-  // Transport Security
   final String? sealNumber;
   final String? sealType;
   final String? sealedBy;
   final DateTime? sealedDate;
 
-  // Carrier Information
   final String? carrierLicenseNumber;
   final String? carrierTobaccoPermitNumber;
   final String? driverId;
   final String? vehicleRegistration;
 
-  // State/Regional Compliance (US)
   final String? pactActManifestNumber;
   final String? stateTransitPermitNumber;
   final String? stateTransitPermitState;
 
-  // Manufacturing Batch Tracking
   final bool containsMultipleBatches;
   final String? primaryBatchNumber;
 
-  // Audit Fields
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -342,7 +331,6 @@ class SSCCTobaccoExtension extends Equatable {
       ];
 }
 
-/// Enum for seal types
 enum SealType {
   bolt,
   cable,
@@ -352,7 +340,6 @@ enum SealType {
   other,
 }
 
-/// Enum for tax stamp aggregation level
 enum TaxStampAggregationLevel {
   caseLevel,
   pallet,

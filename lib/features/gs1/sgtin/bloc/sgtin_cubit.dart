@@ -4,9 +4,6 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 import '../../../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 
-
-
-
 enum SGTINStatus { initial, loading, success, error }
 
 class SGTINState extends Equatable {
@@ -88,7 +85,6 @@ class SGTINState extends Equatable {
 class SGTINCubit extends Cubit<SGTINState> {
   final SGTINService _sgtinService;
 
-  // Default size for pagination
   static const int _defaultPageSize = 20;
 
   SGTINCubit({required SGTINService sgtinService})
@@ -135,7 +131,6 @@ class SGTINCubit extends Cubit<SGTINState> {
     String sortDirection = 'DESC',
     bool isLoadMore = false,
   }) async {
-    // For first page or initial load, show loading state. For pagination, maintain current data
     if (page == 0 || !isLoadMore) {
       emit(state.copyWith(status: SGTINStatus.loading));
     } else {
@@ -160,7 +155,6 @@ class SGTINCubit extends Cubit<SGTINState> {
       final int totalPages = result['totalPages'] ?? 0;
       final bool isLast = result['last'] ?? true;
 
-      // If this is first page or not loading more, replace data. Otherwise append.
       if (page == 0 || !isLoadMore) {
         emit(state.copyWith(
           status: SGTINStatus.success,
@@ -172,7 +166,6 @@ class SGTINCubit extends Cubit<SGTINState> {
           error: null,
         ));
       } else {
-        // For pagination, append the new data
         final List<SGTIN> updatedSgtins = List.from(state.sgtins ?? [])..addAll(sgtins);
         emit(state.copyWith(
           status: SGTINStatus.success,
@@ -259,7 +252,6 @@ class SGTINCubit extends Cubit<SGTINState> {
         creationSuccessful: true,
       ));
       
-      // Reset the creation flag
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!isClosed) {
           emit(state.copyWith(creationSuccessful: false));
@@ -448,8 +440,6 @@ class SGTINCubit extends Cubit<SGTINState> {
     }
   }
 
-  /// Fetches the list of statuses that the SGTIN with [id] may transition to
-  /// from its current status. The result is emitted via [SGTINState.availableTransitions].
   Future<void> fetchAvailableTransitions(String id) async {
     try {
       final transitions = await _sgtinService.getAvailableTransitions(id);

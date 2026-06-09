@@ -1,4 +1,3 @@
-/// Enumeration representing the industry mode of the system.
 enum IndustryMode {
   pharmaceutical('Pharmaceutical', 'Pharma track & trace for drugs and medical devices'),
   tobacco('Tobacco', 'Tobacco track & trace with tax stamp and health warning compliance');
@@ -8,10 +7,9 @@ enum IndustryMode {
 
   const IndustryMode(this.displayName, this.description);
 
-  /// Parse from string (case-insensitive).
   static IndustryMode fromString(String? value) {
     if (value == null || value.isEmpty) {
-      return IndustryMode.pharmaceutical; // Default
+      return IndustryMode.pharmaceutical;
     }
     final normalized = value.toUpperCase().trim();
     return IndustryMode.values.firstWhere(
@@ -20,11 +18,9 @@ enum IndustryMode {
     );
   }
 
-  /// Convert to API value (uppercase).
   String toApiValue() => name.toUpperCase();
 }
 
-/// Model representing system settings.
 class SystemSettings {
   final IndustryMode industryMode;
   final String systemName;
@@ -42,7 +38,6 @@ class SystemSettings {
     required this.dateTimeFormat,
   });
 
-  /// Default settings.
   factory SystemSettings.defaults() {
     return const SystemSettings(
       industryMode: IndustryMode.pharmaceutical,
@@ -76,7 +71,6 @@ class SystemSettings {
     };
   }
 
-  /// Convenience getters
   bool get isPharmaceuticalMode => industryMode == IndustryMode.pharmaceutical;
   bool get isTobaccoMode => industryMode == IndustryMode.tobacco;
 
@@ -99,7 +93,6 @@ class SystemSettings {
   }
 }
 
-/// Statistics about data that would be cleared when switching modes.
 class DataClearStatistics {
   final int gtinCount;
   final int sgtinCount;
@@ -134,7 +127,6 @@ class DataClearStatistics {
     );
   }
 
-  /// Total number of records that would be cleared.
   int get totalRecords =>
       gtinCount +
       sgtinCount +
@@ -145,6 +137,5 @@ class DataClearStatistics {
       taxStampCount +
       manufacturingBatchCount;
 
-  /// Check if there's any data to clear.
   bool get hasData => totalRecords > 0;
 }

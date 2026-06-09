@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Date-only picker row (InputDecorator + ink tap). Used by GLN-style forms.
 class Gs1DatePickerField extends StatelessWidget {
   const Gs1DatePickerField({
     super.key,
@@ -53,8 +52,6 @@ class Gs1DatePickerField extends StatelessWidget {
   }
 }
 
-/// Read-only [TextFormField] + tap opens picker; display text lives in [controller].
-/// Used by GTIN lifecycle / marketing date flows that need [Form] validation.
 class Gs1DateFormField extends StatelessWidget {
   const Gs1DateFormField({
     super.key,

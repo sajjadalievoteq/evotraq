@@ -1,7 +1,5 @@
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 
-/// Routes used from the home feature. Values mirror [Constants]; this file is
-/// the single import surface for home navigation.
 abstract final class HomeNavigation {
   static const String home = Constants.homeRoute;
 

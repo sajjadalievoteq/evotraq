@@ -13,8 +13,6 @@ class HomeCubit extends Cubit<HomeState> {
   final DashboardService _dashboardService;
   final HomeOverviewSessionStore _sessionStore;
 
-  /// Loads home overview, reusing [HomeOverviewSessionStore] for the same
-  /// [accountEmail] unless [forceRefresh] is true.
   Future<void> load({
     String? accountEmail,
     bool forceRefresh = false,
@@ -82,12 +80,9 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// Pull-to-refresh: always hits the network.
   Future<void> refresh({String? accountEmail}) =>
       load(accountEmail: accountEmail, forceRefresh: true);
 
-  /// Fetches throughput data for [hours] and updates the current stats.
-  /// Does not reload the full dashboard — only the throughput buckets change.
   Future<void> loadThroughput(int hours) async {
     emit(state.copyWith(throughputHours: hours, throughputLoading: true));
     try {

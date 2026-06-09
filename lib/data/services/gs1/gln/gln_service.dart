@@ -7,11 +7,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 
-/// GLN (Global Location Number) master-data API client.
-///
-/// Auth is handled transparently by [DioService]'s interceptor, which reads
-/// the stored Bearer token and attaches it to every request. No manual token
-/// handling is needed here.
 class GLNService {
   final DioService _dioService;
 
@@ -337,8 +332,6 @@ class GLNService {
     }
   }
 
-  /// Derive GS1 identification for chips: [gs1CompanyPrefixLength], [gs1CompanyPrefix],
-  /// [locationReference], [checkDigit].
   Future<Map<String, dynamic>> deriveIdentification(String glnCode) async {
     final response = await _dioService.post(
       '${_dioService.baseUrl}${GlnMasterDataApiConsts.deriveIdentification}',

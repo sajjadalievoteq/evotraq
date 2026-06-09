@@ -6,12 +6,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as status_rules;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Lifecycle status card for the SGTIN detail / create form.
-///
-/// When editing an existing SGTIN with available status transitions, shows an
-/// editable dropdown. Otherwise shows a read-only info row with a status colour.
-/// Also displays commissioned and decommissioned timestamps from the loaded
-/// SGTIN record.
 class SgtinLifecycleStatusCard extends StatelessWidget {
   const SgtinLifecycleStatusCard({
     super.key,
@@ -67,7 +61,6 @@ class SgtinLifecycleStatusCard extends StatelessWidget {
     );
   }
 
-  /// Editable dropdown when transitions are available; read-only row otherwise.
   Widget _buildStatusField(BuildContext context) {
     if (isEditing && !isCreating && selectedStatus != null) {
       final options = status_rules.selectableStatuses(selectedStatus!);

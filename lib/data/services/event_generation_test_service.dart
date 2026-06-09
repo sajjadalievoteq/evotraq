@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Service for event generation test functionality
-/// Provides API access to test event generation, simulation, and data management
 class EventGenerationTestService {
   final DioService _dioService;
 
@@ -11,7 +9,6 @@ class EventGenerationTestService {
     required DioService dioService,
   }) : _dioService = dioService;
 
-  /// Make authenticated GET request
   Future<Map<String, dynamic>> _getWithAuth(String path) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
@@ -35,7 +32,6 @@ class EventGenerationTestService {
     }
   }
 
-  /// Make authenticated POST request
   Future<Map<String, dynamic>> _postWithAuth(String path, Map<String, dynamic> body) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
@@ -60,7 +56,6 @@ class EventGenerationTestService {
     }
   }
 
-  /// Make authenticated DELETE request
   Future<Map<String, dynamic>> _deleteWithAuth(String path) async {
     final token = await _dioService.getAuthToken();
     if (token == null) {
@@ -84,14 +79,10 @@ class EventGenerationTestService {
     }
   }
 
-  // Event Generation Methods
-  
-  /// Generate single test event
   Future<Map<String, dynamic>> generateSingleEvent(String eventType, Map<String, dynamic> params) async {
     return await _postWithAuth('/admin/event-generation-tests/generate/$eventType', params);
   }
   
-  /// Generate bulk test events
   Future<BulkGenerationResult> generateBulkEvents(String eventType, int count, Map<String, dynamic> params) async {
     final requestBody = {
       'count': count,
@@ -101,59 +92,46 @@ class EventGenerationTestService {
     return BulkGenerationResult.fromJson(json);
   }
 
-  // Event Simulation Methods
-  
-  /// Start supply chain simulation
   Future<SimulationSession> startSupplyChainSimulation(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/simulation/supply-chain/start', params);
     return SimulationSession.fromJson(json);
   }
   
-  /// Stop supply chain simulation
   Future<SimulationResult> stopSupplyChainSimulation(String sessionId) async {
     final json = await _postWithAuth('/admin/event-generation-tests/simulation/supply-chain/stop', {'sessionId': sessionId});
     return SimulationResult.fromJson(json);
   }
   
-  /// Get simulation status
   Future<SimulationStatus> getSimulationStatus(String sessionId) async {
     final json = await _getWithAuth('/admin/event-generation-tests/simulation/$sessionId/status');
     return SimulationStatus.fromJson(json);
   }
   
-  /// Start real-time event generation
   Future<RealTimeGenerationSession> startRealTimeGeneration(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/real-time/start', params);
     return RealTimeGenerationSession.fromJson(json);
   }
   
-  /// Stop real-time event generation
   Future<RealTimeGenerationResult> stopRealTimeGeneration(String sessionId) async {
     final json = await _postWithAuth('/admin/event-generation-tests/real-time/stop', {'sessionId': sessionId});
     return RealTimeGenerationResult.fromJson(json);
   }
   
-  /// Generate time-compressed sequence
   Future<TimeCompressedSequenceResult> generateTimeCompressedSequence(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/time-compressed', params);
     return TimeCompressedSequenceResult.fromJson(json);
   }
   
-  /// Generate randomized variations
   Future<RandomizedVariationResult> generateRandomizedVariations(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/randomized', params);
     return RandomizedVariationResult.fromJson(json);
   }
   
-  /// Inject anomalies
   Future<AnomalyInjectionResult> injectAnomalies(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/inject-anomalies', params);
     return AnomalyInjectionResult.fromJson(json);
   }
 
-  // Test Data Management Methods
-  
-  /// Create test environment
   Future<TestEnvironment> createTestEnvironment(String name, Map<String, dynamic> params) async {
     final requestBody = {
       'name': name,
@@ -163,7 +141,6 @@ class EventGenerationTestService {
     return TestEnvironment.fromJson(json);
   }
   
-  /// Get test environments
   Future<List<TestEnvironment>> getTestEnvironments() async {
     final json = await _getWithAuth('/admin/event-generation-tests/test-environments');
     return (json['environments'] as List)
@@ -171,17 +148,14 @@ class EventGenerationTestService {
         .toList();
   }
   
-  /// Switch to test environment
   Future<void> switchToTestEnvironment(String environmentId) async {
     await _postWithAuth('/admin/event-generation-tests/test-environment/$environmentId/switch', {});
   }
   
-  /// Delete test environment
   Future<void> deleteTestEnvironment(String environmentId) async {
     await _deleteWithAuth('/admin/event-generation-tests/test-environment/$environmentId');
   }
   
-  /// Create test dataset
   Future<TestDataset> createTestDataset(String name, String description, Map<String, dynamic> params) async {
     final requestBody = {
       'name': name,
@@ -192,7 +166,6 @@ class EventGenerationTestService {
     return TestDataset.fromJson(json);
   }
   
-  /// Get test datasets
   Future<List<TestDataset>> getTestDatasets() async {
     final json = await _getWithAuth('/admin/event-generation-tests/test-datasets');
     return (json['datasets'] as List)
@@ -200,83 +173,69 @@ class EventGenerationTestService {
         .toList();
   }
   
-  /// Load test dataset
   Future<DatasetLoadResult> loadTestDataset(String datasetId) async {
     final json = await _postWithAuth('/admin/event-generation-tests/test-dataset/$datasetId/load', {});
     return DatasetLoadResult.fromJson(json);
   }
   
-  /// Share test dataset
   Future<void> shareTestDataset(String datasetId, String userId) async {
     await _postWithAuth('/admin/event-generation-tests/test-dataset/$datasetId/share', {'userId': userId});
   }
   
-  /// Delete test dataset
   Future<void> deleteTestDataset(String datasetId) async {
     await _deleteWithAuth('/admin/event-generation-tests/test-dataset/$datasetId');
   }
   
-  /// Clean test data
   Future<CleanupResult> cleanTestData(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup', params);
     return CleanupResult.fromJson(json);
   }
 
-  /// Clean transformation event test data
   Future<Map<String, dynamic>> cleanTransformationEvents() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/transformation-events', {});
     return json;
   }
 
-  /// Clean transaction event test data
   Future<Map<String, dynamic>> cleanTransactionEvents() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/transaction-events', {});
     return json;
   }
 
-  /// Clean aggregation event test data
   Future<Map<String, dynamic>> cleanAggregationEvents() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/aggregation-events', {});
     return json;
   }
 
-  /// Clean object event test data
   Future<Map<String, dynamic>> cleanObjectEvents() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/object-events', {});
     return json;
   }
 
-  /// Clean GLN test data (location names starting with "Test Location")
   Future<Map<String, dynamic>> cleanGLNTestData() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/gln-test-data', {});
     return json;
   }
 
-  /// Clean GTIN test data (product names starting with "Test Product")
   Future<Map<String, dynamic>> cleanGTINTestData() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/gtin-test-data', {});
     return json;
   }
 
-  /// Clean SGTIN test data (batch lot numbers starting with "TEST-BATCH-")
   Future<Map<String, dynamic>> cleanSGTINTestData() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/sgtin-test-data', {});
     return json;
   }
 
-  /// Clean SSCC test data (GS1 company prefix matches pharmaceutical test companies)
   Future<Map<String, dynamic>> cleanSSCCTestData() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/sscc-test-data', {});
     return json;
   }
 
-  /// DANGER - Clean ALL SSCC data from system (not just test data!)
   Future<Map<String, dynamic>> cleanAllSSCCData() async {
     final json = await _postWithAuth('/admin/event-generation-tests/cleanup/all-sscc-data', {});
     return json;
   }
   
-  /// Create data snapshot
   Future<DataSnapshot> createDataSnapshot(String name, Map<String, dynamic> params) async {
     final requestBody = {
       'name': name,
@@ -286,7 +245,6 @@ class EventGenerationTestService {
     return DataSnapshot.fromJson(json);
   }
   
-  /// Get data snapshots
   Future<List<DataSnapshot>> getDataSnapshots() async {
     final json = await _getWithAuth('/admin/event-generation-tests/snapshots');
     return (json['snapshots'] as List)
@@ -294,31 +252,25 @@ class EventGenerationTestService {
         .toList();
   }
   
-  /// Restore data snapshot
   Future<RestoreResult> restoreDataSnapshot(String snapshotId) async {
     final json = await _postWithAuth('/admin/event-generation-tests/snapshot/$snapshotId/restore', {});
     return RestoreResult.fromJson(json);
   }
   
-  /// Delete data snapshot
   Future<void> deleteDataSnapshot(String snapshotId) async {
     await _deleteWithAuth('/admin/event-generation-tests/snapshot/$snapshotId');
   }
   
-  /// Archive test data
   Future<ArchiveResult> archiveTestData(Map<String, dynamic> params) async {
     final json = await _postWithAuth('/admin/event-generation-tests/archive', params);
     return ArchiveResult.fromJson(json);
   }
   
-  /// Get data statistics
   Future<TestDataStatistics> getTestDataStatistics() async {
     final json = await _getWithAuth('/admin/event-generation-tests/statistics');
     return TestDataStatistics.fromJson(json);
   }
 }
-
-// Data Models
 
 class BulkGenerationResult {
   final String sessionId;

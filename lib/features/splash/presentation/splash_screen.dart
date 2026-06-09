@@ -22,11 +22,6 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _canNavigate = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
@@ -37,7 +32,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final authCheck = context.read<AuthCubit>().checkAuth();
-
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
@@ -64,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _checkAndNavigate(AuthState state) {
     if (!_canNavigate || _navigated || !mounted) return;
-    
+
     final pendingLocation = _resolvePendingLocation(context);
     if (state.status == AuthStatus.authenticated) {
       _go(pendingLocation ?? Constants.homeRoute);
@@ -81,12 +75,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   String? _resolvePendingLocation(BuildContext context) {
     final from = GoRouterState.of(context).uri.queryParameters['from'];
-    if (from == null || from.isEmpty || from ==  Constants.splashRoute) {
+    if (from == null || from.isEmpty || from == Constants.splashRoute) {
       return null;
     }
 
     final parsed = Uri.tryParse(from);
-    if (parsed == null || parsed.path ==  Constants.splashRoute) {
+    if (parsed == null || parsed.path == Constants.splashRoute) {
       return null;
     }
 
@@ -97,9 +91,9 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final primary = c.primary;
-     final size = MediaQuery.sizeOf(context);
+    final size = MediaQuery.sizeOf(context);
     final displayHeight = size.height > 0 ? size.height : 800.0;
-    
+
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
@@ -121,11 +115,14 @@ class _SplashScreenState extends State<SplashScreen> {
                         AppAssets.logo,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return Icon(Icons.broken_image, size: 64, color: primary);
+                          return Icon(
+                            Icons.broken_image,
+                            size: 64,
+                            color: primary,
+                          );
                         },
                       ),
                     ),
-
                     Text(
                       'traq',
                       style: TextStyle(
@@ -135,7 +132,6 @@ class _SplashScreenState extends State<SplashScreen> {
                         color: primary,
                       ),
                     ),
-
                     Text(
                       'Preparing your workspace...',
                       style: TextStyle(
@@ -151,9 +147,12 @@ class _SplashScreenState extends State<SplashScreen> {
                         child: LinearProgressIndicator(
                           minHeight: 6,
                           backgroundColor: primary.withOpacity(
-                            Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.12,
+                            Theme.of(context).brightness == Brightness.dark
+                                ? 0.18
+                                : 0.12,
                           ),
-                          valueColor: AlwaysStoppedAnimation<Color>(primary),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(primary),
                         ),
                       ),
                     ),

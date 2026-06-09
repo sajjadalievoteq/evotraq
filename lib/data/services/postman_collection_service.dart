@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart' show FormData, MultipartFile, DioMediaType;
+import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class PostmanDownloadInfo {
@@ -15,6 +15,35 @@ class PostmanCollectionService {
 
   PostmanCollectionService({required DioService dioService})
       : _dioService = dioService;
+
+  Future<({Uint8List bytes, String filename})> downloadCollection() async {
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}/admin/postman/download',
+      responseType: ResponseType.bytes,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      final raw = response.data;
+      final bytes = raw is Uint8List
+          ? raw
+          : Uint8List.fromList(List<int>.from(raw as List));
+      final filename = _filenameFromHeaders(response.headers) ??
+          'TraqTrace-API-Collection.zip';
+      return (bytes: bytes, filename: filename);
+    }
+
+    final err = _extractError(response.data);
+    throw Exception(err);
+  }
+
+  String? _filenameFromHeaders(Headers headers) {
+    final values = headers['content-disposition'];
+    if (values == null || values.isEmpty) return null;
+    final match =
+        RegExp(r'filename="?([^";\n]+)"?').firstMatch(values.first);
+    return match?.group(1);
+  }
 
   Future<PostmanDownloadInfo> getDownloadUrl() async {
     final response = await _dioService.get(

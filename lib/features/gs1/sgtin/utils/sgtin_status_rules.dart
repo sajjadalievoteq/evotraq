@@ -1,4 +1,4 @@
-library sgtin_status_rules;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';

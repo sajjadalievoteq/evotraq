@@ -410,7 +410,7 @@ class _QuickActionsAndComplianceSkeleton extends StatelessWidget {
 }
 
 class _QuickActionsSkeleton extends StatelessWidget {
-  const _QuickActionsSkeleton({super.key});
+  const _QuickActionsSkeleton();
 
   @override
   Widget build(BuildContext context) {
@@ -448,7 +448,7 @@ class _QuickActionsSkeleton extends StatelessWidget {
 }
 
 class _ComplianceSkeleton extends StatelessWidget {
-  const _ComplianceSkeleton({super.key});
+  const _ComplianceSkeleton();
 
   @override
   Widget build(BuildContext context) {

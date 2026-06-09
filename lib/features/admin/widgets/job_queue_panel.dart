@@ -2121,7 +2121,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               Expanded(
                 child: ListTile(
                   title: Text('From Date'),
-                  subtitle: Text('${DateTime.now().subtract(Duration(days: 30)).toString().split(' ')[0]}'),
+                  subtitle: Text(DateTime.now().subtract(Duration(days: 30)).toString().split(' ')[0]),
                   trailing: Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(
@@ -2140,7 +2140,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               Expanded(
                 child: ListTile(
                   title: Text('To Date'),
-                  subtitle: Text('${DateTime.now().toString().split(' ')[0]}'),
+                  subtitle: Text(DateTime.now().toString().split(' ')[0]),
                   trailing: Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(
@@ -2279,7 +2279,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               Expanded(
                 child: ListTile(
                   title: Text('Report Period From'),
-                  subtitle: Text('${DateTime.now().subtract(Duration(days: 7)).toString().split(' ')[0]}'),
+                  subtitle: Text(DateTime.now().subtract(Duration(days: 7)).toString().split(' ')[0]),
                   trailing: Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(
@@ -2298,7 +2298,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               Expanded(
                 child: ListTile(
                   title: Text('Report Period To'),
-                  subtitle: Text('${DateTime.now().toString().split(' ')[0]}'),
+                  subtitle: Text(DateTime.now().toString().split(' ')[0]),
                   trailing: Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(

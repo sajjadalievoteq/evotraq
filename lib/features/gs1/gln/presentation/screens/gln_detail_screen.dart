@@ -683,8 +683,9 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
                     glnTypesErrorText: _glnTypesErrorText,
                     industryClassification: _industryClassification,
                     onIndustryClassificationChanged: (v) {
-                      if (v != null)
+                      if (v != null) {
                         setState(() => _industryClassification = v);
+                      }
                     },
                     glnSource: _glnSource,
                     onGlnSourceChanged: (v) {

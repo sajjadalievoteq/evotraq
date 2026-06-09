@@ -250,8 +250,9 @@ class LifecycleAvailabilityStatusCoreGroupState
                   final s = (v ?? '').trim();
                   if (s.isEmpty) return null;
                   final parsed = DateTime.tryParse(s);
-                  if (parsed == null)
+                  if (parsed == null) {
                     return 'publication_date must be YYYY-MM-DD';
+                  }
                   final today = DateTime.now();
                   final todayDate = DateTime(
                     today.year,
@@ -259,8 +260,9 @@ class LifecycleAvailabilityStatusCoreGroupState
                     today.day,
                   );
                   final d = DateTime(parsed.year, parsed.month, parsed.day);
-                  if (d.isAfter(todayDate))
+                  if (d.isAfter(todayDate)) {
                     return 'publication_date must be <= today';
+                  }
                   return null;
                 },
           onPick: () => _pickDate(

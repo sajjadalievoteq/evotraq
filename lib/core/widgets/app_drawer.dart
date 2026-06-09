@@ -314,22 +314,22 @@ class _AppDrawerState extends State<AppDrawer> {
                           onTap: () => _navigate(
                               Constants.epcisAggregationEventsRoute),
                         ),
-                        ListTile(
-                          leading: const Icon(Icons.receipt),
-                          title: const Text('Transaction Events'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                              Constants.epcisTransactionEventsRoute),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.transform),
-                          title: const Text('Transformation Events'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                              Constants.epcisTransformationEventsRoute),
-                        ),
+                        // ListTile(
+                        //   leading: const Icon(Icons.receipt),
+                        //   title: const Text('Transaction Events'),
+                        //   contentPadding:
+                        //       const EdgeInsets.only(left: 32.0),
+                        //   onTap: () => _navigate(
+                        //       Constants.epcisTransactionEventsRoute),
+                        // ),
+                        // ListTile(
+                        //   leading: const Icon(Icons.transform),
+                        //   title: const Text('Transformation Events'),
+                        //   contentPadding:
+                        //       const EdgeInsets.only(left: 32.0),
+                        //   onTap: () => _navigate(
+                        //       Constants.epcisTransformationEventsRoute),
+                        // ),
                       ],
                     ),
 
@@ -399,14 +399,15 @@ class _AppDrawerState extends State<AppDrawer> {
                             );
                           },
                         ),
-                        ListTile(
-                          leading: const Icon(Icons.description),
-                          title: const Text('Transaction Documents'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                              Constants.epcisTransactionDocumentsRoute),
-                        ),
+                        //needs to be removed completely including components
+                        // ListTile(
+                        //   leading: const Icon(Icons.description),
+                        //   title: const Text('Transaction Documents'),
+                        //   contentPadding:
+                        //       const EdgeInsets.only(left: 32.0),
+                        //   onTap: () => _navigate(
+                        //       Constants.epcisTransactionDocumentsRoute),
+                        // ),
                         ListTile(
                           leading: const Icon(Icons.manage_search),
                           title: const Text('Advanced Query'),

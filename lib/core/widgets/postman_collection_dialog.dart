@@ -2,9 +2,12 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/web/web_download_stub.dart'
+    if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart'
+    if (dart.library.io) 'package:traqtrace_app/core/web/web_download_io.dart'
+    as web_download;
 import 'package:traqtrace_app/data/services/postman_collection_service.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 class PostmanCollectionDialog extends StatefulWidget {
@@ -28,18 +31,27 @@ class PostmanCollectionDialog extends StatefulWidget {
   static Future<void> _downloadDirect(BuildContext context) async {
     try {
       final service = PostmanCollectionService(dioService: DioService());
-      final info = await service.getDownloadUrl();
-      final uri = Uri.parse(info.url);
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        if (context.mounted) {
-          context.showError('Could not open download link.');
-        }
+      final file = await service.downloadCollection();
+      web_download.downloadBytes(
+        bytes: file.bytes,
+        filename: file.filename,
+        mimeType: _mimeTypeFor(file.filename),
+      );
+      if (context.mounted) {
+        context.showSuccess('Downloaded ${file.filename}');
       }
     } catch (e) {
       if (context.mounted) {
         context.showError(e.toString().replaceFirst('Exception: ', ''));
       }
     }
+  }
+
+  static String _mimeTypeFor(String filename) {
+    final lower = filename.toLowerCase();
+    if (lower.endsWith('.zip')) return 'application/zip';
+    if (lower.endsWith('.json')) return 'application/json';
+    return 'application/octet-stream';
   }
 
   @override
@@ -62,13 +74,14 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
   Future<void> _onDownload() async {
     setState(() => _downloadStatus = _Status.loading);
     try {
-      final info = await _service.getDownloadUrl();
-      final uri = Uri.parse(info.url);
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        throw Exception('Could not open download link.');
-      }
+      final file = await _service.downloadCollection();
+      web_download.downloadBytes(
+        bytes: file.bytes,
+        filename: file.filename,
+        mimeType: PostmanCollectionDialog._mimeTypeFor(file.filename),
+      );
       if (mounted) {
-        context.showSuccess('Download started — check your browser.');
+        context.showSuccess('Downloaded ${file.filename}');
       }
     } catch (e) {
       if (mounted) {

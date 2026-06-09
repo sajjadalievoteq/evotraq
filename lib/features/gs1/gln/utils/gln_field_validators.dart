@@ -144,8 +144,9 @@ abstract final class GlnFieldValidators {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
     if (v.length > 254) return GlnValidationConstants.emailMaxLength;
-    if (_controlChars.hasMatch(v))
+    if (_controlChars.hasMatch(v)) {
       return GlnValidationConstants.emailInvalidChars;
+    }
 
     if (!RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',

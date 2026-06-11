@@ -4,9 +4,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 
-import '../../../data/services/transformation_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transformation_event_service.dart';
 
 class TransformationEventsState extends Equatable {
   final List<TransformationEvent> transformationEvents;

@@ -136,6 +136,8 @@ class SsccClassificationCard extends StatelessWidget {
               label: 'Contained Expiry (AI 17)',
               value: containedExpiry,
               onTap: isReadOnly ? null : onPickContainedExpiry,
+              helperText: 'Optional — batch expiry for homogeneous contents',
+              emptyValueLabel: 'Not set (optional)',
             ),
           ],
         ],

@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_test_screen.dart';
@@ -19,14 +18,13 @@ import 'package:traqtrace_app/features/admin/screens/job_queue_management_screen
 import 'package:traqtrace_app/features/admin/screens/etl_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/bulk_export_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity_dashboard.dart';
-import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/validation_rules_help_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/rule_editor_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/validation_rule_management_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/validation_rules_help_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/rule_editor_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/screens/gln_screen.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
-import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/screens/gtin_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/screens/gtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/screens/sgtin_detail_screen.dart';
@@ -34,37 +32,40 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/screens/sgtin_scre
 import 'package:traqtrace_app/features/gs1/sscc/presentation/screens/sscc_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/screens/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
-import 'package:traqtrace_app/data/services/epc_conversion_service.dart';
 import 'package:traqtrace_app/features/home/presentation/screens/home_screen.dart';
 import 'package:traqtrace_app/features/user/presentation/screens/profile_screen.dart';
-import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/epcis_events_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/object_events_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/object_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/object_event_batch_import_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/aggregation_events_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/aggregation_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/aggregation_event_hierarchy_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transaction_events_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transaction_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transaction_events_help_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transaction_document_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transaction_document_help_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transformation_events_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/transformation_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/advanced_query_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/traversal_query_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/epcis_serialization_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/shipping_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/receiving_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/receiving_operation_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/receiving_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/screens/operations/packing_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_events_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/screens/detail/object_event_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/shared/object_event_route_constants.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/screens/list/object_events_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/screens/object_event_batch_import_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/object_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/screens/object_event_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_hierarchy_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_events_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_events_help_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_document_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_document_help_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transformation_events/screens/transformation_events_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/transformation_events/screens/transformation_event_form_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/query/screens/advanced_query_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/query/screens/traversal_query_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_generic_event_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_serialization_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/packing/screens/packing_operation_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/packing/screens/packing_operation_list_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/operations/packing/screens/packing_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/screens/commissioning_operation_list_screen.dart';
@@ -74,10 +75,7 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/subscr
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_details_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
-import 'package:traqtrace_app/features/epcis/models/object_event.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/dashboards/screens/product_journey_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_detail_screen.dart';
@@ -302,10 +300,7 @@ class AppRouter {
         path: Constants.adminUsersRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: BlocProvider(
-            create: (context) => getIt<UserManagementCubit>(),
-            child: const UserManagementScreen(),
-          ),
+          child: const UserManagementScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -326,10 +321,7 @@ class AppRouter {
         path: Constants.adminApprovalsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: BlocProvider(
-            create: (context) => getIt<UserManagementCubit>(),
-            child: const ApprovalsScreen(),
-          ),
+          child: const ApprovalsScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1177,9 +1169,7 @@ class AppRouter {
         path: Constants.gs1EpcConversionRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: EPCConversionScreen(
-            epcConversionService: getIt<EPCConversionService>(),
-          ),
+          child: const EPCConversionScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1221,7 +1211,7 @@ class AppRouter {
         path: Constants.epcisObjectEventsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const ObjectEventsListScreen(),
+          child: const ObjectEventScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1235,7 +1225,7 @@ class AppRouter {
         path: Constants.epcisAggregationEventsRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const AggregationEventsListScreen(),
+          child: const AggregationEventScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1308,7 +1298,7 @@ class AppRouter {
         path: Constants.epcisSerializationRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: EPCISSerializationScreen(appConfig: getIt<AppConfig>()),
+          child: const EPCISSerializationScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1410,10 +1400,26 @@ class AppRouter {
           final eventId = state.pathParameters['id'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: Scaffold(
-              appBar: AppBar(title: const Text('Event Details')),
-              body: Center(child: Text('Viewing event ID: $eventId')),
-            ),
+            child: EpcisGenericEventDetailScreen(eventId: eventId),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.epcisObjectEventDetailQueryRoute,
+        pageBuilder: (context, state) {
+          final eventId = state.uri.queryParameters[
+                  ObjectEventRouteConstants.queryEventId] ??
+              '';
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: ObjectEventDetailScreen(eventId: eventId),
           );
         },
         redirect: (context, state) {
@@ -1428,38 +1434,21 @@ class AppRouter {
         path: Constants.epcisObjectEventDetailRoute,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          final extra = state.extra;
-
-          if (extra is ObjectEvent) {
-            return TraqRouterTransitions.page(
-              key: state.pageKey,
-              child: ObjectEventFormScreen(
-                event: extra,
-                isViewOnly: true,
-              ),
-            );
-          } else {
-            return TraqRouterTransitions.page(
-              key: state.pageKey,
-              child: Builder(
-                builder: (context) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    final cubit = context.read<ObjectEventsCubit>();
-                    cubit.getObjectEvent(id);
-                  });
-
-                  return const ObjectEventFormScreen(
-                    isViewOnly: true,
-                  );
-                },
-              ),
-            );
-          }
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: ObjectEventDetailScreen(eventId: id),
+          );
         },
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
             return Constants.loginRoute;
+          }
+          final id = state.pathParameters['id'] ?? '';
+          if (id.contains(':') ||
+              id.contains(';') ||
+              id.contains('/')) {
+            return ObjectEventRouteConstants.detailLocation(id);
           }
           return null;
         },
@@ -1470,8 +1459,8 @@ class AppRouter {
           final aggregationEventId = state.pathParameters['id'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: AggregationEventFormScreen(
-              aggregationEventId: aggregationEventId,
+            child: AggregationEventDetailScreen(
+              eventId: aggregationEventId,
             ),
           );
         },
@@ -1730,10 +1719,7 @@ class AppRouter {
         path: Constants.opCommissioningNewRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: BlocProvider(
-            create: (_) => getIt<GTINCubit>(),
-            child: const CommissioningOperationScreen(),
-          ),
+          child: const CommissioningOperationScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1879,12 +1865,7 @@ class AppRouter {
     ],
     errorPageBuilder: (context, state) => TraqRouterTransitions.page(
       key: state.pageKey,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Page Not Found')),
-        body: Center(
-          child: Text('No route defined for ${state.uri.toString()}'),
-        ),
-      ),
+      child: RouterNotFoundScreen(uri: state.uri.toString()),
     ),
   );
 }

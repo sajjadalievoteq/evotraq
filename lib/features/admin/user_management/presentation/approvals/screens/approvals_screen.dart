@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
@@ -15,14 +16,26 @@ import 'package:traqtrace_app/shared/layout/layout_manager.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 import 'dart:async';
 
-class ApprovalsScreen extends StatefulWidget {
+class ApprovalsScreen extends StatelessWidget {
   const ApprovalsScreen({super.key});
 
   @override
-  State<ApprovalsScreen> createState() => _ApprovalsScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<UserManagementCubit>(),
+      child: const _ApprovalsView(),
+    );
+  }
 }
 
-class _ApprovalsScreenState extends State<ApprovalsScreen> {
+class _ApprovalsView extends StatefulWidget {
+  const _ApprovalsView();
+
+  @override
+  State<_ApprovalsView> createState() => _ApprovalsViewState();
+}
+
+class _ApprovalsViewState extends State<_ApprovalsView> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   bool _isRefreshing = false;
@@ -184,26 +197,20 @@ class _ApprovalsContent extends StatelessWidget {
       );
     }
 
-    const tileMaxExtent = 240.0;
     final g = context.gutter;
 
-    return GridView.builder(
+    return ListView.separated(
       padding: EdgeInsets.all(g),
       physics: const ClampingScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: tileMaxExtent,
-        mainAxisSpacing: g,
-        crossAxisSpacing: g,
-        childAspectRatio: 1,
-      ),
       itemCount: approvals.length,
+      separatorBuilder: (_, __) => SizedBox(height: g),
       itemBuilder: (context, index) {
         final approval = approvals[index];
         return UserApprovalCard(
           user: approval,
           onApprove: onApprove,
           onReject: onReject,
-          variant: UserApprovalCardVariant.gridSquare,
+          variant: UserApprovalCardVariant.list,
         );
       },
     );

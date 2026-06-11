@@ -14,8 +14,6 @@ class UserApprovalsLoadingView extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;
-
-    const tileMaxExtent = 240.0;
     final g = context.gutter;
 
     return AppShimmer(
@@ -26,19 +24,13 @@ class UserApprovalsLoadingView extends StatelessWidget {
         children: [
           _UserApprovalsHeaderSkeleton(baseColor: baseColor),
           Expanded(
-            child: GridView.builder(
+            child: ListView.separated(
               padding: EdgeInsets.all(g),
               physics: const ClampingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: tileMaxExtent,
-                mainAxisSpacing: g,
-                crossAxisSpacing: g,
-                childAspectRatio: 1,
-              ),
-              itemCount: 8,
-              itemBuilder: (context, index) {
-                return _UserApprovalCardSkeleton(baseColor: baseColor);
-              },
+              itemCount: 6,
+              separatorBuilder: (_, __) => SizedBox(height: g),
+              itemBuilder: (context, _) =>
+                  _UserApprovalTileSkeleton(baseColor: baseColor),
             ),
           ),
         ],
@@ -46,6 +38,8 @@ class UserApprovalsLoadingView extends StatelessWidget {
     );
   }
 }
+
+// ── Header skeleton ────────────────────────────────────────────────────────
 
 class _UserApprovalsHeaderSkeleton extends StatelessWidget {
   const _UserApprovalsHeaderSkeleton({required this.baseColor});
@@ -55,6 +49,7 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final r = TraqRadius.md.x.toDouble();
+
     return Card(
       elevation: 1,
       child: Padding(
@@ -71,18 +66,17 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
             LayoutBuilder(
               builder: (context, constraints) {
                 final isCompact = constraints.maxWidth < 600;
-
                 final search = _skeletonBox(
                   baseColor,
                   width: double.infinity,
                   height: 50,
-                  radius: TraqRadius.md.x.toDouble(),
+                  radius: r,
                 );
                 final refresh = _skeletonBox(
                   baseColor,
                   width: 50,
                   height: 50,
-                  radius: TraqRadius.md.x.toDouble(),
+                  radius: r,
                 );
 
                 if (isCompact) {
@@ -112,67 +106,99 @@ class _UserApprovalsHeaderSkeleton extends StatelessWidget {
   }
 }
 
-class _UserApprovalCardSkeleton extends StatelessWidget {
-  const _UserApprovalCardSkeleton({required this.baseColor});
+// ── List tile skeleton — mirrors list variant card layout ──────────────────
+
+class _UserApprovalTileSkeleton extends StatelessWidget {
+  const _UserApprovalTileSkeleton({required this.baseColor});
 
   final Color baseColor;
 
   @override
   Widget build(BuildContext context) {
     final r = TraqRadius.md.x.toDouble();
+    final btnRadius = TraqRadius.md.x.toDouble();
+
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        padding: const EdgeInsets.all(16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 760;
+
+            // User info block
+            final info = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _skeletonBox(baseColor, width: 36, height: 36, radius: 999),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _skeletonBox(
-                    baseColor,
-                    width: double.infinity,
-                    height: 18,
-                    radius: r,
-                  ),
-                ),
+                // Full name
+                _skeletonBox(baseColor, width: 160, height: 18, radius: r),
+                const SizedBox(height: 6),
+                // Username line
+                _skeletonBox(baseColor, width: 120, height: 14, radius: r),
+                const SizedBox(height: 4),
+                // Email line
+                _skeletonBox(baseColor, width: double.infinity, height: 14, radius: r),
               ],
-            ),
-            const SizedBox(height: 10),
-            _skeletonBox(baseColor, width: double.infinity, height: 14, radius: r),
-            const SizedBox(height: 8),
-            _skeletonBox(baseColor, width: 180, height: 14, radius: r),
-            const SizedBox(height: 12),
-            Row(
+            );
+
+            // Approve / Reject buttons
+            final buttons = Column(
               children: [
-                Expanded(
-                  child: _skeletonBox(
-                    baseColor,
-                    width: double.infinity,
-                    height: 36,
-                    radius: TraqRadius.md.x.toDouble(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _skeletonBox(
-                    baseColor,
-                    width: double.infinity,
-                    height: 36,
-                    radius: TraqRadius.md.x.toDouble(),
-                  ),
-                ),
+                _skeletonBox(baseColor, width: double.infinity, height: 40, radius: btnRadius),
+                const SizedBox(height: Constants.spacing),
+                _skeletonBox(baseColor, width: double.infinity, height: 40, radius: btnRadius),
               ],
-            ),
-          ],
+            );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _skeletonBox(baseColor, width: 40, height: 40, radius: 999),
+                    const SizedBox(width: 16),
+                    Expanded(child: info),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Registration date line
+                _skeletonBox(baseColor, width: 180, height: 13, radius: r),
+                const SizedBox(height: 16),
+                if (compact)
+                  buttons
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _skeletonBox(
+                          baseColor,
+                          width: double.infinity,
+                          height: 40,
+                          radius: btnRadius,
+                        ),
+                      ),
+                      const SizedBox(width: Constants.spacing),
+                      Expanded(
+                        child: _skeletonBox(
+                          baseColor,
+                          width: double.infinity,
+                          height: 40,
+                          radius: btnRadius,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
+
+// ── Shared helper ──────────────────────────────────────────────────────────
 
 Widget _skeletonBox(
   Color color, {

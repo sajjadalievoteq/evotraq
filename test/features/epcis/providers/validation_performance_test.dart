@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/data/services/validation_rule_service.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
-import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 
 
 class _InMemoryValidationRuleService implements ValidationRuleService {

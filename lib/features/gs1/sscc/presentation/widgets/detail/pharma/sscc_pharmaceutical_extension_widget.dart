@@ -599,6 +599,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               child: Gs1DatePickerField(
                 label: 'GDP Certificate Expiry',
                 value: _gdpCertificateExpiry,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,
@@ -964,6 +965,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               child: Gs1DatePickerField(
                 label: 'Carrier GDP Qualification Expiry',
                 value: _carrierGdpQualificationExpiry,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,
@@ -997,6 +999,7 @@ class SSCCPharmaceuticalExtensionWidgetState
               child: Gs1DatePickerField(
                 label: 'Vehicle Last Qualified',
                 value: _vehicleLastQualificationDate,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,

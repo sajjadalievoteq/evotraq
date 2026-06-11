@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/services/validation_service.dart';
-import 'package:traqtrace_app/features/epcis/models/object_event.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 
 import 'dart:convert';
 import 'validation_service_test.mocks.dart';

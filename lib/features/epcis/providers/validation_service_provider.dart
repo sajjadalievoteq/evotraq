@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/data/services/validation_service.dart';
-import 'package:traqtrace_app/features/epcis/models/object_event.dart';
-import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
-import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
-import 'package:traqtrace_app/features/epcis/models/transformation_event.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
+import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 

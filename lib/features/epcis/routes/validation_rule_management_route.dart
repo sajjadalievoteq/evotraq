@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/epcis/screens/validation_rule_management_screen.dart';
+import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/validation_rule_management_screen.dart';
 
 /// Route to handle initialization for the validation rule management screen
 class ValidationRuleManagementRoute extends StatelessWidget {

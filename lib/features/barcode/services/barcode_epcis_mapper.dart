@@ -1,8 +1,8 @@
 //import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart' show BarcodeFormat;
-import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
-import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
-import 'package:traqtrace_app/features/epcis/models/object_event.dart';
-import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
+import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
 

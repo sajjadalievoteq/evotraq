@@ -38,8 +38,14 @@ class SplitOrListIndexedStack extends StatelessWidget {
         return IndexedStack(
           index: showSplit ? 0 : 1,
           children: [
-            PrimaryFetchScope(isPrimary: showSplit, child: split),
-            PrimaryFetchScope(isPrimary: !showSplit, child: fallback),
+            PrimaryFetchScope(
+              isPrimary: showSplit,
+              child: HeroMode(enabled: showSplit, child: split),
+            ),
+            PrimaryFetchScope(
+              isPrimary: !showSplit,
+              child: HeroMode(enabled: !showSplit, child: fallback),
+            ),
           ],
         );
       },

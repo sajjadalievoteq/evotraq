@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/services/advanced_query_service.dart';
-import '../models/advanced_query_result.dart';
-import '../models/epcis_query_parameters.dart';
+import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
+import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters.dart';
 
 
 class AdvancedQueryState extends Equatable {

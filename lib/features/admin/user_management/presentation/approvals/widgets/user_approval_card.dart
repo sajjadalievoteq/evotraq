@@ -27,14 +27,6 @@ class UserApprovalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (variant == UserApprovalCardVariant.gridSquare) {
-      return _GridSquareApprovalCard(
-        user: user,
-        onApprove: onApprove,
-        onReject: onReject,
-      );
-    }
-
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -128,40 +120,41 @@ class UserApprovalCard extends StatelessWidget {
                   ),
                 ] else
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          '${UserManagementConstants.registeredOnLabel}: ${_registeredDate}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[700]),
-                        ),
+                      Text(
+                        '${UserManagementConstants.registeredOnLabel}: ${_registeredDate}',
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey[700]),
                       ),
                       const SizedBox(height: Constants.spacing),
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomOutlinedButtonWidget(
-                          title: UserManagementConstants.rejectLabel,
-                          onTap: () => onReject(user),
-                        ),
-                      ),
-                      const SizedBox(width: Constants.spacing),
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomButtonWidget(
-                          onTap: () => onApprove(user),
-                          title: UserManagementConstants.approveLabel,
-                          iconWidget: SvgPicture.asset(
-                            AppAssets.iconCheck,
-                            width: 18,
-                            height: 18,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomOutlinedButtonWidget(
+                              title: UserManagementConstants.rejectLabel,
+                              onTap: () => onReject(user),
                             ),
                           ),
-                          backgroundColor: context.colors.success,
-                          foregroundColor: Colors.white,
-                        ),
+                          const SizedBox(width: Constants.spacing),
+                          Expanded(
+                            child: CustomButtonWidget(
+                              onTap: () => onApprove(user),
+                              title: UserManagementConstants.approveLabel,
+                              iconWidget: SvgPicture.asset(
+                                AppAssets.iconCheck,
+                                width: 18,
+                                height: 18,
+                                colorFilter: const ColorFilter.mode(
+                                  Colors.white,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              backgroundColor: context.colors.success,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -186,115 +179,3 @@ class UserApprovalCard extends StatelessWidget {
   }
 }
 
-class _GridSquareApprovalCard extends StatelessWidget {
-  const _GridSquareApprovalCard({
-    required this.user,
-    required this.onApprove,
-    required this.onReject,
-  });
-
-  final UserResponse user;
-  final ValueChanged<UserResponse> onApprove;
-  final ValueChanged<UserResponse> onReject;
-
-  String get _displayName {
-    final fullName = '${user.firstName} ${user.lastName}'.trim();
-    return fullName.isEmpty ? user.username : fullName;
-  }
-
-  String get _registeredDate {
-    if (!user.createdAt.contains('T')) {
-      return user.createdAt;
-    }
-    return user.createdAt.split('T').first;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: context.colors.textSecondary,
-                  child: Text(
-                    user.firstName.isNotEmpty
-                        ? user.firstName.characters.first.toUpperCase()
-                        : 'U',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              user.email,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: t.bodySmall,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '$_registeredDate',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: t.bodySmall?.copyWith(color: context.colors.textSecondary),
-            ),
-            const SizedBox(height: 6),
-            Spacer(),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomOutlinedButtonWidget(
-                    title: UserManagementConstants.rejectLabel,
-                    onTap: () => onReject(user),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomButtonWidget(
-                    onTap: () => onApprove(user),
-                    title: UserManagementConstants.approveLabel,
-                    iconWidget: SvgPicture.asset(
-                      AppAssets.iconCheck,
-                      width: 18,
-                      height: 18,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    backgroundColor: context.colors.success,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -11,7 +11,7 @@ abstract final class TraqRouterTransitions {
   }) {
     return CustomTransitionPage<T>(
       key: key,
-      child: child,
+      child: SelectionArea(child: child),
       transitionDuration: _forward,
       reverseTransitionDuration: _reverse,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {

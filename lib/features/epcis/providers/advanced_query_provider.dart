@@ -1,6 +1,6 @@
 // import 'package:flutter/foundation.dart';
-// import '../models/epcis_query_parameters.dart';
-// import '../models/advanced_query_result.dart';
+// import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters.dart';
+// import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
 // import '../services/advanced_query_service.dart';
 
 // class AdvancedQueryProvider with ChangeNotifier {

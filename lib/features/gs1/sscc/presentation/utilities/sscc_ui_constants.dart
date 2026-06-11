@@ -96,6 +96,8 @@ abstract final class SsccUiConstants {
   static const labelIssuingGlnField = 'Issuing GLN';
   static const labelSortByField = 'Sort By';
 
+  static String requiredFieldLabel(String label) => '$label *';
+
   static const sortFieldFallback = 'Date Created';
 
   static const detailCreateTitle = 'Create New SSCC';

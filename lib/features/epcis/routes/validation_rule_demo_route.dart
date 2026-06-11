@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
-import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart';
-import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 // Import for ValidationSeverity enum
-import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart'
+import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart'
     show ValidationSeverity;
 
 /// A demonstration screen for the validation features

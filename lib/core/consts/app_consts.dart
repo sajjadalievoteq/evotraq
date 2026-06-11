@@ -116,7 +116,13 @@ class Constants {
   static const String epcisTransformationEventNewRoute =
       '/epcis/transformation-events/new';
   static const String epcisEventDetailRoute = '/epcis/events/:id';
+  static const String epcisGenericEventDetailTitle = 'Event Details';
+  static const String epcisGenericEventDetailViewingPrefix = 'Viewing event ID:';
+  static const String routerNotFoundTitle = 'Page Not Found';
+  static const String routerNotFoundMessagePrefix = 'No route defined for';
   static const String epcisObjectEventDetailRoute = '/epcis/object-events/:id';
+  static const String epcisObjectEventDetailQueryRoute =
+      '/epcis/object-events/detail';
   static const String epcisAggregationEventDetailRoute =
       '/epcis/aggregation-events/:id';
   static const String epcisTransactionEventDetailRoute =

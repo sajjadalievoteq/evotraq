@@ -28,7 +28,7 @@ import 'package:traqtrace_app/features/epcis/providers/validation_service_provid
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/cubit/advanced_query_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/traversal_query_provider.dart';
-import 'package:traqtrace_app/data/services/advanced_query_service.dart';
+import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
 // Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
@@ -46,10 +46,10 @@ import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
-import 'package:traqtrace_app/data/services/epcis_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/data/services/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/user_service.dart';
@@ -224,7 +224,8 @@ class TraqTraceApp extends StatelessWidget {
               ],
               builder: (context, child) => AppScreenUtilInit(
                 child: AppLayoutBuilder(
-                  builder: (context, layout) => child ?? const SizedBox.shrink(),
+                  builder: (context, layout) =>
+                      child ?? const SizedBox.shrink(),
                 ),
               ),
             ),

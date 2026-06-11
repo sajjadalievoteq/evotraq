@@ -4,12 +4,13 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
-import 'package:traqtrace_app/data/services/advanced_query_service.dart';
+import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
+import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
@@ -20,38 +21,38 @@ import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
 import '../../data/services/advanced_performance_service.dart';
-import '../../data/services/aggregation_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 import '../../features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
-import '../../data/services/epc_conversion_service.dart';
-import '../../data/services/epcis_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import '../../data/services/gs1/gtin/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
-import '../../data/services/packing_operation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/packing_operation_service.dart';
 import '../../data/services/product_journey_service.dart';
-import '../../data/services/receiving_operation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/receiving_operation_service.dart';
 import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import '../../data/services/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
 import '../../data/services/system_settings_service.dart';
-import '../../data/services/transaction_document_service.dart';
-import '../../data/services/transformation_event_service.dart';
-import '../../data/services/transaction_event_service.dart';
-import '../../data/services/sensor_element_service.dart';
-import '../../data/services/certification_info_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transformation_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/sensor_element_service.dart';
+import 'package:traqtrace_app/data/services/epcis/certification_info_service.dart';
 import '../../data/services/data_consistency_service.dart';
-import '../../data/services/epcis_serialization_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
 import '../../data/services/error_correction_service.dart';
 import '../../data/services/gs1_barcode_api_service.dart';
 import '../../data/services/bulk_export_service.dart';
@@ -60,7 +61,7 @@ import '../../data/services/etl_service.dart';
 import '../../data/services/performance_optimization_service.dart';
 import '../../data/services/user_service.dart';
 import '../../data/services/profile_service.dart';
-import '../../data/services/validation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
 import '../../data/services/websocket_service.dart';
 
 final getIt = GetIt.instance;
@@ -96,6 +97,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<ProfileService>(
     () => ProfileService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ObjectEventService>(
+    () => ObjectEventService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<UserManagementService>(
@@ -293,9 +298,7 @@ Future<void> initDependencies(AppConfig appConfig) async {
     ),
   );
   getIt.registerFactory<GTINCubit>(
-    () => GTINCubit(
-      gtinService: getIt<GTINService>(),
-    ),
+    () => GTINCubit(gtinService: getIt<GTINService>()),
   );
   getIt.registerSingleton<AppRouter>(AppRouter(authCubit: getIt<AuthCubit>()));
 }

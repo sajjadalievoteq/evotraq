@@ -6,9 +6,9 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:traqtrace_app/data/services/validation_rule_service.dart'
+import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart'
     as _i3;
-import 'package:traqtrace_app/features/epcis/models/validation_rule.dart'
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart'
     as _i2;
 
 // ignore_for_file: type=lint

@@ -527,6 +527,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
               child: Gs1DatePickerField(
                 label: 'Route Authorization Date',
                 value: _euRouteAuthorizationDate,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,
@@ -542,6 +543,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
               child: Gs1DatePickerField(
                 label: 'Route Authorization Expiry',
                 value: _euRouteAuthorizationExpiry,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,
@@ -654,6 +656,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
               child: Gs1DatePickerField(
                 label: 'Customs Declaration Date',
                 value: _customsDeclarationDate,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,
@@ -814,6 +817,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
               child: Gs1DatePickerField(
                 label: 'Sealed Date',
                 value: _sealedDate,
+                emptyValueLabel: 'Not set (optional)',
                 onTap: widget.isEditing
                     ? () => _selectDate(
                           context,

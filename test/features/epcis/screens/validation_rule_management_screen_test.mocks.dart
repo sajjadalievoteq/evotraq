@@ -16,7 +16,7 @@ import 'package:traqtrace_app/data/services/auth_service/auth_service.dart'
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart' as _i11;
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart' as _i4;
 import 'package:traqtrace_app/data/models/auth/auth_models.dart' as _i12;
-import 'package:traqtrace_app/features/epcis/models/validation_rule.dart'
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart'
     as _i8;
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart'
     as _i2;

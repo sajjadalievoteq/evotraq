@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
-import 'package:traqtrace_app/data/services/transaction_document_service.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';
 
 import '../../../core/network/dio_service.dart';
 

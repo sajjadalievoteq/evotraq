@@ -1,91 +1,160 @@
-import 'dart:math' as math;
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/epcis/models/aggregation_event.dart';
-import 'package:traqtrace_app/data/services/aggregation_event_service.dart';
+import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_list_utils.dart';
+
+// ---------------------------------------------------------------------------
+// Status enum
+// ---------------------------------------------------------------------------
+
+enum AggregationEventsStatus { initial, loading, success, error }
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
 
 class AggregationEventsState extends Equatable {
+  final AggregationEventsStatus status;
   final List<AggregationEvent> aggregationEvents;
-  final bool loading;
-  final String? error;
-  final int totalPages;
-  final int totalElements;
-  final int currentPage;
   final AggregationEvent? selectedEvent;
+
+  // List-loading flags (aligned with GS1 pattern)
+  final bool isListLoading;
+  final bool isFetchingMore;
+  final bool hasMoreData;
+  final int page;
+  final int pageSize;
+
+  // Per-operation error vs list-fetch error
+  final String? error;
+  final String? listFetchError;
+
+  // Filters
   final String? filterAction;
   final String? filterBizStep;
   final String? filterDisposition;
   final String? filterLocationGLN;
   final String? filterParentEPC;
   final String? filterChildEPC;
+  final String? filterSearchText;
+
+  // Sorting
+  final String sortOrder;
 
   const AggregationEventsState({
+    this.status = AggregationEventsStatus.initial,
     this.aggregationEvents = const [],
-    this.loading = false,
-    this.error,
-    this.totalPages = 0,
-    this.totalElements = 0,
-    this.currentPage = 0,
     this.selectedEvent,
+    this.isListLoading = false,
+    this.isFetchingMore = false,
+    this.hasMoreData = false,
+    this.page = 0,
+    this.pageSize = 20,
+    this.error,
+    this.listFetchError,
     this.filterAction,
     this.filterBizStep,
     this.filterDisposition,
     this.filterLocationGLN,
     this.filterParentEPC,
     this.filterChildEPC,
+    this.filterSearchText,
+    this.sortOrder = 'DESC',
   });
 
   AggregationEventsState copyWith({
+    AggregationEventsStatus? status,
     List<AggregationEvent>? aggregationEvents,
-    bool? loading,
-    String? error,
-    int? totalPages,
-    int? totalElements,
-    int? currentPage,
     AggregationEvent? selectedEvent,
+    bool? isListLoading,
+    bool? isFetchingMore,
+    bool? hasMoreData,
+    int? page,
+    int? pageSize,
+    String? error,
+    String? listFetchError,
     String? filterAction,
     String? filterBizStep,
     String? filterDisposition,
     String? filterLocationGLN,
     String? filterParentEPC,
     String? filterChildEPC,
+    String? filterSearchText,
+    String? sortOrder,
+    bool clearSelectedEvent = false,
+    bool clearError = false,
+    bool clearListFetchError = false,
+    bool clearFilters = false,
   }) {
     return AggregationEventsState(
+      status: status ?? this.status,
       aggregationEvents: aggregationEvents ?? this.aggregationEvents,
-      loading: loading ?? this.loading,
-      error: error,
-      totalPages: totalPages ?? this.totalPages,
-      totalElements: totalElements ?? this.totalElements,
-      currentPage: currentPage ?? this.currentPage,
-      selectedEvent: selectedEvent ?? this.selectedEvent,
-      filterAction: filterAction ?? this.filterAction,
-      filterBizStep: filterBizStep ?? this.filterBizStep,
-      filterDisposition: filterDisposition ?? this.filterDisposition,
-      filterLocationGLN: filterLocationGLN ?? this.filterLocationGLN,
-      filterParentEPC: filterParentEPC ?? this.filterParentEPC,
-      filterChildEPC: filterChildEPC ?? this.filterChildEPC,
+      selectedEvent:
+          clearSelectedEvent ? null : (selectedEvent ?? this.selectedEvent),
+      isListLoading: isListLoading ?? this.isListLoading,
+      isFetchingMore: isFetchingMore ?? this.isFetchingMore,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      page: page ?? this.page,
+      pageSize: pageSize ?? this.pageSize,
+      error: clearError ? null : (error ?? this.error),
+      listFetchError: clearListFetchError
+          ? null
+          : (listFetchError ?? this.listFetchError),
+      filterAction:
+          clearFilters ? null : (filterAction ?? this.filterAction),
+      filterBizStep:
+          clearFilters ? null : (filterBizStep ?? this.filterBizStep),
+      filterDisposition:
+          clearFilters ? null : (filterDisposition ?? this.filterDisposition),
+      filterLocationGLN:
+          clearFilters ? null : (filterLocationGLN ?? this.filterLocationGLN),
+      filterParentEPC:
+          clearFilters ? null : (filterParentEPC ?? this.filterParentEPC),
+      filterChildEPC:
+          clearFilters ? null : (filterChildEPC ?? this.filterChildEPC),
+      filterSearchText:
+          clearFilters ? null : (filterSearchText ?? this.filterSearchText),
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
+  bool get hasActiveFilters =>
+      filterAction != null ||
+      filterBizStep != null ||
+      filterDisposition != null ||
+      filterLocationGLN != null ||
+      filterParentEPC != null ||
+      filterChildEPC != null ||
+      (filterSearchText != null && filterSearchText!.isNotEmpty);
+
   @override
   List<Object?> get props => [
+        status,
         aggregationEvents,
-        loading,
-        error,
-        totalPages,
-        totalElements,
-        currentPage,
         selectedEvent,
+        isListLoading,
+        isFetchingMore,
+        hasMoreData,
+        page,
+        pageSize,
+        error,
+        listFetchError,
         filterAction,
         filterBizStep,
         filterDisposition,
         filterLocationGLN,
         filterParentEPC,
         filterChildEPC,
+        filterSearchText,
+        sortOrder,
       ];
 }
+
+// ---------------------------------------------------------------------------
+// Cubit
+// ---------------------------------------------------------------------------
 
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   final AggregationEventService _service;
@@ -94,108 +163,234 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       : _service = service ?? getIt<AggregationEventService>(),
         super(const AggregationEventsState());
 
+  // -------------------------------------------------------------------------
+  // List loading — primary entry point used by the list screen
+  // -------------------------------------------------------------------------
+
   Future<void> loadAggregationEvents({
-    int? page,
-    int size = 20,
+    int page = 0,
+    int? size,
     String? action,
     String? parentEPC,
     String? childEPC,
     String? businessStep,
+    String? disposition,
     String? locationGLN,
+    String? searchText,
     DateTime? startTime,
     DateTime? endTime,
-    bool loadMore = false,
+    bool isLoadMore = false,
   }) async {
-    page = page ?? state.currentPage;
-    action = action ?? state.filterAction;
-    parentEPC = parentEPC ?? state.filterParentEPC;
-    childEPC = childEPC ?? state.filterChildEPC;
-    businessStep = businessStep ?? state.filterBizStep;
-    locationGLN = locationGLN ?? state.filterLocationGLN;
+    final effectiveSize = size ?? state.pageSize;
 
-    if (!loadMore) {
-      emit(state.copyWith(
-        loading: true,
-        error: null,
-        aggregationEvents: const [],
-        currentPage: page,
-      ));
+    final effectiveAction = action ?? state.filterAction;
+    var effectiveParentEPC = parentEPC ?? state.filterParentEPC;
+    var effectiveChildEPC = childEPC ?? state.filterChildEPC;
+    final effectiveBizStepRaw = businessStep ?? state.filterBizStep;
+    final effectiveDispositionRaw =
+        disposition ?? state.filterDisposition;
+    final effectiveLocationGLN = locationGLN ?? state.filterLocationGLN;
+    final effectiveSearchText = searchText ?? state.filterSearchText;
+
+    final effectiveBizStep = effectiveBizStepRaw != null
+        ? AggregationEventListUtils.toBizStepUrn(effectiveBizStepRaw)
+        : null;
+    final effectiveDisposition = effectiveDispositionRaw != null
+        ? AggregationEventListUtils.toDispositionUrn(effectiveDispositionRaw)
+        : null;
+
+    final searchEpc =
+        AggregationEventListUtils.epcFromSearchQuery(effectiveSearchText);
+    if (searchEpc != null) {
+      if (effectiveParentEPC == null) {
+        effectiveParentEPC = searchEpc;
+      } else if (effectiveChildEPC == null &&
+          effectiveParentEPC != searchEpc) {
+        effectiveChildEPC = searchEpc;
+      }
+    }
+
+    if (isLoadMore) {
+      if (!state.hasMoreData || state.isFetchingMore) return;
+      emit(state.copyWith(isFetchingMore: true, clearListFetchError: true));
     } else {
-      emit(state.copyWith(loading: true, error: null));
+      emit(state.copyWith(
+        isListLoading: true,
+        isFetchingMore: false,
+        aggregationEvents: const [],
+        page: 0,
+        hasMoreData: false,
+        clearListFetchError: true,
+      ));
     }
 
     try {
       List<AggregationEvent> events = [];
+      var usedPaginatedEndpoint = false;
 
-      if (locationGLN != null && startTime != null && endTime != null) {
-        events = await _service.findAggregationEventsByLocationAndTimeWindow(locationGLN, startTime, endTime);
-      } else if (businessStep != null && parentEPC != null) {
-        events = await _service.findAggregationEventsByBusinessStepAndParentEPC(businessStep, parentEPC);
-      } else if (parentEPC != null && action != null) {
-        events = await _service.findAggregationEventsByParentEPCAndAction(parentEPC, action);
-      } else if (childEPC != null && action != null) {
-        events = await _service.findAggregationEventsByChildEPCAndAction(childEPC, action);
-      } else if (parentEPC != null) {
-        events = await _service.findAggregationEventsByParentEPC(parentEPC);
-      } else if (childEPC != null) {
-        events = await _service.findAggregationEventsByChildEPC(childEPC);
-      } else if (action != null) {
-        events = await _service.findAggregationEventsByAction(action);
+      if (effectiveLocationGLN != null &&
+          startTime != null &&
+          endTime != null) {
+        events = await _service.findAggregationEventsByLocationAndTimeWindow(
+            effectiveLocationGLN, startTime, endTime);
+      } else if (effectiveBizStep != null && effectiveParentEPC != null) {
+        events =
+            await _service.findAggregationEventsByBusinessStepAndParentEPC(
+                effectiveBizStep, effectiveParentEPC);
+      } else if (effectiveParentEPC != null && effectiveAction != null) {
+        events = await _service.findAggregationEventsByParentEPCAndAction(
+            effectiveParentEPC, effectiveAction);
+      } else if (effectiveChildEPC != null && effectiveAction != null) {
+        events = await _service.findAggregationEventsByChildEPCAndAction(
+            effectiveChildEPC, effectiveAction);
+      } else if (effectiveParentEPC != null) {
+        events = await _service
+            .findAggregationEventsByParentEPC(effectiveParentEPC);
+      } else if (effectiveChildEPC != null) {
+        events =
+            await _service.findAggregationEventsByChildEPC(effectiveChildEPC);
+      } else if (effectiveDisposition != null) {
+        events = await _service.findAggregationEventsByDisposition(
+            effectiveDisposition);
+      } else if (effectiveBizStep != null) {
+        events = await _service.findAggregationEventsByBusinessStep(
+            effectiveBizStep);
+      } else if (effectiveAction != null) {
+        events =
+            await _service.findAggregationEventsByAction(effectiveAction);
       } else {
-        events = await _service.getAllAggregationEvents(page, size);
+        usedPaginatedEndpoint = true;
+        events = await _service.getAllAggregationEvents(
+          page,
+          effectiveSize,
+          direction: state.sortOrder,
+        );
       }
 
-      final nextEvents = loadMore ? [...state.aggregationEvents, ...events] : events;
-      final totalElements = events.length;
-      final totalPages = events.isEmpty ? 0 : math.max(1, (totalElements / size).ceil());
+      events = AggregationEventListUtils.filterByDisposition(
+        events,
+        effectiveDisposition,
+      );
+      events = AggregationEventListUtils.filterByBizStep(
+        events,
+        effectiveBizStep,
+      );
+      events = AggregationEventListUtils.applySearchFilter(
+        events,
+        effectiveSearchText,
+      );
+      if (!usedPaginatedEndpoint) {
+        events = AggregationEventListUtils.sortByEventTime(
+          events,
+          state.sortOrder,
+        );
+      }
+
+      final nextEvents = isLoadMore
+          ? [...state.aggregationEvents, ...events]
+          : events;
+      final hasMore = usedPaginatedEndpoint && events.length >= effectiveSize;
 
       emit(state.copyWith(
+        status: AggregationEventsStatus.success,
         aggregationEvents: nextEvents,
-        totalElements: totalElements,
-        totalPages: totalPages,
-        loading: false,
-        error: null,
+        isListLoading: false,
+        isFetchingMore: false,
+        hasMoreData: hasMore,
+        page: page,
+        pageSize: effectiveSize,
+        filterAction: effectiveAction,
+        filterBizStep: effectiveBizStepRaw,
+        filterDisposition: effectiveDispositionRaw,
+        filterLocationGLN: effectiveLocationGLN,
+        filterParentEPC: effectiveParentEPC,
+        filterChildEPC: effectiveChildEPC,
+        filterSearchText: effectiveSearchText,
+        clearListFetchError: true,
       ));
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        isListLoading: false,
+        isFetchingMore: false,
+        listFetchError: e.toString(),
+      ));
     }
   }
+
+  Future<void> loadMore() async {
+    if (!state.hasMoreData || state.isFetchingMore) return;
+    await loadAggregationEvents(
+      page: state.page + 1,
+      size: state.pageSize,
+      isLoadMore: true,
+    );
+  }
+
+  void updatePageSize(int newSize) {
+    emit(state.copyWith(pageSize: newSize));
+    loadAggregationEvents(page: 0, size: newSize);
+  }
+
+  void toggleSortOrder() {
+    final next = state.sortOrder == 'ASC' ? 'DESC' : 'ASC';
+    emit(state.copyWith(sortOrder: next));
+    loadAggregationEvents(page: 0);
+  }
+
+  void clearFiltersAndReload() {
+    emit(state.copyWith(clearFilters: true));
+    loadAggregationEvents(page: 0);
+  }
+
+  // -------------------------------------------------------------------------
+  // Single-event fetch
+  // -------------------------------------------------------------------------
 
   Future<AggregationEvent?> getAggregationEventById(String id) async {
-    emit(state.copyWith(loading: true, error: null));
+    emit(state.copyWith(
+      status: AggregationEventsStatus.loading,
+      clearError: true,
+    ));
     try {
-      final isUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-          .hasMatch(id);
-
-      final event = isUuid ? await _service.getAggregationEventById(id) : await _service.getAggregationEventByEventId(id);
-      emit(state.copyWith(loading: false, selectedEvent: event));
+      final event = await _service.getAggregationEventByIdentifier(id);
+      emit(state.copyWith(
+        status: AggregationEventsStatus.success,
+        selectedEvent: event,
+      ));
       return event;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        error: e.toString(),
+      ));
       return null;
     }
   }
 
-  Future<AggregationEvent?> getAggregationEventByEventId(String eventId) async {
-    emit(state.copyWith(loading: true, error: null));
-    try {
-      final event = await _service.getAggregationEventByEventId(eventId);
-      emit(state.copyWith(loading: false, selectedEvent: event));
-      return event;
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      return null;
-    }
-  }
+  // -------------------------------------------------------------------------
+  // Create
+  // -------------------------------------------------------------------------
 
-  Future<AggregationEvent> createAggregationEvent(AggregationEvent event) async {
-    emit(state.copyWith(loading: true, error: null));
+  Future<AggregationEvent> createAggregationEvent(
+      AggregationEvent event) async {
+    emit(state.copyWith(
+      status: AggregationEventsStatus.loading,
+      clearError: true,
+    ));
     try {
       final newEvent = await _service.createAggregationEvent(event);
-      emit(state.copyWith(aggregationEvents: [newEvent, ...state.aggregationEvents], loading: false));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.success,
+        selectedEvent: newEvent,
+        aggregationEvents: [newEvent, ...state.aggregationEvents],
+      ));
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        error: e.toString(),
+      ));
       rethrow;
     }
   }
@@ -210,7 +405,10 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     List<Map<String, dynamic>>? sourceList,
     List<Map<String, dynamic>>? destinationList,
   }) async {
-    emit(state.copyWith(loading: true, error: null));
+    emit(state.copyWith(
+      status: AggregationEventsStatus.loading,
+      clearError: true,
+    ));
     try {
       final newEvent = await _service.createPackEvent(
         parentEPC,
@@ -222,10 +420,17 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         sourceList: sourceList,
         destinationList: destinationList,
       );
-      emit(state.copyWith(aggregationEvents: [newEvent, ...state.aggregationEvents], loading: false));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.success,
+        selectedEvent: newEvent,
+        aggregationEvents: [newEvent, ...state.aggregationEvents],
+      ));
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        error: e.toString(),
+      ));
       rethrow;
     }
   }
@@ -240,7 +445,10 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     List<Map<String, dynamic>>? sourceList,
     List<Map<String, dynamic>>? destinationList,
   }) async {
-    emit(state.copyWith(loading: true, error: null));
+    emit(state.copyWith(
+      status: AggregationEventsStatus.loading,
+      clearError: true,
+    ));
     try {
       final newEvent = await _service.createUnpackEvent(
         parentEPC,
@@ -252,160 +460,85 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         sourceList: sourceList,
         destinationList: destinationList,
       );
-      emit(state.copyWith(aggregationEvents: [newEvent, ...state.aggregationEvents], loading: false));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.success,
+        selectedEvent: newEvent,
+        aggregationEvents: [newEvent, ...state.aggregationEvents],
+      ));
       return newEvent;
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
-    }
-  }
-
-  Future<void> updateAggregationEvent(AggregationEvent event) async {
-    emit(state.copyWith(loading: true, error: null));
-    try {
-      final updatedEvent = await _service.updateAggregationEvent(event.id!, event);
-      final nextEvents = [...state.aggregationEvents];
-      final index = nextEvents.indexWhere((e) => e.id == event.id);
-      if (index != -1) {
-        nextEvents[index] = updatedEvent;
-      }
-
-      final nextSelected = (state.selectedEvent != null && state.selectedEvent!.id == event.id) ? updatedEvent : state.selectedEvent;
-
       emit(state.copyWith(
-        aggregationEvents: nextEvents,
-        selectedEvent: nextSelected,
-        loading: false,
+        status: AggregationEventsStatus.error,
+        error: e.toString(),
       ));
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
       rethrow;
     }
   }
 
-  Future<void> deleteAggregationEvent(String id) async {
-    emit(state.copyWith(loading: true, error: null));
-    try {
-      await _service.deleteAggregationEvent(id);
-      final nextEvents = state.aggregationEvents.where((event) => event.id != id).toList();
-      final nextSelected = (state.selectedEvent != null && state.selectedEvent!.id == id) ? null : state.selectedEvent;
-      emit(state.copyWith(aggregationEvents: nextEvents, selectedEvent: nextSelected, loading: false));
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-      rethrow;
-    }
-  }
-
-  Future<void> findCurrentChildrenOfParent(String parentEPC) async {
-    emit(state.copyWith(loading: true, error: null));
-    try {
-      final events = await _service.findCurrentChildrenOfParent(parentEPC);
-      emit(state.copyWith(
-        aggregationEvents: events,
-        totalElements: events.length,
-        totalPages: 1,
-        loading: false,
-      ));
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
-    }
-  }
+  // -------------------------------------------------------------------------
+  // Hierarchy helpers
+  // -------------------------------------------------------------------------
 
   Future<AggregationEvent?> findCurrentParentOfChild(String childEPC) async {
-    emit(state.copyWith(loading: true, error: null));
     try {
-      final event = await _service.findCurrentParentOfChild(childEPC);
-      emit(state.copyWith(loading: false));
-      return event;
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      return await _service.findCurrentParentOfChild(childEPC);
+    } catch (_) {
       return null;
     }
   }
 
   Future<void> trackParentHistory(String parentEPC) async {
-    emit(state.copyWith(loading: true, error: null));
+    emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final events = await _service.trackParentHistory(parentEPC);
+      final events = await _service.findAggregationEventsByParentEPC(parentEPC);
       emit(state.copyWith(
+        status: AggregationEventsStatus.success,
         aggregationEvents: events,
-        totalElements: events.length,
-        totalPages: 1,
-        loading: false,
+        isListLoading: false,
+        hasMoreData: false,
       ));
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        isListLoading: false,
+        listFetchError: e.toString(),
+      ));
     }
   }
 
   Future<void> trackChildHistory(String childEPC) async {
-    emit(state.copyWith(loading: true, error: null));
+    emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final events = await _service.trackChildHistory(childEPC);
+      final events = await _service.findAggregationEventsByChildEPC(childEPC);
       emit(state.copyWith(
+        status: AggregationEventsStatus.success,
         aggregationEvents: events,
-        totalElements: events.length,
-        totalPages: 1,
-        loading: false,
+        isListLoading: false,
+        hasMoreData: false,
       ));
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        status: AggregationEventsStatus.error,
+        isListLoading: false,
+        listFetchError: e.toString(),
+      ));
     }
-  }
-
-  void clearError() {
-    emit(state.copyWith(error: null));
   }
 
   Future<List<String>> loadContainerContents(String parentEPC) async {
     try {
-      emit(state.copyWith(loading: true));
-      final contents = await _service.findContainerContents(parentEPC);
-      emit(state.copyWith(loading: false));
-      return contents;
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: "Error loading container contents: $e"));
-      return [];
-    }
-  }
-
-  Future<void> applyChildEPCFilter(String childEPC) async {
-    emit(state.copyWith(
-      filterAction: null,
-      filterBizStep: null,
-      filterDisposition: null,
-      filterLocationGLN: null,
-      filterParentEPC: null,
-      filterChildEPC: childEPC,
-      currentPage: 0,
-      aggregationEvents: const [],
-    ));
-
-    await loadAggregationEvents(childEPC: childEPC);
-  }
-
-  Future<List<AggregationEvent>> loadAggregationEventsByParentEPC(String parentEPC) async {
-    try {
-      emit(state.copyWith(loading: true));
-      final events = await _service.findAggregationEventsByParentEPC(parentEPC);
-      emit(state.copyWith(loading: false));
-      return events;
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: "Error loading events by parent EPC: $e"));
+      return await _service.findContainerContents(parentEPC);
+    } catch (_) {
       return [];
     }
   }
 
   Future<bool> verifyHierarchy(String epc) async {
     try {
-      emit(state.copyWith(loading: true));
-      final result = await _service.verifyHierarchy(epc);
-      emit(state.copyWith(loading: false));
-      return result;
-    } catch (e) {
-      emit(state.copyWith(loading: false, error: "Error verifying hierarchy: $e"));
+      return await _service.verifyHierarchy(epc);
+    } catch (_) {
       return false;
     }
   }
-}
 
+}

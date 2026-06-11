@@ -40,7 +40,7 @@ import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
 
 import '../../../../../core/theme/traq_theme.dart';
 import '../../../../../core/utils/responsive_utils.dart';
-import '../../../../epcis/models/geospatial_coordinates.dart';
+import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import '../../../widgets/card_with_background_widget.dart';
 
 class GLNDetailScreen extends StatefulWidget {
@@ -600,7 +600,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
               formColumn: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-              if(_glnCodeController.text.isNotEmpty)    CardWithBackgroundWidget(
+              if(_glnCodeController.text.isNotEmpty)
+                CardWithBackgroundWidget(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

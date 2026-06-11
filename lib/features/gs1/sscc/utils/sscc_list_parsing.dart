@@ -26,7 +26,7 @@ List<SSCC> parseSsccListFromContent(List<dynamic> contentList) {
 
 String userFacingSsccErrorMessage(String? raw) {
   if (raw == null || raw.trim().isEmpty) {
-    return 'Failed to load SSCC data.';
+    return 'Failed to save SSCC. Please try again.';
   }
   final trimmed = raw.trim();
   if (trimmed.contains('"glnCode"') ||
@@ -34,6 +34,37 @@ String userFacingSsccErrorMessage(String? raw) {
       trimmed.contains('locationName')) {
     return 'Failed to load SSCC data. Please refresh the list.';
   }
+
+  final lower = trimmed.toLowerCase();
+  const fieldHints = <String, String>{
+    'issuing gln': 'Issuing GLN',
+    'issuinggln': 'Issuing GLN',
+    'extension digit': 'Extension Digit',
+    'sscc code': 'SSCC Code',
+    'sscc must': 'SSCC Code',
+    'sscc gcp': 'SSCC Code',
+    'gs1 company prefix': 'SSCC Code / Issuing GLN',
+    'contained gtin': 'Contained GTIN (AI 02)',
+    'contained quantity': 'Contained Quantity (AI 37)',
+    'content homogeneity': 'Content Homogeneity',
+    'gsin': 'GSIN (AI 402)',
+    'purchase order': 'Purchase Order (AI 400)',
+    'ship-from gln': 'Ship From GLN',
+    'ship-to gln': 'Ship To GLN',
+    'packing date': 'Packing Date',
+    'xsc-002': 'Issuing GLN / SSCC Code',
+    'xsc-004': 'Classification & Content',
+  };
+
+  for (final entry in fieldHints.entries) {
+    if (lower.contains(entry.key)) {
+      if (trimmed.startsWith('${entry.value}:')) {
+        return trimmed;
+      }
+      return '${entry.value}: $trimmed';
+    }
+  }
+
   if (trimmed.length > 240) {
     return '${trimmed.substring(0, 240)}…';
   }

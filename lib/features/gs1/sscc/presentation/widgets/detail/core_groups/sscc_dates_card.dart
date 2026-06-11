@@ -31,6 +31,8 @@ class SsccDatesCard extends StatelessWidget {
             label: 'Packing Date',
             value: packingDate,
             onTap: isReadOnly ? null : onPackingDateSelected,
+            helperText: 'Optional — when the logistic unit was packed',
+            emptyValueLabel: 'Not set (optional)',
           ),
           if (sscc?.shippingDate != null) ...[
             const SizedBox(height: 12),

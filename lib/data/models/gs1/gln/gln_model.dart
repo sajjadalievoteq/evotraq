@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
-import 'package:traqtrace_app/features/epcis/models/geospatial_coordinates.dart';
+import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 
 enum LocationType {
   manufacturing_site,

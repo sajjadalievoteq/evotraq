@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
@@ -17,14 +18,26 @@ import '../widgets/user_management_form_dialog.dart';
 import '../widgets/user_management_loading_view.dart';
 import '../widgets/user_management_user_card.dart';
 
-class UserManagementScreen extends StatefulWidget {
+class UserManagementScreen extends StatelessWidget {
   const UserManagementScreen({super.key});
 
   @override
-  State<UserManagementScreen> createState() => _UserManagementScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<UserManagementCubit>(),
+      child: const _UserManagementView(),
+    );
+  }
 }
 
-class _UserManagementScreenState extends State<UserManagementScreen> {
+class _UserManagementView extends StatefulWidget {
+  const _UserManagementView();
+
+  @override
+  State<_UserManagementView> createState() => _UserManagementViewState();
+}
+
+class _UserManagementViewState extends State<_UserManagementView> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
 
@@ -252,19 +265,14 @@ class _UserManagementContent extends StatelessWidget {
       );
     }
 
-    const tileMaxExtent = 240.0;
+
     final g = context.gutter;
 
-    return GridView.builder(
+    return ListView.separated(
       padding: EdgeInsets.all(g),
       physics: const ClampingScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: tileMaxExtent,
-        mainAxisSpacing: g,
-        crossAxisSpacing: g,
-        childAspectRatio: 1,
-      ),
       itemCount: users.length,
+      separatorBuilder: (_, __) => SizedBox(height: g),
       itemBuilder: (context, index) {
         final user = users[index];
         return UserManagementUserCard(
@@ -272,7 +280,7 @@ class _UserManagementContent extends StatelessWidget {
           isToggleLoading: togglingUserId == user.id,
           onEdit: onEditUser,
           onToggleStatus: onToggleStatus,
-          variant: UserManagementUserCardVariant.gridSquare,
+          variant: UserManagementUserCardVariant.listTile,
         );
       },
     );

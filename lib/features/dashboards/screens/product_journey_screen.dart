@@ -7,6 +7,8 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
 
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/shared/object_event_route_constants.dart';
+
 import '../../../data/services/product_journey_service.dart';
 
 /// Dashboard screen showing the complete journey of a product through the supply chain
@@ -948,7 +950,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
   String _getEventDetailRoute(String eventType, String eventId) {
     switch (eventType.toLowerCase()) {
       case 'objectevent':
-        return '/epcis/object-events/$eventId';
+        return ObjectEventRouteConstants.detailLocation(eventId);
       case 'aggregationevent':
         return '/epcis/aggregation-events/$eventId';
       case 'transactionevent':
@@ -956,7 +958,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
       case 'transformationevent':
         return '/epcis/transformation-events/$eventId';
       default:
-        return '/epcis/object-events/$eventId';
+        return ObjectEventRouteConstants.detailLocation(eventId);
     }
   }
 }

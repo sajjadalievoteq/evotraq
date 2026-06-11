@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
-import 'package:traqtrace_app/features/epcis/widgets/validation_error_widget.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 
 /// Show validation errors dialog
 void showValidationErrors(

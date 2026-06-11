@@ -1,5 +1,5 @@
 
-import '../models/epcis_query_parameters_dto.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
 
 /// Factory class for creating common EPCIS query parameters
 class EPCISQueryFactory {

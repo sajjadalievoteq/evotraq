@@ -9,12 +9,14 @@ class Gs1DatePickerField extends StatelessWidget {
     required this.value,
     this.onTap,
     this.helperText,
+    this.emptyValueLabel = 'Select date',
   });
 
   final String label;
   final DateTime? value;
   final VoidCallback? onTap;
   final String? helperText;
+  final String emptyValueLabel;
 
   static final DateFormat displayDateFormat = DateFormat('yyyy-MM-dd');
 
@@ -35,7 +37,7 @@ class Gs1DatePickerField extends StatelessWidget {
             Text(
               value != null
                   ? displayDateFormat.format(value!)
-                  : 'Select date',
+                  : emptyValueLabel,
               style: TextStyle(
                 color: value != null ? context.colors.textPrimary : Colors.grey,
               ),

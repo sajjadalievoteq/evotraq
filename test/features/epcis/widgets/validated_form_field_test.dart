@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/features/epcis/widgets/validated_form_field.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_form_field.dart';
 
 void main() {
   group('ValidatedFormField Widget Tests', () {

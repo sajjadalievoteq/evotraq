@@ -32,16 +32,28 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import '../../../../../core/theme/traq_theme.dart';
 import '../../../../../core/widgets/traq_app_bar.dart';
 
-class CommissioningOperationScreen extends StatefulWidget {
+class CommissioningOperationScreen extends StatelessWidget {
   const CommissioningOperationScreen({super.key});
 
   @override
-  State<CommissioningOperationScreen> createState() =>
-      _CommissioningOperationScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<GTINCubit>(),
+      child: const _CommissioningOperationView(),
+    );
+  }
 }
 
-class _CommissioningOperationScreenState
-    extends State<CommissioningOperationScreen> {
+class _CommissioningOperationView extends StatefulWidget {
+  const _CommissioningOperationView();
+
+  @override
+  State<_CommissioningOperationView> createState() =>
+      _CommissioningOperationViewState();
+}
+
+class _CommissioningOperationViewState
+    extends State<_CommissioningOperationView> {
   final _pageController = PageController();
   int _currentStep = 0;
 

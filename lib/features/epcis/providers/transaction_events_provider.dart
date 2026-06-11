@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 
-import '../../../data/services/transaction_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_event_service.dart';
 
 class TransactionEventsState extends Equatable {
   final List<TransactionEvent> transactionEvents;

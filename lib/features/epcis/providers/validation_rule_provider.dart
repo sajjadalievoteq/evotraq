@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/features/epcis/models/validation_rule.dart';
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 
 
-import '../../../data/services/validation_rule_service.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart';
 
 class ValidationRuleState extends Equatable {
   final List<ValidationRule> validationRules;

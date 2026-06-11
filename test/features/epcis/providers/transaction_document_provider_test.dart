@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
-import 'package:traqtrace_app/data/services/transaction_document_service.dart';
-import 'package:traqtrace_app/features/epcis/models/transaction_event.dart';
+import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';
+import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 
 

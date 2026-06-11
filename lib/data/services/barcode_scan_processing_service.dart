@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/barcode_api_service.dart';
-import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
-import 'package:traqtrace_app/features/epcis/models/object_event.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
+import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 class BarcodeScanProcessingService {

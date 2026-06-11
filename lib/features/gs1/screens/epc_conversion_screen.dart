@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
 
-import '../../../data/services/epc_conversion_service.dart';
+import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 
 class EPCConversionScreen extends StatefulWidget {
-  final EPCConversionService epcConversionService;
-
-  const EPCConversionScreen({
-    Key? key, 
-    required this.epcConversionService,
-  }) : super(key: key);
+  const EPCConversionScreen({super.key});
 
   @override
   State<EPCConversionScreen> createState() => _EPCConversionScreenState();
 }
 
 class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTickerProviderStateMixin {
+  late final EPCConversionService _epcConversionService;
   late TabController _tabController;
   
   final _gtinController = TextEditingController();
@@ -46,6 +43,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
   @override
   void initState() {
     super.initState();
+    _epcConversionService = getIt<EPCConversionService>();
     _tabController = TabController(length: 5, vsync: this);
   }
 
@@ -82,14 +80,14 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     try {
       switch (tabIndex) {
         case 0:
-          final epcUri = await widget.epcConversionService.convertSGTINToEPC(
+          final epcUri = await _epcConversionService.convertSGTINToEPC(
             _gtinController.text,
             _serialController.text,
           );
           _sgtinEpcResultController.text = epcUri;
           break;
         case 1:
-          final epcUri = await widget.epcConversionService.convertSSCCToEPC(
+          final epcUri = await _epcConversionService.convertSSCCToEPC(
             _ssccController.text,
           );
           _ssccEpcResultController.text = epcUri;
@@ -98,7 +96,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           final String? extension = _glnExtensionController.text.isEmpty 
               ? null 
               : _glnExtensionController.text;
-          final epcUri = await widget.epcConversionService.convertGLNToEPC(
+          final epcUri = await _epcConversionService.convertGLNToEPC(
             _glnController.text,
             extension,
           );
@@ -127,15 +125,15 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
       
       switch (_selectedEpcType) {
         case 'SGTIN':
-          final result = await widget.epcConversionService.convertEPCToSGTIN(epcUri);
+          final result = await _epcConversionService.convertEPCToSGTIN(epcUri);
           _epcConversionResultController.text = 'GTIN: ${result['gtin']}\nSerial: ${result['serial']}';
           break;
         case 'SSCC':
-          final sscc = await widget.epcConversionService.convertEPCToSSCC(epcUri);
+          final sscc = await _epcConversionService.convertEPCToSSCC(epcUri);
           _epcConversionResultController.text = 'SSCC: $sscc';
           break;
         case 'GLN':
-          final gln = await widget.epcConversionService.convertEPCToGLN(epcUri);
+          final gln = await _epcConversionService.convertEPCToGLN(epcUri);
           _epcConversionResultController.text = 'GLN: $gln';
           break;
       }
@@ -157,7 +155,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
     });
 
     try {
-      final epcUri = await widget.epcConversionService.convertGS1ElementStringToEPC(
+      final epcUri = await _epcConversionService.convertGS1ElementStringToEPC(
         _gs1ElementStringController.text,
       );
       _gs1ToEpcResultController.text = epcUri;

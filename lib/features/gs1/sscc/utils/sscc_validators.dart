@@ -1,4 +1,5 @@
 
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
@@ -15,15 +16,15 @@ final RegExp _ssccGs1DlRegex = RegExp(
 );
 
 String? validateSsccCode(String? value) {
+  final parsed = SsccInputParser.parseToSsccCode(value);
+  if (parsed != null) return null;
+
   final s = SsccFormat.stripSsccInput(value);
   if (s.isEmpty) return 'SSCC is required';
-  if (!RegExp(r'^\d{18}$').hasMatch(s)) {
-    return 'SSCC must be exactly 18 numeric digits';
+  if (!RegExp(r'^\d{18}$').hasMatch(s.replaceAll(RegExp(r'\D'), ''))) {
+    return 'SSCC must be exactly 18 numeric digits (or a valid GS1 (00) barcode)';
   }
-  if (!SsccFormat.isValidSscc(s)) {
-    return 'Invalid SSCC check digit. Verify the code or use a check-digit calculator.';
-  }
-  return null;
+  return 'Invalid SSCC check digit. Verify the code or use a check-digit calculator.';
 }
 
 String? validateSsccCodeOptional(String? value) {
@@ -50,7 +51,7 @@ String? validateGln(String? value, {String fieldName = 'GLN'}) {
 
 String? validateIssuingGlnRequired(String? value) {
   if (value == null || value.trim().isEmpty) {
-    return 'Issuing GLN is required to generate an SSCC';
+    return 'Issuing GLN is required';
   }
   return GlnFieldValidators.validateGlnCode(value);
 }

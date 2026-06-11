@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/features/epcis/widgets/field_validation_indicator.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 
 void main() {
   group('FieldValidationIndicator Widget Tests', () {

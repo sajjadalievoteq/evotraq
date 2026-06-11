@@ -14,7 +14,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/barcode/services/barcode_epcis_mapper.dart';
 
 import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
-import 'package:traqtrace_app/features/epcis/models/epcis_event.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 
 import '../../../data/services/barcode_scanner_service.dart';
 import '../../../data/services/wired_scanner_service.dart';

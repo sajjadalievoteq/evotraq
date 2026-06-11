@@ -11,7 +11,8 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/epcis/widgets/validated_text_field.dart';
+import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
+import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
@@ -37,7 +38,12 @@ import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/core
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/core_groups/sscc_lifecycle_status_card.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/skeleton/sscc_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_form_validation.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/shared/models/scan_result.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
@@ -80,6 +86,8 @@ class SSCCDetailScreen extends StatefulWidget {
   State<SSCCDetailScreen> createState() => _SSCCDetailScreenState();
 }
 
+enum _SsccInputMode { generate, scan, manual }
+
 class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     with GS1FormValidationMixin<SSCCDetailScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -104,6 +112,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   late TextEditingController _poController;
   late TextEditingController _carrierRoutingController;
 
+  _SsccInputMode _ssccInputMode = _SsccInputMode.generate;
+
   UnitType _unitType = UnitType.PALLET;
   LogisticUnitStatus _status = LogisticUnitStatus.DRAFT;
   ContentHomogeneity _contentHomogeneity = ContentHomogeneity.UNKNOWN;
@@ -125,6 +135,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   dynamic _capturedPharmaExtension;
   String? _capturedSsccCode;
   bool _editRedirectHandled = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -273,6 +284,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     _gincController.dispose();
     _poController.dispose();
     _carrierRoutingController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -508,118 +520,158 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   Future<void> _saveSSCC() async {
     if (widget.awaitingListSelection) return;
-    if (_ssccCodeController.text.isEmpty &&
-        widget.isCreating) {
-      context.showWarning(
-        'Please generate an SSCC code first by clicking the generate button',
+
+    setState(() {
+      _issuingGlnError = validateIssuingGlnRequired(_issuingGln?.glnCode);
+    });
+
+    final validationErrors = SsccCreateFormValidation.collectErrors(
+      isCreating: widget.isCreating,
+      issuingGlnCode: _issuingGln?.glnCode,
+      extensionDigit: _extensionDigitController.text,
+      ssccCodeRaw: _ssccCodeController.text,
+      ssccMissingMessage: _ssccCodeMissingMessage(),
+      contentHomogeneity: _contentHomogeneity,
+      containedGtin: _containedGtinController.text,
+      containedQuantity: _containedQuantityController.text,
+      gsin: _gsinController.text,
+      purchaseOrder: _poController.text,
+    );
+
+    _formKey.currentState?.validate();
+
+    validationErrors.addAll(
+      SsccCreateFormValidation.collectFormFieldErrors(_formKey),
+    );
+
+    if (validationErrors.isNotEmpty) {
+      _scrollToFormTop();
+      showValidationErrors(
+        context,
+        validationErrors,
+        title: 'Cannot save SSCC — fix these fields',
       );
       return;
     }
 
-    if (_formKey.currentState!.validate()) {
-      final now = DateTime.now();
+    final now = DateTime.now();
 
-      setState(() {
-        _isLoading = true;
-        _hasSubmittedForm = true;
-      });
-      String gs1CompanyPrefix = '';
-      String serialReference = '';
-      String checkDigit = '';
-      if (_ssccCodeController.text.isNotEmpty) {
-        var ssccCode = _ssccCodeController.text;
+    setState(() {
+      _isLoading = true;
+      _hasSubmittedForm = true;
+    });
 
-        if (ssccCode.length != 18) {
-          final fixedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
-          if (fixedSSCC != null) {
-            ssccCode = fixedSSCC;
-            _ssccCodeController.text =
-                ssccCode;
-          } else {
-            context.showError(
-              'Invalid SSCC code - must be 18 digits (current: ${ssccCode.length} digits)',
-            );
-            setState(() {
-              _isLoading = false;
-            });
-            return;
-          }
+    String gs1CompanyPrefix = '';
+    String serialReference = '';
+    String checkDigit = '';
+    if (_ssccCodeController.text.isNotEmpty) {
+      var ssccCode = SsccInputParser.parseToSsccCode(_ssccCodeController.text)
+          ?? _ssccCodeController.text.trim();
+
+      if (ssccCode.length != 18) {
+        final fixedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
+        if (fixedSSCC != null) {
+          ssccCode = fixedSSCC;
+          _ssccCodeController.text = ssccCode;
+        } else {
+          setState(() => _isLoading = false);
+          showValidationErrors(
+            context,
+            [
+              'SSCC Code: must be 18 digits or a valid GS1 (00) barcode (current: ${ssccCode.length} digits)',
+            ],
+            title: 'Cannot save SSCC — fix these fields',
+          );
+          return;
         }
-
-        gs1CompanyPrefix = ssccCode.substring(
-          1,
-          8,
-        );
-        serialReference = ssccCode.substring(8, 17);
-        checkDigit = ssccCode.substring(17);
-      } else {
-        context.showWarning('Please generate an SSCC code first');
-        setState(() {
-          _isLoading = false;
-        });
-        return;
       }
 
-      final containedQty = int.tryParse(_containedQuantityController.text.trim());
-      final identityLocked = !widget.isCreating &&
-          _sscc != null &&
-          edit_rules.isSsccIdentityLocked(_sscc!.status);
-      final persistedStatus = _sscc?.status ?? _status;
-      final saveStatus = edit_rules.canManuallyEditSsccStatus(
-            persistedStatus,
-            isCreating: widget.isCreating,
-          )
-          ? _status
-          : persistedStatus;
+      _syncExtensionDigitFromSscc(ssccCode);
 
-      final sscc = SSCC(
-        id: widget.isCreating ? null : _sscc?.id,
-        ssccCode: identityLocked ? _sscc!.ssccCode : _ssccCodeController.text,
-        unitType: _unitType,
-        status: saveStatus,
-        contentHomogeneity: _contentHomogeneity,
-        containedGtin: _containedGtinController.text.trim().isEmpty
-            ? null
-            : _containedGtinController.text.trim(),
-        containedQuantity: containedQty,
-        containedBatch: _containedBatchController.text.trim().isEmpty
-            ? null
-            : _containedBatchController.text.trim(),
-        containedExpiry: _containedExpiry,
-        packingDate: _packingDate,
-        shipFromGln: _glnCodeOrNull(_shipFromGln),
-        shipToGln: _glnCodeOrNull(_shipToGln),
-        billToGln: _glnCodeOrNull(_billToGln),
-        shipForGln: _glnCodeOrNull(_shipForGln),
-        currentCustodianGln: _glnCodeOrNull(_custodianGln),
-        gsin: _trimOrNull(_gsinController.text),
-        ginc: _trimOrNull(_gincController.text),
-        purchaseOrderNumber: _trimOrNull(_poController.text),
-        carrierRoutingCode: _trimOrNull(_carrierRoutingController.text),
-        parentSsccCode: _sscc?.parentSsccCode,
-        extensionDigit: identityLocked
-            ? (_sscc!.extensionDigit ?? '0')
-            : (_extensionDigitController.text.isEmpty
-                ? '0'
-                : _extensionDigitController.text),
-        gs1CompanyPrefix:
-            identityLocked ? (_sscc!.gs1CompanyPrefix ?? gs1CompanyPrefix) : gs1CompanyPrefix,
-        serialReference:
-            identityLocked ? (_sscc!.serialReference ?? serialReference) : serialReference,
-        checkDigit: identityLocked ? (_sscc!.checkDigit ?? checkDigit) : checkDigit,
-        issuingGLN: _issuingGln,
-        createdAt: _sscc?.createdAt ?? now,
-        updatedAt: now,
+      gs1CompanyPrefix = ssccCode.substring(1, 8);
+      serialReference = ssccCode.substring(8, 17);
+      checkDigit = ssccCode.substring(17);
+    } else {
+      setState(() => _isLoading = false);
+      showValidationErrors(
+        context,
+        ['SSCC Code: ${_ssccCodeMissingMessage()}'],
+        title: 'Cannot save SSCC — fix these fields',
       );
-
-      if (widget.isCreating) {
-        _cubit.createSSCC(sscc);
-      } else if (widget.isEditing &&
-          _sscc?.id != null &&
-          edit_rules.canEditSsccRecord(_sscc!.status)) {
-        _cubit.updateSSCC(_sscc!.id!, sscc);
-      }
+      return;
     }
+
+    final containedQty = int.tryParse(_containedQuantityController.text.trim());
+    final identityLocked = !widget.isCreating &&
+        _sscc != null &&
+        edit_rules.isSsccIdentityLocked(_sscc!.status);
+    final persistedStatus = _sscc?.status ?? _status;
+    final saveStatus = edit_rules.canManuallyEditSsccStatus(
+          persistedStatus,
+          isCreating: widget.isCreating,
+        )
+        ? _status
+        : persistedStatus;
+
+    final sscc = SSCC(
+      id: widget.isCreating ? null : _sscc?.id,
+      ssccCode: identityLocked ? _sscc!.ssccCode : _ssccCodeController.text,
+      unitType: _unitType,
+      status: saveStatus,
+      contentHomogeneity: _contentHomogeneity,
+      containedGtin: _containedGtinController.text.trim().isEmpty
+          ? null
+          : _containedGtinController.text.trim(),
+      containedQuantity: containedQty,
+      containedBatch: _containedBatchController.text.trim().isEmpty
+          ? null
+          : _containedBatchController.text.trim(),
+      containedExpiry: _containedExpiry,
+      packingDate: _packingDate,
+      shipFromGln: _glnCodeOrNull(_shipFromGln),
+      shipToGln: _glnCodeOrNull(_shipToGln),
+      billToGln: _glnCodeOrNull(_billToGln),
+      shipForGln: _glnCodeOrNull(_shipForGln),
+      currentCustodianGln: _glnCodeOrNull(_custodianGln),
+      gsin: _trimOrNull(_gsinController.text),
+      ginc: _trimOrNull(_gincController.text),
+      purchaseOrderNumber: _trimOrNull(_poController.text),
+      carrierRoutingCode: _trimOrNull(_carrierRoutingController.text),
+      parentSsccCode: _sscc?.parentSsccCode,
+      extensionDigit: identityLocked
+          ? (_sscc!.extensionDigit ?? '0')
+          : (_extensionDigitController.text.isEmpty
+              ? '0'
+              : _extensionDigitController.text),
+      gs1CompanyPrefix: identityLocked
+          ? (_sscc!.gs1CompanyPrefix ?? gs1CompanyPrefix)
+          : gs1CompanyPrefix,
+      serialReference: identityLocked
+          ? (_sscc!.serialReference ?? serialReference)
+          : serialReference,
+      checkDigit:
+          identityLocked ? (_sscc!.checkDigit ?? checkDigit) : checkDigit,
+      issuingGLN: _issuingGln,
+      createdAt: _sscc?.createdAt ?? now,
+      updatedAt: now,
+    );
+
+    if (widget.isCreating) {
+      _cubit.createSSCC(sscc);
+    } else if (widget.isEditing &&
+        _sscc?.id != null &&
+        edit_rules.canEditSsccRecord(_sscc!.status)) {
+      _cubit.updateSSCC(_sscc!.id!, sscc);
+    }
+  }
+
+  void _scrollToFormTop() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   void _generateSSCCCode() {
@@ -654,6 +706,52 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       _issuingGln!.glnCode,
       _extensionDigitController.text,
     );
+  }
+
+  Future<void> _scanSSCCCode() async {
+    final result = await AggregationBarcodeScanDialog.show(
+      context,
+      title: 'Scan SSCC Barcode',
+      allowedFormats: const ['SSCC', 'CODE_128'],
+    );
+    if (result == null || !mounted) return;
+
+    if (!result.isValid) {
+      context.showError(result.error ?? 'Invalid barcode scan');
+      return;
+    }
+
+    final parsed = SsccInputParser.parseToSsccCode(result.data);
+    if (parsed == null) {
+      context.showError(
+        'Could not read an SSCC from the scan. Use a GS1 (00) barcode or 18-digit SSCC.',
+      );
+      return;
+    }
+
+    setState(() {
+      _ssccCodeController.text = parsed;
+      _syncExtensionDigitFromSscc(parsed);
+    });
+    context.showSuccess('SSCC captured: $parsed');
+  }
+
+  String _ssccCodeMissingMessage() {
+    switch (_ssccInputMode) {
+      case _SsccInputMode.generate:
+        return 'Generate an SSCC code using the button, or switch to Manual or Scan';
+      case _SsccInputMode.scan:
+        return 'Scan an SSCC barcode using the scan button';
+      case _SsccInputMode.manual:
+        return 'Enter an 18-digit SSCC code or paste a GS1 (00) barcode';
+    }
+  }
+
+  void _syncExtensionDigitFromSscc(String ssccCode) {
+    final ext = SsccFormat.extensionDigit(ssccCode);
+    if (ext != null) {
+      _extensionDigitController.text = ext;
+    }
   }
 
   @override
@@ -695,8 +793,15 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
               _isLoading = false;
               _formFieldsHydrated = true;
             });
-            if (_sscc == null && !widget.isCreating) {
-              context.showError(userFacingSsccErrorMessage(state.error));
+            final message = userFacingSsccErrorMessage(state.error);
+            if (_hasSubmittedForm) {
+              showValidationErrors(
+                context,
+                [message],
+                title: 'Cannot save SSCC',
+              );
+            } else if (_sscc == null && !widget.isCreating) {
+              context.showError(message);
             }
             return;
           }
@@ -768,6 +873,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
             setState(() {
               _isLoading = false;
               _ssccCodeController.text = ssccCode;
+              _syncExtensionDigitFromSscc(ssccCode);
             });
           }
         });
@@ -867,6 +973,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     return RefreshIndicator(
       onRefresh: _refresh,
       child: SingleChildScrollView(
+        controller: _scrollController,
         physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.only(
           top: context.horizontalPadding.left,
@@ -1080,6 +1187,59 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   }
 
   Widget _buildSSCCCodeSection(bool isReadOnly) {
+    final isManual = _ssccInputMode == _SsccInputMode.manual;
+    final isScan = _ssccInputMode == _SsccInputMode.scan;
+
+    Widget? ssccSuffixIcon;
+    String ssccHelperText;
+    String ssccHintText;
+
+    if (!isReadOnly) {
+      if (_ssccInputMode == _SsccInputMode.generate) {
+        ssccHelperText = 'Will be generated automatically';
+        ssccHintText = 'Click Generate button →';
+        ssccSuffixIcon = IconButton(
+          icon: const Icon(Icons.autorenew),
+          tooltip: 'Generate SSCC Code',
+          onPressed: _generateSSCCCode,
+        );
+      } else if (isScan) {
+        ssccHelperText = 'Tap the scan button to read a barcode';
+        ssccHintText = 'Tap scan icon to scan →';
+        ssccSuffixIcon = IconButton(
+          icon: const Icon(Icons.qr_code_scanner),
+          tooltip: 'Scan SSCC Barcode',
+          onPressed: _scanSSCCCode,
+        );
+      } else {
+        ssccHelperText =
+            'Type 18 digits, paste GS1 (00)…, or tap scan';
+        ssccHintText = 'e.g. 003762345678900001';
+        ssccSuffixIcon = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.qr_code_scanner),
+              tooltip: 'Scan SSCC Barcode',
+              onPressed: _scanSSCCCode,
+            ),
+            if (_ssccCodeController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                tooltip: 'Clear',
+                onPressed: () => setState(() {
+                  _ssccCodeController.clear();
+                  _extensionDigitController.text = '0';
+                }),
+              ),
+          ],
+        );
+      }
+    } else {
+      ssccHelperText = '';
+      ssccHintText = '';
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1122,6 +1282,42 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   });
                 },
               ),
+            if (!isReadOnly) ...[
+              const SizedBox(height: 16.0),
+              SegmentedButton<_SsccInputMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: _SsccInputMode.generate,
+                    label: Text('Generate'),
+                    icon: Icon(Icons.autorenew, size: 16),
+                  ),
+                  ButtonSegment(
+                    value: _SsccInputMode.scan,
+                    label: Text('Scan'),
+                    icon: Icon(Icons.qr_code_scanner, size: 16),
+                  ),
+                  ButtonSegment(
+                    value: _SsccInputMode.manual,
+                    label: Text('Manual'),
+                    icon: Icon(Icons.edit, size: 16),
+                  ),
+                ],
+                selected: {_ssccInputMode},
+                onSelectionChanged: (selection) {
+                  final mode = selection.first;
+                  setState(() {
+                    _ssccInputMode = mode;
+                    _ssccCodeController.clear();
+                    _extensionDigitController.text = '0';
+                  });
+                  if (mode == _SsccInputMode.scan) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _scanSSCCCode();
+                    });
+                  }
+                },
+              ),
+            ],
             const SizedBox(height: 16.0),
             Row(
               children: [
@@ -1129,12 +1325,14 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   flex: 1,
                   child: ValidatedTextField(
                     controller: _extensionDigitController,
-                    decoration: const InputDecoration(
-                      labelText: 'Extension Digit',
+                    decoration: InputDecoration(
+                      labelText: SsccUiConstants.requiredFieldLabel(
+                        SsccUiConstants.labelExtensionDigitField,
+                      ),
                       helperText: 'Logistic variants (0-9)',
                       border: OutlineInputBorder(),
                     ),
-                    readOnly: isReadOnly,
+                    readOnly: isReadOnly || _ssccInputMode != _SsccInputMode.generate,
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       final err = validateExtensionDigit(value);
@@ -1149,28 +1347,50 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   child: ValidatedTextField(
                     controller: _ssccCodeController,
                     decoration: InputDecoration(
-                      labelText: 'SSCC Code',
-                      helperText: 'Will be generated automatically',
-                      hintText: 'Click Generate button →',
-                      border: OutlineInputBorder(),
-                      suffixIcon: !isReadOnly
-                          ? IconButton(
-                              icon: const Icon(Icons.autorenew),
-                              tooltip: 'Generate SSCC Code',
-                              onPressed: _generateSSCCCode,
-                            )
-                          : null,
+                      labelText: SsccUiConstants.requiredFieldLabel(
+                        SsccUiConstants.labelSsccCodeField,
+                      ),
+                      helperText: ssccHelperText,
+                      hintText: ssccHintText,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: ssccSuffixIcon,
                       filled: true,
                       fillColor: _ssccCodeController.text.isEmpty
                           ? Colors.grey.shade100
                           : (_ssccCodeController.text.length == 18
-                                ? Colors.green.shade50
-                                : Colors.red.shade50),
+                              ? Colors.green.shade50
+                              : Colors.red.shade50),
                     ),
-                    readOnly: true,
+                    readOnly: isReadOnly || !isManual,
+                    keyboardType: TextInputType.text,
+                    onChanged: isManual
+                        ? (value) {
+                            final parsed = SsccInputParser.parseToSsccCode(value);
+                            if (parsed != null && value != parsed) {
+                              _ssccCodeController.value = TextEditingValue(
+                                text: parsed,
+                                selection: TextSelection.collapsed(
+                                  offset: parsed.length,
+                                ),
+                              );
+                              _syncExtensionDigitFromSscc(parsed);
+                            } else {
+                              _syncExtensionDigitFromSscc(
+                                value.replaceAll(RegExp(r'\D'), ''),
+                              );
+                            }
+                            setState(() {});
+                          }
+                        : null,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please generate an SSCC code';
+                        if (_ssccInputMode == _SsccInputMode.generate) {
+                          return 'Please generate an SSCC code';
+                        } else if (isScan) {
+                          return 'Please scan an SSCC barcode';
+                        } else {
+                          return 'Please enter an SSCC code';
+                        }
                       }
                       return validateSsccCode(value);
                     },

@@ -106,7 +106,15 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
   void didUpdateWidget(covariant _GLNSelectorBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialValue?.glnCode != oldWidget.initialValue?.glnCode) {
-      _applyInitialValue(widget.initialValue);
+      final incoming = widget.initialValue;
+      final keepCurrentSelection = incoming != null &&
+          _selectedGLN != null &&
+          incoming.glnCode == _selectedGLN!.glnCode &&
+          isPlaceholderGlnLocation(incoming) &&
+          !isPlaceholderGlnLocation(_selectedGLN!);
+      if (!keepCurrentSelection) {
+        _applyInitialValue(incoming);
+      }
     }
     if (widget.pickerCatalog != oldWidget.pickerCatalog) {
       _applyPickerCatalog(widget.pickerCatalog);
@@ -231,11 +239,24 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
             if (widget.label.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  widget.label + (widget.isRequired ? ' *' : ''),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (widget.isRequired)
+                      Text(
+                        ' *',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             

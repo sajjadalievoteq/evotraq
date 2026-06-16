@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 
 import '../../../../../../core/consts/app_consts.dart';
 import '../../users/widgets/user_management_constants.dart';

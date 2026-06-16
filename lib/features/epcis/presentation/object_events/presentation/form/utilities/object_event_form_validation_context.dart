@@ -1,4 +1,3 @@
-/// Callbacks bridging [EventFormValidationMixin] to form widgets.
 class ObjectEventFormValidationContext {
   final String? Function(String fieldName) getFieldError;
   final bool Function(String fieldName) hasFieldBeenValidated;

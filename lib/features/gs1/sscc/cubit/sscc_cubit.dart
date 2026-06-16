@@ -6,7 +6,7 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_filters.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
 export 'sscc_state.dart';
 export 'sscc_status.dart';

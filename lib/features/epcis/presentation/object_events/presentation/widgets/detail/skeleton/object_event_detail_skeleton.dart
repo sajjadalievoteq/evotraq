@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/widgets/detail/skeleton/object_event_skeleton_group_card.dart';
 
-/// Shimmer placeholder matching the object event detail section layout.
 class ObjectEventDetailSkeleton extends StatelessWidget {
   const ObjectEventDetailSkeleton({super.key});
 

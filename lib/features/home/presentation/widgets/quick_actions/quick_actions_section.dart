@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/home/presentation/constants/home_strings.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/quick_actions/widgets/quick_actions_grid.dart';
-import 'package:traqtrace_app/shared/widgets/traq_section_title.dart';
+import 'package:traqtrace_app/core/widgets/traq_section_title.dart';
 
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});

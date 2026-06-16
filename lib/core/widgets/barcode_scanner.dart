@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/services/gs1_scan_pipeline.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
 
 /// Wrapper widget for barcode scanning that provides a simplified interface
 /// for operational screens like shipping, receiving, etc.
@@ -39,63 +40,34 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   void _onBarcodeDetected(String gs1ElementString) {
     if (!_isScanning) return;
 
-    // Basic validation of the scanned data
-    if (gs1ElementString.isEmpty) {
+    final pipelineResult = Gs1ScanPipeline.processScan(gs1ElementString);
+    if (!pipelineResult.isValid) {
+      widget.onScanResult(pipelineResult);
+      return;
+    }
+
+    final barcodeType = pipelineResult.barcodeType;
+
+    if (widget.validateGS1 &&
+        widget.allowedFormats.isNotEmpty &&
+        (barcodeType == null ||
+            !widget.allowedFormats.contains(barcodeType))) {
       widget.onScanResult(ScanResult.error(
         data: gs1ElementString,
-        error: 'Empty barcode data',
+        error: 'Barcode type not allowed: ${barcodeType ?? 'Unknown'}',
       ));
       return;
     }
 
-    // Determine barcode type based on GS1 element string
-    String? barcodeType;
-    if (widget.validateGS1) {
-      barcodeType = _determineGS1BarcodeType(gs1ElementString);
-      
-      // Check if the barcode type is in allowed formats
-      if (widget.allowedFormats.isNotEmpty && 
-          (barcodeType == null || !widget.allowedFormats.contains(barcodeType))) {
-        widget.onScanResult(ScanResult.error(
-          data: gs1ElementString,
-          error: 'Barcode type not allowed: ${barcodeType ?? 'Unknown'}',
-        ));
-        return;
-      }
-    }
-
-    // Create successful scan result
     widget.onScanResult(ScanResult.success(
-      data: gs1ElementString,
+      data: pipelineResult.data,
       barcodeType: barcodeType,
       metadata: {
+        ...?pipelineResult.metadata,
         'timestamp': DateTime.now().toIso8601String(),
         'validated': widget.validateGS1,
       },
     ));
-  }
-
-  String? _determineGS1BarcodeType(String gs1Data) {
-    try {
-      // Basic GS1 detection logic
-      if (gs1Data.startsWith('01')) {
-        // GTIN detected
-        if (gs1Data.contains('21')) {
-          return 'SGTIN'; // Serial GTIN
-        }
-        return 'GTIN';
-      } else if (gs1Data.startsWith('00')) {
-        return 'SSCC'; // Serial Shipping Container Code
-      } else if (gs1Data.startsWith('414') || gs1Data.startsWith('415')) {
-        return 'GLN'; // Global Location Number
-      } else if (gs1Data.startsWith('8003') || gs1Data.startsWith('8004')) {
-        return 'GIAI'; // Global Individual Asset Identifier
-      }
-      
-      return 'UNKNOWN';
-    } catch (e) {
-      return null;
-    }
   }
 
   @override

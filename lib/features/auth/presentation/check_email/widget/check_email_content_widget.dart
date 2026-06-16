@@ -5,9 +5,9 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 
-import '../../../../../shared/utils/email_provider_launch_utils.dart';
+import 'package:traqtrace_app/core/utils/email_provider_launch_utils.dart';
 
 class CheckEmailContentWidget extends StatelessWidget {
   const CheckEmailContentWidget({

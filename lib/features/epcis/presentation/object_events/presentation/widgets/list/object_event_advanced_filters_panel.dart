@@ -66,7 +66,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Action
         DropdownButtonFormField<String?>(
           decoration: const InputDecoration(
             labelText: 'Action',
@@ -84,7 +83,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Business step
         DropdownButtonFormField<String?>(
           decoration: const InputDecoration(
             labelText: 'Business Step',
@@ -106,7 +104,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Disposition
         DropdownButtonFormField<String?>(
           decoration: const InputDecoration(
             labelText: 'Disposition',
@@ -128,7 +125,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // EPC
         TextField(
           controller: epcController,
           decoration: const InputDecoration(
@@ -140,7 +136,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Location GLN
         TextField(
           controller: locationGlnController,
           decoration: const InputDecoration(
@@ -152,7 +147,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Date range
         _DateRangeRow(
           label: 'From',
           value: eventTimeFrom,
@@ -166,7 +160,6 @@ class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

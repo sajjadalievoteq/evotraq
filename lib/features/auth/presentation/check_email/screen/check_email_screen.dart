@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/auth/presentation/check_email/widget/chec
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_responsive_layout_widget.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class CheckEmailScreen extends StatefulWidget {
   final String? email;

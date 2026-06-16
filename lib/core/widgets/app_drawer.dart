@@ -14,8 +14,8 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
 class DrawerScrollMemory {
   DrawerScrollMemory._();

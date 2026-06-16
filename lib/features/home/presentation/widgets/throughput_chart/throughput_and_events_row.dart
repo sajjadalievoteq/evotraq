@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/epcis_event_stream_section.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/throughput_chart/throughput_chart_section.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class ThroughputAndEventsRow extends StatelessWidget {
   const ThroughputAndEventsRow({super.key, required this.layout});

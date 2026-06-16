@@ -17,7 +17,7 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/list/commissioning_operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/list/commissioning_list_item_skeleton.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/list/commissioning_record_info_section.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:world_countries/helpers.dart';
 
 class CommissioningOperationListScreen extends StatefulWidget {

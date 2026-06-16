@@ -9,9 +9,13 @@ import 'package:traqtrace_app/features/epcis/providers/validation_service_provid
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
 /// Screen for creating or editing Transaction Events
@@ -259,7 +263,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .map(
-          (e) => EPCFormatter.formatToEPCUri(e),
+          (e) => EPCFormatter.formatToEPCUri(e) ?? e,
         ) // Format to EPC URI if needed
         .toList();
     final locationGLN = _locationGLNController.text.trim();
@@ -474,32 +478,13 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            TextFormField(
+                            Gs1ValidatedField(
                               controller: _epcsController,
-                              decoration: const InputDecoration(
-                                labelText: 'EPCs (comma separated) *',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter at least one EPC';
-                                }
-
-                                // Check if EPCs are in correct format
-                                final epcList = value
-                                    .split(',')
-                                    .map((e) => e.trim())
-                                    .where((e) => e.isNotEmpty)
-                                    .toList();
-                                for (final epc in epcList) {
-                                  if (!epc.startsWith('urn:epc:id:') &&
-                                      !RegExp(r'\(\d+\)').hasMatch(epc)) {
-                                    return 'Invalid EPC format: $epc';
-                                  }
-                                }
-
-                                return null;
-                              },
+                              fieldName: 'epcs',
+                              label: 'EPCs (comma separated) *',
+                              maxLines: 3,
+                              validator: (value) =>
+                                  EpcisEpcValidators.validateEpcList(value),
                             ),
                             const SizedBox(height: 4),
                             const Text(
@@ -568,22 +553,11 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: TextFormField(
+                        child: GlnEntryField(
                           controller: _locationGLNController,
-                          decoration: const InputDecoration(
-                            labelText: 'Location GLN *',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter location GLN';
-                            }
-                            // Check if the GLN is in valid format
-                            if (!RegExp(r'^[0-9\.]+$').hasMatch(value)) {
-                              return 'GLN should contain only digits and dots';
-                            }
-                            return null;
-                          },
+                          label: 'Location GLN *',
+                          validator: (value) =>
+                              EpcisGlnValidators.validateLocationGln(value),
                         ),
                       ),
                       const SizedBox(width: 8),

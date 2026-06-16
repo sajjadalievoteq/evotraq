@@ -33,10 +33,10 @@ import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_location_address_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_operational_location_type_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/core_groups/gln_types_classification_core_group.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_location_type_mapper.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
 import '../../../../../core/theme/traq_theme.dart';
 import '../../../../../core/utils/responsive_utils.dart';

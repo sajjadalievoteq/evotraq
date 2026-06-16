@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 
-/// Advanced filters panel rendered inside an AlertDialog.
-/// Stateless — all state managed by the parent screen.
 class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
   const AggregationEventAdvancedFiltersPanel({
     super.key,
@@ -94,7 +92,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Action
         _sectionLabel('Action'),
         DropdownButtonFormField<String>(
           value: selectedAction,
@@ -110,7 +107,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           onChanged: onActionChanged,
         ),
 
-        // Business step
         _sectionLabel('Business Step'),
         DropdownButtonFormField<String>(
           value: selectedBizStep,
@@ -129,7 +125,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           onChanged: onBizStepChanged,
         ),
 
-        // Disposition
         _sectionLabel('Disposition'),
         DropdownButtonFormField<String>(
           value: selectedDisposition,
@@ -149,7 +144,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           onChanged: onDispositionChanged,
         ),
 
-        // Parent EPC
         _sectionLabel('Parent EPC'),
         TextField(
           controller: parentEpcController,
@@ -161,7 +155,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        // Child EPC
         _sectionLabel('Child EPC'),
         TextField(
           controller: childEpcController,
@@ -173,7 +166,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        // Location GLN
         _sectionLabel('Location GLN'),
         TextField(
           controller: locationGlnController,
@@ -185,7 +177,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
 
-        // Event time range (used with location GLN for time-window queries)
         _sectionLabel('Event Time Range'),
         Row(
           children: [
@@ -213,7 +204,6 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           ],
         ),
 
-        // Action buttons
         const SizedBox(height: Constants.spacing),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,

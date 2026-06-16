@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -13,8 +15,32 @@ class SgtinEpcisSnapshotCard extends StatelessWidget {
   final SGTIN sgtin;
   final Color borderColor;
 
+  void _openObjectEventForm(BuildContext context) {
+    final params = <String, String>{};
+    if (sgtin.latestDisposition != null &&
+        sgtin.latestDisposition!.trim().isNotEmpty) {
+      params['currentItemDisposition'] = sgtin.latestDisposition!.trim();
+    }
+    final epc = sgtin.epcUri?.trim();
+    if (epc != null && epc.isNotEmpty) {
+      params['epcs'] = epc;
+    }
+    final query = params.entries
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+        )
+        .join('&');
+    final path = query.isEmpty
+        ? Constants.epcisObjectEventNewRoute
+        : '${Constants.epcisObjectEventNewRoute}?$query';
+    context.push(path);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final canRecordEvent = sgtin.epcUri != null || sgtin.latestDisposition != null;
+
     return Gs1GroupCard(
       title: 'EPCIS Event Snapshot',
       outlineColor: borderColor,
@@ -32,6 +58,14 @@ class SgtinEpcisSnapshotCard extends StatelessWidget {
               'Latest Event ID',
               sgtin.latestEventId,
               monospace: true,
+            ),
+          ],
+          if (canRecordEvent) ...[
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () => _openObjectEventForm(context),
+              icon: const Icon(Icons.event_note_outlined, size: 18),
+              label: const Text('Record Object Event'),
             ),
           ],
         ],

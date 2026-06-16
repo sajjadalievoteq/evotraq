@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_surface_card.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/branding_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class AuthMobileFormLayout extends StatelessWidget {
   const AuthMobileFormLayout({

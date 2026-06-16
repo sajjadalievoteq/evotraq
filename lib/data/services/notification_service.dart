@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -34,25 +34,15 @@ class NotificationService {
     String? title,
     Duration duration = const Duration(seconds: 3),
   }) {
-    if (_scaffoldMessengerKey?.currentState != null) {
-      final messenger = _scaffoldMessengerKey!.currentState!;
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(
-        SnackBar(
-          content: CustomSnackBarWidget(
-            variant: variant,
-            title: title,
-            message: message,
-            onClose: messenger.hideCurrentSnackBar,
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          padding: EdgeInsets.zero,
-          duration: duration,
-        ),
-      );
-    }
+    final context = _scaffoldMessengerKey?.currentContext;
+    if (context == null) return;
+
+    CustomSnackBarPresenter.show(
+      context,
+      variant: variant,
+      message: message,
+      title: title,
+      duration: duration,
+    );
   }
 }

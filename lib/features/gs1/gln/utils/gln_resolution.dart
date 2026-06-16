@@ -25,3 +25,10 @@ GLN? resolveGlnForPicker({
 
 bool isPlaceholderGlnLocation(GLN gln) =>
     gln.locationName == 'Unknown Location';
+
+String glnDisplayLabel(GLN gln) {
+  if (!isPlaceholderGlnLocation(gln) && gln.locationName.isNotEmpty) {
+    return gln.locationName;
+  }
+  return gln.glnCode;
+}

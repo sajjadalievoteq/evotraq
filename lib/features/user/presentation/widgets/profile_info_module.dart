@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 
 class ProfileInfoModule extends StatefulWidget {

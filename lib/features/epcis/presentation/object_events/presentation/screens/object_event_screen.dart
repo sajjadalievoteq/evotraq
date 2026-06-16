@@ -38,7 +38,6 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: SplitOrListIndexedStack(
-        // ── Desktop: split view ────────────────────────────────────────────
         split: Gs1SplitViewScreen<ObjectEventsCubit, ObjectEventsState>(
           appBarTitle: ObjectEventSharedUiConstants.appBarManagement,
           fabHeroTag: ObjectEventSharedUiConstants.fabHeroTag,
@@ -85,7 +84,6 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
             awaitingListSelection: true,
           ),
         ),
-        // ── Mobile / tablet: standalone list ──────────────────────────────
         fallback: const ObjectEventsListScreen(),
       ),
     );

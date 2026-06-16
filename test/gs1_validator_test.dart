@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/shared/utils/gs1_validator.dart';
+import 'package:traqtrace_app/core/utils/gs1_validator.dart';
 
 void main() {
   group('GS1Validator Tests', () {

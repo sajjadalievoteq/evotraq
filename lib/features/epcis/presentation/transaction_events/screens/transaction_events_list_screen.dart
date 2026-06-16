@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:intl/intl.dart';
 
 /// Screen for displaying a list of Transaction Events

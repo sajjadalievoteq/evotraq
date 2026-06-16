@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/list/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/shared/object_event_shared_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/widgets/shared/object_event_action_chip.dart';
@@ -45,7 +46,6 @@ class ObjectEventListItemCard extends StatelessWidget {
       );
     }
 
-    // Show a truncated version of long URNs
     String truncateEpc(String? epc) {
       if (epc == null) return '—';
       if (epc.length <= 40) return epc;
@@ -55,9 +55,8 @@ class ObjectEventListItemCard extends StatelessWidget {
     final epcList = event.epcList ?? [];
     final primaryEpc = epcList.isNotEmpty ? epcList.first : null;
     final additionalCount = epcList.length > 1 ? epcList.length - 1 : 0;
-    final locationName = event.businessLocation?.locationName ??
-        event.businessLocation?.glnCode ??
-        event.readPoint?.glnCode;
+    final locationGln = event.businessLocation ?? event.readPoint;
+    final locationName = locationGln != null ? glnDisplayLabel(locationGln) : null;
     final bizStep =
         ObjectEventSharedUiConstants.friendlyBizStep(event.businessStep);
 
@@ -67,7 +66,7 @@ class ObjectEventListItemCard extends StatelessWidget {
         final padding = isCompact
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
-
+print(locationName);
         return Card(
           elevation: 2,
           color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),
@@ -83,7 +82,6 @@ class ObjectEventListItemCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Primary EPC
                         Text(
 
                           event.eventId,

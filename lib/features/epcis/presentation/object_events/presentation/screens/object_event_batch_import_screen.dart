@@ -6,10 +6,9 @@ import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
-/// Screen for bulk importing object events
 class ObjectEventBatchImportScreen extends StatefulWidget {
   const ObjectEventBatchImportScreen({Key? key}) : super(key: key);
 
@@ -20,7 +19,6 @@ class ObjectEventBatchImportScreen extends StatefulWidget {
 class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   
-  // Manual entry fields
   final _formKey = GlobalKey<FormState>();
   final _epcController = TextEditingController();
   final _businessStepController = TextEditingController();
@@ -33,11 +31,9 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
   List<String> _epcList = [];
   List<ObjectEvent> _pendingEvents = [];
   
-  // CSV import
   final _csvController = TextEditingController();
   List<Map<String, dynamic>> _csvData = [];
   
-  // Import results
   bool _isImporting = false;
   String? _importError;
   Map<String, dynamic>? _importResults;
@@ -65,7 +61,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now();
       
-      // Create ILMD data
       final ilmd = <String, dynamic>{};
       if (_lotController.text.isNotEmpty) {
         ilmd['LOT'] = _lotController.text;
@@ -109,8 +104,7 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
   void _addEPC() {
     final epc = _epcController.text.trim();
     if (epc.isNotEmpty) {
-      // Format EPC to URI if it's in GS1 barcode format
-      final formattedEpc = EPCFormatter.formatToEPCUri(epc);
+      final formattedEpc = EPCFormatter.formatToEPCUri(epc) ?? epc;
       
       if (!_epcList.contains(formattedEpc)) {
         setState(() {
@@ -171,7 +165,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
       try {
         final now = DateTime.now();
         
-        // Extract required fields - adjust column names as needed
         String? epc = row['EPC'] ?? row['epc'];
         String? action = row['Action'] ?? row['action'] ?? 'ADD';
         String? businessStep = row['BusinessStep'] ?? row['businessStep'] ?? row['business_step'];
@@ -184,10 +177,8 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         if (businessStep == null || businessStep.isEmpty) continue;
         if (disposition == null || disposition.isEmpty) continue;
         
-        // Convert EPC to URI format if it's in GS1 barcode format
-        final formattedEpc = EPCFormatter.formatToEPCUri(epc);
+        final formattedEpc = EPCFormatter.formatToEPCUri(epc) ?? epc;
         
-        // Create ILMD
         final ilmd = <String, dynamic>{};
         if (lot != null && lot.isNotEmpty) {
           ilmd['LOT'] = lot;
@@ -214,7 +205,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         
         events.add(event);
       } catch (e) {
-        // Skip invalid rows
         continue;
       }
     }
@@ -225,7 +215,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
   Future<void> _importEvents() async {
     List<ObjectEvent> eventsToImport = [];
     
-    // Combine manual events and CSV events
     eventsToImport.addAll(_pendingEvents);
     
     if (_tabController.index == 1 && _csvData.isNotEmpty) {
@@ -321,7 +310,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event details card
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -334,7 +322,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
                     ),
                     const SizedBox(height: 16),
                     
-                    // Action dropdown
                     DropdownButtonFormField<String>(
                       value: _selectedAction,
                       decoration: const InputDecoration(
@@ -352,7 +339,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
                     ),
                     const SizedBox(height: 16),
                     
-                    // Business Step
                     TextFormField(
                       controller: _businessStepController,
                       decoration: const InputDecoration(
@@ -369,7 +355,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
                     ),
                     const SizedBox(height: 16),
                     
-                    // Disposition
                     TextFormField(
                       controller: _dispositionController,
                       decoration: const InputDecoration(
@@ -386,7 +371,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
                     ),
                     const SizedBox(height: 16),
                     
-                    // Business Location
                     TextFormField(
                       controller: _businessLocationController,
                       decoration: const InputDecoration(
@@ -397,7 +381,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
                     ),
                     const SizedBox(height: 16),
                     
-                    // Read Point
                     TextFormField(
                       controller: _readPointController,
                       decoration: const InputDecoration(
@@ -413,7 +396,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
             
             const SizedBox(height: 16),
             
-            // EPCs card
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -468,7 +450,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
             
             const SizedBox(height: 16),
             
-            // ILMD card
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -495,7 +476,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
             
             const SizedBox(height: 16),
             
-            // Add to batch button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -543,7 +523,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // CSV input
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -582,7 +561,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
             ),
           ),
           
-          // Preview
           if (_csvData.isNotEmpty) ...[
             const SizedBox(height: 16),
             Card(
@@ -621,7 +599,6 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
             ),
           ],
           
-          // Import results
           if (_importResults != null) ...[
             const SizedBox(height: 16),
             Card(

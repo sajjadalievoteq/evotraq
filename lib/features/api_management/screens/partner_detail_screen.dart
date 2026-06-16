@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 
@@ -377,15 +378,12 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: GlnEntryField(
                     controller: _glnController,
-                    decoration: const InputDecoration(
-                      labelText: 'GLN (Global Location Number)',
-                      prefixIcon: Icon(Icons.location_on),
-                      helperText: '13-digit GS1 identifier',
-                    ),
+                    label: 'GLN (Global Location Number)',
+                    helperText: '13-digit GS1 identifier',
                     enabled: _isEditing,
-                    maxLength: 13,
+                    optional: true,
                   ),
                 ),
                 const SizedBox(width: 16),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class DashboardLoader extends StatelessWidget {
   const DashboardLoader({super.key});

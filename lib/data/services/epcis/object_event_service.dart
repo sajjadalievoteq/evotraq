@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_api_constants.dart';
 
 class ObjectEventService {
@@ -56,11 +59,19 @@ class ObjectEventService {
 
   Future<ObjectEvent> getObjectEventById(String id) async {
     final headers = await _getHeaders();
+    final path = '$_baseUrl/$id';
     final response = await _dioService.get(
-      '$_baseUrl/$id',
+      path,
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
+    );
+
+    _logObjectEventDetailResponse(
+      lookup: 'id=$id',
+      path: path,
+      statusCode: response.statusCode,
+      body: response.data,
     );
 
     if (response.statusCode == 200) {
@@ -71,19 +82,62 @@ class ObjectEventService {
   }
 
   Future<ObjectEvent> getObjectEventByEventId(String eventId) async {
+    final trimmedEventId = eventId.trim();
+    if (trimmedEventId.isEmpty) {
+      throw ArgumentError('eventId must not be empty');
+    }
+
     final headers = await _getHeaders();
+    final path = '$_baseUrl/${ObjectEventApiConstants.segmentEventId}';
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEventId}',
-      queryParameters: {ObjectEventApiConstants.queryEventId: eventId},
+      path,
+      queryParameters: {ObjectEventApiConstants.queryEventId: trimmedEventId},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
+    );
+
+    _logObjectEventDetailResponse(
+      lookup: 'eventId=$trimmedEventId',
+      path: '$path?${ObjectEventApiConstants.queryEventId}=$trimmedEventId',
+      statusCode: response.statusCode,
+      body: response.data,
     );
 
     if (response.statusCode == 200) {
       return ObjectEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception('Failed to fetch object event: ${response.statusCode}');
+    }
+  }
+
+  static void _logObjectEventDetailResponse({
+    required String lookup,
+    required String path,
+    required int? statusCode,
+    required dynamic body,
+  }) {
+    debugPrint(
+      '[ObjectEventService.getObjectEventDetail] $lookup '
+      'status=$statusCode path=$path',
+    );
+    if (body == null) {
+      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody: null');
+      return;
+    }
+    final bodyString = body is String ? body : body.toString();
+    if (bodyString.isEmpty) {
+      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody: (empty)');
+      return;
+    }
+    try {
+      final decoded = json.decode(bodyString);
+      final pretty = const JsonEncoder.withIndent('  ').convert(decoded);
+      debugPrint('[ObjectEventService.getObjectEventDetail] responseBody:\n$pretty');
+    } catch (_) {
+      debugPrint(
+        '[ObjectEventService.getObjectEventDetail] responseBody: $bodyString',
+      );
     }
   }
 
@@ -107,6 +161,9 @@ class ObjectEventService {
   }) async {
     final headers = await _getHeaders();
 
+    final versionString =
+        epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
+
     final now = DateTime.now();
     final eventData = <String, dynamic>{
       ObjectEventApiConstants.jsonKeyEventId:
@@ -114,8 +171,10 @@ class ObjectEventService {
       ObjectEventApiConstants.jsonKeyEventType:
           ObjectEventApiConstants.eventTypeObject,
       ObjectEventApiConstants.jsonKeyAction: action,
-      ObjectEventApiConstants.jsonKeyBusinessStep: businessStep,
-      ObjectEventApiConstants.jsonKeyDisposition: disposition,
+      ObjectEventApiConstants.jsonKeyBusinessStep:
+          CbvVocabularyFormatter.formatBizStep(versionString, businessStep),
+      ObjectEventApiConstants.jsonKeyDisposition:
+          CbvVocabularyFormatter.formatDisposition(versionString, disposition),
       ObjectEventApiConstants.jsonKeyEventTime: now.toUtc().toIso8601String(),
       ObjectEventApiConstants.jsonKeyRecordTime: now.toUtc().toIso8601String(),
       ObjectEventApiConstants.jsonKeyEpcisVersion:
@@ -181,28 +240,96 @@ class ObjectEventService {
           certificationInfo;
     }
 
-    final response = await _dioService.post(
-      _baseUrl,
-      headers: headers,
-      data: json.encode(eventData),
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
+    try {
+      final response = await _dioService.post(
+        _baseUrl,
+        headers: headers,
+        data: json.encode(eventData),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
 
-    if (response.statusCode == 201) {
-      try {
-        final responseData = json.decode(response.data);
-        return ObjectEvent.fromJson(responseData);
-      } catch (e) {
-        throw Exception(
-          'Failed to parse object event response: $e. Response body: ${response.data}',
-        );
+      if (response.statusCode == 201) {
+        try {
+          final responseData = json.decode(response.data);
+          return ObjectEvent.fromJson(responseData);
+        } catch (e, st) {
+          final parseError = ApiException(
+            statusCode: response.statusCode,
+            message:
+                'Failed to parse object event response: $e. Response body: ${response.data}',
+            responseBody: response.data?.toString(),
+            originalException: e,
+          );
+          _logCreateObjectEventApiException(parseError, stackTrace: st);
+          throw parseError;
+        }
       }
-    } else {
-      throw Exception(
-        'Failed to create object event: ${response.statusCode} - ${response.data}',
+
+      final apiException = ApiException(
+        statusCode: response.statusCode,
+        message: _parseCreateObjectEventErrorMessage(response.data) ??
+            'Failed to create object event',
+        responseBody: response.data?.toString(),
+      );
+      _logCreateObjectEventApiException(apiException);
+      throw apiException;
+    } on DioException catch (e, st) {
+      final apiException = ApiException(
+        statusCode: e.response?.statusCode,
+        message: e.message ?? 'Network error while creating object event',
+        originalException: e,
+        responseBody: e.response?.data?.toString(),
+      );
+      _logCreateObjectEventApiException(apiException, stackTrace: st);
+      throw apiException;
+    } on ApiException catch (e, st) {
+      _logCreateObjectEventApiException(e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  static void _logCreateObjectEventApiException(
+    ApiException e, {
+    StackTrace? stackTrace,
+  }) {
+    debugPrint(
+      '[ObjectEventService.createObjectEvent] ApiException '
+      'status=${e.statusCode} message=${e.message}',
+    );
+    if (e.responseBody != null && e.responseBody!.isNotEmpty) {
+      debugPrint(
+        '[ObjectEventService.createObjectEvent] responseBody: ${e.responseBody}',
       );
     }
+    if (e.originalException != null) {
+      debugPrint(
+        '[ObjectEventService.createObjectEvent] original: ${e.originalException}',
+      );
+    }
+    if (stackTrace != null) {
+      debugPrint('[ObjectEventService.createObjectEvent] $stackTrace');
+    }
+  }
+
+  static String? _parseCreateObjectEventErrorMessage(dynamic data) {
+    if (data == null) return null;
+    try {
+      final dynamic decoded = data is String ? json.decode(data) : data;
+      if (decoded is Map) {
+        final message = decoded['message'];
+        if (message != null && message.toString().isNotEmpty) {
+          return message.toString();
+        }
+        final error = decoded['error'];
+        if (error != null && error.toString().isNotEmpty) {
+          return error.toString();
+        }
+      }
+    } catch (_) {
+      // Fall back to raw body string below.
+    }
+    return data.toString();
   }
 
   Future<Map<String, dynamic>> validateObjectEvent(ObjectEvent event) async {

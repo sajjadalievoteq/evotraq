@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_field_decoration.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_read_only_field.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_required_indicator.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 
 enum ObjectEventCbvFieldType { businessStep, disposition }
 
-/// CBV dropdown with custom-value dialog for business step and disposition.
-class ObjectEventCbvDropdownField extends StatelessWidget {
+class ObjectEventCbvDropdownField extends StatefulWidget {
   final ObjectEventCbvFieldType fieldType;
   final String fieldName;
   final String label;
   final String? value;
   final List<String> standardValues;
+  final Map<String, String> valueLabels;
   final bool isMandatory;
   final bool isViewOnly;
   final ObjectEventFormValidationContext validation;
+  final EPCISVersion epcisVersion;
   final ValueChanged<String?> onChanged;
 
   const ObjectEventCbvDropdownField({
@@ -25,120 +29,161 @@ class ObjectEventCbvDropdownField extends StatelessWidget {
     required this.label,
     required this.value,
     required this.standardValues,
+    this.valueLabels = const {},
     required this.isMandatory,
     required this.isViewOnly,
     required this.validation,
+    required this.epcisVersion,
     required this.onChanged,
   });
 
-  String get _cbvPrefix => fieldType == ObjectEventCbvFieldType.businessStep
-      ? 'urn:epcglobal:cbv:bizstep:'
-      : 'urn:epcglobal:cbv:disp:';
+  @override
+  State<ObjectEventCbvDropdownField> createState() =>
+      _ObjectEventCbvDropdownFieldState();
+}
 
-  String get _customDialogTitle => fieldType == ObjectEventCbvFieldType.businessStep
-      ? 'Custom Business Step'
-      : 'Custom Disposition';
+class _ObjectEventCbvDropdownFieldState extends State<ObjectEventCbvDropdownField> {
+  bool _useCustomValue = false;
 
-  String get _customHint => '$_cbvPrefix${fieldType == ObjectEventCbvFieldType.businessStep ? 'custom_step' : 'custom_disposition'}';
-
-  String? Function(String?) get _validator =>
-      fieldType == ObjectEventCbvFieldType.businessStep
-      ? ObjectEventFormValidators.validateBusinessStepCbv
-      : ObjectEventFormValidators.validateDispositionCbv;
-
-  String? Function(String) get _customValidator =>
-      fieldType == ObjectEventCbvFieldType.businessStep
-      ? ObjectEventFormValidators.validateCustomBusinessStep
-      : ObjectEventFormValidators.validateCustomDisposition;
-
-  void _showCustomDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        String customValue = '';
-        return AlertDialog(
-          title: Text(_customDialogTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Enter a custom ${label.toLowerCase()} following GS1 CBV format:',
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: _customHint,
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (v) => customValue = v,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (customValue.isNotEmpty) {
-                  onChanged(customValue);
-                  validation.validateField(
-                    fieldName,
-                    customValue,
-                    _customValidator,
-                  );
-                }
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    _useCustomValue = _isCustomValue(widget.value);
   }
 
   @override
+  void didUpdateWidget(ObjectEventCbvDropdownField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && !_useCustomValue) {
+      _useCustomValue = _isCustomValue(widget.value);
+    }
+  }
+
+  bool _isCustomValue(String? value) {
+    if (value == null || value.isEmpty) return false;
+    return !widget.standardValues.contains(value);
+  }
+
+  String get _cbvPrefix => widget.fieldType == ObjectEventCbvFieldType.businessStep
+      ? CbvVocabularyFormatter.bizStepCbvPrefix(_versionString)
+      : CbvVocabularyFormatter.dispCbvPrefix(_versionString);
+
+  String get _versionString =>
+      widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
+
+  String get _customHint =>
+      '$_cbvPrefix${widget.fieldType == ObjectEventCbvFieldType.businessStep ? 'custom_step' : 'custom_disposition'}';
+
+  String? Function(String?) get _validator =>
+      widget.fieldType == ObjectEventCbvFieldType.businessStep
+      ? (v) => ObjectEventFormValidators.validateBusinessStepCbv(
+          v,
+          epcisVersion: widget.epcisVersion,
+        )
+      : ObjectEventFormValidators.validateDispositionCbv;
+
+  String? Function(String) get _customValidator =>
+      widget.fieldType == ObjectEventCbvFieldType.businessStep
+      ? (v) => ObjectEventFormValidators.validateCustomBusinessStep(
+          v,
+          epcisVersion: widget.epcisVersion,
+        )
+      : (v) => ObjectEventFormValidators.validateCustomDisposition(
+          v,
+          epcisVersion: widget.epcisVersion,
+        );
+
+  @override
   Widget build(BuildContext context) {
-    if (isViewOnly) {
-      return ObjectEventFormReadOnlyText(label: label, value: value);
+    if (widget.isViewOnly) {
+      final display = widget.value != null
+          ? (widget.valueLabels[widget.value!] ??
+              CbvVocabularyFormatter.shortName(widget.value!))
+          : null;
+      return ObjectEventFormReadOnlyText(
+        label: widget.label,
+        value: display ?? widget.value,
+      );
     }
 
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
-        fieldName: fieldName,
-        label: label,
-        hintText: 'Select a ${label.toLowerCase()}',
-        isMandatory: isMandatory,
-        validation: validation,
-      ),
-      items: [
-        const DropdownMenuItem(value: null, child: Text('Custom...')),
-        ...standardValues
-            .map(
+    final dropdownValue =
+        _useCustomValue || _isCustomValue(widget.value) ? null : widget.value;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          value: dropdownValue,
+          decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
+            context: context,
+            fieldName: widget.fieldName,
+            label: widget.label,
+            hintText: 'Select a ${widget.label.toLowerCase()}',
+            isMandatory: widget.isMandatory,
+            validation: widget.validation,
+          ),
+          items: [
+            const DropdownMenuItem(value: null, child: Text('Custom...')),
+            ...widget.standardValues.map(
               (item) => DropdownMenuItem(
                 value: item,
-                child: Text(item.split(':').last),
+                child: Text(
+                  widget.valueLabels[item] ??
+                      CbvVocabularyFormatter.shortName(item),
+                ),
               ),
-            )
-            .toList(),
+            ),
+          ],
+          validator: (v) {
+            if (_useCustomValue || _isCustomValue(widget.value)) {
+              return null;
+            }
+            final error = _validator(v);
+            widget.validation.setFieldError(widget.fieldName, error);
+            return error;
+          },
+          onChanged: (selected) {
+            if (selected == null) {
+              setState(() => _useCustomValue = true);
+              widget.onChanged('');
+              return;
+            }
+            setState(() => _useCustomValue = false);
+            widget.onChanged(selected);
+            widget.validation.markFieldAsValid(widget.fieldName);
+          },
+        ),
+        if (_useCustomValue || _isCustomValue(widget.value)) ...[
+          const SizedBox(height: 8.0),
+          TextFormField(
+            key: ValueKey('${widget.fieldName}-custom'),
+            initialValue: widget.value ?? '',
+            decoration: InputDecoration(
+              label: objectEventFormFieldLabel(
+                context,
+                'Custom ${widget.label}',
+                widget.isMandatory,
+              ),
+              hintText: _customHint,
+              border: const OutlineInputBorder(),
+              errorText: widget.validation.getFieldError(widget.fieldName),
+            ),
+            validator: (value) {
+              final error = _customValidator(value ?? '');
+              widget.validation.setFieldError(widget.fieldName, error);
+              return error;
+            },
+            onChanged: (value) {
+              widget.onChanged(value.isEmpty ? null : value);
+              widget.validation.validateField(
+                widget.fieldName,
+                value,
+                _customValidator,
+              );
+            },
+          ),
+        ],
       ],
-      validator: (v) {
-        final error = _validator(v);
-        validation.setFieldError(fieldName, error);
-        return error;
-      },
-      onChanged: (selected) {
-        if (selected == null) {
-          _showCustomDialog(context);
-        } else {
-          onChanged(selected);
-          validation.markFieldAsValid(fieldName);
-        }
-      },
     );
   }
 }

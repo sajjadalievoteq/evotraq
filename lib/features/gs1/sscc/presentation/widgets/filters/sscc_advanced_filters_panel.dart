@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/utilities/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/filters/sscc_date_range_row.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 
 class SsccAdvancedFiltersPanel extends StatelessWidget {
   const SsccAdvancedFiltersPanel({

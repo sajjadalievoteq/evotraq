@@ -12,7 +12,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_event_action_chip.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class AggregationEventDetailScreen extends StatefulWidget {
   const AggregationEventDetailScreen({
@@ -23,7 +23,6 @@ class AggregationEventDetailScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
   });
 
-  /// The database UUID or urn:uuid: eventId to load.
   final String? eventId;
   final bool embedded;
   final bool awaitingListSelection;
@@ -68,7 +67,6 @@ class _AggregationEventDetailScreenState
     }
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
 
   static const _dateFormat = 'MMM dd, yyyy HH:mm:ss';
 
@@ -140,7 +138,6 @@ class _AggregationEventDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Identification ─────────────────────────────────────────────
           Gs1GroupCard(
             title: AggregationEventUiConstants.sectionIdentification,
             outlineColor: colors.primary,
@@ -166,7 +163,6 @@ class _AggregationEventDetailScreenState
             ),
           ),
 
-          // ── Aggregation hierarchy ──────────────────────────────────────
           Gs1GroupCard(
             title: AggregationEventUiConstants.sectionHierarchy,
             outlineColor: AggregationEventActionChip.colorFor(event.action),
@@ -217,7 +213,6 @@ class _AggregationEventDetailScreenState
             ),
           ),
 
-          // ── Location & Timing ──────────────────────────────────────────
           Gs1GroupCard(
             title: AggregationEventUiConstants.sectionLocation,
             outlineColor: Colors.teal,
@@ -239,7 +234,6 @@ class _AggregationEventDetailScreenState
             ),
           ),
 
-          // ── Business context ───────────────────────────────────────────
           Gs1GroupCard(
             title: AggregationEventUiConstants.sectionBizStep,
             outlineColor: Colors.deepPurple,
@@ -270,7 +264,6 @@ class _AggregationEventDetailScreenState
             ),
           ),
 
-          // ── Extensions / ILMD ─────────────────────────────────────────
           if ((event.extensions != null && event.extensions!.isNotEmpty) ||
               (event.bizData != null && event.bizData!.isNotEmpty))
             Gs1GroupCard(

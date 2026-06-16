@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/utilities/sgtin_ui_constants.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 @immutable
 class SgtinQuickFilterResult {

@@ -19,7 +19,7 @@ import 'package:traqtrace_app/features/home/presentation/widgets/quick_actions/q
 import 'package:traqtrace_app/features/home/presentation/widgets/shared/home_error_view.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/status_rail/status_rail.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/throughput_chart/throughput_and_events_row.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

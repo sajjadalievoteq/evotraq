@@ -12,8 +12,8 @@ import '../widgets/user_approval_reject_dialog.dart';
 import '../widgets/user_approvals_header_section.dart';
 import '../../users/widgets/user_management_constants.dart';
 import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'dart:async';
 
 class ApprovalsScreen extends StatelessWidget {

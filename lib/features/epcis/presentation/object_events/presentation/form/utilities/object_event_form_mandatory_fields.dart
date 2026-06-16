@@ -1,23 +1,73 @@
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_constants.dart';
 
-/// Determines whether a form field is mandatory for the current event context.
+/// Mirrors backend {@code ObjectEventValidationService} required-field rules.
 class ObjectEventFormMandatoryFields {
   ObjectEventFormMandatoryFields._();
 
-  static bool isFieldMandatory({
-    required String fieldName,
-    required EPCISVersion epcisVersion,
+  static bool requiresCommissioningIlmd({
     required String? action,
+    required String? businessStep,
+    required List<String> epcList,
+  }) {
+    if (action != 'ADD') return false;
+    if (!CbvVocabularyFormatter.isBizStepCommissioning(businessStep)) {
+      return false;
+    }
+    return epcList.any((epc) => epc.toLowerCase().contains('sgtin'));
+  }
+
+  static bool requiresShippingDestination(String? businessStep) {
+    return CbvVocabularyFormatter.isBizStepName(businessStep, 'shipping');
+  }
+
+  /// Field names grouped by form section (for title required indicators).
+  static const certificationFields = ['certificationType', 'certificationAgency'];
+  static const sourceListFields = ['sourceType', 'sourceID'];
+  static const destinationListFields = ['destinationType', 'destinationID'];
+  static const quantityEntryFields = ['quantityEpcClass', 'quantityValue'];
+  static const ilmdFields = [
+    ilmdItemExpirationDateKey,
+    ilmdManufacturerOfGoodsKey,
+  ];
+
+  static bool groupHasRequiredField({
+    required List<String> fieldNames,
+    required String? action,
+    required String? businessStep,
     required bool epcListEmpty,
     required bool quantityListEmpty,
+    required List<String> epcList,
   }) {
-    final bool isEpcis20 = epcisVersion == EPCISVersion.v2_0;
+    for (final fieldName in fieldNames) {
+      if (isFieldMandatory(
+        fieldName: fieldName,
+        action: action,
+        businessStep: businessStep,
+        epcListEmpty: epcListEmpty,
+        quantityListEmpty: quantityListEmpty,
+        epcList: epcList,
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-    const alwaysMandatory = ['action', 'eventTime', 'eventTimeZone'];
+  static bool isFieldMandatory({
+    required String fieldName,
+    required String? action,
+    required String? businessStep,
+    required bool epcListEmpty,
+    required bool quantityListEmpty,
+    required List<String> epcList,
+  }) {
+    const alwaysMandatory = ['action', 'eventTime'];
     if (alwaysMandatory.contains(fieldName)) {
       return true;
     }
 
+    // Form always sends bizStep/disposition; backend validates pairing when both present.
     if (['businessStep', 'disposition'].contains(fieldName)) {
       return true;
     }
@@ -26,30 +76,49 @@ class ObjectEventFormMandatoryFields {
       return epcListEmpty && quantityListEmpty;
     }
 
-    if (action == 'ADD') {
-      if (fieldName == 'ilmd' || fieldName == 'lotNumber') {
-        return true;
-      }
-      if (fieldName == 'bizData') {
-        return false;
-      }
+    if (fieldName == ilmdItemExpirationDateKey ||
+        fieldName == 'ilmdItemExpirationDate') {
+      return requiresCommissioningIlmd(
+        action: action,
+        businessStep: businessStep,
+        epcList: epcList,
+      );
     }
 
-    if (action == 'OBSERVE' && fieldName == 'readPointGLN') {
+    if (fieldName == ilmdManufacturerOfGoodsKey ||
+        fieldName == 'ilmdManufacturerOfGoods') {
+      return requiresCommissioningIlmd(
+        action: action,
+        businessStep: businessStep,
+        epcList: epcList,
+      );
+    }
+
+    if (fieldName == 'destinationList') {
+      return requiresShippingDestination(businessStep);
+    }
+
+    // Per-entry required when adding source/destination rows (backend validateSourceDestination).
+    if (fieldName == 'sourceType' ||
+        fieldName == 'sourceID' ||
+        fieldName == 'destinationType' ||
+        fieldName == 'destinationID') {
       return true;
     }
 
-    if (fieldName == 'businessLocationGLN') {
+    // Certification fields required when user adds a certification entry.
+    if (fieldName == 'certificationType' ||
+        fieldName == 'certificationAgency') {
       return true;
     }
 
-    if (isEpcis20) {
-      if (fieldName == 'readPointGLN') {
-        return true;
-      }
-      if (fieldName == 'certificationInfo' || fieldName == 'sensorElementList') {
-        return false;
-      }
+    if (fieldName == 'certificationStandard') {
+      return false;
+    }
+
+    // Quantity row fields when using quantityList instead of epcList.
+    if (fieldName == 'quantityEpcClass' || fieldName == 'quantityValue') {
+      return true;
     }
 
     return false;

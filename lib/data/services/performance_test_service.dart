@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/shared/utils/gs1_validator.dart';
+import 'package:traqtrace_app/core/utils/gs1_validator.dart';
 
 class PerformanceTestResult {
   final String testName;

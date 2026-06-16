@@ -1,6 +1,6 @@
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
 /// Parses SSCC codes from barcodes, element strings, URIs, or plain 18-digit input.
 abstract final class SsccInputParser {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Read-only text field display for view-only mode.
 class ObjectEventFormReadOnlyText extends StatelessWidget {
   final String label;
   final String? value;
@@ -28,7 +27,6 @@ class ObjectEventFormReadOnlyText extends StatelessWidget {
   }
 }
 
-/// Read-only list display for view-only mode.
 class ObjectEventFormReadOnlyList extends StatelessWidget {
   final String label;
   final List<String>? items;
@@ -67,7 +65,6 @@ class ObjectEventFormReadOnlyList extends StatelessWidget {
   }
 }
 
-/// Read-only map display for view-only mode.
 class ObjectEventFormReadOnlyMap extends StatelessWidget {
   final String label;
   final Map<String, dynamic>? map;

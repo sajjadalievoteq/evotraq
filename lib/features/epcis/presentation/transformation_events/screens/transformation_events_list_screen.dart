@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_events_help.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 
 /// Screen for displaying a list of Transformation Events
 class TransformationEventsListScreen extends StatefulWidget {

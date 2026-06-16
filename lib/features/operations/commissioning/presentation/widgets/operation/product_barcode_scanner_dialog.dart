@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/operation/wired_scanner_ready_prompt.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
 
 class CommissioningProductBarcodeScannerDialog extends StatefulWidget {
   const CommissioningProductBarcodeScannerDialog({

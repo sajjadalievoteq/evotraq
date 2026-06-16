@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Displays a dismissible general error message banner.
+import '../../../../../../../core/utils/responsive_utils.dart';
+
 class ObjectEventFormErrorBanner extends StatelessWidget {
   final String message;
   final VoidCallback onDismiss;
@@ -14,7 +15,7 @@ class ObjectEventFormErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16.0),
+      margin:   context.horizontalPadding,
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: Colors.red.shade100,

@@ -4,22 +4,23 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/presenta
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_read_only_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_section_card.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 class ObjectEventFormLocationSection extends StatelessWidget {
-  final String? businessLocationGLN;
-  final String? readPointGLN;
+  final GLN? businessLocation;
+  final GLN? readPoint;
   final bool isViewOnly;
   final bool isBusinessLocationMandatory;
   final bool isReadPointMandatory;
   final ObjectEventFormValidationContext validation;
-  final ValueChanged<String?> onBusinessLocationChanged;
-  final ValueChanged<String?> onReadPointChanged;
+  final ValueChanged<GLN?> onBusinessLocationChanged;
+  final ValueChanged<GLN?> onReadPointChanged;
 
   const ObjectEventFormLocationSection({
     super.key,
-    required this.businessLocationGLN,
-    required this.readPointGLN,
+    required this.businessLocation,
+    required this.readPoint,
     required this.isViewOnly,
     required this.isBusinessLocationMandatory,
     required this.isReadPointMandatory,
@@ -28,20 +29,19 @@ class ObjectEventFormLocationSection extends StatelessWidget {
     required this.onReadPointChanged,
   });
 
-  GLN? _glnFromCode(String? code) {
-    if (code == null || code.isEmpty) return null;
-    try {
-      return GLN.fromCode(code);
-    } catch (_) {
-      return null;
+  String _formatGlnDisplay(GLN? gln) {
+    if (gln == null) return 'Not provided';
+    if (gln.locationName.isNotEmpty && !isPlaceholderGlnLocation(gln)) {
+      return '${gln.glnCode} - ${gln.locationName}';
     }
+    return gln.glnCode;
   }
 
   String? _validateGlnField(String fieldName, String? code, bool mandatory) {
     if (mandatory && (code == null || code.isEmpty)) {
       final label = fieldName == 'readPointGLN'
-          ? 'Read Point GLN is required for EPCIS 2.0'
-          : 'Business Location GLN is required by GS1 standard';
+          ? 'Read Point GLN is required'
+          : 'Business Location GLN is required';
       validation.setFieldError(fieldName, label);
       return label;
     }
@@ -65,29 +65,28 @@ class ObjectEventFormLocationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ObjectEventFormSectionCard(
-      title: 'Location Information (required)',
+      title: 'Location Information',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isViewOnly)
             ObjectEventFormReadOnlyText(
               label: 'Business Location GLN',
-              value: businessLocationGLN ?? 'Not provided',
+              value: _formatGlnDisplay(businessLocation),
             )
           else
             GLNSelector(
               label: 'Business Location GLN',
               hintText:
                   'e.g., 0614141.00001.0 or urn:epc:id:sgln:0614141.00001.0',
-              initialValue: _glnFromCode(businessLocationGLN),
+              initialValue: businessLocation,
               isRequired: isBusinessLocationMandatory,
               errorText: validation.getFieldError('businessLocationGLN'),
               onChanged: (gln) {
-                final code = gln?.glnCode;
-                onBusinessLocationChanged(code);
+                onBusinessLocationChanged(gln);
                 _validateGlnField(
                   'businessLocationGLN',
-                  code,
+                  gln?.glnCode,
                   isBusinessLocationMandatory,
                 );
               },
@@ -96,22 +95,21 @@ class ObjectEventFormLocationSection extends StatelessWidget {
           if (isViewOnly)
             ObjectEventFormReadOnlyText(
               label: 'Read Point GLN',
-              value: readPointGLN ?? 'Not provided',
+              value: _formatGlnDisplay(readPoint),
             )
           else
             GLNSelector(
               label: 'Read Point GLN',
               hintText:
                   'e.g., 0614141.00777.0 or urn:epc:id:sgln:0614141.00777.0',
-              initialValue: _glnFromCode(readPointGLN),
+              initialValue: readPoint,
               isRequired: isReadPointMandatory,
               errorText: validation.getFieldError('readPointGLN'),
               onChanged: (gln) {
-                final code = gln?.glnCode;
-                onReadPointChanged(code);
+                onReadPointChanged(gln);
                 _validateGlnField(
                   'readPointGLN',
-                  code,
+                  gln?.glnCode,
                   isReadPointMandatory,
                 );
               },

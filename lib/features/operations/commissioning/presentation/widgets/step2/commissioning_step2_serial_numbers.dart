@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/operations/commissioning/presentation/wid
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step2/commissioning_scan_input_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step2/commissioning_serial_list.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step2/commissioning_serial_list_header.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
 
 import '../../../../../../core/utils/responsive_utils.dart';
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Small chip that displays the EPCIS action (ADD / OBSERVE / DELETE).
 class ObjectEventActionChip extends StatelessWidget {
   const ObjectEventActionChip({super.key, required this.action});
 

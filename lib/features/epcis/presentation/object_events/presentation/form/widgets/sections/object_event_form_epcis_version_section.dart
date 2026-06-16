@@ -23,7 +23,7 @@ class ObjectEventFormEpcisVersionSection extends StatelessWidget {
         decoration: const InputDecoration(border: OutlineInputBorder()),
         items: EPCISVersion.values
             .map(
-              (v) => DropdownMenuItem(value: v, child: Text(v.toString())),
+              (v) => DropdownMenuItem(value: v, child: Text(v==EPCISVersion.v2_0?'EPCIS Version 2.0':'EPCIS Version 1.3')),
             )
             .toList(),
         onChanged: isViewOnly ? null : (value) => onChanged(value!),

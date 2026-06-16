@@ -6,7 +6,6 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 
-/// Pick commissioned SSCC / SGTIN records from master data (no demo generation).
 class AggregationEpcPickerDialog {
   AggregationEpcPickerDialog._();
 

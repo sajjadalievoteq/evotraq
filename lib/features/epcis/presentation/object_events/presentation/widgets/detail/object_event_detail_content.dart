@@ -21,10 +21,12 @@ class ObjectEventDetailContent extends StatelessWidget {
 
   final ObjectEvent event;
   String bizStep ='';
+  String disposition = '';
 
   @override
   Widget build(BuildContext context) {
 bizStep=  ObjectEventSharedUiConstants.friendlyBizStep(event.businessStep);
+disposition = ObjectEventSharedUiConstants.friendlyDisposition(event.disposition);
     return SingleChildScrollView(
       padding: context.padding,
       child: Column(
@@ -37,13 +39,13 @@ bizStep=  ObjectEventSharedUiConstants.friendlyBizStep(event.businessStep);
               spacing: 3,
               children: [
                 Text(
-                  event.eventId ?? '',
+            '${ObjectEventListUiConstants.listCardBizStepPrefix}$bizStep',
                   style: context.text.h1.copyWith(
                     color: Colors.white,
                   ),
                 ),
                 Text(
-                  '${ObjectEventListUiConstants.listCardBizStepPrefix}$bizStep',
+                  '${ObjectEventListUiConstants.listCardDispositionPrefix}${disposition}',
                   style: context.text.h3.copyWith(
                     color: Colors.white,
                   ),

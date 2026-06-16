@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
 import '../../../../../gs1/widgets/gtin_validated_field.dart';
 

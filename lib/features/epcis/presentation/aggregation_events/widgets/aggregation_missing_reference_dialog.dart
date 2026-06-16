@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_missing_reference.dart';
 
-/// Notifies the user that required master data is missing and offers create navigation.
 class AggregationMissingReferenceDialog extends StatelessWidget {
   const AggregationMissingReferenceDialog({
     super.key,

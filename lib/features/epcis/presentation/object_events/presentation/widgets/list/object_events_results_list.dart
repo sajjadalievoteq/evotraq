@@ -29,12 +29,10 @@ class ObjectEventsResultsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ObjectEventsCubit, ObjectEventsState>(
       builder: (context, state) {
-        // ── Loading (first load) ─────────────────────────────────────────
         if (state.isListLoading && state.objectEvents.isEmpty) {
           return const Gs1ListLoadingShimmer();
         }
 
-        // ── Error ────────────────────────────────────────────────────────
         if (state.listFetchError != null && state.objectEvents.isEmpty) {
           return Center(
             child: Column(
@@ -56,7 +54,6 @@ class ObjectEventsResultsList extends StatelessWidget {
           );
         }
 
-        // ── Empty ────────────────────────────────────────────────────────
         if (state.objectEvents.isEmpty) {
           return Center(
             child: Column(
@@ -87,7 +84,6 @@ class ObjectEventsResultsList extends StatelessWidget {
           );
         }
 
-        // ── List ─────────────────────────────────────────────────────────
         return NotificationListener<ScrollNotification>(
           onNotification: (n) {
             if (n is ScrollEndNotification &&

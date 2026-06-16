@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 
 /// Screen for Transaction Document operations

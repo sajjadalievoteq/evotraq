@@ -9,7 +9,7 @@ import 'package:traqtrace_app/core/web/web_download_stub.dart'
     if (dart.library.io) 'package:traqtrace_app/core/web/web_download_io.dart'
     as web_download;
 import 'package:traqtrace_app/data/services/postman_collection_service.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 class PostmanCollectionDialog extends StatefulWidget {
   const PostmanCollectionDialog({Key? key}) : super(key: key);
 

@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/auth/presentation/widget/build_success_me
 
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_responsive_layout_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import '../../../../../core/config/constants.dart';
 import '../widget/forgot_password_form_widget.dart';

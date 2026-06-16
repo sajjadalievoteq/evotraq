@@ -4,8 +4,8 @@ import '../../../core/di/injection.dart';
 import '../../../data/services/cache_service.dart';
 import '../../cache/models/cache_statistics.dart';
 import '../../cache/models/cache_health.dart';
-import '../../../shared/widgets/loading_overlay.dart';
-import '../../../shared/widgets/error_message.dart';
+import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
+import 'package:traqtrace_app/core/widgets/error_message.dart';
 import '../../../core/widgets/app_drawer.dart';
 
 /// Cache Management Screen for Phase 3.2 Caching Layer

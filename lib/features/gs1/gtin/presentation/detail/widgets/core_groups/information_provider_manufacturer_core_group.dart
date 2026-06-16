@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgt
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 
 class InformationProviderManufacturerCoreGroup extends StatefulWidget {
   const InformationProviderManufacturerCoreGroup({

@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 
 import '../../../data/services/barcode_generation_service.dart';
 
@@ -297,23 +299,16 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
             style: TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
-          TextField(
+          GtinEntryField(
             controller: _gtinController,
-            decoration: const InputDecoration(
-              labelText: 'GTIN',
-              border: OutlineInputBorder(),
-              hintText: '12345678901231',
-            ),
-            keyboardType: TextInputType.number,
+            label: 'GTIN',
+            hintText: '12345678901231',
           ),
           const SizedBox(height: 16),
-          TextField(
+          SerialEntryField(
             controller: _serialNumberController,
-            decoration: const InputDecoration(
-              labelText: 'Serial Number',
-              border: OutlineInputBorder(),
-              hintText: 'ABC123',
-            ),
+            label: 'Serial Number',
+            hintText: 'ABC123',
           ),
           const SizedBox(height: 16),
           GestureDetector(

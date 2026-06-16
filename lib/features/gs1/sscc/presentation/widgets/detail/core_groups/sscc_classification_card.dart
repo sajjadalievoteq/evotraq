@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
     as status_rules;
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -88,19 +90,13 @@ class SsccClassificationCard extends StatelessWidget {
           if (containedGtinController != null &&
               contentHomogeneity != ContentHomogeneity.MIXED) ...[
             const SizedBox(height: 16),
-            TextFormField(
-              controller: containedGtinController,
-              readOnly: isReadOnly,
-              decoration: const InputDecoration(
-                labelText: 'Contained GTIN (AI 02)',
-                border: OutlineInputBorder(),
-              ),
+            GtinEntryField(
+              controller: containedGtinController!,
+              label: 'Contained GTIN (AI 02)',
+              enabled: !isReadOnly,
               validator: (v) {
                 if (v == null || v.isEmpty) return null;
-                if (!RegExp(r'^\d{8,14}$').hasMatch(v.trim())) {
-                  return 'GTIN must be 8–14 digits';
-                }
-                return null;
+                return GtinFieldValidators.validateGtinCode(v);
               },
             ),
           ],

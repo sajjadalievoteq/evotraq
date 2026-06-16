@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 
-/// Converts between API/event model representations and form state.
 class ObjectEventFormEventMapper {
   ObjectEventFormEventMapper._();
 
@@ -48,7 +47,6 @@ class ObjectEventFormEventMapper {
           );
         }
       } catch (_) {
-        // Silently skip invalid entries.
       }
     }
 

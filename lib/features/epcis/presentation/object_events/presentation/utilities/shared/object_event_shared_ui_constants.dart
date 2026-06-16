@@ -1,4 +1,3 @@
-/// Shared UI constants used across object event list and detail flows.
 class ObjectEventSharedUiConstants {
   ObjectEventSharedUiConstants._();
 

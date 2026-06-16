@@ -4,7 +4,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
-import 'package:traqtrace_app/shared/widgets/gtin_selector.dart';
+import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
 
 class SgtinSerialItemIdentityCard extends StatelessWidget {
   const SgtinSerialItemIdentityCard({

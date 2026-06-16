@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/shared/models/partition_models.dart';
+import 'package:traqtrace_app/core/models/partition_models.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class DatabasePartitioningService {

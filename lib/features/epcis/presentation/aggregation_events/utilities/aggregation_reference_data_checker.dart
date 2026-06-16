@@ -10,7 +10,6 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Verifies GLN, GTIN, SGTIN, and SSCC master data exists before aggregation save.
 class AggregationReferenceDataChecker {
   AggregationReferenceDataChecker({
     required GLNService glnService,

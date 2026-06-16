@@ -1,4 +1,3 @@
-/// Plain-language GS1 pharmaceutical rules shown on the aggregation create form.
 abstract final class AggregationPharmaRulesText {
   static const String sectionTitle = 'Pharmaceutical packing rules';
 

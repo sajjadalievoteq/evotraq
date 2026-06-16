@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_form_validators.dart';
 
-/// List/search helpers for aggregation events.
 class AggregationEventListUtils {
   AggregationEventListUtils._();
 

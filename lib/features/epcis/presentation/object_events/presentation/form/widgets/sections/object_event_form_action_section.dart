@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/presenta
 
 class ObjectEventFormActionSection extends StatelessWidget {
   final String? action;
+  final List<String> allowedActions;
   final bool isViewOnly;
   final bool isMandatory;
   final ObjectEventFormValidationContext validation;
@@ -16,6 +17,7 @@ class ObjectEventFormActionSection extends StatelessWidget {
   const ObjectEventFormActionSection({
     super.key,
     required this.action,
+    required this.allowedActions,
     required this.isViewOnly,
     required this.isMandatory,
     required this.validation,
@@ -26,34 +28,41 @@ class ObjectEventFormActionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ObjectEventFormSectionCard(
-      title: 'Action (required)',
-      child: isViewOnly
-          ? ObjectEventFormReadOnlyText(label: 'Action', value: action)
-          : DropdownButtonFormField<String>(
-              value: action,
-              decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
-                fieldName: 'action',
-                label: 'Action',
-                hintText: 'Select an action',
-                isMandatory: isMandatory,
-                validation: validation,
-              ),
-              items: const [
-                DropdownMenuItem(value: 'ADD', child: Text('ADD')),
-                DropdownMenuItem(value: 'OBSERVE', child: Text('OBSERVE')),
-                DropdownMenuItem(value: 'DELETE', child: Text('DELETE')),
-              ],
-              validator: (value) {
-                final error = ObjectEventFormValidators.validateAction(value);
-                validation.setFieldError('action', error);
-                return error;
-              },
-              onChanged: (value) {
-                onChanged(value);
-                validation.markFieldAsValid('action');
-                onRevalidateForm?.call();
-              },
-            ),
+      title: 'Action',
+      showTitleRequiredIndicator: isMandatory,
+      child: allowedActions.isEmpty
+          ? const Text(
+              'No actions are available for this item state.',
+              style: TextStyle(color: Colors.grey),
+            )
+          : isViewOnly
+              ? ObjectEventFormReadOnlyText(label: 'Action', value: action)
+              : DropdownButtonFormField<String>(
+                  value: allowedActions.contains(action) ? action : null,
+                  decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
+                    context: context,
+                    fieldName: 'action',
+                    label: 'Action',
+                    hintText: 'Select an action',
+                    isMandatory: isMandatory,
+                    validation: validation,
+                  ),
+                  items: allowedActions
+                      .map(
+                        (a) => DropdownMenuItem(value: a, child: Text(a)),
+                      )
+                      .toList(),
+                  validator: (value) {
+                    final error = ObjectEventFormValidators.validateAction(value);
+                    validation.setFieldError('action', error);
+                    return error;
+                  },
+                  onChanged: (value) {
+                    onChanged(value);
+                    validation.markFieldAsValid('action');
+                    onRevalidateForm?.call();
+                  },
+                ),
     );
   }
 }

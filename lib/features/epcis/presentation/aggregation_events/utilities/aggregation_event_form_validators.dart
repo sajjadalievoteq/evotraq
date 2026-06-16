@@ -1,11 +1,10 @@
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
-import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
 
-/// Shared validation helpers for aggregation event create/edit forms.
 class AggregationEventFormValidators {
   AggregationEventFormValidators._();
 
@@ -26,7 +25,6 @@ class AggregationEventFormValidators {
         _digitalLink.hasMatch(trimmed);
   }
 
-  /// GTIN with GS1 check-digit validation (8/12/13/14 digit forms).
   static String? validateGtin14(String? value, {bool required = true}) {
     if (value == null || value.trim().isEmpty) {
       return required ? 'GTIN is required' : null;
@@ -34,7 +32,6 @@ class AggregationEventFormValidators {
     return GtinFieldValidators.validateGtinCode(value);
   }
 
-  /// Serial number per GS1 SGTIN file-7 charset (1–20 chars).
   static String? validateSerialNumber(String? value, {bool required = true}) {
     if (value == null || value.trim().isEmpty) {
       return required ? 'Serial number is required' : null;
@@ -42,7 +39,6 @@ class AggregationEventFormValidators {
     return sgtin_validators.validateSerialNumber(value.trim());
   }
 
-  /// SSCC: 18-digit + check digit, AI (00) element string, or EPC URI.
   static String? validateSsccInput(String? value, {bool required = true}) {
     if (value == null || value.trim().isEmpty) {
       return required ? 'SSCC is required' : null;
@@ -112,7 +108,6 @@ class AggregationEventFormValidators {
     return null;
   }
 
-  /// Validates a built SGTIN EPC URI.
   static String? validateSgtinEpcUri(String? uri) {
     if (uri == null || uri.isEmpty) {
       return 'Could not build a valid SGTIN EPC URI';
@@ -120,7 +115,6 @@ class AggregationEventFormValidators {
     return sgtin_validators.validateEpcUri(uri);
   }
 
-  /// Validates a built SSCC EPC URI.
   static String? validateSsccEpcUri(String? uri) {
     if (uri == null || uri.isEmpty) {
       return 'Could not build a valid SSCC EPC URI';
@@ -128,7 +122,6 @@ class AggregationEventFormValidators {
     return _validateSsccEpcUri(uri);
   }
 
-  /// Single child instance EPC (typically SGTIN).
   static String? validateChildEpcEntry(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return 'Empty EPC value';
@@ -179,7 +172,6 @@ class AggregationEventFormValidators {
     return null;
   }
 
-  /// Parent is required for ADD and DELETE; optional for OBSERVE (GS1 / backend).
   static String? validateParentEpc(String? value, String action) {
     final requiresParent = action != 'OBSERVE';
     if (requiresParent && (value == null || value.trim().isEmpty)) {
@@ -191,7 +183,6 @@ class AggregationEventFormValidators {
     return validateResolvedParentEpc(value.trim());
   }
 
-  /// Validates resolved parent EPC URI structure.
   static String? validateResolvedParentEpc(String uri) {
     final lower = uri.toLowerCase();
     if (lower.contains(':sgtin:')) {
@@ -210,7 +201,6 @@ class AggregationEventFormValidators {
     return 'Parent EPC must be a valid GS1 EPC URI or barcode';
   }
 
-  /// Child instance EPCs required for ADD and OBSERVE; optional for DELETE.
   static String? validateChildEpcList(String? value, String action) {
     if (action == 'DELETE') {
       return null;
@@ -257,46 +247,9 @@ class AggregationEventFormValidators {
     return null;
   }
 
-  /// Parses GLN from 13-digit code or GS1 element-string / URN forms.
-  static String parseGlnToCode(String input) {
-    final clean = input.trim();
-    final extracted = GS1Utils.extractGLNCode(clean);
-    if (extracted != null && RegExp(r'^\d{13}$').hasMatch(extracted)) {
-      return extracted;
-    }
-    if (RegExp(r'^\d{13}$').hasMatch(clean)) {
-      return clean;
-    }
-    if (clean.contains('.') && !clean.startsWith('urn:')) {
-      final parts = clean.split('.');
-      if (parts.length >= 2) {
-        final companyPrefix = parts[0];
-        final locationRef = parts[1].padLeft(5, '0');
-        if (companyPrefix.length >= 7 && companyPrefix.length <= 10) {
-          final withoutCheck = companyPrefix + locationRef;
-          return withoutCheck + GS1Utils.calculateGS1CheckDigit(withoutCheck);
-        }
-      }
-    }
-    return clean;
-  }
+  static String parseGlnToCode(String input) =>
+      EpcisGlnValidators.parseGlnToCode(input);
 
-  static String? validateLocationGln(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Please enter the location GLN';
-    }
-    try {
-      final code = parseGlnToCode(value);
-      if (!RegExp(r'^\d{13}$').hasMatch(code)) {
-        return 'GLN must resolve to exactly 13 digits';
-      }
-      final expectedCheck = GS1Utils.calculateGS1CheckDigit(code.substring(0, 12));
-      if (code[12] != expectedCheck) {
-        return 'Invalid GLN check digit';
-      }
-      return null;
-    } catch (_) {
-      return 'Invalid GLN format';
-    }
-  }
+  static String? validateLocationGln(String? value) =>
+      EpcisGlnValidators.validateLocationGln(value);
 }

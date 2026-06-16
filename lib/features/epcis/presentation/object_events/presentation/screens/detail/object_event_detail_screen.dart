@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/presenta
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/widgets/detail/skeleton/object_event_detail_skeleton.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/shared/object_event_shared_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class ObjectEventDetailScreen extends StatefulWidget {
   const ObjectEventDetailScreen({
@@ -74,11 +74,9 @@ class _ObjectEventDetailScreenState extends State<ObjectEventDetailScreen> {
   Widget build(BuildContext context) {
     Widget body;
 
-    if (widget.awaitingListSelection) {
-      body = const ObjectEventDetailAwaitingPane();
-    } else if (_loading) {
+    if (widget.awaitingListSelection || _loading) {
       body = const ObjectEventDetailSkeleton();
-    } else if (_event == null) {
+    }  else if (_event == null) {
       body = ObjectEventDetailNotFoundPane(onRetry: _load);
     } else {
       body = ObjectEventDetailContent(event: _event!);

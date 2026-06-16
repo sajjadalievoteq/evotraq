@@ -44,7 +44,6 @@ class AggregationEventListItemCard extends StatelessWidget {
       );
     }
 
-    // Truncate long EPC URNs for display
     String truncateEpc(String? epc) {
       if (epc == null) return '—';
       if (epc.length <= 40) return epc;
@@ -76,12 +75,10 @@ class AggregationEventListItemCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left: main content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Parent EPC (primary identifier)
                         Text(
                           truncateEpc(event.parentID),
                           style: theme.textTheme.titleSmall?.copyWith(
@@ -117,7 +114,6 @@ class AggregationEventListItemCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Right: action chip
                   AggregationEventActionChip(action: event.action),
                 ],
               ),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/models/sscc_quick_filter_result.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/utilities/sscc_ui_constants.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 class SsccQuickFilterDialog extends StatefulWidget {
   const SsccQuickFilterDialog({

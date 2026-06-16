@@ -34,8 +34,9 @@ import 'package:traqtrace_app/features/notifications/presentation/cubit/notifica
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/shared/utils/app_screen_util.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/app_screen_util.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 // Dashboard imports
 
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
@@ -78,6 +79,9 @@ void main() async {
     debugPrint('Initializing dependencies...');
     // Initialize dependency injection
     await initDependencies(appConfig);
+    getIt.registerSingleton<AppRouter>(
+      AppRouter(authCubit: getIt<AuthCubit>()),
+    );
     debugPrint('Dependencies initialized.');
 
     debugPrint('Starting TraqTraceApp...');
@@ -222,10 +226,12 @@ class TraqTraceApp extends StatelessWidget {
                 ...GlobalMaterialLocalizations.delegates,
                 TypedLocaleDelegate(),
               ],
-              builder: (context, child) => AppScreenUtilInit(
-                child: AppLayoutBuilder(
-                  builder: (context, layout) =>
-                      child ?? const SizedBox.shrink(),
+              builder: (context, child) => SnackBarInteractionScope(
+                child: AppScreenUtilInit(
+                  child: AppLayoutBuilder(
+                    builder: (context, layout) =>
+                        child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

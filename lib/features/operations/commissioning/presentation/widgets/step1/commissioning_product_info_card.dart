@@ -5,7 +5,8 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
-import 'package:traqtrace_app/shared/widgets/gtin_selector.dart';
+import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 
 class CommissioningProductInfoCard extends StatelessWidget {
   const CommissioningProductInfoCard({
@@ -86,14 +87,10 @@ class CommissioningProductInfoCard extends StatelessWidget {
               errorText: gtinError,
             )
           else
-            Gs1ValidatedField(
+            GtinEntryField(
               controller: gtinController,
-              fieldName: 'gtinCode',
               label: 'GTIN *',
               hintText: 'Enter 14-digit GTIN',
-              keyboardType: TextInputType.number,
-              maxLength: 14,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               validator: CommissioningFieldValidators.validateGtinRequired,
             ),
           const SizedBox(height: 16),

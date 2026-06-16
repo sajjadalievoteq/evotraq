@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 
@@ -145,21 +146,12 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                 const SizedBox(height: 24),
                 _buildSectionHeader('GS1 Identification'),
                 const SizedBox(height: 8),
-                TextFormField(
+                GlnEntryField(
                   controller: _glnController,
-                  decoration: const InputDecoration(
-                    labelText: 'GLN (Global Location Number)',
-                    hintText: 'e.g., 0614141000012',
-                    prefixIcon: Icon(Icons.location_on),
-                    helperText: '13-digit GS1 Global Location Number',
-                  ),
-                  maxLength: 13,
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty && value.length != 13) {
-                      return 'GLN must be 13 digits';
-                    }
-                    return null;
-                  },
+                  label: 'GLN (Global Location Number)',
+                  hintText: 'e.g., 0614141000012',
+                  helperText: '13-digit GS1 Global Location Number',
+                  optional: true,
                 ),
                 const SizedBox(height: 24),
                 _buildSectionHeader('Integration Settings'),

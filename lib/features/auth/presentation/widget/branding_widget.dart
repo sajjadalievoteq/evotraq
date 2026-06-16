@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 import '../../../../core/config/app_assets.dart';
 import '../../../../core/config/constants.dart';
-import '../../../../shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class AuthBrandingSection extends StatelessWidget {
   const AuthBrandingSection({

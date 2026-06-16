@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 @immutable
 class GlnQuickFilterResult {

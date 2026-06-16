@@ -5,11 +5,12 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/operations/packing_models.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
-import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
 import 'package:traqtrace_app/data/services/epcis/packing_operation_service.dart';
@@ -337,10 +338,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   void _onItemScanResult(ScanResult result) {
     if (result.isValid) {
       final barcode = result.data;
-
-      // Check for duplicates
-      if (_scannedEPCs.contains(barcode)) {
-        _showError('Item already scanned: $barcode');
+      final duplicate = OperationEpcScanValidator.checkDuplicate(
+        barcode,
+        _scannedEPCs,
+      );
+      if (duplicate != null) {
+        _showError(duplicate.errorMessage ?? 'Item already scanned');
         return;
       }
 
@@ -382,8 +385,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       return;
     }
 
-    if (_scannedEPCs.contains(barcode)) {
-      _showError('Item already added: $barcode');
+    final duplicate = OperationEpcScanValidator.checkDuplicate(
+      barcode,
+      _scannedEPCs,
+    );
+    if (duplicate != null) {
+      _showError(duplicate.errorMessage ?? 'Item already added');
       return;
     }
 

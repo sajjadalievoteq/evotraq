@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Help widget for Object Event Form that explains GS1 EPCIS Object Event fields
 class ObjectEventHelpWidget extends StatelessWidget {
-  /// Constructor
   const ObjectEventHelpWidget({Key? key}) : super(key: key);
 
   @override

@@ -1,4 +1,3 @@
-/// UI constants for the object events list screen.
 class ObjectEventListUiConstants {
   ObjectEventListUiConstants._();
 
@@ -19,7 +18,8 @@ class ObjectEventListUiConstants {
 
   static const String listCardEpcPrefix = 'EPC: ';
   static const String listCardLocationPrefix = 'Location: ';
-  static const String listCardBizStepPrefix = 'Biz step: ';
+  static const String listCardBizStepPrefix = 'Biz Step: ';
+  static const String listCardDispositionPrefix = 'Disposition: ';
 
   static const String menuViewDetails = 'View details';
   static const String menuTooltipActions = 'Actions';

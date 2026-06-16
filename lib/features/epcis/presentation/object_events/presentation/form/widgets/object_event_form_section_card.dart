@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_required_indicator.dart';
 
-/// Reusable card wrapper for object event form sections.
 class ObjectEventFormSectionCard extends StatelessWidget {
   final String? title;
+  final bool showTitleRequiredIndicator;
   final Widget child;
   final Color? color;
   final EdgeInsetsGeometry? margin;
@@ -10,6 +11,7 @@ class ObjectEventFormSectionCard extends StatelessWidget {
   const ObjectEventFormSectionCard({
     super.key,
     this.title,
+    this.showTitleRequiredIndicator = false,
     required this.child,
     this.color,
     this.margin,
@@ -18,7 +20,6 @@ class ObjectEventFormSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: color,
       margin: margin,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,12 +27,19 @@ class ObjectEventFormSectionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (title != null) ...[
-              Text(
-                title!,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  if (showTitleRequiredIndicator)
+                    const ObjectEventFormRequiredIndicator(),
+                ],
               ),
               const SizedBox(height: 8.0),
             ],

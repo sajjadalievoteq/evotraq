@@ -14,14 +14,14 @@ import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/list/sscc_r
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/list/sscc_results_list.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/utilities/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart' as edit_rules;
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 class SSCCListScreen extends StatefulWidget {
   const SSCCListScreen({

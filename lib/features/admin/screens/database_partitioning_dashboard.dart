@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import '../../../../shared/models/partition_models.dart';
+import 'package:traqtrace_app/core/models/partition_models.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
 

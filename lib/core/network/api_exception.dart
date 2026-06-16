@@ -23,28 +23,26 @@ class ApiException implements Exception {
     }
     return 'ApiException: $message';
   }
+
   String getUserFriendlyMessage() {
     if (statusCode == null) {
       return 'Network error. Please check your connection and try again.';
     }
-    
-    if (responseBody != null) {
-      try {
-        final jsonBody = json.decode(responseBody!);
-        final errors = jsonBody['errors'];
-        if (errors is Map && errors.isNotEmpty) {
-          return errors.values.join(', ');
-        }
-        if (jsonBody['message'] != null) {
-          return jsonBody['message'] as String;
-        }
-        if (jsonBody['error'] != null) {
-          return jsonBody['error'] as String;
-        }
-      } catch (_) {
+
+    final parsed = _parseResponseBody();
+    if (parsed != null) {
+      final fromStructured = _messageFromStructuredBody(parsed);
+      if (fromStructured != null && fromStructured.isNotEmpty) {
+        return fromStructured;
       }
     }
-    
+
+    if (message.isNotEmpty &&
+        !message.startsWith('ApiException:') &&
+        message != 'Failed to create object event') {
+      return message;
+    }
+
     switch (statusCode) {
       case 400:
         return 'The request was invalid. Please check your input and try again.';
@@ -64,5 +62,53 @@ class ApiException implements Exception {
       default:
         return message;
     }
+  }
+
+  Map<String, dynamic>? _parseResponseBody() {
+    if (responseBody == null || responseBody!.isEmpty) {
+      return null;
+    }
+    try {
+      final decoded = json.decode(responseBody!);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
+  String? _messageFromStructuredBody(Map<String, dynamic> jsonBody) {
+    final fieldErrors = jsonBody['fieldErrors'];
+    if (fieldErrors is Map && fieldErrors.isNotEmpty) {
+      return fieldErrors.entries
+          .map((e) => '${e.key}: ${e.value}')
+          .join('\n');
+    }
+
+    final errors = jsonBody['errors'];
+    if (errors is List && errors.isNotEmpty) {
+      return errors.map((e) => e.toString()).join('\n');
+    }
+
+    if (errors is Map && errors.isNotEmpty) {
+      return errors.values.map((e) => e.toString()).join('\n');
+    }
+
+    final message = jsonBody['message'];
+    if (message != null && message.toString().isNotEmpty) {
+      return message.toString();
+    }
+
+    final error = jsonBody['error'];
+    if (error != null && error.toString().isNotEmpty) {
+      return error.toString();
+    }
+
+    return null;
   }
 }

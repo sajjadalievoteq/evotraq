@@ -11,7 +11,7 @@ import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/dashboard_recent_event_tile.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/epcis_event_stream/widgets/stream_dummy_event_rows.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class EpcisEventStreamCard extends StatelessWidget {
   const EpcisEventStreamCard({super.key});

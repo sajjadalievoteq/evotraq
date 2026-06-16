@@ -28,7 +28,6 @@ class AggregationEventsListScreen extends StatefulWidget {
     this.onEmbeddedCreate,
   });
 
-  /// When [embedded] is true this screen sits inside the split-view left pane.
   final bool embedded;
   final String? selectedEventId;
   final ValueChanged<String>? onSelectEvent;

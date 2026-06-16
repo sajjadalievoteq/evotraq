@@ -73,32 +73,30 @@ class EPCURIConverter {
   /// - Result: urn:epc:id:sgtin:3664798.00337.13123123
   static String? convertGTINSerialToEPCUri(String gtin, String serialNumber) {
     if (gtin.isEmpty || serialNumber.isEmpty) return null;
-    
+
     try {
-      // Normalize GTIN to 14 digits
-      String normalizedGtin = gtin.padLeft(14, '0');
-      
-      // Remove leading zero (indicator digit) for EPC conversion
-      // GTIN-14: [indicator][company prefix (variable)][item reference][check digit]
-      // We'll use a simplified approach with 7-digit company prefix
-      
-      // Extract components (assuming 7-digit company prefix which is common)
-      // Position 0: Indicator digit (removed for EPC)
-      // Position 1-7: Company prefix (7 digits)
-      // Position 8-12: Item reference (5 digits)
-      // Position 13: Check digit (not included in EPC)
-      
-      String companyPrefix = normalizedGtin.substring(1, 8);
-      String itemReference = normalizedGtin.substring(8, 13);
-      
-      // Clean serial number (remove any special characters)
-      String cleanSerial = serialNumber.replaceAll(RegExp(r'[^A-Za-z0-9]'), '');
-      
-      return 'urn:epc:id:sgtin:$companyPrefix.$itemReference.$cleanSerial';
+      final normalizedGtin = gtin.padLeft(14, '0');
+      if (normalizedGtin.length != 14) return null;
+
+      final gcpLength = _resolveGcpLength(normalizedGtin);
+      // GTIN-14: [indicator][GCP][itemRef][check]; EPC URN: <GCP>.<indicator+itemRef>.<serial>
+      final companyPrefix = normalizedGtin.substring(1, 1 + gcpLength);
+      final indicatorAndItemRef =
+          normalizedGtin[0] + normalizedGtin.substring(1 + gcpLength, 13);
+
+      return 'urn:epc:id:sgtin:$companyPrefix.$indicatorAndItemRef.$serialNumber';
     } catch (e) {
       debugPrint('EPCURIConverter: Error converting GTIN/Serial to EPC URI: $e');
       return null;
     }
+  }
+
+  /// Resolves GS1 Company Prefix length for SGTIN encoding from GTIN-14.
+  /// TraqTrace UAE pharma demo GTINs (GCP 629200) use 6 digits; default to 7 otherwise.
+  static int _resolveGcpLength(String gtin14) {
+    if (gtin14.length != 14) return 7;
+    if (gtin14.substring(1, 7) == '062920') return 6;
+    return 7;
   }
   
   /// Converts an SSCC to SSCC EPC URI
@@ -165,15 +163,17 @@ class EPCURIConverter {
   /// Format: urn:epc:idpat:sgtin:{companyPrefix}.{itemReference}.*
   static String? convertGTINToClassEPCUri(String gtin) {
     if (gtin.isEmpty) return null;
-    
+
     try {
-      // Normalize GTIN to 14 digits
-      String normalizedGtin = gtin.padLeft(14, '0');
-      
-      String companyPrefix = normalizedGtin.substring(1, 8);
-      String itemReference = normalizedGtin.substring(8, 13);
-      
-      return 'urn:epc:idpat:sgtin:$companyPrefix.$itemReference.*';
+      final normalizedGtin = gtin.padLeft(14, '0');
+      if (normalizedGtin.length != 14) return null;
+
+      final gcpLength = _resolveGcpLength(normalizedGtin);
+      final companyPrefix = normalizedGtin.substring(1, 1 + gcpLength);
+      final indicatorAndItemRef =
+          normalizedGtin[0] + normalizedGtin.substring(1 + gcpLength, 13);
+
+      return 'urn:epc:idpat:sgtin:$companyPrefix.$indicatorAndItemRef.*';
     } catch (e) {
       debugPrint('EPCURIConverter: Error converting GTIN to Class EPC URI: $e');
       return null;

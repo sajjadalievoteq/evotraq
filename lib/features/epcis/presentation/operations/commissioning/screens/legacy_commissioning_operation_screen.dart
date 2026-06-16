@@ -9,10 +9,10 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
-import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
 
 import '../../../../../../data/models/operations/commissioning/commissioning_models.dart';
 import '../../../../../operations/commissioning/cubit/commissioning_operation_cubit.dart';
@@ -23,16 +23,17 @@ enum ScanningMode { camera, wired, manual }
 /// Step 1: Reference details (GTIN, batch/lot, location, dates)
 /// Step 2: Scan/enter serial numbers
 /// Step 3: Review and submit
-class CommissioningOperationScreen extends StatefulWidget {
-  const CommissioningOperationScreen({Key? key}) : super(key: key);
+@Deprecated('Replaced by operations commissioning module')
+class LegacyCommissioningOperationScreen extends StatefulWidget {
+  const LegacyCommissioningOperationScreen({Key? key}) : super(key: key);
 
   @override
-  State<CommissioningOperationScreen> createState() =>
-      _CommissioningOperationScreenState();
+  State<LegacyCommissioningOperationScreen> createState() =>
+      _LegacyCommissioningOperationScreenState();
 }
 
-class _CommissioningOperationScreenState
-    extends State<CommissioningOperationScreen> {
+class _LegacyCommissioningOperationScreenState
+    extends State<LegacyCommissioningOperationScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
 

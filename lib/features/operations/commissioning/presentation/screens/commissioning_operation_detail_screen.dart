@@ -12,7 +12,7 @@ import 'package:traqtrace_app/data/models/operations/commissioning/commissioning
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
 import '../../../../../core/config/app_assets.dart';
 

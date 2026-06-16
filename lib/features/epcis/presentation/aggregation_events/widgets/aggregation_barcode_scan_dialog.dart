@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
-import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
 
-/// Full-screen scan dialog for SSCC or SGTIN barcodes.
 class AggregationBarcodeScanDialog extends StatelessWidget {
   const AggregationBarcodeScanDialog({
     super.key,

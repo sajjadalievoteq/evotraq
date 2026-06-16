@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 
@@ -221,24 +225,16 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          TextFormField(
+          GtinEntryField(
             controller: _gtinController,
-            decoration: const InputDecoration(
-              labelText: 'GTIN',
-              hintText: 'Enter the GTIN code (e.g., 08712345678906)',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
+            label: 'GTIN',
+            hintText: 'Enter the GTIN code (e.g., 08712345678906)',
           ),
           const SizedBox(height: 16),
-          
-          TextFormField(
+          SerialEntryField(
             controller: _serialController,
-            decoration: const InputDecoration(
-              labelText: 'Serial Number',
-              hintText: 'Enter the serial number',
-              border: OutlineInputBorder(),
-            ),
+            label: 'Serial Number',
+            hintText: 'Enter the serial number',
           ),
           const SizedBox(height: 24),
           
@@ -456,14 +452,13 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          TextFormField(
+          EpcEntryField(
             controller: _epcUriController,
-            decoration: const InputDecoration(
-              labelText: 'EPC URI',
-              hintText: 'Enter the EPC URI (e.g., urn:epc:id:sgtin:...)',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 2,
+            label: 'EPC URI',
+            hintText: 'Enter the EPC URI (e.g., urn:epc:id:sgtin:...)',
+            required: true,
+            validator: (value) =>
+                EpcisEpcValidators.validateEpcOrBarcode(value),
           ),
           const SizedBox(height: 24),
           

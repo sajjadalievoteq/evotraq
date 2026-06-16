@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 class LoginFormWidget extends StatefulWidget {
   const LoginFormWidget({super.key, required this.state});

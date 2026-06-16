@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/home/presentation/constants/home_strings.
 import 'package:traqtrace_app/features/home/presentation/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/presentation/cubit/home_state.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/key_metrics/widgets/dashboard_stat_card.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class KeyMetricsGrid extends StatelessWidget {
   const KeyMetricsGrid({super.key, required this.layout});

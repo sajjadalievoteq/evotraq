@@ -109,8 +109,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      width: displayHeight * 0.15,
-                      height: displayHeight * 0.15,
+                      width: displayHeight * 0.12,
+                      height: displayHeight * 0.12,
                       child: Image.asset(
                         AppAssets.logo,
                         fit: BoxFit.contain,
@@ -126,6 +126,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     Text(
                       'traq',
                       style: TextStyle(
+                        height: 0,
                         fontSize: displayHeight * 0.08,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.2,

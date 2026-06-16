@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 import 'auth_form_header.dart';
 import '../screens/mobile/auth_mobile_form_layout.dart';

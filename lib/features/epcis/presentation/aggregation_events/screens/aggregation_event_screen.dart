@@ -40,7 +40,6 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: SplitOrListIndexedStack(
-        // ── Desktop: split view ────────────────────────────────────────────
         split: Gs1SplitViewScreen<AggregationEventsCubit, AggregationEventsState>(
           appBarTitle: AggregationEventUiConstants.appBarManagement,
           fabHeroTag: AggregationEventUiConstants.fabHeroTag,
@@ -91,7 +90,6 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
             awaitingListSelection: true,
           ),
         ),
-        // ── Mobile / tablet: standalone list ──────────────────────────────
         fallback: const AggregationEventsListScreen(),
       ),
     );

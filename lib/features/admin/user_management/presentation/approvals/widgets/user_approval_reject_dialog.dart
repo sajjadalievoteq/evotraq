@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 import '../../users/widgets/user_management_constants.dart';
 

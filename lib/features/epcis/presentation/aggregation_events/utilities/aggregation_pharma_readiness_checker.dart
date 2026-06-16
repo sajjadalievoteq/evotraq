@@ -8,7 +8,6 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Client-side GS1 pharma readiness checks (mirrors backend aggregation rules).
 class AggregationPharmaReadinessChecker {
   AggregationPharmaReadinessChecker({
     required GLNService glnService,

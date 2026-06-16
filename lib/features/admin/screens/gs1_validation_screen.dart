@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/shared/utils/gs1_validator.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/utils/gs1_validator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 
 class GS1ValidationScreen extends StatefulWidget {
   const GS1ValidationScreen({Key? key}) : super(key: key);

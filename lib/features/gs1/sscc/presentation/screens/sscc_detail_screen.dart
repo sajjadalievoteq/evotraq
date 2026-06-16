@@ -14,7 +14,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
@@ -23,7 +23,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffo
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/gs1/utils/gs1_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/tobacco/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/presentation/widgets/detail/pharma/sscc_pharmaceutical_extension_widget.dart';
@@ -43,7 +43,7 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_barcode_scan_dialog.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
@@ -52,8 +52,8 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import '../../../../../../core/theme/traq_theme.dart';
 

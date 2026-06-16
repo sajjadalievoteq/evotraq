@@ -8,10 +8,12 @@ import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_event_form_help.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:uuid/uuid.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
@@ -362,14 +364,14 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           .split(',')
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
-          .map((e) => EPCFormatter.formatToEPCUri(e)) // Format to EPC URI if needed
+          .map((e) => EPCFormatter.formatToEPCUri(e) ?? e)
           .toList();
           
       final outputEpcs = _outputEpcsController.text
           .split(',')
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
-          .map((e) => EPCFormatter.formatToEPCUri(e)) // Format to EPC URI if needed
+          .map((e) => EPCFormatter.formatToEPCUri(e) ?? e)
           .toList();
 
       // Initialize bizData map with the existing data
@@ -801,19 +803,15 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
             },
           ),
           const SizedBox(height: 16),
-          _buildTextField(
-            controller: _locationGLNController, 
+          GlnEntryField(
+            controller: _locationGLNController,
             label: 'Business Location GLN',
-            helperText: 'GLN code where the transformation occurred (must exist in master data)',
+            helperText:
+                'GLN code where the transformation occurred (must exist in master data)',
             fieldName: 'locationGLN',
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                if (!RegExp(r'^[0-9\.]+$').hasMatch(value)) {
-                  return 'GLN should contain only digits and dots';
-                }
-              }
-              return null;
-            },
+            optional: true,
+            validator: (value) =>
+                EpcisGlnValidators.validateLocationGln(value, required: false),
           ),
           const SizedBox(height: 24),
           

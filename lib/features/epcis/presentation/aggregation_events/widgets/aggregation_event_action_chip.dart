@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Pill-style chip for EPCIS AggregationEvent action (ADD / OBSERVE / DELETE).
-/// Follows the same tinted-border pattern as SsccStatusChip.
 class AggregationEventActionChip extends StatelessWidget {
   const AggregationEventActionChip({super.key, required this.action});
 
@@ -37,6 +35,5 @@ class AggregationEventActionChip extends StatelessWidget {
     };
   }
 
-  /// Returns the chip color for a given action string (useful for borders etc.)
   static Color colorFor(String? action) => _resolve(action).$1;
 }

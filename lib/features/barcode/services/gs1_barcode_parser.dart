@@ -46,6 +46,50 @@ class GS1BarcodeParser {
     '16': 8,  // Sell By Date (6 digits content + 2 digits AI)
     '17': 8,  // Expiration Date (6 digits content + 2 digits AI)
   };
+  /// Parse a GS1 Application Identifier element string for item-level SGTIN input.
+  ///
+  /// Supports FMD-style barcodes where GTIN is carried in AI (01) or AI (00),
+  /// with serial in AI (21). Returns null when GTIN or serial cannot be extracted.
+  static Map<String, String>? parseAIString(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty || !trimmed.contains('(')) {
+      return null;
+    }
+
+    final serialMatch = RegExp(r'\(21\)([^()]*)').firstMatch(trimmed);
+    if (serialMatch == null) {
+      return null;
+    }
+    final serial = serialMatch.group(1)?.trim() ?? '';
+    if (serial.isEmpty) {
+      return null;
+    }
+
+    final gtin01Match = RegExp(r'\(01\)([^()]*)').firstMatch(trimmed);
+    final gtin00Match = RegExp(r'\(00\)([^()]*)').firstMatch(trimmed);
+
+    String? gtinRaw;
+    if (gtin01Match != null) {
+      gtinRaw = gtin01Match.group(1)?.trim();
+    } else if (gtin00Match != null) {
+      gtinRaw = gtin00Match.group(1)?.trim();
+    }
+
+    if (gtinRaw == null || gtinRaw.isEmpty) {
+      return null;
+    }
+
+    final gtinDigits = gtinRaw.replaceAll(RegExp(r'\D'), '');
+    if (gtinDigits.isEmpty) {
+      return null;
+    }
+
+    return {
+      'GTIN': gtinDigits.padLeft(14, '0'),
+      'SERIAL': serial,
+    };
+  }
+
   /// Parse a raw GS1 barcode string into structured data
   /// 
   /// Returns a Map with the following keys:

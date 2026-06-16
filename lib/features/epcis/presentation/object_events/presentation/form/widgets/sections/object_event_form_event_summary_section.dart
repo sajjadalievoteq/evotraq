@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_section_card.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 class ObjectEventFormEventSummarySection extends StatelessWidget {
   final String? action;
   final String? businessStep;
   final String? disposition;
-  final String? businessLocationGLN;
+  final GLN? businessLocation;
   final List<String> epcList;
   final List<String> epcClassList;
   final List<types.QuantityElement> quantityList;
@@ -20,7 +22,7 @@ class ObjectEventFormEventSummarySection extends StatelessWidget {
     required this.action,
     required this.businessStep,
     required this.disposition,
-    required this.businessLocationGLN,
+    required this.businessLocation,
     required this.epcList,
     required this.epcClassList,
     required this.quantityList,
@@ -29,6 +31,15 @@ class ObjectEventFormEventSummarySection extends StatelessWidget {
     required this.eventTime,
     required this.eventTimeZone,
   });
+
+  String get _locationSummary {
+    if (businessLocation == null) return 'Not selected';
+    if (businessLocation!.locationName.isNotEmpty &&
+        !isPlaceholderGlnLocation(businessLocation!)) {
+      return '${businessLocation!.glnCode} - ${businessLocation!.locationName}';
+    }
+    return businessLocation!.glnCode;
+  }
 
   String get _objectsSummary {
     final parts = <String>[
@@ -53,10 +64,7 @@ class ObjectEventFormEventSummarySection extends StatelessWidget {
           const SizedBox(height: 4.0),
           _summaryRow('Disposition', disposition ?? 'Not selected'),
           const SizedBox(height: 4.0),
-          _summaryRow(
-            'Location',
-            businessLocationGLN ?? 'Not selected',
-          ),
+          _summaryRow('Location', _locationSummary),
           const SizedBox(height: 4.0),
           _summaryRow('Objects', _objectsSummary),
           const SizedBox(height: 4.0),

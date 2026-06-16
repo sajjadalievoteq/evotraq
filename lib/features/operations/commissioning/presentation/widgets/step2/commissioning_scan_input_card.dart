@@ -4,8 +4,8 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/models/commissioning_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step2/commissioning_manual_serial_input.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/widgets/step2/commissioning_wired_scanner_input.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
-import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
 
 class CommissioningScanInputCard extends StatelessWidget {
   const CommissioningScanInputCard({

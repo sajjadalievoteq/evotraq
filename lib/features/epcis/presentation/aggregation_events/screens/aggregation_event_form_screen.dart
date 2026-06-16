@@ -20,12 +20,13 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/wid
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_parent_pack_section.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_pharma_rules_panel.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart' as epcis_models;
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
@@ -50,9 +51,7 @@ class _QuantityRowControllers {
   }
 }
 
-/// Screen for creating a new aggregation event.
 class AggregationEventFormScreen extends StatefulWidget {
-  /// When true, shown inside the split-view create pane (no route pop on save).
   final bool embedded;
 
   final VoidCallback? onEmbeddedActionSuccess;
@@ -73,7 +72,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
   String? _errorMessage;
   List<dynamic> _validationErrors = [];
   
-  // Form fields
   String _selectedAction = 'ADD';
   final _parentEPCController = TextEditingController();
   final _childEPCsController = TextEditingController();
@@ -84,18 +82,14 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
   AggregationReferenceDataChecker? _referenceDataChecker;
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
 
-  // Source and destination lists
   final List<MapEntry<TextEditingController, TextEditingController>> _sourceListControllers = [];
   final List<MapEntry<TextEditingController, TextEditingController>> _destinationListControllers = [];
   
-  // Business data key-value pairs
   final List<MapEntry<TextEditingController, TextEditingController>> _bizDataControllers = [];
   final List<_QuantityRowControllers> _quantityRows = [_QuantityRowControllers()];
   bool _useQuantityList = false;
   DateTime _eventTime = DateTime.now();
   String _eventTimeZoneOffset = "+00:00"; // Use standard ISO 8601 format for timezone
-    // GS1 standard business steps relevant for pharmaceutical track and trace
-  // Following GS1 Core Business Vocabulary (CBV) standard
   final List<String> _standardBusinessSteps = [
     'urn:epcglobal:cbv:bizstep:commissioning',  // Initial creation of object
     'urn:epcglobal:cbv:bizstep:packing',        // Adding objects to container
@@ -112,8 +106,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     'urn:epcglobal:cbv:bizstep:dispensing',     // Dispensing for use
   ];
   
-  // GS1 standard dispositions relevant for pharmaceutical track and trace
-  // Following GS1 Core Business Vocabulary (CBV) standard
   final List<String> _standardDispositions = [
     'urn:epcglobal:cbv:disp:active',                // Object is active or in use
     'urn:epcglobal:cbv:disp:in_progress',           // Process is occurring
@@ -250,13 +242,12 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     });
     
     try {
-      // Get provider for event creation
       final cubit = context.read<AggregationEventsCubit>();
       final validationProvider = context.read<ValidationCubit>();
 
       final String parentRaw = _parentEPCController.text.trim();
       final String parentEPC = parentRaw.isNotEmpty
-          ? EPCFormatter.formatToEPCUri(parentRaw)
+          ? EPCFormatter.formatToEPCUri(parentRaw) ?? parentRaw
           : '';
 
       List<String> childEPCs = [];
@@ -293,7 +284,7 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
             .where((e) => e.isNotEmpty)
             .toList();
         childEPCs = rawChildEPCs
-            .map((epc) => EPCFormatter.formatToEPCUri(epc))
+            .map((epc) => EPCFormatter.formatToEPCUri(epc) ?? epc)
             .toList();
         if (_selectedAction != 'DELETE' && childEPCs.isEmpty) {
           setState(() => _isLoading = false);
@@ -302,7 +293,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
         }
       }
       
-      // Parse business data
       final Map<String, String> bizData = {};
       for (var entry in _bizDataControllers) {
         final key = entry.key.text.trim();
@@ -312,7 +302,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
         }
       }
       
-      // Get source and destination lists
       final sourceList = _getSourceList();
       final destinationList = _getDestinationList();
       
@@ -372,7 +361,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
         destinationList: destinationList.isNotEmpty ? destinationList : null,
       );
 
-      // Perform frontend validation via Cubit
       final isValid = await validationProvider.validateAggregationEvent(eventToValidate);
 
       if (!isValid) {
@@ -434,7 +422,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
       setState(() {
         _errorMessage = e.toString();
       });
-      // Show detailed error dialog for better user experience
       _showErrorDialog(_errorMessage!);
     } finally {
       setState(() {
@@ -443,14 +430,11 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     }
   }
   
-  // Helper method to filter dispositions based on selected business step
   List<String> _getRelevantDispositions() {
-    // If no business step is selected, return all dispositions
     if (_businessStep == null) {
       return _standardDispositions;
     }
     
-    // Filter dispositions based on common business step + disposition combinations
     switch (_businessStep) {
       case 'urn:epcglobal:cbv:bizstep:commissioning':
         return _standardDispositions.where((d) => 
@@ -515,11 +499,9 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
           ].contains(d)).toList();
       
       default:
-        // For all other business steps, return all dispositions
         return _standardDispositions;
     }
   }
-  // Help content organized by field for the aggregation event form
   final Map<String, Map<String, String>> _helpContent = {
     'overview': {
       'title': 'Aggregation Event Overview',
@@ -630,7 +612,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     }
   };
 
-  /// Show comprehensive help screen covering all aspects of aggregation events
   void _showFullHelpScreen(BuildContext context) {
     showDialog(
       context: context,
@@ -656,11 +637,9 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                 child: ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
-                    // Overview Section
                     _buildHelpSection(context, 'overview'),
                     const Divider(),
                     
-                    // Field-specific sections
                     _buildHelpSection(context, 'action'),
                     const Divider(),
                     _buildHelpSection(context, 'eventTime'),
@@ -716,7 +695,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     );
   }
   
-  /// Build a help section for a specific field
   Widget _buildHelpSection(BuildContext context, String field) {
     final helpItem = _helpContent[field];
     if (helpItem == null) return const SizedBox.shrink();
@@ -738,7 +716,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     );
   }
   
-  // Add a source entry row
   void _addSourceEntry() {
     setState(() {
       _sourceListControllers.add(
@@ -750,7 +727,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     });
   }
   
-  // Remove a source entry row
   void _removeSourceEntry(int index) {
     setState(() {
       final entry = _sourceListControllers.removeAt(index);
@@ -759,7 +735,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     });
   }
 
-  // Add a destination entry row
   void _addDestinationEntry() {
     setState(() {
       _destinationListControllers.add(
@@ -771,7 +746,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     });
   }
   
-  // Remove a destination entry row
   void _removeDestinationEntry(int index) {
     setState(() {
       final entry = _destinationListControllers.removeAt(index);
@@ -780,7 +754,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     });
   }
   
-  // Convert source controllers to map format
   List<Map<String, dynamic>> _getSourceList() {
     final sourceList = <Map<String, dynamic>>[];
     for (var entry in _sourceListControllers) {
@@ -793,7 +766,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     return sourceList;
   }
   
-  // Convert destination controllers to map format
   List<Map<String, dynamic>> _getDestinationList() {
     final destinationList = <Map<String, dynamic>>[];
     for (var entry in _destinationListControllers) {
@@ -806,21 +778,17 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
     return destinationList;
   }
   
-  // Show a user-friendly error dialog with formatted error messages
   void _showErrorDialog(String errorMessage) {
     if (!mounted) return;
     
-    // Check if it's a validation error with our custom formatting
     bool isValidationError = errorMessage.contains('Validation Error:');
     bool needsCommissioning = errorMessage.contains('not been commissioned') || 
                              errorMessage.contains('not commissioned:');
                              
-    // Extract parent and child EPCs needing commissioning
     List<String> parentEPCs = [];
     List<String> childEPCs = [];
     List<String> otherErrors = [];
     
-    // Parse the error message to extract specific EPCs
     if (needsCommissioning) {
       final lines = errorMessage.split('\n');
       bool collectingParents = false;
@@ -982,7 +950,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     style: TextStyle(fontStyle: FontStyle.italic),
                   ),
                 ] else ...[
-                  // For other errors or if we couldn't parse the validation error
                   Text(
                     errorMessage,
                     style: const TextStyle(height: 1.5),
@@ -992,27 +959,22 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
             ),
           ),
           actions: [
-            // Add button to navigate to commissioning form if the error is about uncommissioned EPCs
             if (needsCommissioning) ...[
               TextButton.icon(
                 icon: const Icon(Icons.add_circle_outline),
                 label: const Text('Go to Commissioning Form'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Navigate to object event form with commissioning preset
-                  // Build query parameters for pre-filling fields
                   final params = {
                     'bizStep': 'commissioning',
                     'action': 'ADD',
                   };
                   
-                  // Add EPCs to commission if available
                   final List<String> allEPCs = [...parentEPCs, ...childEPCs];
                   if (allEPCs.isNotEmpty) {
                     params['epcs'] = allEPCs.join(',');
                   }
                   
-                  // Construct query string
                   final queryString = params.entries
                       .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
                       .join('&');
@@ -1052,7 +1014,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                         onDismiss: () => setState(() => _validationErrors = []),
                       ),
 
-                    // Information about GS1 barcode support
                     Container(
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -1114,7 +1075,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     const AggregationPharmaRulesPanel(),
                     const SizedBox(height: 16.0),
 
-                    // Event Action
                     DropdownButtonFormField<String>(                      decoration: const InputDecoration(
                         labelText: 'Action *',
                         border: OutlineInputBorder(),
@@ -1144,7 +1104,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     ),
                     const SizedBox(height: 16.0),
                     
-                    // Event Time
                     InkWell(
                       onTap: _selectEventTime,
                       child: InputDecorator(                      decoration: const InputDecoration(
@@ -1199,10 +1158,9 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                             child: Icon(Icons.help_outline, size: 16),
                           ),
                         ),
-                        validator: (value) =>
-                            AggregationEventFormValidators.validateChildEpcList(
+                        validator: (value) => EpcisEpcValidators.validateEpcList(
                           value,
-                          _selectedAction,
+                          required: _selectedAction != 'DELETE',
                         ),
                       ),
                     ] else ...[
@@ -1319,7 +1277,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                         setState(() {
                           _businessStep = value;
                           
-                          // Reset disposition when business step changes and select a relevant one
                           final relevantDispositions = _getRelevantDispositions();
                           if (!relevantDispositions.contains(_disposition)) {
                             _disposition = relevantDispositions.isNotEmpty 
@@ -1337,7 +1294,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     ),
                     const SizedBox(height: 16.0),
                     
-                    // Disposition
                     DropdownButtonFormField<String>(                      decoration: const InputDecoration(
                         labelText: 'Disposition *',
                         border: OutlineInputBorder(),
@@ -1387,7 +1343,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     ),
                     const SizedBox(height: 24.0),
                     
-                    // Source List
                     Card(
                       margin: const EdgeInsets.only(bottom: 16.0),
                       child: Column(
@@ -1410,14 +1365,12 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                // Standard source types dropdown
                                 if (_sourceListControllers.isEmpty) 
                                   const Text(
                                     'No source information added yet. Click "Add Source" to specify where products are coming from.',
                                     style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
                                   ),
                                 
-                                // Source List Items
                                 ..._sourceListControllers.asMap().entries.map((entry) {
                                   final index = entry.key;
                                   final controllers = entry.value;
@@ -1480,7 +1433,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                                                 return 'Please enter a source value';
                                               }
                                               
-                                              // Check format for URN or GLN
                                               if (value != null && value.isNotEmpty) {
                                                 if (!value.startsWith('urn:epc:id:') && !RegExp(r'^[0-9\.]+$').hasMatch(value)) {
                                                   return 'Invalid format. Use URN or GLN format';
@@ -1496,7 +1448,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                                   );
                                 }).toList(),
                                 
-                                // Add Source Button
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                                   child: OutlinedButton.icon(
@@ -1517,7 +1468,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     
                     const SizedBox(height: 24.0),
                     
-                    // Destination List
                     Card(
                       margin: const EdgeInsets.only(bottom: 16.0),
                       child: Column(
@@ -1546,7 +1496,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                                     style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
                                   ),
                                 
-                                // Destination List Items
                                 ..._destinationListControllers.asMap().entries.map((entry) {
                                   final index = entry.key;
                                   final controllers = entry.value;
@@ -1609,7 +1558,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                                                 return 'Please enter a destination value';
                                               }
                                               
-                                              // Check format for URN or GLN
                                               if (value != null && value.isNotEmpty) {
                                                 if (!value.startsWith('urn:epc:id:') && !RegExp(r'^[0-9\.]+$').hasMatch(value)) {
                                                   return 'Invalid format. Use URN or GLN format';
@@ -1625,7 +1573,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                                   );
                                 }).toList(),
                                 
-                                // Add Destination Button
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                                   child: OutlinedButton.icon(
@@ -1645,7 +1592,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                     ),
                     
                     const SizedBox(height: 24.0),
-                      // Business Data
                     Row(
                       children: [
                         const Text(
@@ -1730,7 +1676,6 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
                       const SizedBox(height: 16.0),
                     ],
                     
-                    // Action buttons
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

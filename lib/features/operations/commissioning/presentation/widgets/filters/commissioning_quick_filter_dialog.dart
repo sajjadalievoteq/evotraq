@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/models/commissioning_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/utilities/commissioning_ui_constants.dart';
-import 'package:traqtrace_app/shared/widgets/custom_outlined_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 class CommissioningQuickFilterDialog extends StatefulWidget {
   const CommissioningQuickFilterDialog({

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/compliance_posture/compliance_posture_section.dart';
 import 'package:traqtrace_app/features/home/presentation/widgets/quick_actions/quick_actions_section.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class QuickActionsAndComplianceRow extends StatelessWidget {
   const QuickActionsAndComplianceRow({super.key, required this.layout});

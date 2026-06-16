@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_section_card.dart';
-import 'package:traqtrace_app/features/epcis/presentation/widgets/certification_info_widget.dart';
-import 'package:traqtrace_app/features/epcis/presentation/widgets/sensor_element_widget.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_certification_section.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_sensor_data_section.dart';
 
 class ObjectEventFormEpcis20ExtensionsSection extends StatelessWidget {
   final EPCISVersion epcisVersion;
@@ -38,43 +37,35 @@ class ObjectEventFormEpcis20ExtensionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-          child: Row(
-            children: [
-              Expanded(child: Divider(color: Colors.grey[400])),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  'EPCIS 2.0 Extensions',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
-              Expanded(child: Divider(color: Colors.grey[400])),
-            ],
-          ),
+        // Padding(
+        //   padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+        //   child: Row(
+        //     children: [
+        //       Expanded(child: Divider(color: Colors.grey[400])),
+        //       Padding(
+        //         padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        //         child: Text(
+        //           'EPCIS 2.0 Extensions',
+        //           style: TextStyle(
+        //             fontSize: 16,
+        //             fontWeight: FontWeight.bold,
+        //             color: Colors.grey[600],
+        //           ),
+        //         ),
+        //       ),
+        //       Expanded(child: Divider(color: Colors.grey[400])),
+        //     ],
+        //   ),
+        // ),
+        ObjectEventFormSensorDataSection(
+          sensorElements: sensorElementList,
+          isViewOnly: isViewOnly,
+          onChanged: onSensorElementsChanged,
         ),
-        ObjectEventFormSectionCard(
-          margin: const EdgeInsets.only(top: 16.0),
-          title: 'Sensor Data',
-          child: SensorElementWidget(
-            sensorElements: sensorElementList,
-            onSensorElementsChanged: onSensorElementsChanged,
-            isViewOnly: isViewOnly,
-          ),
-        ),
-        ObjectEventFormSectionCard(
-          margin: const EdgeInsets.only(top: 16.0),
-          title: 'Certification Information',
-          child: CertificationInfoWidget(
-            certifications: certificationInfoList,
-            onCertificationsChanged: onCertificationsChanged,
-            isViewOnly: isViewOnly,
-          ),
+        ObjectEventFormCertificationSection(
+          certifications: certificationInfoList,
+          isViewOnly: isViewOnly,
+          onChanged: onCertificationsChanged,
         ),
       ],
     );

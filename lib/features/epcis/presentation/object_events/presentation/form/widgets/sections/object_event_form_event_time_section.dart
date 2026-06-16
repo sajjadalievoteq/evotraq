@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_field_decoration.dart';
@@ -27,13 +28,14 @@ class ObjectEventFormEventTimeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ObjectEventFormSectionCard(
-      title: 'Event Time (required)',
+      title: 'Event Time',
+      showTitleRequiredIndicator: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(child: Text('Date & Time: ${eventTime.toLocal()}')),
+              Expanded(child: Text('Date & Time: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}')),
               IconButton(
                 icon: const Icon(Icons.calendar_today),
                 onPressed: isViewOnly ? null : onSelectEventTime,
@@ -43,6 +45,7 @@ class ObjectEventFormEventTimeSection extends StatelessWidget {
           TextFormField(
             initialValue: eventTimeZone,
             decoration: ObjectEventFormFieldDecoration.getFieldDecoration(
+              context: context,
               fieldName: 'eventTimeZone',
               label: 'Time Zone',
               hintText: 'e.g. +01:00',

@@ -12,7 +12,7 @@ import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_butt
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
 
 import '../../../../../core/config/constants.dart';
-import '../../../../../shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 enum _UsernameAvailabilityStatus { initial, checking, available, taken, error }
 

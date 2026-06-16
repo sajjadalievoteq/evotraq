@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
@@ -329,6 +331,7 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     String? persistentDisposition,
     List<Map<String, dynamic>>? sensorElementList,
     List<Map<String, dynamic>>? certificationInfo,
+    EPCISVersion epcisVersion = EPCISVersion.v2_0,
   }) async {
     emit(state.copyWith(isListLoading: true, clearError: true));
     try {
@@ -348,6 +351,7 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
         persistentDisposition: persistentDisposition,
         sensorElements: sensorElementList,
         certificationInfo: certificationInfo,
+        epcisVersion: epcisVersion,
       );
       emit(state.copyWith(
         objectEvents: [newEvent, ...state.objectEvents],
@@ -355,7 +359,21 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
         isListLoading: false,
       ));
       return newEvent;
-    } catch (e) {
+    } catch (e, st) {
+      if (e is ApiException) {
+        debugPrint(
+          '[ObjectEventsCubit.createObjectEvent] ApiException '
+          'status=${e.statusCode} message=${e.message}',
+        );
+        if (e.responseBody != null && e.responseBody!.isNotEmpty) {
+          debugPrint(
+            '[ObjectEventsCubit.createObjectEvent] responseBody: ${e.responseBody}',
+          );
+        }
+      } else {
+        debugPrint('[ObjectEventsCubit.createObjectEvent] error: $e');
+        debugPrint('[ObjectEventsCubit.createObjectEvent] $st');
+      }
       emit(state.copyWith(isListLoading: false, error: e.toString()));
       rethrow;
     }

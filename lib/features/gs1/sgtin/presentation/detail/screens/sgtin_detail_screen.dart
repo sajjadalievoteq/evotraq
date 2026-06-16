@@ -26,8 +26,8 @@ import 'package:traqtrace_app/features/gs1/sgtin/presentation/utilities/sgtin_ui
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
-import 'package:traqtrace_app/shared/widgets/custom_button_widget.dart';
-import 'package:traqtrace_app/shared/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as status_rules;

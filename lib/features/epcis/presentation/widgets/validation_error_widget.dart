@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/responsive_utils.dart';
+
 /// Widget to display validation errors from the backend
 class ValidationErrorWidget extends StatelessWidget {
   /// List of validation errors
@@ -27,7 +29,7 @@ class ValidationErrorWidget extends StatelessWidget {
 
     return Card(
       color: Colors.red[50],
-      margin: const EdgeInsets.all(16.0),
+      margin:      context.horizontalPadding,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

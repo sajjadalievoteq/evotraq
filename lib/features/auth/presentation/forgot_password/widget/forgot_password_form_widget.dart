@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_input_field.dart';
-import 'package:traqtrace_app/shared/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 import '../../../../../core/config/constants.dart';
 

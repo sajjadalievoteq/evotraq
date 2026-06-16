@@ -1,4 +1,3 @@
-/// Master-data reference that must exist before posting an aggregation event.
 enum AggregationReferenceKind { gln, gtin, sgtin, sscc }
 
 class AggregationMissingReference {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Shows pharma packing rule violations in plain language before submit.
 class AggregationPharmaIssuesDialog extends StatelessWidget {
   const AggregationPharmaIssuesDialog({
     super.key,

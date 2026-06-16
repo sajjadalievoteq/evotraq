@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/widgets/trace_network_background.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/auth_surface_card.dart';
 import 'package:traqtrace_app/features/auth/presentation/widget/branding_widget.dart';
-import 'package:traqtrace_app/shared/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class AuthWebFormLayout extends StatelessWidget {
   const AuthWebFormLayout({

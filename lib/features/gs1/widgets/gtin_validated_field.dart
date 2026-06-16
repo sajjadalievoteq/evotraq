@@ -20,6 +20,7 @@ class Gs1ValidatedField extends StatelessWidget {
     this.maxLength,
     this.maxLines = 1,
     this.inputFormatters,
+    this.onChanged,
   });
 
   final TextEditingController controller;
@@ -37,6 +38,7 @@ class Gs1ValidatedField extends StatelessWidget {
   final int? maxLength;
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class Gs1ValidatedField extends StatelessWidget {
       maxLength: maxLength,
       maxLines: maxLines,
       inputFormatters: inputFormatters,
+      onChanged: onChanged == null ? null : (value) => onChanged!(value ?? ''),
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,

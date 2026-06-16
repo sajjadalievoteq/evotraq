@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_pharma_rules_text.dart';
 
-/// Collapsible panel listing GS1 pharmaceutical packing rules in plain language.
 class AggregationPharmaRulesPanel extends StatelessWidget {
   const AggregationPharmaRulesPanel({super.key});
 

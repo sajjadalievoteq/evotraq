@@ -4,6 +4,8 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregatio
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/detail/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 
 class SsccAggregationCard extends StatefulWidget {
   const SsccAggregationCard({
@@ -226,13 +228,13 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
                   : (v) => setState(() => _childKind = v ?? 'SGTIN'),
             ),
             const SizedBox(height: 12),
-            TextField(
+            EpcEntryField(
               controller: _childEpcController,
-              decoration: const InputDecoration(
-                labelText: 'Child EPC URI',
-                border: OutlineInputBorder(),
-              ),
+              label: 'Child EPC URI',
               enabled: !_isSubmitting,
+              required: true,
+              validator: (value) =>
+                  EpcisEpcValidators.validateEpcOrBarcode(value),
             ),
             const SizedBox(height: 12),
             TextField(

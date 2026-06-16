@@ -4,19 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:intl/intl.dart';
 
-/// Screen for viewing and verifying the hierarchical relationship 
-/// of aggregation events for a specific EPC
 class AggregationEventHierarchyScreen extends StatefulWidget {
-  /// The EPC to view hierarchy for (could be a parent or child EPC)
   final String epc;
   
-  /// Whether this EPC is a parent or child
   final bool isParent;
   
-  /// Constructor
   const AggregationEventHierarchyScreen({
     Key? key, 
     required this.epc,
@@ -52,23 +47,19 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
     });
     
     try {
-      // Load container contents or current parent based on whether this is a parent or child
       if (widget.isParent) {
         _hierarchyContents = await cubit.loadContainerContents(widget.epc);
       } else {
         try {
-          // If this is a child, find its current parent
           final parentEvent = await cubit.findCurrentParentOfChild(widget.epc);
           if (parentEvent != null) {
             _hierarchyContents = [parentEvent.parentID];
           }
         } catch (e) {
-          // Handle case where child is not in any container
           _hierarchyContents = [];
         }
       }
       
-      // Load history
       if (widget.isParent) {
         await cubit.trackParentHistory(widget.epc);
         _historyEvents = cubit.state.aggregationEvents;
@@ -87,18 +78,15 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
     }
   }
   
-  /// Verify hierarchy integrity by querying the backend
   Future<void> _verifyHierarchy() async {
     setState(() {
       _isVerifying = true;
     });
     
     try {
-      // Call the backend verification endpoint through the provider
       final cubit = context.read<AggregationEventsCubit>();
       _isVerified = await cubit.verifyHierarchy(widget.epc);
       
-      // Show result in a dialog
       if (mounted) {
         showDialog(
           context: context,
@@ -213,7 +201,6 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // EPC information card
           Card(
             margin: const EdgeInsets.only(bottom: 16.0),
             child: Padding(
@@ -263,7 +250,6 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
             ),
           ),
           
-          // Current hierarchy section
           Text(
             widget.isParent ? 'Current Contents:' : 'Current Container:',
             style: Theme.of(context).textTheme.titleLarge,
@@ -292,7 +278,6 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
                     trailing: IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () {
-                        // Navigate to the hierarchy view for this EPC
                         context.push('/epcis/aggregation-events/hierarchy/${_hierarchyContents[index]}', 
                           extra: {'epc': _hierarchyContents[index], 'isParent': !widget.isParent});
                       },
@@ -304,7 +289,6 @@ class _AggregationEventHierarchyScreenState extends State<AggregationEventHierar
           
           const SizedBox(height: 24.0),
           
-          // History section
           Text(
             'Event History:',
             style: Theme.of(context).textTheme.titleLarge,

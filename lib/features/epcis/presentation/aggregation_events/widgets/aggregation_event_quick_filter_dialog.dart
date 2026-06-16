@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_ui_constants.dart';
 
-// ---------------------------------------------------------------------------
-// Result model
-// ---------------------------------------------------------------------------
 
 class AggregationEventQuickFilterResult {
   const AggregationEventQuickFilterResult({
@@ -17,9 +14,6 @@ class AggregationEventQuickFilterResult {
   final bool cleared;
 }
 
-// ---------------------------------------------------------------------------
-// Dialog widget
-// ---------------------------------------------------------------------------
 
 class AggregationEventQuickFilterDialog extends StatefulWidget {
   const AggregationEventQuickFilterDialog({

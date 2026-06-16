@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
-import 'package:traqtrace_app/shared/widgets/app_loading_indicator.dart';
-import 'package:traqtrace_app/shared/widgets/error_display.dart';
+import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/error_display.dart';
 
 /// Screen to display a list of EPCIS events with filtering and pagination
 class EPCISEventsListScreen extends StatefulWidget {

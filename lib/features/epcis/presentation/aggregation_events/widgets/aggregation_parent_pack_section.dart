@@ -5,7 +5,6 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_parent_pack_mode.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
-/// Parent identification via simple text input: SSCC **or** GTIN + serial → SGTIN.
 class AggregationParentPackSection extends StatefulWidget {
   const AggregationParentPackSection({
     super.key,
@@ -75,7 +74,7 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
         if (RegExp(r'^\d{18}$').hasMatch(digits)) {
           return EPCURIConverter.convertSSCCToEPCUri(digits);
         }
-        return EPCFormatter.formatToEPCUri(raw);
+        return EPCFormatter.formatToEPCUri(raw) ?? raw;
       case AggregationParentPackMode.sgtin:
         final gtin = _gtinController.text.trim().replaceAll(RegExp(r'\D'), '');
         final serial = _serialController.text.trim();

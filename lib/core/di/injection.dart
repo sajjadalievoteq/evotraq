@@ -11,13 +11,13 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
 
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
-import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
 import '../../data/services/advanced_performance_service.dart';
@@ -49,15 +49,11 @@ import '../../data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';
 import 'package:traqtrace_app/data/services/epcis/transformation_event_service.dart';
 import 'package:traqtrace_app/data/services/epcis/transaction_event_service.dart';
-import 'package:traqtrace_app/data/services/epcis/sensor_element_service.dart';
-import 'package:traqtrace_app/data/services/epcis/certification_info_service.dart';
 import '../../data/services/data_consistency_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
 import '../../data/services/error_correction_service.dart';
 import '../../data/services/gs1_barcode_api_service.dart';
-import '../../data/services/bulk_export_service.dart';
 import '../../data/services/cache_service.dart';
-import '../../data/services/etl_service.dart';
 import '../../data/services/performance_optimization_service.dart';
 import '../../data/services/user_service.dart';
 import '../../data/services/profile_service.dart';
@@ -101,6 +97,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<ObjectEventService>(
     () => ObjectEventService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<CbvMasterDataService>(
+    () => CbvMasterDataService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<UserManagementService>(
@@ -229,14 +229,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => TransactionEventService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<SensorElementService>(
-    () => SensorElementService(dioService: getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<CertificationInfoService>(
-    () => CertificationInfoService(dioService: getIt<DioService>()),
-  );
-
   getIt.registerLazySingleton<AdvancedPerformanceService>(
     () => AdvancedPerformanceService(
       dioService: getIt<DioService>(),
@@ -273,14 +265,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => GS1BarcodeApiService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<BulkExportService>(
-    () => BulkExportService(getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<ETLService>(
-    () => ETLService(getIt<DioService>()),
-  );
-
   getIt.registerLazySingleton<CacheService>(
     () => CacheService(dioService: getIt<DioService>()),
   );
@@ -300,5 +284,4 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerFactory<GTINCubit>(
     () => GTINCubit(gtinService: getIt<GTINService>()),
   );
-  getIt.registerSingleton<AppRouter>(AppRouter(authCubit: getIt<AuthCubit>()));
 }

@@ -8,15 +8,16 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 import 'package:traqtrace_app/data/models/epcis/operations/shipping_models.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/shared/widgets/barcode_scanner.dart';
-import 'package:traqtrace_app/shared/widgets/loading_overlay.dart';
-import 'package:traqtrace_app/shared/widgets/gln_selector.dart';
-import 'package:traqtrace_app/shared/models/scan_result.dart';
-import 'package:traqtrace_app/shared/utils/gs1_validator.dart';
+import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
+import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/utils/gs1_validator.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
+import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
 /// Scanning mode options for different input methods
 enum ScanningMode {
@@ -258,100 +259,29 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
   /// Validates an EPC against GS1 standards and database existence
   Future<void> _validateAndAddEPC(String epc, {bool isManual = false, bool isWiredScanner = false}) async {
-    // Check if already scanned
-    if (_scannedEPCs.contains(epc)) {
-      _showError('Item already scanned: $epc');
-      return;
-    }
-
-    // Show loading for validation
+    final validator = OperationEpcScanValidator(_validationService!);
     setState(() => _isLoading = true);
 
     try {
-      // Use centralized GS1BarcodeParser to parse the barcode
-      final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(epc);
-      
-      String epcType = '';
-      String? identifierToValidate;
-      
-      // Check if parsing was successful
-      if (parsedBarcode['valid'] == true) {
-        // Determine the EPC type based on parsed data
-        if (parsedBarcode['SSCC'] != null) {
-          epcType = 'SSCC';
-          identifierToValidate = parsedBarcode['SSCC'];
-        } else if (parsedBarcode['GTIN'] != null && parsedBarcode['SERIAL'] != null) {
-          epcType = 'SGTIN';
-          // For SGTIN validation, we need the Serial Number (stored in SGTIN table)
-          identifierToValidate = parsedBarcode['SERIAL'];
-        } else if (parsedBarcode['GTIN'] != null) {
-          // GTIN without serial - cannot validate as SGTIN, need serial number
-          _showError('Barcode missing serial number: $epc\n\nFor shipping, a complete SGTIN with serial number (AI 21) is required.');
-          return;
-        }
-      }
-      
-      // Also check for pure SSCC format (18 digits)
-      if (epcType.isEmpty && GS1Validator.isValidSSCC(epc)) {
-        epcType = 'SSCC';
-        identifierToValidate = epc;
-      }
-      
-      if (epcType.isEmpty || identifierToValidate == null) {
-        _showError('Invalid barcode format: $epc\n\nSupported formats:\n- GS1 with AI syntax: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n- SSCC: 18 digits\n- SGTIN URI: urn:epc:id:sgtin:...');
+      final outcome = await validator.validateAndAdd(
+        epc,
+        alreadyScanned: _scannedEPCs,
+        operationLabel: 'shipping',
+      );
+
+      if (!outcome.success) {
+        _showError(outcome.errorMessage ?? 'Validation failed');
         return;
       }
 
-      // Validate against database
-      EPCValidationResult validationResult;
-      if (epcType == 'SSCC') {
-        validationResult = await _validationService!.validateSSCC(identifierToValidate);
-      } else {
-        // For SGTIN, validate using the Serial Number (unique identifier in SGTIN table)
-        validationResult = await _validationService!.validateSGTIN(identifierToValidate);
-      }
-
-      if (validationResult.exists) {
-        // Add to scanned list
-        setState(() {
-          _scannedEPCs.add(epc);
-          
-          // Clear input fields if needed
-          if (isManual) {
-            _manualEntryController.clear();
-          } else if (isWiredScanner) {
-            _wiredScannerController.clear();
-          }
-        });
-        
-        // Build success message with parsed details
-        // String successMessage = '$epcType validated and added';
-        // if (parsedBarcode['valid'] == true) {
-        //   final details = <String>[];
-        //   if (parsedBarcode['GTIN'] != null) details.add('GTIN: ${parsedBarcode['GTIN']}');
-        //   if (parsedBarcode['SERIAL'] != null) details.add('Serial: ${parsedBarcode['SERIAL']}');
-        //   if (parsedBarcode['BATCH'] != null) details.add('Batch: ${parsedBarcode['BATCH']}');
-        //   if (details.isNotEmpty) {
-        //     successMessage += '\n${details.join(', ')}';
-        //   }
-        // }
-        //_showSuccess(successMessage);
-      } else {
-        String errorMessage = '$epcType not found in system';
-        if (epcType == 'SGTIN') {
-          errorMessage += '\nSerial Number: $identifierToValidate';
-          if (parsedBarcode['GTIN'] != null) {
-            errorMessage += '\nGTIN: ${parsedBarcode['GTIN']}';
-          }
-        } else {
-          errorMessage += ': $identifierToValidate';
+      setState(() {
+        _scannedEPCs.add(epc);
+        if (isManual) {
+          _manualEntryController.clear();
+        } else if (isWiredScanner) {
+          _wiredScannerController.clear();
         }
-        if (validationResult.errors.isNotEmpty) {
-          errorMessage += '\n\nDetails: ${validationResult.errors.join(', ')}';
-        }
-        errorMessage += '\n\nPlease ensure the $epcType is properly registered in the system before shipping.';
-        _showError(errorMessage);
-      }
+      });
     } catch (e) {
       _showError('Error validating EPC: $e\nPlease check your connection and try again.');
     } finally {
@@ -363,14 +293,11 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
   /// Helper method to determine EPC type using centralized parser
   String _getEPCType(String epc) {
-    final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(epc);
-    
-    if (parsedBarcode['SSCC'] != null || GS1Validator.isValidSSCC(epc)) {
-      return 'SSCC';
-    } else if (parsedBarcode['GTIN'] != null) {
-      return parsedBarcode['SERIAL'] != null ? 'SGTIN' : 'GTIN';
-    }
-    return 'UNKNOWN';
+    return switch (OperationEpcScanValidator.resolveEpcType(epc)) {
+      OperationScanItemType.sscc => 'SSCC',
+      OperationScanItemType.sgtin => 'SGTIN',
+      OperationScanItemType.unknown => 'UNKNOWN',
+    };
   }
 
   void _addManualEPC() {

@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
+import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
@@ -183,24 +184,20 @@ class EPCISEvent {
       data['epcisVersion'] = '2.0'; // Default to 2.0
     }
     
-    // Extract the final part from the disposition URN
+    final versionString = epcisVersion == EPCISVersion.v1_3 ? '1.3' : '2.0';
+
     if (disposition != null) {
-      // For full URNs like "urn:epcglobal:cbv:disp:active", extract just "active"
-      if (disposition!.contains(':')) {
-        data['disposition'] = disposition!.split(':').last;
-      } else {
-        data['disposition'] = disposition;
-      }
+      data['disposition'] = CbvVocabularyFormatter.formatDisposition(
+        versionString,
+        disposition!,
+      );
     }
-    
-    // Extract the final part from the businessStep URN
+
     if (businessStep != null) {
-      // For full URNs like "urn:epcglobal:cbv:bizstep:commissioning", extract just "commissioning"
-      if (businessStep!.contains(':')) {
-        data['businessStep'] = businessStep!.split(':').last;
-      } else {
-        data['businessStep'] = businessStep;
-      }
+      data['businessStep'] = CbvVocabularyFormatter.formatBizStep(
+        versionString,
+        businessStep!,
+      );
     }
     
     // Handle readPoint properly

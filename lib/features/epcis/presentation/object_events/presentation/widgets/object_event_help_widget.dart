@@ -256,8 +256,8 @@ class ObjectEventHelpWidget extends StatelessWidget {
               'The object is in the process of being transported from one location to another.',
             ),
             _buildHelpItem(
-              'sold',
-              'The object has been sold.',
+              'retail_sold',
+              'The object has been sold at retail to the end consumer.',
             ),
             _buildHelpItem(
               'expired',

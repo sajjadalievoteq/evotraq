@@ -12,6 +12,7 @@ import 'package:world_countries/world_countries.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
@@ -122,6 +123,7 @@ class TraqTraceApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>.value(value: getIt<AuthCubit>()),
+        BlocProvider<CbvVocabularyCubit>.value(value: getIt<CbvVocabularyCubit>()),
         BlocProvider<TransactionEventsCubit>(
           create: (context) =>
               TransactionEventsCubit(),

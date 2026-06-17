@@ -449,6 +449,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
+                      trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
                       leading: const Icon(Icons.list_alt),
                       title: const Text('Commissioning'),
                       onTap: () =>
@@ -814,6 +815,16 @@ class _AppDrawerState extends State<AppDrawer> {
                           ),
                         ],
                       ),
+                      ListTile(
+                        trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
+                        leading:
+                        const Icon(Icons.library_books_outlined),
+                        title: const Text('CBV Vocabulary'),
+
+                        onTap: () =>
+                            _navigate(Constants.adminCbvVocabularyRoute),
+                      ),
+
                     ],
 
                     const Divider(),

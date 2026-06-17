@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/presentation/utilities/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
@@ -44,22 +46,18 @@ class SgtinAdvancedFiltersPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
+        GtinEntryField(
           controller: gtinCodeController,
-          decoration: const InputDecoration(
-            labelText: SgtinUiConstants.labelGtinCodeField,
-            hintText: 'e.g., 1234567890123',
-            border: OutlineInputBorder(),
-          ),
+          label: SgtinUiConstants.labelGtinCodeField,
+          hintText: 'e.g., 1234567890123',
+          validator: (_) => null,
         ),
         const SizedBox(height: 12),
-        TextField(
+        SerialEntryField(
           controller: serialNumberController,
-          decoration: const InputDecoration(
-            labelText: SgtinUiConstants.labelSerialNumberField,
-            hintText: 'e.g., ABC123',
-            border: OutlineInputBorder(),
-          ),
+          label: SgtinUiConstants.labelSerialNumberField,
+          hintText: 'e.g., ABC123',
+          validator: (_) => null,
         ),
         const SizedBox(height: 12),
         TextField(

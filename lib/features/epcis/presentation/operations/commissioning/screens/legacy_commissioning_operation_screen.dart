@@ -12,6 +12,8 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 
 import '../../../../../../data/models/operations/commissioning/commissioning_models.dart';
@@ -624,15 +626,11 @@ class _LegacyCommissioningOperationScreenState
                       },
                     ),
                   ] else ...[
-                    TextField(
+                    GtinEntryField(
                       controller: _gtinController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter 14-digit GTIN',
-                        border: const OutlineInputBorder(),
-                        errorText: _gtinError,
-                      ),
-                      keyboardType: TextInputType.number,
-                      maxLength: 14,
+                      label: 'GTIN',
+                      hintText: 'Enter 14-digit GTIN',
+                      validator: (_) => _gtinError,
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -993,17 +991,16 @@ class _LegacyCommissioningOperationScreenState
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
+                          child: SerialEntryField(
                             controller: _manualSerialController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter serial number',
-                              border: OutlineInputBorder(),
-                            ),
-                            onSubmitted: (value) {
-                              if (value.isNotEmpty) {
-                                _addSerial(value);
+                            label: 'Serial Number',
+                            hintText: 'Enter serial number',
+                            onEditingComplete: () {
+                              if (_manualSerialController.text.isNotEmpty) {
+                                _addSerial(_manualSerialController.text);
                               }
                             },
+                            validator: (_) => null,
                           ),
                         ),
                         const SizedBox(width: 8),

@@ -6,6 +6,8 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/operations/packing_models.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
@@ -870,15 +872,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
+            SsccEntryField(
               controller: _containerManualEntryController,
-              decoration: const InputDecoration(
-                labelText: 'Container SSCC / Barcode',
-                hintText: 'Enter the SSCC or container barcode',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.inventory_2),
-              ),
-              onSubmitted: (_) => _addManualContainer(),
+              label: 'Container SSCC / Barcode',
+              hintText: 'Enter the SSCC or container barcode',
+              onEditingComplete: _addManualContainer,
+              validator: (_) => null,
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -1047,15 +1046,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
+            EpcEntryField(
               controller: _manualEntryController,
-              decoration: const InputDecoration(
-                labelText: 'Item Barcode',
-                hintText: 'Enter GTIN, SGTIN, or barcode',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.qr_code),
-              ),
-              onSubmitted: (_) => _addManualItem(),
+              label: 'Item Barcode',
+              hintText: 'Enter GTIN, SGTIN, or barcode',
+              onEditingComplete: _addManualItem,
+              validator: (_) => null,
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(

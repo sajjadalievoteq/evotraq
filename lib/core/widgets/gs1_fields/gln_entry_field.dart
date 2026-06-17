@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/formatters/gs1_input_formatters.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 
@@ -18,6 +19,7 @@ class GlnEntryField extends StatelessWidget {
     this.focusNode,
     this.onEditingComplete,
     this.optional = false,
+    this.barcodeScanEnabled = true,
   });
 
   final TextEditingController controller;
@@ -32,6 +34,13 @@ class GlnEntryField extends StatelessWidget {
   final FocusNode? focusNode;
   final VoidCallback? onEditingComplete;
   final bool optional;
+  final bool barcodeScanEnabled;
+
+  void _applyScannedValue(String value) {
+    controller.text = value;
+    setFieldError?.call(fieldName, null);
+    onChanged?.call(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +61,13 @@ class GlnEntryField extends StatelessWidget {
       maxLength: 13,
       inputFormatters: Gs1InputFormatters.gln(),
       onChanged: onChanged,
+      suffixIcon: enabled && barcodeScanEnabled
+          ? Gs1FieldBarcodeScan.scanSuffixIcon(
+              context: context,
+              kind: Gs1FieldScanKind.gln,
+              onScanned: _applyScannedValue,
+            )
+          : null,
       validator: validator ??
           (optional
               ? GlnFieldValidators.validateGlnCodeOptional

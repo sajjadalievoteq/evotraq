@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
-
-import '../../../../../gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 
 class CommissioningManualSerialInput extends StatelessWidget {
   const CommissioningManualSerialInput({
@@ -17,7 +16,7 @@ class CommissioningManualSerialInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Gs1ValidatedField(
+        SerialEntryField(
           controller: controller,
           fieldName: 'serialNumber',
           label: 'Serial Number',

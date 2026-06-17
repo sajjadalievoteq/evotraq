@@ -66,7 +66,6 @@ class ObjectEventListItemCard extends StatelessWidget {
         final padding = isCompact
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
-print(locationName);
         return Card(
           elevation: 2,
           color: Gs1ListItemSelectionStyle.cardBackground(context, isSelected),

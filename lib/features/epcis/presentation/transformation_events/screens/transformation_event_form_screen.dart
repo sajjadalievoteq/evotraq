@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_event_form_help.dart';
@@ -1065,15 +1066,12 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValidatedTextField(
+        EpcEntryField(
           controller: controller,
-          decoration: InputDecoration(
-            labelText: label,
-            helperText: helperText,
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-          ),
+          fieldName: fieldName ?? 'epc',
+          label: label,
+          helperText: helperText,
+          required: true,
           validator: (value) {
             if (validator != null) {
               final error = validator(value);

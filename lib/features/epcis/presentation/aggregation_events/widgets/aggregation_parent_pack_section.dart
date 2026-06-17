@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_pharma_rules_text.dart';
@@ -177,16 +180,12 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
             ),
             const SizedBox(height: 16),
             if (_mode == AggregationParentPackMode.sscc)
-              TextFormField(
+              SsccEntryField(
                 controller: _ssccController,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: const InputDecoration(
-                  labelText: 'SSCC',
-                  hintText: '18-digit code, (00)… barcode, or urn:epc:id:sscc:…',
-                  border: OutlineInputBorder(),
-                  helperText:
-                      'GS1 SSCC with valid check digit (AI 00)',
-                ),
+                label: 'SSCC',
+                hintText: '18-digit code, (00)… barcode, or urn:epc:id:sscc:…',
+                helperText: 'GS1 SSCC with valid check digit (AI 00)',
+                optional: !_parentRequired,
                 validator: (value) =>
                     AggregationEventFormValidators.validateSsccInput(
                   value,
@@ -195,15 +194,10 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 onChanged: (_) => _syncResolvedParent(),
               )
             else ...[
-              TextFormField(
+              GtinEntryField(
                 controller: _gtinController,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: const InputDecoration(
-                  labelText: 'GTIN',
-                  hintText: '8, 12, 13, or 14 digits (check digit validated)',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
+                label: 'GTIN',
+                hintText: '8, 12, 13, or 14 digits (check digit validated)',
                 validator: (value) =>
                     AggregationEventFormValidators.validateGtin14(
                   value,
@@ -212,14 +206,10 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 onChanged: (_) => _syncResolvedParent(),
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              SerialEntryField(
                 controller: _serialController,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: const InputDecoration(
-                  labelText: 'Serial number',
-                  hintText: 'GS1 serial (1–20 chars, file-7 charset)',
-                  border: OutlineInputBorder(),
-                ),
+                label: 'Serial number',
+                hintText: 'GS1 serial (1–20 chars, file-7 charset)',
                 validator: (value) =>
                     AggregationEventFormValidators.validateSerialNumber(
                   value,

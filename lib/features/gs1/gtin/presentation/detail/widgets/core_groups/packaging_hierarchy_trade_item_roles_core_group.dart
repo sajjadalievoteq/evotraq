@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -150,16 +151,12 @@ class PackagingHierarchyTradeItemRolesCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Gs1ValidatedField(
+        GtinEntryField(
           controller: _nextLowerLevelGtin,
           fieldName: 'next_lower_level_gtin',
           label: GtinUiConstants.labelNextLowerLevelGtin,
           helperText: GtinUiConstants.helperWhenBaseUnitFalse,
-          readOnly: widget.isReadOnly,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
+          enabled: !widget.isReadOnly,
           validator: (v) =>
               GtinFieldValidators.validateNextLowerLevelGtinConditional(
                 v,

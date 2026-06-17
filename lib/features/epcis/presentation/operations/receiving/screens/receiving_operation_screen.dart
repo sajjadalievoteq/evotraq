@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/epcis/operations/receiving_models.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
@@ -538,15 +539,12 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: EpcEntryField(
                     controller: _manualEntryController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter SGTIN or SSCC manually...',
-                      prefixIcon: Icon(Icons.edit),
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => _addManualEPC(),
-                    textCapitalization: TextCapitalization.characters,
+                    label: 'SGTIN / SSCC',
+                    hintText: 'Enter SGTIN or SSCC manually...',
+                    onEditingComplete: _addManualEPC,
+                    validator: (_) => null,
                   ),
                 ),
                 const SizedBox(width: 8),

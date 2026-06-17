@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
@@ -478,11 +479,11 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Gs1ValidatedField(
+                            EpcEntryField(
                               controller: _epcsController,
                               fieldName: 'epcs',
                               label: 'EPCs (comma separated) *',
-                              maxLines: 3,
+                              required: true,
                               validator: (value) =>
                                   EpcisEpcValidators.validateEpcList(value),
                             ),

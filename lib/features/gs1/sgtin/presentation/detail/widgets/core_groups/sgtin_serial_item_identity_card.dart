@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
-import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
 
 class SgtinSerialItemIdentityCard extends StatelessWidget {
   const SgtinSerialItemIdentityCard({
@@ -48,11 +49,11 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
             readOnly: !(isEditing && isCreating),
           ),
           const SizedBox(height: 12),
-          Gs1ValidatedField(
+          SerialEntryField(
             controller: serialNumberController,
             fieldName: 'serialNumber',
             label: 'Serial Number *',
-            readOnly: !(isEditing && isCreating),
+            enabled: isEditing && isCreating,
             validator: sgtin_validators.validateSerialNumber,
             setFieldError: setFieldError,
           ),

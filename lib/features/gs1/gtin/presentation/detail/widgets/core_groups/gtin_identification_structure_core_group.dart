@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/detail/widgets/gtin_structure_chips.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
@@ -204,22 +204,18 @@ class _GtinIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Gs1ValidatedField(
+        GtinEntryField(
           focusNode: _focusNode,
           onEditingComplete: () {
             _normalizeGtinIfPossible();
             _deriveIdentificationDebounced();
             widget.onGtinEditingComplete?.call();
           },
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
           controller: widget.gtinCodeController,
           fieldName: 'gtinCode',
           label: GtinUiConstants.labelGtinRequired,
           helperText: GtinUiConstants.helperGtinDigits,
-          readOnly: widget.gtinFieldLocked ?? widget.isReadOnly,
+          enabled: !(widget.gtinFieldLocked ?? widget.isReadOnly),
           validator: GtinFieldValidators.validateGtinCode,
         ),
         GtinStructureChips(gtinCodeController: widget.gtinCodeController),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/presentation/utilities/gtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
@@ -80,19 +81,11 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextField(
+                  child: GtinEntryField(
                     controller: gtinCodeController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: GtinUiConstants.labelGtinCodeField,
-                      hintText: GtinUiConstants.hintGtinCodeExample,
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
+                    label: GtinUiConstants.labelGtinCodeField,
+                    hintText: GtinUiConstants.hintGtinCodeExample,
+                    validator: (_) => null,
                   ),
                 ),
               ],

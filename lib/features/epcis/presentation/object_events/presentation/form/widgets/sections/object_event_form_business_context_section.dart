@@ -14,6 +14,7 @@ class ObjectEventFormBusinessContextSection extends StatelessWidget {
   final Map<String, String> valueLabels;
   final bool isCbvLoading;
   final String? cbvLoadError;
+  final VoidCallback? onCbvRetry;
   final EPCISVersion epcisVersion;
   final bool isViewOnly;
   final bool isBusinessStepMandatory;
@@ -31,6 +32,7 @@ class ObjectEventFormBusinessContextSection extends StatelessWidget {
     required this.valueLabels,
     required this.isCbvLoading,
     this.cbvLoadError,
+    this.onCbvRetry,
     required this.epcisVersion,
     required this.isViewOnly,
     required this.isBusinessStepMandatory,
@@ -57,9 +59,22 @@ class ObjectEventFormBusinessContextSection extends StatelessWidget {
               child: Center(child: AppLoadingIndicator()),
             )
           else if (cbvLoadError != null)
-            ObjectEventFormErrorBanner(
-              message: cbvLoadError!,
-              onDismiss: () {},
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ObjectEventFormErrorBanner(
+                  message: cbvLoadError!,
+                  onDismiss: () {},
+                ),
+                if (onCbvRetry != null) ...[
+                  const SizedBox(height: 8.0),
+                  TextButton.icon(
+                    onPressed: onCbvRetry,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry loading vocabulary'),
+                  ),
+                ],
+              ],
             )
           else if (bizStepValues.isEmpty)
             const Text(

@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
+import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import '../../../core/config/constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -32,11 +33,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final authCheck = context.read<AuthCubit>().checkAuth();
+    final vocabLoad = context.read<CbvVocabularyCubit>().loadVocabulary();
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
       await Future.wait([
         authCheck,
+        vocabLoad,
         precacheImage(
           const AssetImage(AppAssets.traqBackgroundPng),
           context,

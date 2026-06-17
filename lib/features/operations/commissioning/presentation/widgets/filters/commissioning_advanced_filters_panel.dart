@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/operations/commissioning/presentation/utilities/commissioning_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
@@ -26,13 +26,12 @@ class CommissioningAdvancedFiltersPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Gs1ValidatedField(
+        GtinEntryField(
           controller: gtinController,
           fieldName: 'gtinCode',
           label: 'GTIN',
           hintText: 'Filter batches by GTIN (14 digits)',
-          keyboardType: TextInputType.number,
-          maxLength: 14,
+          validator: (_) => null,
         ),
         const SizedBox(height: 8),
         Text(

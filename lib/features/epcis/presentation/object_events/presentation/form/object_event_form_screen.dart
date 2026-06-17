@@ -3,10 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
-import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
@@ -23,8 +19,8 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/presenta
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_save_handler.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/object_event_form_error_banner.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/cbv_biz_step_disposition_picker.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_action_section.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_business_context_section.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_destination_list_section.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_epc_classes_section.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/widgets/sections/object_event_form_epcis20_extensions_section.dart';
@@ -91,11 +87,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
   final List<CertificationInfo> _certificationInfoList = [];
   final Map<String, Object> _ilmd = {};
 
-  final CbvMasterDataService _cbvMasterDataService = getIt<CbvMasterDataService>();
-  bool _cbvMasterDataLoading = true;
-  String? _cbvLoadError;
-  List<CbvVocabularyItem> _allBizSteps = [];
-  List<CbvVocabularyItem> _filteredDispositions = [];
   EPCISVersion _epcisVersion = EPCISVersion.v2_0;
 
   String _epcisVersionString() =>
@@ -138,117 +129,10 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       _eventTimeZone =
           '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
       _action = 'ADD';
-      _applyActionCoupling('ADD', forceDefaultIfNull: true);
       if (widget.currentItemDisposition != null) {
         _applyDispositionContextActions();
       }
     }
-    _loadCbvMasterData();
-  }
-
-  Future<void> _loadCbvMasterData() async {
-    setState(() {
-      _cbvMasterDataLoading = true;
-      _cbvLoadError = null;
-    });
-    try {
-      final bizSteps = await _cbvMasterDataService.getBizSteps();
-      if (!mounted) return;
-      setState(() {
-        _allBizSteps = bizSteps;
-        _cbvMasterDataLoading = false;
-      });
-      await _refreshValidDispositionsForCurrentBizStep();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _cbvMasterDataLoading = false;
-        _cbvLoadError = e is ApiException
-            ? e.getUserFriendlyMessage()
-            : 'Failed to load CBV vocabulary options.';
-        _allBizSteps = [];
-        _filteredDispositions = [];
-      });
-    }
-  }
-
-  Future<void> _refreshValidDispositionsForCurrentBizStep() async {
-    if (_businessStep == null) {
-      if (mounted) {
-        setState(() => _filteredDispositions = []);
-      }
-      return;
-    }
-
-    final code = CbvVocabularyFormatter.shortName(
-      CbvVocabularyFormatter.canonicalBizStepUrn(_businessStep!),
-    );
-
-    try {
-      final dispositions =
-          await _cbvMasterDataService.getValidDispositionsForBizStep(code);
-      if (!mounted) return;
-      setState(() {
-        _filteredDispositions = dispositions;
-        _alignDispositionWithFilteredList();
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _filteredDispositions = []);
-    }
-  }
-
-  void _alignDispositionWithFilteredList() {
-    if (_filteredDispositions.isEmpty) return;
-    final version = _epcisVersionString();
-    final validValues = _filteredDispositions
-        .map(
-          (d) => CbvVocabularyFormatter.formatDisposition(version, d.urn),
-        )
-        .toList();
-    if (_disposition != null && validValues.contains(_disposition)) {
-      return;
-    }
-    _disposition = validValues.first;
-  }
-
-  List<CbvVocabularyItem> _allowedBizStepItemsForAction() {
-    final allowedUrns = _action == null
-        ? objectEventStandardBusinessSteps
-        : actionAllowedBizSteps[_action] ?? objectEventStandardBusinessSteps;
-    if (_allBizSteps.isEmpty) return [];
-    return _allBizSteps.where((item) {
-      final canonical = CbvVocabularyFormatter.canonicalBizStepUrn(item.urn);
-      return allowedUrns.contains(canonical);
-    }).toList();
-  }
-
-  List<String> _bizStepDropdownValues() {
-    final version = _epcisVersionString();
-    return _allowedBizStepItemsForAction()
-        .map((item) => CbvVocabularyFormatter.formatBizStep(version, item.urn))
-        .toList();
-  }
-
-  List<String> _dispositionDropdownValues() {
-    final version = _epcisVersionString();
-    return _filteredDispositions
-        .map((d) => CbvVocabularyFormatter.formatDisposition(version, d.urn))
-        .toList();
-  }
-
-  Map<String, String> _cbvValueLabels() {
-    final version = _epcisVersionString();
-    final labels = <String, String>{};
-    for (final item in _allBizSteps) {
-      labels[CbvVocabularyFormatter.formatBizStep(version, item.urn)] =
-          item.label;
-    }
-    for (final item in _filteredDispositions) {
-      labels[CbvVocabularyFormatter.formatDisposition(version, item.urn)] =
-          item.label;
-    }
-    return labels;
   }
 
   String? get _effectiveItemDisposition =>
@@ -275,7 +159,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       return ['OBSERVE', 'DELETE'];
     }
 
-    if (d.endsWith('encoded') || d.endsWith('created')) {
+    if (d.endsWith('encoded')) {
       return ['ADD'];
     }
 
@@ -286,8 +170,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     final allowed = _allowedActionsForItemState();
     if (_effectiveItemDisposition == null || allowed.isEmpty) return;
     if (allowed.length == 1 || !allowed.contains(_action)) {
-      _action = allowed.first;
-      _applyActionCoupling(_action!);
+      setState(() => _action = allowed.first);
     }
   }
 
@@ -305,11 +188,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     }
   }
 
-  void _applyDispositionForBizStep(String? bizStep) {
-    if (bizStep == null) return;
-    _refreshValidDispositionsForCurrentBizStep();
-  }
-
   void _formatCbvFieldsForVersion(EPCISVersion version) {
     final versionString =
         version == EPCISVersion.v2_0 ? '2.0' : '1.3';
@@ -323,74 +201,10 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     }
   }
 
-  void _applyActionCoupling(String action, {bool forceDefaultIfNull = false}) {
-    final allowed =
-        actionAllowedBizSteps[action] ?? objectEventStandardBusinessSteps;
-
-    if (_businessStep == null) {
-      if (action == 'ADD' || forceDefaultIfNull) {
-        final defaultStep = actionDefaultBizStep[action];
-        if (defaultStep != null) {
-          _businessStep = CbvVocabularyFormatter.formatBizStep(
-            _epcisVersionString(),
-            defaultStep,
-          );
-        }
-      }
-    } else {
-      final allowedCanonical = allowed
-          .map(CbvVocabularyFormatter.canonicalBizStepUrn)
-          .toList();
-      if (!allowedCanonical.contains(
-        CbvVocabularyFormatter.canonicalBizStepUrn(_businessStep!),
-      )) {
-        final defaultStep = actionDefaultBizStep[action];
-        if (defaultStep != null) {
-          _businessStep = CbvVocabularyFormatter.formatBizStep(
-            _epcisVersionString(),
-            defaultStep,
-          );
-        }
-      }
-    }
-
-    if (_businessStep != null) {
-      _applyDispositionForBizStep(_businessStep);
-    }
-
-    if (action == 'OBSERVE') {
-      if (_businessStep != null &&
-          (CbvVocabularyFormatter.isBizStepName(
-                _businessStep,
-                'commissioning',
-              ) ||
-              CbvVocabularyFormatter.isBizStepName(
-                _businessStep,
-                'decommissioning',
-              ) ||
-              CbvVocabularyFormatter.isBizStepName(
-                _businessStep,
-                'destroying',
-              ))) {
-        _businessStep = CbvVocabularyFormatter.formatBizStep(
-          _epcisVersionString(),
-          'urn:epcglobal:cbv:bizstep:shipping',
-        );
-        _applyDispositionForBizStep(_businessStep);
-      }
-    }
-
-    _syncIlmdState();
-  }
-
   void _onActionChanged(String? newAction) {
     setState(() {
       _action = newAction;
-      if (newAction != null) {
-        _applyActionCoupling(newAction);
-      } else {
-        _syncIlmdState();
-      }
+      _syncIlmdState();
     });
   }
 
@@ -399,7 +213,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       _businessStep = value;
       _syncIlmdState();
     });
-    _refreshValidDispositionsForCurrentBizStep();
   }
 
   @override
@@ -425,14 +238,12 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
                 ? bizStep
                 : 'urn:epcglobal:cbv:bizstep:$bizStep',
           );
-          _applyDispositionForBizStep(_businessStep);
           _syncIlmdState();
         });
       }
       if (queryParams.containsKey('action')) {
         setState(() {
           _action = queryParams['action']!;
-          _applyActionCoupling(_action!);
         });
       }
       if (queryParams.containsKey('epcs')) {
@@ -715,20 +526,16 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        ObjectEventFormBusinessContextSection(
-                          businessStep: _businessStep,
-                          disposition: _disposition,
-                          bizStepValues: _bizStepDropdownValues(),
-                          dispositionValues: _dispositionDropdownValues(),
-                          valueLabels: _cbvValueLabels(),
-                          isCbvLoading: _cbvMasterDataLoading,
-                          cbvLoadError: _cbvLoadError,
+                        CbvBizStepDispositionPicker(
+                          action: _action,
+                          initialBizStep: _businessStep,
+                          initialDisposition: _disposition,
                           epcisVersion: _epcisVersion,
                           isViewOnly: widget.isViewOnly,
-                          isBusinessStepMandatory: _isMandatory('businessStep'),
+                          isBizStepMandatory: _isMandatory('businessStep'),
                           isDispositionMandatory: _isMandatory('disposition'),
                           validation: _validationContext,
-                          onBusinessStepChanged: _onBusinessStepChanged,
+                          onBizStepChanged: _onBusinessStepChanged,
                           onDispositionChanged: (v) =>
                               setState(() => _disposition = v),
                         ),

@@ -74,6 +74,8 @@ class Constants {
       '/admin/api-management/partners/:partnerId/access';
   static const String adminApiAccessRoute = '/admin/api-management/access';
 
+  static const String adminCbvVocabularyRoute = '/admin/cbv-vocabulary';
+
   static const String gs1GtinsRoute = '/gs1/gtins';
   static const String gs1GtinNewRoute = '/gs1/gtins/new';
   static const String gs1GtinDetailRoute = '/gs1/gtins/:gtinCode';

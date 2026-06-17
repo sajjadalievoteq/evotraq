@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/form/utilities/object_event_form_constants.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
 class ObjectEventFormValidators {
@@ -23,9 +22,7 @@ class ObjectEventFormValidators {
       return 'Business Step is required by GS1 standard';
     }
     final versionString = _versionString(epcisVersion);
-    final canonical = CbvVocabularyFormatter.canonicalBizStepUrn(value);
-    if (!objectEventStandardBusinessSteps.contains(canonical) &&
-        !CbvVocabularyFormatter.isValidBizStepFormat(versionString, value)) {
+    if (!CbvVocabularyFormatter.isValidBizStepFormat(versionString, value)) {
       if (epcisVersion == EPCISVersion.v2_0) {
         return 'Business Step should follow CBV 2.0 format: https://ref.gs1.org/cbv/BizStep-<step>';
       }

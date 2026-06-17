@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/formatters/gs1_input_formatters.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 
@@ -17,6 +18,7 @@ class GtinEntryField extends StatelessWidget {
     this.validator,
     this.focusNode,
     this.onEditingComplete,
+    this.barcodeScanEnabled = true,
   });
 
   final TextEditingController controller;
@@ -30,6 +32,13 @@ class GtinEntryField extends StatelessWidget {
   final String? Function(String?)? validator;
   final FocusNode? focusNode;
   final VoidCallback? onEditingComplete;
+  final bool barcodeScanEnabled;
+
+  void _applyScannedValue(String value) {
+    controller.text = value;
+    setFieldError?.call(fieldName, null);
+    onChanged?.call(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +59,13 @@ class GtinEntryField extends StatelessWidget {
       maxLength: 14,
       inputFormatters: Gs1InputFormatters.gtin(),
       onChanged: onChanged,
+      suffixIcon: enabled && barcodeScanEnabled
+          ? Gs1FieldBarcodeScan.scanSuffixIcon(
+              context: context,
+              kind: Gs1FieldScanKind.gtin,
+              onScanned: _applyScannedValue,
+            )
+          : null,
       validator: validator ?? GtinFieldValidators.validateGtinCode,
     );
   }

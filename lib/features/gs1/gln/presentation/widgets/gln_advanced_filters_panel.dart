@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
@@ -89,19 +90,12 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextField(
+                  child: GlnEntryField(
                     controller: glnCodeController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: GlnUiConstants.labelGlnCode,
-                      hintText: GlnUiConstants.hintGlnCodeExample,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
+                    label: GlnUiConstants.labelGlnCode,
+                    hintText: GlnUiConstants.hintGlnCodeExample,
+                    optional: true,
+                    validator: (_) => null,
                   ),
                 ),
               ],

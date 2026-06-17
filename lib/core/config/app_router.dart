@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
+import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabulary_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_test_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test_screen.dart';
@@ -490,6 +491,27 @@ class AppRouter {
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
           child: const IndustryTestDataScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          final user = authCubit.state.user;
+
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+
+          if (user?.role != 'ADMIN') {
+            return Constants.homeRoute;
+          }
+
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.adminCbvVocabularyRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const CbvVocabularyManagementScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;

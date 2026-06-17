@@ -17,6 +17,8 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
+import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_vocabulary_cubit.dart';
+import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
@@ -275,6 +277,15 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerSingleton<AuthCubit>(
     AuthCubit(authService: getIt<AuthService>()),
+  );
+  getIt.registerSingleton<CbvVocabularyCubit>(
+    CbvVocabularyCubit(service: getIt<CbvMasterDataService>()),
+  );
+  getIt.registerFactory<AdminCbvVocabularyCubit>(
+    () => AdminCbvVocabularyCubit(
+      service: getIt<CbvMasterDataService>(),
+      vocabCubit: getIt<CbvVocabularyCubit>(),
+    ),
   );
   getIt.registerFactory<UserManagementCubit>(
     () => UserManagementCubit(

@@ -5,8 +5,10 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
@@ -292,14 +294,11 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          TextFormField(
+          SsccEntryField(
             controller: _ssccController,
-            decoration: const InputDecoration(
-              labelText: 'SSCC',
-              hintText: 'Enter the 18-digit SSCC code',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
+            label: 'SSCC',
+            hintText: 'Enter the 18-digit SSCC code',
+            validator: (_) => null,
           ),
           const SizedBox(height: 24),
           
@@ -357,14 +356,12 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           ),
           const SizedBox(height: 16),
           
-          TextFormField(
+          GlnEntryField(
             controller: _glnController,
-            decoration: const InputDecoration(
-              labelText: 'GLN',
-              hintText: 'Enter the 13-digit GLN code',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
+            label: 'GLN',
+            hintText: 'Enter the 13-digit GLN code',
+            optional: true,
+            validator: (_) => null,
           ),
           const SizedBox(height: 16),
           

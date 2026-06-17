@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
 
@@ -17,6 +18,7 @@ class EpcEntryField extends StatelessWidget {
     this.focusNode,
     this.onEditingComplete,
     this.required = false,
+    this.barcodeScanEnabled = true,
   });
 
   final TextEditingController controller;
@@ -31,12 +33,19 @@ class EpcEntryField extends StatelessWidget {
   final FocusNode? focusNode;
   final VoidCallback? onEditingComplete;
   final bool required;
+  final bool barcodeScanEnabled;
 
   String? _defaultValidator(String? value) {
     if (required && (value == null || value.trim().isEmpty)) {
       return '$label is required';
     }
     return validateEpcUri(value);
+  }
+
+  void _applyScannedValue(String value) {
+    controller.text = value;
+    setFieldError?.call(fieldName, null);
+    onChanged?.call(value);
   }
 
   @override
@@ -52,6 +61,13 @@ class EpcEntryField extends StatelessWidget {
       focusNode: focusNode,
       onEditingComplete: onEditingComplete,
       onChanged: onChanged,
+      suffixIcon: enabled && barcodeScanEnabled
+          ? Gs1FieldBarcodeScan.scanSuffixIcon(
+              context: context,
+              kind: Gs1FieldScanKind.sgtin,
+              onScanned: _applyScannedValue,
+            )
+          : null,
       validator: validator ?? _defaultValidator,
     );
   }

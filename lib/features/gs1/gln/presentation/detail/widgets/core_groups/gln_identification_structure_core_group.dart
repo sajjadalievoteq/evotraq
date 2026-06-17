@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/presentation/detail/widgets/gln_structure_chips.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
@@ -188,7 +188,7 @@ class _GlnIdentificationStructureCoreGroupState
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Gs1ValidatedField(
+        GlnEntryField(
           focusNode: _glnFocusNode,
           onEditingComplete: () {
             _deriveIdentificationDebounced();
@@ -197,11 +197,8 @@ class _GlnIdentificationStructureCoreGroupState
           fieldName: 'glnCode',
           label: GlnUiConstants.labelGlnThirteenDigits,
           hintText: GlnUiConstants.hintGlnThirteen,
-          readOnly: widget.readOnly,
+          enabled: !widget.readOnly,
           setFieldError: widget.setFieldError,
-          keyboardType: TextInputType.number,
-          maxLength: 13,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           validator: GlnFieldValidators.validateGlnCode,
         ),
         GlnStructureChips(glnCodeController: widget.glnCodeController),
@@ -279,16 +276,14 @@ class _GlnIdentificationStructureCoreGroupState
           },
         ),
         const SizedBox(height: 16),
-        Gs1ValidatedField(
+        GlnEntryField(
           controller: widget.parentGlnCodeController,
           fieldName: 'parentGlnCode',
           label: GlnUiConstants.labelParentGln,
           hintText: GlnUiConstants.hintParentGln,
-          readOnly: widget.readOnly,
+          enabled: !widget.readOnly,
           setFieldError: widget.setFieldError,
-          keyboardType: TextInputType.number,
-          maxLength: 13,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          optional: true,
           validator: GlnFieldValidators.validateParentGlnOptional,
         ),
         const SizedBox(height: 12),

@@ -4,14 +4,23 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
   const AggregationPharmaIssuesDialog({
     super.key,
     required this.issues,
+    this.allowProceed = false,
   });
 
   final List<String> issues;
+  final bool allowProceed;
 
-  static Future<void> show(BuildContext context, List<String> issues) {
-    return showDialog<void>(
+  static Future<bool?> show(
+    BuildContext context,
+    List<String> issues, {
+    bool allowProceed = false,
+  }) {
+    return showDialog<bool>(
       context: context,
-      builder: (_) => AggregationPharmaIssuesDialog(issues: issues),
+      builder: (_) => AggregationPharmaIssuesDialog(
+        issues: issues,
+        allowProceed: allowProceed,
+      ),
     );
   }
 
@@ -20,14 +29,22 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
     final theme = Theme.of(context);
     return AlertDialog(
       icon: Icon(Icons.block, color: theme.colorScheme.error),
-      title: const Text('Packing Blocked — GS1 Compliance Issues'),
+      title: Text(
+        allowProceed
+            ? 'GS1 Compliance Issues'
+            : 'Packing Blocked — GS1 Compliance Issues',
+      ),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'The following issues must be resolved before this packing operation can be submitted:',
+            Text(
+              allowProceed
+                  ? 'The following GS1 compliance issues were detected. You may '
+                      'resolve them or proceed at your own risk:'
+                  : 'The following issues must be resolved before this '
+                      'operation can be submitted:',
             ),
             const SizedBox(height: 12),
             ...issues.map(
@@ -50,12 +67,23 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('OK'),
-        ),
-      ],
+      actions: allowProceed
+          ? [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Proceed Anyway'),
+              ),
+            ]
+          : [
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
     );
   }
 }

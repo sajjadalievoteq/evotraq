@@ -469,72 +469,41 @@ class _AppDrawerState extends State<AppDrawer> {
                     //   onTap: () =>
                     //       _navigate(Constants.opUnpackingRoute),
                     // ),
+                    // ListTile(
+                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
+                    //   leading: const Icon(Icons.local_shipping),
+                    //   title: const Text('Shipping'),
+                    //   onTap: () =>
+                    //       _navigate(Constants.opShippingRoute),
+                    // ),
+                    // ListTile(
+                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),  leading: const Icon(Icons.move_to_inbox),
+                    //   title: const Text('Receiving'),
+                    //   onTap: () =>
+                    //       _navigate(Constants.opReceivingRoute),
+                    // ),
                     // ExpansionTile(
-                    //   leading: const Icon(Icons.inventory_2),
-                    //   title: const Text('Packing'),
+                    //   leading: const Icon(Icons.move_to_inbox),
+                    //   title: const Text('Receiving Operations'),
                     //   children: [
                     //     ListTile(
                     //       leading: const Icon(Icons.add_circle_outline),
-                    //       title: const Text('Create Packing'),
+                    //       title: const Text('Create Receiving'),
                     //       contentPadding:
                     //           const EdgeInsets.only(left: 32.0),
                     //       onTap: () =>
-                    //           _navigate(Constants.opPackingCreateRoute),
+                    //           _navigate(Constants.opReceivingCreateRoute),
                     //     ),
                     //     ListTile(
                     //       leading: const Icon(Icons.list_alt),
-                    //       title: const Text('View Packing'),
+                    //       title: const Text('View Receiving'),
                     //       contentPadding:
                     //           const EdgeInsets.only(left: 32.0),
                     //       onTap: () =>
-                    //           _navigate(Constants.opPackingRoute),
+                    //           _navigate(Constants.opReceivingRoute),
                     //     ),
                     //   ],
                     // ),
-                    ExpansionTile(
-                      leading: const Icon(Icons.local_shipping),
-                      title: const Text('Shipping Operations'),
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.add_circle_outline),
-                          title: const Text('Create Shipment'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opShippingCreateRoute),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.list_alt),
-                          title: const Text('View Shipments'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opShippingRoute),
-                        ),
-                      ],
-                    ),
-                    ExpansionTile(
-                      leading: const Icon(Icons.move_to_inbox),
-                      title: const Text('Receiving Operations'),
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.add_circle_outline),
-                          title: const Text('Create Receiving'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opReceivingCreateRoute),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.list_alt),
-                          title: const Text('View Receiving'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opReceivingRoute),
-                        ),
-                      ],
-                    ),
 
                     const Divider(),
                     const Padding(

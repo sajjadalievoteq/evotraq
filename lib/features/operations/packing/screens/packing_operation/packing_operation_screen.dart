@@ -4,6 +4,7 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
@@ -296,12 +297,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
             'Packing operation completed successfully.',
           );
         }
-        if (mounted && response.operationId != null) {
-          context.go(
-            '${Constants.opPackingRoute}?selected=${response.operationId}',
-          );
-        } else if (mounted) {
-          context.go(Constants.opPackingRoute);
+        if (mounted) {
+          if (!context.isDesktop && response.operationId != null) {
+            context.go('${Constants.opPackingRoute}/${response.operationId}');
+          } else {
+            context.go(Constants.opPackingRoute);
+          }
         }
       } else {
         final errorMessage = response.messages?.isNotEmpty == true

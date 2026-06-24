@@ -67,6 +67,8 @@ class OperationEpcScanValidator {
   }
 
   static OperationScanItemType resolveEpcType(String epc) {
+    if (epc.startsWith('urn:epc:id:sgtin:')) return OperationScanItemType.sgtin;
+    if (epc.startsWith('urn:epc:id:sscc:')) return OperationScanItemType.sscc;
     final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(epc);
     if (parsedBarcode['SSCC'] != null ||
         GS1Validator.isValidSSCC(epc)) {
@@ -79,6 +81,44 @@ class OperationEpcScanValidator {
   }
 
   OperationEpcScanOutcome parseForOperation(String rawBarcode) {
+    // ── Fast path: GS1 EPC URN formats (not handled by GS1BarcodeParser) ──────
+    if (rawBarcode.startsWith('urn:epc:id:sgtin:')) {
+      final tail = rawBarcode.substring('urn:epc:id:sgtin:'.length);
+      final parts = tail.split('.');
+      if (parts.length == 3 && parts[0].isNotEmpty && parts[1].isNotEmpty && parts[2].isNotEmpty) {
+        return OperationEpcScanOutcome.success(
+          rawBarcode: rawBarcode,
+          epcType: OperationScanItemType.sgtin,
+          identifierToValidate: parts[2], // serial number
+        );
+      }
+      return OperationEpcScanOutcome.failure(
+        rawBarcode: rawBarcode,
+        errorMessage: 'Malformed SGTIN URI — expected '
+            'urn:epc:id:sgtin:<companyPrefix>.<itemRef>.<serial>\n\n'
+            'Got: $rawBarcode',
+      );
+    }
+
+    if (rawBarcode.startsWith('urn:epc:id:sscc:')) {
+      final tail = rawBarcode.substring('urn:epc:id:sscc:'.length);
+      final parts = tail.split('.');
+      if (parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+        return OperationEpcScanOutcome.success(
+          rawBarcode: rawBarcode,
+          epcType: OperationScanItemType.sscc,
+          identifierToValidate: parts[1], // serial reference
+        );
+      }
+      return OperationEpcScanOutcome.failure(
+        rawBarcode: rawBarcode,
+        errorMessage: 'Malformed SSCC URI — expected '
+            'urn:epc:id:sscc:<companyPrefix>.<serialRef>\n\n'
+            'Got: $rawBarcode',
+      );
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     final details = extractBarcodeDetails(rawBarcode);
     final parsedBarcode = GS1BarcodeParser.parseGS1Barcode(rawBarcode);
 

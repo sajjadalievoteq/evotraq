@@ -39,7 +39,6 @@ import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart
 import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/object_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/object_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_batch_import/object_event_batch_import_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/object_event_form_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event/object_event_screen.dart';
@@ -58,12 +57,12 @@ import 'package:traqtrace_app/features/epcis/presentation/query/screens/advanced
 import 'package:traqtrace_app/features/epcis/presentation/query/screens/traversal_query_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_generic_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_serialization_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/shipping/screens/shipping_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_list_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/operations/receiving/screens/receiving_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/shipping_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving/receiving_screen.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/receiving_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing/packing_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/packing_operation_detail_screen.dart';
@@ -71,7 +70,6 @@ import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_op
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking/unpacking_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/unpacking_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/commissioning_operation_list_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning/commissioning_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/notification_center_screen.dart';
@@ -1592,7 +1590,7 @@ class AppRouter {
         path: Constants.opShippingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const ShippingOperationListScreen(),
+          child: const ShippingScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1638,7 +1636,7 @@ class AppRouter {
         path: Constants.opReceivingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const ReceivingOperationListScreen(),
+          child: const ReceivingScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;

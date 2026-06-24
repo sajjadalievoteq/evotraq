@@ -4,6 +4,7 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
@@ -291,10 +292,12 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
             'Unpacking operation completed successfully.',
           );
         }
-        if (mounted && response.operationId != null) {
-          context.go('${Constants.opUnpackingRoute}/${response.operationId}');
-        } else if (mounted) {
-          context.go(Constants.opUnpackingRoute);
+        if (mounted) {
+          if (!context.isDesktop && response.operationId != null) {
+            context.go('${Constants.opUnpackingRoute}/${response.operationId}');
+          } else {
+            context.go(Constants.opUnpackingRoute);
+          }
         }
       } else {
         final errorMessage = response.messages?.isNotEmpty == true

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -25,15 +26,23 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     required this.isEmptyNoMatch,
     required this.listBuilder,
     required this.detailViewBuilder,
-    required this.detailCreateBuilder,
+    this.detailCreateBuilder,
     required this.detailAwaitBuilder,
-  });
+    this.fabNavigateRoute,
+  }) : assert(
+          fabNavigateRoute != null || detailCreateBuilder != null,
+          'detailCreateBuilder is required when fabNavigateRoute is not set',
+        );
 
   final String appBarTitle;
 
   final String fabHeroTag;
   final String fabAddTooltip;
   final String fabCloseTooltip;
+
+  /// When set, FAB navigates to this route instead of swapping in an embedded
+  /// create panel via [IndexedStack].
+  final String? fabNavigateRoute;
 
   final String createHeaderText;
   final String closeCreateTooltip;
@@ -54,7 +63,7 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
 
   final Widget Function(BuildContext context, String id) detailViewBuilder;
 
-  final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)
+  final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)?
       detailCreateBuilder;
 
   final WidgetBuilder detailAwaitBuilder;
@@ -70,8 +79,28 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   bool _isCreateMode = false;
   VoidCallback? _refreshList;
 
+  bool get _useEmbeddedCreate => widget.fabNavigateRoute == null;
+
   void _toggleFab() {
     setState(() => _isCreateMode = !_isCreateMode);
+  }
+
+  void _onFabPressed() {
+    final route = widget.fabNavigateRoute;
+    if (route != null) {
+      context.go(route);
+      return;
+    }
+    _toggleFab();
+  }
+
+  void _onRequestCreate() {
+    final route = widget.fabNavigateRoute;
+    if (route != null) {
+      context.go(route);
+      return;
+    }
+    setState(() => _isCreateMode = true);
   }
 
   void _onEmbeddedCreateSuccess() {
@@ -94,9 +123,14 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton(
         heroTag: widget.fabHeroTag,
-        onPressed: _toggleFab,
-        tooltip: _isCreateMode ? widget.fabCloseTooltip : widget.fabAddTooltip,
-        child: Icon(_isCreateMode ? Icons.close : Icons.add, color: Colors.white,),
+        onPressed: _onFabPressed,
+        tooltip: _useEmbeddedCreate && _isCreateMode
+            ? widget.fabCloseTooltip
+            : widget.fabAddTooltip,
+        child: Icon(
+          _useEmbeddedCreate && _isCreateMode ? Icons.close : Icons.add,
+          color: Colors.white,
+        ),
       ),
       body: BlocListener<TCubit, TState>(
         listenWhen: widget.listenWhenListChanged,
@@ -133,7 +167,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
               });
             },
             bindRefresh: (fn) => _refreshList = fn,
-            onRequestCreate: () => setState(() => _isCreateMode = true),
+            onRequestCreate: _onRequestCreate,
           ),
           detail: _buildRightPane(),
         ),
@@ -158,6 +192,11 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
       },
     );
 
+    if (!_useEmbeddedCreate) {
+      return viewPane;
+    }
+
+    final createBuilder = widget.detailCreateBuilder!;
     final c = context.colors;
     final webTopInset = kIsWeb ? 12.0 : 0.0;
     final createPane = Column(
@@ -202,7 +241,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
         ),
         const Divider(height: 1),
         Expanded(
-          child: widget.detailCreateBuilder(context, _onEmbeddedCreateSuccess),
+          child: createBuilder(context, _onEmbeddedCreateSuccess),
         ),
       ],
     );

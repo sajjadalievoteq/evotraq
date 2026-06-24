@@ -19,7 +19,6 @@ import 'package:traqtrace_app/features/epcis/providers/transformation_events_pro
 
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
-import 'package:traqtrace_app/features/epcis/cubit/shipping_operation_cubit.dart';
 
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 
@@ -46,19 +45,15 @@ import 'package:traqtrace_app/features/api_management/providers/partner_access_p
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 
 import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/data/services/epcis/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
-import 'package:traqtrace_app/data/services/user_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 
 import 'core/network/dio_service.dart';
-import 'core/widgets/app_animated_background_layer.dart';
 
 void main() async {
   try {
@@ -188,10 +183,6 @@ class TraqTraceApp extends StatelessWidget {
         BlocProvider<AdvancedQueryCubit>(
           create: (context) =>
               AdvancedQueryCubit(getIt<AdvancedQueryService>()),
-        ),
-        BlocProvider<ShippingOperationCubit>(
-          create: (context) =>
-              ShippingOperationCubit(getIt<ShippingOperationService>()),
         ),
         BlocProvider<SystemSettingsCubit>(
           create: (context) =>

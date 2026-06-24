@@ -14,7 +14,6 @@ class CbvVocabularyFormResult {
   const CbvVocabularyFormResult({
     required this.code,
     required this.label,
-    required this.group,
     required this.urn,
     required this.enabled,
     required this.cbvVersion,
@@ -22,7 +21,6 @@ class CbvVocabularyFormResult {
 
   final String code;
   final String label;
-  final String group;
   final String urn;
   final bool enabled;
   final String cbvVersion;
@@ -36,7 +34,6 @@ Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
   required BuildContext context,
   required CbvVocabType type,
   required List<String> existingCodes,
-  required List<String> existingGroups,
 }) {
   return showDialog<CbvVocabularyFormResult>(
     context: context,
@@ -44,7 +41,6 @@ Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
     builder: (_) => _CbvVocabularyFormDialog(
       type: type,
       existingCodes: existingCodes,
-      existingGroups: existingGroups,
     ),
   );
 }
@@ -53,18 +49,14 @@ Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
 // Dialog widget
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _newGroupSentinel = '__new_group__';
-
 class _CbvVocabularyFormDialog extends StatefulWidget {
   const _CbvVocabularyFormDialog({
     required this.type,
     required this.existingCodes,
-    required this.existingGroups,
   });
 
   final CbvVocabType type;
   final List<String> existingCodes;
-  final List<String> existingGroups;
 
   @override
   State<_CbvVocabularyFormDialog> createState() =>
@@ -75,9 +67,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final _labelController = TextEditingController();
   final _codeController = TextEditingController();
-  final _newGroupController = TextEditingController();
 
-  String? _selectedGroup;
   String _cbvVersion = kCbvVersionOptions.first;
   bool _enabled = true;
   bool _autoGenerateCode = true;
@@ -104,13 +94,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
         .replaceAll(RegExp(r'^_+|_+$'), '');
   }
 
-  String get _effectiveGroup {
-    if (_selectedGroup == _newGroupSentinel) {
-      return _newGroupController.text.trim();
-    }
-    return _selectedGroup ?? '';
-  }
-
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
@@ -125,7 +108,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
       ..removeListener(_onLabelChanged)
       ..dispose();
     _codeController.dispose();
-    _newGroupController.dispose();
     super.dispose();
   }
 
@@ -149,7 +131,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
     final result = CbvVocabularyFormResult(
       code: _codeController.text.trim(),
       label: _labelController.text.trim(),
-      group: _effectiveGroup,
       urn: _computeUrn(_codeController.text.trim()),
       enabled: _enabled,
       cbvVersion: _cbvVersion,
@@ -175,7 +156,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
       contentPadding: const EdgeInsets.fromLTRB(
           TraqSpacing.xl, TraqSpacing.md, TraqSpacing.xl, 0),
       content: SizedBox(
-        width: 480,
+        width: 440,
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -213,8 +194,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                   decoration: InputDecoration(
                     labelText: 'Code *',
                     hintText: 'e.g. quality_hold',
-                    helperText:
-                        'Lowercase, numbers and underscores only',
+                    helperText: 'Lowercase, numbers and underscores only',
                     suffixIcon: !_autoGenerateCode
                         ? IconButton(
                             tooltip: 'Re-generate from label',
@@ -222,8 +202,8 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                             onPressed: () {
                               setState(() {
                                 _autoGenerateCode = true;
-                                _codeController.text = _labelToCode(
-                                    _labelController.text);
+                                _codeController.text =
+                                    _labelToCode(_labelController.text);
                               });
                             },
                           )
@@ -242,57 +222,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: TraqSpacing.lg),
-
-                // ── Group ────────────────────────────────────────────────
-                DropdownButtonFormField<String>(
-                  value: _selectedGroup,
-                  decoration: const InputDecoration(labelText: 'Group *'),
-                  items: [
-                    ...widget.existingGroups.map(
-                      (g) => DropdownMenuItem(value: g, child: Text(g)),
-                    ),
-                    const DropdownMenuItem(
-                      value: _newGroupSentinel,
-                      child: Row(
-                        children: [
-                          Icon(Icons.add, size: 16),
-                          SizedBox(width: 6),
-                          Text('Create New Group'),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _selectedGroup = v),
-                  validator: (v) {
-                    if (v == null) return 'Group is required';
-                    if (v == _newGroupSentinel &&
-                        _newGroupController.text.trim().isEmpty) {
-                      return 'Enter the new group name';
-                    }
-                    return null;
-                  },
-                ),
-                if (_selectedGroup == _newGroupSentinel) ...[
-                  const SizedBox(height: TraqSpacing.md),
-                  TextFormField(
-                    controller: _newGroupController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'New Group Name *',
-                      hintText: 'e.g. Quality & Inspection',
-                      prefixIcon: Icon(Icons.folder_outlined, size: 18),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    validator: (v) {
-                      if (_selectedGroup == _newGroupSentinel &&
-                          (v == null || v.trim().isEmpty)) {
-                        return 'Group name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
                 const SizedBox(height: TraqSpacing.lg),
 
                 // ── URN preview ───────────────────────────────────────────
@@ -344,8 +273,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                 // ── Enabled switch ────────────────────────────────────────
                 Row(
                   children: [
-                    Text('Enabled by default',
-                        style: context.text.body),
+                    Text('Enabled by default', style: context.text.body),
                     const Spacer(),
                     Switch.adaptive(
                       value: _enabled,

@@ -1,0 +1,41 @@
+﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
+import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_group_card.dart';
+
+/// Messages card for packing operation detail.
+class PackingDetailMessagesCard extends StatelessWidget {
+  const PackingDetailMessagesCard({
+    super.key,
+    required this.operation,
+  });
+
+  final PackingResponse operation;
+
+  @override
+  Widget build(BuildContext context) {
+    final msgs = operation.messages ?? [];
+
+    return PackingDetailGroupCard(
+      title: 'Messages',
+      children: msgs
+          .map(
+            (m) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(m, style: const TextStyle(fontSize: 13))),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+}

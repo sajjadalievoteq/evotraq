@@ -13,7 +13,7 @@ import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
-import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
+import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
@@ -455,28 +455,42 @@ class _AppDrawerState extends State<AppDrawer> {
                       onTap: () =>
                           _navigate(Constants.opCommissioningRoute),
                     ),
-                    ExpansionTile(
+                    ListTile(
+                      trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
                       leading: const Icon(Icons.inventory_2),
-                      title: const Text('Packing Operations'),
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.add_circle_outline),
-                          title: const Text('Create Packing'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opPackingCreateRoute),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.list_alt),
-                          title: const Text('View Packing'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.opPackingRoute),
-                        ),
-                      ],
+                      title: const Text('Packing'),
+                      onTap: () =>
+                          _navigate(Constants.opPackingRoute),
                     ),
+                    // ListTile(
+                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
+                    //   leading: const Icon(Icons.unarchive_outlined),
+                    //   title: const Text('Unpacking'),
+                    //   onTap: () =>
+                    //       _navigate(Constants.opUnpackingRoute),
+                    // ),
+                    // ExpansionTile(
+                    //   leading: const Icon(Icons.inventory_2),
+                    //   title: const Text('Packing'),
+                    //   children: [
+                    //     ListTile(
+                    //       leading: const Icon(Icons.add_circle_outline),
+                    //       title: const Text('Create Packing'),
+                    //       contentPadding:
+                    //           const EdgeInsets.only(left: 32.0),
+                    //       onTap: () =>
+                    //           _navigate(Constants.opPackingCreateRoute),
+                    //     ),
+                    //     ListTile(
+                    //       leading: const Icon(Icons.list_alt),
+                    //       title: const Text('View Packing'),
+                    //       contentPadding:
+                    //           const EdgeInsets.only(left: 32.0),
+                    //       onTap: () =>
+                    //           _navigate(Constants.opPackingRoute),
+                    //     ),
+                    //   ],
+                    // ),
                     ExpansionTile(
                       leading: const Icon(Icons.local_shipping),
                       title: const Text('Shipping Operations'),

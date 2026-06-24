@@ -2,8 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_list_utils.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_list_utils.dart';
+import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 // ---------------------------------------------------------------------------
 // Status enum
@@ -158,10 +161,90 @@ class AggregationEventsState extends Equatable {
 
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   final AggregationEventService _service;
+  final GLNService _glnService;
 
-  AggregationEventsCubit({AggregationEventService? service})
-      : _service = service ?? getIt<AggregationEventService>(),
+  /// In-memory cache: GLN code → resolved GLN. Avoids redundant API calls
+  /// across list refreshes within the same cubit lifetime.
+  final Map<String, GLN> _glnCache = {};
+
+  AggregationEventsCubit({
+    AggregationEventService? service,
+    GLNService? glnService,
+  })  : _service = service ?? getIt<AggregationEventService>(),
+        _glnService = glnService ?? getIt<GLNService>(),
         super(const AggregationEventsState());
+
+  // -------------------------------------------------------------------------
+  // GLN enrichment — resolves "Unknown Location" stubs to real location names
+  // -------------------------------------------------------------------------
+
+  /// Replaces stub GLNs (created by [GLN.fromCode]) with fully resolved ones
+  /// fetched from the backend. Results are cached so repeated fetches of the
+  /// same GLN code cost only one network round-trip.
+  Future<List<AggregationEvent>> _enrichWithGlns(
+    List<AggregationEvent> events,
+  ) async {
+    // Collect unique codes that still need resolving
+    final codesToFetch = <String>{};
+    for (final e in events) {
+      if (e.businessLocation != null &&
+          isPlaceholderGlnLocation(e.businessLocation!)) {
+        codesToFetch.add(e.businessLocation!.glnCode);
+      }
+      if (e.readPoint != null && isPlaceholderGlnLocation(e.readPoint!)) {
+        codesToFetch.add(e.readPoint!.glnCode);
+      }
+    }
+
+    // Strip codes we already have cached
+    codesToFetch.removeWhere(_glnCache.containsKey);
+
+    // Fetch remaining in parallel — failures are silently ignored so a single
+    // missing GLN doesn't break the whole list.
+    if (codesToFetch.isNotEmpty) {
+      final results = await Future.wait(
+        codesToFetch.map((code) async {
+          try {
+            final gln = await _glnService.getGLNByCode(code);
+            return MapEntry(code, gln);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
+      for (final entry in results.whereType<MapEntry<String, GLN>>()) {
+        _glnCache[entry.key] = entry.value;
+      }
+    }
+
+    // Rebuild events with resolved GLNs where available
+    return events.map((e) {
+      final resolvedBizLoc = (e.businessLocation != null &&
+              isPlaceholderGlnLocation(e.businessLocation!))
+          ? (_glnCache[e.businessLocation!.glnCode] ?? e.businessLocation)
+          : e.businessLocation;
+
+      final resolvedReadPt =
+          (e.readPoint != null && isPlaceholderGlnLocation(e.readPoint!))
+              ? (_glnCache[e.readPoint!.glnCode] ?? e.readPoint)
+              : e.readPoint;
+
+      if (resolvedBizLoc == e.businessLocation &&
+          resolvedReadPt == e.readPoint) {
+        return e; // nothing changed
+      }
+      return e.copyWith(
+        businessLocation: resolvedBizLoc,
+        readPoint: resolvedReadPt,
+      );
+    }).toList();
+  }
+
+  /// Convenience wrapper for a single event.
+  Future<AggregationEvent> _enrichOne(AggregationEvent event) async {
+    final enriched = await _enrichWithGlns([event]);
+    return enriched.first;
+  }
 
   // -------------------------------------------------------------------------
   // List loading — primary entry point used by the list screen
@@ -286,6 +369,9 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         );
       }
 
+      // Resolve "Unknown Location" stubs to real GLN names
+      events = await _enrichWithGlns(events);
+
       final nextEvents = isLoadMore
           ? [...state.aggregationEvents, ...events]
           : events;
@@ -353,7 +439,8 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       clearError: true,
     ));
     try {
-      final event = await _service.getAggregationEventByIdentifier(id);
+      final raw = await _service.getAggregationEventByIdentifier(id);
+      final event = await _enrichOne(raw);
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
         selectedEvent: event,
@@ -490,7 +577,8 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   Future<void> trackParentHistory(String parentEPC) async {
     emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final events = await _service.findAggregationEventsByParentEPC(parentEPC);
+      final raw = await _service.findAggregationEventsByParentEPC(parentEPC);
+      final events = await _enrichWithGlns(raw);
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
         aggregationEvents: events,
@@ -509,7 +597,8 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   Future<void> trackChildHistory(String childEPC) async {
     emit(state.copyWith(isListLoading: true, clearListFetchError: true));
     try {
-      final events = await _service.findAggregationEventsByChildEPC(childEPC);
+      final raw = await _service.findAggregationEventsByChildEPC(childEPC);
+      final events = await _enrichWithGlns(raw);
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
         aggregationEvents: events,

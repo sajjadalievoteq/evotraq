@@ -14,4 +14,7 @@ abstract final class CbvMasterDataApiConsts {
 
   static String validDispositionsPath(String bizStepCode) =>
       '$prefix/biz-steps/$bizStepCode/valid-dispositions';
+
+  static String pairPath(String bizStepCode, String dispCode) =>
+      '$prefix/biz-steps/$bizStepCode/dispositions/$dispCode';
 }

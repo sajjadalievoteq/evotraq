@@ -44,7 +44,7 @@ abstract final class SsccCreateFormValidation {
       containedQuantity: containedQuantity,
     );
 
-    add('GSIN (AI 402)', validateGsin(gsin));
+    add('GSIN', validateGsin(gsin));
     add('Purchase Order Number', validatePurchaseOrderNumber(purchaseOrder));
 
     return errors;
@@ -102,7 +102,7 @@ abstract final class SsccCreateFormValidation {
 
     if (contentHomogeneity != ContentHomogeneity.MIXED && hasGtin) {
       if (!RegExp(r'^\d{8,14}$').hasMatch(gtin)) {
-        errors.add('Contained GTIN (AI 02): must be 8–14 digits');
+        errors.add('Contained GTIN: must be 8–14 digits');
       }
     }
 
@@ -110,26 +110,26 @@ abstract final class SsccCreateFormValidation {
       if (hasGtin != hasQty) {
         if (!hasGtin) {
           errors.add(
-            'Contained GTIN (AI 02): required when Contained Quantity is provided (XSC-004)',
+            'Contained GTIN: required when Contained Quantity is provided (XSC-004)',
           );
         }
         if (!hasQty) {
           errors.add(
-            'Contained Quantity (AI 37): required when Contained GTIN is provided (XSC-004)',
+            'Contained Quantity: required when Contained GTIN is provided (XSC-004)',
           );
         }
       }
       if (hasQty) {
         final qtyErr = validateContainedQuantity(qtyText);
         if (qtyErr != null) {
-          errors.add('Contained Quantity (AI 37): $qtyErr');
+          errors.add('Contained Quantity: $qtyErr');
         }
       }
     }
 
     if (contentHomogeneity == ContentHomogeneity.MIXED && hasGtin) {
       errors.add(
-        'Contained GTIN (AI 02): must not be set when Content Homogeneity is MIXED (XSC-004)',
+        'Contained GTIN: must not be set when Content Homogeneity is MIXED (XSC-004)',
       );
     }
   }

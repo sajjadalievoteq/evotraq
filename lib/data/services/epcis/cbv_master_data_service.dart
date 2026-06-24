@@ -116,7 +116,6 @@ class CbvMasterDataService {
   Future<CbvVocabularyItem> createBizStep({
     required String code,
     required String label,
-    required String group,
     required String urn,
     required bool enabled,
     required String cbvVersion,
@@ -127,7 +126,6 @@ class CbvMasterDataService {
       data: {
         'code': code,
         'label': label,
-        'group': group,
         'urn': urn,
         'enabled': enabled,
         'cbvVersion': cbvVersion,
@@ -150,7 +148,6 @@ class CbvMasterDataService {
   Future<CbvVocabularyItem> createDisposition({
     required String code,
     required String label,
-    required String group,
     required String urn,
     required bool enabled,
     required String cbvVersion,
@@ -161,7 +158,6 @@ class CbvMasterDataService {
       data: {
         'code': code,
         'label': label,
-        'group': group,
         'urn': urn,
         'enabled': enabled,
         'cbvVersion': cbvVersion,
@@ -211,6 +207,42 @@ class CbvMasterDataService {
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to delete disposition $code',
+        responseBody: response.data is String ? response.data as String? : null,
+      );
+    }
+    _enabledOnlyCache = null;
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Pair management (admin only)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  Future<void> addPair(String bizStepCode, String dispCode) async {
+    final url = '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
+    final response = await _dioService.post(
+      url,
+      acceptAllStatusCodes: true,
+    );
+    if (response.statusCode != 204) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to add pair $bizStepCode → $dispCode',
+        responseBody: response.data is String ? response.data as String? : null,
+      );
+    }
+    _enabledOnlyCache = null;
+  }
+
+  Future<void> removePair(String bizStepCode, String dispCode) async {
+    final url = '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';
+    final response = await _dioService.delete(
+      url,
+      acceptAllStatusCodes: true,
+    );
+    if (response.statusCode != 204) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to remove pair $bizStepCode → $dispCode',
         responseBody: response.data is String ? response.data as String? : null,
       );
     }

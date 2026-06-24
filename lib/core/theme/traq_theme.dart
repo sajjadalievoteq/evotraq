@@ -71,6 +71,18 @@ class TraqTheme {
       popupMenuTheme: TraqThemeMenus.popupMenu(c, roundedMd),
       menuTheme: TraqThemeMenus.menu(c, roundedMd),
       dropdownMenuTheme: TraqThemeMenus.dropdown(c, roundedMd),
+      tabBarTheme: TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withOpacity(0.6),
+        indicator: const UnderlineTabIndicator(
+          borderSide: BorderSide(color: Colors.white, width: 2),
+          insets: EdgeInsets.zero,
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: text.bodySm.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: text.bodySm,
+        dividerColor: Colors.transparent,
+      ),
       textTheme: TraqText.materialTextTheme(text),
       extensions: <ThemeExtension<dynamic>>[
         c,

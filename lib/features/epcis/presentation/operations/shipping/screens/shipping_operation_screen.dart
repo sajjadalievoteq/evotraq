@@ -45,8 +45,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   final _referenceController = TextEditingController();
   final _notesController = TextEditingController();
   final _manualEntryController = TextEditingController();
-  final _wiredScannerController = TextEditingController();
-  final FocusNode _wiredScannerFocusNode = FocusNode();
   GLN? _sourceGLN;
   GLN? _destinationGLN;
   String? _sourceGLNError;
@@ -57,21 +55,9 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   
   // Scanning mode state
   ScanningMode _scanningMode = kIsWeb ? ScanningMode.wired : ScanningMode.camera;
-  bool _isWiredScannerActive = false;
 
   // Validation service
   ReferenceDataValidationService? _validationService;
-
-  @override
-  void initState() {
-    super.initState();
-    // Add focus listener for wired scanner
-    _wiredScannerFocusNode.addListener(() {
-      setState(() {
-        _isWiredScannerActive = _wiredScannerFocusNode.hasFocus;
-      });
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -88,8 +74,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     _referenceController.dispose();
     _notesController.dispose();
     _manualEntryController.dispose();
-    _wiredScannerController.dispose();
-    _wiredScannerFocusNode.dispose();
     super.dispose();
   }
 
@@ -258,7 +242,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   }
 
   /// Validates an EPC against GS1 standards and database existence
-  Future<void> _validateAndAddEPC(String epc, {bool isManual = false, bool isWiredScanner = false}) async {
+  Future<void> _validateAndAddEPC(String epc, {bool isManual = false}) async {
     final validator = OperationEpcScanValidator(_validationService!);
     setState(() => _isLoading = true);
 
@@ -278,8 +262,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
         _scannedEPCs.add(epc);
         if (isManual) {
           _manualEntryController.clear();
-        } else if (isWiredScanner) {
-          _wiredScannerController.clear();
         }
       });
     } catch (e) {
@@ -304,13 +286,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     final epc = _manualEntryController.text.trim();
     if (epc.isNotEmpty) {
       _validateAndAddEPC(epc, isManual: true);
-    }
-  }
-
-  void _handleWiredScannerInput(String value) {
-    final epc = value.trim();
-    if (epc.isNotEmpty) {
-      _validateAndAddEPC(epc, isWiredScanner: true);
     }
   }
 
@@ -384,79 +359,10 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.keyboard, color: Colors.green),
-                const SizedBox(width: 8),
-                const Text('Wired Scanner Input'),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _isWiredScannerActive ? Colors.green[100] : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _isWiredScannerActive ? Colors.green : Colors.grey,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _isWiredScannerActive ? 'Ready' : 'Inactive',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _isWiredScannerActive ? Colors.green[800] : Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Click in the field below and scan with your wired barcode scanner',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _wiredScannerController,
-              focusNode: _wiredScannerFocusNode,
-              decoration: const InputDecoration(
-                hintText: 'Focus here and scan with wired scanner...',
-                prefixIcon: Icon(Icons.qr_code_scanner),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                // Handle real-time input from wired scanner
-                if (value.isNotEmpty && (value.endsWith('\n') || value.endsWith('\r'))) {
-                  _handleWiredScannerInput(value.replaceAll(RegExp(r'[\n\r]'), ''));
-                }
-              },
-              onSubmitted: _handleWiredScannerInput,
-              onTap: () {
-                setState(() => _isWiredScannerActive = true);
-              },
-              onEditingComplete: () {
-                setState(() => _isWiredScannerActive = false);
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tip: Most wired scanners send an Enter key after scanning',
-              style: TextStyle(color: Colors.grey[500], fontSize: 10),
-            ),
-          ],
+        child: BarcodeScanner(
+          title: 'Scan Item',
+          allowedFormats: const ['SGTIN', 'SSCC'],
+          onScanResult: _onScanResult,
         ),
       ),
     );
@@ -798,10 +704,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
                         onSelected: (selected) {
                           if (selected) {
                             setState(() => _scanningMode = ScanningMode.wired);
-                            // Focus the wired scanner field when selected
-                            Future.delayed(const Duration(milliseconds: 100), () {
-                              _wiredScannerFocusNode.requestFocus();
-                            });
                           }
                         },
                       ),

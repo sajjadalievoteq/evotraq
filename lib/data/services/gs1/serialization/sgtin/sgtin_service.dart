@@ -386,7 +386,15 @@ class SGTINService {
       final data = json.decode(response.data);
       return {
         SgtinServiceConstants.rContent:       (data[SgtinServiceConstants.rContent] as List?)
-                               ?.map((item) => SGTIN.fromJson(item))
+                               ?.map((item) {
+                                 if (item is! Map<String, dynamic>) return null;
+                                 try {
+                                   return SGTIN.fromJson(item);
+                                 } catch (_) {
+                                   return null;
+                                 }
+                               })
+                               .whereType<SGTIN>()
                                .toList() ??
                            [],
         SgtinServiceConstants.rTotalElements: data[SgtinServiceConstants.rTotalElements] ?? 0,

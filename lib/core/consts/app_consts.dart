@@ -150,6 +150,10 @@ class Constants {
   static const String opPackingCreateRoute = '/operations/packing/create';
   static const String opPackingDetailRoute =
       '/operations/packing/:operationId';
+  static const String opUnpackingRoute = '/operations/unpacking';
+  static const String opUnpackingCreateRoute = '/operations/unpacking/create';
+  static const String opUnpackingDetailRoute =
+      '/operations/unpacking/:operationId';
   static const String opCommissioningRoute = '/operations/commissioning';
   static const String opCommissioningNewRoute = '/operations/commissioning/new';
   static const String opCommissioningDetailRoute =

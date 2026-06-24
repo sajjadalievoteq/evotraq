@@ -83,6 +83,11 @@ class ApiException implements Exception {
   }
 
   String? _messageFromStructuredBody(Map<String, dynamic> jsonBody) {
+    final message = jsonBody['message'];
+    if (message != null && message.toString().isNotEmpty) {
+      return message.toString();
+    }
+
     final fieldErrors = jsonBody['fieldErrors'];
     if (fieldErrors is Map && fieldErrors.isNotEmpty) {
       return fieldErrors.entries
@@ -97,11 +102,6 @@ class ApiException implements Exception {
 
     if (errors is Map && errors.isNotEmpty) {
       return errors.values.map((e) => e.toString()).join('\n');
-    }
-
-    final message = jsonBody['message'];
-    if (message != null && message.toString().isNotEmpty) {
-      return message.toString();
     }
 
     final error = jsonBody['error'];

@@ -8,8 +8,10 @@ class AdminCbvVocabularyState extends Equatable {
     this.status = AdminCbvVocabularyStatus.initial,
     this.bizSteps = const [],
     this.dispositions = const [],
+    this.pairMap = const {},
     this.togglingCodes = const {},
     this.deletingCodes = const {},
+    this.pairingKeys = const {},
     this.isCreating = false,
     this.error,
   });
@@ -18,11 +20,17 @@ class AdminCbvVocabularyState extends Equatable {
   final List<CbvVocabularyItem> bizSteps;
   final List<CbvVocabularyItem> dispositions;
 
+  /// bizStep short code → list of valid disposition short codes (from backend).
+  final Map<String, List<String>> pairMap;
+
   /// Codes currently being PATCH'd (toggle) — drives per-item spinner.
   final Set<String> togglingCodes;
 
   /// Codes currently being DELETE'd — drives per-item spinner.
   final Set<String> deletingCodes;
+
+  /// "bizCode|dispCode" keys currently being toggled in the pair table.
+  final Set<String> pairingKeys;
 
   /// True while a POST create call is in-flight.
   final bool isCreating;
@@ -46,8 +54,10 @@ class AdminCbvVocabularyState extends Equatable {
     AdminCbvVocabularyStatus? status,
     List<CbvVocabularyItem>? bizSteps,
     List<CbvVocabularyItem>? dispositions,
+    Map<String, List<String>>? pairMap,
     Set<String>? togglingCodes,
     Set<String>? deletingCodes,
+    Set<String>? pairingKeys,
     bool? isCreating,
     String? error,
     bool clearError = false,
@@ -56,8 +66,10 @@ class AdminCbvVocabularyState extends Equatable {
       status: status ?? this.status,
       bizSteps: bizSteps ?? this.bizSteps,
       dispositions: dispositions ?? this.dispositions,
+      pairMap: pairMap ?? this.pairMap,
       togglingCodes: togglingCodes ?? this.togglingCodes,
       deletingCodes: deletingCodes ?? this.deletingCodes,
+      pairingKeys: pairingKeys ?? this.pairingKeys,
       isCreating: isCreating ?? this.isCreating,
       error: clearError ? null : error ?? this.error,
     );
@@ -68,8 +80,10 @@ class AdminCbvVocabularyState extends Equatable {
         status,
         bizSteps,
         dispositions,
+        pairMap,
         togglingCodes,
         deletingCodes,
+        pairingKeys,
         isCreating,
         error,
       ];

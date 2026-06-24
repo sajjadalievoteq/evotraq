@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/features/user/presentation/widgets/responsive_modules_row.dart';
 
 enum AppLayoutBreakpoint { compact, medium, expanded, large }
 

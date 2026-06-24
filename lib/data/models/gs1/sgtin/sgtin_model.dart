@@ -14,6 +14,8 @@ class SGTIN extends Equatable {
   final ItemStatus status;
   final GLN? currentLocation;
   final SSCC? currentSSCC;
+  /// SSCC container code when the API returns a plain string (not a nested object).
+  final String? currentSsccCode;
   final String? regulatoryMarket;
   final String? regulatoryStatus;
   final String? decommissionedReason;
@@ -59,6 +61,7 @@ class SGTIN extends Equatable {
     required this.status,
     this.currentLocation,
     this.currentSSCC,
+    this.currentSsccCode,
     this.regulatoryMarket,
     this.regulatoryStatus,
     this.decommissionedReason,
@@ -98,7 +101,7 @@ class SGTIN extends Equatable {
 
     return SGTIN(
       id: id,
-      gtinCode: json['gtin'] ?? json['gtinCode'] ?? '',
+      gtinCode: _parseGtinCode(json),
       serialNumber: json['serialNumber'] ?? '',
       expiryDate: _parseDateTime(json['expiryDate']),
       batchLotNumber: json['batchLotNumber'],
@@ -106,8 +109,9 @@ class SGTIN extends Equatable {
       bestBeforeDate: _parseDateTime(json['bestBeforeDate']),
       status: _parseItemStatus(json['status']),
       currentLocation: _parseCurrentLocation(json),
-      currentSSCC: json['currentSSCC'] != null
-          ? SSCC.fromJson(json['currentSSCC'])
+      currentSsccCode: _parseCurrentSsccCode(json['currentSSCC']),
+      currentSSCC: json['currentSSCC'] is Map<String, dynamic>
+          ? SSCC.fromJson(json['currentSSCC'] as Map<String, dynamic>)
           : null,
       regulatoryMarket: json['regulatoryMarket'],
       regulatoryStatus: json['regulatoryStatus'],
@@ -137,7 +141,7 @@ class SGTIN extends Equatable {
       serialGuessingProbability: (json['serialGuessingProbability'] as num?)?.toDouble(),
       serialEntropySeed: json['serialEntropySeed'] as String?,
       createdBy: json['createdBy'] as String?,
-      pharmaExtension: json['pharmaExtension'] != null
+      pharmaExtension: json['pharmaExtension'] is Map<String, dynamic>
           ? SGTINPharmaceuticalExtensionModel.fromJson(
               json['pharmaExtension'] as Map<String, dynamic>)
           : null,
@@ -155,7 +159,9 @@ class SGTIN extends Equatable {
       if (bestBeforeDate != null) 'bestBeforeDate': _formatDateWithTimezone(bestBeforeDate!),
       'status': status.name,
       if (currentLocation != null) 'currentLocationGLN': currentLocation!.glnCode,
-      if (currentSSCC != null) 'currentSSCC': currentSSCC!.id,
+      if (currentSsccCode != null) 'currentSSCC': currentSsccCode,
+      if (currentSSCC != null && currentSsccCode == null)
+        'currentSSCC': currentSSCC!.id,
       if (regulatoryMarket != null) 'regulatoryMarket': regulatoryMarket,
       if (regulatoryStatus != null) 'regulatoryStatus': regulatoryStatus,
       if (decommissionedReason != null) 'decommissionedReason': decommissionedReason,
@@ -199,6 +205,7 @@ class SGTIN extends Equatable {
     ItemStatus? status,
     GLN? currentLocation,
     SSCC? currentSSCC,
+    String? currentSsccCode,
     String? regulatoryMarket,
     String? regulatoryStatus,
     String? decommissionedReason,
@@ -240,6 +247,7 @@ class SGTIN extends Equatable {
       status: status ?? this.status,
       currentLocation: currentLocation ?? this.currentLocation,
       currentSSCC: currentSSCC ?? this.currentSSCC,
+      currentSsccCode: currentSsccCode ?? this.currentSsccCode,
       regulatoryMarket: regulatoryMarket ?? this.regulatoryMarket,
       regulatoryStatus: regulatoryStatus ?? this.regulatoryStatus,
       decommissionedReason: decommissionedReason ?? this.decommissionedReason,
@@ -285,7 +293,8 @@ class SGTIN extends Equatable {
   @override
   List<Object?> get props => [
         id, gtinCode, serialNumber, expiryDate, batchLotNumber, productionDate,
-        bestBeforeDate, status, currentLocation, currentSSCC, regulatoryMarket,
+        bestBeforeDate, status, currentLocation, currentSSCC, currentSsccCode,
+        regulatoryMarket,
         regulatoryStatus, decommissionedReason, decommissionedDate, createdAt,
         updatedAt, epcUri, gs1DigitalLinkUri, commissionedAt,
         commissioningReadpointGln, commissioningEventId, expiryDateTime,
@@ -295,6 +304,23 @@ class SGTIN extends Equatable {
         alertCount, serialGuessingProbability, serialEntropySeed, createdBy,
         pharmaExtension,
       ];
+
+  static String _parseGtinCode(Map<String, dynamic> json) {
+    final gtin = json['gtin'];
+    if (gtin is String) return gtin;
+    if (gtin is Map<String, dynamic>) {
+      return (gtin['gtinCode'] ?? gtin['code'] ?? '').toString();
+    }
+    return (json['gtinCode'] ?? '').toString();
+  }
+
+  static String? _parseCurrentSsccCode(dynamic value) {
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+    if (value is Map<String, dynamic>) {
+      return (value['ssccCode'] ?? value['sscc'])?.toString();
+    }
+    return null;
+  }
 
   static DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
@@ -325,8 +351,8 @@ class SGTIN extends Equatable {
         active: true,
       );
     }
-    if (json['currentLocation'] != null) {
-      return GLN.fromJson(json['currentLocation']);
+    if (json['currentLocation'] is Map<String, dynamic>) {
+      return GLN.fromJson(json['currentLocation'] as Map<String, dynamic>);
     }
     return null;
   }

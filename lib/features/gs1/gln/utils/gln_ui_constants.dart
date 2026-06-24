@@ -154,7 +154,7 @@ abstract final class GlnUiConstants {
   static const labelParentGln = 'Parent GLN';
   static const hintParentGln =
       '13-digit parent (e.g. legal entity for a function)';
-  static const labelGlnExtensionAi254 = 'GLN extension component (AI 254)';
+  static const labelGlnExtensionAi254 = 'GLN extension component';
   static const helperGlnExtensionAi254 =
       'Internal sub-location — max 20 chars; pairs with physical GLN';
 
@@ -279,7 +279,7 @@ abstract final class GlnValidationConstants {
       'Use digits with optional + prefix (spaces/parentheses allowed)';
 
   static String extensionAi254Max(int max) =>
-      'Extension component must be at most $max characters (GS1 AI 254)';
+      'Extension component must be at most $max characters';
   static const extensionAi254Charset =
       'Use letters, digits, and - _ . / & + only (GS1 character set)';
 

@@ -153,16 +153,22 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
     }
 
     final Widget validationIcon = _validationStatus == ValidationStatus.valid
-      ? const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 18,
-        )
-      : const Icon(
-          Icons.error,
-          color: Colors.red,
-          size: 18,
-        );
+      ? Padding(
+        padding: const EdgeInsets.only(right: 5),
+        child: const Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 18,
+          ),
+      )
+      : Padding(
+      padding: const EdgeInsets.only(right: 5),
+        child: const Icon(
+            Icons.error,
+            color: Colors.red,
+            size: 18,
+          ),
+      );
     
     final Widget tooltipIcon = Tooltip(
       message: _validationStatus == ValidationStatus.valid 

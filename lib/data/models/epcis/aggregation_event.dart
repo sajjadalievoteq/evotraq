@@ -56,6 +56,7 @@ class AggregationEvent extends EPCISEvent {
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
+    json['eventType'] = 'AggregationEvent';
     if (parentID.isNotEmpty) {
       json['parentID'] = parentID;
     }
@@ -117,7 +118,7 @@ class AggregationEvent extends EPCISEvent {
     }
     
     return AggregationEvent(
-      id: json['id'],
+      id: json['id']?.toString(),
       eventId: json['eventId'] ?? '',
       eventTime: json['eventTime'] != null ? DateTime.parse(json['eventTime']) : DateTime.now(),
       recordTime: json['recordTime'] != null ? DateTime.parse(json['recordTime']) : DateTime.now(),

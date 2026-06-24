@@ -16,7 +16,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
 /// Screen for creating or editing Transaction Events

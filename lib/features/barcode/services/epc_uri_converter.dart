@@ -27,19 +27,25 @@ class EPCURIConverter {
   /// Returns null if conversion fails
   static String? convertToEPCUri(String barcode) {
     if (barcode.isEmpty) return null;
-    
-    // If already in EPC URI format, return as-is
-    if (barcode.startsWith('urn:epc:id:')) {
+
+    // If already in EPC URI format (URN), return as-is
+    if (barcode.startsWith('urn:epc:id:') || barcode.startsWith('urn:epc:idpat:')) {
       return barcode;
     }
-    
+
+    // GS1 Digital Link URL — parse identifiers directly from the URL path without
+    // passing to GS1BarcodeParser, which misparses URL separators as AI values.
+    if (barcode.startsWith('https://id.gs1.org/')) {
+      return _convertGs1DlToEpcUri(barcode);
+    }
+
     // IMPORTANT: Check for raw SSCC format FIRST (18 digits) before GS1 parsing
     // This prevents 18-digit SSCC codes from being misinterpreted as GTINs
     if (RegExp(r'^\d{18}$').hasMatch(barcode)) {
       debugPrint('EPCURIConverter: Detected raw 18-digit SSCC: $barcode');
       return convertSSCCToEPCUri(barcode);
     }
-    
+
     // Try to parse as GS1 barcode
     final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
     
@@ -237,28 +243,43 @@ class EPCURIConverter {
            sglnPattern.hasMatch(uri);
   }
   
-  /// Extract GTIN from an SGTIN EPC URI
+  /// Extract GTIN-14 from an SGTIN EPC URI.
+  ///
+  /// SGTIN URN structure: urn:epc:id:sgtin:<GCP>.<indicatorDigit+itemRef>.<serial>
+  ///
+  /// The second dot-segment already contains the indicator digit as its first
+  /// character.  The GTIN-14 body (13 chars) is therefore:
+  ///   indicatorDigit(1) + GCP(n) + itemRef(remaining)
+  /// NOT '0' + GCP + fullSecondSegment (which would be 14 chars before the check).
+  ///
+  /// Check digit uses GS1 Mod-10: rightmost body digit × 3 (matching
+  /// GtinFormat.calculateCheckDigitForBody).
   static String? extractGTINFromEPCUri(String epcUri) {
     if (!epcUri.startsWith('urn:epc:id:sgtin:')) return null;
-    
+
     try {
       final parts = epcUri.substring('urn:epc:id:sgtin:'.length).split('.');
       if (parts.length >= 2) {
-        String companyPrefix = parts[0];
-        String itemReference = parts[1];
-        
-        // Reconstruct GTIN (without check digit - would need to calculate)
-        String gtinWithoutCheck = '0$companyPrefix$itemReference';
-        
-        // Calculate check digit
+        final gcp = parts[0];
+        final indicatorPlusRef = parts[1];
+        if (indicatorPlusRef.isEmpty) return null;
+
+        // GTIN-14 body: indicator(1) + GCP(n) + itemRef = 13 chars for 6-digit GCP
+        final indicator = indicatorPlusRef[0];
+        final itemRef = indicatorPlusRef.substring(1);
+        final body = '$indicator$gcp$itemRef';
+
+        // GS1 Mod-10: rightmost digit × 3, alternating left
         int sum = 0;
-        for (int i = 0; i < gtinWithoutCheck.length; i++) {
-          int digit = int.parse(gtinWithoutCheck[i]);
-          sum += (i % 2 == 0) ? digit : digit * 3;
+        bool x3 = true;
+        for (int i = body.length - 1; i >= 0; i--) {
+          final d = int.parse(body[i]);
+          sum += x3 ? d * 3 : d;
+          x3 = !x3;
         }
-        int checkDigit = (10 - (sum % 10)) % 10;
-        
-        return '$gtinWithoutCheck$checkDigit';
+        final checkDigit = (10 - (sum % 10)) % 10;
+
+        return '$body$checkDigit';
       }
     } catch (e) {
       debugPrint('EPCURIConverter: Error extracting GTIN from EPC URI: $e');
@@ -266,6 +287,52 @@ class EPCURIConverter {
     return null;
   }
   
+  /// Parse a GS1 Digital Link URL and convert to the appropriate EPC URI.
+  ///
+  /// GS1BarcodeParser cannot handle DL URLs because its normalizer does not
+  /// recognise the `https://id.gs1.org/` scheme and falls through to a
+  /// digit-pattern matcher that slurps URL path separators into identifier
+  /// values (e.g. GTIN starts with `/`), causing int.parse to throw.
+  ///
+  /// Supported DL forms:
+  ///   SGTIN instance: https://id.gs1.org/01/<gtin14>/21/<serial>
+  ///   SGTIN class:    https://id.gs1.org/01/<gtin14>
+  ///   SSCC:           https://id.gs1.org/00/<sscc18>
+  static String? _convertGs1DlToEpcUri(String dlUrl) {
+    // SGTIN instance (GTIN + serial)
+    final sgtinRe = RegExp(
+      r'^https://id\.gs1\.org/01/(\d{14})/21/([A-Za-z0-9!"%()*+,\-./:;<=>?_`{|}~]+)$',
+      caseSensitive: false,
+    );
+    final sgtinMatch = sgtinRe.firstMatch(dlUrl);
+    if (sgtinMatch != null) {
+      return convertGTINSerialToEPCUri(sgtinMatch.group(1)!, sgtinMatch.group(2)!);
+    }
+
+    // SGTIN class (GTIN only, no serial)
+    final gtinClassRe = RegExp(
+      r'^https://id\.gs1\.org/01/(\d{14})$',
+      caseSensitive: false,
+    );
+    final gtinClassMatch = gtinClassRe.firstMatch(dlUrl);
+    if (gtinClassMatch != null) {
+      return convertGTINToClassEPCUri(gtinClassMatch.group(1)!);
+    }
+
+    // SSCC
+    final ssccRe = RegExp(
+      r'^https://id\.gs1\.org/00/(\d{18})$',
+      caseSensitive: false,
+    );
+    final ssccMatch = ssccRe.firstMatch(dlUrl);
+    if (ssccMatch != null) {
+      return convertSSCCToEPCUri(ssccMatch.group(1)!);
+    }
+
+    debugPrint('EPCURIConverter: Unrecognised GS1 DL URL: $dlUrl');
+    return null;
+  }
+
   /// Extract Serial Number from an SGTIN EPC URI
   static String? extractSerialFromEPCUri(String epcUri) {
     if (!epcUri.startsWith('urn:epc:id:sgtin:')) return null;

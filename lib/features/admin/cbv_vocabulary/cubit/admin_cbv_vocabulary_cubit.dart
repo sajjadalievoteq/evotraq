@@ -37,6 +37,7 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
         status: AdminCbvVocabularyStatus.loaded,
         bizSteps: session.bizSteps,
         dispositions: session.dispositions,
+        pairMap: session.bizStepValidDispositions,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -105,7 +106,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
   Future<void> createBizStep({
     required String code,
     required String label,
-    required String group,
     required String urn,
     required bool enabled,
     required String cbvVersion,
@@ -115,7 +115,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       final item = await _service.createBizStep(
         code: code,
         label: label,
-        group: group,
         urn: urn,
         enabled: enabled,
         cbvVersion: cbvVersion,
@@ -134,7 +133,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
   Future<void> createDisposition({
     required String code,
     required String label,
-    required String group,
     required String urn,
     required bool enabled,
     required String cbvVersion,
@@ -144,7 +142,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       final item = await _service.createDisposition(
         code: code,
         label: label,
-        group: group,
         urn: urn,
         enabled: enabled,
         cbvVersion: cbvVersion,
@@ -210,6 +207,84 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       ));
       rethrow;
     }
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Pair management
+  // ──────────────────────────────────────────────────────────────────────────
+
+  Future<void> addPair(String bizCode, String dispCode) async {
+    final key = '$bizCode|$dispCode';
+    if (state.pairingKeys.contains(key)) return;
+
+    // Optimistic update
+    final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: true);
+    emit(state.copyWith(
+      pairMap: updated,
+      pairingKeys: {...state.pairingKeys, key},
+    ));
+
+    try {
+      await _service.addPair(bizCode, dispCode);
+      emit(state.copyWith(
+        pairingKeys: {...state.pairingKeys}..remove(key),
+      ));
+      _vocabCubit.refresh();
+    } catch (e) {
+      final reverted = _pairMapWith(state.pairMap, bizCode, dispCode, add: false);
+      emit(state.copyWith(
+        pairMap: reverted,
+        pairingKeys: {...state.pairingKeys}..remove(key),
+      ));
+      rethrow;
+    }
+  }
+
+  Future<void> removePair(String bizCode, String dispCode) async {
+    final key = '$bizCode|$dispCode';
+    if (state.pairingKeys.contains(key)) return;
+
+    // Optimistic update
+    final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: false);
+    emit(state.copyWith(
+      pairMap: updated,
+      pairingKeys: {...state.pairingKeys, key},
+    ));
+
+    try {
+      await _service.removePair(bizCode, dispCode);
+      emit(state.copyWith(
+        pairingKeys: {...state.pairingKeys}..remove(key),
+      ));
+      _vocabCubit.refresh();
+    } catch (e) {
+      final reverted = _pairMapWith(state.pairMap, bizCode, dispCode, add: true);
+      emit(state.copyWith(
+        pairMap: reverted,
+        pairingKeys: {...state.pairingKeys}..remove(key),
+      ));
+      rethrow;
+    }
+  }
+
+  Map<String, List<String>> _pairMapWith(
+    Map<String, List<String>> current,
+    String bizCode,
+    String dispCode, {
+    required bool add,
+  }) {
+    final copy = {
+      for (final e in current.entries) e.key: List<String>.from(e.value),
+    };
+    if (add) {
+      copy.putIfAbsent(bizCode, () => []);
+      if (!copy[bizCode]!.contains(dispCode)) {
+        copy[bizCode]!.add(dispCode);
+      }
+    } else {
+      copy[bizCode]?.remove(dispCode);
+    }
+    return copy;
   }
 
   // ──────────────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
 
-import 'package:traqtrace_app/features/epcis/presentation/object_events/presentation/utilities/shared/object_event_route_constants.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
 
 import '../../../data/services/product_journey_service.dart';
 

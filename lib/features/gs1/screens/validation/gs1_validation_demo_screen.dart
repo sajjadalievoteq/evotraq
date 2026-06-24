@@ -241,7 +241,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Application Identifier (AI) Validation',
+          'Application Identifier Validation',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -249,7 +249,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
         DropdownButtonFormField<String>(
           value: _selectedAI,
           decoration: const InputDecoration(
-            labelText: 'Select AI',
+            labelText: 'Select identifier',
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
@@ -270,7 +270,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
         ValidatedTextField(
           controller: _aiValueController,
           decoration: InputDecoration(
-            hintText: 'Enter value for AI ($_selectedAI)',
+            hintText: 'Enter value for ($_selectedAI)',
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),

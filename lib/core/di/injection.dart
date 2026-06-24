@@ -36,7 +36,8 @@ import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import '../../data/services/gs1/gtin/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
-import 'package:traqtrace_app/data/services/epcis/packing_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
 import '../../data/services/product_journey_service.dart';
 import 'package:traqtrace_app/data/services/epcis/receiving_operation_service.dart';
 import '../../data/services/reference_data_validation_service.dart';
@@ -161,6 +162,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<PackingOperationService>(
     () => PackingOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<UnpackingOperationService>(
+    () => UnpackingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<CommissioningOperationService>(

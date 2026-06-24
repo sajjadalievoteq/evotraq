@@ -21,10 +21,30 @@ class AggregationEventService {
   }
 
   Future<AggregationEvent> getAggregationEventByIdentifier(String id) async {
+    final trimmed = id.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('event identifier must not be empty');
+    }
+
     final headers = await _getHeaders();
+
+    // Numeric database PK (legacy / direct links).
+    if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+      final response = await _dioService.get(
+        '$_baseUrl/$trimmed',
+        headers: headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+      if (response.statusCode == 200) {
+        return AggregationEvent.fromJson(json.decode(response.data));
+      }
+    }
+
+    // EPCIS eventId — query param handles urn:uuid:… and client-generated ids.
     final response = await _dioService.get(
       '$_baseUrl/event-id',
-      queryParameters: {'eventId': id},
+      queryParameters: {'eventId': trimmed},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -32,11 +52,11 @@ class AggregationEventService {
 
     if (response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
-    } else {
-      throw Exception(
-        'Failed to get aggregation event: ${response.statusCode}',
-      );
     }
+
+    throw Exception(
+      'Failed to get aggregation event: ${response.statusCode}',
+    );
   }
 
   Future<AggregationEvent> createAggregationEvent(

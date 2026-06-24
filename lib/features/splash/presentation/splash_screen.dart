@@ -33,26 +33,25 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final authCheck = context.read<AuthCubit>().checkAuth();
-    final vocabLoad = context.read<CbvVocabularyCubit>().loadVocabulary();
+
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
       await Future.wait([
         authCheck,
-        vocabLoad,
+      context.read<CbvVocabularyCubit>().loadVocabulary(),
         precacheImage(
           const AssetImage(AppAssets.traqBackgroundPng),
           context,
         ),
         precacheImage(const AssetImage(AppAssets.logo), context),
         minDelay,
-      ]).timeout(const Duration(seconds: 5));
+      ]).timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('Pre-caching or auth check took too long or failed: $e');
     } finally {
       if (mounted) {
         setState(() => _canNavigate = true);
-
         final authState = context.read<AuthCubit>().state;
         _checkAndNavigate(authState);
       }

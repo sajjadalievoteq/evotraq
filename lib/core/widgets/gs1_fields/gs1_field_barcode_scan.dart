@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/widgets/aggregation_barcode_scan_dialog.dart';
+import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
@@ -43,7 +43,7 @@ abstract final class Gs1FieldBarcodeScan {
     BuildContext context,
     Gs1FieldScanKind kind,
   ) async {
-    final result = await AggregationBarcodeScanDialog.show(
+    final result = await GS1BarcodeScanDialog.show(
       context,
       title: _dialogTitle(kind),
       allowedFormats: _allowedFormats(kind),

@@ -373,7 +373,7 @@ class GS1BarcodeParser {
     
     parsedData.forEach((ai, value) {
       // Get description or use AI as fallback
-      final description = _applicationIdentifiers[ai] ?? 'AI ($ai)';
+      final description = _applicationIdentifiers[ai] ?? '($ai)';
       
       // Format certain AIs specially
       if (ai == '17') {

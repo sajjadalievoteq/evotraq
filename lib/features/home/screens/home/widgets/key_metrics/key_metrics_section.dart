@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/home/utils/home_strings.dart';
+import 'package:traqtrace_app/features/home/screens/home/widgets/key_metrics/widgets/key_metrics_grid.dart';
+import 'package:traqtrace_app/core/widgets/traq_section_title.dart';
+import 'package:traqtrace_app/core/layout/layout_manager.dart';
+
+class KeyMetricsSection extends StatelessWidget {
+  const KeyMetricsSection({super.key, required this.layout});
+
+  final AppLayoutData layout;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const TraqSectionTitle(label: HomeStrings.sectionKeyMetrics),
+        const SizedBox(height: 12),
+        KeyMetricsGrid(layout: layout),
+      ],
+    );
+  }
+}

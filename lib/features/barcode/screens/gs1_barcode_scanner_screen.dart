@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/services/scanner_detection_service.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/data/services/gs1_barcode_api_service.dart';
+import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
 
@@ -32,12 +36,16 @@ class GS1BarcodeScannerScreen extends StatefulWidget {
   /// Single = stop scanning after first hit. Continuous = keep scanning.
   final ScanMode scanMode;
 
+  /// When true, renders without [Scaffold] for use inside a [Dialog].
+  final bool embedded;
+
   const GS1BarcodeScannerScreen({
     Key? key,
     this.title,
     this.onBarcodeDetected,
     this.verifyWithBackend = true,
     this.scanMode = ScanMode.single,
+    this.embedded = false,
   }) : super(key: key);
 
   @override
@@ -47,6 +55,7 @@ class GS1BarcodeScannerScreen extends StatefulWidget {
 
 class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   GS1BarcodeApiService? _apiService;
+  late final ScannerDetectionService _scannerDetection;
 
   BarcodeDetails? _details;
   Map<String, dynamic>? _verificationResult;
@@ -62,6 +71,9 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
 
   /// Whether wired scanner keyboard-listener is active.
   bool _isWiredActive = false;
+
+  /// Timer that auto-confirms the scan after 2 seconds.
+  Timer? _autoConfirmTimer;
 
   /// Buffer for wired-scanner keystrokes.
   String _wiredBuffer = '';
@@ -79,15 +91,30 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   @override
   void initState() {
     super.initState();
+    _scannerDetection = ScannerDetectionService();
+    _scannerDetection.addListener(_onScannerDetectionChanged);
     try {
       _apiService = getIt<GS1BarcodeApiService>();
     } catch (_) {
       // DI not configured for this service — verification skipped.
     }
+
+    if (_scannerDetection.supportsWired) {
+      _isWiredActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _wiredFocusNode.requestFocus();
+      });
+    }
+  }
+
+  void _onScannerDetectionChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _autoConfirmTimer?.cancel();
+    _scannerDetection.removeListener(_onScannerDetectionChanged);
     _manualController.dispose();
     _manualFocusNode.dispose();
     _wiredFocusNode.dispose();
@@ -98,9 +125,13 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   // Core detection handler
   // ---------------------------------------------------------------------------
 
-  Future<void> _handleDetection(String raw) async {
+  Future<void> _handleDetection(String raw, {bool fromWiredScanner = false}) async {
     if (_isProcessing) return;
     if (_details != null && widget.scanMode == ScanMode.single) return;
+
+    if (fromWiredScanner) {
+      _scannerDetection.onWiredScannerBurst();
+    }
 
     setState(() {
       _isProcessing = true;
@@ -126,6 +157,13 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
           _isProcessing = false;
           _manualController.clear();
         });
+
+        if (widget.onBarcodeDetected != null) {
+          _autoConfirmTimer?.cancel();
+          _autoConfirmTimer = Timer(const Duration(seconds: 2), () {
+            if (mounted && _details != null) _useBarcode();
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -138,15 +176,27 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   }
 
   void _scanAgain() {
+    _autoConfirmTimer?.cancel();
+    _autoConfirmTimer = null;
+    _scannerDetection.resetWiredConfirmation();
     setState(() {
       _details = null;
       _verificationResult = null;
       _errorMessage = null;
       _isCameraActive = false;
-      _isWiredActive = false;
       _wiredBuffer = '';
       _scannerKey = UniqueKey();
+      if (_scannerDetection.supportsWired) {
+        _isWiredActive = true;
+      } else {
+        _isWiredActive = false;
+      }
     });
+    if (_isWiredActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _wiredFocusNode.requestFocus();
+      });
+    }
   }
 
   void _useBarcode() {
@@ -165,16 +215,57 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title ?? 'Scan GS1 Barcode'),
-      ),
-      body: _details != null ? _buildDetailsView() : _buildScannerView(),
+    final body = _details != null ? _buildDetailsView() : _buildScannerView();
+
+    if (!widget.embedded) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title ?? 'Scan GS1 Barcode'),
+        ),
+        body: body,
+      );
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+          child: Row(
+            children: [
+              Icon(Icons.qr_code_scanner, color: colorScheme.primary, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.title ?? 'Scan GS1 Barcode',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Close',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+        Divider(height: 1, color: colorScheme.outlineVariant),
+        Expanded(child: body),
+      ],
     );
   }
 
   Widget _buildScannerView() {
     final colorScheme = Theme.of(context).colorScheme;
+    final isScannable = _scannerDetection.isScannable;
+    final showCameraButton =
+        _scannerDetection.hasCamera && _cameraSupported;
+    final showWiredToggle = _scannerDetection.supportsWired &&
+        _scannerDetection.hasCamera &&
+        _cameraSupported;
 
     return KeyboardListener(
       focusNode: _wiredFocusNode,
@@ -184,7 +275,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
           if (event.logicalKey == LogicalKeyboardKey.enter ||
               event.logicalKey == LogicalKeyboardKey.numpadEnter) {
             if (_wiredBuffer.isNotEmpty) {
-              _handleDetection(_wiredBuffer);
+              _handleDetection(_wiredBuffer, fromWiredScanner: true);
               _wiredBuffer = '';
             }
           } else if (event.character != null &&
@@ -195,79 +286,80 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
       },
       child: Column(
         children: [
-          // ── Scanner-mode buttons ─────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(
-              children: [
-                if (_cameraSupported) ...[
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _isCameraActive = !_isCameraActive;
-                          if (_isCameraActive) {
-                            _isWiredActive = false;
-                            _wiredBuffer = '';
-                            _scannerKey = UniqueKey();
-                          }
-                        });
-                      },
-                      icon: Icon(
-                        _isCameraActive
-                            ? Icons.camera_alt
-                            : Icons.camera_alt_outlined,
-                        size: 16,
+          if (isScannable && (showCameraButton || showWiredToggle))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  if (showCameraButton) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isCameraActive = !_isCameraActive;
+                            if (_isCameraActive) {
+                              _isWiredActive = false;
+                              _wiredBuffer = '';
+                              _scannerKey = UniqueKey();
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          _isCameraActive
+                              ? Icons.camera_alt
+                              : Icons.camera_alt_outlined,
+                          size: 16,
+                        ),
+                        label: Text(
+                          _isCameraActive ? 'Stop Camera' : 'Scan with Camera',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: _isCameraActive
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                                side: BorderSide(color: colorScheme.error),
+                              )
+                            : null,
                       ),
-                      label: Text(
-                        _isCameraActive ? 'Stop Camera' : 'Scan with Camera',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      style: _isCameraActive
-                          ? OutlinedButton.styleFrom(
-                              foregroundColor: colorScheme.error,
-                              side: BorderSide(color: colorScheme.error),
-                            )
-                          : null,
                     ),
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                  ],
+                  if (showWiredToggle)
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isWiredActive = !_isWiredActive;
+                            if (_isWiredActive) {
+                              _isCameraActive = false;
+                              _wiredBuffer = '';
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _wiredFocusNode.requestFocus(),
+                              );
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          _isWiredActive
+                              ? Icons.keyboard
+                              : Icons.keyboard_outlined,
+                          size: 16,
+                        ),
+                        label: Text(
+                          _isWiredActive ? 'Disconnect' : 'Wired Scanner',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: _isWiredActive
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.primary,
+                                side: BorderSide(color: colorScheme.primary),
+                              )
+                            : null,
+                      ),
+                    ),
                 ],
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _isWiredActive = !_isWiredActive;
-                        if (_isWiredActive) {
-                          _isCameraActive = false;
-                          _wiredBuffer = '';
-                          // request focus so keyboard events are captured
-                          WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => _wiredFocusNode.requestFocus());
-                        }
-                      });
-                    },
-                    icon: Icon(
-                      _isWiredActive
-                          ? Icons.keyboard
-                          : Icons.keyboard_outlined,
-                      size: 16,
-                    ),
-                    label: Text(
-                      _isWiredActive ? 'Disconnect' : 'Wired Scanner',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: _isWiredActive
-                        ? OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.primary,
-                            side: BorderSide(color: colorScheme.primary),
-                          )
-                        : null,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
 
           // ── Camera view ──────────────────────────────────────────────
           if (_isCameraActive && _cameraSupported)
@@ -286,31 +378,12 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
               ),
             ),
 
-          // ── Wired scanner status banner ───────────────────────────────
           if (_isWiredActive)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.sensors,
-                        color: colorScheme.onPrimaryContainer, size: 20),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Wired scanner active — scan a barcode now',
-                      style: TextStyle(
-                          color: colorScheme.onPrimaryContainer,
-                          fontSize: 13),
-                    ),
-                  ],
-                ),
+            Expanded(
+              flex: 3,
+              child: _WiredScannerReadyView(
+                availability: _scannerDetection.availability,
+                isProcessing: _isProcessing,
               ),
             ),
 
@@ -340,6 +413,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
       isProcessing: _isProcessing,
       onScanAgain: _scanAgain,
       onUse: widget.onBarcodeDetected != null ? _useBarcode : null,
+      autoConfirm: widget.onBarcodeDetected != null,
     );
   }
 }
@@ -394,13 +468,14 @@ class _TypeChip extends StatelessWidget {
 // Details view
 // =============================================================================
 
-class _BarcodeDetailsView extends StatelessWidget {
+class _BarcodeDetailsView extends StatefulWidget {
   const _BarcodeDetailsView({
     required this.details,
     required this.isProcessing,
     required this.onScanAgain,
     this.verificationResult,
     this.onUse,
+    this.autoConfirm = false,
   });
 
   final BarcodeDetails details;
@@ -408,24 +483,80 @@ class _BarcodeDetailsView extends StatelessWidget {
   final bool isProcessing;
   final VoidCallback onScanAgain;
   final VoidCallback? onUse;
+  final bool autoConfirm;
+
+  @override
+  State<_BarcodeDetailsView> createState() => _BarcodeDetailsViewState();
+}
+
+class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _countdownController;
+
+  @override
+  void initState() {
+    super.initState();
+    _countdownController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+      value: 1.0,
+    );
+    if (widget.autoConfirm) {
+      _countdownController.animateTo(0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _countdownController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final rows = details.displayRows;
+    final rows = widget.details.displayRows;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Auto-confirm countdown bar ───────────────────────────────
+          if (widget.autoConfirm) ...[
+            AnimatedBuilder(
+              animation: _countdownController,
+              builder: (_, __) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LinearProgressIndicator(
+                    value: _countdownController.value,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    color: colorScheme.primary,
+                    minHeight: 3,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Auto-confirming in ${(_countdownController.value * 2).ceil()}s…',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // ── Type + validity badges ───────────────────────────────────
           Wrap(
             spacing: 8,
             runSpacing: 6,
             children: [
-              _TypeChip(type: details.type),
-              if (details.isValid)
+              _TypeChip(type: widget.details.type),
+              if (widget.details.isValid)
                 Chip(
                   avatar: Icon(Icons.check_circle, size: 14,
                       color: Colors.green.shade700),
@@ -455,7 +586,7 @@ class _BarcodeDetailsView extends StatelessWidget {
 
           // GS1 element string (monospace, subtle)
           SelectableText(
-            details.gs1ElementString,
+            widget.details.gs1ElementString,
             style: TextStyle(
               fontFamily: 'monospace',
               fontSize: 11,
@@ -521,31 +652,31 @@ class _BarcodeDetailsView extends StatelessWidget {
           ),
 
           // ── Backend verification ─────────────────────────────────────
-          if (verificationResult != null) ...[
+          if (widget.verificationResult != null) ...[
             const SizedBox(height: 12),
-            _VerificationCard(result: verificationResult!),
+            _VerificationCard(result: widget.verificationResult!),
           ],
 
           const SizedBox(height: 24),
 
           // ── Action buttons ───────────────────────────────────────────
-          if (isProcessing)
+          if (widget.isProcessing)
             const Center(child: CircularProgressIndicator())
           else
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: onScanAgain,
+                    onPressed: widget.onScanAgain,
                     icon: const Icon(Icons.qr_code_scanner, size: 18),
                     label: const Text('Scan Again'),
                   ),
                 ),
-                if (onUse != null) ...[
+                if (widget.onUse != null) ...[
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton.icon(
-                      onPressed: onUse,
+                      onPressed: widget.onUse,
                       icon: const Icon(Icons.check, size: 18),
                       label: const Text('Use Barcode'),
                     ),
@@ -704,36 +835,139 @@ class _ManualInputSection extends StatelessWidget {
 }
 
 // =============================================================================
-// Web placeholder
+// Wired scanner ready view
 // =============================================================================
 
-class _WebCameraPlaceholder extends StatelessWidget {
-  const _WebCameraPlaceholder();
+class _WiredScannerReadyView extends StatefulWidget {
+  const _WiredScannerReadyView({
+    required this.availability,
+    required this.isProcessing,
+  });
+
+  final ScannerAvailability availability;
+  final bool isProcessing;
+
+  @override
+  State<_WiredScannerReadyView> createState() => _WiredScannerReadyViewState();
+}
+
+class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _scale = Tween<double>(begin: 0.92, end: 1.08).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+    _opacity = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final connected = widget.availability == ScannerAvailability.wiredConnected;
+
     return Container(
-      color: Colors.black87,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.camera_alt_outlined,
-                size: 64, color: Colors.white.withOpacity(0.25)),
-            const SizedBox(height: 12),
-            Text(
-              'Camera not available on web',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Use the input below to enter a barcode manually',
-              style: TextStyle(
-                  color: Colors.white.withOpacity(0.35), fontSize: 12),
-            ),
-          ],
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: connected
+              ? colorScheme.primary.withValues(alpha: 0.4)
+              : colorScheme.outline.withValues(alpha: 0.25),
         ),
       ),
+      child: widget.isProcessing
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedBuilder(
+                  animation: _pulse,
+                  builder: (_, __) => Transform.scale(
+                    scale: _scale.value,
+                    child: Opacity(
+                      opacity: _opacity.value,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: (connected
+                                  ? colorScheme.primary
+                                  : colorScheme.outline)
+                              .withValues(alpha: 0.08),
+                        ),
+                        child: Icon(
+                          Icons.qr_code_scanner,
+                          size: 48,
+                          color: connected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Point scanner at barcode',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  connected
+                      ? 'Scanner ready — waiting for scan'
+                      : 'Scan a barcode to confirm connection',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: connected ? Colors.green : Colors.amber,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      connected ? 'Scanner active' : 'Awaiting first scan',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.45),
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 }

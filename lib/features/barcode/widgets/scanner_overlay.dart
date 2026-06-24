@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Widget that displays a scanner overlay with a targeting rectangle
-/// to help users position barcodes correctly for scanning
+/// Scanner overlay with dimmed background, transparent cutout, and corner accents.
 class ScannerOverlay extends StatelessWidget {
+  const ScannerOverlay({
+    super.key,
+    this.borderColor = Colors.green,
+    this.borderWidth = 3.0,
+    this.borderRadius = 12.0,
+    this.cutOutWidth = 300.0,
+    this.cutOutHeight = 200.0,
+    this.overlayColor = const Color(0x99000000),
+  });
+
   final Color borderColor;
   final double borderWidth;
   final double borderRadius;
@@ -10,177 +19,94 @@ class ScannerOverlay extends StatelessWidget {
   final double cutOutHeight;
   final Color overlayColor;
 
-  const ScannerOverlay({
-    Key? key,
-    this.borderColor = Colors.green,
-    this.borderWidth = 3.0,
-    this.borderRadius = 12.0,
-    this.cutOutWidth = 300.0,
-    this.cutOutHeight = 200.0,
-    this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Background overlay - semi-transparent
-        ColorFiltered(
-          colorFilter: ColorFilter.mode(
-            overlayColor,
-            BlendMode.srcOut,
-          ),
-          child: Stack(
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  color: Colors.transparent,
-                  backgroundBlendMode: BlendMode.dstOut,
-                ),
-                child: CustomPaint(
-                  painter: _OverlayPainter(
-                    cutOutWidth: cutOutWidth,
-                    cutOutHeight: cutOutHeight,
-                    borderColor: borderColor,
-                    borderWidth: borderWidth,
-                    borderRadius: borderRadius,
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        // Corner markers
-        Center(
-          child: Container(
-            width: cutOutWidth,
-            height: cutOutHeight,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.transparent),
-            ),
-            child: Stack(
-              children: [
-                // Top left corner
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  child: _buildCorner(true, true),
-                ),
-                // Top right corner
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: _buildCorner(false, true),
-                ),
-                // Bottom left corner
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: _buildCorner(true, false),
-                ),
-                // Bottom right corner
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: _buildCorner(false, false),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCorner(bool isLeft, bool isTop) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        border: Border(
-          left: isLeft
-              ? BorderSide(color: borderColor, width: borderWidth)
-              : BorderSide.none,
-          top: isTop
-              ? BorderSide(color: borderColor, width: borderWidth)
-              : BorderSide.none,
-          right: !isLeft
-              ? BorderSide(color: borderColor, width: borderWidth)
-              : BorderSide.none,
-          bottom: !isTop
-              ? BorderSide(color: borderColor, width: borderWidth)
-              : BorderSide.none,
-        ),
+    return CustomPaint(
+      painter: _ScannerOverlayPainter(
+        cutOutWidth: cutOutWidth,
+        cutOutHeight: cutOutHeight,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        borderRadius: borderRadius,
+        overlayColor: overlayColor,
       ),
     );
   }
 }
 
-/// Custom painter for the scanner overlay
-class _OverlayPainter extends CustomPainter {
-  final double cutOutWidth;
-  final double cutOutHeight;
-  final Color borderColor;
-  final double borderWidth;
-  final double borderRadius;
-
-  _OverlayPainter({
+class _ScannerOverlayPainter extends CustomPainter {
+  const _ScannerOverlayPainter({
     required this.cutOutWidth,
     required this.cutOutHeight,
     required this.borderColor,
     required this.borderWidth,
     required this.borderRadius,
+    required this.overlayColor,
   });
+
+  final double cutOutWidth;
+  final double cutOutHeight;
+  final Color borderColor;
+  final double borderWidth;
+  final double borderRadius;
+  final Color overlayColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double centerX = size.width / 2;
-    final double centerY = size.height / 2;
-    final double rectLeft = centerX - (cutOutWidth / 2);
-    final double rectTop = centerY - (cutOutHeight / 2);
-    
-    // Draw the transparent cutout rectangle
-    final cutOutRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        rectLeft,
-        rectTop,
-        cutOutWidth,
-        cutOutHeight,
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..color = overlayColor,
+    );
+
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final cutRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(cx, cy),
+        width: cutOutWidth,
+        height: cutOutHeight,
       ),
       Radius.circular(borderRadius),
     );
-    
-    final backgroundPaint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
-      ..style = PaintingStyle.fill;
-      
-    final cutOutPaint = Paint()
-      ..color = Colors.transparent
-      ..style = PaintingStyle.fill
-      ..blendMode = BlendMode.clear;
-      
-    final borderPaint = Paint()
+    canvas.drawRRect(cutRect, Paint()..blendMode = BlendMode.clear);
+
+    canvas.restore();
+
+    canvas.drawRRect(
+      cutRect,
+      Paint()
+        ..color = borderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth,
+    );
+
+    const cornerLength = 24.0;
+    final p = Paint()
       ..color = borderColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth;
-    
-    // Draw background
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      backgroundPaint,
-    );
-    
-    // Draw cutout
-    canvas.drawRRect(cutOutRect, cutOutPaint);
-    
-    // Draw border
-    canvas.drawRRect(cutOutRect, borderPaint);
+      ..strokeWidth = borderWidth + 1
+      ..strokeCap = StrokeCap.round;
+
+    final l = cutRect.left;
+    final t = cutRect.top;
+    final r = cutRect.right;
+    final b = cutRect.bottom;
+
+    canvas.drawLine(Offset(l, t + cornerLength), Offset(l, t), p);
+    canvas.drawLine(Offset(l, t), Offset(l + cornerLength, t), p);
+
+    canvas.drawLine(Offset(r - cornerLength, t), Offset(r, t), p);
+    canvas.drawLine(Offset(r, t), Offset(r, t + cornerLength), p);
+
+    canvas.drawLine(Offset(r, b - cornerLength), Offset(r, b), p);
+    canvas.drawLine(Offset(r, b), Offset(r - cornerLength, b), p);
+
+    canvas.drawLine(Offset(l + cornerLength, b), Offset(l, b), p);
+    canvas.drawLine(Offset(l, b), Offset(l, b - cornerLength), p);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(_ScannerOverlayPainter old) => false;
 }

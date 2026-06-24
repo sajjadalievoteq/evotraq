@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/auth/presentation/widget/logout_confirm_dialog.dart';
+import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
 class TraqAppBar extends AppBar {

@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utilities/aggregation_event_form_validators.dart';
+import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 

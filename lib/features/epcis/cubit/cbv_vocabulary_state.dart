@@ -21,6 +21,10 @@ class CbvVocabularyState extends Equatable {
 
   List<CbvVocabularyItem> get bizSteps => session?.bizSteps ?? [];
   List<CbvVocabularyItem> get dispositions => session?.dispositions ?? [];
+  Map<String, List<String>> get bizStepValidDispositions =>
+      session?.bizStepValidDispositions ?? const {};
+  Map<String, List<String>> get actionBizStepCodes =>
+      session?.actionBizStepCodes ?? const {};
 
   CbvVocabularyState copyWith({
     CbvVocabularyStatus? status,

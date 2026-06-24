@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/formatters/gs1_input_formatters.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
 class SsccEntryField extends StatelessWidget {
   const SsccEntryField({
@@ -54,12 +54,10 @@ class SsccEntryField extends StatelessWidget {
       setFieldError: setFieldError,
       focusNode: focusNode,
       onEditingComplete: onEditingComplete,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: false,
-        signed: false,
-      ),
-      maxLength: 18,
-      inputFormatters: Gs1InputFormatters.sscc(),
+      // Use text keyboard so URN / DL values typed or pasted render correctly.
+      // For pure-digit entry the smart formatter still restricts to max 18 digits.
+      keyboardType: TextInputType.text,
+      inputFormatters: Gs1InputFormatters.ssccOrUri(),
       onChanged: onChanged,
       suffixIcon: enabled && barcodeScanEnabled
           ? Gs1FieldBarcodeScan.scanSuffixIcon(

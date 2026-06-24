@@ -97,7 +97,7 @@ class OperationEpcScanValidator {
         return OperationEpcScanOutcome.failure(
           rawBarcode: rawBarcode,
           errorMessage:
-              'Barcode missing serial number: $rawBarcode\n\nFor operations, a complete SGTIN with serial number (AI 21) is required.',
+              'Barcode missing serial number: $rawBarcode\n\nFor operations, a complete SGTIN with serial number is required.',
         );
       }
     }
@@ -113,7 +113,7 @@ class OperationEpcScanValidator {
       return OperationEpcScanOutcome.failure(
         rawBarcode: rawBarcode,
         errorMessage:
-            'Invalid barcode format: $rawBarcode\n\nSupported formats:\n- GS1 with AI syntax: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n- SSCC: 18 digits\n- SGTIN URI: urn:epc:id:sgtin:...',
+            'Invalid barcode format: $rawBarcode\n\nSupported formats:\n- GS1 element string: (01)GTIN(21)SERIAL(17)EXPIRY(10)BATCH\n- SSCC: 18 digits\n- SGTIN URI: urn:epc:id:sgtin:...',
       );
     }
 

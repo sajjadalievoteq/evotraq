@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gtin_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
 class QuantityEntryField extends StatelessWidget {
   const QuantityEntryField({

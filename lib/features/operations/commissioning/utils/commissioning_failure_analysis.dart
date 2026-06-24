@@ -1,6 +1,6 @@
-import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/presentation/models/commissioning_failure_category.dart';
-import 'package:traqtrace_app/features/operations/commissioning/presentation/models/commissioning_failure_category_info.dart';
+﻿import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_failure_category.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_failure_category_info.dart';
 
 CommissioningFailureCategory categorizeCommissioningError(String? message) {
   final m = (message ?? '').toLowerCase();

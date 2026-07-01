@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class IntegrityStatisticsCard extends StatelessWidget {
   final IntegrityStatistics integrity;
@@ -54,7 +56,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Hash Coverage',
                     integrity.hashCoveragePercentage,
                     integrity.totalEventsWithHashes,
-                    Icons.fingerprint,
+                    AppAssets.iconFingerprint,
                     Colors.blue,
                   ),
                 ),
@@ -64,7 +66,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Signature Coverage',
                     integrity.signatureCoveragePercentage,
                     integrity.totalEventsWithSignatures,
-                    Icons.verified,
+                    AppAssets.iconVerified,
                     Colors.green,
                   ),
                 ),
@@ -79,7 +81,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                   child: _buildIntegrityMetric(
                     'Audit Trail Entries',
                     '${integrity.auditTrailCount}',
-                    Icons.history,
+                    AppAssets.iconHistory,
                     Colors.orange,
                   ),
                 ),
@@ -88,7 +90,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                   child: _buildIntegrityMetric(
                     'Immutable Events',
                     '${integrity.immutableEventsCount}',
-                    Icons.lock,
+                    AppAssets.iconLock,
                     Colors.purple,
                   ),
                 ),
@@ -118,8 +120,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Recent Integrity Violations',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  Icon(
-                    Icons.warning,
+                  TraqIcon(AppAssets.iconAlert,
                     color: Colors.red,
                     size: 20,
                   ),
@@ -149,8 +150,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.schedule,
+                  TraqIcon(AppAssets.iconClock,
                     color: Colors.grey[600],
                     size: 20,
                   ),
@@ -173,7 +173,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCoverageMetric(String title, double percentage, int count, IconData icon, Color color) {
+  Widget _buildCoverageMetric(String title, double percentage, int count, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -183,7 +183,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             '${percentage.toStringAsFixed(1)}%',
@@ -213,7 +213,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIntegrityMetric(String title, String value, IconData icon, Color color) {
+  Widget _buildIntegrityMetric(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -223,7 +223,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             value,
@@ -281,7 +281,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(
+            TraqIcon(
               _getSeverityIcon(violation.severity),
               color: _getSeverityColor(violation.severity),
               size: 20,
@@ -346,16 +346,16 @@ class IntegrityStatisticsCard extends StatelessWidget {
     }
   }
 
-  IconData _getSeverityIcon(String severity) {
+  String _getSeverityIcon(String severity) {
     switch (severity.toUpperCase()) {
       case 'HIGH':
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case 'MEDIUM':
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case 'LOW':
-        return Icons.info;
+        return AppAssets.iconInfo;
       default:
-        return Icons.help;
+        return AppAssets.iconHelpCircle;
     }
   }
 

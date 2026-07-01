@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -21,34 +22,48 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _navigated = false;
   bool _initialized = false;
   bool _canNavigate = false;
+  bool _assetsReady = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      Future.microtask(() => _initializeApp());
+      // Precache images first — before any other async work — so the
+      // background and logo are in the image cache when _assetsReady flips
+      // to true and CardWithBackgroundWidget / Image.asset first render.
+      _precacheAndInit();
     }
+  }
+
+  Future<void> _precacheAndInit() async {
+    // Precache both assets before revealing the splash UI.
+    await Future.wait([
+      precacheImage(const AssetImage(AppAssets.traqBackgroundPng), context)
+          .catchError((_) {}),
+      precacheImage(const AssetImage(AppAssets.logo), context)
+          .catchError((_) {}),
+    ]);
+
+    if (!mounted) return;
+    setState(() => _assetsReady = true);
+
+    // Now kick off auth + vocabulary + minimum display time in parallel.
+    await _initializeApp();
   }
 
   Future<void> _initializeApp() async {
     final authCheck = context.read<AuthCubit>().checkAuth();
-
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
       await Future.wait([
         authCheck,
-      context.read<CbvVocabularyCubit>().loadVocabulary(),
-        precacheImage(
-          const AssetImage(AppAssets.traqBackgroundPng),
-          context,
-        ),
-        precacheImage(const AssetImage(AppAssets.logo), context),
+        context.read<CbvVocabularyCubit>().loadVocabulary(),
         minDelay,
       ]).timeout(const Duration(seconds: 10));
     } catch (e) {
-      debugPrint('Pre-caching or auth check took too long or failed: $e');
+      debugPrint('Auth check or vocabulary load took too long or failed: $e');
     } finally {
       if (mounted) {
         setState(() => _canNavigate = true);
@@ -96,6 +111,12 @@ class _SplashScreenState extends State<SplashScreen> {
     final size = MediaQuery.sizeOf(context);
     final displayHeight = size.height > 0 ? size.height : 800.0;
 
+    // Before assets are in the image cache, render a plain background that
+    // matches the card so there is no visible first-frame flash.
+    if (!_assetsReady) {
+      return Scaffold(backgroundColor: c.background, body: const SizedBox.expand());
+    }
+
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
@@ -111,14 +132,14 @@ class _SplashScreenState extends State<SplashScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      width: displayHeight * 0.12,
-                      height: displayHeight * 0.12,
+                      width: displayHeight * 0.1,
+                      height: displayHeight * 0.1,
                       child: Image.asset(
                         AppAssets.logo,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.broken_image,
+                          return TraqIcon(
+                            AppAssets.iconBrokenImage,
                             size: 64,
                             color: primary,
                           );

@@ -8,7 +8,10 @@ import 'package:traqtrace_app/data/models/operations/receiving/receiving_respons
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to display Receiving operation details.
 class ReceivingOperationDetailScreen extends StatefulWidget {
@@ -37,7 +40,6 @@ class _ReceivingOperationDetailScreenState
   String? _errorMessage;
   GLN? _sourceGLNDetails;
   GLN? _receivingGlnDetails;
-  bool _showAllEpcs = false;
 
   @override
   void initState() {
@@ -54,7 +56,6 @@ class _ReceivingOperationDetailScreenState
     if ((idChanged || selectionOpened) &&
         widget.operationId != null &&
         !widget.awaitingSelection) {
-      _showAllEpcs = false;
       _startLoadIfNeeded(force: true);
     }
   }
@@ -102,6 +103,11 @@ class _ReceivingOperationDetailScreenState
     }
   }
 
+  void _onOperationUpdated(ReceivingResponse updated) {
+    setState(() => _operation = updated);
+    _loadGLNDetails();
+  }
+
   Future<void> _loadGLNDetails() async {
     if (_operation == null) return;
 
@@ -109,11 +115,17 @@ class _ReceivingOperationDetailScreenState
       final glnService = getIt<GLNService>();
       GLN? source;
       GLN? destination;
-      if (_operation!.sourceGLN != null) {
-        source = await glnService.getGLNByCode(_operation!.sourceGLN!);
+      final sourceCode = _operation!.sourceGLN != null
+          ? EpcisGlnValidators.parseGlnToCode(_operation!.sourceGLN!)
+          : null;
+      final receivingCode = _operation!.receivingGLN != null
+          ? EpcisGlnValidators.parseGlnToCode(_operation!.receivingGLN!)
+          : null;
+      if (sourceCode != null && sourceCode.isNotEmpty) {
+        source = await glnService.getGLNByCode(sourceCode);
       }
-      if (_operation!.receivingGLN != null) {
-        destination = await glnService.getGLNByCode(_operation!.receivingGLN!);
+      if (receivingCode != null && receivingCode.isNotEmpty) {
+        destination = await glnService.getGLNByCode(receivingCode);
       }
       if (mounted) {
         setState(() {
@@ -136,9 +148,8 @@ class _ReceivingOperationDetailScreenState
       operation: _operation,
       sourceGlnDetails: _sourceGLNDetails,
       receivingGlnDetails: _receivingGlnDetails,
-      showAllEpcs: _showAllEpcs,
-      onShowAllEpcs: () => setState(() => _showAllEpcs = true),
       onRetry: _loadOperationDetails,
+      onOperationUpdated: _onOperationUpdated,
     );
 
     if (widget.embedded) return content;
@@ -161,13 +172,13 @@ class _ReceivingOperationDetailScreenState
       appBar: TraqAppBar(
         context,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: TraqIcon(AppAssets.iconChevronL),
           onPressed: () => context.go(Constants.opReceivingRoute),
         ),
         title: Text(_operation?.receivingReference ?? 'Receiving Detail'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadOperationDetails,
           ),
         ],

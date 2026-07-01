@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -77,13 +79,9 @@ class StatusRail extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.circle,
-                      size: 10,
-                      color: healthy
+                    TraqIcon(AppAssets.iconCircle, color: healthy
                           ? context.colors.success
-                          : context.colors.warning,
-                    ),
+                          : context.colors.warning, size: 10),
                     const SizedBox(width: 6),
                     Text(
                       healthy

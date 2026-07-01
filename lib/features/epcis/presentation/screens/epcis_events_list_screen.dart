@@ -7,6 +7,8 @@ import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/error_display.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to display a list of EPCIS events with filtering and pagination
 class EPCISEventsListScreen extends StatefulWidget {
@@ -102,24 +104,24 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
         title: const Text('EPCIS Events'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.date_range),
+            icon: const TraqIcon(AppAssets.iconCalendar),
             onPressed: _selectDateRange,
             tooltip: 'Filter by date',
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const TraqIcon(AppAssets.iconFilter),
             onPressed: () {
               _showAdvancedFilterDialog();
             },
             tooltip: 'Advanced filters',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadEvents,
             tooltip: 'Refresh',
           ),
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: TraqIcon(AppAssets.iconSearch),
             onPressed: _showEPCSearchDialog,
             tooltip: 'Search by EPC',          ),
         ],
@@ -200,7 +202,7 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                           ],
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.arrow_forward),
+                          icon: TraqIcon(AppAssets.iconChevronR),
                           onPressed: () => _navigateToEventDetails(event),
                         ),
                         onTap: () => _navigateToEventDetails(event),
@@ -219,7 +221,7 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.chevron_left),
+                        icon: const TraqIcon(AppAssets.iconChevronL),
                         onPressed: _currentPage > 0
                             ? () {
                                 setState(() {
@@ -234,7 +236,7 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.chevron_right),
+                        icon: const TraqIcon(AppAssets.iconChevronR),
                         onPressed: _currentPage < state.totalPages - 1
                             ? () {
                                 setState(() {
@@ -255,7 +257,7 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
         onPressed: () {
           _showEventTypeSelectionDialog();
         },
-        child: const Icon(Icons.add),
+        child: TraqIcon(AppAssets.iconPlus),
         tooltip: 'Create new event',
       ),
     );
@@ -403,7 +405,8 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                 Navigator.pop(context);
                 context.go('/epcis/aggregation-events/new');
               },
-            ),            ListTile(
+            ),
+            ListTile(
               title: const Text('Transaction Event'),
               onTap: () {
                 Navigator.pop(context);

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/utils/gs1_validator.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GS1ValidationScreen extends StatefulWidget {
   const GS1ValidationScreen({Key? key}) : super(key: key);
@@ -231,9 +234,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
       setState(() {
         _isRunningBatchTests = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error running tests: ${e.toString()}')),
-      );
+      context.showError('Error running tests: ${e.toString()}');
     }
   }
 
@@ -351,7 +352,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.play_arrow),
+                          TraqIcon(AppAssets.iconArrowR),
                           SizedBox(width: 8),
                           Text('Run Batch Validation Tests'),
                         ],
@@ -616,8 +617,8 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      result.isValid ? Icons.check_circle : Icons.error,
+                                    TraqIcon(
+                                      result.isValid ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                                       size: 16,
                                       color: result.isValid ? Colors.green : Colors.red,
                                     ),
@@ -655,10 +656,10 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                _allTestsPassed() 
-                                    ? Icons.check_circle 
-                                    : Icons.warning,
+                              TraqIcon(
+                                _allTestsPassed()
+                                    ? AppAssets.iconCheckCircle
+                                    : AppAssets.iconAlert,
                                 color: _allTestsPassed() ? Colors.green : Colors.orange,
                               ),
                               const SizedBox(width: 8),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class CommissioningDetailAwaitingSelection extends StatelessWidget {
   const CommissioningDetailAwaitingSelection({super.key});
@@ -9,7 +11,7 @@ class CommissioningDetailAwaitingSelection extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.play_for_work_outlined, size: 80, color: Colors.grey[300]),
+          TraqIcon(AppAssets.iconDownload, color: Colors.grey[300], size: 80),
           const SizedBox(height: 16),
           Text(
             'Select an operation to view details',

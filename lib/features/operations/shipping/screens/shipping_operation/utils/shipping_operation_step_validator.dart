@@ -6,13 +6,9 @@ class ShippingOperationStepValidator {
   ShippingOperationStepValidator._();
 
   static String? validateReferenceStep({
-    required String shippingReference,
     required GLN? sourceGln,
     required GLN? destinationGln,
   }) {
-    if (shippingReference.trim().isEmpty) {
-      return 'Please enter a Shipping Reference.';
-    }
     if (sourceGln == null) {
       return 'Please select Ship From Location (source GLN).';
     }
@@ -37,14 +33,14 @@ class ShippingOperationStepValidator {
 
   static String? validateItemsStep(List<String> scannedEpcs) {
     if (scannedEpcs.isEmpty) {
-      return 'Scan at least one SGTIN or SSCC before continuing.';
+      return 'Scan at least one SGTIN, SSCC, or GTIN (lot-based) before continuing.';
     }
 
     for (final epc in scannedEpcs) {
       if (!_isValidEpc(epc)) {
         return '"$epc" is not a valid GS1 EPC.\n'
-            'Expected format: urn:epc:id:sgtin:… or urn:epc:id:sscc:…, '
-            'or a scannable SGTIN/SSCC barcode.';
+            'Expected format: urn:epc:id:sgtin:…, urn:epc:id:sscc:…, '
+            'urn:epc:class:lgtin:…, or a scannable SGTIN/SSCC/GTIN barcode.';
       }
     }
 
@@ -70,7 +66,9 @@ class ShippingOperationStepValidator {
 
   static bool _isValidEpc(String epc) {
     if (epc.startsWith('urn:epc:id:sgtin:') ||
-        epc.startsWith('urn:epc:id:sscc:')) {
+        epc.startsWith('urn:epc:id:sscc:') ||
+        epc.startsWith('urn:epc:class:lgtin:') ||
+        epc.startsWith('urn:epc:idpat:sgtin:')) {
       return true;
     }
     return OperationEpcScanValidator.resolveEpcType(epc) !=

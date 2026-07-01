@@ -126,6 +126,14 @@ class AggregationEventFormValidators {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return 'Empty EPC value';
 
+    if (trimmed.toLowerCase().startsWith('urn:epc:class:lgtin:')) {
+      return _validateLgtinUri(trimmed);
+    }
+
+    if (trimmed.toLowerCase().startsWith('urn:epc:idpat:sgtin:')) {
+      return _validateLgtinUri(trimmed.replaceFirst('idpat:sgtin:', 'class:lgtin:'));
+    }
+
     if (trimmed.toLowerCase().startsWith('urn:epc:id:sgtin:')) {
       return sgtin_validators.validateEpcUri(trimmed);
     }
@@ -152,7 +160,23 @@ class AggregationEventFormValidators {
       return null;
     }
 
-    return 'Invalid child EPC — use SGTIN EPC URI, GS1 (01)…(21)…, or Digital Link';
+    return 'Invalid child EPC — use SGTIN, SSCC, or GTIN (lot-based) EPC URI, GS1 barcode, or Digital Link';
+  }
+
+  static String? _validateLgtinUri(String uri) {
+    final lower = uri.toLowerCase();
+    if (!lower.startsWith('urn:epc:class:lgtin:')) {
+      return 'Invalid LGTIN URI';
+    }
+    final parts = uri.substring('urn:epc:class:lgtin:'.length).split('.');
+    if (parts.length < 3) {
+      return 'LGTIN URI must include company prefix, item reference, and lot';
+    }
+    final gtin = '${parts[0]}${parts[1]}';
+    final gtinError = GtinFieldValidators.validateGtinCode(gtin);
+    if (gtinError != null) return gtinError;
+    if (parts[2].trim().isEmpty) return 'LGTIN URI must include a lot number';
+    return null;
   }
 
   static String? _validateSgtinElementString(String trimmed) {
@@ -162,14 +186,24 @@ class AggregationEventFormValidators {
     }
     final gtin = parsed['GTIN']?.toString();
     final serial = parsed['SERIAL']?.toString();
-    if (gtin == null || serial == null) {
-      return 'Child barcode must include (01) GTIN and (21) serial';
+    final lot = parsed['BATCH'] ?? parsed['LOT']?.toString();
+    if (gtin == null) {
+      return 'Child barcode must include (01) GTIN';
     }
-    final gtinError = GtinFieldValidators.validateGtinCode(gtin);
-    if (gtinError != null) return gtinError;
-    final serialError = sgtin_validators.validateSerialNumber(serial);
-    if (serialError != null) return serialError;
-    return null;
+    if (serial != null) {
+      final gtinError = GtinFieldValidators.validateGtinCode(gtin);
+      if (gtinError != null) return gtinError;
+      final serialError = sgtin_validators.validateSerialNumber(serial);
+      if (serialError != null) return serialError;
+      return null;
+    }
+    if (lot != null) {
+      final gtinError = GtinFieldValidators.validateGtinCode(gtin);
+      if (gtinError != null) return gtinError;
+      if (lot.trim().isEmpty) return 'Lot number must not be empty';
+      return null;
+    }
+    return 'Child barcode must include (21) serial or (10) lot';
   }
 
   static String? validateParentEpc(String? value, String action) {

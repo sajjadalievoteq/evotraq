@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -261,7 +263,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
                 filled: true,
                 fillColor: Colors.grey[100],
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const TraqIcon(AppAssets.iconCopy),
                   onPressed: () => _copyToClipboard(_sgtinEpcResultController.text),
                 ),
               ),
@@ -323,7 +325,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
                 filled: true,
                 fillColor: Colors.grey[100],
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const TraqIcon(AppAssets.iconCopy),
                   onPressed: () => _copyToClipboard(_ssccEpcResultController.text),
                 ),
               ),
@@ -396,7 +398,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
                 filled: true,
                 fillColor: Colors.grey[100],
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const TraqIcon(AppAssets.iconCopy),
                   onPressed: () => _copyToClipboard(_glnEpcResultController.text),
                 ),
               ),
@@ -480,7 +482,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
                 filled: true,
                 fillColor: Colors.grey[100],
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const TraqIcon(AppAssets.iconCopy),
                   onPressed: () => _copyToClipboard(_epcConversionResultController.text),
                 ),
               ),
@@ -545,7 +547,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
                 filled: true,
                 fillColor: Colors.grey[100],
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.copy),
+                  icon: const TraqIcon(AppAssets.iconCopy),
                   onPressed: () => _copyToClipboard(_gs1ToEpcResultController.text),
                 ),
               ),

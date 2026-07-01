@@ -3,6 +3,7 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class Gs1ListSearchBar extends StatelessWidget {
   const Gs1ListSearchBar({
@@ -28,11 +29,16 @@ class Gs1ListSearchBar extends StatelessWidget {
   final VoidCallback? onRefresh;
   final VoidCallback? onQuickFilters;
 
+  static const double _fieldIconSize = 18;
+
   @override
   Widget build(BuildContext context) {
     return AppLayoutBuilder(
       builder: (context, layout) {
         final c = context.colors;
+        final fieldIconColor = Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
         return Card(
           child: DecoratedBox(
 
@@ -70,14 +76,22 @@ class Gs1ListSearchBar extends StatelessWidget {
                             if (onRefresh != null)
                               IconButton(
                                 onPressed: onRefresh,
-                                icon: const Icon(Icons.refresh),
+                                iconSize: _fieldIconSize,
+                                icon: TraqIcon(
+                                  AppAssets.iconRefresh,
+                                  size: _fieldIconSize,
+                                ),
                                 color: Colors.white,
                                 tooltip: 'Refresh',
                               ),
                             if (onQuickFilters != null)
                               IconButton(
                                 onPressed: onQuickFilters,
-                                icon: const Icon(Icons.filter_list),
+                                iconSize: _fieldIconSize,
+                                icon: TraqIcon(
+                                  AppAssets.iconFilter,
+                                  size: _fieldIconSize,
+                                ),
                                 color: Colors.white,
                                 tooltip: 'Quick Filters',
                               ),
@@ -88,21 +102,34 @@ class Gs1ListSearchBar extends StatelessWidget {
                         onChanged: onQueryChanged,
                         decoration: InputDecoration(
                           hintText: hintText,
-                          prefixIcon: Icon(Icons.search,color: Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,),
+                          prefixIcon: TraqIcon(
+                            AppAssets.iconSearch,
+                            size: _fieldIconSize,
+                            color: fieldIconColor,
+                          ),
+
                           suffixIcon: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (controller.text.isNotEmpty)
                                 IconButton(
                                   onPressed: onClear,
-                                  icon: const Icon(Icons.clear),
-                                  color:Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
+                                  iconSize: _fieldIconSize,
+                                  icon: TraqIcon(
+                                    AppAssets.iconX,
+                                    size: _fieldIconSize,
+                                  ),
+                                  color: fieldIconColor,
                                   tooltip: 'Clear',
                                 ),
                               IconButton(
                                 onPressed: onToggleAdvancedFilters,
-                                icon: const Icon(Icons.tune),
-                                color:Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
+                                iconSize: _fieldIconSize,
+                                icon: TraqIcon(
+                                  AppAssets.iconFilter,
+                                  size: _fieldIconSize,
+                                ),
+                                color: fieldIconColor,
                                 tooltip: showAdvancedFilters
                                     ? 'Hide Advanced Filters'
                                     : 'Advanced Filters',
@@ -121,16 +148,16 @@ class Gs1ListSearchBar extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12.0),
                             borderSide: BorderSide(color: c.primary, width: 2),
                           ),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.95),
                         ),
                         onSubmitted: (_) => onSearch(),
                       ),
                     ],
                   ),
                 ),
-
               ],
             ),
-
           ),
         );
       },

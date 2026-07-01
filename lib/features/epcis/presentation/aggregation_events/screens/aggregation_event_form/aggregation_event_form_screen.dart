@@ -19,14 +19,12 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_reference_data_checker.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_event_form_body.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_event_form_error_dialog.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_event_form_help_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_missing_reference_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
-import 'package:world_countries/helpers.dart';
 
 import '../../../../../../core/widgets/traq_app_bar.dart';
 import '../../../../mixins/event_form_validation_mixin.dart'

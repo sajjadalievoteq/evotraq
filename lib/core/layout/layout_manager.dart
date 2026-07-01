@@ -157,12 +157,15 @@ class AppResponsiveBody extends StatelessWidget {
         final targetWidth = maxContentWidth ?? layout.width;
         final extraHorizontalMargin =
             (layout.width - targetWidth) > 0 ? (layout.width - targetWidth) / 2 : 0.0;
-        final resolvedPadding = basePadding.add(
+        final resolvedPadding = (padding ?? basePadding).add(
           EdgeInsets.symmetric(horizontal: extraHorizontalMargin),
         );
-        return Align(
-          alignment: alignment,
-          child: _buildChild(context, layout),
+        return Padding(
+          padding: resolvedPadding,
+          child: Align(
+            alignment: alignment,
+            child: _buildChild(context, layout),
+          ),
         );
       },
     );

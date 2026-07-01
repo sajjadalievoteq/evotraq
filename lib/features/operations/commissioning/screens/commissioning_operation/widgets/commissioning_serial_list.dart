@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningSerialList extends StatelessWidget {
   const CommissioningSerialList({
@@ -30,7 +32,7 @@ class CommissioningSerialList extends StatelessWidget {
           ),
           title: Text(serialNumbers[index]),
           trailing: IconButton(
-            icon: const Icon(Icons.close, size: 20),
+            icon: TraqIcon(AppAssets.iconX, size: 20),
             onPressed: () => onRemove(index),
           ),
         ),

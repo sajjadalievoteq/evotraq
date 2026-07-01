@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/co
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_epcis_snapshot_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_lifecycle_status_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_location_custody_card.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_packed_items_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_regulatory_info_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_serial_governance_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_serial_item_identity_card.dart';
@@ -164,6 +165,11 @@ class SgtinDetailFormBody extends StatelessWidget {
                 ),
                 if (loadedSgtin != null && !isCreating)
                   SgtinLocationCustodyCard(
+                    sgtin: loadedSgtin!,
+                    borderColor: borderColor,
+                  ),
+                if (loadedSgtin != null && !isCreating)
+                  SgtinPackedItemsCard(
                     sgtin: loadedSgtin!,
                     borderColor: borderColor,
                   ),

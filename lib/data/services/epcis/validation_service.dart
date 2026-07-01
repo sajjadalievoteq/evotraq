@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' hide ObjectEvent;
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';

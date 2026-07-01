@@ -4,6 +4,8 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class HomeErrorView extends StatelessWidget {
   const HomeErrorView({super.key, required this.message});
@@ -16,7 +18,7 @@ class HomeErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             HomeStrings.loadHomeFailed(message),

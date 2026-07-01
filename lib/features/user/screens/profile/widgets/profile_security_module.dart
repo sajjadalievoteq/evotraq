@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -142,7 +144,7 @@ class _ProfileSecurityModuleState extends State<ProfileSecurityModule> {
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
                   backgroundColor: context.colors.primary,
-                  child: const Icon(Icons.computer, color: Colors.white),
+                  child: const TraqIcon(AppAssets.iconComputer, color: Colors.white),
                 ),
                 title: const Text(UserStrings.currentSessionTitle),
                 subtitle: const Text(UserStrings.currentSessionSubtitle),

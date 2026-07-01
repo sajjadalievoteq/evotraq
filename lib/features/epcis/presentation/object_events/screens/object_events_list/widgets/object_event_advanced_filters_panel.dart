@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventAdvancedFiltersPanel extends StatelessWidget {
   const ObjectEventAdvancedFiltersPanel({
@@ -193,7 +195,7 @@ class _DateRangeRow extends StatelessWidget {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 isDense: true,
-                suffixIcon: Icon(Icons.calendar_today, size: 16),
+                suffixIcon: TraqIcon(AppAssets.iconClock, size: 16),
               ),
               child: Text(
                 value != null
@@ -206,7 +208,7 @@ class _DateRangeRow extends StatelessWidget {
         ),
         if (value != null)
           IconButton(
-            icon: const Icon(Icons.clear, size: 16),
+            icon: TraqIcon(AppAssets.iconX, size: 16),
             onPressed: () => onChanged(null),
           ),
       ],

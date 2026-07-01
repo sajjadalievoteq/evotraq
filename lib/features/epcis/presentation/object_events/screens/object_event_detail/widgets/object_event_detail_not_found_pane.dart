@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
 
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class ObjectEventDetailNotFoundPane extends StatelessWidget {
   const ObjectEventDetailNotFoundPane({super.key, required this.onRetry});
 
@@ -12,8 +15,8 @@ class ObjectEventDetailNotFoundPane extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.search_off_outlined,
+          TraqIcon(
+            AppAssets.iconSearch,
             size: 48,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

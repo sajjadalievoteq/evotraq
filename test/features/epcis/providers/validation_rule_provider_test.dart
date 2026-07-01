@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart';
 
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
@@ -17,11 +16,6 @@ void main() {
   late ValidationRuleCubit cubit;
   late MockValidationRuleService mockService;
   
-  final appConfig = AppConfig(
-    apiBaseUrl: 'https://api.test.com',
-    appName: 'TraqTrace Test',
-    appVersion: '1.0.0',
-  );
 
   group('ValidationRuleProvider Tests', () {
     setUp(() {
@@ -191,10 +185,10 @@ void main() {
       expect(RuleSeverity.WARNING.color, isNotNull);
       expect(RuleSeverity.ERROR.color, isNotNull);
       
-      // Test severity icons are different
-      expect(RuleSeverity.INFO.icon, isNotNull);
-      expect(RuleSeverity.WARNING.icon, isNotNull);
-      expect(RuleSeverity.ERROR.icon, isNotNull);
+      // Test severity icon assets are different
+      expect(RuleSeverity.INFO.iconAsset, isNotNull);
+      expect(RuleSeverity.WARNING.iconAsset, isNotNull);
+      expect(RuleSeverity.ERROR.iconAsset, isNotNull);
     });
   });
 }

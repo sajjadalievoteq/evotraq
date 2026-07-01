@@ -5,6 +5,8 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for viewing partner API usage analytics and audit logs
 class ApiAnalyticsScreen extends StatefulWidget {
@@ -63,7 +65,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
         actions: [
           TextButton.icon(
             onPressed: _selectDateRange,
-            icon: const Icon(Icons.date_range, color: Colors.white),
+            icon: const TraqIcon(AppAssets.iconCalendar, color: Colors.white),
             label: Text(
               _dateRange != null
                   ? '${_formatDate(_dateRange!.start)} - ${_formatDate(_dateRange!.end)}'
@@ -72,15 +74,15 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadData,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.analytics), text: 'Usage Stats'),
-            Tab(icon: Icon(Icons.history), text: 'Audit Logs'),
+            Tab(icon: TraqIcon(AppAssets.iconBarChart), text: 'Usage Stats'),
+            Tab(icon: TraqIcon(AppAssets.iconClock), text: 'Audit Logs'),
           ],
         ),
       ),
@@ -188,24 +190,24 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
   Widget _buildSummaryCards(ApiUsageStats stats) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), Icons.api, Colors.blue)),
+        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), AppAssets.iconApi, Colors.blue)),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Successful', '${stats.successRate.toStringAsFixed(1)}%', Icons.check_circle, Colors.green)),
+        Expanded(child: _buildStatCard('Successful', '${stats.successRate.toStringAsFixed(1)}%', AppAssets.iconCheckCircle, Colors.green)),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Failed', stats.failedRequests.toString(), Icons.error, Colors.red)),
+        Expanded(child: _buildStatCard('Failed', stats.failedRequests.toString(), AppAssets.iconXCircle, Colors.red)),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', Icons.timer, Colors.orange)),
+        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', AppAssets.iconTimer, Colors.orange)),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(String label, String value, String iconAsset, Color color) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 32),
+            TraqIcon(iconAsset, color: color, size: 32),
             const SizedBox(height: 8),
             Text(
               value,
@@ -335,7 +337,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
       child: Column(
         children: stats.topEndpoints.entries.take(5).map((entry) {
           return ListTile(
-            leading: const Icon(Icons.arrow_forward),
+            leading: TraqIcon(AppAssets.iconChevronR),
             title: Text(entry.key),
             trailing: Text(
               '${entry.value} calls',
@@ -355,7 +357,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history_toggle_off, size: 64, color: Colors.grey.shade400),
+            TraqIcon(AppAssets.iconHistory, color: Colors.grey.shade400, size: 64),
             const SizedBox(height: 16),
             const Text('No audit logs found'),
             const SizedBox(height: 8),
@@ -537,7 +539,6 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
       context: context,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
-      initialDateRange: _dateRange,
     );
 
     if (range != null) {

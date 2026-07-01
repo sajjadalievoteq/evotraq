@@ -29,7 +29,7 @@ class EPCURIConverter {
     if (barcode.isEmpty) return null;
 
     // If already in EPC URI format (URN), return as-is
-    if (barcode.startsWith('urn:epc:id:') || barcode.startsWith('urn:epc:idpat:')) {
+    if (barcode.startsWith('urn:epc:')) {
       return barcode;
     }
 
@@ -59,8 +59,17 @@ class EPCURIConverter {
       if (parsed['GTIN'] != null && parsed['SERIAL'] != null) {
         return convertGTINSerialToEPCUri(parsed['GTIN'], parsed['SERIAL']);
       }
+
+      // GTIN + lot → LGTIN instance URI
+      final lot = parsed['BATCH'] ?? parsed['LOT'];
+      if (parsed['GTIN'] != null && lot != null && lot.toString().isNotEmpty) {
+        return convertGTINLotToLGTINEpcUri(
+          parsed['GTIN'].toString(),
+          lot.toString(),
+        );
+      }
       
-      // GTIN without serial - convert to class-level EPC
+      // GTIN without serial — class-level EPC
       if (parsed['GTIN'] != null) {
         return convertGTINToClassEPCUri(parsed['GTIN']);
       }
@@ -164,6 +173,28 @@ class EPCURIConverter {
     }
   }
   
+  /// Converts a GTIN and Lot Number to LGTIN EPC URI
+  ///
+  /// Format: urn:epc:id:lgtin:{companyPrefix}.{itemReference}.{lotNumber}
+  static String? convertGTINLotToLGTINEpcUri(String gtin, String lotNumber) {
+    if (gtin.isEmpty || lotNumber.isEmpty) return null;
+
+    try {
+      final normalizedGtin = gtin.padLeft(14, '0');
+      if (normalizedGtin.length != 14) return null;
+
+      final gcpLength = _resolveGcpLength(normalizedGtin);
+      final companyPrefix = normalizedGtin.substring(1, 1 + gcpLength);
+      final indicatorAndItemRef =
+          normalizedGtin[0] + normalizedGtin.substring(1 + gcpLength, 13);
+
+      return 'urn:epc:id:lgtin:$companyPrefix.$indicatorAndItemRef.$lotNumber';
+    } catch (e) {
+      debugPrint('EPCURIConverter: Error converting GTIN/Lot to LGTIN EPC URI: $e');
+      return null;
+    }
+  }
+
   /// Converts a GTIN to Class-level EPC URI (for product classes, not individual items)
   /// 
   /// Format: urn:epc:idpat:sgtin:{companyPrefix}.{itemReference}.*
@@ -243,17 +274,7 @@ class EPCURIConverter {
            sglnPattern.hasMatch(uri);
   }
   
-  /// Extract GTIN-14 from an SGTIN EPC URI.
-  ///
-  /// SGTIN URN structure: urn:epc:id:sgtin:<GCP>.<indicatorDigit+itemRef>.<serial>
-  ///
-  /// The second dot-segment already contains the indicator digit as its first
-  /// character.  The GTIN-14 body (13 chars) is therefore:
-  ///   indicatorDigit(1) + GCP(n) + itemRef(remaining)
-  /// NOT '0' + GCP + fullSecondSegment (which would be 14 chars before the check).
-  ///
-  /// Check digit uses GS1 Mod-10: rightmost body digit × 3 (matching
-  /// GtinFormat.calculateCheckDigitForBody).
+
   static String? extractGTINFromEPCUri(String epcUri) {
     if (!epcUri.startsWith('urn:epc:id:sgtin:')) return null;
 
@@ -286,18 +307,7 @@ class EPCURIConverter {
     }
     return null;
   }
-  
-  /// Parse a GS1 Digital Link URL and convert to the appropriate EPC URI.
-  ///
-  /// GS1BarcodeParser cannot handle DL URLs because its normalizer does not
-  /// recognise the `https://id.gs1.org/` scheme and falls through to a
-  /// digit-pattern matcher that slurps URL path separators into identifier
-  /// values (e.g. GTIN starts with `/`), causing int.parse to throw.
-  ///
-  /// Supported DL forms:
-  ///   SGTIN instance: https://id.gs1.org/01/<gtin14>/21/<serial>
-  ///   SGTIN class:    https://id.gs1.org/01/<gtin14>
-  ///   SSCC:           https://id.gs1.org/00/<sscc18>
+
   static String? _convertGs1DlToEpcUri(String dlUrl) {
     // SGTIN instance (GTIN + serial)
     final sgtinRe = RegExp(
@@ -317,6 +327,19 @@ class EPCURIConverter {
     final gtinClassMatch = gtinClassRe.firstMatch(dlUrl);
     if (gtinClassMatch != null) {
       return convertGTINToClassEPCUri(gtinClassMatch.group(1)!);
+    }
+
+    // LGTIN (GTIN + lot)
+    final lgtinRe = RegExp(
+      r'^https://id\.gs1\.org/01/(\d{14})/10/([!%-?A-Z_a-z"]+)$',
+      caseSensitive: false,
+    );
+    final lgtinMatch = lgtinRe.firstMatch(dlUrl);
+    if (lgtinMatch != null) {
+      return convertGTINLotToLGTINEpcUri(
+        lgtinMatch.group(1)!,
+        lgtinMatch.group(2)!,
+      );
     }
 
     // SSCC

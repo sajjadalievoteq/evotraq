@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget to display validation errors from the backend
 class ValidationErrorWidget extends StatelessWidget {
@@ -37,7 +39,7 @@ class ValidationErrorWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.red),
+                TraqIcon(AppAssets.iconAlert, color: Colors.red),
                 const SizedBox(width: 8.0),
                 Text(
                   title ?? 'Validation Errors',
@@ -49,7 +51,7 @@ class ValidationErrorWidget extends StatelessWidget {
                 const Spacer(),
                 if (onDismiss != null)
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                     onPressed: onDismiss,
                     tooltip: 'Dismiss',
                   ),
@@ -79,7 +81,7 @@ class ValidationErrorWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.arrow_right, color: Colors.red, size: 20),
+          TraqIcon(AppAssets.iconChevronR, color: Colors.red, size: 20),
           const SizedBox(width: 4.0),
           Expanded(
             child: Text(
@@ -104,7 +106,7 @@ class ValidationErrorWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.arrow_right, color: Colors.red, size: 20),
+              TraqIcon(AppAssets.iconChevronR, color: Colors.red, size: 20),
               const SizedBox(width: 4.0),
               Text(
                 field,

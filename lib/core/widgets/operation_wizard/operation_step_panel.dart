@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Side-by-side desktop step column with header badge, lock overlay, and footer.
 class OperationStepPanel extends StatelessWidget {
@@ -60,7 +62,7 @@ class OperationStepPanel extends StatelessWidget {
                 ),
                 child: isComplete
                     ? const Center(
-                        child: Icon(Icons.check, size: 16, color: Colors.white),
+                        child: TraqIcon(AppAssets.iconCheck, size: 16, color: Colors.white),
                       )
                     : Center(
                         child: Text(
@@ -79,15 +81,12 @@ class OperationStepPanel extends StatelessWidget {
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isLocked
-                        ? cs.onSurface.withOpacity(0.4)
-                        : cs.onSurface,
+
                   ),
                 ),
               ),
               if (isLocked)
-                Icon(
-                  Icons.lock_outline,
+                TraqIcon(AppAssets.iconLock,
                   size: 18,
                   color: cs.onSurface.withOpacity(0.35),
                 ),

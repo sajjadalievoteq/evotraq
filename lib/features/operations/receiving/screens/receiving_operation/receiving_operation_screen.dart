@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -23,8 +23,7 @@ import 'package:traqtrace_app/features/operations/receiving/screens/receiving_op
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_review_step.dart';
-import 'package:traqtrace_app/features/operations/receiving/utils/receiving_scanning_mode.dart';
-import 'package:traqtrace_app/features/operations/receiving/utils/receiving_snackbar.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class ReceivingOperationScreen extends StatefulWidget {
   const ReceivingOperationScreen({
@@ -45,15 +44,14 @@ class ReceivingOperationScreen extends StatefulWidget {
 
 class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   static const _wizardSteps = [
-    OperationStepConfig(label: 'Details', icon: Icons.tag),
-    OperationStepConfig(label: 'Items', icon: Icons.list_alt),
-    OperationStepConfig(label: 'Review', icon: Icons.checklist),
+    OperationStepConfig.details,
+    OperationStepConfig.items,
+    OperationStepConfig.review,
   ];
 
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
-  final _referenceController = TextEditingController();
   final _purchaseOrderController = TextEditingController();
   final _despatchAdviceController = TextEditingController();
   final _receivingAdviceController = TextEditingController();
@@ -62,8 +60,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   final _carrierController = TextEditingController();
   final _trackingController = TextEditingController();
   final _notesController = TextEditingController();
-  final _manualEntryController = TextEditingController();
-
   GLN? _sourceGln;
   GLN? _receivingGln;
   String? _sourceGlnError;
@@ -75,17 +71,9 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   @override
   void initState() {
     super.initState();
-    // Rebuild on every keystroke so _validateStep0Silent() re-evaluates
-    // and the desktop step-2 panel unlocks as soon as all fields are filled.
-    _referenceController.addListener(_onReferenceChanged);
   }
 
-  void _onReferenceChanged() => setState(() {});
-
-  ReceivingScanningMode _scanningMode = ReceivingScanningMode.scanner;
-
   bool _validateStep0Silent() =>
-      _referenceController.text.trim().isNotEmpty &&
       _sourceGln != null &&
       _receivingGln != null &&
       _sourceGln?.glnCode != _receivingGln?.glnCode;
@@ -97,7 +85,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     bool showDocumentSection = true,
   }) {
     return ReceivingReferenceDetailsStep(
-      referenceController: _referenceController,
       sourceGln: _sourceGln,
       receivingGln: _receivingGln,
       sourceGlnError: _sourceGlnError,
@@ -132,13 +119,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     bool? fillHeight,
   }) {
     return ReceivingItemScanStep(
-      receivingReference: _referenceController.text,
       scannedEpcs: _scannedEpcs,
-      scanningMode: _scanningMode,
-      manualEntryController: _manualEntryController,
-      onScanningModeChanged: (mode) => setState(() => _scanningMode = mode),
-      onItemScanResult: _onItemScanResult,
-      onAddManualItem: _addManualItem,
+      onItemAdded: _onItemAdded,
       onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
       onClearAll: () => setState(() => _scannedEpcs.clear()),
       fillHeight: fillHeight ?? embeddedInPanel,
@@ -148,7 +130,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
   ReceivingReviewStep _reviewStep({bool embeddedInPanel = false}) {
     return ReceivingReviewStep(
-      receivingReference: _referenceController.text,
       sourceGln: _sourceGln,
       receivingGln: _receivingGln,
       purchaseOrder: _purchaseOrderController.text,
@@ -168,8 +149,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _referenceController.removeListener(_onReferenceChanged);
-    _referenceController.dispose();
     _purchaseOrderController.dispose();
     _despatchAdviceController.dispose();
     _receivingAdviceController.dispose();
@@ -178,7 +157,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     _carrierController.dispose();
     _trackingController.dispose();
     _notesController.dispose();
-    _manualEntryController.dispose();
     super.dispose();
   }
 
@@ -210,7 +188,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     switch (_currentStep) {
       case 0:
         final referenceError = ReceivingOperationStepValidator.validateReferenceStep(
-          receivingReference: _referenceController.text,
           sourceGln: _sourceGln,
           receivingGln: _receivingGln,
         );
@@ -220,7 +197,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           } else if (referenceError.contains('Receiving')) {
             setState(() => _receivingGlnError = referenceError);
           } else {
-            ReceivingSnackbar.showError(context, referenceError);
+            context.showError(referenceError);
           }
           return false;
         }
@@ -228,7 +205,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       case 1:
         final itemsError = ReceivingOperationStepValidator.validateItemsStep(_scannedEpcs);
         if (itemsError != null) {
-          ReceivingSnackbar.showError(context, itemsError);
+          context.showError(itemsError);
           return false;
         }
         return true;
@@ -249,16 +226,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
       if (failedConversions.isNotEmpty) {
-        ReceivingSnackbar.showError(
-          context,
+        context.showError(
           '${failedConversions.length} EPC(s) could not be converted. Remove invalid scans and try again.\n${failedConversions.join('\n')}',
         );
         return;
       }
 
       if (epcUris.isEmpty) {
-        ReceivingSnackbar.showError(
-          context,
+        context.showError(
           'No valid EPCs were captured. Scan at least one SGTIN or SSCC.',
         );
         return;
@@ -281,7 +256,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       }
 
       final receivingRequest = ReceivingRequest(
-        receivingReference: _referenceController.text.trim(),
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
         receivingGLN: _receivingGln!.glnCode,
@@ -318,13 +292,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
       if (response.isSuccessOrPartial) {
         if (response.status == ReceivingStatus.partialSuccess) {
-          ReceivingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Receiving submitted with warnings. Open the record for details.',
           );
         } else {
-          ReceivingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Receiving operation completed successfully.',
           );
         }
@@ -349,13 +321,12 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         final errorMessage = response.messages?.isNotEmpty == true
             ? response.messages!.first
             : 'The Receiving operation could not be completed. Check your inputs and try again.';
-        ReceivingSnackbar.showError(context, errorMessage);
+        context.showError(errorMessage);
       }
     } on ApiException catch (e) {
-      ReceivingSnackbar.showError(context, e.getUserFriendlyMessage());
+      context.showError(e.getUserFriendlyMessage());
     } catch (_) {
-      ReceivingSnackbar.showError(
-        context,
+      context.showError(
         'An unexpected error occurred while submitting the Receiving operation.',
       );
     } finally {
@@ -363,28 +334,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
   }
 
-  void _onItemScanResult(ScanResult result) {
-    if (!result.isValid) return;
-    _addEpc(result.data, showSuccessToast: true);
-  }
-
-  void _addManualItem() {
-    final barcode = _manualEntryController.text.trim();
-    if (barcode.isEmpty) {
-      ReceivingSnackbar.showError(context, 'Please type or paste an EPC before tapping Add.');
-      return;
-    }
-    final added = _addEpc(barcode);
-    if (added) {
-      _manualEntryController.clear();
-    }
+  void _onItemAdded(EPCParseResult result) {
+    _addEpc(result.epc, showSuccessToast: true);
   }
 
   bool _addEpc(String barcode, {bool showSuccessToast = false}) {
     final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
     if (duplicate != null) {
-      ReceivingSnackbar.showError(
-        context,
+      context.showError(
         'This EPC is already in the list.',
       );
       return false;
@@ -392,16 +349,15 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
     final type = OperationEpcScanValidator.resolveEpcType(barcode);
     if (type == OperationScanItemType.unknown) {
-      ReceivingSnackbar.showError(
-        context,
-        'Only SGTIN and SSCC values are allowed for receiving.',
+      context.showError(
+        'Only SGTIN, SSCC, and GTIN (lot-based) values are allowed for receiving.',
       );
       return false;
     }
 
     setState(() => _scannedEpcs.add(barcode));
     if (showSuccessToast) {
-      ReceivingSnackbar.showSuccess(context, 'Item added');
+      context.showSuccess('Item added');
     }
     return true;
   }

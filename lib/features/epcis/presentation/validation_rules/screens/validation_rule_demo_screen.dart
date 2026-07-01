@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
-import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// A demonstration screen for validation rule testing and field validation widget
 class ValidationRuleDemoScreen extends StatefulWidget {
@@ -46,7 +48,7 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
         title: const Text('Validation Demo'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: () => _showInfoDialog(context),
           ),
         ],
@@ -114,11 +116,11 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                   value: severity,
                   child: Row(
                     children: [
-                      Icon(severity == ValidationSeverity.info 
-                          ? Icons.info_outline 
+                      TraqIcon(severity == ValidationSeverity.info 
+                          ? AppAssets.iconInfo 
                           : severity == ValidationSeverity.warning 
-                              ? Icons.warning_amber_outlined 
-                              : Icons.error_outline,
+                              ? AppAssets.iconAlert 
+                              : AppAssets.iconXCircle,
                         color: color,
                       ),
                       const SizedBox(width: 8),
@@ -263,7 +265,7 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                   hintText: 'Enter event time',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
+                    icon: TraqIcon(AppAssets.iconClock),
                     onPressed: () async {
                       final now = DateTime.now();
                       _eventTimeController.text = now.toUtc().toIso8601String();
@@ -351,19 +353,11 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
   void _validateForm() {
     if (_formKey.currentState!.validate()) {
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validation passed!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Validation passed!');
     } else {
       // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validation failed. Please check the form for errors.'),
-          backgroundColor: Colors.red,
-        ),
+      context.showError(
+        'Validation failed. Please check the form for errors.',
       );
     }
   }
@@ -380,11 +374,7 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
     // Clear validation errors
     clearFieldErrors();
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Form has been reset.'),
-      ),
-    );
+    context.showInfo('Form has been reset.');
   }
   
   void _showInfoDialog(BuildContext context) {

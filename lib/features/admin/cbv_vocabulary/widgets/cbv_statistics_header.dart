@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_vocabulary_state.dart';
-
-import '../../../../core/utils/responsive_utils.dart';
 
 class CbvStatisticsHeader extends StatelessWidget {
   const CbvStatisticsHeader({
@@ -38,7 +38,7 @@ class CbvStatisticsHeader extends StatelessWidget {
                 total: state.totalBizSteps,
                 enabled: state.enabledBizSteps,
                 disabled: state.disabledBizSteps,
-                icon: Icons.account_tree_outlined,
+                iconAsset: AppAssets.iconHierarchy,
                 color: colors.primary,
               ),
             ),
@@ -49,7 +49,7 @@ class CbvStatisticsHeader extends StatelessWidget {
                 total: state.totalDispositions,
                 enabled: state.enabledDispositions,
                 disabled: state.disabledDispositions,
-                icon: Icons.label_outline,
+                iconAsset: AppAssets.iconTag,
                 color: colors.secondary,
               ),
             ),
@@ -66,7 +66,7 @@ class _StatCard extends StatelessWidget {
     required this.total,
     required this.enabled,
     required this.disabled,
-    required this.icon,
+    required this.iconAsset,
     required this.color,
   });
 
@@ -74,7 +74,7 @@ class _StatCard extends StatelessWidget {
   final int total;
   final int enabled;
   final int disabled;
-  final IconData icon;
+  final String iconAsset;
   final Color color;
 
   @override
@@ -90,7 +90,7 @@ class _StatCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 20),
+                TraqIcon(iconAsset, color: color, size: 20),
                 const SizedBox(width: TraqSpacing.sm),
                 Text(
                   title,

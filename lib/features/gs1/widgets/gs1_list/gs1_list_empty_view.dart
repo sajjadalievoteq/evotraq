@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class Gs1ListEmptyView extends StatelessWidget {
   const Gs1ListEmptyView({
     super.key,
-    required this.icon,
+    required this.iconAsset,
     required this.title,
     required this.onClearFilters,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final String title;
   final VoidCallback onClearFilters;
 
@@ -24,8 +26,8 @@ class Gs1ListEmptyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
+            TraqIcon(
+              iconAsset,
               size: 64,
               color: muted.withValues(alpha: 0.5),
             ),
@@ -46,7 +48,7 @@ class Gs1ListEmptyView extends StatelessWidget {
             const SizedBox(height: 24),
             CustomButtonWidget(
               title: 'Clear filters & search',
-              icon: Icons.refresh,
+              iconAsset: AppAssets.iconRefresh,
               onTap: onClearFilters,
               minimumWidth: 200,
             ),

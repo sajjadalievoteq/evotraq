@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
-// Import for ValidationSeverity enum
-import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart'
-    show ValidationSeverity;
 
 /// A demonstration screen for the validation features
 class ValidationRuleDemoRoute extends StatefulWidget {
@@ -78,7 +77,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'Event ID',
                       hintText: 'Enter a unique event ID',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.perm_identity),
+                      prefixIcon: TraqIcon(AppAssets.iconUser),
                     ),
                     validator: _validateEventId,
                     helpText: 'A unique identifier for this event',
@@ -93,7 +92,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'Action',
                       hintText: 'ADD, OBSERVE, or DELETE',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.category),
+                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
                     ),
                     validator: _validateAction,
                     helpText: 'The action type for this event',
@@ -108,7 +107,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'Business Step',
                       hintText: 'e.g., urn:epcglobal:cbv:bizstep:shipping',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.business),
+                      prefixIcon: TraqIcon(AppAssets.iconUsers),
                     ),
                     validator: _validateBusinessStep,
                     helpText: 'The business process step (optional but recommended)',
@@ -123,7 +122,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'Disposition',
                       hintText: 'e.g., urn:epcglobal:cbv:disp:in_transit',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.style),
+                      prefixIcon: TraqIcon(AppAssets.iconTag),
                     ),
                     validator: _validateDisposition,
                     helpText: 'The business condition (optional)',
@@ -138,7 +137,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'EPCs (comma separated)',
                       hintText: 'urn:epc:id:sgtin:0614141.107346.1, ...',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.list),
+                      prefixIcon: TraqIcon(AppAssets.iconList),
                     ),
                     validator: _validateEpcList,
                     helpText: 'List of EPCs associated with this event',
@@ -296,7 +295,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                           form.validate();
                         }
                       },
-                      icon: const Icon(Icons.check_circle),
+                      icon: TraqIcon(AppAssets.iconCheck),
                       label: const Text('Validate All'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -392,12 +391,8 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
       builder: (context) => const ValidationRuleDemoRoute(),
     );
   }
-  
+
   /// Navigate to this screen
-  /// 
-  /// Note: This method is kept for API consistency with other routes,
-  /// even though it's currently not used directly in the codebase.
-  /// It provides a convenient way to navigate to this screen from anywhere.
   // ignore: unused_element
   static void navigate(BuildContext context) {
     Navigator.of(context).push(route());

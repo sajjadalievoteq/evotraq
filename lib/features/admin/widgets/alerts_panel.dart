@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AlertsPanel extends StatelessWidget {
   final List<PerformanceAlert> alerts;
@@ -26,8 +28,7 @@ class AlertsPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.warning,
+                TraqIcon(AppAssets.iconAlert,
                   color: _getHighestSeverityColor(),
                   size: 24,
                 ),
@@ -79,7 +80,7 @@ class AlertsPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          TraqIcon(
             _getSeverityIcon(alert.severity),
             color: _getSeverityColor(alert.severity),
             size: 20,
@@ -115,8 +116,7 @@ class AlertsPanel extends StatelessWidget {
               ),
             ),
           if (alert.acknowledged)
-            Icon(
-              Icons.check_circle,
+            TraqIcon(AppAssets.iconCheck,
               color: Colors.green,
               size: 16,
             ),
@@ -163,18 +163,18 @@ class AlertsPanel extends StatelessWidget {
     }
   }
 
-  IconData _getSeverityIcon(String severity) {
+  String _getSeverityIcon(String severity) {
     switch (severity.toUpperCase()) {
       case 'CRITICAL':
-        return Icons.dangerous;
+        return AppAssets.iconDangerous;
       case 'HIGH':
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case 'MEDIUM':
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case 'LOW':
-        return Icons.info;
+        return AppAssets.iconInfo;
       default:
-        return Icons.help;
+        return AppAssets.iconHelpCircle;
     }
   }
 
@@ -202,7 +202,7 @@ class AlertsPanel extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                   ),
                 ],
               ),
@@ -221,7 +221,7 @@ class AlertsPanel extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                TraqIcon(
                                   _getSeverityIcon(alert.severity),
                                   color: _getSeverityColor(alert.severity),
                                 ),

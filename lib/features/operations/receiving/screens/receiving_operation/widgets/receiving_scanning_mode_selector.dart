@@ -1,5 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/receiving/utils/receiving_scanning_mode.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Segmented control for scanner vs manual input in Receiving steps.
 class ReceivingScanningModeSelector extends StatelessWidget {
@@ -18,17 +20,20 @@ class ReceivingScanningModeSelector extends StatelessWidget {
       segments: const [
         ButtonSegment(
           value: ReceivingScanningMode.scanner,
-          icon: Icon(Icons.qr_code_scanner),
+          icon: TraqIcon(AppAssets.iconQr),
           label: Text('Camera / Scanner'),
         ),
         ButtonSegment(
           value: ReceivingScanningMode.manual,
-          icon: Icon(Icons.keyboard),
+          icon: TraqIcon(AppAssets.iconKeyboard),
           label: Text('Manual'),
         ),
       ],
       selected: {selectedMode},
-      onSelectionChanged: (modes) => onModeChanged(modes.first),
+      onSelectionChanged: (modes) {
+        if (modes.isEmpty) return;
+        onModeChanged(modes.first);
+      },
     );
   }
 }

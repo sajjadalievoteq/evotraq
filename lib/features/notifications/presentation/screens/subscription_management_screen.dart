@@ -7,6 +7,8 @@ import '../cubit/notification_state.dart';
 import '../widgets/subscription_card.dart';
 import '../widgets/create_subscription_dialog.dart';
 import '../widgets/notification_subscription_help.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key});
@@ -55,12 +57,12 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         title: const Text('Manage Subscriptions'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: () => _showHelpDialog(context),
             tooltip: 'Help',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () {
               context.read<NotificationCubit>().loadSubscriptions(page: 0);
             },
@@ -115,7 +117,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSubscriptionDialog(context),
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('New Subscription'),
       ),
     );
@@ -210,8 +212,8 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.subscriptions_outlined,
+          TraqIcon(
+            AppAssets.iconNotification,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -233,7 +235,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _showCreateSubscriptionDialog(context),
-            icon: const Icon(Icons.add),
+            icon: TraqIcon(AppAssets.iconPlus),
             label: const Text('Create Subscription'),
           ),
         ],
@@ -246,8 +248,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.red[300],
           ),

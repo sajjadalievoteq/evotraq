@@ -1,16 +1,14 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
 /// Validation helpers for unpacking operation wizard steps.
 class UnpackingOperationStepValidator {
   UnpackingOperationStepValidator._();
 
   static String? validateReferenceStep({
-    required String unpackingReference,
     required GLN? unpackingLocationGln,
   }) {
-    if (unpackingReference.trim().isEmpty) {
-      return 'Please enter an Unpacking Reference — this is the internal ID for this operation (e.g. UNPACK-2024-001).';
-    }
     if (unpackingLocationGln == null) {
       return 'Please select the Unpacking Location — search for the GLN of the facility where unpacking is taking place.';
     }
@@ -29,9 +27,19 @@ class UnpackingOperationStepValidator {
     return null;
   }
 
-  static String? validateItemsStep(List<String> scannedEpcs) {
-    if (scannedEpcs.isEmpty) {
-      return 'No items added yet. Scan at least one product barcode (GTIN + serial number) to remove from the container.';
+  static String? validateItemsStep({
+    required Set<String> selectedEpcs,
+    required UnpackingScope scope,
+    required List<HierarchyNode> containerContents,
+  }) {
+    if (containerContents.isEmpty) {
+      return 'This container has no packed items to unpack.';
+    }
+    if (selectedEpcs.isEmpty) {
+      if (scope == UnpackingScope.wholeContainer) {
+        return 'No items found in the container. Reload contents or choose a different container.';
+      }
+      return 'Select at least one item from the table or scan a barcode to unpack.';
     }
     return null;
   }

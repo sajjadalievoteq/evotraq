@@ -12,6 +12,8 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_field_decoration.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_read_only_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Biz-step + disposition dropdowns for an Object Event form.
 ///
@@ -338,7 +340,7 @@ class _CbvBizStepDispositionPickerState
           ),
           TextButton.icon(
             onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             label: const Text('Retry'),
           ),
         ],

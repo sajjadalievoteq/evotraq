@@ -150,7 +150,7 @@ class CommissioningOperationService {
         'size': size,
         'sortBy': sortBy,
         'sortDir': sortDir,
-        if (gtin != null) 'gtin': gtin,
+        'gtin': ?gtin,
       };
       final response = await _dioService.get(
         '$_baseUrl/commissioning/batches',

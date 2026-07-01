@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Bulk Export Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive bulk export management and monitoring interface
@@ -211,7 +213,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
@@ -273,11 +275,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Active', activeExports, Icons.play_circle, color: Colors.green),
+                  _buildSummaryItem('Active', activeExports, AppAssets.iconPlay, color: Colors.green),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Pending', pendingExports, Icons.schedule, color: Colors.orange),
+                  _buildSummaryItem('Pending', pendingExports, AppAssets.iconClock, color: Colors.orange),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Failed', failedExports, Icons.error, color: Colors.red),
+                  _buildSummaryItem('Failed', failedExports, AppAssets.iconXCircle, color: Colors.red),
                 ],
               ),
             ),
@@ -287,24 +289,24 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
               children: [
                 ElevatedButton.icon(
                   onPressed: _showCreateExportDialog,
-                  icon: const Icon(Icons.download),
+                  icon: TraqIcon(AppAssets.iconDownload),
                   label: const Text('New Export'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _showBulkExportDialog,
-                  icon: const Icon(Icons.archive),
+                  icon: TraqIcon(AppAssets.iconDownload),
                   label: const Text('Bulk Export'),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: _refreshCurrentTab,
-                  icon: const Icon(Icons.refresh),
+                  icon: TraqIcon(AppAssets.iconRefresh),
                   tooltip: 'Refresh',
                 ),
                 IconButton(
                   onPressed: _showExportSettings,
-                  icon: const Icon(Icons.settings),
+                  icon: TraqIcon(AppAssets.iconSettings),
                   tooltip: 'Export Settings',
                 ),
               ],
@@ -315,11 +317,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     );
   }
 
-  Widget _buildSummaryItem(String label, int value, IconData icon, {Color? color}) {
+  Widget _buildSummaryItem(String label, int value, String iconAsset, {Color? color}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: color ?? Colors.blue),
+        TraqIcon(iconAsset, size: 20, color: color ?? Colors.blue),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +394,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: _showCreateTemplateDialog,
-                icon: const Icon(Icons.add),
+                icon: TraqIcon(AppAssets.iconPlus),
                 label: const Text('New Template'),
               ),
             ],
@@ -643,7 +645,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           children: [
             IconButton(
               onPressed: () => _useTemplate(template),
-              icon: const Icon(Icons.play_arrow, color: Colors.green),
+              icon: TraqIcon(AppAssets.iconArrowR, color: Colors.green),
               tooltip: 'Use Template',
             ),
             PopupMenuButton<String>(
@@ -740,12 +742,12 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             if (status == 'COMPLETED')
               IconButton(
                 onPressed: () => _downloadExport(export['job_id'] ?? export['jobId'] ?? ''),
-                icon: const Icon(Icons.download, color: Colors.blue),
+                icon: TraqIcon(AppAssets.iconDownload, color: Colors.blue),
                 tooltip: 'Download',
               ),
             IconButton(
               onPressed: () => _showExportDetails(export),
-              icon: const Icon(Icons.info_outline),
+              icon: TraqIcon(AppAssets.iconInfo),
               tooltip: 'Details',
             ),
           ],
@@ -770,11 +772,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('Total Exports', totalExports.toString(), Icons.archive),
+                child: _buildStatCard('Total Exports', totalExports.toString(), AppAssets.iconArchive),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard('Success Rate', '${((successfulExports / (totalExports > 0 ? totalExports : 1)) * 100).toStringAsFixed(1)}%', Icons.check_circle),
+                child: _buildStatCard('Success Rate', '${((successfulExports / (totalExports > 0 ? totalExports : 1)) * 100).toStringAsFixed(1)}%', AppAssets.iconCheckCircle),
               ),
             ],
           ),
@@ -782,11 +784,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('Total Records', _formatNumber(totalRecords), Icons.storage),
+                child: _buildStatCard('Total Records', _formatNumber(totalRecords), AppAssets.iconDatabase),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard('Total Size', _formatFileSize(totalSize), Icons.file_present),
+                child: _buildStatCard('Total Size', _formatFileSize(totalSize), AppAssets.iconDocument),
               ),
             ],
           ),
@@ -794,11 +796,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('Avg Export Time', '${avgExportTime.toStringAsFixed(1)}s', Icons.timer),
+                child: _buildStatCard('Avg Export Time', '${avgExportTime.toStringAsFixed(1)}s', AppAssets.iconTimer),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildStatCard('Failed Exports', failedExports.toString(), Icons.error),
+                child: _buildStatCard('Failed Exports', failedExports.toString(), AppAssets.iconXCircle),
               ),
             ],
           ),
@@ -863,13 +865,13 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon) {
+  Widget _buildStatCard(String title, String value, String iconAsset) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue),
+            TraqIcon(iconAsset, size: 32, color: Colors.blue),
             const SizedBox(height: 8),
             Text(
               title,
@@ -1046,15 +1048,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Export cancelled successfully')),
-        );
+        context.showSuccess('Export cancelled successfully');
         _loadExportJobs();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to cancel export: $e')),
-      );
+      context.showError('Failed to cancel export: $e');
     }
   }
 
@@ -1084,26 +1082,14 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
           if (response.statusCode == 200) {
             // In a real implementation, this would trigger file download
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Download started for file: $fileId'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            context.showSuccess('Download started for file: $fileId');
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No export file available for download'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          context.showWarning('No export file available for download');
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download export: $e')),
-      );
+      context.showError('Failed to download export: $e');
     }
   }
 
@@ -1115,15 +1101,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Export retry started')),
-        );
+        context.showInfo('Export retry started');
         _loadExportJobs();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to retry export: $e')),
-      );
+      context.showError('Failed to retry export: $e');
     }
   }
 
@@ -1136,23 +1118,13 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
       if (response.statusCode == 200) {
         final result = _decodeBody(response.data);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export job executed successfully: ${result['status']}'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Export job executed successfully: ${result['status']}');
         _loadExportJobs();
       } else {
         throw Exception('Failed to execute export job');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to execute export job: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Failed to execute export job: $e');
     }
   }
 
@@ -1183,15 +1155,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         );
 
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Export deleted successfully')),
-          );
+          context.showSuccess('Export deleted successfully');
           _loadExportJobs();
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete export: $e')),
-        );
+        context.showError('Failed to delete export: $e');
       }
     }
   }
@@ -1208,15 +1176,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Template duplicated successfully')),
-        );
+        context.showSuccess('Template duplicated successfully');
         _loadExportTemplates();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to duplicate template: $e')),
-      );
+      context.showError('Failed to duplicate template: $e');
     }
   }
 
@@ -1228,14 +1192,10 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Template configuration exported')),
-        );
+        context.showSuccess('Template configuration exported');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to export template: $e')),
-      );
+      context.showError('Failed to export template: $e');
     }
   }
 
@@ -1266,15 +1226,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         );
 
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Template deleted successfully')),
-          );
+          context.showSuccess('Template deleted successfully');
           _loadExportTemplates();
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete template: $e')),
-        );
+        context.showError('Failed to delete template: $e');
       }
     }
   }
@@ -1527,21 +1483,11 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
       if (mounted) {
         Navigator.of(context).pop();
         widget.onExportCreated();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export "${exportData['name']}" created successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Export "${exportData['name']}" created successfully');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating export: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Error creating export: $e');
       }
     } finally {
       if (mounted) {
@@ -1631,7 +1577,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Start Date',
                           border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                          suffixIcon: TraqIcon(AppAssets.iconClock),
                         ),
                         readOnly: true,
                         controller: TextEditingController(
@@ -1657,7 +1603,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                         decoration: const InputDecoration(
                           labelText: 'End Date',
                           border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                          suffixIcon: TraqIcon(AppAssets.iconClock),
                         ),
                         readOnly: true,
                         controller: TextEditingController(
@@ -1828,11 +1774,8 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
         if (mounted) {
           Navigator.of(context).pop();
           widget.onExportCreated();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Bulk export session "${exportData['session_id']}" created successfully'),
-              backgroundColor: Colors.green,
-            ),
+          context.showSuccess(
+            'Bulk export session "${exportData['session_id']}" created successfully',
           );
         }
       } else {
@@ -1840,12 +1783,7 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating bulk export: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Error creating bulk export: $e');
       }
     } finally {
       if (mounted) {
@@ -1919,7 +1857,7 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Start Date',
                           border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                          suffixIcon: TraqIcon(AppAssets.iconClock),
                         ),
                         readOnly: true,
                         controller: TextEditingController(
@@ -1944,7 +1882,7 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                         decoration: const InputDecoration(
                           labelText: 'End Date',
                           border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                          suffixIcon: TraqIcon(AppAssets.iconClock),
                         ),
                         readOnly: true,
                         controller: TextEditingController(

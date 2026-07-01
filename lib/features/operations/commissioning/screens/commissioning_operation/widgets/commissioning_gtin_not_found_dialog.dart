@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningGtinNotFoundDialog extends StatelessWidget {
   const CommissioningGtinNotFoundDialog({
@@ -20,7 +22,7 @@ class CommissioningGtinNotFoundDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      icon: const Icon(Icons.qr_code, size: 40),
+      icon: TraqIcon(AppAssets.iconQr, size: 40),
       title: const Text('GTIN Not Registered'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -39,7 +41,7 @@ class CommissioningGtinNotFoundDialog extends StatelessWidget {
           child: const Text('Cancel'),
         ),
         FilledButton.icon(
-          icon: const Icon(Icons.arrow_forward, size: 16),
+          icon: TraqIcon(AppAssets.iconChevronR, size: 16),
           label: const Text('Go to GTINs'),
           onPressed: () {
             Navigator.of(context).pop();

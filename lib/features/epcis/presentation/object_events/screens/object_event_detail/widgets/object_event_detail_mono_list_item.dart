@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -19,11 +21,7 @@ class ObjectEventDetailMonoListItem extends StatelessWidget {
         },
         child: Row(
           children: [
-            Icon(
-              Icons.circle,
-              size: 6,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            TraqIcon(AppAssets.iconCircle, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 6),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 
@@ -79,6 +80,12 @@ class GTIN extends Equatable {
   final GTINPharmaceuticalExtension? pharmaceuticalExtension;
   final GTINTobaccoExtension? tobaccoExtension;
 
+  final GLN? currentLocation;
+  final String? currentLocationGln;
+  final String? currentLocationName;
+  final String? currentPackedInEpc;
+  final List<String> childGtinCodes;
+
   const GTIN({
     required this.gtinCode,
     required this.productName,
@@ -142,6 +149,11 @@ class GTIN extends Equatable {
     this.isPharmaceuticalProduct = false,
     this.pharmaceuticalExtension,
     this.tobaccoExtension,
+    this.currentLocation,
+    this.currentLocationGln,
+    this.currentLocationName,
+    this.currentPackedInEpc,
+    this.childGtinCodes = const [],
   });
 
   @override
@@ -208,6 +220,11 @@ class GTIN extends Equatable {
         isPharmaceuticalProduct,
         pharmaceuticalExtension,
         tobaccoExtension,
+        currentLocation,
+        currentLocationGln,
+        currentLocationName,
+        currentPackedInEpc,
+        childGtinCodes,
       ];
 
   GTIN copyWith({
@@ -273,6 +290,11 @@ class GTIN extends Equatable {
     bool? isPharmaceuticalProduct,
     GTINPharmaceuticalExtension? pharmaceuticalExtension,
     GTINTobaccoExtension? tobaccoExtension,
+    GLN? currentLocation,
+    String? currentLocationGln,
+    String? currentLocationName,
+    String? currentPackedInEpc,
+    List<String>? childGtinCodes,
   }) {
     return GTIN(
       gtinCode: gtinCode ?? this.gtinCode,
@@ -345,6 +367,11 @@ class GTIN extends Equatable {
       pharmaceuticalExtension:
           pharmaceuticalExtension ?? this.pharmaceuticalExtension,
       tobaccoExtension: tobaccoExtension ?? this.tobaccoExtension,
+      currentLocation: currentLocation ?? this.currentLocation,
+      currentLocationGln: currentLocationGln ?? this.currentLocationGln,
+      currentLocationName: currentLocationName ?? this.currentLocationName,
+      currentPackedInEpc: currentPackedInEpc ?? this.currentPackedInEpc,
+      childGtinCodes: childGtinCodes ?? this.childGtinCodes,
     );
   }
 
@@ -430,6 +457,11 @@ class GTIN extends Equatable {
       if (authorizationExpiry != null && registrationDate == null)
         'marketingAuthorizationDate':
             _formatDateWithTimezone(authorizationExpiry!),
+      if (currentLocation != null) 'currentLocationGLN': currentLocation!.glnCode,
+      if (currentLocationGln != null) 'currentLocationGln': currentLocationGln,
+      if (currentLocationName != null) 'currentLocationName': currentLocationName,
+      if (currentPackedInEpc != null) 'currentPackedInEpc': currentPackedInEpc,
+      if (childGtinCodes.isNotEmpty) 'childGtinCodes': childGtinCodes,
     };
   }
 
@@ -572,7 +604,55 @@ class GTIN extends Equatable {
       isPharmaceuticalProduct: json['isPharmaceuticalProduct'] == true,
       pharmaceuticalExtension: pharmaceuticalExtension,
       tobaccoExtension: tobaccoExtension,
+      currentLocation: _parseCurrentLocation(json),
+      currentLocationGln: json['currentLocationGln'] as String? ??
+          json['currentLocationGLN'] as String?,
+      currentLocationName: json['currentLocationName'] as String?,
+      currentPackedInEpc: json['currentPackedInEpc'] as String?,
+      childGtinCodes: _parseStringList(json['childGtinCodes']),
     );
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    return const [];
+  }
+
+  static GLN? _parseCurrentLocation(Map<String, dynamic> json) {
+    if (json['currentLocationGLN'] != null) {
+      return GLN(
+        glnCode: json['currentLocationGLN'] as String,
+        locationName:
+            json['currentLocationName'] as String? ?? 'Unknown Location',
+        addressLine1: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        country: '',
+        locationType: LocationType.other,
+        active: true,
+      );
+    }
+    if (json['currentLocation'] is Map<String, dynamic>) {
+      return GLN.fromJson(json['currentLocation'] as Map<String, dynamic>);
+    }
+    if (json['currentLocationGln'] != null) {
+      return GLN(
+        glnCode: json['currentLocationGln'] as String,
+        locationName:
+            json['currentLocationName'] as String? ?? 'Unknown Location',
+        addressLine1: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        country: '',
+        locationType: LocationType.other,
+        active: true,
+      );
+    }
+    return null;
   }
 
   static const String packagingLevelItem = 'ITEM';

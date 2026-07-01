@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AppBackgroundLayer extends StatelessWidget {
   const AppBackgroundLayer({super.key});
@@ -48,7 +50,7 @@ class BackgroundContainerWidget extends StatelessWidget {
               title: Text(appBarTitle ?? ''),
               leading: Builder(
                 builder: (ctx) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: TraqIcon(AppAssets.iconMenu),
                   onPressed: () => Scaffold.of(ctx).openDrawer(),
                 ),
               ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Help widget shown on the transformation event form screen
 class TransformationEventFormHelp extends StatelessWidget {
@@ -19,7 +21,7 @@ class TransformationEventFormHelp extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.help_outline, color: Colors.blue),
+                    TraqIcon(AppAssets.iconInfo, color: Colors.blue),
                     const SizedBox(width: 12),
                     Text(
                       'Form Guidance',

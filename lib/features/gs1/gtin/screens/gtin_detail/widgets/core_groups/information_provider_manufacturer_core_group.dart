@@ -158,6 +158,7 @@ class InformationProviderManufacturerCoreGroupState
 
     return Gs1GroupCard(
       title: GtinUiConstants.sectionInformationProviderManufacturer,
+      showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(

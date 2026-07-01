@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_status.dart';
@@ -27,7 +28,7 @@ import 'package:traqtrace_app/features/operations/packing/screens/packing_operat
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_review_step.dart';
 import 'package:traqtrace_app/features/operations/packing/utils/packing_scanning_mode.dart';
-import 'package:traqtrace_app/features/operations/packing/utils/packing_snackbar.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
 /// Multi-step packing operations screen.
@@ -40,19 +41,17 @@ class PackingOperationScreen extends StatefulWidget {
 
 class _PackingOperationScreenState extends State<PackingOperationScreen> {
   static const _wizardSteps = [
-    OperationStepConfig(label: 'Details', icon: Icons.tag),
-    OperationStepConfig(label: 'Items', icon: Icons.list_alt),
-    OperationStepConfig(label: 'Review', icon: Icons.checklist),
+    OperationStepConfig.details,
+    OperationStepConfig.items,
+    OperationStepConfig.review,
   ];
 
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
-  final _referenceController = TextEditingController();
   final _workOrderController = TextEditingController();
   final _batchNumberController = TextEditingController();
   final _productionOrderController = TextEditingController();
-  final _manualEntryController = TextEditingController();
   final _containerManualEntryController = TextEditingController();
 
   GLN? _packingLocationGLN;
@@ -61,14 +60,13 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   final List<String> _scannedEPCs = [];
   bool _isLoading = false;
   bool _closeContainer = false;
+  DateTime? _eventTime;
 
-  PackingScanningMode _scanningMode = PackingScanningMode.scanner;
   PackingScanningMode _containerScanningMode = PackingScanningMode.scanner;
 
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
 
-  bool _validateStep0Silent() =>
-      _referenceController.text.trim().isNotEmpty && _packingLocationGLN != null;
+  bool _validateStep0Silent() => _packingLocationGLN != null;
 
   PackingReferenceDetailsStep _referenceDetailsStep({
     bool embeddedInPanel = false,
@@ -78,7 +76,6 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     bool showProductionSection = true,
   }) {
     return PackingReferenceDetailsStep(
-      referenceController: _referenceController,
       workOrderController: _workOrderController,
       batchNumberController: _batchNumberController,
       productionOrderController: _productionOrderController,
@@ -96,6 +93,8 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       onContainerScanResult: _onContainerScanResult,
       onAddManualContainer: _addManualContainer,
       onClearContainer: () => setState(() => _parentContainerId = null),
+      eventTime: _eventTime,
+      onEventTimeChanged: (dt) => setState(() => _eventTime = dt),
       showPageHeader: !embeddedInPanel,
       showReferenceSection: showReferenceSection,
       showLocationSection: showLocationSection,
@@ -110,13 +109,8 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   }) {
     return PackingItemScanStep(
       parentContainerId: _parentContainerId,
-      packingReference: _referenceController.text,
       scannedEpcs: _scannedEPCs,
-      scanningMode: _scanningMode,
-      manualEntryController: _manualEntryController,
-      onScanningModeChanged: (mode) => setState(() => _scanningMode = mode),
-      onItemScanResult: _onItemScanResult,
-      onAddManualItem: _addManualItem,
+      onItemAdded: _onItemAdded,
       onRemoveItem: (index) => setState(() => _scannedEPCs.removeAt(index)),
       onClearAll: () => setState(() => _scannedEPCs.clear()),
       fillHeight: fillHeight ?? embeddedInPanel,
@@ -126,8 +120,8 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
   PackingReviewStep _reviewStep({bool embeddedInPanel = false}) {
     return PackingReviewStep(
-      packingReference: _referenceController.text,
       packingLocationGln: _packingLocationGLN,
+      eventTime: _eventTime,
       workOrder: _workOrderController.text,
       batchNumber: _batchNumberController.text,
       productionOrder: _productionOrderController.text,
@@ -143,11 +137,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _referenceController.dispose();
     _workOrderController.dispose();
     _batchNumberController.dispose();
     _productionOrderController.dispose();
-    _manualEntryController.dispose();
     _containerManualEntryController.dispose();
     super.dispose();
   }
@@ -177,21 +169,20 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     switch (_currentStep) {
       case 0:
         final referenceError = PackingOperationStepValidator.validateReferenceStep(
-          packingReference: _referenceController.text,
           packingLocationGln: _packingLocationGLN,
         );
         if (referenceError != null) {
           if (referenceError.contains('GLN')) {
             setState(() => _packingLocationGLNError = referenceError);
           } else {
-            PackingSnackbar.showError(context, referenceError);
+            context.showError(referenceError);
           }
           return false;
         }
         final containerError =
             PackingOperationStepValidator.validateContainerStep(_parentContainerId);
         if (containerError != null) {
-          PackingSnackbar.showError(context, containerError);
+          context.showError(containerError);
           return false;
         }
         return true;
@@ -199,7 +190,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         final itemsError =
             PackingOperationStepValidator.validateItemsStep(_scannedEPCs);
         if (itemsError != null) {
-          PackingSnackbar.showError(context, itemsError);
+          context.showError(itemsError);
           return false;
         }
         return true;
@@ -222,8 +213,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           List<String>.from(conversionResult['failed'] ?? []);
 
       if (failedConversions.isNotEmpty) {
-        PackingSnackbar.showError(
-          context,
+        context.showError(
           '${failedConversions.length} item(s) could not be processed — their barcodes are not in a valid GS1 format. '
           'Remove them from the list, check the labels, and re-scan:\n${failedConversions.join('\n')}',
         );
@@ -232,8 +222,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       }
 
       if (epcUris.isEmpty) {
-        PackingSnackbar.showError(
-          context,
+        context.showError(
           'None of the scanned items could be converted to valid EPCs. '
           'Remove all items and re-scan using product labels that include a GTIN and serial number.',
         );
@@ -265,7 +254,6 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       }
 
       final packingRequest = PackingRequest(
-        packingReference: _referenceController.text.trim(),
         parentContainerId: containerEpc,
         childEpcs: epcUris,
         packingLocationGLN: _packingLocationGLN!.glnCode,
@@ -279,6 +267,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         productionOrder: _productionOrderController.text.trim().isNotEmpty
             ? _productionOrderController.text.trim()
             : null,
+        eventTime: _eventTime,
       );
 
       final response =
@@ -286,14 +275,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
       if (response.isSuccessOrPartial) {
         if (response.status == PackingStatus.partialSuccess) {
-          PackingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Packing submitted with warnings — some items were not processed. '
             'Open the operation record to see which items need attention.',
           );
         } else {
-          PackingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Packing operation completed successfully.',
           );
         }
@@ -309,13 +296,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
             ? response.messages!.first
             : 'The packing operation could not be completed. Check your inputs and try again. '
               'If the problem persists, contact your system administrator.';
-        PackingSnackbar.showError(context, errorMessage);
+        context.showError(errorMessage);
       }
     } on ApiException catch (e) {
-      PackingSnackbar.showError(context, e.getUserFriendlyMessage());
+      context.showError(e.getUserFriendlyMessage());
     } catch (e) {
-      PackingSnackbar.showError(
-        context,
+      context.showError(
         'An unexpected error occurred while submitting the packing operation. '
         'Please try again. If the problem continues, contact support.',
       );
@@ -333,8 +319,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       parsed['SSCC'] ?? barcode,
     );
     if (ssccError != null) {
-      PackingSnackbar.showError(
-        context,
+      context.showError(
         'That barcode is not a valid container label (SSCC). '
         'Make sure you are scanning the outer carton or pallet label — not a product label.',
       );
@@ -343,18 +328,15 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
     final containerId = parsed['SSCC'] ?? barcode;
     setState(() => _parentContainerId = containerId);
-    PackingSnackbar.showSuccess(context, 'Container ready — SSCC: $containerId');
+    context.showSuccess('Container ready — SSCC: $containerId');
   }
 
-  void _onItemScanResult(ScanResult result) {
-    if (!result.isValid) return;
-
-    final barcode = result.data;
+  void _onItemAdded(EPCParseResult result) {
+    final barcode = result.epc;
     final duplicate =
         OperationEpcScanValidator.checkDuplicate(barcode, _scannedEPCs);
     if (duplicate != null) {
-      PackingSnackbar.showError(
-        context,
+      context.showError(
         'This item is already in the list. Each product serial can only appear once in a packing operation.',
       );
       return;
@@ -363,22 +345,21 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     final epcError =
         AggregationEventFormValidators.validateChildEpcEntry(barcode);
     if (epcError != null) {
-      PackingSnackbar.showError(
-        context,
-        'This barcode is not a valid product serial (EPC). '
-        'Scan a product label that includes both a GTIN (AI 01) and a serial number (AI 21).',
+      context.showError(
+        'This barcode is not a valid child EPC. '
+        'Scan a product serial (SGTIN), lot-based GTIN, or nested SSCC label.',
       );
       return;
     }
 
     setState(() => _scannedEPCs.add(barcode));
-    PackingSnackbar.showSuccess(context, 'Item added ✓');
+    context.showSuccess('Item added ✓');
   }
 
   void _addManualContainer() {
     final barcode = _containerManualEntryController.text.trim();
     if (barcode.isEmpty) {
-      PackingSnackbar.showError(context, 'Please type or paste an SSCC before tapping Add.');
+      context.showError('Please type or paste an SSCC before tapping Add.');
       return;
     }
 
@@ -387,8 +368,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     final ssccError =
         AggregationEventFormValidators.validateSsccInput(ssccToValidate);
     if (ssccError != null) {
-      PackingSnackbar.showError(
-        context,
+      context.showError(
         'The value entered is not a valid SSCC. '
         'An SSCC must be exactly 18 digits. Check the number and try again.',
       );
@@ -397,38 +377,6 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
     setState(() => _parentContainerId = parsed['SSCC'] ?? barcode);
     _containerManualEntryController.clear();
-  }
-
-  void _addManualItem() {
-    final barcode = _manualEntryController.text.trim();
-    if (barcode.isEmpty) {
-      PackingSnackbar.showError(context, 'Please type or paste a product barcode before tapping Add.');
-      return;
-    }
-
-    final duplicate =
-        OperationEpcScanValidator.checkDuplicate(barcode, _scannedEPCs);
-    if (duplicate != null) {
-      PackingSnackbar.showError(
-        context,
-        'This item is already in the list. Each product serial can only appear once in a packing operation.',
-      );
-      return;
-    }
-
-    final epcError =
-        AggregationEventFormValidators.validateChildEpcEntry(barcode);
-    if (epcError != null) {
-      PackingSnackbar.showError(
-        context,
-        'This barcode is not a recognised product serial format. '
-        'It must contain a GTIN (AI 01) and a serial number (AI 21), or be a valid EPC URI.',
-      );
-      return;
-    }
-
-    setState(() => _scannedEPCs.add(barcode));
-    _manualEntryController.clear();
   }
 
   @override

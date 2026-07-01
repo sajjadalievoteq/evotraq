@@ -17,6 +17,8 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/ob
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_shared_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventsListScreen extends StatefulWidget {
   const ObjectEventsListScreen({
@@ -301,7 +303,7 @@ class _ObjectEventsListScreenState extends State<ObjectEventsListScreen> {
         tooltip: ObjectEventSharedUiConstants.fabAddTooltip,
         onPressed: widget.onEmbeddedCreate ??
             () => context.push(Constants.epcisObjectEventNewRoute),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: TraqIcon(AppAssets.iconPlus, color: Colors.white),
       ),
       body: body,
     );

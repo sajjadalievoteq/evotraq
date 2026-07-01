@@ -4,13 +4,14 @@ import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
-import 'package:traqtrace_app/core/widgets/gln_selector.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
@@ -18,6 +19,8 @@ import 'package:traqtrace_app/core/models/scan_result.dart';
 
 import '../../../../../../data/models/operations/commissioning/commissioning_models.dart';
 import '../../../../../operations/commissioning/cubit/commissioning_operation_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 /// Scanning mode options for different input methods
 enum ScanningMode { camera, wired, manual }
 
@@ -152,7 +155,7 @@ class _LegacyCommissioningOperationScreenState
           isValid = false;
         }
         if (_batchLotController.text.trim().isEmpty) {
-          _showError('Batch/Lot Number is required');
+          context.showError('Batch/Lot Number is required');
           isValid = false;
         }
         if (_commissioningLocationGLN == null) {
@@ -165,7 +168,7 @@ class _LegacyCommissioningOperationScreenState
       case 1:
         // Step 2: Validate serial numbers
         if (_serialNumbers.isEmpty) {
-          _showError('At least one serial number is required');
+          context.showError('At least one serial number is required');
           return false;
         }
         return true;
@@ -175,38 +178,6 @@ class _LegacyCommissioningOperationScreenState
       default:
         return true;
     }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   Future<void> _submitCommissioningOperation() async {
@@ -245,12 +216,14 @@ class _LegacyCommissioningOperationScreenState
       final response = await cubit.commissionBulk(request);
 
       if (response == null) {
-        _showError(cubit.state.error ?? 'Failed to create commissioning operation');
+        context.showError(
+          cubit.state.error ?? 'Failed to create commissioning operation',
+        );
         return;
       }
 
       if (response.status == CommissioningStatus.success) {
-        _showSuccess(
+        context.showSuccess(
           'Successfully commissioned ${response.commissionedCount} items',
         );
         if (mounted) {
@@ -262,10 +235,10 @@ class _LegacyCommissioningOperationScreenState
         final errorMessage = response.messages?.isNotEmpty == true
             ? response.messages!.first
             : 'Failed to create commissioning operation';
-        _showError(errorMessage);
+        context.showError(errorMessage);
       }
     } catch (e) {
-      _showError('Error creating commissioning operation: $e');
+      context.showError('Error creating commissioning operation: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -279,7 +252,7 @@ class _LegacyCommissioningOperationScreenState
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning, color: Colors.orange[700]),
+            TraqIcon(AppAssets.iconAlert, color: Colors.orange[700]),
             const SizedBox(width: 8),
             const Text('Partial Success'),
           ],
@@ -308,8 +281,7 @@ class _LegacyCommissioningOperationScreenState
                         .map(
                           (r) => ListTile(
                             dense: true,
-                            leading: const Icon(
-                              Icons.error,
+                            leading: TraqIcon(AppAssets.iconAlert,
                               color: Colors.red,
                               size: 20,
                             ),
@@ -346,13 +318,13 @@ class _LegacyCommissioningOperationScreenState
   void _addSerial(String serial) {
     final trimmedSerial = serial.trim();
     if (trimmedSerial.isEmpty) {
-      _showError('Please enter a serial number');
+      context.showError('Please enter a serial number');
       return;
     }
 
     // Check for duplicates
     if (_serialNumbers.contains(trimmedSerial)) {
-      _showError('Serial number already added: $trimmedSerial');
+      context.showError('Serial number already added: $trimmedSerial');
       return;
     }
 
@@ -447,7 +419,7 @@ class _LegacyCommissioningOperationScreenState
         title: const Text('Commissioning'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () {
               setState(() {
                 _currentStep = 0;
@@ -507,17 +479,17 @@ class _LegacyCommissioningOperationScreenState
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       child: Row(
         children: [
-          _buildStepCircle(0, 'Product', Icons.inventory_2),
+          _buildStepCircle(0, 'Product', AppAssets.iconBox),
           _buildStepConnector(0),
-          _buildStepCircle(1, 'Serials', Icons.qr_code_scanner),
+          _buildStepCircle(1, 'Serials', AppAssets.iconQr),
           _buildStepConnector(1),
-          _buildStepCircle(2, 'Review', Icons.checklist),
+          _buildStepCircle(2, 'Review', AppAssets.iconChecklist),
         ],
       ),
     );
   }
 
-  Widget _buildStepCircle(int step, String label, IconData icon) {
+  Widget _buildStepCircle(int step, String label, String iconAsset) {
     final isActive = _currentStep >= step;
     final isCurrent = _currentStep == step;
 
@@ -536,8 +508,8 @@ class _LegacyCommissioningOperationScreenState
                   ? Border.all(color: Theme.of(context).primaryColor, width: 3)
                   : null,
             ),
-            child: Icon(
-              icon,
+            child: TraqIcon(
+              iconAsset,
               color: isActive ? Colors.white : Colors.grey[600],
               size: 24,
             ),
@@ -614,7 +586,7 @@ class _LegacyCommissioningOperationScreenState
                         return DropdownMenuItem(
                           value: gtin,
                           child: Text(
-                            '${gtin.gtinCode} - ${gtin.productName ?? 'Unknown'}',
+                            '${gtin.gtinCode} - ${gtin.productName}',
                           ),
                         );
                       }).toList(),
@@ -673,9 +645,9 @@ class _LegacyCommissioningOperationScreenState
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  GLNSelector(
+                  OperationGlnSelector(
                     label: 'Location GLN *',
-                    initialValue: _commissioningLocationGLN,
+                    gln: _commissioningLocationGLN,
                     onChanged: (gln) {
                       setState(() {
                         _commissioningLocationGLN = gln;
@@ -707,7 +679,7 @@ class _LegacyCommissioningOperationScreenState
                   // Production Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.calendar_today),
+                    leading: TraqIcon(AppAssets.iconClock),
                     title: const Text('Production Date'),
                     subtitle: Text(
                       _productionDate != null
@@ -718,12 +690,12 @@ class _LegacyCommissioningOperationScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit),
+                          icon: TraqIcon(AppAssets.iconEdit),
                           onPressed: () => _selectDate('production'),
                         ),
                         if (_productionDate != null)
                           IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: TraqIcon(AppAssets.iconX),
                             onPressed: () =>
                                 setState(() => _productionDate = null),
                           ),
@@ -735,7 +707,7 @@ class _LegacyCommissioningOperationScreenState
                   // Expiry Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.event),
+                    leading: TraqIcon(AppAssets.iconEvent),
                     title: const Text('Expiry Date'),
                     subtitle: Text(
                       _expiryDate != null
@@ -746,12 +718,12 @@ class _LegacyCommissioningOperationScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit),
+                          icon: TraqIcon(AppAssets.iconEdit),
                           onPressed: () => _selectDate('expiry'),
                         ),
                         if (_expiryDate != null)
                           IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: TraqIcon(AppAssets.iconX),
                             onPressed: () => setState(() => _expiryDate = null),
                           ),
                       ],
@@ -762,7 +734,7 @@ class _LegacyCommissioningOperationScreenState
                   // Best Before Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.schedule),
+                    leading: TraqIcon(AppAssets.iconClock),
                     title: const Text('Best Before Date'),
                     subtitle: Text(
                       _bestBeforeDate != null
@@ -773,12 +745,12 @@ class _LegacyCommissioningOperationScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit),
+                          icon: TraqIcon(AppAssets.iconEdit),
                           onPressed: () => _selectDate('bestBefore'),
                         ),
                         if (_bestBeforeDate != null)
                           IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: TraqIcon(AppAssets.iconX),
                             onPressed: () =>
                                 setState(() => _bestBeforeDate = null),
                           ),
@@ -840,7 +812,7 @@ class _LegacyCommissioningOperationScreenState
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  const Icon(Icons.inventory_2),
+                  TraqIcon(AppAssets.iconPackage),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -877,17 +849,17 @@ class _LegacyCommissioningOperationScreenState
                       if (!kIsWeb)
                         const ButtonSegment(
                           value: ScanningMode.camera,
-                          icon: Icon(Icons.camera_alt),
+                          icon: TraqIcon(AppAssets.iconCamera),
                           label: Text('Camera'),
                         ),
                       const ButtonSegment(
                         value: ScanningMode.wired,
-                        icon: Icon(Icons.keyboard),
+                        icon: TraqIcon(AppAssets.iconKeyboard),
                         label: Text('Scanner'),
                       ),
                       const ButtonSegment(
                         value: ScanningMode.manual,
-                        icon: Icon(Icons.edit),
+                        icon: TraqIcon(AppAssets.iconEdit),
                         label: Text('Manual'),
                       ),
                     ],
@@ -960,10 +932,10 @@ class _LegacyCommissioningOperationScreenState
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                TraqIcon(
                                   _isWiredScannerActive
-                                      ? Icons.sensors
-                                      : Icons.sensors_off,
+                                      ? AppAssets.iconSignal
+                                      : AppAssets.iconSensorsOff,
                                   color: _isWiredScannerActive
                                       ? Colors.green
                                       : Colors.grey,
@@ -1031,7 +1003,7 @@ class _LegacyCommissioningOperationScreenState
               if (_serialNumbers.isNotEmpty)
                 TextButton.icon(
                   onPressed: _clearAllSerials,
-                  icon: const Icon(Icons.clear_all, size: 18),
+                  icon: const TraqIcon(AppAssets.iconFilter, size: 18),
                   label: const Text('Clear All'),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
@@ -1046,8 +1018,7 @@ class _LegacyCommissioningOperationScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.qr_code_2,
+                        TraqIcon(AppAssets.iconQr,
                           size: 64,
                           color: Colors.grey[400],
                         ),
@@ -1087,7 +1058,7 @@ class _LegacyCommissioningOperationScreenState
                           ),
                           title: Text(_serialNumbers[index]),
                           trailing: IconButton(
-                            icon: const Icon(Icons.close, size: 20),
+                            icon: TraqIcon(AppAssets.iconX, size: 20),
                             onPressed: () => _removeSerial(index),
                           ),
                         ),
@@ -1102,7 +1073,7 @@ class _LegacyCommissioningOperationScreenState
 
   Widget _buildStep3Review() {
     final gtinDisplay = _selectedGTIN != null
-        ? '${_selectedGTIN!.gtinCode} - ${_selectedGTIN!.productName ?? 'Unknown'}'
+        ? '${_selectedGTIN!.gtinCode} - ${_selectedGTIN!.productName}'
         : _gtinController.text;
 
     return SingleChildScrollView(
@@ -1173,7 +1144,7 @@ class _LegacyCommissioningOperationScreenState
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.qr_code_2),
+                      TraqIcon(AppAssets.iconQr),
                       const SizedBox(width: 8),
                       Text(
                         'Serial Numbers (${_serialNumbers.length})',
@@ -1221,7 +1192,7 @@ class _LegacyCommissioningOperationScreenState
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.info, color: Colors.blue[700]),
+                  TraqIcon(AppAssets.iconInfo, color: Colors.blue[700]),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -1278,27 +1249,22 @@ class _LegacyCommissioningOperationScreenState
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _previousStep,
-                icon: const Icon(Icons.arrow_back),
+                icon: TraqIcon(AppAssets.iconChevronL),
                 label: const Text('Previous'),
               ),
             ),
           if (_currentStep > 0) const SizedBox(width: 16),
           Expanded(
-            child: _currentStep < 2
-                ? ElevatedButton.icon(
-                    onPressed: _nextStep,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Next'),
-                  )
-                : ElevatedButton.icon(
-                    onPressed: _submitCommissioningOperation,
-                    icon: const Icon(Icons.check),
-                    label: Text('Commission ${_serialNumbers.length} Items'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
+            child: ElevatedButton.icon(
+              onPressed:
+                  _currentStep < 2 ? _nextStep : _submitCommissioningOperation,
+              icon: TraqIcon(
+                _currentStep < 2
+                    ? AppAssets.iconChevronR
+                    : AppAssets.iconCheck,
+              ),
+              label: Text(_currentStep < 2 ? 'Next' : 'Submit'),
+            ),
           ),
         ],
       ),

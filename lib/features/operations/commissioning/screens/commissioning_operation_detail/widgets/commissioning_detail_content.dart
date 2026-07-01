@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_body.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_error_view.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
 
 class CommissioningDetailContent extends StatelessWidget {
   const CommissioningDetailContent({
@@ -14,6 +15,7 @@ class CommissioningDetailContent extends StatelessWidget {
     required this.errorMessage,
     required this.batch,
     required this.items,
+    required this.itemStatuses,
     required this.onRetry,
   });
 
@@ -23,16 +25,16 @@ class CommissioningDetailContent extends StatelessWidget {
   final String? errorMessage;
   final CommissioningBatch? batch;
   final List<CommissioningBatchItem> items;
+  final Map<String, ItemStatus> itemStatuses;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    if (awaitingSelection) {
-      return listLoading
-          ? const CommissioningDetailSkeleton()
-          : const CommissioningDetailAwaitingSelection();
+    if (awaitingSelection || isLoading) {
+      return const OperationDetailLoadingSkeleton();
+
     }
-    if (isLoading) return const CommissioningDetailSkeleton();
+
     if (errorMessage != null) {
       return CommissioningDetailErrorView(
         errorMessage: errorMessage!,
@@ -40,6 +42,6 @@ class CommissioningDetailContent extends StatelessWidget {
       );
     }
     if (batch == null) return const CommissioningDetailAwaitingSelection();
-    return CommissioningDetailBody(batch: batch!, items: items);
+    return CommissioningDetailBody(batch: batch!, items: items, itemStatuses: itemStatuses);
   }
 }

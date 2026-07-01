@@ -1,14 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class PackagingHierarchyTradeItemRolesCoreGroup extends StatefulWidget {

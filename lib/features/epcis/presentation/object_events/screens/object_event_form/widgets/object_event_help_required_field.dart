@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventHelpRequiredField extends StatelessWidget {
   const ObjectEventHelpRequiredField({
@@ -17,7 +19,7 @@ class ObjectEventHelpRequiredField extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle, color: Colors.green),
+          TraqIcon(AppAssets.iconCheck, color: Colors.green),
           const SizedBox(width: 8.0),
           Expanded(
             child: Column(

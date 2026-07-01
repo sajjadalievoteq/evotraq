@@ -10,6 +10,8 @@ import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ProfileInfoModule extends StatefulWidget {
   const ProfileInfoModule({super.key, required this.user});
@@ -159,8 +161,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Icon(
-                                    Icons.camera_alt_rounded,
+                                : TraqIcon(AppAssets.iconCamera,
                                     size: 14,
                                     color: Colors.white,
                                   ),
@@ -180,7 +181,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                             width: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.delete_outline_rounded, size: 18),
+                        : const TraqIcon(AppAssets.iconTrash, size: 18),
                     label: const Text('Remove picture'),
                   ),
                 ),
@@ -206,7 +207,7 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
                             height: 50,
                             child: OutlinedButton.icon(
                               onPressed: isSaving ? null : _toggleEdit,
-                              icon: const Icon(Icons.close_rounded, size: 16),
+                              icon: TraqIcon(AppAssets.iconX, size: 16),
                               label: const Text(
                                 UserStrings.cancel,
                                 style: TextStyle(fontSize: 16),
@@ -278,3 +279,4 @@ class _ProfileInfoModuleState extends State<ProfileInfoModule> {
     );
   }
 }
+   

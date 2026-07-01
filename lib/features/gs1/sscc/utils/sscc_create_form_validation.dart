@@ -80,7 +80,7 @@ abstract final class SsccCreateFormValidation {
 
   static String? _labelForFormField(FormField<String> field) {
     if (field is DropdownButtonFormField<String>) {
-      return field.decoration?.labelText;
+      return field.decoration.labelText;
     }
     final decoration = (field as dynamic).decoration;
     if (decoration is InputDecoration) {

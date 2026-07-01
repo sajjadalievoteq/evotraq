@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/utils/receiving_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_info_row.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_info_row_copy.dart';
@@ -20,6 +21,11 @@ class ReceivingDetailLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final receivingGlnCode = ReceivingDetailHelpers.receivingGlnCode(
+      operation,
+      receivingGlnDetails: receivingGlnDetails,
+    );
+
     return ReceivingDetailGroupCard(
       title: 'Receiving Locations',
       children: [
@@ -30,10 +36,10 @@ class ReceivingDetailLocationCard extends StatelessWidget {
         if (sourceGlnDetails?.city.isNotEmpty == true)
           ReceivingDetailInfoRow(label: 'From City', value: sourceGlnDetails!.city),
         const ReceivingDetailInfoRow(label: 'Direction', value: 'From -> To'),
-        if (operation.receivingGLN != null)
+        if (receivingGlnCode != null)
           ReceivingDetailInfoRowCopy(
             label: 'Receiving GLN',
-            value: operation.receivingGLN!,
+            value: receivingGlnCode,
           ),
         if (receivingGlnDetails?.locationName.isNotEmpty == true)
           ReceivingDetailInfoRow(

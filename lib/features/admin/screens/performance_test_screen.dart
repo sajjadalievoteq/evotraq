@@ -5,7 +5,8 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/data/services/performance_test_service.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class PerformanceTestScreen extends StatefulWidget {
   const PerformanceTestScreen({Key? key}) : super(key: key);
@@ -134,7 +135,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
               'Error',
@@ -258,7 +259,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
       return Center(
         child: Column(
           children: [
-            const Icon(Icons.play_circle_outline, size: 64, color: Colors.grey),
+            const TraqIcon(AppAssets.iconPlay, color: Colors.grey, size: 64),
             const SizedBox(height: 16),
             Text(
               'No tests have been run yet',
@@ -330,18 +331,18 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                   const Divider(height: 32),
                   _buildMetricRow(
                     'Operations per second',
-                    '${result.operationsPerSecond.toStringAsFixed(2)}',
-                    Icons.speed,
+                    result.operationsPerSecond.toStringAsFixed(2),
+                    AppAssets.iconGauge,
                   ),
                   _buildMetricRow(
                     'Execution time',
                     '${result.executionTimeMs} ms',
-                    Icons.timer,
+                    AppAssets.iconTimer,
                   ),
                   _buildMetricRow(
                     'Threshold',
                     '${result.thresholdOperationsPerSecond} ops/s',
-                    Icons.trending_up,
+                    AppAssets.iconTrendingUp,
                   ),
                   const SizedBox(height: 16),
                   Container(
@@ -352,7 +353,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, color: Colors.grey),
+                        TraqIcon(AppAssets.iconInfo, color: Colors.grey),
                         const SizedBox(width: 12),
                         Expanded(child: Text(result.message)),
                       ],
@@ -380,8 +381,8 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            passed ? Icons.check_circle : Icons.cancel,
+          TraqIcon(
+            passed ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
             size: 16,
             color: passed ? Colors.green : Colors.red,
           ),
@@ -398,12 +399,13 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
     );
   }
 
-  Widget _buildMetricRow(String label, String value, IconData icon) {
+
+  Widget _buildMetricRow(String label, String value, String iconAsset) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey),
+          TraqIcon(iconAsset, size: 20, color: Colors.grey),
           const SizedBox(width: 12),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           const Spacer(),

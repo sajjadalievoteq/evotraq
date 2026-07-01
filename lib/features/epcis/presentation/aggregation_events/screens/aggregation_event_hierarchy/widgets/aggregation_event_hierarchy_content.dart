@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_hierarchy/widgets/aggregation_event_hierarchy_history_tile.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventHierarchyContent extends StatelessWidget {
   const AggregationEventHierarchyContent({
@@ -33,8 +35,7 @@ class AggregationEventHierarchyContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
+            TraqIcon(AppAssets.iconAlert,
               size: 48.0,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -92,11 +93,7 @@ class AggregationEventHierarchyContent extends StatelessWidget {
                     const SizedBox(height: 8.0),
                     const Row(
                       children: [
-                        Icon(
-                          Icons.verified,
-                          color: Colors.green,
-                          size: 16.0,
-                        ),
+                        TraqIcon(AppAssets.iconVerified, color: Colors.green, size: 16.0),
                         SizedBox(width: 4.0),
                         Text(
                           'Hierarchy Verified',
@@ -120,7 +117,7 @@ class AggregationEventHierarchyContent extends StatelessWidget {
           if (hierarchyContents.isEmpty)
             Card(
               child: ListTile(
-                leading: Icon(isParent ? Icons.inventory : Icons.inventory_2),
+                leading: TraqIcon(isParent ? AppAssets.iconBox : AppAssets.iconBox),
                 title: Text(isParent
                     ? 'This container is currently empty'
                     : 'This item is not currently in any container'),
@@ -135,12 +132,10 @@ class AggregationEventHierarchyContent extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final contentEpc = hierarchyContents[index];
                   return ListTile(
-                    leading: Icon(
-                      isParent ? Icons.inventory_2 : Icons.inventory,
-                    ),
+                    leading: TraqIcon(AppAssets.iconBox),
                     title: Text(contentEpc),
                     trailing: IconButton(
-                      icon: const Icon(Icons.search),
+                      icon: TraqIcon(AppAssets.iconSearch),
                       onPressed: () => onNavigateToEpc(
                         contentEpc,
                         isParent: !isParent,
@@ -159,7 +154,7 @@ class AggregationEventHierarchyContent extends StatelessWidget {
           if (historyEvents.isEmpty)
             const Card(
               child: ListTile(
-                leading: Icon(Icons.history),
+                leading: TraqIcon(AppAssets.iconClock),
                 title: Text('No event history found'),
               ),
             )

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class AggregationEventDetailAwaitingPane extends StatelessWidget {
   const AggregationEventDetailAwaitingPane({super.key});
@@ -9,7 +11,7 @@ class AggregationEventDetailAwaitingPane extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.layers_outlined, size: 48, color: Colors.grey),
+          TraqIcon(AppAssets.iconLayers, color: Colors.grey, size: 48),
           SizedBox(height: 12),
           Text(
             'Select an event from the list',

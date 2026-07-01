@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class BulkJobsPanel extends StatefulWidget {
   final List<BulkJobStatus> jobs;
@@ -34,7 +36,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
           children: [
             Row(
               children: [
-                const Icon(Icons.work, size: 24),
+                TraqIcon(AppAssets.iconList, size: 24),
                 const SizedBox(width: 8),
                 const Text(
                   'Bulk Processing Jobs',
@@ -48,7 +50,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: widget.onRefresh,
-                  icon: const Icon(Icons.refresh),
+                  icon: TraqIcon(AppAssets.iconRefresh),
                   tooltip: 'Refresh Jobs',
                 ),
               ],
@@ -142,8 +144,8 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.work_off,
+          TraqIcon(
+            AppAssets.iconX,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -188,7 +190,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
           children: [
             Row(
               children: [
-                Icon(
+                TraqIcon(
                   _getStatusIcon(job.status),
                   color: _getStatusColor(job.status),
                 ),
@@ -242,7 +244,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                TraqIcon(AppAssets.iconClock, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
                   'Started: ${_formatDateTime(job.startTime)}',
@@ -253,7 +255,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 ),
                 const Spacer(),
                 if (job.endTime != null) ...[
-                  Icon(Icons.schedule, size: 14, color: Colors.grey[600]),
+                  TraqIcon(AppAssets.iconClock, size: 14, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
                     'Completed: ${_formatDateTime(job.endTime!)}',
@@ -276,7 +278,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error, color: Colors.red, size: 16),
+                    TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -298,7 +300,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 if (job.status == 'RUNNING')
                   TextButton.icon(
                     onPressed: () => widget.onJobCancel(job.jobId),
-                    icon: const Icon(Icons.stop, size: 16),
+                    icon: TraqIcon(AppAssets.iconX, size: 16),
                     label: const Text('Cancel'),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red,
@@ -307,7 +309,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 if (job.status == 'FAILED')
                   TextButton.icon(
                     onPressed: () => widget.onJobRetry(job.jobId),
-                    icon: const Icon(Icons.refresh, size: 16),
+                    icon: TraqIcon(AppAssets.iconRefresh, size: 16),
                     label: const Text('Retry'),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.blue,
@@ -315,7 +317,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                   ),
                 TextButton.icon(
                   onPressed: () => _showJobDetails(job),
-                  icon: const Icon(Icons.info, size: 16),
+                  icon: TraqIcon(AppAssets.iconInfo, size: 16),
                   label: const Text('Details'),
                 ),
               ],
@@ -345,20 +347,20 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
     );
   }
 
-  IconData _getStatusIcon(String status) {
+  String _getStatusIcon(String status) {
     switch (status.toUpperCase()) {
       case 'RUNNING':
-        return Icons.play_circle_filled;
+        return AppAssets.iconPlay;
       case 'COMPLETED':
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       case 'FAILED':
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case 'PENDING':
-        return Icons.schedule;
+        return AppAssets.iconClock;
       case 'CANCELLED':
-        return Icons.cancel;
+        return AppAssets.iconXCircle;
       default:
-        return Icons.help;
+        return AppAssets.iconHelpCircle;
     }
   }
 
@@ -403,7 +405,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  TraqIcon(
                     _getStatusIcon(job.status),
                     color: _getStatusColor(job.status),
                   ),
@@ -418,7 +420,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                   ),
                 ],
               ),

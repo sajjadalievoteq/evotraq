@@ -29,9 +29,12 @@ abstract final class HomeStrings {
   static const quickActionSsccTitle = 'SSCC Management';
   static const quickActionCreateShipment = 'Create Shipment';
   static const quickActionReceiveShipment = 'Receive Shipment';
+  static const quickActionReturnShipping = 'Return Shipping';
+  static const quickActionReturnReceiving = 'Return Receiving';
   static const quickActionPacking = 'Packing';
   static const quickActionUnpacking = 'Unpacking';
   static const quickActionCommissioning = 'Commissioning';
+  static const quickActionDecommissioning = 'Decommissioning';
   static const quickActionUnavailable =
       'This action is not available right now.';
 

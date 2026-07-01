@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:world_countries/world_countries.dart';
 
-import '../../../core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GtinCountryCodePickerField extends StatefulWidget {
   const GtinCountryCodePickerField({
@@ -132,7 +133,7 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
                 child: IconButton(
                   tooltip: 'Close',
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  icon: const Icon(Icons.close),
+                  icon: TraqIcon(AppAssets.iconX),
                 ),
               ),
             ],
@@ -164,14 +165,16 @@ class _GtinCountryCodePickerFieldState extends State<GtinCountryCodePickerField>
                 labelText: widget.labelText,
                 helperText: widget.helperText,
                 border: const OutlineInputBorder(),
-                suffixIcon: const Icon(Icons.public),
+                suffixIcon: const TraqIcon(AppAssets.iconGlobe),
                 errorText: fieldState.errorText,
               ),
               child: Text(
-                formatted.isEmpty ? ' ' : formatted,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: context.colors.textPrimary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                formatted.isEmpty ? 'Select country' : formatted,
+                style: TextStyle(
+                  color: widget.enabled
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).disabledColor,
+                ),
               ),
             ),
           ),

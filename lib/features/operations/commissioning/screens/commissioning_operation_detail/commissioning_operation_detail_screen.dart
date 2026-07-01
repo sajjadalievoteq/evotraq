@@ -4,8 +4,12 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningOperationDetailScreen extends StatefulWidget {
   const CommissioningOperationDetailScreen({
@@ -34,6 +38,7 @@ class _CommissioningOperationDetailScreenState
     extends State<CommissioningOperationDetailScreen> {
   CommissioningBatch? _batch;
   List<CommissioningBatchItem> _items = [];
+  Map<String, ItemStatus> _itemStatuses = {};
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -62,6 +67,7 @@ class _CommissioningOperationDetailScreenState
       _errorMessage = null;
       _batch = null;
       _items = [];
+      _itemStatuses = {};
     });
     try {
       final service = getIt<CommissioningOperationService>();
@@ -69,15 +75,39 @@ class _CommissioningOperationDetailScreenState
         service.getBatch(id),
         service.getBatchItems(id),
       ]);
+      final batch = results[0] as CommissioningBatch?;
+      final items = (results[1] as List<CommissioningBatchItem>?) ?? [];
       setState(() {
-        _batch = results[0] as CommissioningBatch?;
-        _items = (results[1] as List<CommissioningBatchItem>?) ?? [];
+        _batch = batch;
+        _items = items;
       });
+      // Fetch current SGTIN status for each successfully commissioned item.
+      _fetchItemStatuses(items);
     } catch (e) {
       setState(() => _errorMessage = 'Failed to load operation: $e');
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _fetchItemStatuses(List<CommissioningBatchItem> items) async {
+    final sgtinService = getIt<SGTINService>();
+    final successItems = items.where((i) => i.success && i.serialNumber.isNotEmpty);
+    final futures = successItems.map((item) async {
+      try {
+        final sgtin = await sgtinService.getSGTINBySerialNumber(item.serialNumber);
+        return MapEntry(item.serialNumber, sgtin.status);
+      } catch (_) {
+        return null;
+      }
+    });
+    final entries = await Future.wait(futures);
+    if (!mounted) return;
+    setState(() {
+      _itemStatuses = Map.fromEntries(
+        entries.whereType<MapEntry<String, ItemStatus>>(),
+      );
+    });
   }
 
   @override
@@ -89,6 +119,7 @@ class _CommissioningOperationDetailScreenState
       errorMessage: _errorMessage,
       batch: _batch,
       items: _items,
+      itemStatuses: _itemStatuses,
       onRetry: _load,
     );
 
@@ -98,12 +129,12 @@ class _CommissioningOperationDetailScreenState
       appBar: TraqAppBar(
         context,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: TraqIcon(AppAssets.iconChevronL),
           onPressed: () => context.go('/operations/commissioning'),
         ),
         title: const Text('Commissioning Details'),
         actions: [
-          IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
+          IconButton(onPressed: _load, icon: TraqIcon(AppAssets.iconRefresh)),
         ],
       ),
       drawer: const AppDrawer(),

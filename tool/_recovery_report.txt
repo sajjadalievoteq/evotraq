@@ -1,0 +1,16 @@
+Recovered files: 0
+Merged files: 0
+Unrecoverable: 8
+Already OK: 84
+
+=== Recovered ===
+
+=== Unrecoverable ===
+lib\features\gs1\gln\screens\gln_list\widgets\gln_list_item_card.dart (no history)
+lib\features\gs1\sscc\screens\sscc_detail\widgets\core_groups\sscc_pharma_compliance_card.dart (no history)
+lib\features\gs1\sscc\screens\sscc_list\widgets\sscc_list_item_card.dart (no history)
+lib\features\gs1\widgets\gs1_country_code_picker_field.dart (no history)
+lib\features\gs1\widgets\gs1_list\gs1_list_search_bar.dart (no complete snapshot)
+lib\features\notifications\presentation\widgets\notification_quick_guide.dart (no history)
+lib\features\notifications\presentation\widgets\notification_subscription_help.dart (no history)
+lib\features\user\screens\profile\widgets\profile_info_module.dart (no history)

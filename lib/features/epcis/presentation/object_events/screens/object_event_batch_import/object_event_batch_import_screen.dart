@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
@@ -10,6 +11,8 @@ import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_batch_import/widgets/object_event_batch_import_csv_tab.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_batch_import/widgets/object_event_batch_import_manual_tab.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventBatchImportScreen extends StatefulWidget {
   const ObjectEventBatchImportScreen({Key? key}) : super(key: key);
@@ -97,9 +100,7 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         _lotController.clear();
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added ${_epcList.length} events to batch')),
-      );
+      context.showInfo('Added ${_epcList.length} events to batch');
     }
   }
   
@@ -149,9 +150,7 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
       
       setState(() {});
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Parsed ${_csvData.length} rows from CSV')),
-      );
+      context.showInfo('Parsed ${_csvData.length} rows from CSV');
       
     } catch (e) {
       setState(() {
@@ -224,9 +223,7 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
     }
     
     if (eventsToImport.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No events to import')),
-      );
+      context.showInfo('No events to import');
       return;
     }
     
@@ -252,12 +249,7 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         _csvController.clear();
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully imported ${results.length} events'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Successfully imported ${results.length} events');
       
     } catch (e) {
       setState(() {
@@ -278,14 +270,14 @@ class _ObjectEventBatchImportScreenState extends State<ObjectEventBatchImportScr
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Manual Entry', icon: Icon(Icons.edit)),
-            Tab(text: 'CSV Import', icon: Icon(Icons.upload_file)),
+            Tab(text: 'Manual Entry', icon: TraqIcon(AppAssets.iconEdit)),
+            Tab(text: 'CSV Import', icon: TraqIcon(AppAssets.iconUpload)),
           ],
         ),
         actions: [
           if (_pendingEvents.isNotEmpty || (_tabController.index == 1 && _csvData.isNotEmpty))
             IconButton(
-              icon: const Icon(Icons.cloud_upload),
+              icon: const TraqIcon(AppAssets.iconCloudUpload),
               onPressed: _isImporting ? null : _importEvents,
               tooltip: 'Import Events',
             ),

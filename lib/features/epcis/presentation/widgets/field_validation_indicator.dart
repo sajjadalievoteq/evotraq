@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Severity levels for validation feedback
 enum ValidationSeverity {
@@ -108,14 +110,14 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
     }
   }
   
-  IconData _getIconForSeverity() {
+  String _getIconAssetForSeverity() {
     switch (widget.severity) {
       case ValidationSeverity.info:
-        return Icons.info_outline;
+        return AppAssets.iconInfo;
       case ValidationSeverity.warning:
-        return Icons.warning_amber_outlined;
+        return AppAssets.iconAlert;
       case ValidationSeverity.error:
-        return Icons.error_outline;
+        return AppAssets.iconXCircle;
     }
   }
 
@@ -144,8 +146,7 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
     if (widget.isValid) {
       content = Row(
         children: [
-          Icon(
-            Icons.check_circle_outline,
+          TraqIcon(AppAssets.iconCheck,
             color: Colors.green[700],
             size: 16,
           ),
@@ -161,15 +162,15 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
       );
     } else if (widget.showError && widget.errorMessage != null && widget.errorMessage!.isNotEmpty) {
       final color = _getColorForSeverity();
-      final icon = _getIconForSeverity();
+      final iconAsset = _getIconAssetForSeverity();
       
       content = Padding(
         padding: const EdgeInsets.only(top: 4.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
+            TraqIcon(
+              iconAsset,
               color: color,
               size: 16,
             ),
@@ -188,12 +189,12 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
       );
     } else {
       final color = _getColorForSeverity();
-      final icon = _getIconForSeverity();
+      final iconAsset = _getIconAssetForSeverity();
       
       content = Row(
         children: [
-          Icon(
-            icon,
+          TraqIcon(
+            iconAsset,
             color: color,
             size: 16,
           ),

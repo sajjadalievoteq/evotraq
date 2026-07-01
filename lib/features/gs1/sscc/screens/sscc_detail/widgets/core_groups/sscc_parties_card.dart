@@ -83,6 +83,15 @@ class SsccPartiesCard extends StatelessWidget {
             onChanged: onShipForChanged,
           ),
           const SizedBox(height: 12),
+          if (isReadOnly && sscc != null) ...[
+            SgtinInfoRow(
+              'Current Location',
+              sscc!.currentLocation?.locationName ??
+                  sscc!.currentLocationGln ??
+                  'Unknown',
+            ),
+            const SizedBox(height: 12),
+          ],
           _partyField(
             context,
             label: 'Current Custodian GLN',

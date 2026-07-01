@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class CustomButtonWidget extends StatelessWidget {
   const CustomButtonWidget({
@@ -7,6 +8,7 @@ class CustomButtonWidget extends StatelessWidget {
     required this.onTap,
     this.title,
     this.icon,
+    this.iconAsset,
     this.iconWidget,
     this.iconOnly,
     this.height = TraqSpacing.buttonH,
@@ -19,6 +21,7 @@ class CustomButtonWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final String? title;
   final IconData? icon;
+  final String? iconAsset;
   final Widget? iconWidget;
 
   /// When true, renders an icon-only button.
@@ -30,13 +33,11 @@ class CustomButtonWidget extends StatelessWidget {
   final double? minimumWidth;
   final String? tooltip;
 
-  // height default matches TraqSpacing.buttonH = 36
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final resolvedIconOnly = iconOnly ?? false;
-    final hasIcon = icon != null || iconWidget != null;
+    final hasIcon = icon != null || iconAsset != null || iconWidget != null;
     final hasTitle = (title ?? '').trim().isNotEmpty;
 
     final buttonWidth = minimumWidth ?? (resolvedIconOnly ? height : null);
@@ -44,11 +45,16 @@ class CustomButtonWidget extends StatelessWidget {
     final resolvedForegroundColor = foregroundColor ?? scheme.onPrimary;
 
     assert(
-    resolvedIconOnly ? hasIcon : hasTitle,
-    'CustomButtonWidget requires `icon` or `iconWidget` when iconOnly=true, otherwise it requires a non-empty `title`.',
+      resolvedIconOnly ? hasIcon : hasTitle,
+      'CustomButtonWidget requires `icon` or `iconWidget` when iconOnly=true, otherwise it requires a non-empty `title`.',
     );
 
-    final resolvedIconWidget = iconWidget ?? (icon != null ? Icon(icon) : null);
+    final resolvedIconWidget = iconWidget ??
+        (iconAsset != null
+            ? TraqIcon(iconAsset!, color: resolvedForegroundColor)
+            : icon != null
+                ? Icon(icon, color: resolvedForegroundColor)
+                : null);
 
     final button = SizedBox(
       width: buttonWidth,
@@ -60,10 +66,8 @@ class CustomButtonWidget extends StatelessWidget {
           minimumSize: Size(buttonWidth ?? 0, height),
         ),
         child: resolvedIconOnly
-            ? const SizedBox.expand(
-                child: Center(
-                  child: Icon(Icons.circle), // placeholder, replaced below
-                ),
+            ? SizedBox.expand(
+                child: Center(child: resolvedIconWidget!),
               )
             : Row(
                 mainAxisSize: MainAxisSize.min,
@@ -79,30 +83,9 @@ class CustomButtonWidget extends StatelessWidget {
       ),
     );
 
-    final finalButton = resolvedIconOnly
-        ? SizedBox(
-            width: buttonWidth,
-            child: ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: resolvedBackgroundColor,
-                foregroundColor: resolvedForegroundColor,
-                minimumSize: Size(buttonWidth ?? 0, height),
-              ),
-              child: SizedBox.expand(
-                child: Center(child: resolvedIconWidget),
-              ),
-            ),
-          )
-        : button;
-
-    if (tooltip != null && tooltip!.trim().isNotEmpty) {
-      return Tooltip(
-        message: tooltip!.trim(),
-        child: finalButton,
-      );
+    if (tooltip != null && tooltip!.isNotEmpty) {
+      return Tooltip(message: tooltip!, child: button);
     }
-
-    return finalButton;
+    return button;
   }
 }

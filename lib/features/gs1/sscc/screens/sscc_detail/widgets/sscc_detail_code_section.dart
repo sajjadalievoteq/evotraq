@@ -8,6 +8,8 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_i
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SsccDetailCodeSection extends StatelessWidget {
   const SsccDetailCodeSection({
@@ -61,7 +63,7 @@ class SsccDetailCodeSection extends StatelessWidget {
         ssccHelperText = 'Will be generated automatically';
         ssccHintText = 'Click Generate button →';
         ssccSuffixIcon = IconButton(
-          icon: const Icon(Icons.autorenew),
+          icon: const TraqIcon(AppAssets.iconRefresh),
           tooltip: 'Generate SSCC Code',
           onPressed: onGenerateSsccCode,
         );
@@ -69,7 +71,7 @@ class SsccDetailCodeSection extends StatelessWidget {
         ssccHelperText = 'Tap the scan button to read a barcode';
         ssccHintText = 'Tap scan icon to scan →';
         ssccSuffixIcon = IconButton(
-          icon: const Icon(Icons.qr_code_scanner),
+          icon: TraqIcon(AppAssets.iconQr),
           tooltip: 'Scan SSCC Barcode',
           onPressed: onScanSsccCode,
         );
@@ -83,13 +85,13 @@ class SsccDetailCodeSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: TraqIcon(AppAssets.iconQr),
                   tooltip: 'Scan SSCC Barcode',
                   onPressed: onScanSsccCode,
                 ),
                 if (ssccCodeController.text.isNotEmpty)
                   IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: TraqIcon(AppAssets.iconX),
                     tooltip: 'Clear',
                     onPressed: onClearSsccCode,
                   ),
@@ -145,17 +147,17 @@ class SsccDetailCodeSection extends StatelessWidget {
                   ButtonSegment(
                     value: SsccInputMode.generate,
                     label: Text('Generate'),
-                    icon: Icon(Icons.autorenew, size: 16),
+                    icon: TraqIcon(AppAssets.iconRefresh, size: 16),
                   ),
                   ButtonSegment(
                     value: SsccInputMode.scan,
                     label: Text('Scan'),
-                    icon: Icon(Icons.qr_code_scanner, size: 16),
+                    icon: TraqIcon(AppAssets.iconQr, size: 16),
                   ),
                   ButtonSegment(
                     value: SsccInputMode.manual,
                     label: Text('Manual'),
-                    icon: Icon(Icons.edit, size: 16),
+                    icon: TraqIcon(AppAssets.iconEdit, size: 16),
                   ),
                 ],
                 selected: {ssccInputMode},

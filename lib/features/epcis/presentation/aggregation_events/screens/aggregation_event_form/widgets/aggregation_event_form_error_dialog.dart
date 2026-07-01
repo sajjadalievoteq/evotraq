@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_error_parser.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_form_external_navigation.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventFormErrorDialog extends StatelessWidget {
   const AggregationEventFormErrorDialog({
@@ -43,8 +45,8 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(
-            isValidationError ? Icons.error_outline : Icons.warning_amber_outlined,
+          TraqIcon(
+            isValidationError ? AppAssets.iconXCircle : AppAssets.iconAlert,
             color: isValidationError ? Colors.red[800] : Colors.orange[800],
           ),
           const SizedBox(width: 8),
@@ -84,8 +86,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 2),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.error_outline,
+                                TraqIcon(AppAssets.iconAlert,
                                   size: 16,
                                   color: Colors.red,
                                 ),
@@ -128,8 +129,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 2),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.warning_amber_outlined,
+                                TraqIcon(AppAssets.iconAlert,
                                   size: 16,
                                   color: Colors.orange,
                                 ),
@@ -172,8 +172,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 2),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.info_outline,
+                                TraqIcon(AppAssets.iconInfo,
                                   size: 16,
                                   color: Colors.grey,
                                 ),
@@ -204,7 +203,7 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
       actions: [
         if (needsCommissioning) ...[
           TextButton.icon(
-            icon: const Icon(Icons.add_circle_outline),
+            icon: const TraqIcon(AppAssets.iconAddCircle),
             label: const Text('Go to Commissioning Form'),
             onPressed: () async {
               Navigator.of(context).pop();
@@ -230,9 +229,8 @@ class AggregationEventFormErrorDialog extends StatelessWidget {
           const SizedBox(width: 8),
         ],
         TextButton.icon(
-          icon: const Icon(Icons.close),
-          label: const Text('Close'),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: TraqIcon(AppAssets.iconX),
+          label: const Text('Close'), onPressed: ()=>Navigator.of(context).pop() ,
         ),
       ],
     );

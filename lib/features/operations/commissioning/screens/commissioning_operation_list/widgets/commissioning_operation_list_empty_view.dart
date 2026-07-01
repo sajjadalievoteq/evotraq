@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 
 class CommissioningOperationListEmptyView extends StatelessWidget {
@@ -19,7 +21,7 @@ class CommissioningOperationListEmptyView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.play_for_work, size: 64, color: Colors.grey[400]),
+          TraqIcon(AppAssets.iconDownload, color: Colors.grey[400], size: 64),
           const SizedBox(height: 16),
           Text(
             hasOperations

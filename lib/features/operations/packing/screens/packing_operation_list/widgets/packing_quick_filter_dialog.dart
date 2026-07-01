@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/models/packing_quick_filter_result.dart';
+import 'package:traqtrace_app/data/models/operations/packing/packing_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/packing/utils/packing_ui_constants.dart';
 
 class PackingQuickFilterDialog extends StatefulWidget {
-  const PackingQuickFilterDialog({
-    super.key,
-    required this.initialStatus,
-  });
+  const PackingQuickFilterDialog({super.key, required this.initialStatus});
 
   final String? initialStatus;
 
@@ -67,8 +64,8 @@ class _PackingQuickFilterDialogState extends State<PackingQuickFilterDialog> {
             Text(
               PackingUiConstants.quickFiltersFooterHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -76,9 +73,9 @@ class _PackingQuickFilterDialogState extends State<PackingQuickFilterDialog> {
       actions: [
         CustomTextButtonWidget(
           title: PackingUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context).pop(
-            const PackingQuickFilterResult.cleared(),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const PackingQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: PackingUiConstants.buttonCancel,

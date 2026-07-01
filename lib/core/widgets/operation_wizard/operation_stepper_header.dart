@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 /// Animated stepper header with scale transitions and connector fill animation.
 class OperationStepperHeader extends StatefulWidget {
@@ -69,7 +70,7 @@ class _OperationStepperHeaderState extends State<OperationStepperHeader>
                 _OperationStepCircle(
                   step: i,
                   label: widget.steps[i].label,
-                  icon: widget.steps[i].icon,
+                  iconAsset: widget.steps[i].iconAsset,
                   currentStep: widget.currentStep,
                   previousStep: _previousStep,
                   progress: _progress.value,
@@ -87,7 +88,7 @@ class _OperationStepCircle extends StatelessWidget {
   const _OperationStepCircle({
     required this.step,
     required this.label,
-    required this.icon,
+    required this.iconAsset,
     required this.currentStep,
     required this.previousStep,
     required this.progress,
@@ -95,7 +96,7 @@ class _OperationStepCircle extends StatelessWidget {
 
   final int step;
   final String label;
-  final IconData icon;
+  final String iconAsset;
   final int currentStep;
   final int previousStep;
   final double progress;
@@ -137,8 +138,8 @@ class _OperationStepCircle extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: Icon(
-                icon,
+              child: TraqIcon(
+                iconAsset,
                 color: isActive ? Colors.white : Colors.grey[600],
                 size: 24,
               ),

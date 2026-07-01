@@ -15,6 +15,8 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningOperationListScreen extends StatefulWidget {
   const CommissioningOperationListScreen({
@@ -339,7 +341,7 @@ class _CommissioningOperationListScreenState
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/operations/commissioning/new'),
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('New Commissioning'),
       ),
       body: body,

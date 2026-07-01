@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
@@ -302,8 +304,8 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
           top: BorderSide(color: Colors.transparent),
           bottom: BorderSide(color: Colors.transparent),
         ),
-        leading: Icon(
-          Icons.smoking_rooms,
+        leading: TraqIcon(
+          AppAssets.iconSmokingRooms,
           color: _hasExtension ? Colors.brown : Colors.grey,
         ),
         title: Text(
@@ -343,7 +345,7 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Icon(Icons.smoke_free, size: 48, color: Colors.grey.shade400),
+              TraqIcon(AppAssets.iconBlock, color: Colors.grey.shade400, size: 48),
               const SizedBox(height: 16),
               Text(
                 'No tobacco extension defined for this product',

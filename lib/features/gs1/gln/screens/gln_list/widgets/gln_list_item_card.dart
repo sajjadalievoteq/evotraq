@@ -3,6 +3,8 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_active_chip.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GlnListItemCard extends StatelessWidget {
   const GlnListItemCard({
@@ -35,14 +37,14 @@ class GlnListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(IconData icon, String text) {
+        Widget infoRow(String iconAsset, String text) {
           final rowColor =
               Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: rowColor),
+                TraqIcon(iconAsset, size: 16, color: rowColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -92,15 +94,15 @@ class GlnListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         infoRow(
-                          Icons.pin_outlined,
+                          AppAssets.iconMapPin,
                           '${GlnUiConstants.listCardGlnPrefix}${gln.glnCode}',
                         ),
                         if (gln.addressLine1.isNotEmpty)
-                          infoRow(Icons.place_outlined, gln.addressLine1),
+                          infoRow(AppAssets.iconMapPin, gln.addressLine1),
                         if (cityCountry.isNotEmpty)
-                          infoRow(Icons.location_city_outlined, cityCountry),
+                          infoRow(AppAssets.iconMapPin, cityCountry),
                         if (gln.contactEmail?.isNotEmpty == true)
-                          infoRow(Icons.email_outlined, gln.contactEmail!),
+                          infoRow(AppAssets.iconMail, gln.contactEmail!),
                       ],
                     ),
                   ),
@@ -131,14 +133,14 @@ class GlnListItemCard extends StatelessWidget {
                       PopupMenuButton<String>(
                         tooltip: GlnUiConstants.menuTooltipActions,
                         padding: EdgeInsets.zero,
-                        icon: Icon(Icons.more_vert, color: menuIconColor),
+                        icon: TraqIcon(AppAssets.iconMoreVert, color: menuIconColor),
                         onSelected: onMenuSelected,
                         itemBuilder: (context) => [
                           PopupMenuItem(
                             value: 'view',
                             child: Row(
                               children: [
-                                const Icon(Icons.visibility, size: 20),
+                                TraqIcon(AppAssets.iconEye, size: 20),
                                 const SizedBox(width: 8),
                                 Text(GlnUiConstants.menuViewDetails),
                               ],
@@ -148,7 +150,7 @@ class GlnListItemCard extends StatelessWidget {
                             value: 'edit',
                             child: Row(
                               children: [
-                                const Icon(Icons.edit, size: 20),
+                                TraqIcon(AppAssets.iconEdit, size: 20),
                                 const SizedBox(width: 8),
                                 Text(GlnUiConstants.menuEdit),
                               ],
@@ -158,8 +160,7 @@ class GlnListItemCard extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.delete,
+                                TraqIcon(AppAssets.iconTrash,
                                   size: 20,
                                   color: Colors.red,
                                 ),
@@ -184,3 +185,4 @@ class GlnListItemCard extends StatelessWidget {
     );
   }
 }
+          

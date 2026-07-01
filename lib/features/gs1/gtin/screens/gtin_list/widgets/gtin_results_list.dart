@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import '../../../../../../core/utils/responsive_utils.dart';
@@ -73,7 +74,7 @@ class GtinResultsList extends StatelessWidget {
         if (gtins == null || gtins.isEmpty) {
           return _constrainedCenter(
             Gs1ListEmptyView(
-              icon: Icons.qr_code_2,
+              iconAsset: AppAssets.iconQr,
               title: GtinUiConstants.emptyListTitle,
               onClearFilters: onClearFilters,
             ),

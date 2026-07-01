@@ -5,7 +5,8 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/data/services/integration_validation_service.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class IntegrationValidationScreen extends StatefulWidget {
   const IntegrationValidationScreen({Key? key}) : super(key: key);
@@ -109,7 +110,7 @@ class _IntegrationValidationScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
               'Error',
@@ -281,7 +282,7 @@ class _IntegrationValidationScreenState
       return Center(
         child: Column(
           children: [
-            const Icon(Icons.play_circle_outline, size: 64, color: Colors.grey),
+            const TraqIcon(AppAssets.iconPlay, color: Colors.grey, size: 64),
             const SizedBox(height: 16),
             Text(
               'No tests have been run yet',
@@ -350,7 +351,7 @@ class _IntegrationValidationScreenState
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, color: Colors.grey),
+                        TraqIcon(AppAssets.iconInfo, color: Colors.grey),
                         const SizedBox(width: 12),
                         Expanded(child: Text(result.message)),
                       ],
@@ -371,7 +372,7 @@ class _IntegrationValidationScreenState
     stepWidgets.add(
       Row(
         children: [
-          Icon(Icons.checklist, size: 20, color: Colors.blue[700]),
+          TraqIcon(AppAssets.iconCheck, size: 20, color: Colors.blue[700]),
           const SizedBox(width: 8),
           Text(
             'Validation Steps',
@@ -408,10 +409,10 @@ class _IntegrationValidationScreenState
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: [
-              Icon(
+              TraqIcon(
                 isPassed
-                    ? Icons.check_circle
-                    : (isFailed ? Icons.cancel : Icons.circle_outlined),
+                    ? AppAssets.iconCheckCircle
+                    : (isFailed ? AppAssets.iconXCircle : AppAssets.iconCircle),
                 size: 18,
                 color: isPassed
                     ? Colors.green
@@ -441,8 +442,8 @@ class _IntegrationValidationScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            passed ? Icons.check_circle : Icons.cancel,
+          TraqIcon(
+            passed ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
             size: 16,
             color: passed ? Colors.green : Colors.red,
           ),
@@ -450,7 +451,6 @@ class _IntegrationValidationScreenState
           Text(
             passed ? 'PASSED' : 'FAILED',
             style: TextStyle(
-              color: passed ? Colors.green : Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),

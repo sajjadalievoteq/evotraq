@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -9,7 +11,6 @@ import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_vali
 class ReceivingReviewStep extends StatelessWidget {
   const ReceivingReviewStep({
     super.key,
-    required this.receivingReference,
     required this.sourceGln,
     required this.receivingGln,
     required this.purchaseOrder,
@@ -24,7 +25,6 @@ class ReceivingReviewStep extends StatelessWidget {
     required this.scannedEpcs,
     this.showPageHeader = true,
   });
-  final String receivingReference;
   final GLN? sourceGln;
   final GLN? receivingGln;
   final String purchaseOrder;
@@ -45,6 +45,7 @@ class ReceivingReviewStep extends StatelessWidget {
       return switch (OperationEpcScanValidator.resolveEpcType(value)) {
         OperationScanItemType.sgtin => 'SGTIN',
         OperationScanItemType.sscc => 'SSCC',
+        OperationScanItemType.gtin => 'GTIN',
         OperationScanItemType.unknown => 'EPC',
       };
     }
@@ -53,6 +54,7 @@ class ReceivingReviewStep extends StatelessWidget {
       return switch (OperationEpcScanValidator.resolveEpcType(value)) {
         OperationScanItemType.sgtin => Colors.blue,
         OperationScanItemType.sscc => Colors.teal,
+        OperationScanItemType.gtin => Colors.orange,
         OperationScanItemType.unknown => Colors.grey,
       };
     }
@@ -78,7 +80,7 @@ class ReceivingReviewStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _row('Receiving Reference', receivingReference),
+                _row('Receiving Reference', 'Auto-generated on submit'),
                 const SizedBox(height: 12),
                 _row('Ship From', sourceGln?.glnCode ?? '-'),
                 if (sourceGln?.locationName.isNotEmpty == true)
@@ -90,7 +92,7 @@ class ReceivingReviewStep extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 12),
-                const Center(child: Icon(Icons.arrow_downward, size: 20)),
+                const Center(child: TraqIcon(AppAssets.iconArrowD, size: 20)),
                 const SizedBox(height: 12),
                 _row('Received At', receivingGln?.glnCode ?? '-'),
                 if (receivingGln?.locationName.isNotEmpty == true)

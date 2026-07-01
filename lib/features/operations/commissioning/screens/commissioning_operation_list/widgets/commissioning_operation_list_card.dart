@@ -2,6 +2,8 @@
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_batch_status_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningOperationListCard extends StatelessWidget {
   const CommissioningOperationListCard({
@@ -90,8 +92,7 @@ class CommissioningOperationListCard extends StatelessWidget {
               if (op.gtinCode != null)
                 Row(
                   children: [
-                    const Icon(
-                      Icons.inventory_2,
+                    TraqIcon(AppAssets.iconPackage,
                       size: 16,
                       color: Colors.orange,
                     ),
@@ -109,7 +110,7 @@ class CommissioningOperationListCard extends StatelessWidget {
               if (op.batchLotNumber != null)
                 Row(
                   children: [
-                    const Icon(Icons.numbers, size: 16, color: Colors.purple),
+                    TraqIcon(AppAssets.iconQr, size: 16, color: Colors.purple),
                     const SizedBox(width: 4),
                     Text(
                       'Lot #: ${op.batchLotNumber}',
@@ -121,7 +122,7 @@ class CommissioningOperationListCard extends StatelessWidget {
               if (op.commissioningLocationGLN != null)
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.blue),
+                    TraqIcon(AppAssets.iconGln, size: 16, color: Colors.blue),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -138,8 +139,7 @@ class CommissioningOperationListCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.check_circle,
+                      TraqIcon(AppAssets.iconCheck,
                         size: 14,
                         color: Colors.green[600],
                       ),
@@ -150,7 +150,7 @@ class CommissioningOperationListCard extends StatelessWidget {
                       ),
                       if (op.totalFailed > 0) ...[
                         const SizedBox(width: 12),
-                        Icon(Icons.error, size: 14, color: Colors.red[600]),
+                        TraqIcon(AppAssets.iconAlert, size: 14, color: Colors.red[600]),
                         const SizedBox(width: 4),
                         Text(
                           '${op.totalFailed} failed',

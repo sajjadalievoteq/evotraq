@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// A widget to display error messages with a retry button
 class ErrorDisplay extends StatelessWidget {
@@ -21,8 +23,7 @@ class ErrorDisplay extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 48,
             color: Theme.of(context).colorScheme.error,
           ),

@@ -7,6 +7,8 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AdvancedPerformanceOptimizationScreen extends StatefulWidget {
   const AdvancedPerformanceOptimizationScreen({Key? key}) : super(key: key);
@@ -155,21 +157,21 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
           controller: _tabController,
           isScrollable: true,
           tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-            Tab(icon: Icon(Icons.analytics), text: 'Query Analysis'),
-            Tab(icon: Icon(Icons.pool), text: 'Connection Pool'),
-            Tab(icon: Icon(Icons.settings), text: 'Thread Pool'),
-            Tab(icon: Icon(Icons.computer), text: 'Resources'),
+            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Overview'),
+            Tab(icon: TraqIcon(AppAssets.iconBarChart), text: 'Query Analysis'),
+            Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Connection Pool'),
+            Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Thread Pool'),
+            Tab(icon: TraqIcon(AppAssets.iconComputer), text: 'Resources'),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _isOptimizing ? null : _loadComprehensiveAnalysis,
             tooltip: 'Refresh Analysis',
           ),
           IconButton(
-            icon: const Icon(Icons.auto_fix_high),
+            icon: TraqIcon(AppAssets.iconSparkle),
             onPressed: _isOptimizing ? null : _performAutomatedOptimization,
             tooltip: 'Auto Optimize',
           ),
@@ -205,7 +207,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      Icon(Icons.error, color: Colors.red),
+                      TraqIcon(AppAssets.iconAlert, color: Colors.red),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -235,7 +237,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.dashboard, color: Theme.of(context).primaryColor),
+                              TraqIcon(AppAssets.iconDashboard, color: Theme.of(context).primaryColor),
                               const SizedBox(width: 8),
                               Text(
                                 'Performance Overview',
@@ -263,7 +265,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.auto_fix_high, color: Theme.of(context).primaryColor),
+                              TraqIcon(AppAssets.iconSparkle, color: Theme.of(context).primaryColor),
                               const SizedBox(width: 8),
                               Text(
                                 'Automated Optimization',
@@ -289,7 +291,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                                     height: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
-                                : const Icon(Icons.auto_fix_high),
+                                : TraqIcon(AppAssets.iconSparkle),
                               label: Text(_isOptimizing ? 'Optimizing...' : 'Start Auto Optimization'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -313,7 +315,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.analytics, color: Theme.of(context).primaryColor),
+                                TraqIcon(AppAssets.iconBarChart, color: Theme.of(context).primaryColor),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Comprehensive Analysis Results',
@@ -366,7 +368,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
               child: _buildMetricCard(
                 'Memory Usage',
                 _getMemoryUsage(systemResources),
-                Icons.memory,
+                AppAssets.iconChip,
                 Colors.blue,
               ),
             ),
@@ -375,7 +377,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
               child: _buildMetricCard(
                 'CPU Usage',
                 _getCpuUsage(systemResources),
-                Icons.speed,
+                AppAssets.iconGauge,
                 Colors.green,
               ),
             ),
@@ -388,7 +390,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
               child: _buildMetricCard(
                 'Active Connections',
                 _getActiveConnections(connectionPool),
-                Icons.link,
+                AppAssets.iconLink,
                 Colors.orange,
               ),
             ),
@@ -397,7 +399,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
               child: _buildMetricCard(
                 'Active Threads',
                 _getActiveThreads(threadPools),
-                Icons.settings,
+                AppAssets.iconSettings,
                 Colors.purple,
               ),
             ),
@@ -407,7 +409,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -417,7 +419,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             title,
@@ -447,7 +449,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.analytics, size: 64, color: Colors.grey),
+          TraqIcon(AppAssets.iconBarChart, color: Colors.grey, size: 64),
           SizedBox(height: 16),
           Text(
             'Query Plan Analysis',
@@ -468,7 +470,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.pool, size: 64, color: Colors.grey),
+          TraqIcon(AppAssets.iconHub, color: Colors.grey, size: 64),
           SizedBox(height: 16),
           Text(
             'Connection Pool Monitoring',
@@ -489,7 +491,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.settings, size: 64, color: Colors.grey),
+          TraqIcon(AppAssets.iconSettings, size: 64, color: Colors.grey),
           SizedBox(height: 16),
           Text(
             'Thread Pool Management',
@@ -510,7 +512,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.computer, size: 64, color: Colors.grey),
+          TraqIcon(AppAssets.iconComputer, color: Colors.grey, size: 64),
           SizedBox(height: 16),
           Text(
             'Resource Management',
@@ -542,6 +544,15 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
   }
 
   String _getActiveThreads(Map<String, dynamic> threadPools) {
-    return threadPools['activeThreads']?.toString() ?? '0';
+    if (threadPools.isEmpty) return '0';
+    final direct = threadPools['activeThreads'] ?? threadPools['activeCount'];
+    if (direct != null) return direct.toString();
+    var total = 0;
+    for (final value in threadPools.values) {
+      if (value is Map) {
+        total += (value['activeThreads'] as num?)?.toInt() ?? 0;
+      }
+    }
+    return total.toString();
   }
 }

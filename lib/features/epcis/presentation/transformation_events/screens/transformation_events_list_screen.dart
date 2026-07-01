@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_events_help.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for displaying a list of Transformation Events
 class TransformationEventsListScreen extends StatefulWidget {
@@ -174,9 +177,7 @@ class _TransformationEventsListScreenState
             }
           });
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Event ID is missing')));
+      context.showInfo('Event ID is missing');
     }
   }
 
@@ -284,9 +285,7 @@ class _TransformationEventsListScreenState
                       setState(() {
                         isSearching = false;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error tracking EPC: $e')),
-                      );
+                      context.showError('Error tracking EPC: $e');
                     }
                   },
                 ),
@@ -381,8 +380,9 @@ class _TransformationEventsListScreenState
                   child: const Text('Find Relationship'),
                   onPressed: () async {
                     if (inputEpcController.text.isEmpty ||
-                        outputEpcController.text.isEmpty)
+                        outputEpcController.text.isEmpty) {
                       return;
+                    }
 
                     setState(() {
                       isSearching = true;
@@ -405,11 +405,7 @@ class _TransformationEventsListScreenState
                       setState(() {
                         isSearching = false;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error finding relationship: $e'),
-                        ),
-                      );
+                      context.showError('Error finding relationship: $e');
                     }
                   },
                 ),
@@ -478,27 +474,27 @@ class _TransformationEventsListScreenState
         title: const Text('Transformation Events'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: _showHelpDialog,
             tooltip: 'Help',
           ),
           IconButton(
-            icon: const Icon(Icons.track_changes),
+            icon: const TraqIcon(AppAssets.iconTarget),
             onPressed: _showTrackEPCDialog,
             tooltip: 'Track EPC',
           ),
           IconButton(
-            icon: const Icon(Icons.compare_arrows),
+            icon: TraqIcon(AppAssets.iconTransform),
             onPressed: _showInputOutputTrackingDialog,
             tooltip: 'Track Input-Output',
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const TraqIcon(AppAssets.iconFilter),
             onPressed: _showFilterDialog,
             tooltip: 'Filter',
           ),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: TraqIcon(AppAssets.iconPlus),
             onPressed: _navigateToCreateEvent,
             tooltip: 'Create Transformation Event',
           ),
@@ -515,7 +511,7 @@ class _TransformationEventsListScreenState
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateEvent,
         tooltip: 'Create Transformation Event',
-        child: const Icon(Icons.add),
+        child: TraqIcon(AppAssets.iconPlus),
       ),
     );
   }
@@ -530,7 +526,7 @@ class _TransformationEventsListScreenState
           children: [
             Row(
               children: [
-                const Icon(Icons.transform, color: Colors.indigo),
+                TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
                 const SizedBox(width: 8),
                 Text(
                   'GS1 Transformation Events',
@@ -565,8 +561,7 @@ class _TransformationEventsListScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.error_outline,
+                TraqIcon(AppAssets.iconAlert,
                   size: 48,
                   color: Colors.redAccent,
                 ),
@@ -587,7 +582,7 @@ class _TransformationEventsListScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.transform, size: 64, color: Colors.grey),
+                TraqIcon(AppAssets.iconTransform, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 const Text('No transformation events found'),
                 const SizedBox(height: 16),
@@ -643,7 +638,7 @@ class _TransformationEventsListScreenState
           color: Colors.indigo.shade100,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.transform, color: Colors.indigo),
+        child: TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
       ),
       title: Text(
         'ID: ${event.transformationID}',
@@ -656,24 +651,9 @@ class _TransformationEventsListScreenState
           Text('Date: $formattedDate'),
           Text('$inputCount input(s) → $outputCount output(s)'),
           if (event.businessStep != null)
-            Text('Process: ${_getReadableBusinessStep(event.businessStep!)}'),
+            Text('Step: ${event.businessStep}'),
         ],
       ),
-      trailing: const Icon(Icons.chevron_right),
     );
-  }
-
-  String _getReadableBusinessStep(String bizStep) {
-    // Convert GS1 standard URN to readable text
-    final parts = bizStep.split(':');
-    if (parts.length > 4) {
-      return _capitalizeFirstLetter(parts[4]);
-    }
-    return bizStep;
-  }
-
-  String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
   }
 }

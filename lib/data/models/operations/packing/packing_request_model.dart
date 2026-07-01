@@ -1,13 +1,7 @@
-String _localTimezoneOffset() {
-  final offset = DateTime.now().timeZoneOffset;
-  final hours = offset.inHours.abs().toString().padLeft(2, '0');
-  final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-  final sign = offset.isNegative ? '-' : '+';
-  return '$sign$hours:$minutes';
-}
+import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class PackingRequest {
-  String packingReference;
+  String? packingReference;
   String parentContainerId;
   List<String> childEpcs;
   String? packingLocationGLN;
@@ -21,7 +15,7 @@ class PackingRequest {
   Map<String, String>? additionalData;
 
   PackingRequest({
-    required this.packingReference,
+    this.packingReference,
     required this.parentContainerId,
     required this.childEpcs,
     this.packingLocationGLN,
@@ -36,16 +30,17 @@ class PackingRequest {
   });
 
   Map<String, dynamic> toJson() {
+    final eventFields = OperationEventTimeCodec.fieldsForRequest(eventTime);
     return {
-      'packingReference': packingReference,
+      if (packingReference != null && packingReference!.isNotEmpty)
+        'packingReference': packingReference,
       'parentContainerId': parentContainerId,
       'childEpcs': childEpcs,
       'packingLocationGLN': packingLocationGLN,
       'readPointGLN': readPointGLN,
-      'eventTime': eventTime != null
-          ? eventTime!.toUtc().toIso8601String()
-          : DateTime.now().toUtc().toIso8601String(),
-      'eventTimeZoneOffset': eventTimeZoneOffset ?? _localTimezoneOffset(),
+      'eventTime': eventFields['eventTime'],
+      'eventTimeZoneOffset':
+          eventTimeZoneOffset ?? eventFields['eventTimeZoneOffset'],
       'closeContainer': closeContainer,
       'workOrderNumber': workOrderNumber,
       'productionOrder': productionOrder,

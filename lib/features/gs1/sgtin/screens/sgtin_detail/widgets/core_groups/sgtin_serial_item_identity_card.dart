@@ -35,6 +35,7 @@ class SgtinSerialItemIdentityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Gs1GroupCard(
       title: 'Serial Item Identity',
+      showRequiredStar: true,
       outlineColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

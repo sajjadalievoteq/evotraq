@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Show validation errors dialog
 void showValidationErrors(
@@ -35,8 +38,7 @@ void showValidationErrors(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.error_outline,
+                        TraqIcon(AppAssets.iconAlert,
                           color: Colors.red,
                           size: 18,
                         ),
@@ -259,7 +261,7 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
 
   /// Show validation errors in a snackbar
   void showValidationErrorSnackbar(BuildContext context, List<dynamic> errors) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.showSnackBar(
       SnackBar(
         content: Text('${errors.length} validation errors found'),
         backgroundColor: Colors.red,

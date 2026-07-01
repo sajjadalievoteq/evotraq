@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:world_countries/world_countries.dart';
 
 class ObjectEventRecordInfoSection extends StatelessWidget {
   const ObjectEventRecordInfoSection({

@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_body.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_error_view.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
 
 /// Resolves which detail view to show based on loading/selection state.
 class UnpackingDetailContent extends StatelessWidget {
@@ -16,8 +16,6 @@ class UnpackingDetailContent extends StatelessWidget {
     required this.errorMessage,
     required this.operation,
     required this.locationGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
     required this.onRetry,
   });
 
@@ -27,29 +25,25 @@ class UnpackingDetailContent extends StatelessWidget {
   final String? errorMessage;
   final UnpackingResponse? operation;
   final GLN? locationGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    if (awaitingSelection) {
-      return UnpackingDetailAwaitingSelection(listLoading: listLoading);
+    if (awaitingSelection || isLoading) {
+      if (isLoading) return const OperationDetailLoadingSkeleton();
     }
-    if (isLoading) return const UnpackingDetailSkeleton();
+
     if (errorMessage != null) {
       return UnpackingDetailErrorView(
         errorMessage: errorMessage!,
         onRetry: onRetry,
       );
     }
-    if (operation == null) return const UnpackingDetailSkeleton();
+    if (operation == null) return const OperationDetailLoadingSkeleton();
 
     return UnpackingDetailBody(
       operation: operation!,
       locationGlnDetails: locationGlnDetails,
-      showAllEpcs: showAllEpcs,
-      onShowAllEpcs: onShowAllEpcs,
     );
   }
 }

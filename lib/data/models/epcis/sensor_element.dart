@@ -189,7 +189,7 @@ class SensorMeasurement extends Equatable {
   static SensorMeasurement fromMap(Map<String, dynamic> map) {
     return SensorMeasurement(
       type: map['type'],
-      value: map['value'] != null ? map['value'].toDouble() : null,
+      value: map['value']?.toDouble(),
       unitOfMeasure: map['unitOfMeasure'],
       component: map['component'],
       stringValue: map['stringValue'],
@@ -346,8 +346,8 @@ class SensorElement extends Equatable {
       if (deviceId != null) 'deviceID': deviceId,
       if (deviceMetadata != null) 'deviceMetadata': deviceMetadata,
       if (rawData != null) 'rawData': rawData,
-      if (time != null) 'time': time?.toIso8601String(),
-      if (measurements != null) 'measurements': measurements?.map((m) => m.toMap()).toList(),
+      if (time != null) 'time': time!.toIso8601String(),
+      'measurements': measurements.map((m) => m.toMap()).toList(),
     };
   }
   

@@ -49,6 +49,7 @@ class SGTIN extends Equatable {
   final String? createdBy;
 
   final SGTINPharmaceuticalExtensionModel? pharmaExtension;
+  final List<String> childEpcs;
 
   const SGTIN({
     this.id,
@@ -91,6 +92,7 @@ class SGTIN extends Equatable {
     this.serialEntropySeed,
     this.createdBy,
     this.pharmaExtension,
+    this.childEpcs = const [],
   });
 
   factory SGTIN.fromJson(Map<String, dynamic> json) {
@@ -145,6 +147,10 @@ class SGTIN extends Equatable {
           ? SGTINPharmaceuticalExtensionModel.fromJson(
               json['pharmaExtension'] as Map<String, dynamic>)
           : null,
+      childEpcs: (json['childEpcs'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
     );
   }
 
@@ -191,6 +197,7 @@ class SGTIN extends Equatable {
       if (serialEntropySeed != null) 'serialEntropySeed': serialEntropySeed,
       if (createdBy != null) 'createdBy': createdBy,
       if (pharmaExtension != null) 'pharmaExtension': pharmaExtension!.toJson(),
+      if (childEpcs.isNotEmpty) 'childEpcs': childEpcs,
     };
   }
 
@@ -303,6 +310,7 @@ class SGTIN extends Equatable {
         latestDisposition, verificationCount, verificationStatus, retentionExpiry,
         alertCount, serialGuessingProbability, serialEntropySeed, createdBy,
         pharmaExtension,
+        childEpcs,
       ];
 
   static String _parseGtinCode(Map<String, dynamic> json) {

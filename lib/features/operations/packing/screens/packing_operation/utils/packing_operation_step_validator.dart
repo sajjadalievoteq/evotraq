@@ -5,12 +5,8 @@ class PackingOperationStepValidator {
   PackingOperationStepValidator._();
 
   static String? validateReferenceStep({
-    required String packingReference,
     required GLN? packingLocationGln,
   }) {
-    if (packingReference.trim().isEmpty) {
-      return 'Please enter a Packing Reference — this is the internal ID for this operation (e.g. PACK-2024-001).';
-    }
     if (packingLocationGln == null) {
       return 'Please select the Packing Location — search for the GLN of the facility where packing is taking place.';
     }

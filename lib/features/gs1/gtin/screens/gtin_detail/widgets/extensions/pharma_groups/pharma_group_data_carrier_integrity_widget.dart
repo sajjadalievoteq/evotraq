@@ -124,6 +124,7 @@ class _DataCarrierIntegrityGroupWidgetState
 
     return Gs1GroupCard(
       title: 'Data carrier & integrity',
+      showRequiredStar: true,
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

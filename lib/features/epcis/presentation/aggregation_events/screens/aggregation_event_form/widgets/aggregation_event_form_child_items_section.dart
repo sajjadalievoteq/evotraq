@@ -4,6 +4,8 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_rules_text.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventFormChildItemsSection extends StatelessWidget {
   const AggregationEventFormChildItemsSection({
@@ -79,8 +81,7 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: IconButton(
-                          icon: const Icon(
-                            Icons.remove_circle_outline,
+                          icon: TraqIcon(AppAssets.iconTrash,
                             color: Colors.red,
                             size: 20,
                           ),
@@ -97,13 +98,13 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
               children: [
                 OutlinedButton.icon(
                   onPressed: onAddChildEpc,
-                  icon: const Icon(Icons.add, size: 18),
+                  icon: TraqIcon(AppAssets.iconPlus, size: 18),
                   label: const Text('Add EPC'),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: onScanAndAddChildEpc,
-                  icon: const Icon(Icons.qr_code_scanner, size: 18),
+                  icon: TraqIcon(AppAssets.iconQr, size: 18),
                   label: const Text('Scan & Add'),
                 ),
               ],
@@ -129,11 +130,7 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                           const Spacer(),
                           if (quantityRows.length > 1)
                             IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.red,
-                                size: 20,
-                              ),
+                              icon: const TraqIcon(AppAssets.iconTrash, color: Colors.red, size: 20),
                               onPressed: () => onRemoveQuantityRow(index, row),
                             ),
                         ],
@@ -191,7 +188,7 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
             }),
             TextButton.icon(
               onPressed: onAddQuantityRow,
-              icon: const Icon(Icons.add),
+              icon: const TraqIcon(AppAssets.iconPlus),
               label: const Text('Add quantity row'),
             ),
           ],

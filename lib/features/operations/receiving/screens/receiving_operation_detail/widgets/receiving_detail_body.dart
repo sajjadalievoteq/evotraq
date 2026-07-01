@@ -12,6 +12,7 @@ import 'package:traqtrace_app/features/operations/receiving/screens/receiving_op
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_production_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_reference_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_status_banner.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
 
 /// Scrollable body content for Receiving operation detail.
 class ReceivingDetailBody extends StatelessWidget {
@@ -20,15 +21,13 @@ class ReceivingDetailBody extends StatelessWidget {
     required this.operation,
     required this.sourceGlnDetails,
     required this.receivingGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
+    this.onOperationUpdated,
   });
 
   final ReceivingResponse operation;
   final GLN? sourceGlnDetails;
   final GLN? receivingGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
+  final ValueChanged<ReceivingResponse>? onOperationUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +52,7 @@ class ReceivingDetailBody extends StatelessWidget {
           if (ReceivingDetailHelpers.hasTransportDetails(operation)) ...[
             ReceivingDetailProductionCard(operation: operation),
           ],
-          ReceivingDetailReceivedItemsCard(
-            operation: operation,
-            showAllEpcs: showAllEpcs,
-            onShowAll: onShowAllEpcs,
-          ),
+          ReceivingDetailReceivedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
             ReceivingDetailEventsCard(operation: operation),
           ],
@@ -68,6 +63,11 @@ class ReceivingDetailBody extends StatelessWidget {
             ReceivingDetailCommentsCard(operation: operation),
           ],
           ReceivingDetailProcessingStatsCard(operation: operation),
+          AcceptGoodsButton(
+            operation: operation,
+            onAccepted: onOperationUpdated,
+          ),
+          InitiateReturnShippingButton(operation: operation),
           const SizedBox(height: 32),
         ],
       ),

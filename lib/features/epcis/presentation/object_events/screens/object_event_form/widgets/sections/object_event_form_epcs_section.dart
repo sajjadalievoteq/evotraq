@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_add_to_list_section.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormEpcsSection extends StatefulWidget {
   final List<String> epcList;
@@ -151,7 +153,7 @@ class _ObjectEventFormEpcsSectionState extends State<ObjectEventFormEpcsSection>
           suffixIcon: widget.isViewOnly
               ? null
               : IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: TraqIcon(AppAssets.iconQr),
                   tooltip: 'Scan barcode',
                   onPressed: _scanBarcode,
                 ),

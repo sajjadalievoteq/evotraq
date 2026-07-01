@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
+import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
 class ReceivingResponse {
   ReceivingResponse({
@@ -21,6 +22,9 @@ class ReceivingResponse {
     this.comments,
     this.messages,
     this.processingTimeMs,
+    this.eventDisposition,
+    this.acceptanceStatus,
+    this.acceptingReference,
   });
 
   String? receivingOperationId;
@@ -42,6 +46,9 @@ class ReceivingResponse {
   String? comments;
   List<String>? messages;
   int? processingTimeMs;
+  String? eventDisposition;
+  String? acceptanceStatus;
+  String? acceptingReference;
 
   factory ReceivingResponse.fromJson(Map<String, dynamic> json) {
     final eventIds = json['eventIds'] != null
@@ -71,8 +78,13 @@ class ReceivingResponse {
       processedAt: json['processedAt'] != null
           ? DateTime.tryParse(json['processedAt'].toString())
           : null,
-      sourceGLN: _str(json['sourceGLN']),
-      receivingGLN: _str(json['receivingGLN']),
+      sourceGLN: _parseGln(json['sourceGLN'] ?? json['sourceGln']),
+      receivingGLN: _parseGln(
+        json['receivingGLN'] ??
+            json['receivingGln'] ??
+            json['destinationGLN'] ??
+            json['destinationGln'],
+      ),
       purchaseOrderNumber: _str(json['purchaseOrderNumber']),
       despatchAdviceNumber: _str(json['despatchAdviceNumber']),
       receivingAdviceNumber: _str(json['receivingAdviceNumber']),
@@ -84,6 +96,9 @@ class ReceivingResponse {
       messages:
           (json['messages'] as List?)?.map((e) => e.toString()).toList(),
       processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),
+      eventDisposition: _str(json['eventDisposition']),
+      acceptanceStatus: _str(json['acceptanceStatus']),
+      acceptingReference: _str(json['acceptingReference']),
     );
   }
 
@@ -93,6 +108,13 @@ class ReceivingResponse {
     return s.isEmpty ? null : s;
   }
 
+  static String? _parseGln(dynamic v) {
+    final raw = _str(v);
+    if (raw == null) return null;
+    final normalized = EpcisGlnValidators.parseGlnToCode(raw);
+    return normalized.trim().isEmpty ? null : normalized;
+  }
+
   String? get navigableOperationId {
     final id = _str(receivingOperationId);
     if (id != null) return id;
@@ -100,6 +122,15 @@ class ReceivingResponse {
   }
 
   bool get isSuccess => status == ReceivingStatus.success;
+  bool get isAccepted =>
+      status == ReceivingStatus.accepted ||
+      acceptanceStatus?.toUpperCase() == 'ACCEPTED';
+  bool get isAwaitingAcceptance {
+    if (isAccepted) return false;
+    final disp = eventDisposition?.toLowerCase() ?? '';
+    return disp.contains('in_progress');
+  }
+
   bool get isSuccessOrPartial =>
       status == ReceivingStatus.success ||
       status == ReceivingStatus.partialSuccess;

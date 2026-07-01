@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_scanning_mode.dart';
@@ -6,6 +6,9 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_wired_scanner_input.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningScanInputCard extends StatelessWidget {
   const CommissioningScanInputCard({
@@ -60,12 +63,7 @@ class CommissioningScanInputCard extends StatelessWidget {
                             ? CommissioningScanningMode.manual
                             : CommissioningScanningMode.camera,
                       ),
-                      icon: Icon(
-                        isCameraActive
-                            ? Icons.camera_alt
-                            : Icons.camera_alt_outlined,
-                        size: 16,
-                      ),
+                      icon: TraqIcon(AppAssets.iconCamera, size: 16),
                       label: Text(
                         isCameraActive ? 'Stop Camera' : 'Scan with Camera',
                         style: const TextStyle(fontSize: 12),
@@ -86,10 +84,7 @@ class CommissioningScanInputCard extends StatelessWidget {
                             ? CommissioningScanningMode.manual
                             : CommissioningScanningMode.wired,
                       ),
-                      icon: Icon(
-                        isWiredActive ? Icons.keyboard : Icons.keyboard_outlined,
-                        size: 16,
-                      ),
+                      icon: TraqIcon(AppAssets.iconKeyboard, size: 16),
                       label: Text(
                         isWiredActive ? 'Disconnect' : 'Wired Scanner',
                         style: const TextStyle(fontSize: 12),

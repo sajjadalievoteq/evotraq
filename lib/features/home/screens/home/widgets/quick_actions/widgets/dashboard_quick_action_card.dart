@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class DashboardQuickAction {
   const DashboardQuickAction({
-    required this.icon,
+    required this.iconAsset,
     required this.title,
     this.subtitle,
     required this.color,
@@ -14,7 +15,7 @@ class DashboardQuickAction {
     this.isDisabled = false,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final String title;
   final String? subtitle;
   final Color color;
@@ -73,8 +74,8 @@ class DashboardQuickActionCard extends StatelessWidget {
                       color: action.color.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(2)
                     ),
-                    child: Icon(
-                      action.icon,
+                    child: TraqIcon(
+                      action.iconAsset,
                       size: iconSize,
                       color: action.color,
                     ),

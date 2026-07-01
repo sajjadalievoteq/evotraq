@@ -7,6 +7,8 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/admin/widgets/job_queue_panel.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Job Queue Management Screen for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive job queue monitoring and management interface
@@ -25,10 +27,6 @@ class JobQueueManagementScreen extends StatelessWidget {
           );
         }
 
-        final appConfig = getIt<AppConfig>();
-        final tokenManager = getIt<TokenManager>();
-        final baseUrl = appConfig.apiBaseUrl;
-
         return Scaffold(
           appBar: AppBar(
             title: const Text('Job Queue Management'),
@@ -37,7 +35,7 @@ class JobQueueManagementScreen extends StatelessWidget {
             elevation: 2,
             actions: [
               IconButton(
-                icon: const Icon(Icons.help_outline),
+                icon: TraqIcon(AppAssets.iconInfo),
                 onPressed: () => _showHelpDialog(context),
                 tooltip: 'Help',
               ),
@@ -77,8 +75,7 @@ class JobQueueManagementScreen extends StatelessWidget {
                                     color: Colors.blue.shade100,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Icon(
-                                    Icons.queue,
+                                  child: TraqIcon(AppAssets.iconList,
                                     color: Colors.blue.shade700,
                                     size: 24,
                                   ),
@@ -148,7 +145,7 @@ class JobQueueManagementScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.help_outline, color: Colors.blue),
+            TraqIcon(AppAssets.iconInfo, color: Colors.blue),
             SizedBox(width: 8),
             Text('Job Queue Management Help'),
           ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningEmptySerialHint extends StatelessWidget {
   const CommissioningEmptySerialHint({super.key});
@@ -9,7 +11,7 @@ class CommissioningEmptySerialHint extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.qr_code_2, size: 64, color: Colors.grey[400]),
+          TraqIcon(AppAssets.iconQr, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No serial numbers added yet',

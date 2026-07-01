@@ -157,6 +157,52 @@ class ReceivingOperationService {
     }
   }
 
+  Future<ReceivingResponse> acceptGoods({
+    required String receivingEventId,
+    required String receiverGln,
+  }) async {
+    try {
+      final headers = await _headers;
+      final response = await _dioService.post(
+        '${_dioService.baseUrl}/operations/accepting',
+        headers: headers,
+        data: jsonEncode({
+          'receivingEventId': receivingEventId,
+          'readPoint': receiverGln,
+          'bizLocation': receiverGln,
+        }),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseData = jsonDecode(response.data);
+        return ReceivingResponse.fromJson(responseData);
+      }
+
+      throw _apiExceptionFromResponse(
+        response,
+        fallbackMessage: 'Failed to accept goods',
+      );
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e, stackTrace) {
+      throw _apiExceptionFromDio(
+        e,
+        stackTrace: stackTrace,
+        fallbackMessage: 'Network error while accepting goods',
+      );
+    } catch (e, stackTrace) {
+      debugPrint(
+        '[ReceivingOperationService.acceptGoods] unexpected: $e\n$stackTrace',
+      );
+      throw ApiException(
+        message: 'Unexpected error accepting goods',
+        originalException: e,
+      );
+    }
+  }
+
   ApiException _apiExceptionFromResponse(
     Response<dynamic> response, {
     required String fallbackMessage,

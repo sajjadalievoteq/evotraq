@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SubscriptionCard extends StatelessWidget {
   final NotificationSubscription subscription;
@@ -79,37 +81,37 @@ class SubscriptionCard extends StatelessWidget {
 
   Widget _buildStatusChip(BuildContext context) {
     Color color;
-    IconData icon;
+    String iconAsset;
     String label = subscription.status;
 
     switch (subscription.status.toLowerCase()) {
       case 'active':
         color = Colors.green;
-        icon = Icons.check_circle;
+        iconAsset = AppAssets.iconCheckCircle;
         break;
       case 'paused':
         color = Colors.orange;
-        icon = Icons.pause_circle;
+        iconAsset = AppAssets.iconPause;
         break;
       case 'error':
         color = Colors.red;
-        icon = Icons.error;
+        iconAsset = AppAssets.iconXCircle;
         break;
       case 'expired':
         color = Colors.grey;
-        icon = Icons.schedule;
+        iconAsset = AppAssets.iconClock;
         break;
       default:
         color = Colors.grey;
-        icon = Icons.help;
+        iconAsset = AppAssets.iconHelpCircle;
     }
 
     return Chip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
+          TraqIcon(
+            iconAsset,
             size: 16,
             color: color,
           ),
@@ -152,7 +154,7 @@ class SubscriptionCard extends StatelessWidget {
           value: 'edit',
           child: Row(
             children: [
-              Icon(Icons.edit),
+              TraqIcon(AppAssets.iconEdit),
               SizedBox(width: 8),
               Text('Edit'),
             ],
@@ -163,7 +165,7 @@ class SubscriptionCard extends StatelessWidget {
             value: 'pause',
             child: Row(
               children: [
-                Icon(Icons.pause),
+                TraqIcon(AppAssets.iconMinus),
                 SizedBox(width: 8),
                 Text('Pause'),
               ],
@@ -174,7 +176,7 @@ class SubscriptionCard extends StatelessWidget {
             value: 'resume',
             child: Row(
               children: [
-                Icon(Icons.play_arrow),
+                TraqIcon(AppAssets.iconArrowR),
                 SizedBox(width: 8),
                 Text('Resume'),
               ],
@@ -184,7 +186,7 @@ class SubscriptionCard extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete, color: Colors.red),
+              TraqIcon(AppAssets.iconTrash, color: Colors.red),
               SizedBox(width: 8),
               Text('Delete', style: TextStyle(color: Colors.red)),
             ],
@@ -203,7 +205,7 @@ class SubscriptionCard extends StatelessWidget {
             context,
             'Success Rate',
             '${(stats.successRate * 100).toStringAsFixed(1)}%',
-            Icons.check_circle_outline,
+            AppAssets.iconCheckCircle,
             Colors.green,
           ),
         ),
@@ -212,7 +214,7 @@ class SubscriptionCard extends StatelessWidget {
             context,
             'Total',
             stats.totalNotifications.toString(),
-            Icons.notifications_outlined,
+            AppAssets.iconNotification,
             Colors.blue,
           ),
         ),
@@ -221,7 +223,7 @@ class SubscriptionCard extends StatelessWidget {
             context,
             'Failed',
             stats.failedNotifications.toString(),
-            Icons.error_outline,
+            AppAssets.iconXCircle,
             Colors.red,
           ),
         ),
@@ -233,7 +235,7 @@ class SubscriptionCard extends StatelessWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Column(
@@ -241,8 +243,8 @@ class SubscriptionCard extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
+            TraqIcon(
+              iconAsset,
               size: 16,
               color: color,
             ),

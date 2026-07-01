@@ -5,6 +5,9 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/widgets/aggregation_event_action_chip.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class AggregationEventListItemCard extends StatelessWidget {
   const AggregationEventListItemCard({
     super.key,
@@ -23,13 +26,13 @@ class AggregationEventListItemCard extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final dateFormat = DateFormat('MMM dd, yyyy HH:mm');
 
-    Widget infoRow(IconData icon, String text) {
+    Widget infoRow(String iconAsset, String text) {
       final color = Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
       return Padding(
         padding: const EdgeInsets.only(bottom: 4),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: color),
+            TraqIcon(iconAsset, size: 16, color: color),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
@@ -92,22 +95,22 @@ class AggregationEventListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         infoRow(
-                          Icons.layers_outlined,
+                          AppAssets.iconLayers,
                           '${AggregationEventUiConstants.listCardItemCountPrefix}'
                           '$childCount child EPC${childCount == 1 ? '' : 's'}',
                         ),
                         if (locationName != null)
                           infoRow(
-                            Icons.location_on_outlined,
+                            AppAssets.iconMapPin,
                             '${AggregationEventUiConstants.listCardLocationPrefix}$locationName',
                           ),
                         if (event.businessStep != null)
                           infoRow(
-                            Icons.route_outlined,
+                            AppAssets.iconRoute,
                             '${AggregationEventUiConstants.listCardBizStepPrefix}$bizStep',
                           ),
                         infoRow(
-                          Icons.schedule_outlined,
+                          AppAssets.iconClock,
                           dateFormat.format(event.eventTime.toLocal()),
                         ),
                       ],

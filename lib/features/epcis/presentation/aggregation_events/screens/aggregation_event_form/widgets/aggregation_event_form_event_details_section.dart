@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventFormEventDetailsSection extends StatelessWidget {
   const AggregationEventFormEventDetailsSection({
@@ -46,7 +48,7 @@ class AggregationEventFormEventDetailsSection extends StatelessWidget {
               decoration: const InputDecoration(
                 labelText: 'Event Time *',
                 border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
+                suffixIcon: TraqIcon(AppAssets.iconClock),
                 helperText: 'When the aggregation event occurred',
               ),
               child: Text(DateFormat.yMd().add_Hms().format(eventTime)),

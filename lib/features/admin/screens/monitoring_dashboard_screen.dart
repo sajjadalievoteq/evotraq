@@ -5,6 +5,7 @@ import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../widgets/performance_metrics_card.dart';
 import '../widgets/storage_statistics_card.dart';
 import '../widgets/integrity_statistics_card.dart';
@@ -14,6 +15,8 @@ import '../widgets/performance_chart.dart';
 import '../widgets/bulk_jobs_panel.dart';
 import '../widgets/storage_utilization_chart.dart';
 import '../widgets/monitoring_overview_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class MonitoringDashboardScreen extends StatefulWidget {
   const MonitoringDashboardScreen({super.key});
@@ -188,7 +191,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _refreshData,
             tooltip: 'Refresh Data',
           ),
@@ -213,10 +216,10 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-            Tab(icon: Icon(Icons.show_chart), text: 'Performance'),
-            Tab(icon: Icon(Icons.storage), text: 'Storage'),
-            Tab(icon: Icon(Icons.security), text: 'Integrity'),
+            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Overview'),
+            Tab(icon: TraqIcon(AppAssets.iconEye), text: 'Performance'),
+            Tab(icon: TraqIcon(AppAssets.iconList), text: 'Storage'),
+            Tab(icon: TraqIcon(AppAssets.iconLock), text: 'Integrity'),
           ],
         ),
       ),
@@ -247,8 +250,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.error_outline,
+              TraqIcon(AppAssets.iconAlert,
                 size: 64,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -486,74 +488,52 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
 
   void _showSettingsDialog() {
     // TODO: Implement monitoring settings dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings dialog coming soon')),
-    );
+    context.showInfo('Settings dialog coming soon');
   }
 
   // Action handlers
   void _acknowledgeAlert(String alertId) async {
     try {
       await _monitoringService.acknowledgeAlert(alertId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Alert acknowledged')),
-      );
+      context.showSuccess('Alert acknowledged');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to acknowledge alert: $e')),
-      );
+      context.showError('Failed to acknowledge alert: $e');
     }
   }
 
   void _configureTransactionIsolation(String level) async {
     try {
       await _monitoringService.configureTransactionIsolation(level);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Transaction isolation set to $level')),
-      );
+      context.showSuccess('Transaction isolation set to $level');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to configure isolation: $e')),
-      );
+      context.showError('Failed to configure isolation: $e');
     }
   }
 
   void _resolveDeadlocks() async {
     try {
       final result = await _monitoringService.resolveDeadlocks();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Deadlocks resolved: ${result['resolved_count'] ?? 0}')),
-      );
+      context.showSuccess('Deadlocks resolved: ${result['resolved_count'] ?? 0}');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resolve deadlocks: $e')),
-      );
+      context.showError('Failed to resolve deadlocks: $e');
     }
   }
 
   void _archiveEvents(DateTime cutoffDate) async {
     try {
       final result = await _monitoringService.archiveEvents(cutoffDate);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Archived ${result['archived_count'] ?? 0} events')),
-      );
+      context.showSuccess('Archived ${result['archived_count'] ?? 0} events');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to archive events: $e')),
-      );
+      context.showError('Failed to archive events: $e');
     }
   }
 
   void _compressEvents(List<String> eventIds) async {
     try {
       final result = await _monitoringService.compressEvents(eventIds);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Compressed ${result['compressed_count'] ?? 0} events')),
-      );
+      context.showSuccess('Compressed ${result['compressed_count'] ?? 0} events');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to compress events: $e')),
-      );
+      context.showError('Failed to compress events: $e');
     }
   }
 
@@ -561,31 +541,24 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
     try {
       final result = await _monitoringService.verifyEventIntegrity(eventId);
       final isValid = result['integrity_valid'] ?? false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Event integrity: ${isValid ? 'VALID' : 'INVALID'}'),
-          backgroundColor: isValid ? Colors.green : Colors.red,
-        ),
-      );
+      if (isValid) {
+        context.showSuccess('Event integrity: VALID');
+      } else {
+        context.showError('Event integrity: INVALID');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to verify integrity: $e')),
-      );
+      context.showError('Failed to verify integrity: $e');
     }
   }
 
   void _cancelBulkJob(String jobId) async {
     // TODO: Implement bulk job cancellation when available in monitoring service
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Cancel bulk job feature coming soon')),
-    );
+    context.showInfo('Cancel bulk job feature coming soon');
   }
 
   void _retryBulkJob(String jobId) async {
     // TODO: Implement bulk job retry when available in monitoring service
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Retry bulk job feature coming soon')),
-    );
+    context.showInfo('Retry bulk job feature coming soon');
   }
 
   void _refreshBulkJobs() async {

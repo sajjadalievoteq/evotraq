@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventFormErrorBanner extends StatelessWidget {
   const AggregationEventFormErrorBanner({
@@ -18,8 +20,7 @@ class AggregationEventFormErrorBanner extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(
-              Icons.error_outline,
+            TraqIcon(AppAssets.iconAlert,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(width: 8),
@@ -32,7 +33,7 @@ class AggregationEventFormErrorBanner extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close),
+              icon: TraqIcon(AppAssets.iconX),
               onPressed: onDismiss,
               visualDensity: VisualDensity.compact,
             ),

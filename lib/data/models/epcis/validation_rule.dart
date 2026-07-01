@@ -2,6 +2,7 @@
 // Matches the backend ValidationRule entity structure
 
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 enum EventType {
   ALL,
@@ -46,14 +47,14 @@ extension RuleSeverityExtension on RuleSeverity {
     }
   }
 
-  IconData get icon {
+  String get iconAsset {
     switch (this) {
       case RuleSeverity.INFO:
-        return Icons.info;
+        return AppAssets.iconInfo;
       case RuleSeverity.WARNING:
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case RuleSeverity.ERROR:
-        return Icons.error;
+        return AppAssets.iconXCircle;
     }
   }
 

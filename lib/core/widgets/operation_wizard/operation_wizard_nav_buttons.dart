@@ -3,6 +3,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Previous / Next / Submit navigation bar for operation wizards.
 class OperationWizardNavButtons extends StatelessWidget {
@@ -57,13 +58,13 @@ class OperationWizardNavButtons extends StatelessWidget {
                     height: TraqSpacing.buttonHLarge,
                     onTap: onSubmit,
                     title: submitLabel,
-                    icon: Icons.check,
+                    iconAsset: AppAssets.iconCheck,
                   )
                 : CustomButtonWidget(
                     height: TraqSpacing.buttonHLarge,
                     onTap: onNext!,
                     title: nextLabel,
-                    icon: Icons.arrow_forward,
+                    iconAsset: AppAssets.iconArrowR,
                   ),
           ),
         ],

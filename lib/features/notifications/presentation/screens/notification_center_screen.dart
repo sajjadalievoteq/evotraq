@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class NotificationCenterScreen extends StatefulWidget {
   const NotificationCenterScreen({super.key});
@@ -43,9 +46,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       setState(() => _isConnected = true);
     } catch (e) {
       setState(() => _isConnected = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to connect: ${e.toString()}')),
-      );
+      context.showError('Failed to connect: ${e.toString()}');
     }
   }
 
@@ -72,20 +73,20 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         title: const Text('Notification Center'),
         actions: [
           IconButton(
-            icon: Icon(
-              _isConnected ? Icons.wifi : Icons.wifi_off,
+            icon: TraqIcon(
+              _isConnected ? AppAssets.iconWifi : AppAssets.iconWifiOff,
               color: _isConnected ? Colors.green : Colors.red,
             ),
             onPressed: _toggleWebSocketConnection,
             tooltip: _isConnected ? 'Connected to real-time updates' : 'Disconnected',
           ),
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: TraqIcon(AppAssets.iconSettings),
             onPressed: () => context.go('/notifications/subscriptions'),
             tooltip: 'Manage Subscriptions',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () {
               context.read<NotificationCubit>().loadSubscriptions(page: 0);
             },
@@ -147,7 +148,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/notifications/subscriptions'),
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('Add Subscription'),
       ),
     );
@@ -167,8 +168,10 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _isConnected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+          TraqIcon(
+            _isConnected
+                ? AppAssets.iconCheckCircle
+                : AppAssets.iconCircle,
             size: 16,
             color: _isConnected ? Colors.green : Colors.red,
           ),
@@ -300,7 +303,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  TraqIcon(
                     _getNotificationIcon(subscription.subscriptionType),
                     color: hasActivity ? Colors.blue : Colors.grey,
                   ),
@@ -353,10 +356,14 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    subscription.status == 'ACTIVE' ? Icons.check_circle : Icons.pause_circle,
+                  TraqIcon(
+                    subscription.status == 'ACTIVE'
+                        ? AppAssets.iconCheckCircle
+                        : AppAssets.iconPause,
                     size: 16,
-                    color: subscription.status == 'ACTIVE' ? Colors.green : Colors.grey,
+                    color: subscription.status == 'ACTIVE'
+                        ? Colors.green
+                        : Colors.grey,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -423,16 +430,16 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     );
   }
 
-  IconData _getNotificationIcon(String? type) {
+  String _getNotificationIcon(String? type) {
     switch (type?.toUpperCase()) {
       case 'EMAIL':
-        return Icons.email;
+        return AppAssets.iconMail;
       case 'WEBHOOK':
-        return Icons.webhook;
+        return AppAssets.iconWebhook;
       case 'SMS':
-        return Icons.sms;
+        return AppAssets.iconSms;
       default:
-        return Icons.notifications;
+        return AppAssets.iconNotification;
     }
   }
 
@@ -441,8 +448,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none,
+          TraqIcon(
+            AppAssets.iconNotification,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -464,7 +471,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => context.go('/notifications/subscriptions'),
-            icon: const Icon(Icons.add),
+            icon: TraqIcon(AppAssets.iconPlus),
             label: const Text('Create Subscription'),
           ),
         ],
@@ -477,8 +484,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.red[300],
           ),
@@ -532,20 +538,14 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       if (_isConnected) {
         context.read<NotificationCubit>().disconnectWebSocket();
         setState(() => _isConnected = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Disconnected from real-time updates')),
-        );
+        context.showInfo('Disconnected from real-time updates');
       } else {
         _connectToWebSocket();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Connecting to real-time updates...')),
-        );
+        context.showInfo('Connecting to real-time updates...');
       }
     } catch (e) {
       setState(() => _isConnected = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Connection error: ${e.toString()}')),
-      );
+      context.showError('Connection error: ${e.toString()}');
     }
   }
 

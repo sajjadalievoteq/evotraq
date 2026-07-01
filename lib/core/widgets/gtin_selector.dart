@@ -6,6 +6,8 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// A reusable widget for selecting GTINs from available system GTINs.
 /// Provides a searchable dropdown interface with GTIN code and product name.
@@ -54,7 +56,7 @@ class GtinSelector extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label + (isRequired ? ' *' : ''),
           border: const OutlineInputBorder(),
-          prefixIcon: const Icon(Icons.qr_code),
+          prefixIcon: TraqIcon(AppAssets.iconQr),
         ),
       );
     }
@@ -191,16 +193,16 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
               focusNode: _focusNode,
               decoration: InputDecoration(
                 hintText: widget.hintText ?? 'Search GTIN code or product name…',
-                prefixIcon: const Icon(Icons.qr_code),
+                prefixIcon: TraqIcon(AppAssets.iconQr),
                 suffixIcon: _selectedGTIN != null
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: TraqIcon(AppAssets.iconX),
                         onPressed: _clearSelection,
                       )
                     : IconButton(
-                        icon: Icon(_isDropdownOpen
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down),
+                        icon: TraqIcon(_isDropdownOpen
+                            ? AppAssets.iconChevronU
+                            : AppAssets.iconChevronD),
                         onPressed: () {
                           setState(() => _isDropdownOpen = !_isDropdownOpen);
                           if (_isDropdownOpen) {
@@ -246,7 +248,7 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
                     final gtin = _filteredGTINs[index];
                     return ListTile(
                       dense: true,
-                      leading: const Icon(Icons.qr_code, size: 20),
+                      leading: TraqIcon(AppAssets.iconQr, size: 20),
                       title: Text(
                         gtin.gtinCode,
                         style: const TextStyle(

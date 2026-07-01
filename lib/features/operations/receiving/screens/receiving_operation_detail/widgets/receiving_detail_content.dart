@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_body.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_error_view.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
 
 /// Resolves which detail view to show based on loading/selection state.
 class ReceivingDetailContent extends StatelessWidget {
@@ -17,9 +17,8 @@ class ReceivingDetailContent extends StatelessWidget {
     required this.operation,
     required this.sourceGlnDetails,
     required this.receivingGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
     required this.onRetry,
+    this.onOperationUpdated,
   });
 
   final bool awaitingSelection;
@@ -29,30 +28,28 @@ class ReceivingDetailContent extends StatelessWidget {
   final ReceivingResponse? operation;
   final GLN? sourceGlnDetails;
   final GLN? receivingGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
   final VoidCallback onRetry;
+  final ValueChanged<ReceivingResponse>? onOperationUpdated;
 
   @override
   Widget build(BuildContext context) {
-    if (awaitingSelection) {
-      return ReceivingDetailAwaitingSelection(listLoading: listLoading);
+    if (awaitingSelection || isLoading) {
+      return const OperationDetailLoadingSkeleton();
     }
-    if (isLoading) return const ReceivingDetailSkeleton();
+
     if (errorMessage != null) {
       return ReceivingDetailErrorView(
         errorMessage: errorMessage!,
         onRetry: onRetry,
       );
     }
-    if (operation == null) return const ReceivingDetailSkeleton();
+    if (operation == null) return const OperationDetailLoadingSkeleton();
 
     return ReceivingDetailBody(
       operation: operation!,
       sourceGlnDetails: sourceGlnDetails,
       receivingGlnDetails: receivingGlnDetails,
-      showAllEpcs: showAllEpcs,
-      onShowAllEpcs: onShowAllEpcs,
+      onOperationUpdated: onOperationUpdated,
     );
   }
 }

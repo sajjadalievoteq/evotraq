@@ -19,6 +19,8 @@ import 'package:traqtrace_app/features/operations/receiving/screens/receiving_op
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/receiving/utils/receiving_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to list all Receiving operations with search capabilities.
 class ReceivingOperationListScreen extends StatefulWidget {
@@ -362,7 +364,7 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
           ? null
           : FloatingActionButton.extended(
               onPressed: () => context.go(Constants.opReceivingCreateRoute),
-              label: const Icon(Icons.add),
+              label: TraqIcon(AppAssets.iconPlus),
             ),
       body: body,
     );

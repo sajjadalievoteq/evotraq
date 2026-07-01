@@ -41,7 +41,6 @@ class SSCCPharmaceuticalExtensionWidgetState
     extends State<SSCCPharmaceuticalExtensionWidget> {
   SSCCPharmaceuticalExtension? _extension;
   bool _isLoading = true;
-  bool _hasExtension = false;
 
   bool _coldChainRequired = false;
   final _minTemperatureCelsiusController = TextEditingController();
@@ -141,7 +140,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _hasExtension = false;
         });
       }
       return;
@@ -160,7 +158,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       if (mounted) {
         setState(() {
           _extension = extension;
-          _hasExtension = extension != null;
           _isLoading = false;
           if (extension != null) {
             _populateFields(extension);
@@ -171,7 +168,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _hasExtension = false;
         });
       }
     }
@@ -369,7 +365,6 @@ class SSCCPharmaceuticalExtensionWidgetState
       if (mounted) {
         setState(() {
           _extension = saved;
-          _hasExtension = true;
         });
       }
 

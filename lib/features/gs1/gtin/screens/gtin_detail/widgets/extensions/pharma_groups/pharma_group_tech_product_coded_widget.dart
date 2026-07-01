@@ -1,6 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
@@ -154,7 +153,7 @@ class _TechProductCodedGroupWidgetState
       ),
     );
     return Gs1GroupCard(
-      title: 'Technical specification — product & coded attributes',
+      title: 'Technical specification â€” product & coded attributes',
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

@@ -1,12 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 
 class MarketingAuthorizationBoundGroup extends StatefulWidget {
   const MarketingAuthorizationBoundGroup({
@@ -98,7 +97,7 @@ class MarketingAuthorizationBoundGroupState
         Gs1ValidatedField(
           controller: _number,
           fieldName: 'registrationNumber',
-          label: 'Marketing Authorization Number',
+          label: 'Marketing Authorization Number *',
           helperText:
               'Regulator-issued; market-specific format (max 50 characters)',
           readOnly: widget.isReadOnly,
@@ -141,6 +140,7 @@ class MarketingAuthorizationBoundGroupState
 
     return Gs1GroupCard(
       title: GtinUiConstants.sectionMarketingAuthorization,
+      showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonBuilder: (c) => Column(

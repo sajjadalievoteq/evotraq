@@ -3,6 +3,9 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_pharmaceutical_extensi
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class SgtinPharmaExtensionSection extends StatelessWidget {
   const SgtinPharmaExtensionSection({
     super.key,
@@ -239,8 +242,8 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ),
-        Icon(
-          value ? Icons.check_circle_outline : Icons.cancel_outlined,
+        TraqIcon(
+          value ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
           size: 18,
           color: color,
         ),

@@ -1,6 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/models/commissioning_quick_filter_result.dart';
+import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
@@ -19,7 +19,8 @@ class CommissioningQuickFilterDialog extends StatefulWidget {
   }) {
     return showDialog<CommissioningQuickFilterResult>(
       context: context,
-      builder: (_) => CommissioningQuickFilterDialog(initialStatus: selectedStatus),
+      builder: (_) =>
+          CommissioningQuickFilterDialog(initialStatus: selectedStatus),
     );
   }
 
@@ -68,8 +69,8 @@ class _CommissioningQuickFilterDialogState
             Text(
               CommissioningUiConstants.quickFiltersFooterHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -77,9 +78,9 @@ class _CommissioningQuickFilterDialogState
       actions: [
         CustomTextButtonWidget(
           title: CommissioningUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context).pop(
-            const CommissioningQuickFilterResult.cleared(),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const CommissioningQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: CommissioningUiConstants.buttonCancel,

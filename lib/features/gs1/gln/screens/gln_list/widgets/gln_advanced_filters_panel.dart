@@ -4,6 +4,8 @@ import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GlnAdvancedFiltersPanel extends StatelessWidget {
   const GlnAdvancedFiltersPanel({
@@ -263,8 +265,7 @@ class GlnAdvancedFiltersPanel extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle_outline,
+                  TraqIcon(AppAssets.iconCheck,
                     size: 16,
                     color: Colors.green[700],
                   ),

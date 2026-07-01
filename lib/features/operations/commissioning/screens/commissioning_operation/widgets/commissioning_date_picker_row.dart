@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningDatePickerRow extends StatelessWidget {
   const CommissioningDatePickerRow({
@@ -33,7 +35,7 @@ class CommissioningDatePickerRow extends StatelessWidget {
         ),
         if (allowClear && value != null)
           IconButton(
-            icon: const Icon(Icons.clear),
+            icon: TraqIcon(AppAssets.iconX),
             tooltip: 'Clear date',
             onPressed: () => onClear(dateKey),
           ),

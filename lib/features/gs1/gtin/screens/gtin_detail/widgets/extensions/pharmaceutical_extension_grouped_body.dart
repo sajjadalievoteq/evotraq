@@ -360,8 +360,7 @@ class PharmaceuticalExtensionGroupedBody extends StatelessWidget {
           initialEmaProcedureNumber: initialEmaProcedureNumber,
           initialEmaApprovalDate: initialEmaApprovalDate,
           onChanged: onRegulatoryApprovalsChanged,
-        ),
-        WarningsPrecautionsGroupWidget(
+        ), WarningsPrecautionsGroupWidget(
           isEditing: isEditing && !isLoading,
           showFieldSkeleton: isLoading,
           initialBlackBoxWarning: initialBlackBoxWarning,

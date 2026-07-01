@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_form_external_navigation.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_missing_reference.dart';
 
@@ -30,7 +32,7 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
     }
 
     return AlertDialog(
-      icon: Icon(Icons.warning_amber_rounded, color: theme.colorScheme.error),
+      icon: TraqIcon(AppAssets.iconAlert, color: theme.colorScheme.error),
       title: const Text('Master data not found'),
       content: SingleChildScrollView(
         child: Column(
@@ -48,8 +50,8 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      _iconFor(item.kind),
+                    TraqIcon(
+                      _iconAssetFor(item.kind),
                       size: 18,
                       color: theme.colorScheme.error,
                     ),
@@ -96,7 +98,7 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
               Navigator.of(context).pop();
               await openAggregationFormRouteInNewTab(item.createRoute);
             },
-            icon: Icon(_iconFor(item.kind), size: 18),
+            icon: TraqIcon(_iconAssetFor(item.kind), size: 18),
             label: Text(item.createActionLabel),
           ),
         ),
@@ -104,10 +106,10 @@ class AggregationMissingReferenceDialog extends StatelessWidget {
     );
   }
 
-  IconData _iconFor(AggregationReferenceKind kind) => switch (kind) {
-        AggregationReferenceKind.gln => Icons.location_on_outlined,
-        AggregationReferenceKind.gtin => Icons.qr_code_2_outlined,
-        AggregationReferenceKind.sgtin => Icons.inventory_outlined,
-        AggregationReferenceKind.sscc => Icons.inventory_2_outlined,
+  String _iconAssetFor(AggregationReferenceKind kind) => switch (kind) {
+        AggregationReferenceKind.gln => AppAssets.iconMapPin,
+        AggregationReferenceKind.gtin => AppAssets.iconQr,
+        AggregationReferenceKind.sgtin => AppAssets.iconBox,
+        AggregationReferenceKind.sscc => AppAssets.iconBox,
       };
 }

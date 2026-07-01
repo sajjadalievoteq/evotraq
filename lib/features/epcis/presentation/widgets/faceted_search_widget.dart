@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class FacetedSearchWidget extends StatefulWidget {
   final Map<String, List<String>>? availableFacets;
@@ -59,10 +61,7 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.filter_list,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              TraqIcon(AppAssets.iconFilter, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 'Faceted Search',
@@ -107,8 +106,8 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
         child: Center(
           child: Column(
             children: [
-              Icon(
-                Icons.filter_list_off,
+              TraqIcon(
+                AppAssets.iconFilter,
                 size: 48,
                 color: Colors.grey,
               ),
@@ -166,8 +165,7 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.check_circle,
+              TraqIcon(AppAssets.iconCheck,
                 color: Theme.of(context).colorScheme.primary,
                 size: 20,
               ),
@@ -219,7 +217,7 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
 
       return ExpansionTile(
         title: Text(_formatFacetKey(facetKey)),
-        leading: Icon(_getFacetIcon(facetKey)),
+        leading: TraqIcon(_getFacetIcon(facetKey)),
         subtitle: Text('${facetValues.length} options'),
         initiallyExpanded: _selectedFacets.containsKey(facetKey),
         children: [
@@ -305,32 +303,33 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
     }
   }
 
-  IconData _getFacetIcon(String facetKey) {
+  String _getFacetIcon(String facetKey) {
     switch (facetKey) {
       case 'eventType':
-        return Icons.category;
+        return AppAssets.iconCategory;
       case 'businessStep':
       case 'bizStep':
-        return Icons.business;
+        return AppAssets.iconBusiness;
       case 'disposition':
-        return Icons.label;
+        return AppAssets.iconTag;
       case 'readPoint':
-        return Icons.place;
+        return AppAssets.iconMapPin;
       case 'businessLocation':
       case 'bizLocation':
-        return Icons.location_on;
+        return AppAssets.iconMapPin;
       case 'source':
-        return Icons.input;
+        return AppAssets.iconArrowR;
       case 'destination':
-        return Icons.output;
+        return AppAssets.iconArrowD;
       case 'transformationId':
-        return Icons.transform;
+        return AppAssets.iconTransform;
       case 'parentId':
-        return Icons.account_tree;
+        return AppAssets.iconHierarchy;
       case 'childEpcs':
-        return Icons.subdirectory_arrow_right;
+        return AppAssets.iconList;
       default:
-        return Icons.filter_alt;
+        return AppAssets.iconFilter;
     }
   }
 }
+    

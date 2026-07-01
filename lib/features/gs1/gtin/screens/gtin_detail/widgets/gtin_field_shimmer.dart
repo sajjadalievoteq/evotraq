@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 const double kGtinSkeletonInputRadius = 4;
 
@@ -126,7 +128,7 @@ class GtinSkeletonExtensionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.expand_more, color: color, size: 28),
+            TraqIcon(AppAssets.iconChevronD, color: color, size: 28),
           ],
         ),
       ),

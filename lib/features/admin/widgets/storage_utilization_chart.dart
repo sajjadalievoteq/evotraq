@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class StorageUtilizationChart extends StatelessWidget {
   final StorageStatistics storageStats;
@@ -126,7 +128,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Total Storage',
                 '${storageStats.totalStorageCapacityGB.toStringAsFixed(0)} GB',
-                Icons.storage,
+                AppAssets.iconDatabase,
                 Colors.blue,
               ),
             ),
@@ -135,7 +137,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Compression',
                 '${storageStats.compressionRatio.toStringAsFixed(1)}:1',
-                Icons.compress,
+                AppAssets.iconCompress,
                 Colors.green,
               ),
             ),
@@ -144,7 +146,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Partitions',
                 storageStats.partitionDistribution.length.toString(),
-                Icons.dataset,
+                AppAssets.iconDataset,
                 Colors.orange,
               ),
             ),
@@ -153,7 +155,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Avg Size',
                 '${storageStats.averagePartitionSize.toStringAsFixed(1)} MB',
-                Icons.folder,
+                AppAssets.iconFolder,
                 Colors.purple,
               ),
             ),
@@ -165,7 +167,7 @@ class StorageUtilizationChart extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -175,7 +177,7 @@ class StorageUtilizationChart extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             value,
@@ -214,7 +216,7 @@ class StorageUtilizationChart extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
+        SizedBox(
           height: 100,
           child: CustomPaint(
             painter: PartitionBarChartPainter(

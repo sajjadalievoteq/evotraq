@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public types
@@ -148,7 +150,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.add_circle_outline, color: colors.primary, size: 20),
+          TraqIcon(AppAssets.iconAddCircle, color: colors.primary, size: 20),
           const SizedBox(width: TraqSpacing.sm),
           Text('Add $_typeName'),
         ],
@@ -198,7 +200,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                     suffixIcon: !_autoGenerateCode
                         ? IconButton(
                             tooltip: 'Re-generate from label',
-                            icon: const Icon(Icons.auto_fix_high, size: 18),
+                            icon: TraqIcon(AppAssets.iconSparkle, size: 18),
                             onPressed: () {
                               setState(() {
                                 _autoGenerateCode = true;
@@ -256,7 +258,7 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                   value: _cbvVersion,
                   decoration: const InputDecoration(
                     labelText: 'CBV Version *',
-                    prefixIcon: Icon(Icons.layers_outlined, size: 18),
+                    prefixIcon: TraqIcon(AppAssets.iconLayers, size: 18),
                   ),
                   items: kCbvVersionOptions
                       .map((v) => DropdownMenuItem(
@@ -301,8 +303,8 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                   child: CircularProgressIndicator(
                       strokeWidth: 2, color: Colors.white),
                 )
-              : const Icon(Icons.check, size: 18),
-          label: Text('Add $_typeName'),
+              : const TraqIcon(AppAssets.iconSave),
+          label: Text(_isSaving ? 'Saving…' : 'Save'),
         ),
       ],
     );

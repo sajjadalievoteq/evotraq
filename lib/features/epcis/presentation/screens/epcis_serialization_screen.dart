@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class EPCISSerializationScreen extends StatefulWidget {
   const EPCISSerializationScreen({super.key});
@@ -26,7 +29,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
   bool _isLoading = false;
   String? _errorMessage;
   String? _validationErrorMessage;
-  String? _exportErrorMessage;
   String? _importErrorMessage;
   String _selectedInputFormat = 'XML';
   String _selectedOutputFormat = 'JSON-LD';
@@ -65,7 +67,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -140,7 +142,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Icon(Icons.arrow_forward),
+                      TraqIcon(AppAssets.iconChevronR),
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
@@ -184,7 +186,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                           const Spacer(),
                           TextButton.icon(
                             onPressed: () => _loadSampleData(),
-                            icon: const Icon(Icons.data_object),
+                            icon: const TraqIcon(AppAssets.iconBraces),
                             label: const Text('Load Sample'),
                           ),
                         ],
@@ -216,13 +218,13 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.transform),
+                          : TraqIcon(AppAssets.iconTransform),
                       label: const Text('Convert'),
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: () => _clearAll(),
-                      icon: const Icon(Icons.clear),
+                      icon: TraqIcon(AppAssets.iconX),
                       label: const Text('Clear'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey,
@@ -245,7 +247,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                             onPressed: _outputController.text.isNotEmpty
                                 ? () => _copyToClipboard(_outputController.text)
                                 : null,
-                            icon: const Icon(Icons.copy),
+                            icon: const TraqIcon(AppAssets.iconCopy),
                             label: const Text('Copy'),
                           ),
                         ],
@@ -280,7 +282,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red.shade600),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -290,7 +292,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                   ),
                   IconButton(
                     onPressed: () => setState(() => _errorMessage = null),
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                     color: Colors.red.shade600,
                   ),
                 ],
@@ -329,7 +331,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.check_circle),
+                            : TraqIcon(AppAssets.iconCheck),
                         label: const Text('Validate XML (EPCIS 1.3)'),
                       ),
                       const SizedBox(width: 16),
@@ -341,7 +343,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.check_circle),
+                            : TraqIcon(AppAssets.iconCheck),
                         label: const Text('Validate JSON (EPCIS 2.0)'),
                       ),
                     ],
@@ -374,7 +376,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red.shade600),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -384,7 +386,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                   ),
                   IconButton(
                     onPressed: () => setState(() => _validationErrorMessage = null),
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                     color: Colors.red.shade600,
                   ),
                 ],
@@ -522,22 +524,22 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                       children: [
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : () => _exportEvents('CSV'),
-                          icon: const Icon(Icons.table_chart),
+                          icon: const TraqIcon(AppAssets.iconTable),
                           label: const Text('Export to CSV'),
                         ),
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : () => _exportEvents('PDF'),
-                          icon: const Icon(Icons.picture_as_pdf),
+                          icon: const TraqIcon(AppAssets.iconPdf),
                           label: const Text('Export to PDF'),
                         ),
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : () => _exportEvents('HTML'),
-                          icon: const Icon(Icons.web),
+                          icon: const TraqIcon(AppAssets.iconGlobe),
                           label: const Text('Export to HTML'),
                         ),
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : () => _exportEvents('EXCEL'),
-                          icon: const Icon(Icons.grid_on),
+                          icon: const TraqIcon(AppAssets.iconGrid),
                           label: const Text('Export to Excel'),
                         ),
                       ],
@@ -616,7 +618,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.cloud_upload),
+                            : const TraqIcon(AppAssets.iconCloudUpload),
                         label: const Text('Import XML Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
@@ -632,7 +634,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.cloud_upload),
+                            : const TraqIcon(AppAssets.iconCloudUpload),
                         label: const Text('Import JSON-LD Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -642,7 +644,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                       const Spacer(),
                       TextButton.icon(
                         onPressed: () => _loadImportSampleData(),
-                        icon: const Icon(Icons.data_object),
+                        icon: const TraqIcon(AppAssets.iconBraces),
                         label: const Text('Load Sample'),
                       ),
                     ],
@@ -715,7 +717,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red.shade600),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -725,7 +727,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                   ),
                   IconButton(
                     onPressed: () => setState(() => _importErrorMessage = null),
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                     color: Colors.red.shade600,
                   ),
                 ],
@@ -803,7 +805,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       _outputController.text = const JsonEncoder.withIndent('  ').convert(response);
       
       if (response['valid'] == true) {
-        _showSuccess('Document is valid according to EPCIS $format schema');
+        context.showSuccess('Document is valid according to EPCIS $format schema');
       } else {
         _showValidationError('Document validation failed: ${response['errors'].join(', ')}');
       }
@@ -895,22 +897,22 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
         case 'csv':
           result = await _serializationService.exportToCsv(queryParams);
           _outputController.text = result;
-          _showSuccess('Events exported to CSV format successfully. ${result.split('\n').length - 1} events exported.');
+          context.showSuccess('Events exported to CSV format successfully. ${result.split('\n').length - 1} events exported.');
           break;
         case 'html':
           result = await _serializationService.exportToHtml(queryParams);
           _outputController.text = result;
-          _showSuccess('Events exported to HTML format successfully');
+          context.showSuccess('Events exported to HTML format successfully');
           break;
         case 'pdf':
           binaryResult = await _serializationService.exportToPdf(queryParams);
           _outputController.text = 'PDF exported successfully (${binaryResult.length} bytes). Binary data cannot be displayed in text format.';
-          _showSuccess('Events exported to PDF format successfully. ${binaryResult.length} bytes generated.');
+          context.showSuccess('Events exported to PDF format successfully. ${binaryResult.length} bytes generated.');
           break;
         case 'excel':
           binaryResult = await _serializationService.exportToExcel(queryParams);
           _outputController.text = 'Excel exported successfully (${binaryResult.length} bytes). Binary data cannot be displayed in text format.';
-          _showSuccess('Events exported to Excel format successfully. ${binaryResult.length} bytes generated.');
+          context.showSuccess('Events exported to Excel format successfully. ${binaryResult.length} bytes generated.');
           break;
         default:
           throw Exception('Export format $format is not supported');
@@ -959,7 +961,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       if (errors.isNotEmpty) {
         _showImportError('Import completed with errors: ${errors.join(', ')}');
       } else {
-        _showSuccess('Successfully imported $eventsImported events into the database${eventsSkipped > 0 ? ' ($eventsSkipped duplicates skipped)' : ''}');
+        context.showSuccess('Successfully imported $eventsImported events into the database${eventsSkipped > 0 ? ' ($eventsSkipped duplicates skipped)' : ''}');
       }
 
     } catch (e) {
@@ -1066,42 +1068,28 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       _importInputController.clear();
       _errorMessage = null;
       _validationErrorMessage = null;
-      _exportErrorMessage = null;
       _importErrorMessage = null;
     });
   }
 
-  void _copyToClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copied to clipboard')),
-    );
-  }
-
-  void _showValidationError(String message) {
-    setState(() {
-      _validationErrorMessage = message;
-    });
-  }
-
-  void _showImportError(String message) {
-    setState(() {
-      _importErrorMessage = message;
-    });
+  Future<void> _copyToClipboard(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    context.showSuccess('Copied to clipboard');
   }
 
   void _showError(String message) {
-    setState(() {
-      _errorMessage = message;
-    });
+    setState(() => _errorMessage = message);
+    context.showError(message);
   }
 
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
+  void _showValidationError(String message) {
+    setState(() => _validationErrorMessage = message);
+    context.showError(message);
+  }
+
+  void _showImportError(String message) {
+    setState(() => _importErrorMessage = message);
+    context.showError(message);
   }
 }

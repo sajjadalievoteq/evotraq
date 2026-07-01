@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for managing partner API credentials
 class CredentialManagementScreen extends StatefulWidget {
@@ -40,7 +43,7 @@ class _CredentialManagementScreenState
         title: const Text('API Credentials'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () => context.read<ApiManagementCubit>().loadCredentials(
               widget.partnerId,
             ),
@@ -50,7 +53,7 @@ class _CredentialManagementScreenState
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateCredentialDialog,
-        icon: const Icon(Icons.key),
+        icon: const TraqIcon(AppAssets.iconKey),
         label: const Text('New Credential'),
       ),
       body: BlocBuilder<ApiManagementCubit, ApiManagementState>(
@@ -120,7 +123,7 @@ class _CredentialManagementScreenState
           TextButton.icon(
             onPressed: () =>
                 context.push('/admin/api-management/partners/${partner.id}'),
-            icon: const Icon(Icons.edit),
+            icon: TraqIcon(AppAssets.iconEdit),
             label: const Text('Edit Partner'),
           ),
         ],
@@ -136,7 +139,7 @@ class _CredentialManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.key_off, size: 64, color: Colors.grey.shade400),
+            TraqIcon(AppAssets.iconKey, color: Colors.grey.shade400, size: 64),
             const SizedBox(height: 16),
             const Text('No credentials configured'),
             const SizedBox(height: 8),
@@ -147,7 +150,7 @@ class _CredentialManagementScreenState
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _showCreateCredentialDialog,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Create Credential'),
             ),
           ],
@@ -177,13 +180,13 @@ class _CredentialManagementScreenState
           children: [
             Row(
               children: [
-                Icon(
+                TraqIcon(
                   credential.credentialType == CredentialType.apiKey
-                      ? Icons.vpn_key
+                      ? AppAssets.iconKey
                       : credential.credentialType ==
                             CredentialType.oauth2ClientCredentials
-                      ? Icons.lock
-                      : Icons.security,
+                      ? AppAssets.iconLock
+                      : AppAssets.iconSecurity,
                   color: isActive ? context.colors.primary : Colors.grey,
                 ),
                 const SizedBox(width: 12),
@@ -220,7 +223,7 @@ class _CredentialManagementScreenState
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18),
+                            TraqIcon(AppAssets.iconEdit, size: 18),
                             SizedBox(width: 8),
                             Text('Edit Scopes'),
                           ],
@@ -243,18 +246,18 @@ class _CredentialManagementScreenState
               children: [
                 _buildInfoChip(
                   'Rate: ${credential.rateLimitPerMinute}/min',
-                  Icons.speed,
+                  AppAssets.iconGauge,
                 ),
                 const SizedBox(width: 8),
                 _buildInfoChip(
                   'Scopes: ${credential.scopes.join(", ")}',
-                  Icons.shield,
+                  AppAssets.iconSecurity,
                 ),
                 if (credential.expiresAt != null) ...[
                   const SizedBox(width: 8),
                   _buildInfoChip(
                     'Expires: ${_formatDate(credential.expiresAt!)}',
-                    Icons.event,
+                    AppAssets.iconEvent,
                     color: credential.isExpired ? Colors.red : null,
                   ),
                 ],
@@ -289,7 +292,7 @@ class _CredentialManagementScreenState
     );
   }
 
-  Widget _buildInfoChip(String label, IconData icon, {Color? color}) {
+  Widget _buildInfoChip(String label, String iconAsset, {Color? color}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -299,7 +302,7 @@ class _CredentialManagementScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color ?? Colors.grey.shade600),
+          TraqIcon(iconAsset, size: 12, color: color ?? Colors.grey.shade600),
           const SizedBox(width: 4),
           Text(
             label,
@@ -361,9 +364,7 @@ class _CredentialManagementScreenState
                 credential.id,
               );
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Credential revoked')),
-                );
+                context.showSuccess('Credential revoked');
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -425,7 +426,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
               value: _selectedType,
               decoration: const InputDecoration(
                 labelText: 'Credential Type',
-                prefixIcon: Icon(Icons.key),
+                prefixIcon: TraqIcon(AppAssets.iconKey),
               ),
               items: [
                 DropdownMenuItem(
@@ -449,7 +450,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
                     initialValue: _rateLimitPerMinute.toString(),
                     decoration: const InputDecoration(
                       labelText: 'Rate Limit (per minute)',
-                      prefixIcon: Icon(Icons.speed),
+                      prefixIcon: TraqIcon(AppAssets.iconClock),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -489,7 +490,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
             const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.event),
+              leading: TraqIcon(AppAssets.iconEvent),
               title: Text(
                 _expiresAt != null
                     ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'
@@ -526,7 +527,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.check_circle, color: Colors.green.shade600),
+          TraqIcon(AppAssets.iconCheck, color: Colors.green.shade600),
           const SizedBox(width: 8),
           const Text('Credential Created'),
         ],
@@ -546,7 +547,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.amber.shade700),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.amber.shade700),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -599,13 +600,11 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: const TraqIcon(AppAssets.iconCopy),
                 tooltip: 'Copy to clipboard',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: value));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$label copied to clipboard')),
-                  );
+                  context.showSuccess('$label copied to clipboard');
                 },
               ),
             ],
@@ -662,12 +661,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
 
       if (cubit.state.errorMessage != null && mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(cubit.state.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError(cubit.state.errorMessage!);
       }
     } finally {
       setState(() => _isSubmitting = false);
@@ -706,7 +700,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          const Icon(Icons.edit, color: Colors.blue),
+          TraqIcon(AppAssets.iconEdit, color: Colors.blue),
           const SizedBox(width: 8),
           const Text('Edit Credential'),
         ],
@@ -726,10 +720,10 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  TraqIcon(
                     widget.credential.credentialType == CredentialType.apiKey
-                        ? Icons.vpn_key
-                        : Icons.lock,
+                        ? AppAssets.iconKey
+                        : AppAssets.iconLock,
                     size: 20,
                     color: Colors.grey.shade600,
                   ),
@@ -764,7 +758,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
               initialValue: _rateLimitPerMinute.toString(),
               decoration: const InputDecoration(
                 labelText: 'Rate Limit (per minute)',
-                prefixIcon: Icon(Icons.speed),
+                prefixIcon: TraqIcon(AppAssets.iconClock),
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
@@ -819,8 +813,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
+                      TraqIcon(AppAssets.iconInfo,
                         size: 16,
                         color: Colors.blue.shade700,
                       ),
@@ -889,12 +882,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
 
   Future<void> _updateCredential() async {
     if (_selectedScopes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('At least one scope must be selected'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      context.showWarning('At least one scope must be selected');
       return;
     }
 
@@ -911,19 +899,9 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
 
       if (success && mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Credential updated successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Credential updated successfully');
       } else if (cubit.state.errorMessage != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(cubit.state.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError(cubit.state.errorMessage!);
       }
     } finally {
       if (mounted) {

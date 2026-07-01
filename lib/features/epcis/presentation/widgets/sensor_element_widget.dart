@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget for displaying and editing sensor data in EPCIS events
 class SensorElementWidget extends StatefulWidget {
@@ -76,7 +78,7 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
             padding: const EdgeInsets.only(top: 8.0),
             child: ElevatedButton.icon(
               onPressed: _addSensorElement,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Add Sensor Data'),
             ),
           ),
@@ -105,11 +107,11 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: TraqIcon(AppAssets.iconEdit),
                         onPressed: () => _editSensorElement(index),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete),
+                        icon: TraqIcon(AppAssets.iconTrash),
                         onPressed: () => _removeSensorElement(index),
                       ),
                     ],
@@ -336,7 +338,7 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
                 subtitle: Text(_time != null 
                   ? _time!.toIso8601String() 
                   : 'Select time'),
-                trailing: const Icon(Icons.calendar_today),
+                trailing: TraqIcon(AppAssets.iconClock),
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,
@@ -386,7 +388,7 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
               const SizedBox(height: 12.0),
               ElevatedButton.icon(
                 onPressed: _addMeasurement,
-                icon: const Icon(Icons.add),
+                icon: TraqIcon(AppAssets.iconPlus),
                 label: const Text('Add Measurement'),
               ),
             ],
@@ -420,11 +422,11 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: TraqIcon(AppAssets.iconEdit),
               onPressed: () => _editMeasurement(index),
             ),
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: TraqIcon(AppAssets.iconTrash),
               onPressed: () => _removeMeasurement(index),
             ),
           ],
@@ -637,7 +639,7 @@ class _MeasurementDialogState extends State<MeasurementDialog> {
                 subtitle: Text(_time != null 
                   ? _time!.toIso8601String() 
                   : 'Select time'),
-                trailing: const Icon(Icons.calendar_today),
+                trailing: TraqIcon(AppAssets.iconClock),
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,

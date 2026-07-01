@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/material.dart' show debugPrint;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget for displaying and editing geospatial coordinates
 class GeospatialCoordinatesWidget extends StatefulWidget {
@@ -73,7 +73,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                 ),
                 if (!widget.isViewOnly && _coordinates != null)
                   IconButton(
-                    icon: const Icon(Icons.edit),
+                    icon: TraqIcon(AppAssets.iconEdit),
                     onPressed: _editCoordinates,
                   ),
               ],
@@ -89,7 +89,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
             if (!widget.isViewOnly && _coordinates == null)
               ElevatedButton.icon(
                 onPressed: _addCoordinates,
-                icon: const Icon(Icons.add_location),
+                icon: TraqIcon(AppAssets.iconPin),
                 label: const Text('Add Coordinates'),
               ),
           ],
@@ -122,7 +122,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
           // Main coordinates display (always shown)
           Row(
             children: [
-              const Icon(Icons.location_on, size: 16, color: Colors.red),
+              TraqIcon(AppAssets.iconGln, size: 16, color: Colors.red),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -145,7 +145,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                     Expanded(
                       child: Row(
                         children: [
-                          const Icon(Icons.height, size: 16, color: Colors.blue),
+                          const TraqIcon(AppAssets.iconSwapVert, color: Colors.blue, size: 16),
                           const SizedBox(width: 4),
                           Text('${_coordinates!.altitude!.toStringAsFixed(1)} m'),
                         ],
@@ -165,13 +165,11 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               padding: const EdgeInsets.only(top: 4.0),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: Colors.orange),
+                  TraqIcon(AppAssets.iconInfo, size: 16, color: Colors.orange),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      'Accuracy: ' +
-                      (_coordinates!.horizontalAccuracy != null ? '±${_coordinates!.horizontalAccuracy!.toStringAsFixed(1)}m horiz.' : '') +
-                      (_coordinates!.verticalAccuracy != null ? ' ±${_coordinates!.verticalAccuracy!.toStringAsFixed(1)}m vert.' : '')
+                      'Accuracy: ${_coordinates!.horizontalAccuracy != null ? '±${_coordinates!.horizontalAccuracy!.toStringAsFixed(1)}m horiz.' : ''}${_coordinates!.verticalAccuracy != null ? ' ±${_coordinates!.verticalAccuracy!.toStringAsFixed(1)}m vert.' : ''}'
                     ),
                   ),
                 ],
@@ -265,17 +263,10 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                                   style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                            const Icon(
-                              Icons.location_on,
+                            TraqIcon(
+                              AppAssets.iconGln,
                               color: Colors.red,
                               size: 40.0,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black54,
-                                  blurRadius: 2,
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
                             ),
                           ],
                         ),
@@ -322,7 +313,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                 top: 8,
                 right: 8,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.open_in_new, size: 16),
+                  icon: const TraqIcon(AppAssets.iconOpenNew, size: 16),
                   label: const Text('Open in Maps', style: TextStyle(fontSize: 12)),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -349,7 +340,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.map, size: 48, color: Colors.grey),
+              TraqIcon(AppAssets.iconMap, color: Colors.grey, size: 48),
               SizedBox(height: 16),
               Text(
                 'No coordinates available',
@@ -680,9 +671,9 @@ class _CoordinatesDialogState extends State<_CoordinatesDialog> {
             : null,
         name: _nameController.text.isNotEmpty ? _nameController.text : null,
       );
-      
-      Navigator.of(context).pop();
       widget.onSave(coordinates);
+      Navigator.of(context).pop();
     }
   }
 }
+    

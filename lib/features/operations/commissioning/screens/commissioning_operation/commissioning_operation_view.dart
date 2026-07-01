@@ -21,12 +21,13 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_step1_product_details.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_scanning_mode.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_submit_error_message.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_step2_serial_numbers.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_step3_review.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_partial_success_choice.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_partial_success_result.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/partial_success_dialog.dart';
+import 'widgets/commissioning_partial_success_dialog.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
@@ -40,9 +41,9 @@ class CommissioningOperationView extends StatefulWidget {
 
 class _CommissioningOperationViewState extends State<CommissioningOperationView> {
   static const _wizardSteps = [
-    OperationStepConfig(label: 'Product', icon: Icons.inventory_2),
-    OperationStepConfig(label: 'Serials', icon: Icons.qr_code_scanner),
-    OperationStepConfig(label: 'Review', icon: Icons.checklist),
+    OperationStepConfig.product,
+    OperationStepConfig.serials,
+    OperationStepConfig.review,
   ];
 
   final _pageController = PageController();
@@ -75,6 +76,9 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   DateTime? _expiryDate;
   DateTime? _productionDate;
   DateTime? _bestBeforeDate;
+  bool _expiryManuallySet = false;
+  bool _productionDateManuallySet = false;
+  bool _bestBeforeDateManuallySet = false;
 
   final List<String> _serialNumbers = [];
   CommissioningScanningMode _scanningMode = CommissioningScanningMode.manual;
@@ -236,6 +240,24 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       context.showError('Please enter a serial number');
       return;
     }
+
+    if (details.type == Gs1BarcodeType.unknown && details.serial == null) {
+      if (RegExp(r'^[A-Z]{3}\d{8,}$').hasMatch(extracted)) {
+        context.showError(
+          'This scan looks like an internal operation reference ($extracted), '
+          'not a product serial. Scan the GS1 pack label with GTIN (01) and serial (21), '
+          'or type only the serial number.',
+        );
+        return;
+      }
+      if (_selectedGTIN?.isPharmaceuticalProduct == true) {
+        context.showWarning(
+          'Not a GS1 product barcode. Pharmaceutical serials must be unpredictable '
+          '(FMD/DSCSA). Scan the pack label or enter a random serial — not a date-based code.',
+        );
+      }
+    }
+
     final serialError =
         CommissioningFieldValidators.validateSerialNumberRequired(extracted);
     if (serialError != null) {
@@ -246,7 +268,21 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       context.showError('Serial number already added: $extracted');
       return;
     }
-    setState(() => _serialNumbers.add(extracted));
+    setState(() {
+      _serialNumbers.add(extracted);
+      if (details.batchLot != null && details.batchLot!.isNotEmpty) {
+        _batchLotController.text = details.batchLot!;
+      }
+      if (details.expiry != null && !_expiryManuallySet) {
+        _expiryDate = details.expiry;
+      }
+      if (details.productionDate != null && !_productionDateManuallySet) {
+        _productionDate = details.productionDate;
+      }
+      if (details.bestBeforeDate != null && !_bestBeforeDateManuallySet) {
+        _bestBeforeDate = details.bestBeforeDate;
+      }
+    });
     _manualSerialController.clear();
     _wiredScannerController.clear();
   }
@@ -288,10 +324,13 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
         switch (dateType) {
           case 'production':
             _productionDate = selected;
+            _productionDateManuallySet = true;
           case 'expiry':
             _expiryDate = selected;
+            _expiryManuallySet = true;
           case 'bestBefore':
             _bestBeforeDate = selected;
+            _bestBeforeDateManuallySet = true;
         }
       });
     }
@@ -302,10 +341,13 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       switch (dateType) {
         case 'production':
           _productionDate = null;
+          _productionDateManuallySet = false;
         case 'expiry':
           _expiryDate = null;
+          _expiryManuallySet = false;
         case 'bestBefore':
           _bestBeforeDate = null;
+          _bestBeforeDateManuallySet = false;
       }
     });
   }
@@ -349,9 +391,15 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       if (details.batchLot != null && details.batchLot!.isNotEmpty) {
         _batchLotController.text = details.batchLot!;
       }
-      if (details.expiry != null) _expiryDate = details.expiry;
-      if (details.productionDate != null) _productionDate = details.productionDate;
-      if (details.bestBeforeDate != null) _bestBeforeDate = details.bestBeforeDate;
+      if (details.expiry != null && !_expiryManuallySet) {
+        _expiryDate = details.expiry;
+      }
+      if (details.productionDate != null && !_productionDateManuallySet) {
+        _productionDate = details.productionDate;
+      }
+      if (details.bestBeforeDate != null && !_bestBeforeDateManuallySet) {
+        _bestBeforeDate = details.bestBeforeDate;
+      }
       if (details.countryOfOrigin != null && details.countryOfOrigin!.isNotEmpty) {
         _countryOfOriginController.text = details.countryOfOrigin!;
       }
@@ -502,10 +550,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
           await _handlePartialSuccess(response);
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true
-            ? response.messages!.first
-            : 'Failed to create commissioning operation';
-        context.showError(errorMessage);
+        context.showError(commissioningSubmitErrorMessage(response));
       }
     } catch (e) {
       context.showError('Error creating commissioning operation: $e');

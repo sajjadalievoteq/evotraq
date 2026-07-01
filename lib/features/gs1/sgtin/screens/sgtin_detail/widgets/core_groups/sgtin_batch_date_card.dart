@@ -32,6 +32,7 @@ class SgtinBatchDateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Gs1GroupCard(
       title: 'Batch & Date Information',
+      showRequiredStar: true,
       outlineColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

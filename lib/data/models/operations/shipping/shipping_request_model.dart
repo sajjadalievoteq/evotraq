@@ -1,14 +1,8 @@
-String _localTimezoneOffset() {
-  final offset = DateTime.now().timeZoneOffset;
-  final hours = offset.inHours.abs().toString().padLeft(2, '0');
-  final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-  final sign = offset.isNegative ? '-' : '+';
-  return '$sign$hours:$minutes';
-}
+import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class ShippingRequest {
   ShippingRequest({
-    required this.shippingReference,
+    this.shippingReference,
     required this.epcs,
     required this.sourceGLN,
     required this.destinationGLN,
@@ -22,7 +16,7 @@ class ShippingRequest {
     this.eventTimeZoneOffset,
   });
 
-  String shippingReference;
+  String? shippingReference;
   List<String> epcs;
   String sourceGLN;
   String destinationGLN;
@@ -36,8 +30,10 @@ class ShippingRequest {
   String? eventTimeZoneOffset;
 
   Map<String, dynamic> toJson() {
+    final eventFields = OperationEventTimeCodec.fieldsForRequest(eventTime);
     return {
-      'shippingReference': shippingReference,
+      if (shippingReference != null && shippingReference!.isNotEmpty)
+        'shippingReference': shippingReference,
       'epcs': epcs,
       'sourceGLN': sourceGLN,
       'destinationGLN': destinationGLN,
@@ -47,16 +43,15 @@ class ShippingRequest {
       'carrier': carrier,
       'trackingNumber': trackingNumber,
       'comments': comments,
-      'eventTime': eventTime != null
-          ? eventTime!.toUtc().toIso8601String()
-          : DateTime.now().toUtc().toIso8601String(),
-      'eventTimeZoneOffset': eventTimeZoneOffset ?? _localTimezoneOffset(),
+      'eventTime': eventFields['eventTime'],
+      'eventTimeZoneOffset':
+          eventTimeZoneOffset ?? eventFields['eventTimeZoneOffset'],
     };
   }
 
   factory ShippingRequest.fromJson(Map<String, dynamic> json) {
     return ShippingRequest(
-      shippingReference: (json['shippingReference'] ?? '').toString(),
+      shippingReference: json['shippingReference']?.toString(),
       epcs: (json['epcs'] as List? ?? const [])
           .map((e) => e.toString())
           .toList(),

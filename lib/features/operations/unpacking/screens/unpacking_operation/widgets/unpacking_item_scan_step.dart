@@ -1,81 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_widget.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_contents_table.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_summary_banner.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_item_manual_entry_card.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scanned_items_list.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scanning_mode_selector.dart';
+import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scope_selector.dart';
+import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scanning_mode.dart';
 
-/// Step 2: scan or manually enter child items to pack.
+/// Step 2: view packed contents, select rows, or add items via scan / manual EPC.
 class UnpackingItemScanStep extends StatelessWidget {
   const UnpackingItemScanStep({
     super.key,
     required this.parentContainerId,
-    required this.unpackingReference,
-    required this.scannedEpcs,
-    required this.scanningMode,
-    required this.manualEntryController,
-    required this.onScanningModeChanged,
-    required this.onItemScanResult,
+    required this.scope,
+    required this.onScopeChanged,
+    required this.containerContents,
+    required this.selectedEpcs,
+    required this.onItemSelectionChanged,
+    required this.itemScanningMode,
+    required this.onItemScanningModeChanged,
+    required this.itemManualEntryController,
+    required this.onItemAdded,
     required this.onAddManualItem,
-    required this.onRemoveItem,
-    required this.onClearAll,
+    this.isLoadingContents = false,
+    this.contentsLoadError,
+    this.onRetryLoadContents,
+    this.allowedTypes,
     this.fillHeight = false,
     this.showPageHeader = true,
   });
 
   final String? parentContainerId;
-  final String unpackingReference;
-  final List<String> scannedEpcs;
-  final UnpackingScanningMode scanningMode;
-  final TextEditingController manualEntryController;
-  final ValueChanged<UnpackingScanningMode> onScanningModeChanged;
-  final void Function(ScanResult result) onItemScanResult;
+  final UnpackingScope scope;
+  final ValueChanged<UnpackingScope> onScopeChanged;
+  final List<HierarchyNode> containerContents;
+  final Set<String> selectedEpcs;
+  final void Function(String epc, bool selected) onItemSelectionChanged;
+  final UnpackingScanningMode itemScanningMode;
+  final ValueChanged<UnpackingScanningMode> onItemScanningModeChanged;
+  final TextEditingController itemManualEntryController;
+  final void Function(EPCParseResult result) onItemAdded;
   final VoidCallback onAddManualItem;
-  final ValueChanged<int> onRemoveItem;
-  final VoidCallback onClearAll;
+  final bool isLoadingContents;
+  final String? contentsLoadError;
+  final VoidCallback? onRetryLoadContents;
+  final List<EPCType>? allowedTypes;
   final bool fillHeight;
   final bool showPageHeader;
 
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
+    final isPartial = scope == UnpackingScope.partial;
+    final allowed = allowedTypes ??
+        const [EPCType.sgtin, EPCType.sscc, EPCType.gtin];
 
-    final scanInput = Gs1GroupCard(
-      title: 'Add Items to Unpack',
+    final scopeCard = Gs1GroupCard(
+      title: 'Unpack scope',
       outlineColor: outline,
       margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          UnpackingScanningModeSelector(
-            selectedMode: scanningMode,
-            onModeChanged: onScanningModeChanged,
+          UnpackingScopeSelector(
+            selectedScope: scope,
+            onScopeChanged: onScopeChanged,
           ),
-          const SizedBox(height: 16),
-          if (scanningMode == UnpackingScanningMode.scanner)
-            BarcodeScanner(
-              title: 'Scan Item',
-              allowedFormats: const ['SGTIN', 'GTIN'],
-              onScanResult: onItemScanResult,
-            )
-          else
-            UnpackingItemManualEntryCard(
-              controller: manualEntryController,
-              onAdd: onAddManualItem,
-            ),
+          const SizedBox(height: 8),
+          Text(
+            isPartial
+                ? 'Unpack some or all items. Use the packed-items table, a scanner, or manual EPC entry.'
+                : 'Every direct child of this container will be unpacked.',
+            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+          ),
         ],
       ),
     );
 
-    final itemsList = UnpackingScannedItemsList(
-      scannedEpcs: scannedEpcs,
-      onRemoveItem: onRemoveItem,
-      onClearAll: onClearAll,
+    final contentsTable = UnpackingContainerContentsTable(
+      parentContainerId: parentContainerId,
+      contents: containerContents,
+      scope: scope,
+      selectedEpcs: selectedEpcs,
+      onSelectionChanged: onItemSelectionChanged,
+      isLoading: isLoadingContents,
+      loadError: contentsLoadError,
+      onRetry: onRetryLoadContents,
     );
+
+    final addItemsCard = isPartial
+        ? Gs1GroupCard(
+            title: 'Add item by scan or manual entry',
+            outlineColor: outline,
+            margin: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Alternatively, scan or type an EPC — it must match an item '
+                  'listed in the table above.',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                ),
+                const SizedBox(height: 12),
+                // UnpackingScanningModeSelector(
+                //   selectedMode: itemScanningMode,
+                //   onModeChanged: onItemScanningModeChanged,
+                // ),
+                const SizedBox(height: 16),
+                if (itemScanningMode == UnpackingScanningMode.scanner)
+                  EPCInputWidget(
+                    label: 'Item Barcode',
+                    placeholder: 'Scan GTIN, SGTIN, SSCC, or barcode',
+                    allowedTypes: allowed,
+                    onItemAdded: onItemAdded,
+                  )
+                else
+                  UnpackingItemManualEntryCard(
+                    controller: itemManualEntryController,
+                    onAdd: onAddManualItem,
+                  ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
 
     if (!fillHeight) {
       return SingleChildScrollView(
@@ -85,19 +137,23 @@ class UnpackingItemScanStep extends StatelessWidget {
           children: [
             if (showPageHeader) ...[
               const Text(
-                'Scan Items to Unpack',
+                'Items to Unpack',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Scan the items to remove from container: ${parentContainerId ?? 'Unknown'}',
+                'Container: ${parentContainerId ?? 'Unknown'}',
                 style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 24),
             ],
-            scanInput,
+            scopeCard,
             const SizedBox(height: 16),
-            itemsList,
+            contentsTable,
+            if (isPartial) ...[
+              const SizedBox(height: 16),
+              addItemsCard,
+            ],
           ],
         ),
       );
@@ -110,12 +166,15 @@ class UnpackingItemScanStep extends StatelessWidget {
         children: [
           UnpackingContainerSummaryBanner(
             parentContainerId: parentContainerId,
-            unpackingReference: unpackingReference,
           ),
           const SizedBox(height: 16),
-          scanInput,
+          scopeCard,
           const SizedBox(height: 16),
-          Expanded(child: itemsList),
+          Expanded(child: contentsTable),
+          if (isPartial) ...[
+            const SizedBox(height: 16),
+            addItemsCard,
+          ],
         ],
       ),
     );

@@ -12,6 +12,8 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/toba
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sections/sscc_tobacco_state_compliance_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sections/sscc_tobacco_tax_stamp_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sections/sscc_tobacco_transport_security_section.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SSCCTobaccoExtensionWidget extends StatefulWidget {
   final int? ssccId;
@@ -347,7 +349,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
         collapsedIconColor: Colors.white,
         title: const Text('Tobacco Extension'),
         subtitle: Text(_hasExtension ? 'Extension data loaded' : 'No extension data'),
-        leading: const Icon(Icons.local_shipping),
+        leading: TraqIcon(AppAssets.iconShipment),
         initiallyExpanded: false,
         children: [
           Padding(

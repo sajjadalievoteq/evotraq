@@ -15,6 +15,8 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/uti
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventsListScreen extends StatefulWidget {
   const AggregationEventsListScreen({
@@ -311,7 +313,7 @@ class _AggregationEventsListScreenState
         tooltip: AggregationEventUiConstants.fabAddTooltip,
         onPressed: widget.onEmbeddedCreate ??
             () => context.push(Constants.epcisAggregationEventNewRoute),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: TraqIcon(AppAssets.iconPlus, color: Colors.white),
       ),
       body: body,
     );

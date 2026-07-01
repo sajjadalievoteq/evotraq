@@ -6,6 +6,8 @@ import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for displaying a list of Transaction Events
 class TransactionEventsListScreen extends StatefulWidget {
@@ -139,7 +141,7 @@ class _TransactionEventsListScreenState
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.calendar_today),
+                      icon: TraqIcon(AppAssets.iconClock),
                       onPressed: () async {
                         final result = await showDateRangePicker(
                           context: context,
@@ -161,7 +163,7 @@ class _TransactionEventsListScreenState
                     ),
                     if (dateRange != null)
                       IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: TraqIcon(AppAssets.iconX),
                         onPressed: () {
                           dateRange = null;
                         },
@@ -264,12 +266,12 @@ class _TransactionEventsListScreenState
         title: const Text('Transaction Events'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: () => _showHelpScreen(context),
             tooltip: 'Help',
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const TraqIcon(AppAssets.iconFilter),
             onPressed: _showFilterDialog,
             tooltip: 'Filter',
           ),
@@ -278,7 +280,7 @@ class _TransactionEventsListScreenState
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateEvent,
         tooltip: 'Create Transaction Event',
-        child: const Icon(Icons.add),
+        child: TraqIcon(AppAssets.iconPlus),
       ),
       drawer: const AppDrawer(),
       body: BlocBuilder<TransactionEventsCubit, TransactionEventsState>(
@@ -292,8 +294,7 @@ class _TransactionEventsListScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  TraqIcon(AppAssets.iconAlert,
                     size: 48.0,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -323,7 +324,7 @@ class _TransactionEventsListScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.event_note, size: 48.0, color: Colors.grey[400]),
+                  TraqIcon(AppAssets.iconEvent, size: 48.0, color: Colors.grey[400]),
                   const SizedBox(height: 16.0),
                   Text(
                     'No Transaction Events Found',
@@ -386,13 +387,9 @@ class _TransactionEventsListScreenState
                           Text(
                             'Transactions: ${event.bizTransactionList.entries.map((e) => "${e.key}: ${e.value}").join(", ")}',
                           ),
-                        if (event.epcList != null && event.epcList!.isNotEmpty)
-                          Text('EPCs: ${event.epcList!.length}'),
                       ],
                     ),
-                    isThreeLine: true,
                     onTap: () => _navigateToEventDetails(event),
-                    trailing: const Icon(Icons.chevron_right),
                   ),
                 );
               },
@@ -403,3 +400,4 @@ class _TransactionEventsListScreenState
     );
   }
 }
+      

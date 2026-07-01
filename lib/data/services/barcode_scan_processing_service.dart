@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/barcode_api_service.dart';
-import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
-import 'package:traqtrace_app/data/models/epcis/object_event.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+
 
 class BarcodeScanProcessingService {
   final BarcodeApiService _barcodeApiService;
@@ -53,31 +50,8 @@ class BarcodeScanProcessingService {
       debugPrint('Error in processBarcodeScan: $e');
       
       try {
-        final readPoint = GLN.fromCode(locationGLN);
-        final bizLocation = GLN.fromCode(locationGLN);
-        
         final now = DateTime.now();
         final uuid = const Uuid().v4();
-        
-        final epcisEvent = ObjectEvent(
-          eventId: uuid, 
-          eventTime: now,
-          recordTime: now,
-          eventTimeZone: now.timeZoneOffset.toString(),
-          businessStep: businessStep,
-          disposition: disposition,
-          readPoint: readPoint,
-          businessLocation: bizLocation,
-          action: 'OBSERVE',
-          epcList: [barcodeData],          bizData: {
-            'barcodeType': 'UNKNOWN',
-            'barcodeValue': barcodeData,
-            'scannedTime': now.toIso8601String(),
-            'scanSource': 'BARCODE_SCANNER',
-            'errorProcessing': 'true',
-            'errorMessage': e.toString(),
-          },
-        );
         
         return {
           'success': true,

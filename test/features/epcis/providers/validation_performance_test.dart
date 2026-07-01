@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
@@ -93,11 +92,6 @@ class _InMemoryValidationRuleService implements ValidationRuleService {
 
 /// Tests focused on the performance features of the validation service
 void main() {
-  final appConfig = AppConfig(
-    apiBaseUrl: 'https://api.test.com',
-    appName: 'TraqTrace Test',
-    appVersion: '1.0.0',
-  );
 
   group('ValidationRuleProvider Performance Tests', () {
     test('should efficiently filter rules by event type', () async {
@@ -256,8 +250,7 @@ void main() {
       
       // Run a series of filter operations to measure performance
       for (int i = 0; i < 10; i++) {
-        final objectRules = cubit.rules.where((r) => r.eventType == EventType.ObjectEvent).toList();
-        final field3Rules = cubit.rules.where((r) => r.description?.contains('field_3') == true).toList();
+        cubit.rules.where((r) => r.eventType == EventType.ObjectEvent).toList();
       }
       
       stopwatch.stop();
@@ -301,8 +294,6 @@ void main() {
           enabled: true,
         ));
       }
-      
-      final originalRuleCount = cubit.rules.length;
       
       final stopwatch = Stopwatch()..start();
       await cubit.resetToDefaults(); // Uses actual reset method

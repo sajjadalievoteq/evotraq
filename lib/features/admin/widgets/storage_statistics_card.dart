@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class StorageStatisticsCard extends StatelessWidget {
   final StorageStatistics storage;
@@ -34,7 +36,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Total Events',
                     _formatNumber(storage.totalEvents),
-                    Icons.event,
+                    AppAssets.iconEvent,
                     Colors.blue,
                   ),
                 ),
@@ -43,7 +45,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Storage Used',
                     '${storage.storageUsedGB.toStringAsFixed(2)} GB',
-                    Icons.storage,
+                    AppAssets.iconDatabase,
                     Colors.orange,
                   ),
                 ),
@@ -52,7 +54,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Partitions',
                     '${storage.partitionDistribution.length}',
-                    Icons.view_module,
+                    AppAssets.iconGrid,
                     Colors.green,
                   ),
                 ),
@@ -61,7 +63,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Compression Ratio',
                     '${storage.compressionRatio.toStringAsFixed(1)}:1',
-                    Icons.compress,
+                    AppAssets.iconCompress,
                     Colors.purple,
                   ),
                 ),
@@ -129,13 +131,13 @@ class StorageStatisticsCard extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _showArchiveDialog(context),
-                  icon: const Icon(Icons.archive),
+                  icon: TraqIcon(AppAssets.iconDownload),
                   label: const Text('Archive Old Events'),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
                   onPressed: () => _showCompressionDialog(context),
-                  icon: const Icon(Icons.compress),
+                  icon: const TraqIcon(AppAssets.iconCompress),
                   label: const Text('Compress Events'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -150,7 +152,7 @@ class StorageStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStorageMetric(String title, String value, IconData icon, Color color) {
+  Widget _buildStorageMetric(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -160,7 +162,7 @@ class StorageStatisticsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             value,
@@ -338,7 +340,7 @@ class StorageStatisticsCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              onCompressEvents([]); // Empty list means compress all eligible events
+              onCompressEvents([]); // Empty list means compress all
             },
             child: const Text('Compress'),
           ),

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../data/services/data_consistency_persistence_service.dart';
 import '../../../data/services/data_consistency_service.dart';
 import '../../../data/services/error_correction_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
 
@@ -248,13 +251,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-      ),
-    );
+    context.showError(message, duration: const Duration(seconds: 5));
   }
 
   // Consistency violation correction methods
@@ -317,12 +314,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           'current_user',
         );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Correction workflow $workflowId created successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Correction workflow $workflowId created successfully!');
 
         // Refresh workflow data
         await _loadWorkflowData();
@@ -424,12 +416,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           'current_user',
         );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Correction workflow $workflowId created successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Correction workflow $workflowId created successfully!');
 
         // Refresh workflow data
         await _loadWorkflowData();
@@ -510,21 +497,21 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.assessment), text: 'Consistency'),
-            Tab(icon: Icon(Icons.search), text: 'Anomaly Detection'),
-            Tab(icon: Icon(Icons.build), text: 'Error Correction'),
-            Tab(icon: Icon(Icons.security), text: 'Integrity Monitoring'),
-            Tab(icon: Icon(Icons.timeline), text: 'Workflows'),
+            Tab(icon: TraqIcon(AppAssets.iconList), text: 'Consistency'),
+            Tab(icon: TraqIcon(AppAssets.iconSearch), text: 'Anomaly Detection'),
+            Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Error Correction'),
+            Tab(icon: TraqIcon(AppAssets.iconLock), text: 'Integrity Monitoring'),
+            Tab(icon: TraqIcon(AppAssets.iconGlobe), text: 'Workflows'),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _isLoading ? null : _loadDashboardData,
             tooltip: 'Refresh Data',
           ),
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: TraqIcon(AppAssets.iconSettings),
             onPressed: _showFiltersDialog,
             tooltip: 'Filters',
           ),
@@ -541,7 +528,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, color: Colors.red, size: 64),
+            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 64),
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
@@ -584,7 +571,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.assessment, color: Colors.blue),
+                      TraqIcon(AppAssets.iconList, color: Colors.blue),
                       const SizedBox(width: 8),
                       const Text(
                         'Consistency Validation',
@@ -599,7 +586,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.play_arrow),
+                            : TraqIcon(AppAssets.iconArrowR),
                         label: Text(_isGeneratingReport ? 'Generating...' : 'Generate Report'),
                       ),
                     ],
@@ -644,7 +631,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Consistency Score',
                     '${score.toStringAsFixed(1)}%',
                     _getScoreColor(score),
-                    Icons.score,
+                    AppAssets.iconScore,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -653,7 +640,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Events Analyzed',
                     total.toString(),
                     Colors.blue,
-                    Icons.event,
+                    AppAssets.iconEvent,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -662,7 +649,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Violations Found',
                     violations.toString(),
                     violations > 0 ? Colors.red : Colors.green,
-                    Icons.warning,
+                    AppAssets.iconAlert,
                   ),
                 ),
               ],
@@ -710,8 +697,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ExpansionTile(
-        leading: Icon(
-          Icons.warning,
+        leading: TraqIcon(AppAssets.iconAlert,
           color: _getSeverityColor(severity),
         ),
         title: Text(type),
@@ -727,7 +713,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: () => _correctConsistencyViolation(violation),
-              icon: const Icon(Icons.build_circle, size: 16),
+              icon: TraqIcon(AppAssets.iconFactory, size: 16),
               label: const Text('Correct'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -761,7 +747,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
                         onPressed: () => _correctConsistencyViolation(violation),
-                        icon: const Icon(Icons.auto_fix_high),
+                        icon: TraqIcon(AppAssets.iconSparkle),
                         label: const Text('Apply Fix'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
@@ -791,7 +777,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.search, color: Colors.orange),
+                      TraqIcon(AppAssets.iconSearch, color: Colors.orange),
                       const SizedBox(width: 8),
                       const Text(
                         'Anomaly Detection',
@@ -806,7 +792,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.search),
+                            : TraqIcon(AppAssets.iconSearch),
                         label: Text(_isDetectingAnomalies ? 'Detecting...' : 'Detect Anomalies'),
                       ),
                     ],
@@ -837,8 +823,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
-        leading: Icon(
-          Icons.warning_amber,
+        leading: TraqIcon(AppAssets.iconAlert,
           color: _getSeverityColor(severity),
         ),
         title: Text(
@@ -856,7 +841,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: () => _correctAnomaly(anomaly),
-              icon: const Icon(Icons.auto_fix_high, size: 16),
+              icon: TraqIcon(AppAssets.iconSparkle, size: 16),
               label: const Text('Correct'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -897,7 +882,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     padding: const EdgeInsets.only(left: 16, bottom: 4),
                     child: Row(
                       children: [
-                        const Icon(Icons.arrow_right, size: 16),
+                        TraqIcon(AppAssets.iconChevronR, size: 16),
                         const SizedBox(width: 8),
                         Expanded(child: Text(action)),
                       ],
@@ -915,7 +900,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: () => _correctAnomaly(anomaly),
-                      icon: const Icon(Icons.build_circle),
+                      icon: TraqIcon(AppAssets.iconFactory),
                       label: const Text('Apply Correction'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -950,7 +935,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.build, color: Colors.green),
+                      TraqIcon(AppAssets.iconSettings, color: Colors.green),
                       const SizedBox(width: 8),
                       const Text(
                         'Correctable Errors',
@@ -965,7 +950,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.search),
+                            : TraqIcon(AppAssets.iconSearch),
                         label: Text(_isIdentifyingErrors ? 'Identifying...' : 'Identify Errors'),
                       ),
                     ],
@@ -1011,7 +996,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Total Errors',
                     totalErrors.toString(),
                     Colors.red,
-                    Icons.error,
+                    AppAssets.iconXCircle,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1020,7 +1005,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Workflows Created',
                     totalWorkflows.toString(),
                     Colors.blue,
-                    Icons.work,
+                    AppAssets.iconWork,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1029,7 +1014,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Approval Rate',
                     '${approvalRate.toStringAsFixed(1)}%',
                     _getScoreColor(approvalRate),
-                    Icons.check,
+                    AppAssets.iconCheck,
                   ),
                 ),
               ],
@@ -1056,8 +1041,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           children: [
             Row(
               children: [
-                Icon(
-                  isCorrectable ? Icons.build : Icons.warning,
+                TraqIcon(
+                  isCorrectable ? AppAssets.iconBuild : AppAssets.iconAlert,
                   color: isCorrectable ? Colors.green : Colors.orange,
                 ),
                 const SizedBox(width: 8),
@@ -1110,7 +1095,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.security, color: Colors.purple),
+                      TraqIcon(AppAssets.iconLock, color: Colors.purple),
                       const SizedBox(width: 8),
                       const Text(
                         'Integrity Monitoring',
@@ -1119,7 +1104,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                       const Spacer(),
                       ElevatedButton.icon(
                         onPressed: () => _startIntegrityJob(),
-                        icon: const Icon(Icons.play_arrow),
+                        icon: TraqIcon(AppAssets.iconArrowR),
                         label: const Text('Run Integrity Check'),
                       ),
                     ],
@@ -1178,7 +1163,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                         child: _buildResultMetric(
                           'Events Checked',
                           '${results['events_checked'] ?? 0}',
-                          Icons.event_note,
+                          AppAssets.iconCalendar,
                           Colors.blue,
                         ),
                       ),
@@ -1187,7 +1172,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                         child: _buildResultMetric(
                           'Violations Found',
                           '${results['integrity_violations'] ?? 0}',
-                          Icons.warning,
+                          AppAssets.iconAlert,
                           Colors.orange,
                         ),
                       ),
@@ -1197,14 +1182,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   _buildResultMetric(
                     'Overall Integrity Score',
                     '${results['overall_integrity_score'] ?? 0}%',
-                    Icons.grade,
+                    AppAssets.iconGrade,
                     Colors.green,
                   ),
                   const SizedBox(height: 12),
                   if (results['integrity_violations'] != null && results['integrity_violations'] > 0)
                     ElevatedButton.icon(
                       onPressed: () => _showIntegrityViolations(jobId, results),
-                      icon: const Icon(Icons.list),
+                      icon: TraqIcon(AppAssets.iconList),
                       label: const Text('View Violation Details'),
                     ),
                 ],
@@ -1238,7 +1223,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     );
   }
 
-  Widget _buildResultMetric(String title, String value, IconData icon, Color color) {
+  Widget _buildResultMetric(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1247,7 +1232,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             value,
@@ -1290,19 +1275,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                       _buildViolationItem(
                         'Missing Event Chain',
                         'EPC-12345: Gap detected between shipping and receiving events',
-                        Icons.broken_image,
+                        AppAssets.iconBrokenImage,
                         Colors.red,
                       ),
                       _buildViolationItem(
                         'Timestamp Inconsistency',
                         'EPC-67890: Receiving event timestamp precedes shipping event',
-                        Icons.access_time,
+                        AppAssets.iconClock,
                         Colors.orange,
                       ),
                       _buildViolationItem(
                         'Location Mismatch',
                         'EPC-54321: Event location does not match expected business rules',
-                        Icons.location_off,
+                        AppAssets.iconMapPin,
                         Colors.blue,
                       ),
                     ],
@@ -1449,7 +1434,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           return AlertDialog(
             title: const Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
+                TraqIcon(AppAssets.iconCheck, color: Colors.green),
                 SizedBox(width: 8),
                 Text('Correction Workflow Started'),
               ],
@@ -1498,7 +1483,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           return AlertDialog(
             title: const Row(
               children: [
-                Icon(Icons.error, color: Colors.red),
+                TraqIcon(AppAssets.iconAlert, color: Colors.red),
                 SizedBox(width: 8),
                 Text('Workflow Creation Failed'),
               ],
@@ -1519,7 +1504,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   void _navigateToWorkflowDetails(String workflowId) {
     // For now, show a placeholder. In a full implementation, this would
     // navigate to a workflow details screen or add a workflow tracking section
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.showSnackBar(
       SnackBar(
         content: Text('Workflow $workflowId created. Check the Error Correction section for progress.'),
         duration: const Duration(seconds: 4),
@@ -1531,14 +1516,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     );
   }
 
-  Widget _buildViolationItem(String title, String description, IconData icon, Color color) {
+  Widget _buildViolationItem(String title, String description, String iconAsset, Color color) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: Icon(icon, color: color),
+        leading: TraqIcon(iconAsset, color: color),
         title: Text(title),
         subtitle: Text(description),
-        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[600]),
+        trailing: TraqIcon(AppAssets.iconChevronR, size: 16, color: Colors.grey[600]),
       ),
     );
   }
@@ -1546,17 +1531,17 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   Widget _buildJobStatusIcon(String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return const Icon(Icons.check_circle, color: Colors.green);
+        return TraqIcon(AppAssets.iconCheck, color: Colors.green);
       case 'RUNNING':
-        return const Icon(Icons.play_circle, color: Colors.blue);
+        return TraqIcon(AppAssets.iconArrowR, color: Colors.blue);
       case 'FAILED':
-        return Icon(Icons.error, color: Colors.red);
+        return TraqIcon(AppAssets.iconAlert, color: Colors.red);
       default:
-        return const Icon(Icons.help_outline, color: Colors.grey);
+        return TraqIcon(AppAssets.iconInfo, color: Colors.grey);
     }
   }
 
-  Widget _buildMetricCard(String title, String value, Color color, IconData icon) {
+  Widget _buildMetricCard(String title, String value, Color color, String iconAsset) {
     return Card(
       elevation: 1,
       child: Padding(
@@ -1564,7 +1549,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
+            TraqIcon(iconAsset, color: color, size: 32),
             const SizedBox(height: 8),
             Text(
               value,
@@ -1749,12 +1734,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         'current_user', // In real app, get from authentication
       );
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Correction workflow initiated: ${result['workflow_id']}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Correction workflow initiated: ${result['workflow_id']}');
       
       // Refresh the correctable errors list
       _identifyCorrectableErrors();
@@ -1789,12 +1769,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         'progress': 0.0,
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Integrity verification job started: ${result['job_id']}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showInfo('Integrity verification job started: ${result['job_id']}');
       
       // Start polling for job status
       _pollJobStatus(result['job_id']);
@@ -1843,7 +1818,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.timeline, color: Colors.purple),
+                      TraqIcon(AppAssets.iconGlobe, color: Colors.purple),
                       const SizedBox(width: 8),
                       const Text(
                         'Correction Workflows',
@@ -1852,7 +1827,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                       const Spacer(),
                       ElevatedButton.icon(
                         onPressed: _refreshWorkflowData,
-                        icon: const Icon(Icons.refresh),
+                        icon: TraqIcon(AppAssets.iconRefresh),
                         label: const Text('Refresh'),
                       ),
                     ],
@@ -1875,7 +1850,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.timeline, size: 64, color: Colors.grey[400]),
+                      TraqIcon(AppAssets.iconGlobe, size: 64, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
                         'No correction workflows found (Length: ${_correctionWorkflows.length})',
@@ -1942,21 +1917,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       
       print('DEBUG: Refresh - Final length: ${_correctionWorkflows.length}');
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Loaded ${_correctionWorkflows.length} workflows'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Loaded ${_correctionWorkflows.length} workflows');
     } catch (e, stackTrace) {
       print('DEBUG: ERROR in _refreshWorkflowData: $e');
       print('DEBUG: Stack trace: $stackTrace');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Error: $e');
     }
   }
 
@@ -1975,7 +1940,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: _getWorkflowStatusColor(status),
-          child: Icon(
+          child: TraqIcon(
             _getWorkflowStatusIcon(status),
             color: Colors.white,
             size: 20,
@@ -2033,19 +1998,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     }
   }
 
-  IconData _getWorkflowStatusIcon(String status) {
+  String _getWorkflowStatusIcon(String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       case 'IN_PROGRESS':
-        return Icons.settings;
+        return AppAssets.iconSettings;
       case 'PENDING':
       case 'AWAITING_APPROVAL':
-        return Icons.pending;
+        return AppAssets.iconPending;
       case 'FAILED':
-        return Icons.error;
+        return AppAssets.iconXCircle;
       default:
-        return Icons.help_outline;
+        return AppAssets.iconHelpCircle;
     }
   }
 
@@ -2114,11 +2079,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 onPressed: () {
                   Navigator.of(context).pop();
                   // TODO: Navigate to approval interface
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Approval interface coming soon'),
-                    ),
-                  );
+                  context.showInfo('Approval interface coming soon');
                 },
                 child: const Text('Review for Approval'),
               ),

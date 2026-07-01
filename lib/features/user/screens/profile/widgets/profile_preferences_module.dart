@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/features/user/utils/user_strings.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
+import 'package:traqtrace_app/features/user/screens/profile/widgets/operational_gln_preference_card.dart';
 
 class ProfilePreferencesModule extends StatefulWidget {
   const ProfilePreferencesModule({super.key});
@@ -188,6 +189,8 @@ class _ProfilePreferencesModuleState extends State<ProfilePreferencesModule> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+            const OperationalGlnPreferenceCard(),
           ],
         );
       },

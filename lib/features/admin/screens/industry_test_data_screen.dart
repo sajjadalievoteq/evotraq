@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
-
 import '../../../core/network/dio_service.dart';
 import '../../../data/services/industry_test_data_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for generating industry-specific test data (Tobacco and Pharmaceutical)
 /// This creates real product data with accurate specifications for the UAE market
@@ -396,11 +395,11 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           indicatorColor: Colors.white,
           tabs: const [
             Tab(
-              icon: Icon(Icons.local_florist),
+              icon: TraqIcon(AppAssets.iconSparkle),
               text: 'Tobacco',
             ),
             Tab(
-              icon: Icon(Icons.medical_services),
+              icon: TraqIcon(AppAssets.iconMedical),
               text: 'Pharmaceutical',
             ),
           ],
@@ -419,8 +418,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   : Colors.green.shade100,
               child: Row(
                 children: [
-                  Icon(
-                    _isError ? Icons.error : Icons.info,
+                  TraqIcon(
+                    _isError ? AppAssets.iconXCircle : AppAssets.iconInfo,
                     color: _isError ? Colors.red : Colors.green,
                   ),
                   const SizedBox(width: 8),
@@ -532,7 +531,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.local_florist, color: Colors.white, size: 32),
+                      const TraqIcon(AppAssets.iconSparkle, color: Colors.white, size: 32),
                       const SizedBox(width: 12),
                       const Text(
                         'Tobacco Industry Test Data',
@@ -559,7 +558,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Master Data Section
-          _buildSectionHeader('Master Data Generation', Icons.dataset),
+          _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
           const SizedBox(height: 12),
           
           Row(
@@ -569,7 +568,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate GTINs',
                   description: 'Create 50 tobacco product GTINs with complete '
                       'tobacco extension data (brand, tar, nicotine, etc.)',
-                  icon: Icons.qr_code,
+                  iconAsset: AppAssets.iconQr,
                   color: Colors.brown,
                   onPressed: _isLoading ? null : _generateTobaccoGTINs,
                   buttonText: 'Generate 50 GTINs',
@@ -581,7 +580,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate GLNs',
                   description: 'Create 50 tobacco-related location GLNs '
                       '(factories, warehouses, distributors, retailers)',
-                  icon: Icons.location_on,
+                  iconAsset: AppAssets.iconMapPin,
                   color: Colors.brown,
                   onPressed: _isLoading ? null : _generateTobaccoGLNs,
                   buttonText: 'Generate 50 GLNs',
@@ -593,7 +592,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Serialization Section
-          _buildSectionHeader('Serialization', Icons.numbers),
+          _buildSectionHeader('Serialization', AppAssets.iconNumbers),
           const SizedBox(height: 12),
           
           Row(
@@ -603,7 +602,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate SGTINs',
                   description: 'Create 500 serialized tobacco items (10 per GTIN) '
                       'with batch numbers, production dates, and expiry dates',
-                  icon: Icons.qr_code_scanner,
+                  iconAsset: AppAssets.iconQr,
                   color: Colors.brown,
                   onPressed: _isLoading ? null : _generateTobaccoSGTINs,
                   buttonText: 'Generate 500 SGTINs',
@@ -615,7 +614,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate SSCCs',
                   description: 'Create 50 shipping containers (pallets, cases, cartons) '
                       'with tax stamp aggregation and UAE compliance data',
-                  icon: Icons.inventory,
+                  iconAsset: AppAssets.iconBox,
                   color: Colors.brown,
                   onPressed: _isLoading ? null : _generateTobaccoSSCCs,
                   buttonText: 'Generate 50 SSCCs',
@@ -627,7 +626,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Events Section
-          _buildSectionHeader('EPCIS Events - Full Supply Chain', Icons.event),
+          _buildSectionHeader('EPCIS Events - Full Supply Chain', AppAssets.iconEvent),
           const SizedBox(height: 12),
           
           _buildActionCard(
@@ -637,7 +636,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                 '• Packing/Aggregation: Items packed into SSCCs\n'
                 '• Shipping: Manufacturer → Distributor → Retailer\n'
                 '• Receiving: At each destination location',
-            icon: Icons.timeline,
+            iconAsset: AppAssets.iconTimeline,
             color: Colors.brown.shade600,
             onPressed: _isLoading ? null : _generateTobaccoEvents,
             buttonText: 'Generate ~200 Events',
@@ -650,10 +649,10 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
             spacing: 12,
             runSpacing: 12,
             children: [
-              _buildEventTypeChip('Object Events', Icons.inventory_2, Colors.blue),
-              _buildEventTypeChip('Aggregation Events', Icons.category, Colors.green),
-              _buildEventTypeChip('Shipping Events', Icons.local_shipping, Colors.orange),
-              _buildEventTypeChip('Receiving Events', Icons.move_to_inbox, Colors.purple),
+              _buildEventTypeChip('Object Events', AppAssets.iconBox, Colors.blue),
+              _buildEventTypeChip('Aggregation Events', AppAssets.iconCategory, Colors.green),
+              _buildEventTypeChip('Shipping Events', AppAssets.iconTruck, Colors.orange),
+              _buildEventTypeChip('Receiving Events', AppAssets.iconInbox, Colors.purple),
             ],
           ),
           
@@ -691,7 +690,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.medical_services, color: Colors.white, size: 32),
+                      const TraqIcon(AppAssets.iconMedical, color: Colors.white, size: 32),
                       const SizedBox(width: 12),
                       const Text(
                         'Pharmaceutical Industry Test Data',
@@ -717,7 +716,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Master Data Section
-          _buildSectionHeader('Master Data Generation', Icons.dataset),
+          _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
           const SizedBox(height: 12),
           
           Row(
@@ -727,7 +726,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate GTINs',
                   description: 'Create 50 pharmaceutical product GTINs with complete '
                       'pharma extension data (active ingredient, dosage, etc.)',
-                  icon: Icons.qr_code,
+                  iconAsset: AppAssets.iconQr,
                   color: const Color(0xFF2D4A3E),
                   onPressed: _isLoading ? null : _generatePharmaGTINs,
                   buttonText: 'Generate 50 GTINs',
@@ -739,7 +738,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate GLNs',
                   description: 'Create 50 pharmaceutical-related location GLNs '
                       '(manufacturers, wholesalers, pharmacies, hospitals)',
-                  icon: Icons.location_on,
+                  iconAsset: AppAssets.iconMapPin,
                   color: const Color(0xFF2D4A3E),
                   onPressed: _isLoading ? null : _generatePharmaGLNs,
                   buttonText: 'Generate 50 GLNs',
@@ -751,7 +750,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Serialization Section
-          _buildSectionHeader('Serialization', Icons.numbers),
+          _buildSectionHeader('Serialization', AppAssets.iconNumbers),
           const SizedBox(height: 12),
           
           Row(
@@ -761,7 +760,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate SSCCs',
                   description: 'Create shipping containers with pharma extension data '
                       '(temperature control, batch tracking)',
-                  icon: Icons.inventory,
+                  iconAsset: AppAssets.iconBox,
                   color: const Color(0xFF2D4A3E),
                   onPressed: _isLoading ? null : _generatePharmaSSCCs,
                   buttonText: 'Generate 50 SSCCs',
@@ -773,7 +772,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   title: 'Generate SGTINs',
                   description: 'Create serialized pharmaceutical products with batch, '
                       'expiry date, and lot number',
-                  icon: Icons.qr_code_scanner,
+                  iconAsset: AppAssets.iconQr,
                   color: const Color(0xFF2D4A3E),
                   onPressed: _isLoading ? null : _generatePharmaSGTINs,
                   buttonText: 'Generate SGTINs',
@@ -785,7 +784,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           const SizedBox(height: 24),
           
           // Events Section
-          _buildSectionHeader('EPCIS Events', Icons.event),
+          _buildSectionHeader('EPCIS Events', AppAssets.iconEvent),
           const SizedBox(height: 12),
           
           Card(
@@ -803,7 +802,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                           color: const Color(0xFF2D4A3E).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.event, color: Color(0xFF2D4A3E), size: 24),
+                        child: TraqIcon(AppAssets.iconEvent, color: Color(0xFF2D4A3E), size: 24),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
@@ -832,7 +831,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _generatePharmaEvents,
-                      icon: const Icon(Icons.play_arrow),
+                      icon: TraqIcon(AppAssets.iconArrowR),
                       label: const Text('Generate Supply Chain Events'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2D4A3E),
@@ -850,10 +849,10 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
+  Widget _buildSectionHeader(String title, String iconAsset) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey.shade700),
+        TraqIcon(iconAsset, size: 20, color: Colors.grey.shade700),
         const SizedBox(width: 8),
         Text(
           title,
@@ -870,7 +869,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   Widget _buildActionCard({
     required String title,
     required String description,
-    required IconData icon,
+    required String iconAsset,
     required Color color,
     required VoidCallback? onPressed,
     required String buttonText,
@@ -891,7 +890,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: color, size: 24),
+                  child: TraqIcon(iconAsset, color: color, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -919,7 +918,9 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: onPressed,
-                icon: Icon(isDisabled ? Icons.lock : Icons.play_arrow),
+                icon: TraqIcon(
+                  isDisabled ? AppAssets.iconLock : AppAssets.iconPlay,
+                ),
                 label: Text(buttonText),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isDisabled ? Colors.grey.shade300 : color,
@@ -929,53 +930,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSmallActionCard({
-    required String title,
-    required IconData icon,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      width: 160,
-      child: Card(
-        elevation: 1,
-        child: InkWell(
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Icon(
-                  icon,
-                  size: 32,
-                  color: onPressed != null ? Colors.brown : Colors.grey,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: onPressed != null ? null : Colors.grey,
-                  ),
-                ),
-                if (onPressed == null)
-                  const Text(
-                    'Coming Soon',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -992,7 +946,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           children: [
             Row(
               children: [
-                Icon(Icons.info, color: Colors.blue.shade700),
+                TraqIcon(AppAssets.iconInfo, color: Colors.blue.shade700),
                 const SizedBox(width: 8),
                 Text(
                   'Included Tobacco Brands (UAE Market)',
@@ -1051,14 +1005,13 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     );
   }
 
-  Widget _buildEventTypeChip(String label, IconData icon, Color color) {
+  Widget _buildEventTypeChip(String label, String iconAsset, Color color) {
     return Chip(
-      avatar: Icon(icon, size: 16, color: color),
+      avatar: TraqIcon(iconAsset, size: 16, color: color),
       label: Text(
         label,
         style: TextStyle(fontSize: 11, color: color),
       ),
-      backgroundColor: color.withOpacity(0.1),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );

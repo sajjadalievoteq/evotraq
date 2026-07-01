@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../models/api_collection.dart';
 import '../providers/partner_access_provider.dart';
 import '../cubit/api_collection_cubit.dart';
-import '../cubit/api_collection_state.dart';
 import '../cubit/api_management_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for managing Partner API Access
 /// Allows assigning collection-level and individual API access to partners
@@ -59,13 +61,13 @@ class _PartnerAccessManagementScreenState
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.summarize), text: 'Summary'),
-            Tab(icon: Icon(Icons.folder_special), text: 'Collection Access'),
+            Tab(icon: TraqIcon(AppAssets.iconDocument), text: 'Summary'),
+            Tab(icon: TraqIcon(AppAssets.iconList), text: 'Collection Access'),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _selectedPartnerId != null
                 ? () => context.read<PartnerAccessCubit>().loadAccessSummary(
                     _selectedPartnerId!,
@@ -102,7 +104,7 @@ class _PartnerAccessManagementScreenState
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Row(
             children: [
-              const Icon(Icons.business),
+              TraqIcon(AppAssets.iconUsers),
               const SizedBox(width: 12),
               const Text(
                 'Partner:',
@@ -181,7 +183,7 @@ class _PartnerAccessManagementScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.person_search, size: 80, color: Colors.grey[300]),
+          TraqIcon(AppAssets.iconUser, color: Colors.grey[300], size: 80),
           const SizedBox(height: 16),
           Text(
             'Select a partner to manage API access',
@@ -210,7 +212,7 @@ class _PartnerAccessManagementScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
                 const SizedBox(height: 16),
                 Text('Error: ${state.error}'),
               ],
@@ -234,21 +236,21 @@ class _PartnerAccessManagementScreenState
                   _buildSummaryCard(
                     'Collections',
                     summary.collectionAccessCount.toString(),
-                    Icons.folder_special,
+                    AppAssets.iconFolder,
                     Colors.blue,
                   ),
                   const SizedBox(width: 16),
                   _buildSummaryCard(
                     'Individual APIs',
                     summary.individualApiAccessCount.toString(),
-                    Icons.api,
+                    AppAssets.iconApi,
                     Colors.green,
                   ),
                   const SizedBox(width: 16),
                   _buildSummaryCard(
                     'Total APIs',
                     summary.totalAccessibleApis.toString(),
-                    Icons.check_circle,
+                    AppAssets.iconCheckCircle,
                     Colors.purple,
                   ),
                 ],
@@ -270,7 +272,7 @@ class _PartnerAccessManagementScreenState
                       _tabController.animateTo(1);
                       _showGrantCollectionAccessDialog();
                     },
-                    icon: const Icon(Icons.add),
+                    icon: TraqIcon(AppAssets.iconPlus),
                     label: const Text('Grant Collection Access'),
                   ),
                 ],
@@ -294,10 +296,10 @@ class _PartnerAccessManagementScreenState
                                 access.accessLevel == AccessLevel.full
                                 ? Colors.green
                                 : Colors.orange,
-                            child: Icon(
+                            child: TraqIcon(
                               access.accessLevel == AccessLevel.full
-                                  ? Icons.lock_open
-                                  : Icons.tune,
+                                  ? AppAssets.iconLock
+                                  : AppAssets.iconTune,
                               color: Colors.white,
                               size: 20,
                             ),
@@ -307,11 +309,10 @@ class _PartnerAccessManagementScreenState
                             '${access.accessLevel.displayName} • ${access.statusText}',
                           ),
                           trailing: access.isValid
-                              ? const Icon(
-                                  Icons.check_circle,
+                              ? TraqIcon(AppAssets.iconCheck,
                                   color: Colors.green,
                                 )
-                              : const Icon(Icons.warning, color: Colors.orange),
+                              : TraqIcon(AppAssets.iconAlert, color: Colors.orange),
                         ),
                       ),
                     ),
@@ -364,11 +365,10 @@ class _PartnerAccessManagementScreenState
                             ),
                           ),
                           trailing: access.isValid
-                              ? const Icon(
-                                  Icons.check_circle,
+                              ? TraqIcon(AppAssets.iconCheck,
                                   color: Colors.green,
                                 )
-                              : const Icon(Icons.warning, color: Colors.orange),
+                              : TraqIcon(AppAssets.iconAlert, color: Colors.orange),
                         ),
                       ),
                     ),
@@ -390,7 +390,7 @@ class _PartnerAccessManagementScreenState
   Widget _buildSummaryCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Expanded(
@@ -400,7 +400,7 @@ class _PartnerAccessManagementScreenState
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(icon, size: 40, color: color),
+              TraqIcon(iconAsset, size: 40, color: color),
               const SizedBox(height: 12),
               Text(
                 value,
@@ -447,7 +447,7 @@ class _PartnerAccessManagementScreenState
                   const Spacer(),
                   ElevatedButton.icon(
                     onPressed: _showGrantCollectionAccessDialog,
-                    icon: const Icon(Icons.add),
+                    icon: TraqIcon(AppAssets.iconPlus),
                     label: const Text('Grant Access'),
                   ),
                 ],
@@ -461,11 +461,7 @@ class _PartnerAccessManagementScreenState
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.folder_off,
-                            size: 64,
-                            color: Colors.grey[300],
-                          ),
+                          TraqIcon(AppAssets.iconFolder, color: Colors.grey[300], size: 64),
                           const SizedBox(height: 16),
                           Text(
                             'No collection access granted',
@@ -698,8 +694,7 @@ class _PartnerAccessManagementScreenState
                           children: [
                             Row(
                               children: [
-                                const Icon(
-                                  Icons.api,
+                                TraqIcon(AppAssets.iconGlobe,
                                   size: 18,
                                   color: Colors.blue,
                                 ),
@@ -855,7 +850,7 @@ class _PartnerAccessManagementScreenState
                                 setState(() => validFrom = date);
                               }
                             },
-                            icon: const Icon(Icons.schedule),
+                            icon: TraqIcon(AppAssets.iconClock),
                             label: Text(
                               validFrom != null
                                   ? _formatDate(validFrom!)
@@ -881,7 +876,7 @@ class _PartnerAccessManagementScreenState
                                 setState(() => validUntil = date);
                               }
                             },
-                            icon: const Icon(Icons.event_busy),
+                            icon: const TraqIcon(AppAssets.iconCalendar),
                             label: Text(
                               validUntil != null
                                   ? _formatDate(validUntil!)
@@ -942,9 +937,7 @@ class _PartnerAccessManagementScreenState
                           final message = accessLevel == AccessLevel.selective
                               ? 'Collection access granted with ${selectedApiIds.length} API(s)'
                               : 'Full collection access granted';
-                          ScaffoldMessenger.of(
-                            this.context,
-                          ).showSnackBar(SnackBar(content: Text(message)));
+                          context.showSuccess(message);
                         }
                       },
                 child: Text(
@@ -1014,10 +1007,10 @@ class _ExpandableCollectionAccessCardState
                       backgroundColor: access.accessLevel == AccessLevel.full
                           ? Colors.green
                           : Colors.orange,
-                      child: Icon(
+                      child: TraqIcon(
                         access.accessLevel == AccessLevel.full
-                            ? Icons.lock_open
-                            : Icons.tune,
+                            ? AppAssets.iconLock
+                            : AppAssets.iconTune,
                         color: Colors.white,
                       ),
                     ),
@@ -1052,8 +1045,8 @@ class _ExpandableCollectionAccessCardState
                     ),
                     const SizedBox(width: 8),
                     Chip(
-                      avatar: Icon(
-                        access.isValid ? Icons.check : Icons.warning,
+                      avatar: TraqIcon(
+                        access.isValid ? AppAssets.iconCheck : AppAssets.iconAlert,
                         size: 16,
                         color: access.isValid ? Colors.green : Colors.orange,
                       ),
@@ -1102,13 +1095,13 @@ class _ExpandableCollectionAccessCardState
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            _isExpanded ? Icons.expand_less : Icons.expand_more,
+                          TraqIcon(
+                            _isExpanded ? AppAssets.iconChevronU : AppAssets.iconChevronD,
                             size: 20,
                             color: Colors.orange[700],
                           ),
                           const SizedBox(width: 8),
-                          Icon(Icons.api, size: 16, color: Colors.orange[700]),
+                          TraqIcon(AppAssets.iconGlobe, size: 16, color: Colors.orange[700]),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -1141,19 +1134,19 @@ class _ExpandableCollectionAccessCardState
                   children: [
                     if (access.rateLimitOverride != null)
                       Chip(
-                        avatar: const Icon(Icons.speed, size: 16),
+                        avatar: TraqIcon(AppAssets.iconClock, size: 16),
                         label: Text('${access.rateLimitOverride}/min'),
                         visualDensity: VisualDensity.compact,
                       ),
                     if (access.validFrom != null)
                       Chip(
-                        avatar: const Icon(Icons.schedule, size: 16),
+                        avatar: TraqIcon(AppAssets.iconClock, size: 16),
                         label: Text('From: ${_formatDate(access.validFrom!)}'),
                         visualDensity: VisualDensity.compact,
                       ),
                     if (access.validUntil != null)
                       Chip(
-                        avatar: const Icon(Icons.event_busy, size: 16),
+                        avatar: const TraqIcon(AppAssets.iconCalendar, size: 16),
                         label: Text(
                           'Until: ${_formatDate(access.validUntil!)}',
                         ),
@@ -1237,7 +1230,7 @@ class _ExpandableCollectionAccessCardState
               if (availableApis.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => _showAddApisDialog(availableApis),
-                  icon: const Icon(Icons.add, size: 16),
+                  icon: TraqIcon(AppAssets.iconPlus, size: 16),
                   label: const Text('Add APIs'),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -1255,7 +1248,7 @@ class _ExpandableCollectionAccessCardState
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.api, size: 32, color: Colors.grey[400]),
+                    TraqIcon(AppAssets.iconGlobe, size: 32, color: Colors.grey[400]),
                     const SizedBox(height: 8),
                     Text(
                       'No APIs granted yet',
@@ -1265,7 +1258,7 @@ class _ExpandableCollectionAccessCardState
                     if (availableApis.isNotEmpty)
                       ElevatedButton.icon(
                         onPressed: () => _showAddApisDialog(availableApis),
-                        icon: const Icon(Icons.add, size: 16),
+                        icon: TraqIcon(AppAssets.iconPlus, size: 16),
                         label: const Text('Add APIs'),
                       ),
                   ],
@@ -1334,15 +1327,15 @@ class _ExpandableCollectionAccessCardState
                         ],
                       ),
                     ),
-                    Icon(
-                      apiAccess.isValid ? Icons.check_circle : Icons.warning,
+                    TraqIcon(
+                      apiAccess.isValid ? AppAssets.iconCheckCircle : AppAssets.iconAlert,
                       size: 16,
                       color: apiAccess.isValid ? Colors.green : Colors.orange,
                     ),
                     const SizedBox(width: 8),
                     IconButton(
                       onPressed: () => _confirmRevokeApi(api, apiAccess),
-                      icon: const Icon(Icons.delete_outline, size: 18),
+                      icon: const TraqIcon(AppAssets.iconTrash, size: 18),
                       color: Colors.red[400],
                       tooltip: 'Revoke API access',
                       visualDensity: VisualDensity.compact,
@@ -1506,12 +1499,8 @@ class _ExpandableCollectionAccessCardState
                       Navigator.pop(context);
                       await widget.onApisAdded();
                       if (mounted) {
-                        ScaffoldMessenger.of(this.context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${selectedApiIds.length} API(s) added',
-                            ),
-                          ),
+                        context.showSuccess(
+                          '${selectedApiIds.length} API(s) added',
                         );
                       }
                     },

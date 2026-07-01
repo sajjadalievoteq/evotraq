@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Placeholder shown when no shipping operation is selected in split view.
 class ShippingDetailAwaitingSelection extends StatelessWidget {
@@ -19,8 +21,7 @@ class ShippingDetailAwaitingSelection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.inventory_2_outlined,
+          TraqIcon(AppAssets.iconPackage,
             size: 64,
             color: Theme.of(context).colorScheme.outlineVariant,
           ),

@@ -316,7 +316,7 @@ class PharmaService {
       'alertType': alertType,
       'severity': severity,
       'message': message,
-      if (regimeContext != null) 'regimeContext': regimeContext,
+      'regimeContext': ?regimeContext,
     });
     _assertOk(r, [200, 201]);
     return _decode(r.data, SGTINAlert.fromJson);

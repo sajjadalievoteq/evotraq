@@ -39,7 +39,7 @@ class WebSocketService {
     _reconnectAttempts = 0;
 
     try {
-      final wsUrl = _baseUrl!.replaceFirst('http', 'ws') + '/ws';
+      final wsUrl = '${_baseUrl!.replaceFirst('http', 'ws')}/ws';
       
       _channel = WebSocketChannel.connect(
         Uri.parse(wsUrl),
@@ -100,7 +100,7 @@ class WebSocketService {
     }
   }
 
-  void _onError(error) {
+  void _onError(dynamic error) {
     print('WebSocket Error: $error');
     _isConnected = false;
     _connectionController.add(false);

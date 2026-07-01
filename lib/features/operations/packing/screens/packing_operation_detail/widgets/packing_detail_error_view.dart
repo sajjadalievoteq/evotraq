@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Error view for packing operation detail with retry action.
 class PackingDetailErrorView extends StatelessWidget {
@@ -19,8 +21,7 @@ class PackingDetailErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
+            TraqIcon(AppAssets.iconAlert,
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -29,7 +30,7 @@ class PackingDetailErrorView extends StatelessWidget {
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: TraqIcon(AppAssets.iconRefresh),
               label: const Text('Retry'),
             ),
           ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget that displays help information about transformation events
 class TransformationEventsHelp extends StatelessWidget {
@@ -17,7 +19,7 @@ class TransformationEventsHelp extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.info_outline, color: Colors.blue),
+                TraqIcon(AppAssets.iconInfo, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text(
                   'About Transformation Events',

@@ -19,8 +19,8 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 /// | LGTIN URN / DL | `urn:epc:id:lgtin:…` or `https://id.gs1.org/01/…/10/…` |
 /// | GRAI / GIAI URN | `urn:epc:id:grai:…` / `urn:epc:id:giai:…` |
 ///
-/// GS1 AI bracket notation is automatically converted to a GS1 Digital Link
-/// EPC URI when the user leaves the field (focus lost or submit). The field
+/// GS1 AI bracket notation is automatically converted to a `urn:epc:…` URI
+/// when the user leaves the field (focus lost or submit). The field
 /// text is updated in-place and a helper text note is shown.
 ///
 /// Drop-in replacement for the old SGTIN-only `EpcEntryField`.

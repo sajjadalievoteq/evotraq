@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_list_item_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_empty_view.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_error_view.dart';
@@ -46,7 +46,7 @@ class CommissioningOperationListResults extends StatelessWidget {
         child: ListView.builder(
           padding: EdgeInsets.all(context.horizontalPadding.left),
           itemCount: 6,
-          itemBuilder: (context, _) => const CommissioningListItemSkeleton(),
+          itemBuilder: (context, _) => const OperationListItemSkeleton(),
         ),
       );
     }

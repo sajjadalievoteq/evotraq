@@ -10,6 +10,8 @@ import 'package:traqtrace_app/core/web/web_download_stub.dart'
     as web_download;
 import 'package:traqtrace_app/data/services/postman_collection_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 class PostmanCollectionDialog extends StatefulWidget {
   const PostmanCollectionDialog({Key? key}) : super(key: key);
 
@@ -135,7 +137,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.api, color: colors.primary),
+          TraqIcon(AppAssets.iconGlobe, color: colors.primary),
           const SizedBox(width: 10),
           const Text('Postman Collection'),
         ],
@@ -153,7 +155,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
             const SizedBox(height: 20),
 
             _ActionCard(
-              icon: Icons.download_rounded,
+              iconAsset: AppAssets.iconDownload,
               title: 'Download Collection',
               subtitle: 'Get the latest Postman collection zip',
               color: colors.primary,
@@ -164,7 +166,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
             const SizedBox(height: 12),
 
             _ActionCard(
-              icon: Icons.upload_rounded,
+              iconAsset: AppAssets.iconUpload,
               title: 'Upload New Collection',
               subtitle: 'Replace the hosted file (.zip or .json)',
               color: Colors.orange.shade700,
@@ -187,7 +189,7 @@ class _PostmanCollectionDialogState extends State<PostmanCollectionDialog> {
 enum _Status { idle, loading }
 
 class _ActionCard extends StatelessWidget {
-  final IconData icon;
+  final String iconAsset;
   final String title;
   final String subtitle;
   final Color color;
@@ -195,7 +197,7 @@ class _ActionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _ActionCard({
-    required this.icon,
+    required this.iconAsset,
     required this.title,
     required this.subtitle,
     required this.color,
@@ -230,7 +232,7 @@ class _ActionCard extends StatelessWidget {
                           color: color,
                         ),
                       )
-                    : Icon(icon, color: color, size: 22),
+                    : TraqIcon(iconAsset, color: color, size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -256,8 +258,7 @@ class _ActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
+              TraqIcon(AppAssets.iconChevronR,
                 color: onTap == null ? Colors.grey.shade400 : color,
               ),
             ],

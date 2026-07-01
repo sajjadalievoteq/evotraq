@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as status_rules;
@@ -36,11 +38,7 @@ class SgtinLifecycleStatusField extends StatelessWidget {
               value: selectedStatus,
               child: Row(
                 children: [
-                  Icon(
-                    Icons.circle,
-                    size: 12,
-                    color: status_rules.statusColor(selectedStatus!),
-                  ),
+                  TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(selectedStatus!), size: 12),
                   const SizedBox(width: 8),
                   Text(status_rules.friendlyLabel(selectedStatus!)),
                 ],
@@ -51,11 +49,7 @@ class SgtinLifecycleStatusField extends StatelessWidget {
                 value: s,
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.circle,
-                      size: 12,
-                      color: status_rules.statusColor(s),
-                    ),
+                    TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(s), size: 12),
                     const SizedBox(width: 8),
                     Text(status_rules.friendlyLabel(s)),
                   ],

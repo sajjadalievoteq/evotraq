@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/utils/gtin_d
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/audit_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/classification_market_origin_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/gtin_identification_structure_core_group.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/gtin_supply_chain_card.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/information_provider_manufacturer_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/lifecycle_availability_status_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/marketing_authorization_bound_group.dart';
@@ -108,6 +109,7 @@ class GtinDetailFormBody extends StatelessWidget {
             gtin: gtin,
             gtinCodeText: gtinCodeController.text,
           ),
+          GtinSupplyChainCard(gtin: gtin),
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: gtinCodeController,

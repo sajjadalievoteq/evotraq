@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class Gs1ListSortingControls extends StatelessWidget {
   const Gs1ListSortingControls({
@@ -18,7 +20,6 @@ class Gs1ListSortingControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = context.colors;
 
     final text = Text(
       label,
@@ -29,8 +30,8 @@ class Gs1ListSortingControls extends StatelessWidget {
 
     final toggle = IconButton(
       onPressed: onToggleSortOrder,
-      icon: Icon(
-        sortOrder == 'asc' ? Icons.arrow_upward : Icons.arrow_downward,
+      icon: TraqIcon(
+        sortOrder == 'asc' ? AppAssets.iconArrowUpR : AppAssets.iconArrowD,
       ),
       color: Theme.of(context).brightness==Brightness.dark? Colors.white:Colors.black,
       tooltip: sortOrder == 'asc' ? 'Ascending' : 'Descending',

@@ -5,12 +5,13 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_status.dart';
+import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
@@ -23,8 +24,8 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_review_step.dart';
-import 'package:traqtrace_app/features/operations/shipping/utils/shipping_scanning_mode.dart';
-import 'package:traqtrace_app/features/operations/shipping/utils/shipping_snackbar.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/features/operations/shipping/utils/shipping_submit_error_message.dart';
 
 class ShippingOperationScreen extends StatefulWidget {
   const ShippingOperationScreen({
@@ -45,21 +46,28 @@ class ShippingOperationScreen extends StatefulWidget {
 
 class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   static const _wizardSteps = [
-    OperationStepConfig(label: 'Details', icon: Icons.tag),
-    OperationStepConfig(label: 'Items', icon: Icons.list_alt),
-    OperationStepConfig(label: 'Review', icon: Icons.checklist),
+    OperationStepConfig.details,
+    OperationStepConfig.items,
+    OperationStepConfig.review,
   ];
+
+  void _showOperationError(String message) {
+    context.showError(
+      message,
+      duration: message.contains('\n')
+          ? const Duration(seconds: 12)
+          : const Duration(seconds: 5),
+    );
+  }
 
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
-  final _referenceController = TextEditingController();
   final _purchaseOrderController = TextEditingController();
   final _despatchAdviceController = TextEditingController();
   final _billOfLadingController = TextEditingController();
   final _carrierController = TextEditingController();
   final _trackingController = TextEditingController();
-  final _manualEntryController = TextEditingController();
 
   GLN? _sourceGln;
   GLN? _destinationGln;
@@ -68,21 +76,17 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
   bool _isLoading = false;
+  bool _isAddingEpc = false;
+
+  late final OperationEpcScanValidator _epcScanValidator =
+      OperationEpcScanValidator(getIt<ReferenceDataValidationService>());
 
   @override
   void initState() {
     super.initState();
-    // Rebuild on every keystroke so _validateStep0Silent() re-evaluates
-    // and the desktop step-2 panel unlocks as soon as all fields are filled.
-    _referenceController.addListener(_onReferenceChanged);
   }
 
-  void _onReferenceChanged() => setState(() {});
-
-  ShippingScanningMode _scanningMode = ShippingScanningMode.scanner;
-
   bool _validateStep0Silent() =>
-      _referenceController.text.trim().isNotEmpty &&
       _sourceGln != null &&
       _destinationGln != null &&
       _sourceGln?.glnCode != _destinationGln?.glnCode;
@@ -94,7 +98,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     bool showDocumentSection = true,
   }) {
     return ShippingReferenceDetailsStep(
-      referenceController: _referenceController,
       sourceGln: _sourceGln,
       destinationGln: _destinationGln,
       sourceGlnError: _sourceGlnError,
@@ -126,13 +129,8 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     bool? fillHeight,
   }) {
     return ShippingItemScanStep(
-      shippingReference: _referenceController.text,
       scannedEpcs: _scannedEpcs,
-      scanningMode: _scanningMode,
-      manualEntryController: _manualEntryController,
-      onScanningModeChanged: (mode) => setState(() => _scanningMode = mode),
-      onItemScanResult: _onItemScanResult,
-      onAddManualItem: _addManualItem,
+      onItemAdded: _onItemAdded,
       onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
       onClearAll: () => setState(() => _scannedEpcs.clear()),
       fillHeight: fillHeight ?? embeddedInPanel,
@@ -142,7 +140,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
   ShippingReviewStep _reviewStep({bool embeddedInPanel = false}) {
     return ShippingReviewStep(
-      shippingReference: _referenceController.text,
       sourceGln: _sourceGln,
       destinationGln: _destinationGln,
       purchaseOrder: _purchaseOrderController.text,
@@ -159,14 +156,11 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _referenceController.removeListener(_onReferenceChanged);
-    _referenceController.dispose();
     _purchaseOrderController.dispose();
     _despatchAdviceController.dispose();
     _billOfLadingController.dispose();
     _carrierController.dispose();
     _trackingController.dispose();
-    _manualEntryController.dispose();
     super.dispose();
   }
 
@@ -198,7 +192,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     switch (_currentStep) {
       case 0:
         final referenceError = ShippingOperationStepValidator.validateReferenceStep(
-          shippingReference: _referenceController.text,
           sourceGln: _sourceGln,
           destinationGln: _destinationGln,
         );
@@ -208,7 +201,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
           } else if (referenceError.contains('Ship To')) {
             setState(() => _destinationGlnError = referenceError);
           } else {
-            ShippingSnackbar.showError(context, referenceError);
+            _showOperationError(referenceError);
           }
           return false;
         }
@@ -216,7 +209,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
       case 1:
         final itemsError = ShippingOperationStepValidator.validateItemsStep(_scannedEpcs);
         if (itemsError != null) {
-          ShippingSnackbar.showError(context, itemsError);
+          _showOperationError(itemsError);
           return false;
         }
         return true;
@@ -237,17 +230,15 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
       if (failedConversions.isNotEmpty) {
-        ShippingSnackbar.showError(
-          context,
-          '${failedConversions.length} EPC(s) could not be converted. Remove invalid scans and try again.\n${failedConversions.join('\n')}',
+_showOperationError(
+          ShippingSubmitErrorMessage.epcConversionFailures(failedConversions),
         );
         return;
       }
 
       if (epcUris.isEmpty) {
-        ShippingSnackbar.showError(
-          context,
-          'No valid EPCs were captured. Scan at least one SGTIN or SSCC.',
+_showOperationError(
+          ShippingSubmitErrorMessage.emptyEpcList(),
         );
         return;
       }
@@ -269,7 +260,6 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
       }
 
       final shippingRequest = ShippingRequest(
-        shippingReference: _referenceController.text.trim(),
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
         destinationGLN: _destinationGln!.glnCode,
@@ -295,13 +285,11 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
       if (response.isSuccessOrPartial) {
         if (response.status == ShippingStatus.partialSuccess) {
-          ShippingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Shipping submitted with warnings. Open the record for details.',
           );
         } else {
-          ShippingSnackbar.showSuccess(
-            context,
+          context.showSuccess(
             'Shipping operation completed successfully.',
           );
         }
@@ -323,64 +311,55 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
           }
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true
-            ? response.messages!.first
-            : 'The shipping operation could not be completed. Check your inputs and try again.';
-        ShippingSnackbar.showError(context, errorMessage);
+_showOperationError(
+          ShippingSubmitErrorMessage.fromResponse(response),
+        );
       }
     } on ApiException catch (e) {
-      ShippingSnackbar.showError(context, e.getUserFriendlyMessage());
-    } catch (_) {
-      ShippingSnackbar.showError(
-        context,
-        'An unexpected error occurred while submitting the shipping operation.',
+      _showOperationError(
+        ShippingSubmitErrorMessage.fromApiException(e),
+      );
+    } catch (e) {
+      _showOperationError(
+        ShippingSubmitErrorMessage.unexpected(e),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _onItemScanResult(ScanResult result) {
-    if (!result.isValid) return;
-    _addEpc(result.data, showSuccessToast: true);
+  Future<void> _onItemAdded(EPCParseResult result) async {
+    await _addEpc(result.epc, showSuccessToast: true);
   }
 
-  void _addManualItem() {
-    final barcode = _manualEntryController.text.trim();
-    if (barcode.isEmpty) {
-      ShippingSnackbar.showError(context, 'Please type or paste an EPC before tapping Add.');
-      return;
-    }
-    final added = _addEpc(barcode);
-    if (added) {
-      _manualEntryController.clear();
-    }
-  }
+  Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
+    if (_isAddingEpc) return false;
 
-  bool _addEpc(String barcode, {bool showSuccessToast = false}) {
-    final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
-    if (duplicate != null) {
-      ShippingSnackbar.showError(
-        context,
-        'This EPC is already in the list.',
+    setState(() => _isAddingEpc = true);
+    try {
+      final outcome = await _epcScanValidator.validateAndAdd(
+        barcode,
+        alreadyScanned: _scannedEpcs,
+        operationLabel: 'shipping',
+        allowGtin: true,
       );
-      return false;
-    }
+      if (!outcome.success) {
+_showOperationError(
+          outcome.errorMessage ??
+              'This scan is not valid for shipping. Use SGTIN, SSCC, or lot-based GTIN.',
+        );
+        return false;
+      }
 
-    final type = OperationEpcScanValidator.resolveEpcType(barcode);
-    if (type == OperationScanItemType.unknown) {
-      ShippingSnackbar.showError(
-        context,
-        'Only SGTIN and SSCC values are allowed for shipping.',
-      );
-      return false;
+      if (!mounted) return false;
+      setState(() => _scannedEpcs.add(outcome.rawBarcode));
+      if (showSuccessToast) {
+        context.showSuccess('Item added');
+      }
+      return true;
+    } finally {
+      if (mounted) setState(() => _isAddingEpc = false);
     }
-
-    setState(() => _scannedEpcs.add(barcode));
-    if (showSuccessToast) {
-      ShippingSnackbar.showSuccess(context, 'Item added');
-    }
-    return true;
   }
 
   @override

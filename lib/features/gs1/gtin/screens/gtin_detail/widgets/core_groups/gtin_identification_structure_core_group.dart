@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -6,7 +6,6 @@ import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_structure_chips.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
@@ -54,7 +53,6 @@ class _GtinIdentificationStructureCoreGroupState
   late final TextEditingController _itemReference;
 
   Timer? _deriveDebounce;
-  bool _isDeriving = false;
 
   @override
   void initState() {
@@ -120,7 +118,6 @@ class _GtinIdentificationStructureCoreGroupState
     if (widget.isReadOnly) return;
     final raw = widget.gtinCodeController.text;
     if (!GtinFieldValidators.isGtinCodeValid(raw)) {
-      if (mounted) setState(() => _isDeriving = false);
       return;
     }
 
@@ -142,8 +139,6 @@ class _GtinIdentificationStructureCoreGroupState
       _itemReference.text = itemRef;
     } catch (e) {
       debugPrint('[GtinIdentification] derive-identification failed: $e');
-    } finally {
-      if (mounted) setState(() => _isDeriving = false);
     }
   }
 
@@ -151,7 +146,6 @@ class _GtinIdentificationStructureCoreGroupState
     _deriveDebounce?.cancel();
     if (!mounted) return;
 
-    setState(() => _isDeriving = true);
     _deriveDebounce = Timer(const Duration(milliseconds: 250), () {
       _deriveIdentificationFromBackend();
     });
@@ -171,25 +165,6 @@ class _GtinIdentificationStructureCoreGroupState
       label: Text(
         '$label $text',
         style: theme.textTheme.labelSmall?.copyWith(color: foregroundColor),
-      ),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
-  Widget _shimmerChip({required ThemeData theme, required String label}) {
-    final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-
-    return Chip(
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      label: Container(
-        height: 14,
-        width: 120,
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
       ),
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

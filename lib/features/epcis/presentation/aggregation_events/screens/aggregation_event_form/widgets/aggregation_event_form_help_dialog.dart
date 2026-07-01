@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_help_content.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_event_form_help_section.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventFormHelpDialog extends StatelessWidget {
   const AggregationEventFormHelpDialog({super.key});
@@ -27,7 +29,7 @@ class AggregationEventFormHelpDialog extends StatelessWidget {
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: TraqIcon(AppAssets.iconX),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],

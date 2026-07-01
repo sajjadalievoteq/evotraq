@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 /// Status banner with background image for shipping operation detail.
 class ShippingDetailStatusBanner extends StatelessWidget {
@@ -61,8 +62,7 @@ class ShippingDetailStatusBanner extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Icon(
-                          Icons.inventory_2_outlined,
+                        TraqIcon(AppAssets.iconPackage,
                           size: 14,
                           color: Colors.white70,
                         ),

@@ -121,7 +121,7 @@ class SystemSettingsService {
       data: jsonEncode({
         'newMode': newMode.toApiValue(),
         'confirmDataClear': confirmDataClear,
-        if (reason != null) 'reason': reason,
+        'reason': ?reason,
       }),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -168,7 +168,7 @@ class SystemSettingsService {
     final response = await _dioService.put(
       '${_dioService.baseUrl}/system/config/$key',
       headers: headers,
-      data: jsonEncode({'value': value, if (reason != null) 'reason': reason}),
+      data: jsonEncode({'value': value, 'reason': ?reason}),
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );

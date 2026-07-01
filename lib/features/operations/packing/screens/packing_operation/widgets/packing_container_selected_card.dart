@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Displays the currently selected parent container SSCC.
 class PackingContainerSelectedCard extends StatelessWidget {
@@ -16,14 +18,14 @@ class PackingContainerSelectedCard extends StatelessWidget {
     return Card(
       color: Colors.green[50],
       child: ListTile(
-        leading: const Icon(Icons.inventory_2, color: Colors.green),
+        leading: TraqIcon(AppAssets.iconPackage, color: Colors.green),
         title: const Text('Container Selected'),
         subtitle: Text(
           containerId,
           style: const TextStyle(fontFamily: 'monospace'),
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.clear),
+          icon: TraqIcon(AppAssets.iconX),
           onPressed: onClear,
         ),
       ),

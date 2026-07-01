@@ -6,6 +6,8 @@ import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Biz-step + disposition dropdowns for an Aggregation Event form.
 ///
@@ -205,7 +207,7 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
               ),
               TextButton.icon(
                 onPressed: () => context.read<CbvVocabularyCubit>().refresh(),
-                icon: const Icon(Icons.refresh),
+                icon: TraqIcon(AppAssets.iconRefresh),
                 label: const Text('Retry'),
               ),
             ],
@@ -257,7 +259,7 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
         helperText: 'The business process step associated with this event',
         suffixIcon: Tooltip(
           message: 'Standard GS1 business steps from Core Business Vocabulary',
-          child: Icon(Icons.help_outline, size: 16),
+          child: TraqIcon(AppAssets.iconInfo, size: 16),
         ),
       ),
       items: _menuItems(items: bizSteps, formatter: _fmtBizStep),
@@ -322,7 +324,7 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
         helperText: 'The business condition of the objects',
         suffixIcon: Tooltip(
           message: 'Standard GS1 dispositions from Core Business Vocabulary',
-          child: Icon(Icons.help_outline, size: 16),
+          child: TraqIcon(AppAssets.iconInfo, size: 16),
         ),
       ),
       items: _menuItems(items: dispositions, formatter: _fmtDisposition),

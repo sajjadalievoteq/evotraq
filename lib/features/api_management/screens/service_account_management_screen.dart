@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for managing internal Service Accounts (M2M authentication)
 class ServiceAccountManagementScreen extends StatefulWidget {
@@ -36,7 +39,7 @@ class _ServiceAccountManagementScreenState
         title: const Text('Service Accounts'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () => context.read<ServiceAccountCubit>().loadAccounts(),
           ),
         ],
@@ -44,7 +47,7 @@ class _ServiceAccountManagementScreenState
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateDialog,
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('New Service Account'),
       ),
       body: BlocBuilder<ServiceAccountCubit, ServiceAccountState>(
@@ -81,7 +84,7 @@ class _ServiceAccountManagementScreenState
       ),
       child: Row(
         children: [
-          Icon(Icons.info, color: Colors.blue.shade700),
+          TraqIcon(AppAssets.iconInfo, color: Colors.blue.shade700),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
@@ -150,7 +153,7 @@ class _ServiceAccountManagementScreenState
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search by name or client ID...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: TraqIcon(AppAssets.iconSearch),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -201,13 +204,13 @@ class _ServiceAccountManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.vpn_key_off, size: 64, color: Colors.grey.shade400),
+            TraqIcon(AppAssets.iconKey, color: Colors.grey.shade400, size: 64),
             const SizedBox(height: 16),
             const Text('No service accounts found'),
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: _showCreateDialog,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Create Service Account'),
             ),
           ],
@@ -239,8 +242,7 @@ class _ServiceAccountManagementScreenState
                   backgroundColor: isUsable
                       ? context.colors.primary.withOpacity(0.2)
                       : Colors.grey.withOpacity(0.2),
-                  child: Icon(
-                    Icons.api,
+                  child: TraqIcon(AppAssets.iconGlobe,
                     color: isUsable ? context.colors.primary : Colors.grey,
                   ),
                 ),
@@ -314,22 +316,22 @@ class _ServiceAccountManagementScreenState
               children: [
                 _buildInfoChip(
                   'Rate: ${account.rateLimitPerMinute}/min',
-                  Icons.speed,
+                  AppAssets.iconGauge,
                 ),
                 if (account.allowedIps.isNotEmpty)
                   _buildInfoChip(
                     'IPs: ${account.allowedIps.length}',
-                    Icons.security,
+                    AppAssets.iconSecurity,
                   ),
                 if (account.allowedEndpoints.isNotEmpty)
                   _buildInfoChip(
                     'Endpoints: ${account.allowedEndpoints.length}',
-                    Icons.link,
+                    AppAssets.iconLink,
                   ),
                 if (account.expiresAt != null)
                   _buildInfoChip(
                     'Expires: ${_formatDate(account.expiresAt!)}',
-                    Icons.event,
+                    AppAssets.iconEvent,
                     color: account.isExpired ? Colors.red : null,
                   ),
               ],
@@ -374,7 +376,7 @@ class _ServiceAccountManagementScreenState
     );
   }
 
-  Widget _buildInfoChip(String label, IconData icon, {Color? color}) {
+  Widget _buildInfoChip(String label, String iconAsset, {Color? color}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -384,7 +386,7 @@ class _ServiceAccountManagementScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color ?? Colors.grey.shade600),
+          TraqIcon(iconAsset, size: 12, color: color ?? Colors.grey.shade600),
           const SizedBox(width: 4),
           Text(
             label,
@@ -453,9 +455,7 @@ class _ServiceAccountManagementScreenState
     final cubit = context.read<ServiceAccountCubit>();
     final success = await cubit.reactivateAccount(account.id);
     if (success && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${account.name} activated')));
+      context.showSuccess('${account.name} activated');
     }
   }
 
@@ -479,9 +479,7 @@ class _ServiceAccountManagementScreenState
               final cubit = context.read<ServiceAccountCubit>();
               final success = await cubit.deactivateAccount(account.id);
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${account.name} deactivated')),
-                );
+                context.showSuccess('${account.name} deactivated');
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
@@ -511,9 +509,7 @@ class _ServiceAccountManagementScreenState
               final cubit = context.read<ServiceAccountCubit>();
               final success = await cubit.deleteAccount(account.id);
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${account.name} deleted')),
-                );
+                context.showSuccess('${account.name} deleted');
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -574,7 +570,7 @@ class _CreateServiceAccountDialogState
     return AlertDialog(
       title: const Row(
         children: [
-          Icon(Icons.vpn_key),
+          TraqIcon(AppAssets.iconLock),
           SizedBox(width: 8),
           Text('Create Service Account'),
         ],
@@ -593,7 +589,7 @@ class _CreateServiceAccountDialogState
                   decoration: const InputDecoration(
                     labelText: 'Name *',
                     hintText: 'e.g., Integration Layer Service',
-                    prefixIcon: Icon(Icons.label),
+                    prefixIcon: TraqIcon(AppAssets.iconTag),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -608,7 +604,7 @@ class _CreateServiceAccountDialogState
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     hintText: 'Describe the purpose of this account',
-                    prefixIcon: Icon(Icons.description),
+                    prefixIcon: TraqIcon(AppAssets.iconList),
                   ),
                   maxLines: 2,
                 ),
@@ -617,7 +613,7 @@ class _CreateServiceAccountDialogState
                   initialValue: _rateLimitPerMinute.toString(),
                   decoration: const InputDecoration(
                     labelText: 'Rate Limit (per minute)',
-                    prefixIcon: Icon(Icons.speed),
+                    prefixIcon: TraqIcon(AppAssets.iconClock),
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
@@ -631,7 +627,7 @@ class _CreateServiceAccountDialogState
                   decoration: const InputDecoration(
                     labelText: 'Allowed IPs (comma-separated)',
                     hintText: 'e.g., 10.0.0.1, 192.168.1.0/24',
-                    prefixIcon: Icon(Icons.security),
+                    prefixIcon: TraqIcon(AppAssets.iconLock),
                     helperText: 'Leave empty to allow all IPs',
                   ),
                 ),
@@ -641,14 +637,14 @@ class _CreateServiceAccountDialogState
                   decoration: const InputDecoration(
                     labelText: 'Allowed Endpoints (comma-separated)',
                     hintText: 'e.g., /api/events/*, /api/gs1/*',
-                    prefixIcon: Icon(Icons.link),
+                    prefixIcon: TraqIcon(AppAssets.iconAggregate),
                     helperText: 'Leave empty to allow all endpoints',
                   ),
                 ),
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.event),
+                  leading: TraqIcon(AppAssets.iconEvent),
                   title: Text(
                     _expiresAt != null
                         ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'
@@ -736,12 +732,7 @@ class _CreateServiceAccountDialogState
                 _CredentialsDisplayDialog(credentials: credentials),
           );
         } else if (cubit.state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(cubit.state.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showError(cubit.state.errorMessage!);
         }
       }
     } finally {
@@ -763,7 +754,7 @@ class _CredentialsDisplayDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.check_circle, color: Colors.green.shade600),
+          TraqIcon(AppAssets.iconCheck, color: Colors.green.shade600),
           const SizedBox(width: 8),
           const Text('Credentials Created'),
         ],
@@ -783,7 +774,7 @@ class _CredentialsDisplayDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.amber.shade700),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.amber.shade700),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -841,13 +832,11 @@ class _CredentialsDisplayDialog extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: const TraqIcon(AppAssets.iconCopy),
                 tooltip: 'Copy to clipboard',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: value));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$label copied to clipboard')),
-                  );
+                  context.showSuccess('$label copied to clipboard');
                 },
               ),
             ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
@@ -42,7 +44,7 @@ class Gs1MasterDataDetailScaffold extends StatelessWidget {
           if (showSaveAction && onSave != null)
             IconButton(
               tooltip: saveActionTooltip,
-              icon: const Icon(Icons.save),
+              icon: const TraqIcon(AppAssets.iconSave),
               onPressed: saveEnabled ? onSave : null,
             ),
         ],

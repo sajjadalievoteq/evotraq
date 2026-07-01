@@ -396,7 +396,7 @@ class BarcodeToEPCISMapper {  final Uuid _uuid = Uuid();
     });
     
     // Handle dates - convert from YYMMDD format to ISO format
-    ['11', '15', '17'].forEach((dateAI) {
+    for (final dateAI in ['11', '15', '17']) {
       if (elementStrings.containsKey(dateAI)) {
         final yymmdd = elementStrings[dateAI]!;
         if (yymmdd.length == 6) {
@@ -412,7 +412,7 @@ class BarcodeToEPCISMapper {  final Uuid _uuid = Uuid();
           }
         }
       }
-    });
+    }
     
     return bizData;
   }

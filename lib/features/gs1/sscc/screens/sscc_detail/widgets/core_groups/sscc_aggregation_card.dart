@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SsccAggregationCard extends StatefulWidget {
   const SsccAggregationCard({
@@ -55,9 +58,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
     final childEpc = _childEpcController.text.trim();
     final eventId = _eventIdController.text.trim();
     if (childEpc.isEmpty || eventId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Child EPC and aggregation event ID are required')),
-      );
+      context.showWarning('Child EPC and aggregation event ID are required');
       return;
     }
 
@@ -132,6 +133,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
 
     return Gs1GroupCard(
       title: 'Aggregation',
+      showRequiredStar: true,
       outlineColor: widget.borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,7 +182,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
                         onPressed: _isSubmitting
                             ? null
                             : () => _confirmDisaggregate(link),
-                        icon: const Icon(Icons.link_off, size: 20),
+                        icon: TraqIcon(AppAssets.iconX, size: 20),
                       ),
                   ],
                 ),
@@ -230,7 +232,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
             const SizedBox(height: 12),
             EpcEntryField(
               controller: _childEpcController,
-              label: 'Child EPC URI',
+              label: 'Child EPC URI *',
               enabled: !_isSubmitting,
               required: true,
               validator: (value) =>
@@ -244,7 +246,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   tooltip: 'Generate event ID',
-                  icon: const Icon(Icons.bolt),
+                  icon: TraqIcon(AppAssets.iconSparkle),
                   onPressed: _isSubmitting
                       ? null
                       : () => _eventIdController.text = const Uuid().v4(),
@@ -263,7 +265,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.add_link),
+                    : TraqIcon(AppAssets.iconAggregate),
                 label: const Text('Add child'),
               ),
             ),

@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/utils/object_event_form_mandatory_fields.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_required_indicator.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormListItemData {
   final String title;
@@ -148,7 +150,7 @@ class ObjectEventFormAddToListSection extends StatelessWidget {
                         : null,
                     trailing: item.onRemove != null
                         ? IconButton(
-                            icon: const Icon(Icons.close, size: 20),
+                            icon: TraqIcon(AppAssets.iconX, size: 20),
                             onPressed: item.onRemove,
                           )
                         : null,

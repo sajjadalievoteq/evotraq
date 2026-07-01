@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
@@ -13,11 +12,6 @@ import 'validation_service_provider_cache_test.mocks.dart';
 void main() {
   late ValidationCubit cubit;
   late MockValidationService mockValidationService;
-  final appConfig = AppConfig(
-    apiBaseUrl: 'https://api.test.com',
-    appName: 'TraqTrace Test',
-    appVersion: '1.0.0',
-  );
   
   setUp(() {
     mockValidationService = MockValidationService();

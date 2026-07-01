@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_hierarchy/widgets/aggregation_event_hierarchy_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationEventHierarchyScreen extends StatefulWidget {
   const AggregationEventHierarchyScreen({
@@ -111,12 +114,7 @@ class _AggregationEventHierarchyScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error verifying hierarchy: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Error verifying hierarchy: $e');
       }
     } finally {
       setState(() {
@@ -142,7 +140,7 @@ class _AggregationEventHierarchyScreenState
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -151,7 +149,7 @@ class _AggregationEventHierarchyScreenState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loading ? null : _loadData,
             tooltip: 'Refresh',
           ),
@@ -183,7 +181,7 @@ class _AggregationEventHierarchyScreenState
                 ),
               )
             : const Text('Verify Hierarchy'),
-        icon: const Icon(Icons.verified),
+        icon: TraqIcon(AppAssets.iconVerified),
       ),
     );
   }

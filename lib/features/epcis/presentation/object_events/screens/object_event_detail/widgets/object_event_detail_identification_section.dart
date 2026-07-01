@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_formatters.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';

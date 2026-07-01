@@ -175,8 +175,8 @@ class ObjectEventService {
           CbvVocabularyFormatter.formatBizStep(versionString, businessStep),
       ObjectEventApiConstants.jsonKeyDisposition:
           CbvVocabularyFormatter.formatDisposition(versionString, disposition),
-      ObjectEventApiConstants.jsonKeyEventTime: now.toUtc().toIso8601String(),
-      ObjectEventApiConstants.jsonKeyRecordTime: now.toUtc().toIso8601String(),
+      ObjectEventApiConstants.jsonKeyEventTime: now.toIso8601String(),
+      ObjectEventApiConstants.jsonKeyRecordTime: now.toIso8601String(),
       ObjectEventApiConstants.jsonKeyEpcisVersion:
           epcisVersion == EPCISVersion.v2_0
               ? ObjectEventApiConstants.epcisVersion20
@@ -757,7 +757,9 @@ class ObjectEventService {
       ObjectEventApiConstants.jsonKeyIlmd: ilmd,
       ObjectEventApiConstants.jsonKeyBizData: bizData,
       ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toUtc().toIso8601String(),
+          DateTime.now().toIso8601String(),
+      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
+          _localTimezoneOffset(),
     };
 
     final response = await _dioService.post(
@@ -793,7 +795,9 @@ class ObjectEventService {
       ObjectEventApiConstants.jsonKeyDisposition: disposition,
       ObjectEventApiConstants.jsonKeyBizData: bizData,
       ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toUtc().toIso8601String(),
+          DateTime.now().toIso8601String(),
+      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
+          _localTimezoneOffset(),
     };
 
     final response = await _dioService.post(
@@ -829,7 +833,9 @@ class ObjectEventService {
       ObjectEventApiConstants.jsonKeyDisposition: disposition,
       ObjectEventApiConstants.jsonKeyBizData: bizData,
       ObjectEventApiConstants.jsonKeyEventTime:
-          DateTime.now().toUtc().toIso8601String(),
+          DateTime.now().toIso8601String(),
+      ObjectEventApiConstants.jsonKeyEventTimeZoneOffset:
+          _localTimezoneOffset(),
     };
 
     final response = await _dioService.post(
@@ -1023,7 +1029,17 @@ class ObjectEventService {
       final List<dynamic> data = json.decode(response.data);
       return data.map((e) => ObjectEvent.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to fetch EPC history: ${response.statusCode}');
+      throw Exception(
+        'Failed to fetch EPC history: ${response.statusCode}',
+      );
     }
+  }
+
+  String _localTimezoneOffset() {
+    final offset = DateTime.now().timeZoneOffset;
+    final hours = offset.inHours.abs().toString().padLeft(2, '0');
+    final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+    final sign = offset.isNegative ? '-' : '+';
+    return '$sign$hours:$minutes';
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ErrorMessage extends StatelessWidget {
   final String message;
@@ -16,8 +18,7 @@ class ErrorMessage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.red,
           ),
@@ -36,7 +37,7 @@ class ErrorMessage extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: TraqIcon(AppAssets.iconRefresh),
               label: const Text('Retry'),
             ),
           ],

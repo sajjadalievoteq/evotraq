@@ -4,6 +4,8 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/utils/object_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_field_decoration.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormEventTimeSection extends StatelessWidget {
   final DateTime eventTime;
@@ -35,9 +37,13 @@ class ObjectEventFormEventTimeSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Date & Time: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}')),
+              Expanded(
+                child: Text(
+                  'Date & Time: ${DateFormat('dd/MM/yyyy HH:mm').format(eventTime.toLocal())}',
+                ),
+              ),
               IconButton(
-                icon: const Icon(Icons.calendar_today),
+                icon: TraqIcon(AppAssets.iconClock),
                 onPressed: isViewOnly ? null : onSelectEventTime,
               ),
             ],

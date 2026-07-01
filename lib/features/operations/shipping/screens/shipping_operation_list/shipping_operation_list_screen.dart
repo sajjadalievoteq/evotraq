@@ -19,6 +19,8 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/shipping/utils/shipping_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to list all shipping operations with search capabilities.
 class ShippingOperationListScreen extends StatefulWidget {
@@ -362,7 +364,7 @@ class _ShippingOperationListScreenState extends State<ShippingOperationListScree
           ? null
           : FloatingActionButton.extended(
               onPressed: () => context.go(Constants.opShippingCreateRoute),
-              label: const Icon(Icons.add),
+              label: TraqIcon(AppAssets.iconPlus),
             ),
       body: body,
     );

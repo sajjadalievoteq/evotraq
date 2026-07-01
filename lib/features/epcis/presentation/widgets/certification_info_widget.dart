@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget for displaying and editing certification information in EPCIS events
 class CertificationInfoWidget extends StatefulWidget {
@@ -63,7 +65,7 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
             padding: const EdgeInsets.only(top: 8.0),
             child: ElevatedButton.icon(
               onPressed: _addCertification,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Add Certification'),
             ),
           ),
@@ -99,12 +101,12 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: TraqIcon(AppAssets.iconEdit),
                         onPressed: () => _editCertification(index),
                         tooltip: 'Edit',
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete),
+                        icon: TraqIcon(AppAssets.iconTrash),
                         onPressed: () => _removeCertification(index),
                         tooltip: 'Delete',
                       ),

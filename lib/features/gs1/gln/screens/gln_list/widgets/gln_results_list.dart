@@ -8,6 +8,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
@@ -77,7 +78,7 @@ class GlnResultsList extends StatelessWidget {
         if (state.glns.isEmpty) {
           return _constrainedCenter(
             Gs1ListEmptyView(
-              icon: Icons.location_off_outlined,
+              iconAsset: AppAssets.iconMapPin,
               title: GlnUiConstants.emptyListTitle,
               onClearFilters: onClearFilters,
             ),

@@ -1,5 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 
 /// Copyable label/value row for Receiving detail cards.
@@ -24,17 +27,12 @@ class ReceivingDetailInfoRowCopy extends StatelessWidget {
           InkWell(
             onTap: () {
               Clipboard.setData(ClipboardData(text: value));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Copied'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
+              context.showSuccess('Copied', duration: const Duration(seconds: 1));
             },
             borderRadius: BorderRadius.circular(4),
             child: const Padding(
               padding: EdgeInsets.all(4),
-              child: Icon(Icons.copy, size: 16),
+              child: TraqIcon(AppAssets.iconCopy, size: 16),
             ),
           ),
         ],

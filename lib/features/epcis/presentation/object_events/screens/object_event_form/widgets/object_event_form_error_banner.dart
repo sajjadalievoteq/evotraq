@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormErrorBanner extends StatelessWidget {
   final String message;
@@ -23,7 +25,7 @@ class ObjectEventFormErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red.shade700),
+          TraqIcon(AppAssets.iconAlert, color: Colors.red.shade700),
           const SizedBox(width: 8.0),
           Expanded(
             child: Text(
@@ -32,7 +34,7 @@ class ObjectEventFormErrorBanner extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: TraqIcon(AppAssets.iconX),
             onPressed: onDismiss,
             color: Colors.red.shade700,
           ),

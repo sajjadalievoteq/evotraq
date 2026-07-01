@@ -1,18 +1,16 @@
+import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+
 /// GS1 Application Identifier (AI) bracket notation parser and EPC URI converter.
 ///
 /// Converts scanner output like `(01)00629200080027(21)KOPLYPIEKV3GX70C7WMN`
-/// into a canonical GS1 Digital Link EPC URI accepted by EPCIS 2.0:
-/// `https://id.gs1.org/01/00629200080027/21/KOPLYPIEKV3GX70C7WMN`
+/// into a canonical EPC URI for EPCIS operations:
+/// `urn:epc:id:sgtin:0629200.0080027.KOPLYPIEKV3GX70C7WMN`
 ///
 /// Supported AI combinations:
-/// - `(01)` + `(21)` → SGTIN DL: `https://id.gs1.org/01/{gtin14}/21/{serial}`
-/// - `(00)`          → SSCC DL:  `https://id.gs1.org/00/{sscc18}`
-/// - `(01)` + `(10)` → LGTIN DL: `https://id.gs1.org/01/{gtin14}/10/{lot}`
-/// - `(01)` only     → GTIN class: `urn:epc:idpat:sgtin:{gtin14}.*`
-///
-/// Also handles common FNC1 / symbology-identifier prefixes added by barcode scanners
-/// (]C1, ]e0, ]Q3, and raw GS1 group-separator character U+001D).
-library gs1_ai_normalizer;
+/// - `(01)` + `(21)` → SGTIN URN: `urn:epc:id:sgtin:{gcp}.{itemRef}.{serial}`
+/// - `(00)`          → SSCC URN:  `urn:epc:id:sscc:{gcp}.{serialRef}`
+/// - `(01)` + `(10)` → LGTIN URN: `urn:epc:id:lgtin:{gcp}.{itemRef}.{lot}`
+/// - `(01)` only     → GTIN class: `urn:epc:idpat:sgtin:{gcp}.{itemRef}.*`
 
 /// Regex that matches a single AI element, e.g. `(01)00629200080027`
 final _aiElement = RegExp(r'\((\d{2,4})\)([^(]*)');
@@ -49,7 +47,7 @@ String? gs1AiToEpcUri(String input) {
   if (sscc != null && sscc.isNotEmpty) {
     final s18 = sscc.padLeft(18, '0');
     if (!RegExp(r'^\d{18}$').hasMatch(s18)) return null;
-    return 'https://id.gs1.org/00/$s18';
+    return EPCURIConverter.convertSSCCToEPCUri(s18);
   }
 
   // GTIN-based (AI 01)
@@ -59,16 +57,16 @@ String? gs1AiToEpcUri(String input) {
 
     // SGTIN: 01 + 21
     if (serial != null && serial.isNotEmpty) {
-      return 'https://id.gs1.org/01/$gtin14/21/$serial';
+      return EPCURIConverter.convertGTINSerialToEPCUri(gtin14, serial);
     }
 
     // LGTIN: 01 + 10
     if (lot != null && lot.isNotEmpty) {
-      return 'https://id.gs1.org/01/$gtin14/10/$lot';
+      return EPCURIConverter.convertGTINLotToLGTINEpcUri(gtin14, lot);
     }
 
     // GTIN class only
-    return 'urn:epc:idpat:sgtin:$gtin14.*';
+    return EPCURIConverter.convertGTINToClassEPCUri(gtin14);
   }
 
   return null;
@@ -76,13 +74,16 @@ String? gs1AiToEpcUri(String input) {
 
 /// Normalizes [input] to a canonical EPC URI.
 ///
-/// - If [input] is already an EPC URI or GS1 DL URL → returned unchanged.
-/// - If [input] is GS1 AI bracket notation → converted to GS1 DL EPC URI.
-/// - Otherwise → returned unchanged (caller should treat as invalid).
+/// - GS1 AI bracket notation → `urn:epc:…` URI
+/// - GS1 Digital Link URL → `urn:epc:…` URI when convertible
+/// - Already a URN / unrecognised format → returned trimmed unchanged
 String normalizeEpcInput(String input) {
   final trimmed = input.trim();
   if (isGS1AiNotation(trimmed)) {
     return gs1AiToEpcUri(trimmed) ?? trimmed;
+  }
+  if (trimmed.startsWith('https://id.gs1.org/')) {
+    return EPCURIConverter.convertToEPCUri(trimmed) ?? trimmed;
   }
   return trimmed;
 }

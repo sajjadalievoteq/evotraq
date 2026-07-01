@@ -9,6 +9,8 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to display shipping operation details.
 class ShippingOperationDetailScreen extends StatefulWidget {
@@ -37,7 +39,6 @@ class _ShippingOperationDetailScreenState
   String? _errorMessage;
   GLN? _sourceGLNDetails;
   GLN? _destinationGLNDetails;
-  bool _showAllEpcs = false;
 
   @override
   void initState() {
@@ -54,7 +55,6 @@ class _ShippingOperationDetailScreenState
     if ((idChanged || selectionOpened) &&
         widget.operationId != null &&
         !widget.awaitingSelection) {
-      _showAllEpcs = false;
       _startLoadIfNeeded(force: true);
     }
   }
@@ -136,8 +136,6 @@ class _ShippingOperationDetailScreenState
       operation: _operation,
       sourceGlnDetails: _sourceGLNDetails,
       destinationGlnDetails: _destinationGLNDetails,
-      showAllEpcs: _showAllEpcs,
-      onShowAllEpcs: () => setState(() => _showAllEpcs = true),
       onRetry: _loadOperationDetails,
     );
 
@@ -161,13 +159,13 @@ class _ShippingOperationDetailScreenState
       appBar: TraqAppBar(
         context,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: TraqIcon(AppAssets.iconChevronL),
           onPressed: () => context.go(Constants.opShippingRoute),
         ),
         title: Text(_operation?.shippingReference ?? 'Shipping Detail'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadOperationDetails,
           ),
         ],

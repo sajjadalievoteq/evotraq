@@ -9,6 +9,8 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to display packing operation details.
 class PackingOperationDetailScreen extends StatefulWidget {
@@ -36,7 +38,6 @@ class _PackingOperationDetailScreenState
   bool _isLoading = false;
   String? _errorMessage;
   GLN? _locationGLNDetails;
-  bool _showAllEpcs = false;
 
   @override
   void initState() {
@@ -53,7 +54,6 @@ class _PackingOperationDetailScreenState
     if ((idChanged || selectionOpened) &&
         widget.operationId != null &&
         !widget.awaitingSelection) {
-      _showAllEpcs = false;
       _startLoadIfNeeded(force: true);
     }
   }
@@ -121,8 +121,6 @@ class _PackingOperationDetailScreenState
       errorMessage: _errorMessage,
       operation: _operation,
       locationGlnDetails: _locationGLNDetails,
-      showAllEpcs: _showAllEpcs,
-      onShowAllEpcs: () => setState(() => _showAllEpcs = true),
       onRetry: _loadOperationDetails,
     );
 
@@ -146,13 +144,13 @@ class _PackingOperationDetailScreenState
       appBar: TraqAppBar(
         context,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: TraqIcon(AppAssets.iconChevronL),
           onPressed: () => context.go(Constants.opPackingRoute),
         ),
         title: Text(_operation?.packingReference ?? 'Packing Detail'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadOperationDetails,
           ),
         ],

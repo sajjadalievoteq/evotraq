@@ -99,7 +99,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   List<SsccAggregationLink> _aggregationLinks = const [];
   DateTime? _packingDate;
 
-  bool _isLoading = false;
   bool _formFieldsHydrated = true;
   bool _hasSubmittedForm = false;
   bool _ssccInitialLoadStarted = false;
@@ -109,9 +108,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   SSCCCubit? _ssccCubit;
   SSCC? _sscc;
 
-  dynamic _capturedTobaccoExtension;
-  dynamic _capturedPharmaExtension;
-  String? _capturedSsccCode;
   bool _editRedirectHandled = false;
   final ScrollController _scrollController = ScrollController();
 
@@ -233,7 +229,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     _serverRefreshInFlight = true;
     setState(() {
       _loadedSsccKey = null;
-      _isLoading = true;
       _formFieldsHydrated = false;
     });
     if (RegExp(r'^\d{18}$').hasMatch(code)) {
@@ -400,7 +395,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       _contentHomogeneity = sscc.contentHomogeneity;
       _serverTransitions = sscc.availableTransitions ?? const [];
       _packingDate = sscc.packingDate;
-      _isLoading = false;
       _formFieldsHydrated = true;
     });
 
@@ -563,7 +557,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     final now = DateTime.now();
 
     setState(() {
-      _isLoading = true;
       _hasSubmittedForm = true;
     });
 
@@ -580,7 +573,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
           ssccCode = fixedSSCC;
           _ssccCodeController.text = ssccCode;
         } else {
-          setState(() => _isLoading = false);
           showValidationErrors(
             context,
             [
@@ -598,7 +590,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       serialReference = ssccCode.substring(8, 17);
       checkDigit = ssccCode.substring(17);
     } else {
-      setState(() => _isLoading = false);
       showValidationErrors(
         context,
         ['SSCC Code: ${_ssccCodeMissingMessage()}'],
@@ -702,10 +693,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
     context.showInfo('Generating SSCC code...', duration: const Duration(seconds: 2));
 
     _cubit.generateSSCCFromGLN(
@@ -800,7 +787,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
           if (state.status == SSCCStatus.error && state.error != null) {
             if (_shouldIgnoreCubitError(state)) return;
             setState(() {
-              _isLoading = false;
               _formFieldsHydrated = true;
               _serverRefreshInFlight = false;
             });
@@ -842,7 +828,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                 _parseSsccId(state.selectedSSCC?.id ?? _sscc?.id),
                 ssccCode,
               );
-              setState(() => _isLoading = false);
 
               context.showSuccess(SsccUiConstants.successSsccSaved);
 
@@ -879,13 +864,11 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   );
                 } catch (e) {
                   context.showError('Failed to generate valid SSCC: $e');
-                  setState(() => _isLoading = false);
                   return;
                 }
               }
             }
             setState(() {
-              _isLoading = false;
               _ssccCodeController.text = ssccCode;
               _syncExtensionDigitFromSscc(ssccCode);
             });
@@ -904,7 +887,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
           if (_ssccCodeController.text.isEmpty) {
             _ssccCodeController.text = state.generatedCode!;
           }
-          _isLoading = false;
         }
 
         if (state.status == SSCCStatus.error &&

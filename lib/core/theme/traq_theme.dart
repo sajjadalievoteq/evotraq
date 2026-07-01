@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/utils/app_screen_util.dart';
 
 part 'traq_theme_colors.dart';
 part 'traq_theme_tokens.dart';

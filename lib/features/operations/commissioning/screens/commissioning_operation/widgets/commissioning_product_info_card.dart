@@ -6,6 +6,8 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
 import 'package:traqtrace_app/core/widgets/gtin_selector.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningProductInfoCard extends StatelessWidget {
   const CommissioningProductInfoCard({
@@ -35,6 +37,7 @@ class CommissioningProductInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Gs1GroupCard(
       title: 'Product Information',
+      showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -42,7 +45,7 @@ class CommissioningProductInfoCard extends StatelessWidget {
           if (onScanProductBarcode != null) ...[
             OutlinedButton.icon(
               onPressed: onScanProductBarcode,
-              icon: const Icon(Icons.qr_code_scanner),
+              icon: TraqIcon(AppAssets.iconQr),
               label: const Text('Scan Product Barcode'),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),

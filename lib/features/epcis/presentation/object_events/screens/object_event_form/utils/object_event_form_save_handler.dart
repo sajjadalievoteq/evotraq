@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
@@ -473,15 +474,10 @@ class ObjectEventFormSaveHandler {
         );
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            existingEvent != null
-                ? 'Object event updated'
-                : 'Object event created',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      context.showSuccess(
+        existingEvent != null
+            ? 'Object event updated'
+            : 'Object event created',
       );
 
       WidgetsBinding.instance.addPostFrameCallback((_) {

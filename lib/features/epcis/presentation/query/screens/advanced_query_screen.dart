@@ -5,6 +5,8 @@ import 'package:traqtrace_app/features/epcis/cubit/advanced_query_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/faceted_search_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/query_parameter_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/query_results_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for advanced EPCIS query interface with sophisticated filtering
 /// and analytical capabilities.
@@ -41,7 +43,7 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -54,10 +56,10 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           tabs: const [
-            Tab(text: 'Advanced Query', icon: Icon(Icons.search)),
-            Tab(text: 'Faceted Search', icon: Icon(Icons.filter_list)),
-            Tab(text: 'Full-Text Search', icon: Icon(Icons.text_fields)),
-            Tab(text: 'Geospatial Query', icon: Icon(Icons.map)),
+            Tab(text: 'Advanced Query', icon: TraqIcon(AppAssets.iconSearch)),
+            Tab(text: 'Faceted Search', icon: TraqIcon(AppAssets.iconFilter)),
+            Tab(text: 'Full-Text Search', icon: TraqIcon(AppAssets.iconText)),
+            Tab(text: 'Geospatial Query', icon: TraqIcon(AppAssets.iconMap)),
           ],
         ),
       ),
@@ -658,10 +660,9 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
             const SizedBox(height: 16),
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Description (optional)',
+                labelText: 'Description',
                 border: OutlineInputBorder(),
               ),
-              maxLines: 3,
               onChanged: (value) {
                 cubit.updateStoredQueryDescription(value);
               },
@@ -670,18 +671,13 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () async {
               await cubit.saveStoredQuery();
-              if (mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Query saved successfully')),
-                );
-              }
+              if (context.mounted) Navigator.pop(context);
             },
             child: const Text('Save'),
           ),

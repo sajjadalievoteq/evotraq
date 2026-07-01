@@ -5,6 +5,8 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ResourceManagementDashboard extends StatefulWidget {
   const ResourceManagementDashboard({Key? key}) : super(key: key);
@@ -223,7 +225,7 @@ class _ResourceManagementDashboardState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadAllData,
             tooltip: 'Refresh Data',
           ),
@@ -235,9 +237,9 @@ class _ResourceManagementDashboardState
           children: [
             const TabBar(
               tabs: [
-                Tab(icon: Icon(Icons.monitor), text: 'System Monitor'),
-                Tab(icon: Icon(Icons.tune), text: 'Optimization'),
-                Tab(icon: Icon(Icons.lightbulb), text: 'Recommendations'),
+                Tab(icon: TraqIcon(AppAssets.iconComputer), text: 'System Monitor'),
+                Tab(icon: TraqIcon(AppAssets.iconFilter), text: 'Optimization'),
+                Tab(icon: TraqIcon(AppAssets.iconLightbulb), text: 'Recommendations'),
               ],
             ),
             Expanded(
@@ -283,7 +285,7 @@ class _ResourceManagementDashboardState
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle, color: Colors.green),
+                      TraqIcon(AppAssets.iconCheck, color: Colors.green),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -374,7 +376,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Memory Usage',
                 '${memoryUsage.toStringAsFixed(1)}%',
-                Icons.memory,
+                AppAssets.iconChip,
                 _getUsageColor(memoryUsage.toDouble()),
               ),
             ),
@@ -383,7 +385,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'CPU Usage',
                 '${cpuUsage.toStringAsFixed(1)}%',
-                Icons.speed,
+                AppAssets.iconGauge,
                 _getUsageColor(cpuUsage.toDouble()),
               ),
             ),
@@ -396,7 +398,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Disk Usage',
                 '${diskUsage.toStringAsFixed(1)}%',
-                Icons.storage,
+                AppAssets.iconDatabase,
                 _getUsageColor(diskUsage.toDouble()),
               ),
             ),
@@ -405,7 +407,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Network Load',
                 '${networkLoad.toStringAsFixed(1)}%',
-                Icons.network_check,
+                AppAssets.iconNetworkCheck,
                 _getUsageColor(networkLoad.toDouble()),
               ),
             ),
@@ -454,7 +456,7 @@ class _ResourceManagementDashboardState
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.memory),
+                          : TraqIcon(AppAssets.iconRefresh),
                       label: Text(
                         _isLoading ? 'Optimizing...' : 'Optimize Memory',
                       ),
@@ -493,7 +495,7 @@ class _ResourceManagementDashboardState
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.speed),
+                          : TraqIcon(AppAssets.iconClock),
                       label: Text(
                         _isLoading ? 'Optimizing...' : 'Optimize CPU',
                       ),
@@ -532,7 +534,7 @@ class _ResourceManagementDashboardState
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.storage),
+                          : TraqIcon(AppAssets.iconList),
                       label: Text(
                         _isLoading ? 'Optimizing...' : 'Optimize I/O',
                       ),
@@ -553,7 +555,7 @@ class _ResourceManagementDashboardState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey),
+            TraqIcon(AppAssets.iconLightbulb, color: Colors.grey, size: 64),
             SizedBox(height: 16),
             Text(
               'No recommendations available',
@@ -579,12 +581,12 @@ class _ResourceManagementDashboardState
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.blue.shade100,
-              child: Icon(Icons.lightbulb, color: Colors.blue),
+              child: TraqIcon(AppAssets.iconLightbulb, color: Colors.blue),
             ),
             title: Text('Recommendation #${index + 1}'),
             subtitle: Text(recommendation.toString()),
             trailing: IconButton(
-              icon: const Icon(Icons.info),
+              icon: TraqIcon(AppAssets.iconInfo),
               onPressed: () {
                 _showRecommendationDetails(recommendation);
               },
@@ -618,7 +620,7 @@ class _ResourceManagementDashboardState
   Widget _buildMetricCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Container(
@@ -630,7 +632,7 @@ class _ResourceManagementDashboardState
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             title,
@@ -657,7 +659,7 @@ class _ResourceManagementDashboardState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             'Error',
@@ -676,9 +678,14 @@ class _ResourceManagementDashboardState
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
+          ElevatedButton.icon(
+            onPressed: _loadAllData,
+            icon: const TraqIcon(AppAssets.iconRefresh),
+            label: const Text('Retry'),
+          ),
         ],
       ),
     );
   }
 }
+      

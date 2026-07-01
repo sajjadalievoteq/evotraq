@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SystemSettingsScreen extends StatefulWidget {
   const SystemSettingsScreen({Key? key}) : super(key: key);
@@ -35,13 +38,13 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
         title: const Text('System Settings'),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: const TraqIcon(AppAssets.iconSave),
             tooltip: 'Save Settings',
             onPressed: _saveSettings,
           ),
@@ -181,7 +184,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                       onPressed: () {
                         _testEmailSettings(context);
                       },
-                      icon: const Icon(Icons.send),
+                      icon: TraqIcon(AppAssets.iconArrowR),
                       label: const Text('Test Email Settings'),
                     ),
                   ],
@@ -254,7 +257,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             // Save button
             ElevatedButton.icon(
               onPressed: _saveSettings,
-              icon: const Icon(Icons.save),
+              icon: const TraqIcon(AppAssets.iconSave),
               label: const Text('Save All Settings'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colors.primary,
@@ -270,12 +273,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
 
   void _saveSettings() {
     // Here you would save the settings to your backend
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Settings saved successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    context.showSuccess('Settings saved successfully');
   }
   
   void _testEmailSettings(BuildContext context) {
@@ -303,12 +301,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       Navigator.pop(context); // Close the loading dialog
       
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Test email sent successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Test email sent successfully');
     });
   }
 
@@ -337,11 +330,11 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      settings.isTobaccoMode 
-                          ? Icons.local_florist  // Tobacco leaf
-                          : Icons.medical_services,
-                      color: settings.isTobaccoMode 
+                    TraqIcon(
+                      settings.isTobaccoMode
+                          ? AppAssets.iconSparkle
+                          : AppAssets.iconMedical,
+                      color: settings.isTobaccoMode
                           ? Colors.brown 
                           : const Color(0xFF121F17),
                       size: 28,
@@ -401,7 +394,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: isLoading ? null : () => _showChangeModeDialog(context),
-                    icon: const Icon(Icons.swap_horiz),
+                    icon: TraqIcon(AppAssets.iconTransform),
                     label: Text(
                       'Change to ${settings.isTobaccoMode ? "Pharmaceutical" : "Tobacco"} Mode',
                     ),
@@ -489,7 +482,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
   /// Show dialog to confirm industry mode change.
   Future<void> _showChangeModeDialog(BuildContext context) async {
     final cubit = context.read<SystemSettingsCubit>();
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     
     final currentMode = cubit.state.settings.industryMode;
     final newMode = currentMode == IndustryMode.tobacco 
@@ -502,12 +494,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       stats = await cubit.loadDataStatistics();
     } catch (e) {
       if (!mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Failed to load data statistics: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Failed to load data statistics: $e');
       return;
     }
 
@@ -519,7 +506,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.warning_amber, color: Colors.orange, size: 28),
+            TraqIcon(AppAssets.iconAlert, color: Colors.orange, size: 28),
             const SizedBox(width: 12),
             Text('Change to ${newMode.displayName} Mode'),
           ],
@@ -539,7 +526,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.delete_forever, color: Colors.red.shade700),
+                    TraqIcon(AppAssets.iconTrash, color: Colors.red.shade700),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
@@ -618,12 +605,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
         );
         
         if (mounted) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text('Successfully switched to ${newMode.displayName} mode'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccess('Successfully switched to ${newMode.displayName} mode');
           
           // Navigate to home/dashboard after mode change to avoid
           // "Looking up a deactivated widget's ancestor" errors
@@ -632,12 +614,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
         }
       } catch (e) {
         if (mounted) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text('Failed to change mode: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showError('Failed to change mode: $e');
         }
       }
     }

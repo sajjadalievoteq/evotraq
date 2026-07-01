@@ -5,6 +5,8 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_error_banner.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormBusinessContextSection extends StatelessWidget {
   final String? businessStep;
@@ -70,7 +72,7 @@ class ObjectEventFormBusinessContextSection extends StatelessWidget {
                   const SizedBox(height: 8.0),
                   TextButton.icon(
                     onPressed: onCbvRetry,
-                    icon: const Icon(Icons.refresh),
+                    icon: TraqIcon(AppAssets.iconRefresh),
                     label: const Text('Retry loading vocabulary'),
                   ),
                 ],

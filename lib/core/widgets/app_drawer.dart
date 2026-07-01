@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
-import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:traqtrace_app/core/models/system_settings_model.dart';
 
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -16,6 +13,7 @@ import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
 import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class DrawerScrollMemory {
   DrawerScrollMemory._();
@@ -105,6 +103,10 @@ class _AppDrawerState extends State<AppDrawer> {
     context.go(route, extra: extra);
   }
 
+  Widget _svgLeading(String asset) => TraqIcon(asset);
+
+  Widget _svgTrailingChevron() => TraqIcon(AppAssets.iconChevronR, size: 14);
+
   @override
   Widget build(BuildContext context) {
     final layout = context.layout;
@@ -139,8 +141,6 @@ class _AppDrawerState extends State<AppDrawer> {
                   return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
                     builder: (context, settingsState) {
                       final isDarkMode = themeState.isDarkMode;
-                      final settings = settingsState.settings;
-                      final isTobaccoMode = settings.isTobaccoMode;
 
                       return UserAccountsDrawerHeader(
                         accountName: Row(
@@ -182,8 +182,10 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                         otherAccountsPictures: [
                           IconButton(
-                            icon: Icon(
-                              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                            icon: TraqIcon(
+                              isDarkMode
+                                  ? AppAssets.iconSun
+                                  : AppAssets.iconMoon,
                               color: context.colors.background,
                             ),
                             onPressed: () async {
@@ -202,7 +204,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   padding: EdgeInsets.zero,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.dashboard),
+                      leading: _svgLeading(AppAssets.iconDashboard),
                       title: const Text('Dashboard'),
                       onTap: () => _navigate(
                         Constants.homeRoute,
@@ -210,7 +212,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.person),
+                      leading: _svgLeading(AppAssets.iconUser),
                       title: const Text('My Profile'),
                       onTap: () => _navigate(Constants.profileRoute),
                     ),
@@ -229,7 +231,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.timeline),
+                      leading: _svgLeading(AppAssets.iconGlobe),
                       title: const Text('Product Journey'),
                       subtitle: const Text('Track supply chain flow'),
                       onTap: () =>
@@ -251,18 +253,18 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.dataset),
+                      leading: _svgLeading(AppAssets.iconList),
                       title: const Text('Master Data'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.qr_code),
+                          leading: _svgLeading(AppAssets.iconGtin),
                           title: const Text('GTIN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
                           onTap: () => _navigate(Constants.gs1GtinsRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.location_on),
+                          leading: _svgLeading(AppAssets.iconGln),
                           title: const Text('GLN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -272,11 +274,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.numbers),
+                      leading: _svgLeading(AppAssets.iconQr),
                       title: const Text('Serialization'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.inventory),
+                          leading: _svgLeading(AppAssets.iconSscc),
                           title: const Text('SSCC Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -284,7 +286,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.gs1SsccsRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.qr_code_scanner),
+                          leading: _svgLeading(AppAssets.iconSgtin),
                           title: const Text('SGTIN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -295,11 +297,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.event),
+                      leading: _svgLeading(AppAssets.iconEvent),
                       title: const Text('EPCIS Events'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.inventory_2),
+                          leading: _svgLeading(AppAssets.iconSgtin),
                           title: const Text('Object Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -307,7 +309,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Constants.epcisObjectEventsRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.category),
+                          leading: _svgLeading(AppAssets.iconAggregate),
                           title: const Text('Aggregation Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -315,7 +317,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Constants.epcisAggregationEventsRoute),
                         ),
                         // ListTile(
-                        //   leading: const Icon(Icons.receipt),
+                        //   leading: const TraqIcon(AppAssets.iconReceipt),
                         //   title: const Text('Transaction Events'),
                         //   contentPadding:
                         //       const EdgeInsets.only(left: 32.0),
@@ -323,7 +325,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         //       Constants.epcisTransactionEventsRoute),
                         // ),
                         // ListTile(
-                        //   leading: const Icon(Icons.transform),
+                        //   leading: TraqIcon(AppAssets.iconTransform),
                         //   title: const Text('Transformation Events'),
                         //   contentPadding:
                         //       const EdgeInsets.only(left: 32.0),
@@ -334,11 +336,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.search),
+                      leading: _svgLeading(AppAssets.iconSearch),
                       title: const Text('Event Queries'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.event),
+                          leading: _svgLeading(AppAssets.iconEvent),
                           title: const Text('All Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -346,7 +348,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisEventsRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.account_tree),
+                          leading: _svgLeading(AppAssets.iconAggregate),
                           title: const Text('Aggregation Hierarchy'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -401,7 +403,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                         //needs to be removed completely including components
                         // ListTile(
-                        //   leading: const Icon(Icons.description),
+                        //   leading: TraqIcon(AppAssets.iconList),
                         //   title: const Text('Transaction Documents'),
                         //   contentPadding:
                         //       const EdgeInsets.only(left: 32.0),
@@ -409,7 +411,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         //       Constants.epcisTransactionDocumentsRoute),
                         // ),
                         ListTile(
-                          leading: const Icon(Icons.manage_search),
+                          leading: _svgLeading(AppAssets.iconFilter),
                           title: const Text('Advanced Query'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -417,7 +419,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisAdvancedQueryRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.route),
+                          leading: _svgLeading(AppAssets.iconPin),
                           title: const Text('Supply Chain Traversal'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -425,7 +427,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisTraversalQueryRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.sync_alt),
+                          leading: _svgLeading(AppAssets.iconRefresh),
                           title: const Text('Event Serialization'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -448,62 +450,87 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ),
                     ),
-                    ListTile(
-                      trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
-                      leading: const Icon(Icons.list_alt),
-                      title: const Text('Commissioning'),
-                      onTap: () =>
-                          _navigate(Constants.opCommissioningRoute),
+                    ExpansionTile(
+                      leading: _svgLeading(AppAssets.iconRefresh),
+                      title: const Text('Lifecycle'),
+                      children: [
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconSparkle),
+                          title: const Text('Commissioning'),
+                          onTap: () =>
+                              _navigate(Constants.opCommissioningRoute),
+                        ),
+
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconTrash),
+                          title: const Text('Decommissioning'),
+                          onTap: () =>
+                              _navigate(Constants.opDecommissioningRoute),
+                        ),
+                      ],
                     ),
-                    ListTile(
-                      trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
-                      leading: const Icon(Icons.inventory_2),
-                      title: const Text('Packing'),
-                      onTap: () =>
-                          _navigate(Constants.opPackingRoute),
+                    ExpansionTile(
+                      leading: _svgLeading(AppAssets.iconPackage),
+                      title: const Text('Packaging'),
+                      children: [
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconAggregate),
+                          title: const Text('Packing'),
+                          onTap: () => _navigate(Constants.opPackingRoute),
+                        ),
+
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconTransform),
+                          title: const Text('Unpacking'),
+                          onTap: () => _navigate(Constants.opUnpackingRoute),
+                        ),
+                      ],
                     ),
-                    // ListTile(
-                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
-                    //   leading: const Icon(Icons.unarchive_outlined),
-                    //   title: const Text('Unpacking'),
-                    //   onTap: () =>
-                    //       _navigate(Constants.opUnpackingRoute),
-                    // ),
-                    // ListTile(
-                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
-                    //   leading: const Icon(Icons.local_shipping),
-                    //   title: const Text('Shipping'),
-                    //   onTap: () =>
-                    //       _navigate(Constants.opShippingRoute),
-                    // ),
-                    // ListTile(
-                    //   trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),  leading: const Icon(Icons.move_to_inbox),
-                    //   title: const Text('Receiving'),
-                    //   onTap: () =>
-                    //       _navigate(Constants.opReceivingRoute),
-                    // ),
-                    // ExpansionTile(
-                    //   leading: const Icon(Icons.move_to_inbox),
-                    //   title: const Text('Receiving Operations'),
-                    //   children: [
-                    //     ListTile(
-                    //       leading: const Icon(Icons.add_circle_outline),
-                    //       title: const Text('Create Receiving'),
-                    //       contentPadding:
-                    //           const EdgeInsets.only(left: 32.0),
-                    //       onTap: () =>
-                    //           _navigate(Constants.opReceivingCreateRoute),
-                    //     ),
-                    //     ListTile(
-                    //       leading: const Icon(Icons.list_alt),
-                    //       title: const Text('View Receiving'),
-                    //       contentPadding:
-                    //           const EdgeInsets.only(left: 32.0),
-                    //       onTap: () =>
-                    //           _navigate(Constants.opReceivingRoute),
-                    //     ),
-                    //   ],
-                    // ),
+                    ExpansionTile(
+                      leading: _svgLeading(AppAssets.iconArrowUpR),
+                      title: const Text('Returns'),
+                      children: [
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconShipment),
+                          title: const Text('Return Shipping'),
+                          onTap: () => _navigate(Constants.opReturnShippingRoute),
+                        ),
+
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconReceive),
+                          title: const Text('Return Receiving'),
+                          onTap: () => _navigate(Constants.opReturnReceivingRoute),
+                        ),
+                      ],
+                    ),
+
+
+                    ExpansionTile(
+                      leading: _svgLeading(AppAssets.iconTruck),
+                      title: const Text('Logistics'),
+                      children: [
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconShipment),
+                          title: const Text('Shipping'),
+                          onTap: () =>
+                              _navigate(Constants.opShippingRoute),
+                        ),
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconReceive),
+                          title: const Text('Receiving'),
+                          onTap: () =>
+                              _navigate(Constants.opReceivingRoute),
+                        ),
+                      ],
+                    ),
 
                     const Divider(),
                     const Padding(
@@ -519,18 +546,18 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.add_box),
+                      leading: _svgLeading(AppAssets.iconQr),
                       title: const Text('Generate / Verify Barcode'),
                       onTap: () =>
                           _navigate(Constants.barcodeGenerateRoute),
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.check_circle),
+                      leading: _svgLeading(AppAssets.iconCheck),
                       title: const Text('Validation'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.rule),
+                          leading: _svgLeading(AppAssets.iconFlask),
                           title: const Text('GS1 Validation Demo'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -538,7 +565,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.gs1ValidationDemoRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.fact_check),
+                          leading: _svgLeading(AppAssets.iconCheck),
                           title: const Text('GS1 Validation Tests'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -546,8 +573,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.adminGs1ValidationRoute),
                         ),
                         ListTile(
-                          leading:
-                              const Icon(Icons.integration_instructions),
+                          leading: _svgLeading(AppAssets.iconGlobe),
                           title: const Text('Integration Validation'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -555,7 +581,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Constants.adminIntegrationValidationRoute),
                         ),
                         ListTile(
-                          leading: const Icon(Icons.rule_folder),
+                          leading: _svgLeading(AppAssets.iconList),
                           title: const Text('Validation Rules'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -566,11 +592,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: const Icon(Icons.compare_arrows),
+                      leading: _svgLeading(AppAssets.iconTransform),
                       title: const Text('Conversion'),
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.swap_horiz),
+                          leading: _svgLeading(AppAssets.iconTransform),
                           title: const Text('EPC Conversion'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -596,11 +622,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.people),
+                        leading: _svgLeading(AppAssets.iconUsers),
                         title: const Text('User Management'),
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.group),
+                            leading: _svgLeading(AppAssets.iconUsers),
                             title: const Text('User Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -608,7 +634,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminUsersRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.approval),
+                            leading: _svgLeading(AppAssets.iconApproval),
                             title: const Text('Pending Approvals'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -619,12 +645,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.notifications),
+                        leading: _svgLeading(AppAssets.iconNotification),
                         title: const Text('Notifications'),
                         children: [
                           ListTile(
-                            leading:
-                                const Icon(Icons.notification_important),
+                            leading: _svgLeading(AppAssets.iconNotification),
                             title: const Text('Notification Center'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -632,7 +657,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.notificationsRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.subscriptions),
+                            leading: _svgLeading(AppAssets.iconMail),
                             title: const Text('Manage Subscriptions'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -640,7 +665,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.notificationSubscriptionsRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.webhook),
+                            leading: _svgLeading(AppAssets.iconSettings),
                             title: const Text('Webhook Configuration'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -651,11 +676,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.batch_prediction),
+                        leading: _svgLeading(AppAssets.iconSpinner),
                         title: const Text('Batch Processing'),
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.queue),
+                            leading: _svgLeading(AppAssets.iconList),
                             title: const Text('Job Queue Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -663,7 +688,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminJobQueueRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.transform),
+                            leading: _svgLeading(AppAssets.iconTransform),
                             title: const Text('ETL Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -671,7 +696,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminEtlManagementRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.download),
+                            leading: _svgLeading(AppAssets.iconDownload),
                             title: const Text('Bulk Export'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -682,11 +707,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.api),
+                        leading: _svgLeading(AppAssets.iconGlobe),
                         title: const Text('API Management'),
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.folder_special),
+                            leading: _svgLeading(AppAssets.iconList),
                             title: const Text('API Collections'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -694,7 +719,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminApiCollectionsRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.business),
+                            leading: _svgLeading(AppAssets.iconUsers),
                             title: const Text('Partner Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -702,7 +727,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminApiPartnersRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.vpn_key),
+                            leading: _svgLeading(AppAssets.iconLock),
                             title: const Text('Service Accounts'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -713,11 +738,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.build),
+                        leading: _svgLeading(AppAssets.iconSettings),
                         title: const Text('System Tools'),
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.settings),
+                            leading: _svgLeading(AppAssets.iconSettings),
                             title: const Text('System Settings'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -725,7 +750,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminSettingsRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.memory),
+                            leading: _svgLeading(AppAssets.iconRefresh),
                             title: const Text('Cache Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -733,7 +758,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminCacheRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.speed),
+                            leading: _svgLeading(AppAssets.iconClock),
                             title: const Text('Performance Tests'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -741,7 +766,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminPerformanceTestsRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.tune),
+                            leading: _svgLeading(AppAssets.iconFilter),
                             title: const Text('Performance Optimization'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -749,7 +774,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminPerformanceOptimizationRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.monitor_heart),
+                            leading: _svgLeading(AppAssets.iconEye),
                             title: const Text('System Monitoring'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -757,7 +782,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminMonitoringRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.storage),
+                            leading: _svgLeading(AppAssets.iconList),
                             title: const Text('Database Partitioning'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -765,7 +790,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminDatabasePartitioningRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.security),
+                            leading: _svgLeading(AppAssets.iconLock),
                             title:
                                 const Text('Data Consistency & Integrity'),
                             contentPadding:
@@ -777,11 +802,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: const Icon(Icons.science),
+                        leading: _svgLeading(AppAssets.iconFlask),
                         title: const Text('Test Data Generation'),
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.build_circle),
+                            leading: _svgLeading(AppAssets.iconEvent),
                             title: const Text('Event Generation Tests'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -789,7 +814,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminEventGenerationTestRoute),
                           ),
                           ListTile(
-                            leading: const Icon(Icons.factory),
+                            leading: _svgLeading(AppAssets.iconFactory),
                             title: const Text('Industry Test Data'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -799,9 +824,8 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
                       ListTile(
-                        trailing: Icon(Icons.arrow_forward_ios,size: 14,fontWeight: FontWeight.bold,),
-                        leading:
-                        const Icon(Icons.library_books_outlined),
+                        trailing: _svgTrailingChevron(),
+                        leading: _svgLeading(AppAssets.iconGlobe),
                         title: const Text('CBV Vocabulary'),
 
                         onTap: () =>
@@ -812,7 +836,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
                     const Divider(),
                     ListTile(
-                      leading: const Icon(Icons.api_rounded),
+                      leading: _svgLeading(AppAssets.iconDownload),
                       title: const Text('Postman Collection'),
                       subtitle: Text(
                         isAdmin ? 'Download or update the API collection' : 'Download the API collection',
@@ -821,8 +845,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       trailing: isAdmin
                           ? Tooltip(
                               message: 'Admin: download or upload',
-                              child: Icon(
-                                Icons.admin_panel_settings_outlined,
+                              child: TraqIcon(
+                                AppAssets.iconSecurity,
                                 size: 16,
                                 color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
                               ),
@@ -835,7 +859,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     const Divider(),
                     ListTile(
-                      leading: const Icon(Icons.help),
+                      leading: _svgLeading(AppAssets.iconInfo),
                       title: const Text('Help & Support'),
                       onTap: () {
                         Navigator.pop(context);
@@ -850,11 +874,10 @@ class _AppDrawerState extends State<AppDrawer> {
                               .routerDelegate.navigatorKey.currentContext;
                           showLogoutConfirmDialog(host ?? context);
                         },
-                        title: 'Logout',
-                        icon: TraqThemeAppBar.logoutActionIcon,
+                        title: 'Log Out',
+                        iconAsset: AppAssets.iconLogout,
                       ),
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -866,17 +889,9 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 }
 
+/// Responsive drawer width and shape.
 abstract final class AppDrawerMetrics {
-  static double widthFor(AppLayoutData layout) {
-    return layout
-        .resolve<double>(
-          compact: (layout.width * 0.50).clamp(260.0, 300.0),
-          medium: 300.0,
-          expanded: 300.0,
-          large: (layout.width * 0.2).clamp(300.0, 350.0),
-        )
-        .clamp(0.0, 400.0);
-  }
+  AppDrawerMetrics._();
 
   static const ShapeBorder shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.only(
@@ -884,4 +899,13 @@ abstract final class AppDrawerMetrics {
       bottomRight: Radius.zero,
     ),
   );
+
+  static double widthFor(AppLayoutData layout) {
+    return layout.resolve<double>(
+      compact: (layout.width * 0.88).clamp(260.0, 300.0),
+      medium: 300,
+      expanded: 320,
+      large: (layout.width * 0.20).clamp(340.0, 400.0),
+    );
+  }
 }

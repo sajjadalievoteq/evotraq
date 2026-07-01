@@ -5,6 +5,9 @@ import 'package:traqtrace_app/features/epcis/providers/transaction_document_prov
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for Transaction Document operations
 class TransactionDocumentScreen extends StatefulWidget {
@@ -76,7 +79,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
         title: const Text('Transaction Document Operations'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             tooltip: 'Help',
             onPressed: () {
               context.go('/epcis/transaction-documents/help');
@@ -98,11 +101,11 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                     color: Colors.red[100],
                     child: Row(
                       children: [
-                        const Icon(Icons.error, color: Colors.red),
+                        TraqIcon(AppAssets.iconAlert, color: Colors.red),
                         const SizedBox(width: 8),
                         Expanded(child: Text(documentState.error!)),
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: TraqIcon(AppAssets.iconX),
                           onPressed: () => documentCubit.clearError(),
                         ),
                       ],
@@ -120,10 +123,9 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         final id = _documentIdController.text.trim();
                         
                         if (type.isEmpty || id.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Document type and ID cannot be empty'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError(
+                            'Document type and ID cannot be empty',
+                          );
                           return;
                         }
                         
@@ -147,10 +149,9 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         final id = _documentIdController.text.trim();
                         
                         if (type.isEmpty || id.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Document type and ID cannot be empty'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError(
+                            'Document type and ID cannot be empty',
+                          );
                           return;
                         }
                         
@@ -158,18 +159,14 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           final isValid = await documentCubit.validateDocumentReference(type, id);
                           if (!mounted) return;
                           
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(isValid 
-                              ? 'Document reference is valid' 
-                              : 'Document reference is not valid'),
-                            backgroundColor: isValid ? Colors.green : Colors.red,
-                          ));
+                          if (isValid) {
+                            context.showSuccess('Document reference is valid');
+                          } else {
+                            context.showError('Document reference is not valid');
+                          }
                         } catch (e) {
                           if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Error: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError('Error: ${e.toString()}');
                         }
                       },
                       child: const Text('Validate'),
@@ -188,10 +185,9 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         final id = _documentIdController.text.trim();
                         
                         if (type.isEmpty || id.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Document type and ID cannot be empty'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError(
+                            'Document type and ID cannot be empty',
+                          );
                           return;
                         }
                         
@@ -215,10 +211,9 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         final id = _documentIdController.text.trim();
                         
                         if (type.isEmpty || id.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Document type and ID cannot be empty'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError(
+                            'Document type and ID cannot be empty',
+                          );
                           return;
                         }
                         
@@ -250,10 +245,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                         if (sourceType.isEmpty || sourceId.isEmpty || 
                             targetType.isEmpty || targetId.isEmpty ||
                             relationshipType.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('All fields are required'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError('All fields are required');
                           return;
                         }
                         
@@ -267,18 +259,14 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           );
                           if (!mounted) return;
                           
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(success 
-                              ? 'Document link created successfully' 
-                              : 'Failed to create document link'),
-                            backgroundColor: success ? Colors.green : Colors.red,
-                          ));
+                          if (success) {
+                            context.showSuccess('Document link created successfully');
+                          } else {
+                            context.showError('Failed to create document link');
+                          }
                         } catch (e) {
                           if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Error: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError('Error: ${e.toString()}');
                         }
                       },
                       child: const Text('Create Link'),
@@ -299,10 +287,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           : _documentTypeController.text.trim();
                           
                         if (epc.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('EPC cannot be empty'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError('EPC cannot be empty');
                           return;
                         }
                         
@@ -332,17 +317,13 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                               ),
                             );
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text('No original document found for this EPC'),
-                              backgroundColor: Colors.orange,
-                            ));
+                            context.showWarning(
+                              'No original document found for this EPC',
+                            );
                           }
                         } catch (e) {
                           if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Error: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ));
+                          context.showError('Error: ${e.toString()}');
                         }
                       },
                       child: const Text('Find Original Document'),

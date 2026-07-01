@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_status.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_status_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// List card for a single unpacking operation.
 class UnpackingOperationCard extends StatelessWidget {
@@ -90,8 +92,7 @@ class UnpackingOperationCard extends StatelessWidget {
               if (op.parentContainerId != null)
                 Row(
                   children: [
-                    const Icon(
-                      Icons.inventory_2,
+                    TraqIcon(AppAssets.iconPackage,
                       size: 16,
                       color: Colors.brown,
                     ),
@@ -109,7 +110,7 @@ class UnpackingOperationCard extends StatelessWidget {
               if (op.unpackingLocationGLN != null)
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.blue),
+                    TraqIcon(AppAssets.iconGln, size: 16, color: Colors.blue),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -125,7 +126,7 @@ class UnpackingOperationCard extends StatelessWidget {
                 Row(
                   children: [
                     if (op.workOrderNumber != null) ...[
-                      const Icon(Icons.work, size: 16, color: Colors.orange),
+                      TraqIcon(AppAssets.iconList, size: 16, color: Colors.orange),
                       const SizedBox(width: 4),
                       Text(
                         'WO: ${op.workOrderNumber}',
@@ -134,8 +135,7 @@ class UnpackingOperationCard extends StatelessWidget {
                       const SizedBox(width: 12),
                     ],
                     if (op.batchNumber != null) ...[
-                      const Icon(
-                        Icons.batch_prediction,
+                      TraqIcon(AppAssets.iconSpinner,
                         size: 16,
                         color: Colors.purple,
                       ),

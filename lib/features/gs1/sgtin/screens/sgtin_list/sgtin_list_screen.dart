@@ -14,6 +14,8 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SGTINListScreen extends StatefulWidget {
   const SGTINListScreen({
@@ -258,7 +260,7 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
         heroTag: 'sgtin_list_standalone_add_fab',
         onPressed: _navigateToCreate,
         tooltip: SgtinUiConstants.fabAddNew,
-        child: const Icon(Icons.add),
+        child: TraqIcon(AppAssets.iconPlus),
       ),
     );
   }

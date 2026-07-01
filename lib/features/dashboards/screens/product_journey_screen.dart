@@ -5,11 +5,14 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/dashboards/models/product_journey_models.dart';
 
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
 
 import '../../../data/services/product_journey_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Dashboard screen showing the complete journey of a product through the supply chain
 class ProductJourneyScreen extends StatefulWidget {
@@ -104,7 +107,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -148,10 +151,10 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
             focusNode: _searchFocusNode,
             decoration: InputDecoration(
               hintText: 'Enter Serial Number, SGTIN, or SSCC...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: TraqIcon(AppAssets.iconSearch),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: TraqIcon(AppAssets.iconX),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -245,7 +248,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.orange[300]),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.orange[300]),
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
@@ -269,7 +272,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.timeline, size: 80, color: Colors.grey[300]),
+          TraqIcon(AppAssets.iconGlobe, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 24),
           Text(
             'Track Product Journey',
@@ -291,9 +294,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
-              _buildHintChip('Serial Number', Icons.qr_code),
-              _buildHintChip('SGTIN URI', Icons.link),
-              _buildHintChip('SSCC', Icons.inventory_2),
+              _buildHintChip('Serial Number', AppAssets.iconQr),
+              _buildHintChip('SGTIN URI', AppAssets.iconLink),
+              _buildHintChip('SSCC', AppAssets.iconBox),
             ],
           ),
         ],
@@ -301,9 +304,9 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     );
   }
 
-  Widget _buildHintChip(String label, IconData icon) {
+  Widget _buildHintChip(String label, String iconAsset) {
     return Chip(
-      avatar: Icon(icon, size: 18, color: Colors.grey[600]),
+      avatar: TraqIcon(iconAsset, size: 18, color: Colors.grey[600]),
       label: Text(label),
       backgroundColor: Colors.grey[100],
     );
@@ -326,7 +329,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
           // Timeline Header
           Row(
             children: [
-              const Icon(Icons.timeline, color: Colors.blue),
+              TraqIcon(AppAssets.iconGlobe, color: Colors.blue),
               const SizedBox(width: 8),
               Text(
                 'Journey Timeline',
@@ -369,8 +372,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     color: Colors.blue[50],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.inventory_2,
+                  child: TraqIcon(AppAssets.iconPackage,
                     color: Colors.blue,
                     size: 32,
                   ),
@@ -409,7 +411,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                     _buildInfoTag(
                       'Batch',
                       info.batchLotNumber!,
-                      Icons.batch_prediction,
+                      AppAssets.iconBarChart,
                       Colors.purple,
                     ),
                   if (info.manufacturingDate != null)
@@ -418,14 +420,14 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                       DateFormat(
                         'MMM dd, yyyy',
                       ).format(info.manufacturingDate!),
-                      Icons.factory,
+                      AppAssets.iconFactory,
                       Colors.green,
                     ),
                   if (info.expiryDate != null)
                     _buildInfoTag(
                       'Expiry',
                       DateFormat('MMM dd, yyyy').format(info.expiryDate!),
-                      Icons.event,
+                      AppAssets.iconEvent,
                       Colors.red,
                     ),
                 ],
@@ -437,7 +439,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     );
   }
 
-  Widget _buildInfoTag(String label, String value, IconData icon, Color color) {
+  Widget _buildInfoTag(String label, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -448,7 +450,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
+          TraqIcon(iconAsset, size: 16, color: color),
           const SizedBox(width: 6),
           Text(
             '$label: $value',
@@ -473,25 +475,25 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildSummaryItem(
-              Icons.event_note,
+              AppAssets.iconCalendar,
               '${_journey!.totalSteps}',
               'Events',
               Colors.blue,
             ),
             _buildSummaryItem(
-              Icons.location_on,
+              AppAssets.iconMapPin,
               '${_journey!.locationsVisited}',
               'Locations',
               Colors.green,
             ),
             _buildSummaryItem(
-              Icons.timer,
+              AppAssets.iconTimer,
               _formatDuration(_journey!.journeyDuration),
               'Duration',
               Colors.orange,
             ),
             _buildSummaryItem(
-              Icons.check_circle,
+              AppAssets.iconCheckCircle,
               _journey!.currentDisposition ?? 'Active',
               'Status',
               Colors.teal,
@@ -503,14 +505,14 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
   }
 
   Widget _buildSummaryItem(
-    IconData icon,
+    String iconAsset,
     String value,
     String label,
     Color color,
   ) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 28),
+        TraqIcon(iconAsset, color: color, size: 28),
         const SizedBox(height: 4),
         Text(
           value,
@@ -548,7 +550,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                 color: _getStepColor(step.businessStep),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: TraqIcon(
                 _getStepIcon(step.businessStep),
                 color: Colors.white,
                 size: 16,
@@ -669,7 +671,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
               if (step.locationName != null || step.locationGLN != null)
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                    TraqIcon(AppAssets.iconGln, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -695,7 +697,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.info_outline, size: 14, color: Colors.grey[500]),
+                  TraqIcon(AppAssets.iconInfo, size: 14, color: Colors.grey[500]),
                   const SizedBox(width: 4),
                   Text(
                     'Status: ${step.dispositionLabel}',
@@ -768,7 +770,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                           ).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(
+                        child: TraqIcon(
                           _getStepIcon(step.businessStep),
                           color: _getStepColor(step.businessStep),
                           size: 32,
@@ -843,7 +845,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                         );
                         context.go(route);
                       },
-                      icon: const Icon(Icons.open_in_new),
+                      icon: const TraqIcon(AppAssets.iconOpenNew),
                       label: const Text('View Full Event Details'),
                     ),
                   ),
@@ -877,14 +879,12 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
                 ),
                 if (copyable)
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 16),
+                    icon: const TraqIcon(AppAssets.iconCopy, size: 16),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: value));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Copied: $value'),
-                          duration: const Duration(seconds: 1),
-                        ),
+                      context.showSuccess(
+                        'Copied: $value',
+                        duration: const Duration(seconds: 1),
                       );
                     },
                     padding: EdgeInsets.zero,
@@ -912,18 +912,18 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
     return Colors.grey;
   }
 
-  IconData _getStepIcon(String businessStep) {
+  String _getStepIcon(String businessStep) {
     final step = businessStep.toLowerCase();
-    if (step.contains('commissioning')) return Icons.play_for_work;
-    if (step.contains('packing')) return Icons.inventory_2;
-    if (step.contains('shipping')) return Icons.local_shipping;
-    if (step.contains('receiving')) return Icons.move_to_inbox;
-    if (step.contains('decommissioning')) return Icons.remove_circle;
-    if (step.contains('destroying')) return Icons.delete_forever;
-    if (step.contains('inspecting')) return Icons.search;
-    if (step.contains('storing')) return Icons.warehouse;
-    if (step.contains('picking')) return Icons.shopping_cart;
-    return Icons.event;
+    if (step.contains('commissioning')) return AppAssets.iconDownload;
+    if (step.contains('packing')) return AppAssets.iconBox;
+    if (step.contains('shipping')) return AppAssets.iconTruck;
+    if (step.contains('receiving')) return AppAssets.iconInbox;
+    if (step.contains('decommissioning')) return AppAssets.iconRemoveCircle;
+    if (step.contains('destroying')) return AppAssets.iconTrash;
+    if (step.contains('inspecting')) return AppAssets.iconSearch;
+    if (step.contains('storing')) return AppAssets.iconWarehouse;
+    if (step.contains('picking')) return AppAssets.iconCart;
+    return AppAssets.iconEvent;
   }
 
   Color _getTypeColor(String type) {
@@ -958,7 +958,7 @@ class _ProductJourneyScreenState extends State<ProductJourneyScreen> {
       case 'transformationevent':
         return '/epcis/transformation-events/$eventId';
       default:
-        return ObjectEventRouteConstants.detailLocation(eventId);
+        return '/epcis/events/$eventId';
     }
   }
 }

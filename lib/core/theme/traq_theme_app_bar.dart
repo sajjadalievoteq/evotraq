@@ -3,7 +3,7 @@ part of 'traq_theme.dart';
 abstract final class TraqThemeAppBar {
   static const String backgroundAsset = AppAssets.traqBackgroundSvg;
 
-  static const IconData logoutActionIcon = Icons.logout;
+  static const String logoutActionIconAsset = AppAssets.iconLogout;
   static const String logoutActionTooltip = 'Log out';
 
   static Widget flexibleBackground(TraqColors c) {

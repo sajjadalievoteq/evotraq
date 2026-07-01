@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
 abstract final class CommissioningBatchStatusUtils {
@@ -32,13 +33,13 @@ abstract final class CommissioningBatchStatusUtils {
     };
   }
 
-  static IconData icon(CommissioningBatchStatus status) {
+  static String iconAsset(CommissioningBatchStatus status) {
     return switch (status) {
-      CommissioningBatchStatus.success => Icons.check_circle,
-      CommissioningBatchStatus.partialSuccess => Icons.warning,
-      CommissioningBatchStatus.failed => Icons.error,
-      CommissioningBatchStatus.pending => Icons.schedule,
-      CommissioningBatchStatus.inProgress => Icons.sync,
+      CommissioningBatchStatus.success => AppAssets.iconCheck,
+      CommissioningBatchStatus.partialSuccess => AppAssets.iconAlert,
+      CommissioningBatchStatus.failed => AppAssets.iconAlert,
+      CommissioningBatchStatus.pending => AppAssets.iconClock,
+      CommissioningBatchStatus.inProgress => AppAssets.iconRefresh,
     };
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class PerformanceMetricsCard extends StatelessWidget {
   final PerformanceMetrics performance;
@@ -46,7 +48,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Events/Second',
                     performance.eventsPerSecond.toStringAsFixed(2),
-                    Icons.speed,
+                    AppAssets.iconGauge,
                     _getPerformanceColor(performance.eventsPerSecond, 100, 50),
                   ),
                 ),
@@ -55,7 +57,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Avg Processing Time',
                     '${performance.averageProcessingTimeMs.toStringAsFixed(1)}ms',
-                    Icons.timer,
+                    AppAssets.iconTimer,
                     _getPerformanceColor(performance.averageProcessingTimeMs, 100, 500, inverted: true),
                   ),
                 ),
@@ -70,7 +72,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Success Rate',
                     '${performance.successRate.toStringAsFixed(1)}%',
-                    Icons.check_circle,
+                    AppAssets.iconCheckCircle,
                     _getPerformanceColor(performance.successRate, 95, 90),
                   ),
                 ),
@@ -79,7 +81,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Error Rate',
                     '${performance.errorRate.toStringAsFixed(2)}%',
-                    Icons.error,
+                    AppAssets.iconXCircle,
                     _getPerformanceColor(performance.errorRate, 1, 5, inverted: true),
                   ),
                 ),
@@ -95,7 +97,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Memory Usage',
                     '${performance.memoryUsagePercentage.toStringAsFixed(1)}%',
-                    Icons.memory,
+                    AppAssets.iconChip,
                     _getPerformanceColor(performance.memoryUsagePercentage, 70, 85, inverted: true),
                   ),
                 ),
@@ -104,7 +106,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'CPU Usage',
                     '${performance.cpuUsagePercentage.toStringAsFixed(1)}%',
-                    Icons.developer_board,
+                    AppAssets.iconChip,
                     _getPerformanceColor(performance.cpuUsagePercentage, 70, 85, inverted: true),
                   ),
                 ),
@@ -120,7 +122,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'DB Connections',
                     '${performance.activeConnections}',
-                    Icons.storage,
+                    AppAssets.iconDatabase,
                     _getPerformanceColor(performance.databaseConnectionUtilization, 70, 85, inverted: true),
                   ),
                 ),
@@ -129,7 +131,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Queued Transactions',
                     '${performance.queuedTransactions}',
-                    Icons.queue,
+                    AppAssets.iconQueue,
                     _getPerformanceColor(performance.queuedTransactions.toDouble(), 5, 20, inverted: true),
                   ),
                 ),
@@ -144,12 +146,12 @@ class PerformanceMetricsCard extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _showIsolationDialog(context),
-                  icon: const Icon(Icons.settings),
+                  icon: TraqIcon(AppAssets.iconSettings),
                   label: const Text('Configure Isolation'),
                 ),
                 ElevatedButton.icon(
                   onPressed: onResolveDeadlocks,
-                  icon: const Icon(Icons.healing),
+                  icon: const TraqIcon(AppAssets.iconMedical),
                   label: const Text('Resolve Deadlocks'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -164,7 +166,7 @@ class PerformanceMetricsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricTile(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricTile(String title, String value, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -174,7 +176,7 @@ class PerformanceMetricsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             value,
@@ -253,7 +255,7 @@ class PerformanceMetricsCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Close'),
           ),
         ],
       ),

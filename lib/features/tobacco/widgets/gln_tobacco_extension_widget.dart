@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 import '../../../core/cubit/system_settings_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget that displays/edits tobacco extension data for a GLN (location)
 /// Can be embedded in GLN detail screens or used standalone
@@ -555,8 +557,8 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
         collapsedBackgroundColor: Colors.brown.shade700,
         collapsedTextColor: Colors.white,
         collapsedIconColor: Colors.white,
-        leading: Icon(
-          Icons.smoking_rooms,
+        leading: TraqIcon(
+          AppAssets.iconSmokingRooms,
           color: _hasExtension ? Colors.brown : Colors.grey,
         ),
         title: Text(
@@ -1014,8 +1016,7 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                   color: date != null ? null : Colors.grey,
                 ),
               ),
-              Icon(
-                Icons.calendar_today,
+              TraqIcon(AppAssets.iconClock,
                 color: widget.isEditing ? Colors.brown : Colors.grey,
               ),
             ],

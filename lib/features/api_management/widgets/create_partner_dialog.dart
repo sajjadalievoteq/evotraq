@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Dialog for creating a new B2B partner
 class CreatePartnerDialog extends StatefulWidget {
@@ -41,7 +44,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          const Icon(Icons.business, size: 24),
+          TraqIcon(AppAssets.iconUsers, size: 24),
           const SizedBox(width: 8),
           const Text('Create New Partner'),
         ],
@@ -65,7 +68,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Partner Code *',
                           hintText: 'e.g., PARTNER001',
-                          prefixIcon: Icon(Icons.tag),
+                          prefixIcon: TraqIcon(AppAssets.iconPin),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -85,7 +88,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Company Name *',
                           hintText: 'e.g., Acme Corp',
-                          prefixIcon: Icon(Icons.business),
+                          prefixIcon: TraqIcon(AppAssets.iconUsers),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -105,7 +108,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         value: _selectedPartnerType,
                         decoration: const InputDecoration(
                           labelText: 'Partner Type *',
-                          prefixIcon: Icon(Icons.category),
+                          prefixIcon: TraqIcon(AppAssets.iconAggregate),
                         ),
                         items: PartnerType.values.map((type) {
                           return DropdownMenuItem(
@@ -126,7 +129,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         value: _selectedDataFormat,
                         decoration: const InputDecoration(
                           labelText: 'Data Format *',
-                          prefixIcon: Icon(Icons.data_object),
+                          prefixIcon: TraqIcon(AppAssets.iconBraces),
                         ),
                         items: DataFormat.values.map((format) {
                           return DropdownMenuItem(
@@ -161,7 +164,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                   decoration: const InputDecoration(
                     labelText: 'Webhook URL',
                     hintText: 'https://partner.example.com/webhooks/traqtrace',
-                    prefixIcon: Icon(Icons.webhook),
+                    prefixIcon: TraqIcon(AppAssets.iconSettings),
                     helperText: 'URL for receiving event notifications',
                   ),
                   validator: (value) {
@@ -184,7 +187,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Contact Email',
                           hintText: 'integration@partner.com',
-                          prefixIcon: Icon(Icons.email),
+                          prefixIcon: TraqIcon(AppAssets.iconMail),
                         ),
                         validator: (value) {
                           if (value != null && value.isNotEmpty) {
@@ -203,7 +206,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         decoration: const InputDecoration(
                           labelText: 'Contact Phone',
                           hintText: '+1 (555) 123-4567',
-                          prefixIcon: Icon(Icons.phone),
+                          prefixIcon: TraqIcon(AppAssets.iconPhone),
                         ),
                       ),
                     ),
@@ -227,7 +230,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                   height: 16, 
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.add),
+              : TraqIcon(AppAssets.iconPlus),
           label: const Text('Create Partner'),
         ),
       ],
@@ -266,22 +269,11 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
       if (mounted) {
         Navigator.pop(context);
         if (partner != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Partner "${partner.companyName}" created successfully')),
-          );
+          context.showSuccess('Partner "${partner.companyName}" created successfully');
         } else if (cubit.state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(cubit.state.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showError(cubit.state.errorMessage!);
         }
       }
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
-    }
-  }
-}
+        setState(() => _isSubmitting = false);}}}}

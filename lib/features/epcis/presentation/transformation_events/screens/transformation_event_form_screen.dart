@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_event_form_help.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -18,6 +19,8 @@ import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dar
 import 'package:uuid/uuid.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for creating and editing Transformation Events with support for GS1 EPCIS 2.0
 /// Transformation Events represent a process that takes one set of objects (inputs) and 
@@ -183,9 +186,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading event: ${error.toString()}')),
-        );
+        context.showError('Error loading event: ${error.toString()}');
       }
     }
   }
@@ -463,11 +464,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       
       // Return to the previous screen
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Transformation event ${_isEdit ? "updated" : "created"} successfully'),
-            backgroundColor: Colors.green,
-          ),
+        context.showSuccess(
+          'Transformation event ${_isEdit ? "updated" : "created"} successfully',
         );
         Navigator.pop(context, true);
       }
@@ -477,9 +475,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${error.toString()}')),
-        );
+        context.showError('Error: ${error.toString()}');
       }
     }
   }
@@ -541,7 +537,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         title: Text(_isEdit ? 'Edit Transformation Event' : 'New Transformation Event'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: _showHelpDialog,
             tooltip: 'Help',
           ),
@@ -614,7 +610,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           children: [
             Row(
               children: [
-                const Icon(Icons.transform, color: Colors.indigo),
+                TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
                 const SizedBox(width: 8),
                 Text(
                   'Transformation Event',
@@ -646,7 +642,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.red),
+              TraqIcon(AppAssets.iconAlert, color: Colors.red),
               const SizedBox(width: 16),
               Expanded(child: Text(message, style: const TextStyle(color: Colors.red))),
             ],
@@ -940,7 +936,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            icon: const Icon(Icons.calendar_today),
+            icon: TraqIcon(AppAssets.iconClock),
             label: Text(DateFormat('yyyy-MM-dd').format(_eventTime)),
             onPressed: () async {
               final pickedDate = await showDatePicker(
@@ -967,7 +963,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         const SizedBox(width: 8),
         Expanded(
           child: OutlinedButton.icon(
-            icon: const Icon(Icons.access_time),
+            icon: TraqIcon(AppAssets.iconClock),
             label: Text(DateFormat('HH:mm').format(_eventTime)),
             onPressed: () async {
               final pickedTime = await showTimePicker(

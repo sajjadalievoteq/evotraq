@@ -46,6 +46,7 @@ class SSCC {
   final String? currentReadpointGln;
   final String? currentBizlocationGln;
   final String? currentCustodianGln;
+  final GLN? currentLocation;
 
   final String? purchaseOrderNumber;
   final String? ginc;
@@ -107,6 +108,7 @@ class SSCC {
     this.currentReadpointGln,
     this.currentBizlocationGln,
     this.currentCustodianGln,
+    this.currentLocation,
     this.purchaseOrderNumber,
     this.ginc,
     this.gsin,
@@ -164,6 +166,7 @@ class SSCC {
     String? currentReadpointGln,
     String? currentBizlocationGln,
     String? currentCustodianGln,
+    GLN? currentLocation,
     String? purchaseOrderNumber,
     String? ginc,
     String? gsin,
@@ -221,6 +224,7 @@ class SSCC {
       currentBizlocationGln:
           currentBizlocationGln ?? this.currentBizlocationGln,
       currentCustodianGln: currentCustodianGln ?? this.currentCustodianGln,
+      currentLocation: currentLocation ?? this.currentLocation,
       purchaseOrderNumber: purchaseOrderNumber ?? this.purchaseOrderNumber,
       ginc: ginc ?? this.ginc,
       gsin: gsin ?? this.gsin,
@@ -304,6 +308,7 @@ class SSCC {
       currentReadpointGln: json['currentReadpointGLN'] as String?,
       currentBizlocationGln: json['currentBizlocationGLN'] as String?,
       currentCustodianGln: json['currentCustodianGLN'] as String?,
+      currentLocation: _parseCurrentLocation(json),
       purchaseOrderNumber: json['purchaseOrderNumber'] as String?,
       ginc: json['ginc'] as String?,
       gsin: json['gsin'] as String?,
@@ -368,6 +373,10 @@ class SSCC {
         'currentBizlocationGLN': currentBizlocationGln,
       if (currentCustodianGln != null)
         'currentCustodianGLN': currentCustodianGln,
+      if (currentLocation != null) ...{
+        'currentLocationGLN': currentLocation!.glnCode,
+        'currentLocationName': currentLocation!.locationName,
+      },
       if (issuingGLN != null) 'issuingGLN': issuingGLN!.glnCode,
       if (gs1CompanyPrefix != null) 'gs1CompanyPrefix': gs1CompanyPrefix,
       if (extensionDigit != null) 'extensionDigit': extensionDigit,
@@ -401,6 +410,30 @@ class SSCC {
     if (glnField == null) return null;
     if (glnField is String) return GLN.fromCode(glnField);
     if (glnField is Map<String, dynamic>) return GLN.fromJson(glnField);
+    return null;
+  }
+
+  static GLN? _parseCurrentLocation(Map<String, dynamic> json) {
+    if (json['currentLocation'] is Map<String, dynamic>) {
+      return GLN.fromJson(json['currentLocation'] as Map<String, dynamic>);
+    }
+    final glnCode = json['currentLocationGLN'] as String? ??
+        json['currentLocationGln'] as String? ??
+        json['currentBizlocationGLN'] as String?;
+    final locationName = json['currentLocationName'] as String?;
+    if (glnCode != null) {
+      return GLN(
+        glnCode: glnCode,
+        locationName: locationName ?? 'Unknown Location',
+        addressLine1: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        country: '',
+        locationType: LocationType.other,
+        active: true,
+      );
+    }
     return null;
   }
 

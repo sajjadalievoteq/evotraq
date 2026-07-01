@@ -1,9 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GtinAdvancedFiltersPanel extends StatelessWidget {
   const GtinAdvancedFiltersPanel({
@@ -153,7 +155,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                             ),
                             suffixIcon: CustomButtonWidget(
                               onTap: onPickFromDate,
-                              icon: Icons.calendar_today,
+                              iconAsset: AppAssets.iconCalendar,
                               iconOnly: true,
                               tooltip: GtinUiConstants.tooltipPickFromDate,
                               height: 40,
@@ -175,7 +177,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
                             ),
                             suffixIcon: CustomButtonWidget(
                               onTap: onPickToDate,
-                              icon: Icons.calendar_today,
+                              iconAsset: AppAssets.iconCalendar,
                               iconOnly: true,
                               tooltip: GtinUiConstants.tooltipPickToDate,
                               height: 40,
@@ -216,8 +218,7 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle_outline,
+                  TraqIcon(AppAssets.iconCheck,
                     size: 16,
                     color: Colors.green[700],
                   ),

@@ -20,8 +20,6 @@ class PackingReviewStep extends StatelessWidget {
 
     super.key,
 
-    required this.packingReference,
-
     required this.packingLocationGln,
 
     required this.workOrder,
@@ -38,13 +36,13 @@ class PackingReviewStep extends StatelessWidget {
 
     required this.onCloseContainerChanged,
 
+    this.eventTime,
+
     this.showPageHeader = true,
 
   });
 
 
-
-  final String packingReference;
 
   final GLN? packingLocationGln;
 
@@ -61,6 +59,8 @@ class PackingReviewStep extends StatelessWidget {
   final bool closeContainer;
 
   final ValueChanged<bool> onCloseContainerChanged;
+
+  final DateTime? eventTime;
 
   final bool showPageHeader;
 
@@ -114,7 +114,16 @@ class PackingReviewStep extends StatelessWidget {
 
               children: [
 
-                SgtinInfoRow('Packing Reference', packingReference),
+                SgtinInfoRow('Packing Reference', 'Auto-generated on submit'),
+
+                const SizedBox(height: 12),
+
+                SgtinInfoRow(
+                  'Event Time',
+                  eventTime != null
+                      ? '${eventTime!.toLocal()}'.substring(0, 16)
+                      : 'At time of submission',
+                ),
 
                 const SizedBox(height: 12),
 

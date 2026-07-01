@@ -1,5 +1,4 @@
-﻿import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
@@ -16,6 +15,7 @@ class Gs1GroupCard extends StatelessWidget {
     this.margin = const EdgeInsets.only(bottom: 12),
     this.borderRadius = 8,
     this.skeletonBuilder,
+    this.showRequiredStar = false,
   });
 
   final String title;
@@ -28,6 +28,9 @@ class Gs1GroupCard extends StatelessWidget {
   final EdgeInsets margin;
   final double borderRadius;
   final Widget Function(Color c)? skeletonBuilder;
+  /// When true, a primary-colour * is shown next to the title to indicate
+  /// that this card contains at least one mandatory field.
+  final bool showRequiredStar;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +42,7 @@ class Gs1GroupCard extends StatelessWidget {
           SectionLabel(
             title,
             padding: titlePadding,
+            showStar: showRequiredStar,
           ),
           child,
         ],
@@ -65,6 +69,7 @@ class Gs1GroupCard extends StatelessWidget {
               SectionLabel(
                 title,
                 padding: titlePadding,
+                showStar: showRequiredStar,
               ),
               for (int i = 0; i < skeletonFieldCount; i++) ...[
                 GtinSkeletonOutlineField(color: c, height: 56),

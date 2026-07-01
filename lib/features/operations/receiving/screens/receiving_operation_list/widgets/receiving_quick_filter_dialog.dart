@@ -1,15 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/models/receiving_quick_filter_result.dart';
+import 'package:traqtrace_app/data/models/operations/receiving/receiving_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/receiving/utils/receiving_ui_constants.dart';
 
 class ReceivingQuickFilterDialog extends StatefulWidget {
-  const ReceivingQuickFilterDialog({
-    super.key,
-    required this.initialStatus,
-  });
+  const ReceivingQuickFilterDialog({super.key, required this.initialStatus});
 
   final String? initialStatus;
 
@@ -28,7 +25,8 @@ class ReceivingQuickFilterDialog extends StatefulWidget {
       _ReceivingQuickFilterDialogState();
 }
 
-class _ReceivingQuickFilterDialogState extends State<ReceivingQuickFilterDialog> {
+class _ReceivingQuickFilterDialogState
+    extends State<ReceivingQuickFilterDialog> {
   late String _status;
 
   @override
@@ -67,8 +65,8 @@ class _ReceivingQuickFilterDialogState extends State<ReceivingQuickFilterDialog>
             Text(
               ReceivingUiConstants.quickFiltersFooterHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -76,9 +74,9 @@ class _ReceivingQuickFilterDialogState extends State<ReceivingQuickFilterDialog>
       actions: [
         CustomTextButtonWidget(
           title: ReceivingUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context).pop(
-            const ReceivingQuickFilterResult.cleared(),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const ReceivingQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: ReceivingUiConstants.buttonCancel,
@@ -87,7 +85,9 @@ class _ReceivingQuickFilterDialogState extends State<ReceivingQuickFilterDialog>
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             ReceivingQuickFilterResult.applied(
-              status: _status == ReceivingUiConstants.filterAll ? null : _status,
+              status: _status == ReceivingUiConstants.filterAll
+                  ? null
+                  : _status,
             ),
           ),
           child: const Text(ReceivingUiConstants.buttonApply),

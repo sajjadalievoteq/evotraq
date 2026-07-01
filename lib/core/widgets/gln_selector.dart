@@ -7,6 +7,8 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// A reusable widget for selecting GLNs from available system GLNs
 /// Provides a searchable dropdown interface with GLN code and location name
@@ -268,16 +270,16 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
                   focusNode: _focusNode,
                   decoration: InputDecoration(
                     hintText: widget.hintText ?? 'Search GLN or location name...',
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: TraqIcon(AppAssets.iconSearch),
                     suffixIcon: _selectedGLN != null
                         ? IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: TraqIcon(AppAssets.iconX),
                             onPressed: _clearSelection,
                           )
                         : IconButton(
-                            icon: Icon(_isDropdownOpen 
-                                ? Icons.keyboard_arrow_up 
-                                : Icons.keyboard_arrow_down),
+                            icon: TraqIcon(_isDropdownOpen 
+                                ? AppAssets.iconChevronU 
+                                : AppAssets.iconChevronD),
                             onPressed: () {
                               setState(() {
                                 _isDropdownOpen = !_isDropdownOpen;
@@ -334,7 +336,7 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
                     final gln = _filteredGLNs[index];
                     return ListTile(
                       dense: true,
-                      leading: const Icon(Icons.location_on, size: 20),
+                      leading: TraqIcon(AppAssets.iconGln, size: 20),
                       title: Text(
                         gln.glnCode,
                         style: const TextStyle(

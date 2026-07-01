@@ -224,8 +224,9 @@ class TraversalQueryCubit extends Cubit<TraversalQueryState> {
   }
 
   Future<void> refreshData() async {
-    if (state.lastQueryType == null || state.lastQueryParameters == null)
+    if (state.lastQueryType == null || state.lastQueryParameters == null) {
       return;
+    }
     await executeQuery(state.lastQueryType!, state.lastQueryParameters!);
   }
 

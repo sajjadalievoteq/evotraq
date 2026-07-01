@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart' as status_rules;
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigation.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningDetailSerialItemRow extends StatelessWidget {
   const CommissioningDetailSerialItemRow({
     super.key,
     required this.item,
+    this.currentStatus,
   });
 
   final CommissioningBatchItem item;
+  final ItemStatus? currentStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +24,8 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(
-            item.success ? Icons.check_circle : Icons.cancel,
+          TraqIcon(
+            item.success ? AppAssets.iconCheck : AppAssets.iconX,
             size: 16,
             color: item.success ? Colors.green[600] : Colors.red[600],
           ),
@@ -48,20 +56,52 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
               ],
             ),
           ),
+          // Hierarchy icon — only for successfully commissioned EPCs.
+          // Tapping opens the universal hierarchy screen which walks to the
+          // root ancestor automatically (the EPC may later be aggregated
+          // inside a packing container).
+          if (item.epcUri != null)
+            IconButton(
+              icon: TraqIcon(AppAssets.iconAggregate, size: 16),
+              tooltip: 'View hierarchy',
+              visualDensity: VisualDensity.compact,
+              onPressed: () => openHierarchyScreen(
+                context,
+                epc: item.epcUri!,
+                title: 'Commissioning Hierarchy',
+              ),
+            ),
+          if (currentStatus != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Chip(
+                label: Text(
+                  status_rules.friendlyLabel(currentStatus!),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                backgroundColor: status_rules.statusColor(currentStatus!),
+                padding: EdgeInsets.zero,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
           InkWell(
             onTap: () {
               Clipboard.setData(ClipboardData(text: item.serialNumber));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Copied: ${item.serialNumber}'),
-                  duration: const Duration(seconds: 2),
-                ),
+              context.showSuccess(
+                'Copied: \${item.serialNumber}',
+                duration: const Duration(seconds: 2),
               );
             },
             borderRadius: BorderRadius.circular(4),
             child: const Padding(
               padding: EdgeInsets.all(4),
-              child: Icon(Icons.copy, size: 14),
+              child: TraqIcon(AppAssets.iconCopy, size: 14),
             ),
           ),
         ],

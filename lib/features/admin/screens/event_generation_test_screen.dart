@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import '../../../data/services/event_generation_test_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class EventGenerationTestScreen extends StatefulWidget {
   const EventGenerationTestScreen({Key? key}) : super(key: key);
@@ -115,12 +117,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
         _eventParams,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully generated event: ${result['eventId']}'),
-          backgroundColor: context.colors.success,
-        ),
-      );
+      context.showSuccess('Successfully generated event: ${result['eventId']}');
 
       setState(() {
         _isLoading = false;
@@ -153,13 +150,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Successfully generated ${result.generatedCount} events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Successfully generated ${result.generatedCount} events',
       );
     } catch (e) {
       setState(() {
@@ -187,13 +179,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Supply chain simulation started: ${session.sessionId}',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Supply chain simulation started: ${session.sessionId}',
       );
 
       _pollSimulationStatus();
@@ -224,13 +211,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Simulation stopped. Generated ${result.totalEvents} events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Simulation stopped. Generated ${result.totalEvents} events',
       );
     } catch (e) {
       setState(() {
@@ -336,14 +318,9 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanTestData({});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Cleaned ${result.deletedEvents} events, '
-            '${result.deletedGLNs} GLNs, ${result.deletedGTINs} GTINs',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Cleaned ${result.deletedEvents} events, '
+        '${result.deletedGLNs} GLNs, ${result.deletedGTINs} GTINs',
       );
 
       await _loadDataManagementData();
@@ -388,13 +365,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanTransformationEvents();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Cleaned ${result['deletedTransformationEvents']} transformation events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Cleaned ${result['deletedTransformationEvents']} transformation events',
       );
 
       await _loadDataManagementData();
@@ -440,13 +412,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanTransactionEvents();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Cleaned ${result['deletedTransactionEvents']} transaction events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Cleaned ${result['deletedTransactionEvents']} transaction events',
       );
 
       await _loadDataManagementData();
@@ -491,13 +458,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanAggregationEvents();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Cleaned ${result['deletedAggregationEvents']} aggregation events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Cleaned ${result['deletedAggregationEvents']} aggregation events',
       );
 
       await _loadDataManagementData();
@@ -542,13 +504,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanObjectEvents();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Cleaned ${result['deletedObjectEvents']} object events',
-          ),
-          backgroundColor: context.colors.success,
-        ),
+      context.showSuccess(
+        'Cleaned ${result['deletedObjectEvents']} object events',
       );
 
       await _loadDataManagementData();
@@ -593,12 +550,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanGLNTestData();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cleaned ${result['deletedGLNs']} test GLNs'),
-          backgroundColor: context.colors.success,
-        ),
-      );
+      context.showSuccess('Cleaned ${result['deletedGLNs']} test GLNs');
 
       await _loadDataManagementData();
     } catch (e) {
@@ -642,12 +594,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanGTINTestData();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cleaned ${result['deletedGTINs']} test GTINs'),
-          backgroundColor: context.colors.success,
-        ),
-      );
+      context.showSuccess('Cleaned ${result['deletedGTINs']} test GTINs');
 
       await _loadDataManagementData();
     } catch (e) {
@@ -691,12 +638,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanSGTINTestData();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cleaned ${result['deletedSGTINs']} test SGTINs'),
-          backgroundColor: context.colors.success,
-        ),
-      );
+      context.showSuccess('Cleaned ${result['deletedSGTINs']} test SGTINs');
 
       await _loadDataManagementData();
     } catch (e) {
@@ -740,12 +682,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanSSCCTestData();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cleaned ${result['deletedSSCCs']} test SSCCs'),
-          backgroundColor: context.colors.success,
-        ),
-      );
+      context.showSuccess('Cleaned ${result['deletedSSCCs']} test SSCCs');
 
       await _loadDataManagementData();
     } catch (e) {
@@ -861,14 +798,9 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
     try {
       final result = await _testService!.cleanAllSSCCData();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'DANGER: Deleted ${result['deletedSSCCs']} SSCCs from system (ALL SSCCs!)',
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
+      context.showError(
+        'DANGER: Deleted ${result['deletedSSCCs']} SSCCs from system (ALL SSCCs!)',
+        duration: const Duration(seconds: 5),
       );
 
       await _loadDataManagementData();
@@ -892,9 +824,9 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           tabs: const [
-            Tab(icon: Icon(Icons.build), text: 'Event Generator'),
-            Tab(icon: Icon(Icons.play_circle_filled), text: 'Simulation'),
-            Tab(icon: Icon(Icons.storage), text: 'Data Management'),
+            Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Event Generator'),
+            Tab(icon: TraqIcon(AppAssets.iconArrowR), text: 'Simulation'),
+            Tab(icon: TraqIcon(AppAssets.iconList), text: 'Data Management'),
           ],
         ),
       ),
@@ -1018,7 +950,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                             : (_isBulkGeneration
                                   ? _generateBulkEvents
                                   : _generateSingleEvent),
-                        icon: const Icon(Icons.play_arrow),
+                        icon: TraqIcon(AppAssets.iconArrowR),
                         label: Text(
                           _isBulkGeneration
                               ? 'Generate Bulk'
@@ -1185,7 +1117,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                               : (_simulationStatus?.status == 'RUNNING'
                                     ? _stopSupplyChainSimulation
                                     : null),
-                          icon: const Icon(Icons.stop),
+                          icon: TraqIcon(AppAssets.iconX),
                           label: const Text('Stop Simulation'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.colors.error,
@@ -1194,7 +1126,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         const SizedBox(width: 16),
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _pollSimulationStatus,
-                          icon: const Icon(Icons.refresh),
+                          icon: TraqIcon(AppAssets.iconRefresh),
                           label: const Text('Refresh Status'),
                         ),
                         if (_simulationStatus?.status == 'COMPLETED' ||
@@ -1203,7 +1135,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                           const SizedBox(width: 16),
                           OutlinedButton.icon(
                             onPressed: _clearSimulation,
-                            icon: const Icon(Icons.clear),
+                            icon: TraqIcon(AppAssets.iconX),
                             label: const Text('Clear'),
                           ),
                         ],
@@ -1280,7 +1212,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       onPressed: _isLoading
                           ? null
                           : _startSupplyChainSimulation,
-                      icon: const Icon(Icons.play_arrow),
+                      icon: TraqIcon(AppAssets.iconArrowR),
                       label: const Text('Start Simulation'),
                     ),
                   ],
@@ -1315,7 +1247,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _loadDataManagementData,
-                        icon: const Icon(Icons.refresh),
+                        icon: TraqIcon(AppAssets.iconRefresh),
                         label: const Text('Refresh'),
                       ),
                     ],
@@ -1426,7 +1358,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                     children: [
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanTestData,
-                        icon: const Icon(Icons.cleaning_services),
+                        icon: TraqIcon(AppAssets.iconSparkle),
                         label: const Text('Clean Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1434,7 +1366,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanObjectEvents,
-                        icon: const Icon(Icons.inventory_2_outlined),
+                        icon: TraqIcon(AppAssets.iconPackage),
                         label: const Text('Clean Object Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1442,7 +1374,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanGLNTestData,
-                        icon: const Icon(Icons.location_on),
+                        icon: TraqIcon(AppAssets.iconGln),
                         label: const Text('Clean GLN Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1450,7 +1382,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanGTINTestData,
-                        icon: const Icon(Icons.qr_code),
+                        icon: TraqIcon(AppAssets.iconQr),
                         label: const Text('Clean GTIN Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1458,7 +1390,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanSGTINTestData,
-                        icon: const Icon(Icons.qr_code_2),
+                        icon: TraqIcon(AppAssets.iconQr),
                         label: const Text('Clean SGTIN Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1466,7 +1398,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanSSCCTestData,
-                        icon: const Icon(Icons.inventory),
+                        icon: TraqIcon(AppAssets.iconSscc),
                         label: const Text('Clean SSCC Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1474,7 +1406,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanAllSSCCData,
-                        icon: const Icon(Icons.dangerous),
+                        icon: TraqIcon(AppAssets.iconAlert),
                         label: const Text('DANGER - Delete ALL SSCCs'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
@@ -1482,7 +1414,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanAggregationEvents,
-                        icon: const Icon(Icons.group_work_outlined),
+                        icon: TraqIcon(AppAssets.iconAggregate),
                         label: const Text('Clean Aggregation Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1490,7 +1422,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanTransactionEvents,
-                        icon: const Icon(Icons.swap_horiz),
+                        icon: TraqIcon(AppAssets.iconTransform),
                         label: const Text('Clean Transaction Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1500,7 +1432,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         onPressed: _isLoading
                             ? null
                             : _cleanTransformationEvents,
-                        icon: const Icon(Icons.transform_outlined),
+                        icon: TraqIcon(AppAssets.iconTransform),
                         label: const Text('Clean Transformation Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,

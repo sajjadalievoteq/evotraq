@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';

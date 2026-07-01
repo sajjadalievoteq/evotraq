@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationPharmaIssuesDialog extends StatelessWidget {
   const AggregationPharmaIssuesDialog({
@@ -28,7 +30,7 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
-      icon: Icon(Icons.block, color: theme.colorScheme.error),
+      icon: TraqIcon(AppAssets.iconBlock, color: theme.colorScheme.error),
       title: Text(
         allowProceed
             ? 'GS1 Compliance Issues'
@@ -53,8 +55,7 @@ class AggregationPharmaIssuesDialog extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.error_outline,
+                    TraqIcon(AppAssets.iconAlert,
                       size: 18,
                       color: theme.colorScheme.error,
                     ),

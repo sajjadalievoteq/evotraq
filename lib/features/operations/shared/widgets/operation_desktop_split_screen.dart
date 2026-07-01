@@ -54,6 +54,9 @@ import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_spli
 ///
 /// Set [readSelectedFromQuery] to `false` when the operation does not use the
 /// `?selected=<id>` query-param workaround after form submission.
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class OperationDesktopSplitScreen extends StatefulWidget {
   const OperationDesktopSplitScreen({
     super.key,
@@ -62,13 +65,13 @@ class OperationDesktopSplitScreen extends StatefulWidget {
     required this.listBuilder,
     required this.detailBuilder,
     this.readSelectedFromQuery = true,
-    this.fabIcon = Icons.add,
+    this.fabIconAsset = AppAssets.iconPlus,
   });
 
   final String title;
   final String createRoute;
   final bool readSelectedFromQuery;
-  final IconData fabIcon;
+  final String fabIconAsset;
 
   final Widget Function({
     required bool embedded,
@@ -132,7 +135,7 @@ class _OperationDesktopSplitScreenState extends State<OperationDesktopSplitScree
           primary: false,
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => context.go(widget.createRoute),
-            label: Icon(widget.fabIcon),
+            label: TraqIcon(widget.fabIconAsset),
           ),
           body: widget.detailBuilder(
             selectedId: _selectedId,

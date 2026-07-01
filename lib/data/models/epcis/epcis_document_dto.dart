@@ -61,17 +61,10 @@ class EPCISDocumentDTO {
     };
   }
 
-  /// Helper method to format dates with timezone information
+  /// Helper method to format dates with timezone information.
+  /// Always converts to UTC so the ISO string carries the 'Z' suffix
+  /// and the backend deserializer never has to guess the timezone.
   String _formatDateWithTimezone(DateTime dateTime) {
-    // Convert to format that Java's ZonedDateTime can parse
-    final String iso8601String = dateTime.toIso8601String();
-    
-    // Check if the string already has timezone information
-    if (iso8601String.endsWith('Z') || iso8601String.contains('+')) {
-      return iso8601String;
-    }
-    
-    // Add UTC timezone marker if missing
-    return '${iso8601String}Z';
+    return dateTime.toUtc().toIso8601String();
   }
 }

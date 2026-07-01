@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
@@ -425,8 +424,8 @@ class SSCCService {
     final queryParams = <String, dynamic>{
       if (unitType != null) 'containerType': unitType.name,
       if (status != null) 'containerStatus': status.name,
-      ?'sourceLocationId': sourceLocationId,
-      ?'destinationLocationId': destinationLocationId,
+      'sourceLocationId': sourceLocationId,
+      'destinationLocationId': destinationLocationId,
     };
 
     final response = await _dioService.get(

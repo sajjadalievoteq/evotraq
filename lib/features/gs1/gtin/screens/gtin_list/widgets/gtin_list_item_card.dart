@@ -4,6 +4,8 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_status_chip.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GtinListItemCard extends StatelessWidget {
   const GtinListItemCard({
@@ -30,14 +32,14 @@ class GtinListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(IconData icon, String text) {
+        Widget infoRow(String iconAsset, String text) {
           final rowColor =
               Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: rowColor),
+                TraqIcon(iconAsset, size: 16, color: rowColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -79,23 +81,17 @@ class GtinListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
 
-                        infoRow(Icons.qr_code, 'GTIN: ${gtin.gtinCode}'),
+                        infoRow(AppAssets.iconQr, 'GTIN: ${gtin.gtinCode}'),
 
                         if (gtin.manufacturer != null)
                           infoRow(
-                            Icons.business,
+                            AppAssets.iconFactory,
                             '${GtinUiConstants.listCardManufacturerPrefix}${gtin.manufacturer}',
-                          ),
-
-                        if (gtin.packagingLevel != null)
-                          infoRow(
-                            Icons.inventory,
-                            '${GtinUiConstants.listCardLevelPrefix}${gtin.packagingLevel}',
                           ),
 
                         if (gtin.registrationDate != null)
                           infoRow(
-                            Icons.calendar_today,
+                            AppAssets.iconCalendar,
                             '${GtinUiConstants.listCardRegisteredPrefix}'
                             '${DateFormat('MMM dd, yyyy').format(gtin.registrationDate!)}',
                           ),

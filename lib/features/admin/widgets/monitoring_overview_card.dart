@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class MonitoringOverviewCard extends StatelessWidget {
   final PerformanceMetrics? performance;
@@ -25,7 +27,7 @@ class MonitoringOverviewCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                TraqIcon(
                   _getOverallStatusIcon(),
                   color: _getOverallStatusColor(),
                   size: 24,
@@ -80,7 +82,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning, color: Colors.red, size: 20),
+                    TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -160,7 +162,7 @@ class MonitoringOverviewCard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildStatRow('Events/sec', '${performance!.eventsPerSecond.toStringAsFixed(1)}'),
+              child: _buildStatRow('Events/sec', performance!.eventsPerSecond.toStringAsFixed(1)),
             ),
             Expanded(
               child: _buildStatRow('Avg Processing', '${performance!.averageProcessingTimeMs.toStringAsFixed(1)}ms'),
@@ -229,19 +231,19 @@ class MonitoringOverviewCard extends StatelessWidget {
     }
   }
 
-  IconData _getOverallStatusIcon() {
+  String _getOverallStatusIcon() {
     final status = _getOverallStatus();
     switch (status) {
       case 'CRITICAL':
-        return Icons.dangerous;
+        return AppAssets.iconDangerous;
       case 'WARNING':
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case 'DEGRADED':
-        return Icons.info;
+        return AppAssets.iconInfo;
       case 'HEALTHY':
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       default:
-        return Icons.help;
+        return AppAssets.iconHelpCircle;
     }
   }
 

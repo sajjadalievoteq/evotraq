@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_group_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// EPCIS events card for shipping operation detail.
 class ShippingDetailEventsCard extends StatelessWidget {
@@ -26,7 +28,7 @@ class ShippingDetailEventsCard extends StatelessWidget {
           children: ids
               .map(
                 (id) => ActionChip(
-                  avatar: const Icon(Icons.link, size: 14),
+                  avatar: TraqIcon(AppAssets.iconAggregate, size: 14),
                   label: Text(
                     id.length > 16 ? '…${id.substring(id.length - 16)}' : id,
                     style: const TextStyle(

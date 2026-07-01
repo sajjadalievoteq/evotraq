@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../constants/notification_constants.dart';
 import '../widgets/notification_subscription_help.dart';
 import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CreateSubscriptionDialog extends StatefulWidget {
   final NotificationSubscription? subscription;
@@ -61,7 +64,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             Text(_isEditing ? 'Edit Subscription' : 'Create Subscription'),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.help_outline),
+              icon: TraqIcon(AppAssets.iconInfo),
               onPressed: () => _showHelpDialog(context),
               tooltip: 'Show Help',
             ),
@@ -210,7 +213,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
               if (!_isEditing) ...[
                 TextButton.icon(
                   onPressed: _isLoading ? null : _testDelivery,
-                  icon: const Icon(Icons.science),
+                  icon: TraqIcon(AppAssets.iconFlask),
                   label: Text(_selectedDeliveryMethod == 'EMAIL' ? 'Test Email' : 'Test Webhook'),
                 ),
                 const SizedBox(width: 8),
@@ -378,7 +381,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                             ..remove(value);
                           field.didChange(newValue.isEmpty ? null : newValue);
                         },
-                        deleteIcon: const Icon(Icons.close, size: 16),
+                        deleteIcon: TraqIcon(AppAssets.iconX, size: 16),
                       );
                     }).toList(),
                   ),
@@ -387,7 +390,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.add),
+                  icon: TraqIcon(AppAssets.iconPlus),
                   label: Text(field.value == null || field.value!.isEmpty
                       ? 'Select Event Types'
                       : 'Add More Event Types'),
@@ -538,12 +541,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         if (webhookUrl != null && webhookUrl.isNotEmpty) {
           context.read<NotificationCubit>().testWebhook(webhookUrl);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enter a valid webhook URL'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showError('Please enter a valid webhook URL');
           return;
         }
       } else if (deliveryMethod == 'EMAIL') {
@@ -551,12 +549,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         if (emailAddress != null && emailAddress.isNotEmpty) {
           context.read<NotificationCubit>().testEmail(emailAddress);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enter a valid email address'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showError('Please enter a valid email address');
           return;
         }
       }
@@ -571,12 +564,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
               _showTestResult(context, result);
             } else if (state.status == NotificationStatus.error) {
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Test failed: ${state.error}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              context.showError('Test failed: ${state.error}');
             }
           },
           child: AlertDialog(

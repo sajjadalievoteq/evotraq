@@ -1,5 +1,3 @@
-library sgtin_validators;
-
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'

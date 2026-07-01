@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget to display sensor data in EPCIS events
 class SensorDataWidget extends StatelessWidget {
@@ -40,11 +42,11 @@ class SensorDataWidget extends StatelessWidget {
   Widget _buildCollapsedView(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.sensors),
+        leading: const TraqIcon(AppAssets.iconSignal),
         title: Text('Sensor Data (${sensorElements!.length})'),
         subtitle: Text('${sensorElements!.length} sensor element(s) with ${_countMeasurements()} measurement(s)'),
         trailing: IconButton(
-          icon: const Icon(Icons.expand_more),
+          icon: TraqIcon(AppAssets.iconChevronD),
           onPressed: onExpand,
         ),
       ),
@@ -65,11 +67,11 @@ class SensorDataWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: const Icon(Icons.sensors),
+            leading: const TraqIcon(AppAssets.iconSignal),
             title: Text('Sensor Data (${sensorElements!.length})'),
             subtitle: const Text('Captured sensor measurements'),
             trailing: IconButton(
-              icon: const Icon(Icons.expand_less),
+              icon: const TraqIcon(AppAssets.iconChevronU),
               onPressed: onExpand,
             ),
           ),
@@ -92,7 +94,7 @@ class SensorDataWidget extends StatelessWidget {
     return ExpansionTile(
       title: Text(sensorElement.deviceId ?? 'Sensor'),
       subtitle: Text(sensorElement.deviceMetadata ?? 'No metadata'),
-      leading: const Icon(Icons.memory),
+      leading: TraqIcon(AppAssets.iconRefresh),
       children: [
         // Device information section
         ListTile(
@@ -155,16 +157,12 @@ class SensorDataWidget extends StatelessWidget {
                   ],
                 ),
                 dense: true,
-                onTap: onViewDetails != null ? () => onViewDetails!(sensorElement) : null,
               );
             },
           ),
-        ] else
-          const ListTile(
-            title: Text('No measurements available'),
-            dense: true,
-          ),
+        ],
       ],
     );
   }
 }
+  

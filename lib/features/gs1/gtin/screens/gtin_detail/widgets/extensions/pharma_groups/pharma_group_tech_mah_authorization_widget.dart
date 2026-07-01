@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -7,7 +7,6 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
@@ -251,7 +250,7 @@ class _TechMahAuthorizationGroupWidgetState
             SgtinInfoRow(
               'Marketing Authorization Holder (MAH) GLN',
               _mahGln != null
-                  ? '${_mahGln!.glnCode} – ${_mahGln!.locationName}'
+                  ? '${_mahGln!.glnCode} â ${_mahGln!.locationName}'
                   : (widget.initialMahGln.trim().isEmpty
                       ? null
                       : widget.initialMahGln),
@@ -374,7 +373,7 @@ class _TechMahAuthorizationGroupWidgetState
     );
 
     return Gs1GroupCard(
-      title: 'Technical specification — MAH & authorization',
+      title: 'Technical specification â MAH & authorization',
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

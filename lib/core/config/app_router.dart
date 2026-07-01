@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
@@ -63,12 +63,24 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving/receiving_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/receiving_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping/return_shipping_screen.dart';
+import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/return_shipping_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
+import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/return_shipping_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving/return_receiving_screen.dart';
+import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation/return_receiving_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/return_receiving_operation_detail_screen.dart';
+
+import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/hierarchy_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing/packing_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/packing_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/unpacking_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking/unpacking_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/unpacking_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation/decommissioning_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning/decommissioning_screen.dart';
+import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation_detail/decommissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning/commissioning_screen.dart';
@@ -110,6 +122,15 @@ class GoRouterRefreshStream extends ChangeNotifier {
   void dispose() {
     _subscription.cancel();
     super.dispose();
+  }
+}
+
+PharmaReturnContext? _pharmaReturnContextFromExtra(Object? extra) {
+  if (extra is! Map<String, dynamic>) return null;
+  try {
+    return PharmaReturnContext.fromExtra(extra);
+  } catch (_) {
+    return null;
   }
 }
 
@@ -185,18 +206,24 @@ class AppRouter {
     routes: [
       GoRoute(
         path: Constants.splashRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const SplashScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const SplashScreen(),
+        ),
       ),
       GoRoute(
         path: Constants.loginRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const LoginScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: Constants.registerRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const RegisterScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const RegisterScreen(),
+        ),
       ),
       GoRoute(
         path: Constants.checkEmailRoute,
@@ -259,8 +286,10 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.homeRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const HomeScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const HomeScreen(),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -271,8 +300,10 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.profileRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const ProfileScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const ProfileScreen(),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -936,8 +967,10 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GtinsRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const GTINScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const GTINScreen(),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -996,8 +1029,10 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GlnsRoute,
-        pageBuilder: (context, state) =>
-            TraqRouterTransitions.page(key: state.pageKey, child: const GLNScreen()),
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const GLNScreen(),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -1437,8 +1472,9 @@ class AppRouter {
       GoRoute(
         path: Constants.epcisObjectEventDetailQueryRoute,
         pageBuilder: (context, state) {
-          final eventId = state.uri.queryParameters[
-                  ObjectEventRouteConstants.queryEventId] ??
+          final eventId =
+              state.uri.queryParameters[ObjectEventRouteConstants
+                  .queryEventId] ??
               '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
@@ -1468,9 +1504,7 @@ class AppRouter {
             return Constants.loginRoute;
           }
           final id = state.pathParameters['id'] ?? '';
-          if (id.contains(':') ||
-              id.contains(';') ||
-              id.contains('/')) {
+          if (id.contains(':') || id.contains(';') || id.contains('/')) {
             return ObjectEventRouteConstants.detailLocation(id);
           }
           return null;
@@ -1482,9 +1516,7 @@ class AppRouter {
           final aggregationEventId = state.pathParameters['id'] ?? '';
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: AggregationEventDetailScreen(
-              eventId: aggregationEventId,
-            ),
+            child: AggregationEventDetailScreen(eventId: aggregationEventId),
           );
         },
         redirect: (context, state) {
@@ -1679,6 +1711,106 @@ class AppRouter {
       ),
 
       GoRoute(
+        path: Constants.opReturnShippingRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const ReturnShippingScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opReturnShippingCreateRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: ReturnShippingOperationScreen(
+            pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
+          ),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opReturnShippingDetailRoute,
+        pageBuilder: (context, state) {
+          final operationId = state.pathParameters['operationId']!;
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: ReturnShippingOperationDetailScreen(
+              operationId: operationId,
+            ),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+
+      GoRoute(
+        path: Constants.opReturnReceivingRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const ReturnReceivingScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opReturnReceivingCreateRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: ReturnReceivingOperationScreen(
+            pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
+          ),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opReturnReceivingDetailRoute,
+        pageBuilder: (context, state) {
+          final operationId = state.pathParameters['operationId']!;
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: ReturnReceivingOperationDetailScreen(
+              operationId: operationId,
+            ),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+
+      GoRoute(
         path: Constants.opPackingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
@@ -1698,6 +1830,25 @@ class AppRouter {
           key: state.pageKey,
           child: const PackingOperationScreen(),
         ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.hierarchyRoute,
+        pageBuilder: (context, state) {
+          final rootEpc = state.uri.queryParameters['rootEpc'] ?? '';
+          final title =
+              state.uri.queryParameters['title'] ?? 'Container Hierarchy';
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: HierarchyScreen(rootEpc: rootEpc, title: title),
+          );
+        },
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -1759,6 +1910,52 @@ class AppRouter {
           return TraqRouterTransitions.page(
             key: state.pageKey,
             child: UnpackingOperationDetailScreen(operationId: operationId),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+
+      GoRoute(
+        path: Constants.opDecommissioningRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const DecommissioningScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opDecommissioningCreateRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const DecommissioningOperationScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opDecommissioningDetailRoute,
+        pageBuilder: (context, state) {
+          final operationId = state.pathParameters['operationId']!;
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: DecommissioningOperationDetailScreen(operationId: operationId),
           );
         },
         redirect: (context, state) {
@@ -1880,9 +2077,7 @@ class AppRouter {
         path: Constants.barcodeScanRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const GS1BarcodeScannerScreen(
-            title: 'GS1 Barcode Scanner',
-          ),
+          child: const GS1BarcodeScannerScreen(title: 'GS1 Barcode Scanner'),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;

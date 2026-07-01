@@ -1,0 +1,176 @@
+﻿import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
+import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
+import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_content.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
+/// Screen to display return receiving operation details.
+class ReturnReceivingOperationDetailScreen extends StatefulWidget {
+  const ReturnReceivingOperationDetailScreen({
+    super.key,
+    this.operationId,
+    this.embedded = false,
+    this.awaitingSelection = false,
+    this.listLoading = false,
+  });
+
+  final String? operationId;
+  final bool embedded;
+  final bool awaitingSelection;
+  final bool listLoading;
+
+  @override
+  State<ReturnReceivingOperationDetailScreen> createState() =>
+      _ReturnReceivingOperationDetailScreenState();
+}
+
+class _ReturnReceivingOperationDetailScreenState
+    extends State<ReturnReceivingOperationDetailScreen> {
+  ReturnReceivingResponse? _operation;
+  bool _isLoading = false;
+  String? _errorMessage;
+  GLN? _sourceGLNDetails;
+  GLN? _receivingGlnDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLoadIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(ReturnReceivingOperationDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final idChanged = oldWidget.operationId != widget.operationId;
+    final selectionOpened =
+        oldWidget.awaitingSelection && !widget.awaitingSelection;
+    if ((idChanged || selectionOpened) &&
+        widget.operationId != null &&
+        !widget.awaitingSelection) {
+      _startLoadIfNeeded(force: true);
+    }
+  }
+
+  void _startLoadIfNeeded({bool force = false}) {
+    if (widget.operationId == null || widget.awaitingSelection) return;
+    if (!force && _isLoading) return;
+    _isLoading = true;
+    _errorMessage = null;
+    _operation = null;
+    _sourceGLNDetails = null;
+    _receivingGlnDetails = null;
+    _loadOperationDetails();
+  }
+
+  Future<void> _loadOperationDetails() async {
+    final id = widget.operationId;
+    if (id == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _operation = null;
+      _sourceGLNDetails = null;
+      _receivingGlnDetails = null;
+    });
+
+    try {
+      final receivingService = getIt<ReturnReceivingOperationService>();
+      final operation = await receivingService.getReturnReceivingOperation(id);
+      setState(() => _operation = operation);
+      await _loadGLNDetails();
+    } on ApiException catch (e) {
+      setState(() {
+        _errorMessage = e.getUserFriendlyMessage();
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Unable to load this return receiving operation. '
+            'Check your connection and tap Retry. '
+            'If the problem continues, the record may have been deleted or you may not have access to it.';
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadGLNDetails() async {
+    if (_operation == null) return;
+
+    try {
+      final glnService = getIt<GLNService>();
+      GLN? source;
+      GLN? destination;
+      if (_operation!.sourceGLN != null) {
+        source = await glnService.getGLNByCode(_operation!.sourceGLN!);
+      }
+      if (_operation!.receivingGLN != null) {
+        destination = await glnService.getGLNByCode(_operation!.receivingGLN!);
+      }
+      if (mounted) {
+        setState(() {
+          _sourceGLNDetails = source;
+          _receivingGlnDetails = destination;
+        });
+      }
+    } catch (_) {
+      // GLN not found in master data — display code only.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = ReturnReceivingDetailContent(
+      awaitingSelection: widget.awaitingSelection,
+      listLoading: widget.listLoading,
+      isLoading: _isLoading,
+      errorMessage: _errorMessage,
+      operation: _operation,
+      sourceGlnDetails: _sourceGLNDetails,
+      receivingGlnDetails: _receivingGlnDetails,
+      onRetry: _loadOperationDetails,
+    );
+
+    if (widget.embedded) return content;
+
+    if (_isLoading && _operation == null && _errorMessage == null) {
+      return Scaffold(
+        appBar: TraqAppBar(context, title: const Text('Loading…')),
+        body: content,
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: TraqAppBar(context, title: const Text('Error')),
+        body: content,
+      );
+    }
+
+    return Scaffold(
+      appBar: TraqAppBar(
+        context,
+        leading: IconButton(
+          icon: TraqIcon(AppAssets.iconChevronL),
+          onPressed: () => context.go(Constants.opReturnReceivingRoute),
+        ),
+        title: Text(_operation?.returnReceivingReference ?? 'Return Receiving Detail'),
+        actions: [
+          IconButton(
+            icon: TraqIcon(AppAssets.iconRefresh),
+            onPressed: _loadOperationDetails,
+          ),
+        ],
+      ),
+      body: content,
+    );
+  }
+}

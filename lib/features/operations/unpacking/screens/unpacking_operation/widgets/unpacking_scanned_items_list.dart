@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_hierarchy_row.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// List of scanned EPCs with remove and clear-all actions.
 class UnpackingScannedItemsList extends StatelessWidget {
@@ -24,11 +27,11 @@ class UnpackingScannedItemsList extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.list_alt),
-                    const SizedBox(width: 8),
-                    const Text(
+                    TraqIcon(AppAssets.iconList),
+                    SizedBox(width: 8),
+                    Text(
                       'Items to Unpack',
                       style: TextStyle(
                         fontSize: 16,
@@ -37,20 +40,21 @@ class UnpackingScannedItemsList extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 Text(
-                  '${scannedEpcs.length} item(s) queued for removal',
+                  '${scannedEpcs.length} EPC(s) queued for unpacking',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.orange[800],
+                    color: Colors.teal[800],
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 8),
                 if (scannedEpcs.isNotEmpty)
-                  TextButton(
-                    onPressed: onClearAll,
-                    child: const Text('Clear All'),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: onClearAll,
+                      child: const Text('Clear All'),
+                    ),
                   ),
               ],
             ),
@@ -72,29 +76,14 @@ class UnpackingScannedItemsList extends StatelessWidget {
                 itemCount: scannedEpcs.length,
                 itemBuilder: (context, index) {
                   final epc = scannedEpcs[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.teal[100],
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: Colors.teal[800],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      epc,
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
+                  return EpcHierarchyRow(
+                    epc: epc,
+                    hierarchyScreenTitle: 'Unpacking Hierarchy',
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: TraqIcon(AppAssets.iconTrash, color: Colors.red),
+                      visualDensity: VisualDensity.compact,
                       onPressed: () => onRemoveItem(index),
                     ),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
                   );
                 },
               ),

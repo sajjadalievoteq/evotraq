@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class CommissioningPartialSuccessSummaryRow extends StatelessWidget {
   const CommissioningPartialSuccessSummaryRow({
@@ -18,7 +20,7 @@ class CommissioningPartialSuccessSummaryRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(Icons.circle, size: 8, color: color),
+          TraqIcon(AppAssets.iconCircle, color: color, size: 8),
           const SizedBox(width: 8),
           Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w500)),
           Text(

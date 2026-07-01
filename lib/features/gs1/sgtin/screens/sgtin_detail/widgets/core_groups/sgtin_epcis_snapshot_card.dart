@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
@@ -64,7 +66,7 @@ class SgtinEpcisSnapshotCard extends StatelessWidget {
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => _openObjectEventForm(context),
-              icon: const Icon(Icons.event_note_outlined, size: 18),
+              icon: const TraqIcon(AppAssets.iconCalendar, size: 18),
               label: const Text('Record Object Event'),
             ),
           ],

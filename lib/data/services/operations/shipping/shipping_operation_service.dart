@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_page_response.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
 class ShippingOperationService {
   ShippingOperationService({
@@ -38,11 +39,29 @@ class ShippingOperationService {
         acceptAllStatusCodes: true,
       );
 
-      if (response.statusCode == 201 ||
-          response.statusCode == 200 ||
-          response.statusCode == 207 ||
-          response.statusCode == 422) {
-        final responseData = jsonDecode(response.data);
+      final statusCode = response.statusCode;
+      final body = response.data?.toString();
+
+      if (statusCode == 201 ||
+          statusCode == 200 ||
+          statusCode == 207 ||
+          statusCode == 422 ||
+          statusCode == 400) {
+        if (body == null || body.trim().isEmpty) {
+          throw _apiExceptionFromResponse(
+            response,
+            fallbackMessage: 'Failed to create shipping operation',
+          );
+        }
+        final responseData = jsonDecode(body) as Map<String, dynamic>;
+        if (OperationApiErrorMessage.isStructuredErrorBody(responseData)) {
+          throw ApiException(
+            statusCode: statusCode,
+            message: OperationApiErrorMessage.fromJsonMap(responseData) ??
+                'Failed to create shipping operation',
+            responseBody: body,
+          );
+        }
         return ShippingResponse.fromJson(responseData);
       }
 

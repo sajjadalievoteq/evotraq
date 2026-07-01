@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// A screen for managing validation rules
 class ValidationRuleManagementScreen extends StatefulWidget {
@@ -37,12 +41,12 @@ class _ValidationRuleManagementScreenState
         title: const Text('Validation Rule Management'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             tooltip: 'Help',
             onPressed: () => _showHelp(),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             tooltip: 'Reset to defaults',
             onPressed: () => _confirmResetToDefaults(),
           ),
@@ -67,7 +71,7 @@ class _ValidationRuleManagementScreenState
           TextField(
             decoration: InputDecoration(
               hintText: 'Search rules...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: TraqIcon(AppAssets.iconSearch),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
@@ -216,7 +220,7 @@ class _ValidationRuleManagementScreenState
                       _showHelp();
                     },
                     backgroundColor: Colors.blue,
-                    child: const Icon(Icons.help_outline),
+                    child: TraqIcon(AppAssets.iconInfo),
                   ),
                 )
               : const SizedBox.shrink(),
@@ -238,7 +242,7 @@ class _ValidationRuleManagementScreenState
                       _importRules();
                     },
                     backgroundColor: Colors.orange,
-                    child: const Icon(Icons.file_upload),
+                    child: const TraqIcon(AppAssets.iconUpload),
                   ),
                 )
               : const SizedBox.shrink(),
@@ -260,7 +264,7 @@ class _ValidationRuleManagementScreenState
                       _addNewRule();
                     },
                     backgroundColor: Colors.green,
-                    child: const Icon(Icons.add),
+                    child: TraqIcon(AppAssets.iconPlus),
                   ),
                 )
               : const SizedBox.shrink(),
@@ -276,7 +280,7 @@ class _ValidationRuleManagementScreenState
           child: AnimatedRotation(
             duration: const Duration(milliseconds: 200),
             turns: _isFabOpen ? 0.125 : 0.0, // 45 degrees when open
-            child: Icon(_isFabOpen ? Icons.close : Icons.menu),
+            child: TraqIcon(_isFabOpen ? AppAssets.iconX : AppAssets.iconMenu),
           ),
         ),
       ],
@@ -332,7 +336,8 @@ class _ValidationRuleManagementScreenState
                 .toList();
           } else {
             filteredRules = filteredRules
-                .where((r) => r.eventType == _selectedEventType)
+                .where((r) =>
+                    r.eventType == EventType.values.byName(_selectedEventType))
                 .toList();
           }
         }
@@ -422,8 +427,8 @@ class _ValidationRuleManagementScreenState
                         ],
                         const Spacer(),
                         Chip(
-                          avatar: Icon(
-                            rule.severity.icon,
+                          avatar: TraqIcon(
+                            rule.severity.iconAsset,
                             size: 16,
                             color: rule.severity.color,
                           ),
@@ -472,6 +477,16 @@ class _ValidationRuleManagementScreenState
     context.push('/admin/validation-rules/new/${Uri.encodeComponent(ruleId)}');
   }
 
+  void _showHelp() {
+    context.push(Constants.adminValidationRulesHelpRoute);
+  }
+
+  Future<void> _importRules() async {
+    context.showInfo(
+      'To import rules, use the API export JSON format and create rules via the admin API.',
+    );
+  }
+
   void _confirmResetToDefaults() {
     showDialog(
       context: context,
@@ -485,29 +500,19 @@ class _ValidationRuleManagementScreenState
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
+          FilledButton(
+            onPressed: () async {
               Navigator.of(context).pop();
-              context.read<ValidationRuleCubit>().resetToDefaults();
+              final cubit = context.read<ValidationRuleCubit>();
+              await cubit.resetToDefaults();
+              if (!context.mounted) return;
+              context.showSuccess('Validation rules reset to defaults');
             },
-            child: const Text('Reset', style: TextStyle(color: Colors.red)),
+            child: const Text('Reset'),
           ),
         ],
       ),
     );
   }
-
-  void _showHelp() {
-    context.push('/admin/validation-rules/help');
-  }
-
-  void _importRules() {
-    // TODO: Implement rule import functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Rule import functionality coming soon!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
 }
+   

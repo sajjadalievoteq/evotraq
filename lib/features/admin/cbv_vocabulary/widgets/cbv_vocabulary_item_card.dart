@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CbvVocabularyItemCard extends StatelessWidget {
   const CbvVocabularyItemCard({
@@ -239,18 +241,13 @@ class _DeleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert,
-        size: 18,
-        color: context.colors.textMuted,
-      ),
+      icon: TraqIcon(AppAssets.iconMoreVert, color: context.colors.textMuted, size: 18),
       itemBuilder: (_) => [
         PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline,
-                  size: 18, color: context.colors.error),
+              TraqIcon(AppAssets.iconTrash, color: context.colors.error, size: 18),
               const SizedBox(width: TraqSpacing.sm),
               Text(
                 'Delete',
@@ -291,7 +288,7 @@ class _AuditRow extends StatelessWidget {
       padding: const EdgeInsets.only(top: TraqSpacing.sm),
       child: Row(
         children: [
-          Icon(Icons.history, size: 12, color: colors.textFaint),
+          TraqIcon(AppAssets.iconClock, size: 12, color: colors.textFaint),
           const SizedBox(width: 4),
           Text(
             parts.join(' · '),
@@ -332,8 +329,7 @@ class _DeletingOverlay extends StatelessWidget {
             const SizedBox(width: TraqSpacing.sm),
             Text(
               'Deleting "$label"…',
-              style:
-                  context.text.bodySm.copyWith(color: context.colors.textMuted),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
@@ -341,3 +337,4 @@ class _DeletingOverlay extends StatelessWidget {
     );
   }
 }
+                  

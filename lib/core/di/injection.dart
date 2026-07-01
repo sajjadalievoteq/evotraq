@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
+import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
@@ -44,6 +45,9 @@ import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/decommissioning/decommissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
@@ -160,12 +164,28 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => ReceivingOperationService(dioService: getIt<DioService>()),
   );
 
+  getIt.registerLazySingleton<ReturnShippingOperationService>(
+    () => ReturnShippingOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ReturnReceivingOperationService>(
+    () => ReturnReceivingOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<HierarchyService>(
+    () => HierarchyService(dioService: getIt<DioService>()),
+  );
+
   getIt.registerLazySingleton<PackingOperationService>(
     () => PackingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<UnpackingOperationService>(
     () => UnpackingOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<DecommissioningOperationService>(
+    () => DecommissioningOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<CommissioningOperationService>(

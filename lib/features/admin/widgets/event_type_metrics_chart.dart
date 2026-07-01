@@ -33,7 +33,7 @@ class EventTypeMetricsChart extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Container(
+            SizedBox(
               height: 300,
               child: _buildChart(),
             ),

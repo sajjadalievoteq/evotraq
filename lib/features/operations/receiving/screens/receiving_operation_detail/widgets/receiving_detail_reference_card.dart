@@ -19,6 +19,11 @@ class ReceivingDetailReferenceCard extends StatelessWidget {
     return ReceivingDetailGroupCard(
       title: 'Reference Details',
       children: [
+        if (operation.acceptingReference != null)
+          ReceivingDetailInfoRowCopy(
+            label: 'Accepting Reference',
+            value: operation.acceptingReference!,
+          ),
         if (operation.receivingReference != null)
           ReceivingDetailInfoRowCopy(
             label: 'Receiving Reference',

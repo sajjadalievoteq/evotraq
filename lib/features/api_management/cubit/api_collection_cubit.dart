@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -46,14 +45,12 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
 
     try {
       final selectedCollection = await _service.getCollectionWithApis(collectionId);
-      final apis = selectedCollection?.apiDefinitions ?? [];
+      final apis = selectedCollection.apiDefinitions;
       
       final updatedCollections = List<ApiCollection>.from(state.collections);
-      if (selectedCollection != null) {
-        final index = updatedCollections.indexWhere((c) => c.id == collectionId);
-        if (index >= 0) {
-          updatedCollections[index] = selectedCollection;
-        }
+      final index = updatedCollections.indexWhere((c) => c.id == collectionId);
+      if (index >= 0) {
+        updatedCollections[index] = selectedCollection;
       }
 
       emit(state.copyWith(

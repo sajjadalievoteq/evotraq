@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../data/services/performance_optimization_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
 class PerformanceOptimizationDashboard extends StatefulWidget {
@@ -73,7 +76,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
         title: const Text('Performance Optimization Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadPerformanceData,
             tooltip: 'Refresh Data',
           ),
@@ -81,11 +84,11 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-            Tab(icon: Icon(Icons.query_stats), text: 'Query Optimization'),
-            Tab(icon: Icon(Icons.hub), text: 'Connection Pool'),
-            Tab(icon: Icon(Icons.settings_system_daydream), text: 'Thread Management'),
-            Tab(icon: Icon(Icons.memory), text: 'Resource Management'),
+            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Overview'),
+            Tab(icon: TraqIcon(AppAssets.iconBarChart), text: 'Query Optimization'),
+            Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Connection Pool'),
+            Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Thread Management'),
+            Tab(icon: TraqIcon(AppAssets.iconRefresh), text: 'Resource Management'),
           ],
         ),
       ),
@@ -97,7 +100,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error, size: 64, color: Colors.red[300]),
+                      TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
                       const SizedBox(height: 16),
                       Text(_errorMessage!, textAlign: TextAlign.center),
                       const SizedBox(height: 16),
@@ -152,7 +155,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           children: [
             Row(
               children: [
-                Icon(Icons.speed, size: 32, color: scoreColor),
+                TraqIcon(AppAssets.iconClock, size: 32, color: scoreColor),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,24 +193,24 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
   Widget _buildSystemHealthCards() {
     return Row(
       children: [
-        Expanded(child: _buildHealthCard('Memory Usage', _resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', Icons.memory)),
+        Expanded(child: _buildHealthCard('Memory Usage', _resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', AppAssets.iconChip)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('CPU Usage', '${((_resourceUsage?['cpu']?['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%', Icons.computer)),
+        Expanded(child: _buildHealthCard('CPU Usage', '${((_resourceUsage?['cpu']?['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%', AppAssets.iconComputer)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('Connections', '${_connectionPoolStatus?['activeConnections'] ?? 0}/${_connectionPoolStatus?['totalConnections'] ?? 0}', Icons.hub)),
+        Expanded(child: _buildHealthCard('Connections', '${_connectionPoolStatus?['activeConnections'] ?? 0}/${_connectionPoolStatus?['totalConnections'] ?? 0}', AppAssets.iconHub)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('Threads', '${_threadPoolStatus?['systemMetrics']?['activeThreadCount'] ?? 0}', Icons.settings_system_daydream)),
+        Expanded(child: _buildHealthCard('Threads', '${_threadPoolStatus?['systemMetrics']?['activeThreadCount'] ?? 0}', AppAssets.iconSettings)),
       ],
     );
   }
 
-  Widget _buildHealthCard(String title, String value, IconData icon) {
+  Widget _buildHealthCard(String title, String value, String iconAsset) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue),
+            TraqIcon(iconAsset, size: 32, color: Colors.blue),
             const SizedBox(height: 8),
             Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
             const SizedBox(height: 4),
@@ -227,7 +230,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           children: [
             const Row(
               children: [
-                Icon(Icons.lightbulb, color: Colors.amber),
+                TraqIcon(AppAssets.iconLightbulb, color: Colors.amber),
                 SizedBox(width: 8),
                 Text('Top Recommendations', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ],
@@ -240,7 +243,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                    TraqIcon(AppAssets.iconChevronR, size: 12, color: Colors.grey),
                     const SizedBox(width: 8),
                     Expanded(child: Text(rec.toString())),
                   ],
@@ -267,22 +270,22 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _runBenchmark('comprehensive'),
-                  icon: const Icon(Icons.speed_outlined, size: 16),
+                  icon: const TraqIcon(AppAssets.iconGauge, size: 16),
                   label: const Text('Run Benchmark'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _detectSlowQueries(),
-                  icon: const Icon(Icons.query_stats, size: 16),
+                  icon: const TraqIcon(AppAssets.iconBarChart, size: 16),
                   label: const Text('Detect Slow Queries'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _optimizeMemory(),
-                  icon: const Icon(Icons.memory, size: 16),
+                  icon: TraqIcon(AppAssets.iconRefresh, size: 16),
                   label: const Text('Optimize Memory'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _detectConnectionLeaks(),
-                  icon: const Icon(Icons.hub, size: 16),
+                  icon: const TraqIcon(AppAssets.iconHub, size: 16),
                   label: const Text('Check Leaks'),
                 ),
               ],
@@ -559,9 +562,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
   // Action methods
   void _analyzeQuery(String query) async {
     if (query.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a query to analyze')),
-      );
+      context.showError('Please enter a query to analyze');
       return;
     }
 
@@ -669,7 +670,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.query_stats, color: Colors.red[700]),
+            TraqIcon(AppAssets.iconBarChart, color: Colors.red[700]),
             const SizedBox(width: 8),
             const Text('Slow Query Detection Results'),
           ],
@@ -703,7 +704,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                       'Found ${slowQueries.length} slow queries',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: slowQueries.length > 0 ? Colors.red[700] : Colors.green[700],
+                        color: slowQueries.isNotEmpty ? Colors.red[700] : Colors.green[700],
                       ),
                     ),
                   ],
@@ -730,7 +731,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle, size: 48, color: Colors.green[600]),
+                            TraqIcon(AppAssets.iconCheck, size: 48, color: Colors.green[600]),
                             const SizedBox(height: 16),
                             Text(
                               'Excellent! No slow queries detected.',
@@ -822,7 +823,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                                             children: [
                                               Row(
                                                 children: [
-                                                  Icon(Icons.lightbulb, size: 16, color: Colors.blue[700]),
+                                                  TraqIcon(AppAssets.iconLightbulb, color: Colors.blue[700], size: 16),
                                                   const SizedBox(width: 4),
                                                   const Text(
                                                     'Recommendation:',
@@ -868,7 +869,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.memory, color: Colors.green[700]),
+            TraqIcon(AppAssets.iconRefresh, color: Colors.green[700]),
             const SizedBox(width: 8),
             const Text('Memory Optimization Results'),
           ],
@@ -893,8 +894,8 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        status == 'optimized' ? Icons.check_circle : Icons.settings,
+                      TraqIcon(
+                        status == 'optimized' ? AppAssets.iconCheckCircle : AppAssets.iconSettings,
                         color: status == 'optimized' ? Colors.green[700] : Colors.orange[700],
                       ),
                       const SizedBox(width: 12),
@@ -967,7 +968,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                   ...optimizations.map<Widget>((opt) {
                     return Card(
                       child: ListTile(
-                        leading: Icon(Icons.check, color: Colors.green[600]),
+                        leading: TraqIcon(AppAssets.iconCheck, color: Colors.green[600]),
                         title: Text(opt['action'] ?? 'Unknown action'),
                         subtitle: opt['description'] != null ? Text(opt['description']) : null,
                         trailing: opt['improvement'] != null
@@ -1004,7 +1005,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.speed, color: Colors.blue[700]),
+            TraqIcon(AppAssets.iconClock, color: Colors.blue[700]),
             const SizedBox(width: 8),
             Text('Performance Benchmark Results'),
           ],
@@ -1034,8 +1035,8 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(
-                          status == 'completed' ? Icons.check_circle : Icons.pending,
+                        TraqIcon(
+                          status == 'completed' ? AppAssets.iconCheckCircle : AppAssets.iconPending,
                           color: status == 'completed' ? Colors.green[600] : Colors.orange[600],
                           size: 20,
                         ),
@@ -1099,7 +1100,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.info, size: 48, color: Colors.grey),
+                            TraqIcon(AppAssets.iconInfo, size: 48, color: Colors.grey),
                             SizedBox(height: 16),
                             Text(
                               'No detailed results available',
@@ -1121,8 +1122,8 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: status == 'success' ? Colors.green[100] : Colors.red[100],
-                                child: Icon(
-                                  status == 'success' ? Icons.check : Icons.close,
+                                child: TraqIcon(
+                                  status == 'success' ? AppAssets.iconCheck : AppAssets.iconX,
                                   color: status == 'success' ? Colors.green[700] : Colors.red[700],
                                 ),
                               ),
@@ -1176,7 +1177,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.hub, color: Colors.orange[700]),
+            TraqIcon(AppAssets.iconHub, color: Colors.orange[700]),
             const SizedBox(width: 8),
             const Text('Connection Leak Detection'),
           ],
@@ -1200,8 +1201,8 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      leaks.isEmpty ? Icons.check_circle : Icons.warning,
+                    TraqIcon(
+                      leaks.isEmpty ? AppAssets.iconCheckCircle : AppAssets.iconAlert,
                       color: leaks.isEmpty ? Colors.green[700] : Colors.red[700],
                     ),
                     const SizedBox(width: 12),
@@ -1275,7 +1276,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle, size: 48, color: Colors.green[600]),
+                            TraqIcon(AppAssets.iconCheck, size: 48, color: Colors.green[600]),
                             const SizedBox(height: 16),
                             Text(
                               'Excellent! No connection leaks detected.',
@@ -1307,7 +1308,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                             child: ExpansionTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.red[100],
-                                child: Icon(Icons.warning, color: Colors.red[700], size: 20),
+                                child: TraqIcon(AppAssets.iconAlert, color: Colors.red[700], size: 20),
                               ),
                               title: Text(
                                 'Connection Leak #${index + 1}',
@@ -1368,7 +1369,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                                           children: [
                                             Row(
                                               children: [
-                                                Icon(Icons.lightbulb, size: 16, color: Colors.orange[700]),
+                                                TraqIcon(AppAssets.iconLightbulb, color: Colors.orange[700], size: 16),
                                                 const SizedBox(width: 4),
                                                 const Text(
                                                   'Recommended Action:',
@@ -1402,14 +1403,9 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               onPressed: () {
                 // Could trigger automatic leak cleanup
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Automatic leak cleanup initiated...'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
+                context.showWarning('Automatic leak cleanup initiated...');
               },
-              icon: const Icon(Icons.auto_fix_high),
+              icon: TraqIcon(AppAssets.iconSparkle),
               label: const Text('Auto Fix'),
             ),
           TextButton(
@@ -1444,7 +1440,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.analytics, color: Colors.blue[700]),
+            TraqIcon(AppAssets.iconBarChart, color: Colors.blue[700]),
             const SizedBox(width: 8),
             Text(title),
           ],

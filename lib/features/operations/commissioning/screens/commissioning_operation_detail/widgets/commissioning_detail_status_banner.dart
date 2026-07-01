@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_count_badge.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_batch_status_utils.dart';
 
@@ -52,8 +53,8 @@ class CommissioningDetailStatusBanner extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          CommissioningBatchStatusUtils.icon(batch.status),
+                        TraqIcon(
+                          CommissioningBatchStatusUtils.iconAsset(batch.status),
                           color: Colors.white,
                           size: 16,
                         ),
@@ -78,14 +79,14 @@ class CommissioningDetailStatusBanner extends StatelessWidget {
                       CommissioningDetailCountBadge(
                         text: '${batch.totalCommissioned} Commissioned',
                         color: Colors.green,
-                        icon: Icons.check_circle,
+                        iconAsset: AppAssets.iconCheck,
                       ),
                       if (batch.totalFailed > 0) ...[
                         const SizedBox(height: 4),
                         CommissioningDetailCountBadge(
                           text: '${batch.totalFailed} Failed',
                           color: Colors.red,
-                          icon: Icons.error,
+                          iconAsset: AppAssets.iconAlert,
                         ),
                       ],
                       if (batch.totalRequested > 0) ...[
@@ -93,7 +94,7 @@ class CommissioningDetailStatusBanner extends StatelessWidget {
                         CommissioningDetailCountBadge(
                           text: '${batch.totalRequested} Requested',
                           color: Colors.grey,
-                          icon: Icons.pending,
+                          iconAsset: AppAssets.iconPending,
                         ),
                       ],
                     ],

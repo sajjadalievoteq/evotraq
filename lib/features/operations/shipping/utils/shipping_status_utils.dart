@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_status.dart';
 
 /// Shipping operation status color and icon helpers.
@@ -18,16 +19,16 @@ class ShippingStatusUtils {
     }
   }
 
-  static IconData iconFor(ShippingStatus status) {
+  static String iconAsset(ShippingStatus status) {
     switch (status) {
       case ShippingStatus.success:
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       case ShippingStatus.partialSuccess:
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case ShippingStatus.failed:
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case ShippingStatus.validationError:
-        return Icons.error_outline;
+        return AppAssets.iconXCircle;
     }
   }
 

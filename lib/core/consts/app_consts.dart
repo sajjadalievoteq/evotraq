@@ -146,14 +146,30 @@ class Constants {
   static const String opReceivingCreateRoute = '/operations/receiving/create';
   static const String opReceivingDetailRoute =
       '/operations/receiving/:operationId';
+  static const String opReturnShippingRoute = '/operations/return-shipping';
+  static const String opReturnShippingCreateRoute = '/operations/return-shipping/create';
+  static const String opReturnShippingDetailRoute =
+      '/operations/return-shipping/:operationId';
+  static const String opReturnReceivingRoute = '/operations/return-receiving';
+  static const String opReturnReceivingCreateRoute = '/operations/return-receiving/create';
+  static const String opReturnReceivingDetailRoute =
+      '/operations/return-receiving/:operationId';
+
   static const String opPackingRoute = '/operations/packing';
   static const String opPackingCreateRoute = '/operations/packing/create';
   static const String opPackingDetailRoute =
       '/operations/packing/:operationId';
+  static const String hierarchyRoute = '/hierarchy';
   static const String opUnpackingRoute = '/operations/unpacking';
   static const String opUnpackingCreateRoute = '/operations/unpacking/create';
   static const String opUnpackingDetailRoute =
       '/operations/unpacking/:operationId';
+  static const String opDecommissioningRoute = '/operations/decommissioning';
+  static const String opDecommissioningCreateRoute =
+      '/operations/decommissioning/create';
+  static const String opDecommissioningDetailRoute =
+      '/operations/decommissioning/:operationId';
+
   static const String opCommissioningRoute = '/operations/commissioning';
   static const String opCommissioningNewRoute = '/operations/commissioning/new';
   static const String opCommissioningDetailRoute =

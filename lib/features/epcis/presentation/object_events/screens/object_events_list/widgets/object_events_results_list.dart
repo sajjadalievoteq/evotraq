@@ -6,6 +6,8 @@ import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/widgets/object_event_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventsResultsList extends StatelessWidget {
   const ObjectEventsResultsList({
@@ -39,7 +41,7 @@ class ObjectEventsResultsList extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
 
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                TraqIcon(AppAssets.iconAlert, size: 48, color: Colors.grey),
                 const SizedBox(height: 12),
                 Text(state.listFetchError!,
                     textAlign: TextAlign.center,
@@ -59,8 +61,7 @@ class ObjectEventsResultsList extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.event_note_outlined,
-                    size: 48, color: Colors.grey),
+                const TraqIcon(AppAssets.iconCalendar, color: Colors.grey, size: 48),
                 const SizedBox(height: 12),
                 Text(
                   state.filterAction != null ||
@@ -100,6 +101,7 @@ class ObjectEventsResultsList extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(context.padding.top, 0, context.padding.top, 0),
               itemCount:
                   state.objectEvents.length + (state.isFetchingMore ? 1 : 0),
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 if (i >= state.objectEvents.length) {
                   return const Gs1ListLoadMoreIndicator();
@@ -112,7 +114,7 @@ class ObjectEventsResultsList extends StatelessWidget {
                   isSelected: selectedEventId == id,
                   onTap: () => onTapEvent(event),
                 );
-              }, separatorBuilder: (BuildContext context, int index) { return state.objectEvents.length>index? SizedBox(height: 16,):SizedBox.shrink();  },
+              },
             ),
           ),
         );
@@ -120,3 +122,4 @@ class ObjectEventsResultsList extends StatelessWidget {
     );
   }
 }
+   

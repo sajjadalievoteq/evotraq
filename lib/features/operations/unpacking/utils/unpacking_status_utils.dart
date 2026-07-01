@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_status.dart';
 
 /// Unpacking operation status color and icon helpers.
@@ -18,16 +19,16 @@ class UnpackingStatusUtils {
     }
   }
 
-  static IconData iconFor(UnpackingStatus status) {
+  static String iconAsset(UnpackingStatus status) {
     switch (status) {
       case UnpackingStatus.success:
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       case UnpackingStatus.partialSuccess:
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case UnpackingStatus.failed:
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case UnpackingStatus.validationError:
-        return Icons.error_outline;
+        return AppAssets.iconXCircle;
     }
   }
 

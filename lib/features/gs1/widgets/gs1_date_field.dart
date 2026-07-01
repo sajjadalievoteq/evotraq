@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class Gs1DatePickerField extends StatelessWidget {
   const Gs1DatePickerField({
@@ -42,8 +44,7 @@ class Gs1DatePickerField extends StatelessWidget {
                 color: value != null ? context.colors.textPrimary : Colors.grey,
               ),
             ),
-            Icon(
-              Icons.calendar_today,
+            TraqIcon(AppAssets.iconClock,
               size: 18,
               color: enabled ? null : Colors.grey,
             ),
@@ -81,7 +82,7 @@ class Gs1DateFormField extends StatelessWidget {
             border: OutlineInputBorder(),
           ).copyWith(
             labelText: label,
-            suffixIcon: const Icon(Icons.calendar_today),
+            suffixIcon: TraqIcon(AppAssets.iconClock),
           ),
           readOnly: true,
           validator: validator,

@@ -5,6 +5,9 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class QueryPlanAnalysisDashboard extends StatefulWidget {
   const QueryPlanAnalysisDashboard({Key? key}) : super(key: key);
@@ -123,7 +126,7 @@ class _QueryPlanAnalysisDashboardState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadProblematicQueries,
             tooltip: 'Refresh Problematic Queries',
           ),
@@ -175,7 +178,7 @@ class _QueryPlanAnalysisDashboardState
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.analytics),
+                              : const TraqIcon(AppAssets.iconBarChart),
                           label: Text(
                             _isLoading ? 'Analyzing...' : 'Analyze Query',
                           ),
@@ -190,7 +193,7 @@ class _QueryPlanAnalysisDashboardState
                               _errorMessage = null;
                             });
                           },
-                          icon: const Icon(Icons.clear),
+                          icon: TraqIcon(AppAssets.iconX),
                           label: const Text('Clear'),
                         ),
                       ],
@@ -210,7 +213,7 @@ class _QueryPlanAnalysisDashboardState
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      Icon(Icons.error, color: Colors.red),
+                      TraqIcon(AppAssets.iconAlert, color: Colors.red),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -232,15 +235,15 @@ class _QueryPlanAnalysisDashboardState
                     const TabBar(
                       tabs: [
                         Tab(
-                          icon: Icon(Icons.analytics),
+                          icon: TraqIcon(AppAssets.iconBarChart),
                           text: 'Analysis Results',
                         ),
                         Tab(
-                          icon: Icon(Icons.lightbulb),
+                          icon: TraqIcon(AppAssets.iconLightbulb),
                           text: 'Recommendations',
                         ),
                         Tab(
-                          icon: Icon(Icons.warning),
+                          icon: TraqIcon(AppAssets.iconAlert),
                           text: 'Problematic Queries',
                         ),
                       ],
@@ -275,7 +278,7 @@ class _QueryPlanAnalysisDashboardState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.analytics, size: 64, color: Colors.grey),
+            TraqIcon(AppAssets.iconBarChart, color: Colors.grey, size: 64),
             SizedBox(height: 16),
             Text(
               'No analysis results yet',
@@ -353,15 +356,9 @@ class _QueryPlanAnalysisDashboardState
                           Clipboard.setData(
                             ClipboardData(text: _analysisResult.toString()),
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Analysis results copied to clipboard',
-                              ),
-                            ),
-                          );
+                          context.showSuccess('Analysis results copied to clipboard');
                         },
-                        icon: const Icon(Icons.copy),
+                        icon: const TraqIcon(AppAssets.iconCopy),
                         label: const Text('Copy Results'),
                       ),
                     ],
@@ -388,7 +385,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Execution Time',
             executionTime.toString(),
-            Icons.timer,
+            AppAssets.iconTimer,
             Colors.blue,
           ),
         ),
@@ -397,7 +394,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Complexity',
             complexity.toString(),
-            Icons.trending_up,
+            AppAssets.iconTrendingUp,
             Colors.orange,
           ),
         ),
@@ -406,7 +403,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Node Count',
             nodeCount.toString(),
-            Icons.account_tree,
+            AppAssets.iconHierarchy,
             Colors.green,
           ),
         ),
@@ -415,7 +412,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Total Cost',
             cost.toString(),
-            Icons.monetization_on,
+            AppAssets.iconMonetization,
             Colors.purple,
           ),
         ),
@@ -426,7 +423,7 @@ class _QueryPlanAnalysisDashboardState
   Widget _buildMetricCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Container(
@@ -438,7 +435,7 @@ class _QueryPlanAnalysisDashboardState
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 20),
+          TraqIcon(iconAsset, color: color, size: 20),
           const SizedBox(height: 4),
           Text(
             title,
@@ -466,7 +463,7 @@ class _QueryPlanAnalysisDashboardState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey),
+            TraqIcon(AppAssets.iconLightbulb, color: Colors.grey, size: 64),
             SizedBox(height: 16),
             Text(
               'No recommendations available',
@@ -495,7 +492,7 @@ class _QueryPlanAnalysisDashboardState
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.lightbulb, color: Colors.orange),
+                      TraqIcon(AppAssets.iconLightbulb, color: Colors.orange),
                       const SizedBox(width: 8),
                       Text(
                         'Optimization Recommendations',
@@ -526,7 +523,7 @@ class _QueryPlanAnalysisDashboardState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle, size: 64, color: Colors.green),
+            TraqIcon(AppAssets.iconCheck, size: 64, color: Colors.green),
             SizedBox(height: 16),
             Text(
               'No problematic queries detected',
@@ -552,12 +549,12 @@ class _QueryPlanAnalysisDashboardState
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.red.shade100,
-              child: Icon(Icons.warning, color: Colors.red),
+              child: TraqIcon(AppAssets.iconAlert, color: Colors.red),
             ),
             title: Text('Problematic Pattern #${index + 1}'),
             subtitle: Text(query.toString()),
             trailing: IconButton(
-              icon: const Icon(Icons.info),
+              icon: TraqIcon(AppAssets.iconInfo),
               onPressed: () {
                 _showQueryDetailsDialog(query);
               },
@@ -590,5 +587,4 @@ class _QueryPlanAnalysisDashboardState
   void dispose() {
     _queryController.dispose();
     super.dispose();
-  }
-}
+  }}

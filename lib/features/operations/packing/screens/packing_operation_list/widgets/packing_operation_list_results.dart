@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_list_item_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_operation_card.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_operation_list_empty_view.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_operation_list_error_view.dart';
@@ -53,7 +53,7 @@ class PackingOperationListResults extends StatelessWidget {
         child: ListView.builder(
           padding: EdgeInsets.all(context.horizontalPadding.left),
           itemCount: 6,
-          itemBuilder: (context, _) => const PackingListItemSkeleton(),
+          itemBuilder: (context, _) => const OperationListItemSkeleton(),
         ),
       );
     }

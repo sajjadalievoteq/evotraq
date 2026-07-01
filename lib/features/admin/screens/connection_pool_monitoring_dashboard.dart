@@ -6,6 +6,8 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ConnectionPoolMonitoringDashboard extends StatefulWidget {
   const ConnectionPoolMonitoringDashboard({Key? key}) : super(key: key);
@@ -159,7 +161,7 @@ class _ConnectionPoolMonitoringDashboardState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadAllData,
             tooltip: 'Refresh Data',
           ),
@@ -173,13 +175,13 @@ class _ConnectionPoolMonitoringDashboardState
                 children: [
                   const TabBar(
                     tabs: [
-                      Tab(icon: Icon(Icons.pool), text: 'Pool Status'),
-                      Tab(icon: Icon(Icons.leak_add), text: 'Leak Detection'),
+                      Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Pool Status'),
+                      Tab(icon: TraqIcon(AppAssets.iconSignal), text: 'Leak Detection'),
                       Tab(
-                        icon: Icon(Icons.health_and_safety),
+                        icon: TraqIcon(AppAssets.iconSecurity),
                         text: 'Health Check',
                       ),
-                      Tab(icon: Icon(Icons.lightbulb), text: 'Recommendations'),
+                      Tab(icon: TraqIcon(AppAssets.iconLightbulb), text: 'Recommendations'),
                     ],
                   ),
                   Expanded(
@@ -279,7 +281,7 @@ class _ConnectionPoolMonitoringDashboardState
               child: _buildMetricCard(
                 'Active',
                 activeConnections.toString(),
-                Icons.play_arrow,
+                AppAssets.iconPlay,
                 Colors.green,
               ),
             ),
@@ -288,7 +290,7 @@ class _ConnectionPoolMonitoringDashboardState
               child: _buildMetricCard(
                 'Idle',
                 idleConnections.toString(),
-                Icons.pause,
+                AppAssets.iconPause,
                 Colors.blue,
               ),
             ),
@@ -301,7 +303,7 @@ class _ConnectionPoolMonitoringDashboardState
               child: _buildMetricCard(
                 'Total',
                 totalConnections.toString(),
-                Icons.storage,
+                AppAssets.iconDatabase,
                 Colors.purple,
               ),
             ),
@@ -310,7 +312,7 @@ class _ConnectionPoolMonitoringDashboardState
               child: _buildMetricCard(
                 'Awaiting',
                 awaitingConnections.toString(),
-                Icons.schedule,
+                AppAssets.iconClock,
                 Colors.orange,
               ),
             ),
@@ -412,7 +414,7 @@ class _ConnectionPoolMonitoringDashboardState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey),
+            TraqIcon(AppAssets.iconLightbulb, color: Colors.grey, size: 64),
             SizedBox(height: 16),
             Text(
               'No recommendations available',
@@ -433,7 +435,7 @@ class _ConnectionPoolMonitoringDashboardState
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.orange.shade100,
-              child: Icon(Icons.lightbulb, color: Colors.orange),
+              child: TraqIcon(AppAssets.iconLightbulb, color: Colors.orange),
             ),
             title: Text('Recommendation #${index + 1}'),
             subtitle: Text(recommendation.toString()),
@@ -446,7 +448,7 @@ class _ConnectionPoolMonitoringDashboardState
   Widget _buildMetricCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Container(
@@ -458,7 +460,7 @@ class _ConnectionPoolMonitoringDashboardState
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             title,
@@ -485,7 +487,7 @@ class _ConnectionPoolMonitoringDashboardState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             'Error',
@@ -504,7 +506,11 @@ class _ConnectionPoolMonitoringDashboardState
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
+          ElevatedButton.icon(
+            onPressed: _loadAllData,
+            icon: const TraqIcon(AppAssets.iconRefresh),
+            label: const Text('Retry'),
+          ),
         ],
       ),
     );

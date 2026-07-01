@@ -6,14 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
-enum CustomSnackBarVariant {
-  success(Icons.check_circle_rounded),
-  error(Icons.error_rounded),
-  warning(Icons.warning_rounded),
-  info(Icons.info_rounded);
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-  final IconData icon;
-  const CustomSnackBarVariant(this.icon);
+enum CustomSnackBarVariant {
+  success(AppAssets.iconCheck),
+  error(AppAssets.iconAlert),
+  warning(AppAssets.iconAlert),
+  info(AppAssets.iconInfo);
+
+  final String iconAsset;
+  const CustomSnackBarVariant(this.iconAsset);
 
   Color color(BuildContext context) {
     final c = context.colors;
@@ -143,7 +146,8 @@ class CustomSnackBarPresenter {
   static const double _edgePadding = 16;
   static const double _anchorGap = 8;
   static const double _maxWidth = 420;
-  static const double _estimatedHeight = 80;
+  static const double estimatedSnackBarHeight = 80;
+  static const double _estimatedHeight = estimatedSnackBarHeight;
 
   static void dismiss(BuildContext context) {
     _AnchoredSnackBarLayer.dismiss();
@@ -238,6 +242,9 @@ class CustomSnackBarPresenter {
     );
   }
 
+  /// Computes anchored snackbar position, preferring below the anchor and
+  /// flipping above when the full [snackbarHeight] would not fit underneath.
+  @visibleForTesting
   static ({double top, double left, double width}) layoutForAnchor({
     required Rect anchorRect,
     required Size screenSize,
@@ -255,17 +262,23 @@ class CustomSnackBarPresenter {
     }
     left = left.clamp(_edgePadding, screenSize.width - _edgePadding - width);
 
-    var top = anchorRect.bottom + _anchorGap;
-    final maxBottom =
-        screenSize.height - viewPadding.bottom - _edgePadding;
-    if (top + snackbarHeight > maxBottom) {
-      top = anchorRect.top - _anchorGap - snackbarHeight;
-    }
-    if (top < viewPadding.top + _edgePadding) {
-      top = maxBottom - snackbarHeight;
-    }
+    final minTop = viewPadding.top + _edgePadding;
+    final maxBottom = screenSize.height - viewPadding.bottom - _edgePadding;
+    final maxTop = math.max(minTop, maxBottom - snackbarHeight);
 
-    return (top: top, left: left, width: width);
+    final belowTop = anchorRect.bottom + _anchorGap;
+    final spaceBelow = maxBottom - belowTop;
+    final placeAbove = snackbarHeight > spaceBelow;
+
+    final double top = placeAbove
+        ? anchorRect.top - _anchorGap - snackbarHeight
+        : belowTop;
+
+    return (
+      top: top.clamp(minTop, maxTop),
+      left: left,
+      width: width,
+    );
   }
 }
 
@@ -295,23 +308,9 @@ final class _AnchoredSnackBarLayer {
 
     _entry = OverlayEntry(
       builder: (overlayContext) {
-        final mediaQuery = MediaQuery.of(overlayContext);
-        final layout = CustomSnackBarPresenter.layoutForAnchor(
+        return _AnchoredSnackBarPositioned(
           anchorRect: anchorRect,
-          screenSize: mediaQuery.size,
-          viewPadding: mediaQuery.padding,
-        );
-
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              top: layout.top,
-              left: layout.left,
-              width: layout.width,
-              child: content,
-            ),
-          ],
+          child: content,
         );
       },
     );
@@ -319,6 +318,71 @@ final class _AnchoredSnackBarLayer {
     overlayState.insert(_entry!);
     _dismissTimer = Timer(duration, dismiss);
     return true;
+  }
+}
+
+/// Measures snackbar height after layout so positioning can flip above the
+/// anchor when the full content would not fit below.
+class _AnchoredSnackBarPositioned extends StatefulWidget {
+  const _AnchoredSnackBarPositioned({
+    required this.anchorRect,
+    required this.child,
+  });
+
+  final Rect anchorRect;
+  final Widget child;
+
+  @override
+  State<_AnchoredSnackBarPositioned> createState() =>
+      _AnchoredSnackBarPositionedState();
+}
+
+class _AnchoredSnackBarPositionedState extends State<_AnchoredSnackBarPositioned> {
+  final GlobalKey _measureKey = GlobalKey();
+  double _measuredHeight = CustomSnackBarPresenter.estimatedSnackBarHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_updateMeasuredHeight);
+  }
+
+  void _updateMeasuredHeight(Duration _) {
+    if (!mounted) return;
+    final box = _measureKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+
+    final height = box.size.height;
+    if ((height - _measuredHeight).abs() > 0.5) {
+      setState(() => _measuredHeight = height);
+      WidgetsBinding.instance.addPostFrameCallback(_updateMeasuredHeight);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final layout = CustomSnackBarPresenter.layoutForAnchor(
+      anchorRect: widget.anchorRect,
+      screenSize: mediaQuery.size,
+      viewPadding: mediaQuery.padding,
+      snackbarHeight: _measuredHeight,
+    );
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: layout.top,
+          left: layout.left,
+          width: layout.width,
+          child: KeyedSubtree(
+            key: _measureKey,
+            child: widget.child,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -445,7 +509,7 @@ class CustomSnackBarWidget extends StatelessWidget {
                 color: tone.withOpacity(isDark ? 0.18 : 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(variant.icon, color: tone, size: 22),
+              child: TraqIcon(variant.iconAsset, color: tone, size: 22),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -477,8 +541,7 @@ class CustomSnackBarWidget extends StatelessWidget {
             const SizedBox(width: 8),
             IconButton(
               onPressed: onClose,
-              icon: const Icon(Icons.close_rounded, size: 18),
-              color: subText.withOpacity(0.9),
+              icon: TraqIcon(AppAssets.iconX, size: 18, color: subText.withOpacity(0.9)),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),

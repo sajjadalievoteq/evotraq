@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class QueryResultsWidget extends StatelessWidget {
   final AdvancedQueryResult? result;
@@ -45,13 +47,13 @@ class QueryResultsWidget extends StatelessWidget {
             children: [
               if (onRefresh != null)
                 IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: TraqIcon(AppAssets.iconRefresh),
                   onPressed: isLoading ? null : onRefresh,
                   tooltip: 'Refresh Results',
                 ),
               if (onExport != null && result != null)
                 IconButton(
-                  icon: const Icon(Icons.download),
+                  icon: TraqIcon(AppAssets.iconDownload),
                   onPressed: onExport,
                   tooltip: 'Export Results',
                 ),
@@ -87,8 +89,7 @@ class QueryResultsWidget extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Icon(
-                  Icons.error,
+                TraqIcon(AppAssets.iconAlert,
                   color: Theme.of(context).colorScheme.error,
                 ),
                 const SizedBox(width: 16),
@@ -126,8 +127,7 @@ class QueryResultsWidget extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
-              Icon(
-                Icons.search,
+              TraqIcon(AppAssets.iconSearch,
                 size: 64,
                 color: Colors.grey,
               ),
@@ -186,19 +186,19 @@ class QueryResultsWidget extends StatelessWidget {
             context,
             'Total Events',
             result!.totalCount.toString(),
-            Icons.event,
+            AppAssets.iconEvent,
           ),
           _buildSummaryItem(
             context,
             'Returned',
             result!.returnedCount.toString(),
-            Icons.list,
+            AppAssets.iconList,
           ),
           _buildSummaryItem(
             context,
             'Execution Time',
             '${result!.executionTimeMs}ms',
-            Icons.timer,
+            AppAssets.iconTimer,
           ),
         ],
       ),
@@ -209,12 +209,12 @@ class QueryResultsWidget extends StatelessWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
+    String iconAsset,
   ) {
     return Column(
       children: [
-        Icon(
-          icon,
+        TraqIcon(
+          iconAsset,
           color: Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(height: 8),
@@ -236,7 +236,7 @@ class QueryResultsWidget extends StatelessWidget {
   Widget _buildAggregations(BuildContext context) {
     return ExpansionTile(
       title: const Text('Query Aggregations'),
-      leading: const Icon(Icons.analytics),
+      leading: const TraqIcon(AppAssets.iconBarChart),
       children: [
         Container(
           width: double.infinity,
@@ -263,11 +263,7 @@ class QueryResultsWidget extends StatelessWidget {
           padding: EdgeInsets.all(32.0),
           child: Column(
             children: [
-              Icon(
-                Icons.event_busy,
-                size: 48,
-                color: Colors.grey,
-              ),
+              TraqIcon(AppAssets.iconCalendar, color: Colors.grey, size: 48),
               SizedBox(height: 16),
               Text(
                 'No events found',
@@ -412,19 +408,17 @@ class QueryResultsWidget extends StatelessWidget {
   }
 
   Color _getEventTypeColor(BuildContext context, String eventType) {
-    switch (eventType) {
-      case 'ObjectEvent':
-        return Colors.blue.withOpacity(0.2);
-      case 'AggregationEvent':
-        return Colors.green.withOpacity(0.2);
-      case 'TransactionEvent':
-        return Colors.orange.withOpacity(0.2);
-      case 'TransformationEvent':
-        return Colors.purple.withOpacity(0.2);
-      case 'AssociationEvent':
-        return Colors.red.withOpacity(0.2);
+    switch (eventType.toLowerCase()) {
+      case 'objectevent':
+        return Colors.blue;
+      case 'aggregationevent':
+        return Colors.green;
+      case 'transactionevent':
+        return Colors.orange;
+      case 'transformationevent':
+        return Colors.purple;
       default:
-        return Theme.of(context).colorScheme.surfaceVariant;
+        return Theme.of(context).colorScheme.surfaceContainerHighest;
     }
   }
 }

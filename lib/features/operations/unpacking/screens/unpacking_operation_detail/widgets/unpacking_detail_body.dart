@@ -20,14 +20,10 @@ class UnpackingDetailBody extends StatelessWidget {
     super.key,
     required this.operation,
     required this.locationGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
   });
 
   final UnpackingResponse operation;
   final GLN? locationGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +48,7 @@ class UnpackingDetailBody extends StatelessWidget {
             UnpackingDetailProductionCard(operation: operation),
           ],
 
-          UnpackingDetailUnpackedItemsCard(
-            operation: operation,
-            showAllEpcs: showAllEpcs,
-            onShowAll: onShowAllEpcs,
-          ),
+          UnpackingDetailUnpackedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
 
             UnpackingDetailEventsCard(operation: operation),

@@ -148,12 +148,12 @@ abstract final class GtinUiConstants {
 
   static const sectionLifecycleAvailabilityStatus =
       'Lifecycle, Availability & Status';
-  static const labelTradeItemStatus = 'Trade Item Status';
+  static const labelTradeItemStatus = 'Trade Item Status *';
   static const helperTradeItemStatusCodes = 'ADD / CHN / COR';
   static const tradeItemStatusAdd = 'ADD';
   static const tradeItemStatusChn = 'CHN';
   static const tradeItemStatusCor = 'COR';
-  static const labelEffectiveDateTime = 'Effective Date / Time';
+  static const labelEffectiveDateTime = 'Effective Date / Time *';
   static const labelStartAvailabilityDateTime =
       'Start Availability Date / Time';
   static const labelEndAvailabilityDateTime = 'End Availability Date / Time';
@@ -162,10 +162,10 @@ abstract final class GtinUiConstants {
 
   static const sectionProductionBatchSerialDateAssociations =
       'Production, Batch, Serial & Date Associations';
-  static const labelHasBatchNumberIndicator = 'Has Batch Number Indicator';
+  static const labelHasBatchNumberIndicator = 'Has Batch Number Indicator *';
   static const helperBatchIndicatorPharma =
       'Required for traceability in pharmaceutical products';
-  static const labelHasSerialNumberIndicator = 'Has Serial Number Indicator';
+  static const labelHasSerialNumberIndicator = 'Has Serial Number Indicator *';
   static const helperSerialIndicatorPharma =
       'Required for pharmaceutical serialization and traceability';
   static const batchSerialRequestedByLaw = 'REQUESTED BY LAW';
@@ -181,9 +181,9 @@ abstract final class GtinUiConstants {
       'Trade Item Descriptive Attributes';
   static const labelFunctionalName = 'Functional Name';
   static const labelTradeItemDescription = 'Trade Item Description';
-  static const labelGpcBrickCode = 'GPC Brick Code';
+  static const labelGpcBrickCode = 'GPC Brick Code *';
   static const helperGpcBrickCode = "8 digits, must start with '1000'";
-  static const labelTargetMarketCountryCode = 'Target Market Country Code';
+  static const labelTargetMarketCountryCode = 'Target Market Country Code *';
   static const helperIso3166Numeric3 = 'ISO 3166-1 numeric (3 digits)';
 
   static const sectionTradeItemData = 'Trade Item Data';
@@ -201,17 +201,17 @@ abstract final class GtinUiConstants {
 
   static const sectionInformationProviderManufacturer =
       'Information Provider & Manufacturer';
-  static const labelInformationProviderGln = 'Information Provider GLN';
+  static const labelInformationProviderGln = 'Information Provider GLN *';
   static const helperInformationProviderGln =
       'Enter a 13-digit barcode (numbers only, last digit is auto-verified)';
   static const labelInformationProviderName = 'Information Provider Name';
-  static const labelManufacturerGlnField = 'Manufacturer GLN';
+  static const labelManufacturerGlnField = 'Manufacturer GLN *';
   static const helperManufacturerGlnField =
       'Enter a 13-digit GLN (provided by your organization)';
 
   static const sectionNetContentMeasurements = 'Net Content & Measurements';
-  static const labelNetContentValue = 'Net Content Value';
-  static const labelNetContentUom = 'Net Content UOM';
+  static const labelNetContentValue = 'Net Content Value *';
+  static const labelNetContentUom = 'Net Content UOM *';
   static const helperUneceRec20 = 'UN/ECE Rec 20 code (2–3 chars, uppercase)';
   static const labelGrossWeightValue = 'Gross Weight Value';
   static const labelGrossWeightUom = 'Gross Weight UOM';
@@ -226,9 +226,9 @@ abstract final class GtinUiConstants {
   static const helperMarketingAuthorizationNumber =
       'Regulator-issued; market-specific format (max 50 characters)';
   static const labelAuthorizationValidityFromDate =
-      'Authorization Validity From Date';
+      'Authorization Validity From Date *';
   static const labelAuthorizationValidityToDate =
-      'Authorization Validity To Date';
+      'Authorization Validity To Date *';
 
   static const sectionAudit = 'Audit';
   static const labelCreatedBy = 'Created By';

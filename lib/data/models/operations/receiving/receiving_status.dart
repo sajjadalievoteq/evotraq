@@ -1,4 +1,4 @@
-enum ReceivingStatus { success, partialSuccess, failed, validationError }
+enum ReceivingStatus { success, partialSuccess, failed, validationError, accepted }
 
 ReceivingStatus parseReceivingStatus(String status) {
   switch (status.toUpperCase()) {
@@ -10,6 +10,8 @@ ReceivingStatus parseReceivingStatus(String status) {
       return ReceivingStatus.failed;
     case 'VALIDATION_ERROR':
       return ReceivingStatus.validationError;
+    case 'ACCEPTED':
+      return ReceivingStatus.accepted;
     default:
       return ReceivingStatus.failed;
   }

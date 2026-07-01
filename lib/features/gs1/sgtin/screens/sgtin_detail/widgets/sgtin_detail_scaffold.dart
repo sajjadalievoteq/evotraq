@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SgtinDetailScaffold extends StatelessWidget {
   const SgtinDetailScaffold({
@@ -35,12 +37,12 @@ class SgtinDetailScaffold extends StatelessWidget {
         actions: [
           if (showEditAction)
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: TraqIcon(AppAssets.iconEdit),
               onPressed: onEdit,
             ),
           if (showCloseEditAction)
             IconButton(
-              icon: const Icon(Icons.close),
+              icon: TraqIcon(AppAssets.iconX),
               onPressed: onCloseEdit,
             ),
         ],
@@ -52,7 +54,7 @@ class SgtinDetailScaffold extends StatelessWidget {
               onPressed: onSave,
               child: isSaving
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Icon(Icons.save),
+                  : TraqIcon(AppAssets.iconSave),
             )
           : null,
     );

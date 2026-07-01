@@ -16,8 +16,6 @@
 /// - SGLN URN:           `urn:epc:id:sgln:<prefix>.<locRef>.<extension>`
 /// - Legacy prefixes:    `urn:epc:class:`, `urn:epc:idpat:`, `urn:epc:tag:`
 /// - GS1 AI notation:    `(01)…(21)…` etc. (normalised first)
-library epc_uri_validators;
-
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 
 // ---------------------------------------------------------------------------
@@ -106,8 +104,8 @@ String? validateEpcUriField(String? value, {bool required = false}) {
 
 /// Normalizes [input] to a canonical EPC URI string.
 ///
-/// - AI bracket notation → GS1 Digital Link URI
-/// - Valid URI / URN → trimmed, unchanged
+/// - AI bracket notation → `urn:epc:…` URI
+/// - GS1 Digital Link URL → `urn:epc:…` URI when convertible
 /// - Unknown format → trimmed, unchanged (still invalid per [isValidEpcUri])
 String normalizeEpc(String input) => normalizeEpcInput(input.trim());
 

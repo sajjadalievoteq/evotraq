@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/pharmaceutical/utils/pharma_field_validators.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class RegulatoryApprovalsGroupWidget extends StatefulWidget {
   const RegulatoryApprovalsGroupWidget({
@@ -161,7 +162,7 @@ class _RegulatoryApprovalsGroupWidgetState
           decoration: InputDecoration(
             labelText: label,
             border: const OutlineInputBorder(),
-            suffixIcon: const Icon(Icons.calendar_today),
+            suffixIcon: TraqIcon(AppAssets.iconClock),
           ),
           readOnly: true,
         ),

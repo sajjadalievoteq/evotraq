@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../models/api_collection.dart';
 import '../cubit/api_collection_cubit.dart';
 import '../cubit/api_collection_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for managing API Collections
 /// Allows creating, editing, and managing API collections and their API definitions
@@ -44,7 +47,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
         title: const Text('API Collections'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () => context.read<ApiCollectionCubit>().loadCollections(),
             tooltip: 'Refresh',
           ),
@@ -62,7 +65,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text('Error: ${state.error}'),
                   const SizedBox(height: 16),
@@ -101,7 +104,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateCollectionDialog(context),
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('New Collection'),
       ),
     );
@@ -116,7 +119,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
         children: [
           Row(
             children: [
-              Icon(Icons.folder_special, color: Theme.of(context).colorScheme.primary),
+              TraqIcon(AppAssets.iconList, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
               const Text(
                 'API Collections',
@@ -167,7 +170,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search collections...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: TraqIcon(AppAssets.iconSearch),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               isDense: true,
@@ -230,7 +233,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_off, size: 64, color: Colors.grey[400]),
+            TraqIcon(AppAssets.iconFolder, color: Colors.grey[400], size: 64),
             const SizedBox(height: 16),
             Text('No collections found', style: TextStyle(color: Colors.grey[600])),
           ],
@@ -279,10 +282,10 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (collection.isPublic)
-                  const Icon(Icons.public, size: 16, color: Colors.orange),
+                  const TraqIcon(AppAssets.iconGlobe, color: Colors.orange, size: 16),
                 const SizedBox(width: 4),
-                Icon(
-                  collection.isActive ? Icons.check_circle : Icons.cancel,
+                TraqIcon(
+                  collection.isActive ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                   size: 16,
                   color: collection.isActive ? Colors.green : Colors.red,
                 ),
@@ -311,7 +314,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.touch_app, size: 80, color: Colors.grey[300]),
+          TraqIcon(AppAssets.iconTarget, color: Colors.grey[300], size: 80),
           const SizedBox(height: 16),
           Text(
             'Select a collection to view details',
@@ -384,8 +387,8 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               Row(
                 children: [
                   Chip(
-                    avatar: Icon(
-                      collection.isActive ? Icons.check : Icons.close,
+                    avatar: TraqIcon(
+                      collection.isActive ? AppAssets.iconCheck : AppAssets.iconX,
                       size: 16,
                       color: collection.isActive ? Colors.green : Colors.red,
                     ),
@@ -393,8 +396,8 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   ),
                   const SizedBox(width: 8),
                   Chip(
-                    avatar: Icon(
-                      collection.isPublic ? Icons.public : Icons.lock,
+                    avatar: TraqIcon(
+                      collection.isPublic ? AppAssets.iconGlobe : AppAssets.iconLock,
                       size: 16,
                     ),
                     label: Text(collection.visibilityText),
@@ -404,7 +407,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   if (collection.rateLimitPerMinute != null) ...[
                     const SizedBox(width: 8),
                     Chip(
-                      avatar: const Icon(Icons.speed, size: 16),
+                      avatar: TraqIcon(AppAssets.iconClock, size: 16),
                       label: Text('${collection.rateLimitPerMinute}/min'),
                     ),
                   ],
@@ -418,7 +421,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Icon(Icons.api),
+              TraqIcon(AppAssets.iconGlobe),
               const SizedBox(width: 8),
               Text(
                 'APIs (${apis.length})',
@@ -427,13 +430,13 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               const Spacer(),
               OutlinedButton.icon(
                 onPressed: () => _downloadPostmanCollection(context, collection),
-                icon: const Icon(Icons.download),
+                icon: TraqIcon(AppAssets.iconDownload),
                 label: const Text('Postman'),
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => _showCreateApiDialog(context, collection.id),
-                icon: const Icon(Icons.add),
+                icon: TraqIcon(AppAssets.iconPlus),
                 label: const Text('Add API'),
               ),
             ],
@@ -446,7 +449,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.api, size: 64, color: Colors.grey[300]),
+                      TraqIcon(AppAssets.iconGlobe, size: 64, color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Text('No APIs in this collection', style: TextStyle(color: Colors.grey[600])),
                       const SizedBox(height: 8),
@@ -492,8 +495,8 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              api.isActive ? Icons.check_circle : Icons.cancel,
+            TraqIcon(
+              api.isActive ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
               size: 16,
               color: api.isActive ? Colors.green : Colors.red,
             ),
@@ -528,15 +531,15 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildInfoChip('Timeout', '${api.timeoutSeconds}s', Icons.timer),
+                    _buildInfoChip('Timeout', '${api.timeoutSeconds}s', AppAssets.iconTimer),
                     if (api.cacheTtlSeconds != null)
-                      _buildInfoChip('Cache', '${api.cacheTtlSeconds}s', Icons.cached),
+                      _buildInfoChip('Cache', '${api.cacheTtlSeconds}s', AppAssets.iconRefresh),
                     if (api.rateLimitPerMinute != null)
-                      _buildInfoChip('Rate Limit', '${api.rateLimitPerMinute}/min', Icons.speed),
+                      _buildInfoChip('Rate Limit', '${api.rateLimitPerMinute}/min', AppAssets.iconGauge),
                     if (api.requestContentType != null)
-                      _buildInfoChip('Request', api.requestContentType!, Icons.upload),
+                      _buildInfoChip('Request', api.requestContentType!, AppAssets.iconUpload),
                     if (api.responseContentType != null)
-                      _buildInfoChip('Response', api.responseContentType!, Icons.download),
+                      _buildInfoChip('Response', api.responseContentType!, AppAssets.iconDownload),
                   ],
                 ),
                 if (api.tags != null && api.tags!.isNotEmpty) ...[
@@ -560,7 +563,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
     );
   }
 
-  Widget _buildInfoChip(String label, String value, IconData icon) {
+  Widget _buildInfoChip(String label, String value, String iconAsset) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -570,7 +573,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.grey[600]),
+          TraqIcon(iconAsset, size: 14, color: Colors.grey[600]),
           const SizedBox(width: 4),
           Text('$label: ', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
           Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
@@ -633,54 +636,24 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
   Future<void> _downloadPostmanCollection(BuildContext context, ApiCollection collection) async {
     try {
       final cubit = context.read<ApiCollectionCubit>();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text('Downloading ${collection.name} Postman collection...'),
-            ],
-          ),
-          duration: const Duration(seconds: 2),
-        ),
+      context.showInfo(
+        'Downloading ${collection.name} Postman collection...',
+        duration: const Duration(seconds: 2),
       );
 
       await cubit.exportPostmanCollection(collection.id);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Text('${collection.name} Postman collection downloaded!'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
+        context.showSuccess(
+          '${collection.name} Postman collection downloaded!',
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(child: Text('Failed to download: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
+        context.showError(
+          'Failed to download: $e',
+          duration: const Duration(seconds: 5),
         );
       }
     }
@@ -807,9 +780,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
             ElevatedButton(
               onPressed: () async {
                 if (codeController.text.isEmpty || nameController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Code and Name are required')),
-                  );
+                  context.showWarning('Code and Name are required');
                   return;
                 }
 
@@ -826,13 +797,9 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
                 if (result != null) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Collection "${result.name}" created')),
-                  );
+                  context.showSuccess('Collection "${result.name}" created');
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${cubit.state.error}')),
-                  );
+                  context.showError('Error: ${cubit.state.error}');
                 }
               },
               child: const Text('Create'),
@@ -925,9 +892,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
                 if (success) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Collection updated')),
-                  );
+                  context.showSuccess('Collection updated');
                 }
               },
               child: const Text('Save'),
@@ -1036,9 +1001,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                 if (codeController.text.isEmpty ||
                     nameController.text.isEmpty ||
                     pathController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Code, Name, and Path are required')),
-                  );
+                  context.showWarning('Code, Name, and Path are required');
                   return;
                 }
 
@@ -1056,9 +1019,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
                 if (result != null) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('API "${result.name}" created')),
-                  );
+                  context.showSuccess('API "${result.name}" created');
                 }
               },
               child: const Text('Create'),
@@ -1165,9 +1126,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
                 if (success) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('API updated')),
-                  );
+                  context.showSuccess('API updated');
                 }
               },
               child: const Text('Save'),

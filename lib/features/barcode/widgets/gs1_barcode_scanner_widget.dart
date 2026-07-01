@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
 import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Camera-based GS1 barcode scanner (DataMatrix + Code 128).
 class GS1BarcodeScannerWidget extends StatefulWidget {
@@ -217,11 +220,9 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     } catch (e) {
       debugPrint('Flash control not supported: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Flash mode not supported on this device'),
-            duration: Duration(seconds: 2),
-          ),
+        context.showInfo(
+          'Flash mode not supported on this device',
+          duration: Duration(seconds: 2),
         );
       }
     }
@@ -275,7 +276,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
                     'Camera Error',
@@ -326,8 +327,8 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
           top: 20,
           right: 20,
           child: IconButton(
-            icon: Icon(
-              _flashEnabled ? Icons.flash_on : Icons.flash_off,
+            icon: TraqIcon(
+              _flashEnabled ? AppAssets.iconFlash : AppAssets.iconBlock,
               color: Colors.white,
               size: 32,
             ),
@@ -338,13 +339,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
           top: 20,
           left: 20,
           child: IconButton(
-            icon: Icon(
-              _currentLensDirection == CameraLensDirection.back
-                  ? Icons.camera_front
-                  : Icons.camera_rear,
-              color: Colors.white,
-              size: 32,
-            ),
+            icon: TraqIcon(AppAssets.iconCamera, color: Colors.white, size: 32),
             onPressed: toggleCamera,
           ),
         ),

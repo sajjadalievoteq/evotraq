@@ -22,7 +22,20 @@ abstract final class HomeNavigation {
 
   static const String opShippingCreate = Constants.opShippingCreateRoute;
   static const String opReceiving = Constants.opReceivingRoute;
+  static const String opReceivingCreate = Constants.opReceivingCreateRoute;
+  static const String opReturnShipping = Constants.opReturnShippingRoute;
+  static const String opReturnShippingCreate =
+      Constants.opReturnShippingCreateRoute;
+  static const String opReturnReceiving = Constants.opReturnReceivingRoute;
+  static const String opReturnReceivingCreate =
+      Constants.opReturnReceivingCreateRoute;
   static const String opPacking = Constants.opPackingRoute;
+  static const String opPackingCreate = Constants.opPackingCreateRoute;
   static const String opUnpacking = Constants.opUnpackingRoute;
+  static const String opUnpackingCreate = Constants.opUnpackingCreateRoute;
   static const String opCommissioning = Constants.opCommissioningRoute;
+  static const String opCommissioningNew = Constants.opCommissioningNewRoute;
+  static const String opDecommissioning = Constants.opDecommissioningRoute;
+  static const String opDecommissioningCreate =
+      Constants.opDecommissioningCreateRoute;
 }

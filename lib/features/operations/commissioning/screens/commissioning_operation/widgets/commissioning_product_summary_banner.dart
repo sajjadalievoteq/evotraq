@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningProductSummaryBanner extends StatelessWidget {
   const CommissioningProductSummaryBanner({
@@ -21,7 +23,7 @@ class CommissioningProductSummaryBanner extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            const Icon(Icons.inventory_2, color: Colors.white),
+            TraqIcon(AppAssets.iconPackage, color: Colors.white),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

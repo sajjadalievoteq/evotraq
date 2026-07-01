@@ -11,7 +11,7 @@
 //         mainAxisSize: MainAxisSize.min,
 //         children: [
 //           Icon(
-//             Icons.event_note_outlined,
+//             AppAssets.iconEvent,
 //             size: 48,
 //             color: Theme.of(context).colorScheme.onSurfaceVariant,
 //           ),

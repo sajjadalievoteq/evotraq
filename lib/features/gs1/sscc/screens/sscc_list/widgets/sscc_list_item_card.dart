@@ -13,6 +13,8 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
     as status_rules;
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SsccListItemCard extends StatelessWidget {
   const SsccListItemCard({
@@ -40,14 +42,14 @@ class SsccListItemCard extends StatelessWidget {
     final canEdit = edit_rules.canEditSsccRecord(sscc.status);
     final canDelete = edit_rules.canDeleteSscc(sscc.status);
 
-    Widget infoRow(IconData icon, String text) {
+    Widget infoRow(String iconAsset, String text) {
       final rowColor =
           Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
       return Padding(
         padding: const EdgeInsets.only(bottom: 4),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: rowColor),
+            TraqIcon(iconAsset, size: 16, color: rowColor),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
@@ -117,53 +119,33 @@ class SsccListItemCard extends StatelessWidget {
                         const SizedBox(height: 8),
 
                         infoRow(
-
-                          Icons.inventory_2_outlined,
-
+                          AppAssets.iconBox,
                           '${SsccUiConstants.listCardTypePrefix}${status_rules.friendlyUnitTypeLabel(sscc.unitType)}',
-
                         ),
 
                         if (sscc.issuingGLN?.glnCode != null)
-
                           infoRow(
-
-                            Icons.factory_outlined,
-
+                            AppAssets.iconFactory,
                             '${SsccUiConstants.listCardIssuingGlnPrefix}${sscc.issuingGLN!.glnCode}',
-
                           ),
 
-                        if (sscc.sourceLocation?.locationName?.isNotEmpty == true)
-
+                        if (sscc.sourceLocation?.locationName.isNotEmpty == true)
                           infoRow(
-
-                            Icons.location_on_outlined,
-
+                            AppAssets.iconMapPin,
                             '${SsccUiConstants.listCardFromPrefix}${sscc.sourceLocation!.locationName}',
-
                           ),
 
-                        if (sscc.destinationLocation?.locationName?.isNotEmpty ==
-
+                        if (sscc.destinationLocation?.locationName.isNotEmpty ==
                             true)
-
                           infoRow(
-
-                            Icons.location_on,
-
+                            AppAssets.iconMapPin,
                             '${SsccUiConstants.listCardToPrefix}${sscc.destinationLocation!.locationName}',
-
                           ),
 
                         if (sscc.shippingDate != null)
-
                           infoRow(
-
-                            Icons.local_shipping_outlined,
-
+                            AppAssets.iconTruck,
                             '${SsccUiConstants.listCardShippedPrefix}${dateFormat.format(sscc.shippingDate!)}',
-
                           ),
 
                       ],
@@ -190,13 +172,10 @@ class SsccListItemCard extends StatelessWidget {
 
                         padding: EdgeInsets.zero,
 
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: Gs1ListItemSelectionStyle.mutedColor(
+                        icon: TraqIcon(AppAssets.iconMoreVert, color: Gs1ListItemSelectionStyle.mutedColor(
                             isSelected,
                             muted,
-                          ),
-                        ),
+                          )),
 
                         onSelected: onMenuSelected,
 
@@ -205,7 +184,7 @@ class SsccListItemCard extends StatelessWidget {
                             value: 'view',
                             child: Row(
                               children: [
-                                const Icon(Icons.visibility, size: 20),
+                                TraqIcon(AppAssets.iconEye, size: 20),
                                 const SizedBox(width: 8),
                                 Text(SsccUiConstants.menuViewDetails),
                               ],
@@ -216,7 +195,7 @@ class SsccListItemCard extends StatelessWidget {
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  const Icon(Icons.edit, size: 20),
+                                  TraqIcon(AppAssets.iconEdit, size: 20),
                                   const SizedBox(width: 8),
                                   Text(SsccUiConstants.menuEdit),
                                 ],
@@ -227,8 +206,7 @@ class SsccListItemCard extends StatelessWidget {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  const Icon(
-                                    Icons.delete,
+                                  TraqIcon(AppAssets.iconTrash,
                                     size: 20,
                                     color: Colors.red,
                                   ),

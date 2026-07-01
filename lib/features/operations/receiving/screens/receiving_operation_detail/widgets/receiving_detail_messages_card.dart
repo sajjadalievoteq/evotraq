@@ -1,6 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_group_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Messages card for Receiving operation detail.
 class ReceivingDetailMessagesCard extends StatelessWidget {
@@ -24,8 +26,7 @@ class ReceivingDetailMessagesCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.info_outline,
+                  TraqIcon(AppAssets.iconInfo,
                     size: 16,
                     color: Theme.of(context).colorScheme.primary,
                   ),

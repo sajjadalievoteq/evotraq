@@ -105,7 +105,7 @@ class EpcisEventStreamCard extends StatelessWidget {
                   ],
                 ),
                 Divider(height: 1, color: borderColor),
-                if (eventList != null) eventList,
+                ?eventList,
               ],
             ),
           ),

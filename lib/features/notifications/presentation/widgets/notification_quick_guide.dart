@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class NotificationQuickGuide extends StatelessWidget {
   const NotificationQuickGuide({super.key});
@@ -14,7 +16,7 @@ class NotificationQuickGuide extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb_outline, color: Colors.amber[700]),
+                TraqIcon(AppAssets.iconLightbulb, color: Colors.amber[700]),
                 const SizedBox(width: 8),
                 Text(
                   'Quick Setup Guide',
@@ -31,30 +33,30 @@ class NotificationQuickGuide extends StatelessWidget {
               '1.',
               'Create Subscription',
               'Tap the + button to create your first notification subscription',
-              Icons.add_circle_outline,
+              AppAssets.iconAddCircle,
             ),
             _buildGuideStep(
               '2.',
               'Configure Webhook',
               'Set up your webhook URL where notifications will be sent',
-              Icons.webhook,
+              AppAssets.iconWebhook,
             ),
             _buildGuideStep(
               '3.',
               'Filter Events',
               'Use advanced options to filter specific event types, business steps, or dispositions',
-              Icons.filter_alt_outlined,
+              AppAssets.iconFilter,
             ),
             _buildGuideStep(
               '4.',
               'Test & Monitor',
               'Test your webhook and monitor delivery statistics',
-              Icons.analytics_outlined,
+              AppAssets.iconBarChart,
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: Colors.blue[600]),
+                TraqIcon(AppAssets.iconInfo, size: 16, color: Colors.blue[600]),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -74,7 +76,12 @@ class NotificationQuickGuide extends StatelessWidget {
     );
   }
 
-  Widget _buildGuideStep(String number, String title, String description, IconData icon) {
+  Widget _buildGuideStep(
+    String number,
+    String title,
+    String description,
+    String iconAsset,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -99,7 +106,7 @@ class NotificationQuickGuide extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          TraqIcon(iconAsset, size: 20, color: Colors.grey[600]),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -128,3 +135,4 @@ class NotificationQuickGuide extends StatelessWidget {
     );
   }
 }
+  

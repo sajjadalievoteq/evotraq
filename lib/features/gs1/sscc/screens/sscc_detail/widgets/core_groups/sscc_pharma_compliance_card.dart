@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_controlled_chain_audit_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_emvo_submission_model.dart';
@@ -8,6 +9,8 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_c
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_section_loading_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 const _regimeOptions = ['UAE_TATMEEN', 'EU_FMD'];
 
@@ -125,7 +128,7 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
                       trailing: widget.isReadOnly
                           ? null
                           : IconButton(
-                              icon: const Icon(Icons.remove_circle_outline),
+                              icon: TraqIcon(AppAssets.iconTrash),
                               onPressed: () async {
                                 await _service.removeRegime(
                                   widget.ssccId,
@@ -255,14 +258,10 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
                     onPressed: () async {
                       await _service.reportColdChainExcursion(widget.ssccId);
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cold-chain excursion reported'),
-                          ),
-                        );
+                        context.showSuccess('Cold-chain excursion reported');
                       }
                     },
-                    icon: const Icon(Icons.ac_unit),
+                    icon: const TraqIcon(AppAssets.iconSparkle),
                     label: const Text('Report cold-chain excursion'),
                   ),
                 ],
@@ -271,7 +270,7 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
                     onPressed: _load,
-                    icon: const Icon(Icons.refresh),
+                    icon: TraqIcon(AppAssets.iconRefresh),
                     label: const Text('Refresh'),
                   ),
                 ),
@@ -280,3 +279,4 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
     );
   }
 }
+        

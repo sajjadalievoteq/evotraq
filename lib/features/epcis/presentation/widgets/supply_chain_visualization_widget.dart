@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SupplyChainVisualizationWidget extends StatefulWidget {
   final Map<String, dynamic>? traversalResult;
@@ -56,8 +58,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error,
+            TraqIcon(AppAssets.iconAlert,
               size: 64,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -88,8 +89,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.account_tree_outlined,
+            TraqIcon(AppAssets.iconAggregate,
               size: 64,
               color: Colors.grey[400],
             ),
@@ -122,15 +122,15 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           indicatorColor: Theme.of(context).colorScheme.primary,
           tabs: const [
             Tab(
-              icon: Icon(Icons.route),
+              icon: TraqIcon(AppAssets.iconPin),
               text: 'Supply Chain',
             ),
             Tab(
-              icon: Icon(Icons.timeline),
+              icon: TraqIcon(AppAssets.iconGlobe),
               text: 'Timeline',
             ),
             Tab(
-              icon: Icon(Icons.account_tree),
+              icon: TraqIcon(AppAssets.iconAggregate),
               text: 'Hierarchy',
             ),
           ],
@@ -153,7 +153,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   Widget _buildSupplyChainView() {
     if (widget.traversalResult == null) {
       return _buildEmptyState(
-        icon: Icons.route,
+        iconAsset: AppAssets.iconRoute,
         title: 'No Supply Chain Data',
         subtitle: 'Execute a Supply Chain Path query to see the visualization.',
       );
@@ -201,7 +201,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   Widget _buildTimelineView() {
     if (widget.itemHistory == null) {
       return _buildEmptyState(
-        icon: Icons.timeline,
+        iconAsset: AppAssets.iconTimeline,
         title: 'No Timeline Data',
         subtitle: 'Execute an Item History query to see the timeline.',
       );
@@ -251,7 +251,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   Widget _buildHierarchyView() {
     if (widget.aggregationHierarchy == null) {
       return _buildEmptyState(
-        icon: Icons.account_tree,
+        iconAsset: AppAssets.iconHierarchy,
         title: 'No Hierarchy Data',
         subtitle: 'Execute an Aggregation Hierarchy query to see the structure.',
       );
@@ -306,7 +306,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   }
 
   Widget _buildEmptyState({
-    required IconData icon,
+    required String iconAsset,
     required String title,
     required String subtitle,
   }) {
@@ -314,8 +314,8 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
+          TraqIcon(
+            iconAsset,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -394,7 +394,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: _getNodeColor(node['type']?.toString()),
-          child: Icon(
+          child: TraqIcon(
             _getNodeIcon(node['type']?.toString()),
             color: Colors.white,
           ),
@@ -490,14 +490,13 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           margin: const EdgeInsets.symmetric(vertical: 2.0),
           child: ListTile(
             dense: true,
-            leading: Icon(
-              Icons.inventory_2,
+            leading: TraqIcon(AppAssets.iconPackage,
               color: Theme.of(context).colorScheme.primary,
             ),
             title: Text(parentEpc),
             subtitle: Text('Container - ${directChildren.length} direct children'),
             trailing: directChildren.isNotEmpty 
-                ? const Icon(Icons.keyboard_arrow_down)
+                ? const TraqIcon(AppAssets.iconChevronD)
                 : null,
           ),
         ),
@@ -523,7 +522,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
         margin: const EdgeInsets.symmetric(vertical: 2.0),
         child: ListTile(
           dense: true,
-          leading: Icon(
+          leading: TraqIcon(
             _getItemIcon(epcType),
             color: _getStatusColor(status),
           ),
@@ -541,20 +540,20 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     );
   }
 
-  IconData _getItemIcon(String epcType) {
+  String _getItemIcon(String epcType) {
     switch (epcType.toUpperCase()) {
       case 'SSCC':
-        return Icons.inventory_2;
+        return AppAssets.iconBox;
       case 'SGTIN':
-        return Icons.inventory;
+        return AppAssets.iconBox;
       case 'SGLN':
-        return Icons.location_on;
+        return AppAssets.iconMapPin;
       case 'GRAI':
-        return Icons.crop_free;
+        return AppAssets.iconCropFree;
       case 'GIAI':
-        return Icons.badge;
+        return AppAssets.iconBadge;
       default:
-        return Icons.help_outline;
+        return AppAssets.iconHelpCircle;
     }
   }
 
@@ -586,18 +585,18 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     }
   }
 
-  IconData _getNodeIcon(String? type) {
+  String _getNodeIcon(String? type) {
     switch (type) {
       case 'manufacturer':
-        return Icons.factory;
+        return AppAssets.iconFactory;
       case 'distributor':
-        return Icons.local_shipping;
+        return AppAssets.iconTruck;
       case 'retailer':
-        return Icons.store;
+        return AppAssets.iconStore;
       case 'warehouse':
-        return Icons.warehouse;
+        return AppAssets.iconWarehouse;
       default:
-        return Icons.business;
+        return AppAssets.iconBusiness;
     }
   }
 
@@ -626,8 +625,8 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
         return timestamp.toString();
       }
       return timestamp.toString();
-    } catch (e) {
-      return 'Invalid Date';
+    } catch (_) {
+      return 'Unknown';
     }
   }
 }

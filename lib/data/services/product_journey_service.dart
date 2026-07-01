@@ -292,6 +292,7 @@ class ProductJourneyService {
               };
             }
           } catch (e) {
+            // GLN lookup failed; step will use cached or raw location data.
           }
         }
 

@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Manual EPC entry card for the item scan step.
 class ReceivingItemManualEntryCard extends StatelessWidget {
@@ -29,7 +31,7 @@ class ReceivingItemManualEntryCard extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: onAdd,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Add Item'),
             ),
           ],

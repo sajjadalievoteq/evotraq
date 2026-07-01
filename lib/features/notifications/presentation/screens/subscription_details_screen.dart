@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../../domain/models/notification_subscription.dart';
 import '../widgets/create_subscription_dialog.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
   final String subscriptionId;
@@ -48,7 +51,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             actions: [
               if (subscription != null) ...[
                 IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: TraqIcon(AppAssets.iconEdit),
                   onPressed: () => _editSubscription(subscription),
                   tooltip: 'Edit Subscription',
                 ),
@@ -72,7 +75,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                         value: 'pause',
                         child: Row(
                           children: [
-                            Icon(Icons.pause),
+                            TraqIcon(AppAssets.iconMinus),
                             SizedBox(width: 8),
                             Text('Pause'),
                           ],
@@ -83,7 +86,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                         value: 'resume',
                         child: Row(
                           children: [
-                            Icon(Icons.play_arrow),
+                            TraqIcon(AppAssets.iconArrowR),
                             SizedBox(width: 8),
                             Text('Resume'),
                           ],
@@ -93,7 +96,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, color: Colors.red),
+                          TraqIcon(AppAssets.iconTrash, color: Colors.red),
                           SizedBox(width: 8),
                           Text('Delete', style: TextStyle(color: Colors.red)),
                         ],
@@ -108,9 +111,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           body: BlocListener<NotificationCubit, NotificationState>(
             listener: (context, state) {
               if (state.status == NotificationStatus.error && state.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.error!)),
-                );
+                context.showError(state.error!);
               }
             },
             child: isLoading
@@ -129,8 +130,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -312,28 +312,28 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
 
   Widget _buildStatusChip(String status) {
     Color chipColor;
-    IconData chipIcon;
-    
+    String chipIconAsset;
+
     switch (status) {
       case 'ACTIVE':
         chipColor = Colors.green;
-        chipIcon = Icons.check_circle;
+        chipIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'PAUSED':
         chipColor = Colors.orange;
-        chipIcon = Icons.pause_circle;
+        chipIconAsset = AppAssets.iconPause;
         break;
       case 'ERROR':
         chipColor = Colors.red;
-        chipIcon = Icons.error;
+        chipIconAsset = AppAssets.iconXCircle;
         break;
       default:
         chipColor = Colors.grey;
-        chipIcon = Icons.help;
+        chipIconAsset = AppAssets.iconHelpCircle;
     }
 
     return Chip(
-      avatar: Icon(chipIcon, color: Colors.white, size: 16),
+      avatar: TraqIcon(chipIconAsset, color: Colors.white, size: 16),
       label: Text(
         status,
         style: const TextStyle(color: Colors.white, fontSize: 12),
@@ -359,16 +359,12 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
 
   void _pauseSubscription() {
     context.read<NotificationCubit>().pauseSubscription(widget.subscriptionId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Subscription paused')),
-    );
+    context.showInfo('Subscription paused');
   }
 
   void _resumeSubscription() {
     context.read<NotificationCubit>().resumeSubscription(widget.subscriptionId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Subscription resumed')),
-    );
+    context.showInfo('Subscription resumed');
   }
 
   void _deleteSubscription() {

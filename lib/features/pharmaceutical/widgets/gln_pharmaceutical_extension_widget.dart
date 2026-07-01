@@ -4,6 +4,8 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Widget that displays/edits pharmaceutical extension data for a GLN (location)
 /// Can be embedded in GLN detail screens or used standalone
@@ -53,7 +55,6 @@ class GLNPharmaceuticalExtensionWidgetState
     extends State<GLNPharmaceuticalExtensionWidget> {
   GLNPharmaceuticalExtension? _extension;
   bool _isLoading = true;
-  bool _hasExtension = false;
 
   // Healthcare Facility Type
   HealthcareFacilityType _healthcareFacilityType = HealthcareFacilityType.other;
@@ -185,7 +186,6 @@ class GLNPharmaceuticalExtensionWidgetState
       _populateFormFromExtension(widget.initialExtension!);
       setState(() {
         _extension = widget.initialExtension;
-        _hasExtension = true;
       });
     }
   }
@@ -258,7 +258,6 @@ class GLNPharmaceuticalExtensionWidgetState
       if (mounted) {
         setState(() {
           _extension = widget.initialExtension;
-          _hasExtension = true;
           _isLoading = false;
         });
       }
@@ -707,7 +706,6 @@ class GLNPharmaceuticalExtensionWidgetState
       return const Center(child: CircularProgressIndicator());
     }
 
-    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -897,7 +895,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildFacilitySection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardHealthcareFacilityType,
-      Icons.local_hospital,
+      AppAssets.iconMedical,
       [
         DropdownButtonFormField<HealthcareFacilityType>(
           value: _healthcareFacilityType,
@@ -932,7 +930,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildFdaSection(BuildContext context) {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardFdaEstablishment,
-      Icons.verified_user,
+      AppAssets.iconVerified,
       [
         _buildTextField(
           controller: _fdaEstablishmentIdController,
@@ -986,7 +984,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildDeaSection(BuildContext context) {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardDeaRegistration,
-      Icons.security,
+      AppAssets.iconSecurity,
 
       [
         _buildTextField(
@@ -1026,7 +1024,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildStateLicenseSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardStateProvincialLicense,
-      Icons.badge,
+      AppAssets.iconBadge,
       [
         Row(
           children: [
@@ -1086,7 +1084,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildWholesaleSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardWholesaleDistribution,
-      Icons.local_shipping,
+      AppAssets.iconTruck,
       [
         _buildTextField(
           controller: _wholesaleLicenseNumberController,
@@ -1152,7 +1150,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildColdChainSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardColdChainStorage,
-      Icons.ac_unit,
+      AppAssets.iconSparkle,
       [
         _buildSwitch(
           label: GlnPharmaceuticalExtensionUiConstants.labelColdChainCapability,
@@ -1322,7 +1320,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildClinicalTrialSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardClinicalTrialSite,
-      Icons.science,
+      AppAssets.iconScience,
       [
         _buildSwitch(
           label: GlnPharmaceuticalExtensionUiConstants.labelClinicalTrialSiteSwitch,
@@ -1364,7 +1362,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildDscsaSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardDscsaCompliance,
-      Icons.verified,
+      AppAssets.iconVerified,
       [
         _buildSwitch(
           label: GlnPharmaceuticalExtensionUiConstants.labelDscsaCompliant,
@@ -1414,7 +1412,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildHealthcareIdsSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardHealthcareIdentifiers,
-      Icons.numbers,
+      AppAssets.iconNumbers,
       [
         _buildTextField(
           controller: _npiNumberController,
@@ -1451,7 +1449,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildCertificationsSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardCertificationsAccreditations,
-      Icons.workspace_premium,
+      AppAssets.iconWorkspacePremium,
       [
         _buildSwitch(
           label: GlnPharmaceuticalExtensionUiConstants.labelIsoCertified,
@@ -1518,7 +1516,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildInternationalSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardInternationalRegulatoryIds,
-      Icons.public,
+      AppAssets.iconGlobe,
       [
         _buildTextField(
           controller: _emaSiteIdController,
@@ -1555,7 +1553,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildOperationalSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardOperationalDetails,
-      Icons.access_time,
+      AppAssets.iconClock,
       [
         _buildTextField(
           controller: _receivingHoursController,
@@ -1607,7 +1605,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildContactsSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardContactInformation,
-      Icons.contact_phone,
+      AppAssets.iconPhone,
       [
         const Text(
           GlnPharmaceuticalExtensionUiConstants.headingPharmacistInCharge,
@@ -1740,7 +1738,7 @@ class GLNPharmaceuticalExtensionWidgetState
     );
   }
 
-  Widget _buildSection(String title, IconData icon, List<Widget> children,BuildContext context) {
+  Widget _buildSection(String title, String iconAsset, List<Widget> children,BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1749,7 +1747,7 @@ class GLNPharmaceuticalExtensionWidgetState
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: context.colors.textPrimary),
+                TraqIcon(iconAsset, size: 20, color: context.colors.textPrimary),
                 const SizedBox(width: 8),
                 Text(
                   title,
@@ -1834,7 +1832,7 @@ class GLNPharmaceuticalExtensionWidgetState
               ),
             ),
             if (onChanged != null)
-              const Icon(Icons.calendar_today, size: 20),
+              TraqIcon(AppAssets.iconClock, size: 20),
           ],
         ),
       ),

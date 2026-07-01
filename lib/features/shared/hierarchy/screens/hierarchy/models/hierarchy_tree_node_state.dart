@@ -1,0 +1,24 @@
+import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+
+/// Runtime state for a single node in the rendered tree.
+class HierarchyTreeNodeState {
+  final HierarchyNode node;
+  bool isExpanded;
+  bool isLoading;
+  String? error;
+  List<HierarchyTreeNodeState> loadedChildren;
+  int loadedPage;
+  int totalPages;
+  bool hasMore;
+
+  HierarchyTreeNodeState({
+    required this.node,
+    this.isExpanded = false,
+    this.isLoading = false,
+    this.error,
+    List<HierarchyTreeNodeState>? loadedChildren,
+    this.loadedPage = -1,
+    this.totalPages = 0,
+    this.hasMore = false,
+  }) : loadedChildren = loadedChildren ?? [];
+}

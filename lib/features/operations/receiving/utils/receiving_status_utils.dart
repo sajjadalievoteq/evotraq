@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
 
 /// Receiving operation status color and icon helpers.
@@ -15,19 +16,23 @@ class ReceivingStatusUtils {
         return Colors.red;
       case ReceivingStatus.validationError:
         return Colors.red[700]!;
+      case ReceivingStatus.accepted:
+        return Colors.teal;
     }
   }
 
-  static IconData iconFor(ReceivingStatus status) {
+  static String iconAsset(ReceivingStatus status) {
     switch (status) {
       case ReceivingStatus.success:
-        return Icons.check_circle;
+        return AppAssets.iconCheckCircle;
       case ReceivingStatus.partialSuccess:
-        return Icons.warning;
+        return AppAssets.iconAlert;
       case ReceivingStatus.failed:
-        return Icons.error;
+        return AppAssets.iconXCircle;
       case ReceivingStatus.validationError:
-        return Icons.error_outline;
+        return AppAssets.iconXCircle;
+      case ReceivingStatus.accepted:
+        return AppAssets.iconBox;
     }
   }
 
@@ -41,6 +46,8 @@ class ReceivingStatusUtils {
         return 'FAILED';
       case ReceivingStatus.validationError:
         return 'VALIDATION';
+      case ReceivingStatus.accepted:
+        return 'ACCEPTED';
     }
   }
 
@@ -55,6 +62,8 @@ class ReceivingStatusUtils {
         return 'Failed';
       case ReceivingStatus.validationError:
         return 'Validation Error';
+      case ReceivingStatus.accepted:
+        return 'Accepted';
       case null:
         return 'Unknown';
     }

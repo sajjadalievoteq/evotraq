@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class GS1ValidationDemoScreen extends StatefulWidget {
   const GS1ValidationDemoScreen({Key? key}) : super(key: key);
@@ -168,7 +170,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
               if (_validationPassed)
                 const Center(
                   child: Chip(
-                    avatar: Icon(Icons.check_circle, color: Colors.green),
+                    avatar: TraqIcon(AppAssets.iconCheck, color: Colors.green),
                     label: Text('All validations passed!'),
                     backgroundColor: Color(0xFFE8F5E9),
                   ),

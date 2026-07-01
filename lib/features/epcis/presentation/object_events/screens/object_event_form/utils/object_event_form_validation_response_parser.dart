@@ -18,7 +18,9 @@ class ObjectEventFormValidationResponseParser {
       }
     } else if (response.containsKey('validationErrors')) {
       final list = response['validationErrors'] as List<dynamic>? ?? [];
-      for (final e in list) raw.add(e.toString());
+      for (final e in list) {
+        raw.add(e.toString());
+      }
     } else if (response.containsKey('error')) {
       raw.add(response['error'].toString());
     } else if (response.containsKey('message')) {

@@ -6,6 +6,8 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AdvancedPerformanceOptimizationDashboard extends StatefulWidget {
   const AdvancedPerformanceOptimizationDashboard({Key? key}) : super(key: key);
@@ -152,12 +154,12 @@ class _AdvancedPerformanceOptimizationDashboardState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _isAutoOptimizing ? null : _loadComprehensiveAnalysis,
             tooltip: 'Refresh Analysis',
           ),
           IconButton(
-            icon: const Icon(Icons.auto_fix_high),
+            icon: TraqIcon(AppAssets.iconSparkle),
             onPressed: _isAutoOptimizing ? null : _performAutomatedOptimization,
             tooltip: 'Auto Optimize',
           ),
@@ -178,7 +180,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.green),
+                            TraqIcon(AppAssets.iconCheck, color: Colors.green),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -202,7 +204,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            Icon(Icons.error, color: Colors.red),
+                            TraqIcon(AppAssets.iconAlert, color: Colors.red),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -226,8 +228,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.dashboard,
+                              TraqIcon(AppAssets.iconDashboard,
                                 color: Theme.of(context).primaryColor,
                               ),
                               const SizedBox(width: 8),
@@ -270,8 +271,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.auto_fix_high,
+                              TraqIcon(AppAssets.iconSparkle,
                                 color: Theme.of(context).primaryColor,
                               ),
                               const SizedBox(width: 8),
@@ -302,7 +302,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : const Icon(Icons.auto_fix_high),
+                                  : TraqIcon(AppAssets.iconSparkle),
                               label: Text(
                                 _isAutoOptimizing
                                     ? 'Optimizing...'
@@ -332,10 +332,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                           children: [
                             Row(
                               children: [
-                                Icon(
-                                  Icons.analytics,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                                TraqIcon(AppAssets.iconBarChart, color: Theme.of(context).primaryColor),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Comprehensive Analysis Results',
@@ -389,7 +386,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'Memory Usage',
                 _getMemoryUsage(systemResources),
-                Icons.memory,
+                AppAssets.iconChip,
                 Colors.blue,
               ),
             ),
@@ -398,7 +395,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'CPU Usage',
                 _getCpuUsage(systemResources),
-                Icons.speed,
+                AppAssets.iconGauge,
                 Colors.green,
               ),
             ),
@@ -411,7 +408,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'Active Connections',
                 _getActiveConnections(connectionPool),
-                Icons.link,
+                AppAssets.iconLink,
                 Colors.orange,
               ),
             ),
@@ -420,7 +417,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'Active Threads',
                 _getActiveThreads(threadPools),
-                Icons.settings,
+                AppAssets.iconSettings,
                 Colors.purple,
               ),
             ),
@@ -433,7 +430,7 @@ class _AdvancedPerformanceOptimizationDashboardState
   Widget _buildOverviewCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Container(
@@ -445,7 +442,7 @@ class _AdvancedPerformanceOptimizationDashboardState
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             title,
@@ -476,7 +473,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildComponentCard(
                 'Query Plan Analysis',
                 'Analyze SQL execution plans and optimize query performance',
-                Icons.analytics,
+                AppAssets.iconBarChart,
                 Colors.blue,
                 () => _showComingSoonDialog('Query Plan Analysis'),
               ),
@@ -486,7 +483,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildComponentCard(
                 'Connection Pool Monitoring',
                 'Monitor HikariCP connections and detect leaks',
-                Icons.pool,
+                AppAssets.iconHub,
                 Colors.green,
                 () => _showComingSoonDialog('Connection Pool Monitoring'),
               ),
@@ -500,7 +497,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildComponentCard(
                 'Thread Pool Management',
                 'Manage thread pools with backpressure strategies',
-                Icons.settings,
+                AppAssets.iconSettings,
                 Colors.orange,
                 () => _showComingSoonDialog('Thread Pool Management'),
               ),
@@ -510,7 +507,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildComponentCard(
                 'Resource Management',
                 'Monitor and optimize system resources',
-                Icons.computer,
+                AppAssets.iconComputer,
                 Colors.purple,
                 () => _showComingSoonDialog('Resource Management'),
               ),
@@ -524,7 +521,7 @@ class _AdvancedPerformanceOptimizationDashboardState
   Widget _buildComponentCard(
     String title,
     String description,
-    IconData icon,
+    String iconAsset,
     Color color,
     VoidCallback onTap,
   ) {
@@ -541,7 +538,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 children: [
                   CircleAvatar(
                     backgroundColor: color.withOpacity(0.1),
-                    child: Icon(icon, color: color),
+                    child: TraqIcon(iconAsset, color: color),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -553,7 +550,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                       ),
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                  TraqIcon(AppAssets.iconChevronR, size: 16, color: Colors.grey),
                 ],
               ),
               const SizedBox(height: 12),
@@ -604,6 +601,15 @@ class _AdvancedPerformanceOptimizationDashboardState
   }
 
   String _getActiveThreads(Map<String, dynamic> threadPools) {
-    return threadPools['activeThreads']?.toString() ?? '0';
+    if (threadPools.isEmpty) return '0';
+    final direct = threadPools['activeThreads'] ?? threadPools['activeCount'];
+    if (direct != null) return direct.toString();
+    var total = 0;
+    for (final value in threadPools.values) {
+      if (value is Map) {
+        total += (value['activeThreads'] as num?)?.toInt() ?? 0;
+      }
+    }
+    return total.toString();
   }
 }

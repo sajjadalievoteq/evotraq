@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_epc_product_subtitle.dart';
+import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_hierarchy_row.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// List of scanned EPCs with remove and clear-all actions.
 class PackingScannedItemsList extends StatelessWidget {
@@ -23,7 +27,7 @@ class PackingScannedItemsList extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.list_alt),
+                TraqIcon(AppAssets.iconList),
                 const SizedBox(width: 8),
                 Text(
                   'Scanned Items (${scannedEpcs.length})',
@@ -58,29 +62,15 @@ class PackingScannedItemsList extends StatelessWidget {
                 itemCount: scannedEpcs.length,
                 itemBuilder: (context, index) {
                   final epc = scannedEpcs[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.teal[100],
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: Colors.teal[800],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      epc,
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
+                  return EpcHierarchyRow(
+                    epc: epc,
+                    hierarchyScreenTitle: 'Packing Hierarchy',
+                    subtitle: OperationEpcProductSubtitle(epc: epc),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: TraqIcon(AppAssets.iconTrash, color: Colors.red),
+                      visualDensity: VisualDensity.compact,
                       onPressed: () => onRemoveItem(index),
                     ),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
                   );
                 },
               ),

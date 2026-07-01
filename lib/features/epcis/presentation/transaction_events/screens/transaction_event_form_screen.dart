@@ -5,19 +5,19 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
-import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for creating or editing Transaction Events
 class TransactionEventFormScreen extends StatefulWidget {
@@ -161,20 +161,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     }
 
     super.dispose();
-  }
-
-  /// Show success snackbar
-  void showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
-  }
-
-  /// Show error snackbar
-  void showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
   }
 
   /// Load transaction event data for editing
@@ -354,13 +340,12 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
       if (!mounted) return;
 
-      showSuccessSnackBar(
-        context,
+      context.showSuccess(
         _isEdit ? 'Transaction event updated' : 'Transaction event created',
       );
       Navigator.pop(context, true);
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      context.showError(e.toString());
     }
   }
 
@@ -378,7 +363,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: () => _showHelpScreen(context),
             tooltip: 'Help',
           ),
@@ -645,7 +630,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     subtitle: Text(
                       DateFormat('yyyy-MM-dd HH:mm:ss').format(_eventTime),
                     ),
-                    trailing: const Icon(Icons.calendar_today),
+                    trailing: TraqIcon(AppAssets.iconClock),
                     onTap: () async {
                       final date = await showDatePicker(
                         context: context,
@@ -685,7 +670,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
                   TextButton.icon(
                     onPressed: _addBizDataField,
-                    icon: const Icon(Icons.add),
+                    icon: TraqIcon(AppAssets.iconPlus),
                     label: const Text('Add Business Data Field'),
                   ),
                   const SizedBox(height: 24),
@@ -755,7 +740,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline),
+              icon: TraqIcon(AppAssets.iconTrash),
               onPressed: () => _removeBizDataField(index),
             ),
           ],

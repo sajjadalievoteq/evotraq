@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_rules_text.dart';
 
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class AggregationPharmaRulesPanel extends StatelessWidget {
   const AggregationPharmaRulesPanel({super.key});
 
@@ -11,8 +14,8 @@ class AggregationPharmaRulesPanel extends StatelessWidget {
       margin: EdgeInsets.zero,
 
       child: ExpansionTile(
-        leading: Icon(
-          Icons.medical_information_outlined,
+        leading: TraqIcon(
+          AppAssets.iconMedical,
           color: theme.colorScheme.primary,
         ),
         title: Text(

@@ -13,6 +13,8 @@ import 'package:traqtrace_app/features/admin/cbv_vocabulary/widgets/cbv_statisti
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/widgets/cbv_vocabulary_skeleton.dart';
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/widgets/cbv_vocabulary_form_dialog.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen entry point
@@ -84,7 +86,7 @@ class _CbvVocabularyManagementViewState
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.account_tree_outlined),
+              leading: TraqIcon(AppAssets.iconAggregate),
               title: const Text('Add Biz Step'),
               onTap: () {
                 Navigator.of(dialogCtx).pop();
@@ -92,7 +94,7 @@ class _CbvVocabularyManagementViewState
               },
             ),
             ListTile(
-              leading: const Icon(Icons.label_outline),
+              leading: const TraqIcon(AppAssets.iconTag),
               title: const Text('Add Disposition'),
               onTap: () {
                 Navigator.of(dialogCtx).pop();
@@ -179,7 +181,7 @@ class _CbvVocabularyManagementViewState
                 if (!state.isLoaded) return const SizedBox.shrink();
                 return FloatingActionButton.extended(
                   onPressed: state.isCreating ? null : _showAddDialog,
-                  label: const Icon(Icons.add),
+                  label: TraqIcon(AppAssets.iconPlus),
                 );
               },
             )
@@ -219,10 +221,10 @@ class _CbvVocabularyManagementViewState
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search by label or code…',
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: TraqIcon(AppAssets.iconSearch),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: TraqIcon(AppAssets.iconX),
                               onPressed: _searchController.clear,
                             )
                           : null,
@@ -605,7 +607,7 @@ class _DispChip extends StatelessWidget {
         style: context.text.cap.copyWith(color: colors.textSecondary),
       ),
       deleteIcon: isAdmin
-          ? Icon(Icons.close, size: 14, color: colors.textMuted)
+          ? TraqIcon(AppAssets.iconX, size: 14, color: colors.textMuted)
           : null,
       onDeleted: isAdmin ? onRemove : null,
       backgroundColor: colors.primaryMuted,
@@ -635,7 +637,7 @@ class _AddPairChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return ActionChip(
-      avatar: Icon(Icons.add, size: 14, color: colors.primary),
+      avatar: TraqIcon(AppAssets.iconPlus, size: 14, color: colors.primary),
       label: Text(
         'Add',
         style: context.text.cap.copyWith(color: colors.primary),
@@ -817,8 +819,7 @@ class _VocabFlatTab extends StatelessWidget {
                             strokeWidth: 2),
                       )
                     : IconButton(
-                        icon: Icon(Icons.delete_outline,
-                            color: context.colors.error, size: 20),
+                        icon: TraqIcon(AppAssets.iconTrash, color: context.colors.error, size: 20),
                         tooltip: 'Delete',
                         onPressed: () => onDelete(item),
                       ),
@@ -874,7 +875,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 64, color: context.colors.error),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: context.colors.error),
             const SizedBox(height: TraqSpacing.lg),
             Text('Failed to load CBV vocabulary', style: context.text.h3),
             const SizedBox(height: TraqSpacing.sm),
@@ -887,7 +888,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: TraqSpacing.xl),
             ElevatedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: const TraqIcon(AppAssets.iconRefresh),
               label: const Text('Retry'),
             ),
           ],
@@ -896,3 +897,4 @@ class _ErrorView extends StatelessWidget {
     );
   }
 }
+   

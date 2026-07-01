@@ -3,6 +3,8 @@ import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/services/gs1_scan_pipeline.dart';
 import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Universal GS1 barcode scan dialog — the single entry point for scanning
 /// anywhere in the app (forms, operations, standalone flows).
@@ -128,7 +130,7 @@ abstract final class GS1BarcodeScanDialog {
     String tooltip = 'Scan barcode',
   }) {
     return IconButton(
-      icon: const Icon(Icons.qr_code_scanner),
+      icon: TraqIcon(AppAssets.iconQr),
       tooltip: tooltip,
       onPressed: () async {
         final result = await show(
@@ -192,8 +194,7 @@ class Gs1BarcodeScanTrigger extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.qr_code_scanner,
+          TraqIcon(AppAssets.iconQr,
             size: showPreview ? 48 : 40,
             color: colorScheme.primary.withValues(alpha: 0.7),
           ),
@@ -213,7 +214,7 @@ class Gs1BarcodeScanTrigger extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.tonalIcon(
             onPressed: () => _openScanner(context),
-            icon: const Icon(Icons.qr_code_scanner, size: 18),
+            icon: TraqIcon(AppAssets.iconQr, size: 18),
             label: const Text('Open Scanner'),
           ),
           if (allowedFormats.isNotEmpty) ...[

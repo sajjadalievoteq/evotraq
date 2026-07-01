@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
@@ -38,7 +38,6 @@ class PharmaceuticalExtensionWidgetState
     extends State<PharmaceuticalExtensionWidget> {
   GTINPharmaceuticalExtension? _extension;
   bool _isLoading = true;
-  bool _hasExtension = false;
 
   String _ndcNumber = '';
   String _dinNumber = '';
@@ -130,7 +129,6 @@ class PharmaceuticalExtensionWidgetState
     if (widget.initialExtension != null) {
       _populateFormFromExtension(widget.initialExtension!);
       _extension = widget.initialExtension;
-      _hasExtension = true;
       _isLoading = false;
     } else {
       _isLoading =
@@ -151,7 +149,6 @@ class PharmaceuticalExtensionWidgetState
           if (widget.initialExtension != null) {
             _populateFormFromExtension(widget.initialExtension!);
             _extension = widget.initialExtension;
-            _hasExtension = true;
           }
         });
       }
@@ -162,7 +159,6 @@ class PharmaceuticalExtensionWidgetState
         _populateFormFromExtension(next);
         _applyState(() {
           _extension = next;
-          _hasExtension = true;
           _isLoading = false;
         });
       }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_screen.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/operations/shipping/cubit/shipping_operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/shipping_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/shipping_operation_list_screen.dart';
 
@@ -42,6 +42,7 @@ class _ShippingScreenState extends State<ShippingScreen> {
           createHeaderText: 'New Shipping Operation',
           closeCreateTooltip: 'Close',
           emptyNoMatchText: 'No shipping operations match your search.',
+          fabNavigateRoute: Constants.opShippingCreateRoute,
           listenWhenListChanged: (prev, curr) =>
               prev.operationIds != curr.operationIds,
           idsFromState: (s) => s.operationIds,
@@ -64,11 +65,6 @@ class _ShippingScreenState extends State<ShippingScreen> {
             key: ValueKey(id),
             operationId: id,
             embedded: true,
-          ),
-          detailCreateBuilder: (context, onSuccess) => ShippingOperationScreen(
-            key: const ValueKey('__shipping_embedded_new__'),
-            embedded: true,
-            onEmbeddedActionSuccess: onSuccess,
           ),
           detailAwaitBuilder: (context) => const ShippingOperationDetailScreen(
             key: ValueKey('__shipping_split_await__'),

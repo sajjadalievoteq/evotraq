@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_help_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ObjectEventFormEntryDialogs {
   ObjectEventFormEntryDialogs._();
@@ -27,7 +29,7 @@ class ObjectEventFormEntryDialogs {
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: TraqIcon(AppAssets.iconX),
                     onPressed: () => Navigator.pop(dialogContext),
                   ),
                 ],
@@ -65,8 +67,7 @@ class ObjectEventFormEntryDialogs {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.error_outline,
+                          TraqIcon(AppAssets.iconAlert,
                             color: Colors.red,
                             size: 18,
                           ),

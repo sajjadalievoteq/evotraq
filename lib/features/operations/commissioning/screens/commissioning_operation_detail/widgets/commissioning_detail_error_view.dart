@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningDetailErrorView extends StatelessWidget {
   const CommissioningDetailErrorView({
@@ -17,7 +19,7 @@ class CommissioningDetailErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             errorMessage,

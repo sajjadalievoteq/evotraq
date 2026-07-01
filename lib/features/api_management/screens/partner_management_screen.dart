@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/widgets/create_partner_dialog.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for managing B2B API partners
 class PartnerManagementScreen extends StatefulWidget {
@@ -38,12 +41,12 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         title: const Text('Partner Management'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () => context.read<ApiManagementCubit>().loadPartners(),
             tooltip: 'Refresh',
           ),
           IconButton(
-            icon: const Icon(Icons.health_and_safety),
+            icon: const TraqIcon(AppAssets.iconSecurity),
             onPressed: _checkHealth,
             tooltip: 'Check Integration Layer Health',
           ),
@@ -52,7 +55,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreatePartnerDialog,
-        icon: const Icon(Icons.add),
+        icon: TraqIcon(AppAssets.iconPlus),
         label: const Text('Add Partner'),
       ),
       body: BlocBuilder<ApiManagementCubit, ApiManagementState>(
@@ -66,7 +69,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
                   const SizedBox(height: 16),
                   Text(state.errorMessage!),
                   const SizedBox(height: 16),
@@ -107,18 +110,18 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatCard('Total Partners', state.totalPartners.toString(), Icons.business),
-          _buildStatCard('Active', state.activePartnersCount.toString(), Icons.check_circle, color: Colors.green),
-          _buildStatCard('Inactive', state.inactivePartners.length.toString(), Icons.cancel, color: Colors.grey),
+          _buildStatCard('Total Partners', state.totalPartners.toString(), AppAssets.iconBusiness),
+          _buildStatCard('Active', state.activePartnersCount.toString(), AppAssets.iconCheckCircle, color: Colors.green),
+          _buildStatCard('Inactive', state.inactivePartners.length.toString(), AppAssets.iconXCircle, color: Colors.grey),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, {Color? color}) {
+  Widget _buildStatCard(String label, String value, String iconAsset, {Color? color}) {
     return Column(
       children: [
-        Icon(icon, color: color ?? context.colors.primary, size: 28),
+        TraqIcon(iconAsset, color: color ?? context.colors.primary, size: 28),
         const SizedBox(height: 4),
         Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
@@ -135,7 +138,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search partners...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: TraqIcon(AppAssets.iconSearch),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -177,13 +180,13 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.business_outlined, size: 64, color: Colors.grey.shade400),
+            TraqIcon(AppAssets.iconFactory, color: Colors.grey.shade400, size: 64),
             const SizedBox(height: 16),
             const Text('No partners found'),
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: _showCreatePartnerDialog,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Add First Partner'),
             ),
           ],
@@ -265,14 +268,14 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildInfoChip(partner.partnerType.displayName, Icons.category),
+                  _buildInfoChip(partner.partnerType.displayName, AppAssets.iconCategory),
                   const SizedBox(width: 8),
-                  _buildInfoChip(partner.preferredDataFormat.displayName, Icons.data_object),
+                  _buildInfoChip(partner.preferredDataFormat.displayName, AppAssets.iconBraces),
                   const SizedBox(width: 8),
                   _buildSyncDirectionChip(partner.syncDirection),
                   if (partner.gln != null) ...[
                     const SizedBox(width: 8),
-                    _buildInfoChip('GLN: ${partner.gln}', Icons.location_on),
+                    _buildInfoChip('GLN: ${partner.gln}', AppAssets.iconMapPin),
                   ],
                 ],
               ),
@@ -288,7 +291,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                       Expanded(
                         child: Row(
                           children: [
-                            Icon(Icons.email, size: 14, color: Colors.grey.shade600),
+                            TraqIcon(AppAssets.iconMail, color: Colors.grey.shade600, size: 14),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
@@ -301,7 +304,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                         ),
                       ),
                     if (partner.webhookUrl != null)
-                      Icon(Icons.webhook, size: 16, color: Colors.green.shade600),
+                      TraqIcon(AppAssets.iconSettings, size: 16, color: Colors.green.shade600),
                   ],
                 ),
               ],
@@ -330,7 +333,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     );
   }
 
-  Widget _buildInfoChip(String label, IconData icon) {
+  Widget _buildInfoChip(String label, String iconAsset) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -340,7 +343,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.grey.shade600),
+          TraqIcon(iconAsset, size: 14, color: Colors.grey.shade600),
           const SizedBox(width: 4),
           Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
         ],
@@ -349,24 +352,24 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   }
 
   Widget _buildSyncDirectionChip(SyncDirection direction) {
-    IconData icon;
+    String iconAsset;
     Color color;
-    
+
     switch (direction) {
       case SyncDirection.inbound:
-        icon = Icons.arrow_downward;
+        iconAsset = AppAssets.iconArrowD;
         color = Colors.blue;
         break;
       case SyncDirection.outbound:
-        icon = Icons.arrow_upward;
+        iconAsset = AppAssets.iconArrowUpR;
         color = Colors.orange;
         break;
       case SyncDirection.bidirectional:
-        icon = Icons.swap_vert;
+        iconAsset = AppAssets.iconSwapVert;
         color = Colors.purple;
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -377,7 +380,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          TraqIcon(iconAsset, size: 14, color: color),
           const SizedBox(width: 4),
           Text(
             direction.displayName,
@@ -394,7 +397,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     
     return Row(
       children: [
-        Icon(Icons.sync, size: 14, color: statusColor),
+        TraqIcon(AppAssets.iconRefresh, color: statusColor, size: 14),
         const SizedBox(width: 4),
         Text(
           'Sync: ${partner.syncStatusDisplay}',
@@ -453,9 +456,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     final cubit = context.read<ApiManagementCubit>();
     final success = await cubit.updatePartner(partner.id, active: !partner.active);
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Partner ${partner.active ? 'deactivated' : 'activated'}')),
-      );
+      context.showSuccess('Partner ${partner.active ? 'deactivated' : 'activated'}');
     }
   }
 
@@ -476,9 +477,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               final cubit = context.read<ApiManagementCubit>();
               final success = await cubit.deletePartner(partner.id);
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Partner deleted')),
-                );
+                context.showSuccess('Partner deleted');
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -501,19 +500,11 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     await cubit.checkHealth();
     if (mounted && cubit.state.healthStatus != null) {
       final status = cubit.state.healthStatus!['status'];
-      final color = status == 'UP' ? Colors.green : Colors.red;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(status == 'UP' ? Icons.check_circle : Icons.error, color: Colors.white),
-              const SizedBox(width: 8),
-              Text('Integration Layer: $status'),
-            ],
-          ),
-          backgroundColor: color,
-        ),
-      );
+      if (status == 'UP') {
+        context.showSuccess('Integration Layer: $status');
+      } else {
+        context.showError('Integration Layer: $status');
+      }
     }
   }
 }

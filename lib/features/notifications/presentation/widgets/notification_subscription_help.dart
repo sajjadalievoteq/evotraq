@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class NotificationSubscriptionHelp extends StatelessWidget {
   const NotificationSubscriptionHelp({super.key});
@@ -8,7 +10,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
     return AlertDialog(
       title: const Row(
         children: [
-          Icon(Icons.help_outline, color: Colors.blue),
+          TraqIcon(AppAssets.iconInfo, color: Colors.blue),
           SizedBox(width: 8),
           Text('Notification Subscription Help'),
         ],
@@ -214,7 +216,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue[700]),
+              TraqIcon(AppAssets.iconLightbulb, color: Colors.blue[700], size: 16),
               const SizedBox(width: 4),
               Text(
                 title,
@@ -246,7 +248,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle, size: 16, color: Colors.green[600]),
+          TraqIcon(AppAssets.iconCheck, size: 16, color: Colors.green[600]),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen for viewing and editing partner details
 class PartnerDetailScreen extends StatefulWidget {
@@ -171,24 +174,24 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: TraqIcon(AppAssets.iconChevronL),
           onPressed: () => context.go('/admin/api-management/partners'),
         ),
         title: Text(_partner?.companyName ?? 'Partner Details'),
         actions: [
           if (_partner != null && !_isEditing) ...[
             IconButton(
-              icon: const Icon(Icons.vpn_key),
+              icon: TraqIcon(AppAssets.iconLock),
               onPressed: () => context.push('/admin/api-management/partners/${widget.partnerId}/credentials'),
               tooltip: 'Manage Credentials',
             ),
             IconButton(
-              icon: const Icon(Icons.analytics),
+              icon: const TraqIcon(AppAssets.iconBarChart),
               onPressed: () => context.push('/admin/api-management/partners/${widget.partnerId}/analytics'),
               tooltip: 'View Analytics',
             ),
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: TraqIcon(AppAssets.iconEdit),
               onPressed: () => setState(() => _isEditing = true),
               tooltip: 'Edit Partner',
             ),
@@ -208,7 +211,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               onPressed: _isSaving ? null : _savePartner,
               icon: _isSaving 
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.save),
+                  : const TraqIcon(AppAssets.iconSave),
               label: const Text('Save'),
             ),
             const SizedBox(width: 8),
@@ -229,7 +232,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(_errorMessage!),
             const SizedBox(height: 16),
@@ -311,9 +314,9 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildChip(_partner!.partnerType.displayName, Icons.category, Colors.blue),
+                      _buildChip(_partner!.partnerType.displayName, AppAssets.iconCategory, Colors.blue),
                       const SizedBox(width: 8),
-                      _buildChip(_partner!.preferredDataFormat.displayName, Icons.data_object, Colors.purple),
+                      _buildChip(_partner!.preferredDataFormat.displayName, AppAssets.iconBraces, Colors.purple),
                       const SizedBox(width: 8),
                       _buildSyncDirectionChip(_partner!.syncDirection),
                       const SizedBox(width: 8),
@@ -350,7 +353,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _companyNameController,
                     decoration: const InputDecoration(
                       labelText: 'Company Name',
-                      prefixIcon: Icon(Icons.business),
+                      prefixIcon: TraqIcon(AppAssets.iconUsers),
                     ),
                     enabled: _isEditing,
                     validator: (value) => value?.isEmpty == true ? 'Required' : null,
@@ -362,7 +365,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     value: _selectedPartnerType,
                     decoration: const InputDecoration(
                       labelText: 'Partner Type',
-                      prefixIcon: Icon(Icons.category),
+                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
                     ),
                     items: PartnerType.values.map((type) {
                       return DropdownMenuItem(value: type, child: Text(type.displayName));
@@ -392,7 +395,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     value: _selectedDataFormat,
                     decoration: const InputDecoration(
                       labelText: 'Preferred Data Format',
-                      prefixIcon: Icon(Icons.data_object),
+                      prefixIcon: TraqIcon(AppAssets.iconBraces),
                     ),
                     items: DataFormat.values.map((format) {
                       return DropdownMenuItem(value: format, child: Text(format.displayName));
@@ -409,7 +412,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               controller: _webhookUrlController,
               decoration: const InputDecoration(
                 labelText: 'Webhook URL',
-                prefixIcon: Icon(Icons.webhook),
+                prefixIcon: TraqIcon(AppAssets.iconSettings),
                 helperText: 'URL for receiving event notifications',
               ),
               enabled: _isEditing,
@@ -436,7 +439,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _contactNameController,
                     decoration: const InputDecoration(
                       labelText: 'Contact Name',
-                      prefixIcon: Icon(Icons.person),
+                      prefixIcon: TraqIcon(AppAssets.iconUser),
                     ),
                     enabled: _isEditing,
                   ),
@@ -447,7 +450,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _contactEmailController,
                     decoration: const InputDecoration(
                       labelText: 'Contact Email',
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: TraqIcon(AppAssets.iconMail),
                     ),
                     enabled: _isEditing,
                   ),
@@ -458,7 +461,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _contactPhoneController,
                     decoration: const InputDecoration(
                       labelText: 'Contact Phone',
-                      prefixIcon: Icon(Icons.phone),
+                      prefixIcon: TraqIcon(AppAssets.iconPhone),
                     ),
                     enabled: _isEditing,
                   ),
@@ -487,7 +490,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     value: _selectedSyncDirection,
                     decoration: const InputDecoration(
                       labelText: 'Sync Direction',
-                      prefixIcon: Icon(Icons.swap_vert),
+                      prefixIcon: TraqIcon(AppAssets.iconSwapVert),
                     ),
                     items: SyncDirection.values.map((dir) {
                       return DropdownMenuItem(value: dir, child: Text(dir.displayName));
@@ -503,7 +506,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _syncIntervalController,
                     decoration: const InputDecoration(
                       labelText: 'Sync Interval (minutes)',
-                      prefixIcon: Icon(Icons.timer),
+                      prefixIcon: TraqIcon(AppAssets.iconClock),
                     ),
                     enabled: _isEditing,
                     keyboardType: TextInputType.number,
@@ -538,7 +541,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               controller: _outboundApiUrlController,
               decoration: const InputDecoration(
                 labelText: 'Partner API Base URL',
-                prefixIcon: Icon(Icons.link),
+                prefixIcon: TraqIcon(AppAssets.iconAggregate),
                 hintText: 'https://partner-api.example.com',
               ),
               enabled: _isEditing,
@@ -551,7 +554,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundEventsEndpointController,
                     decoration: const InputDecoration(
                       labelText: 'Events Endpoint',
-                      prefixIcon: Icon(Icons.event),
+                      prefixIcon: TraqIcon(AppAssets.iconEvent),
                       hintText: '/api/v1/events',
                     ),
                     enabled: _isEditing,
@@ -563,7 +566,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundMasterdataEndpointController,
                     decoration: const InputDecoration(
                       labelText: 'Master Data Endpoint',
-                      prefixIcon: Icon(Icons.inventory),
+                      prefixIcon: TraqIcon(AppAssets.iconSscc),
                       hintText: '/api/v1/masterdata',
                     ),
                     enabled: _isEditing,
@@ -578,7 +581,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               value: _selectedOutboundAuthType,
               decoration: const InputDecoration(
                 labelText: 'Authentication Type',
-                prefixIcon: Icon(Icons.security),
+                prefixIcon: TraqIcon(AppAssets.iconLock),
               ),
               items: OutboundAuthType.values.map((type) {
                 return DropdownMenuItem(value: type, child: Text(type.displayName));
@@ -597,7 +600,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundTimeoutController,
                     decoration: const InputDecoration(
                       labelText: 'Timeout (seconds)',
-                      prefixIcon: Icon(Icons.hourglass_empty),
+                      prefixIcon: TraqIcon(AppAssets.iconHourglass),
                     ),
                     enabled: _isEditing,
                     keyboardType: TextInputType.number,
@@ -609,7 +612,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundRetryCountController,
                     decoration: const InputDecoration(
                       labelText: 'Retry Count',
-                      prefixIcon: Icon(Icons.replay),
+                      prefixIcon: TraqIcon(AppAssets.iconRedo),
                     ),
                     enabled: _isEditing,
                     keyboardType: TextInputType.number,
@@ -630,7 +633,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
           controller: _outboundApiKeyController,
           decoration: InputDecoration(
             labelText: 'API Key',
-            prefixIcon: const Icon(Icons.key),
+            prefixIcon: const TraqIcon(AppAssets.iconKey),
             helperText: _partner?.outboundApiKeyConfigured == true 
                 ? 'API key is configured (leave empty to keep existing)'
                 : null,
@@ -649,7 +652,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundClientIdController,
                     decoration: const InputDecoration(
                       labelText: 'Client ID',
-                      prefixIcon: Icon(Icons.perm_identity),
+                      prefixIcon: TraqIcon(AppAssets.iconUser),
                     ),
                     enabled: _isEditing,
                   ),
@@ -660,7 +663,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundClientSecretController,
                     decoration: InputDecoration(
                       labelText: 'Client Secret',
-                      prefixIcon: const Icon(Icons.lock),
+                      prefixIcon: TraqIcon(AppAssets.iconLock),
                       helperText: _partner?.outboundClientSecretConfigured == true 
                           ? 'Secret is configured (leave empty to keep existing)'
                           : null,
@@ -679,7 +682,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundTokenUrlController,
                     decoration: const InputDecoration(
                       labelText: 'Token URL',
-                      prefixIcon: Icon(Icons.link),
+                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
                       hintText: 'https://auth.example.com/oauth/token',
                     ),
                     enabled: _isEditing,
@@ -691,7 +694,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundScopesController,
                     decoration: const InputDecoration(
                       labelText: 'Scopes',
-                      prefixIcon: Icon(Icons.security),
+                      prefixIcon: TraqIcon(AppAssets.iconLock),
                       hintText: 'read write',
                     ),
                     enabled: _isEditing,
@@ -709,7 +712,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                 controller: _outboundUsernameController,
                 decoration: const InputDecoration(
                   labelText: 'Username',
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon: TraqIcon(AppAssets.iconUser),
                 ),
                 enabled: _isEditing,
               ),
@@ -720,7 +723,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                 controller: _outboundPasswordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.password),
+                  prefixIcon: const TraqIcon(AppAssets.iconKey),
                   helperText: _partner?.outboundPasswordConfigured == true 
                       ? 'Password is configured (leave empty to keep existing)'
                       : null,
@@ -755,27 +758,27 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                   _partner!.lastSyncAt != null 
                       ? _formatDateTime(_partner!.lastSyncAt!)
                       : 'Never',
-                  Icons.schedule,
+                  AppAssets.iconClock,
                 ),
                 const SizedBox(width: 32),
                 _buildStatusItem(
                   'Status',
                   _partner!.lastSyncStatus ?? 'N/A',
-                  _partner!.lastSyncStatus == 'SUCCESS' ? Icons.check_circle : Icons.error,
+                  _partner!.lastSyncStatus == 'SUCCESS' ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                   color: _partner!.lastSyncStatus == 'SUCCESS' ? Colors.green : Colors.red,
                 ),
                 const SizedBox(width: 32),
                 _buildStatusItem(
                   'Created',
                   _formatDateTime(_partner!.createdAt),
-                  Icons.calendar_today,
+                  AppAssets.iconCalendar,
                 ),
                 if (_partner!.updatedAt != null) ...[
                   const SizedBox(width: 32),
                   _buildStatusItem(
                     'Last Updated',
                     _formatDateTime(_partner!.updatedAt!),
-                    Icons.update,
+                    AppAssets.iconRefresh,
                   ),
                 ],
               ],
@@ -790,7 +793,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    TraqIcon(AppAssets.iconAlert, color: Colors.red.shade700),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -823,23 +826,23 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               children: [
                 OutlinedButton.icon(
                   onPressed: () => context.push('/admin/api-management/partners/${widget.partnerId}/credentials'),
-                  icon: const Icon(Icons.vpn_key),
+                  icon: TraqIcon(AppAssets.iconLock),
                   label: const Text('Manage Credentials'),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => context.push('/admin/api-management/partners/${widget.partnerId}/analytics'),
-                  icon: const Icon(Icons.analytics),
+                  icon: const TraqIcon(AppAssets.iconBarChart),
                   label: const Text('View Analytics'),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => context.push('/admin/api-management/partners/${widget.partnerId}/access'),
-                  icon: const Icon(Icons.security),
+                  icon: TraqIcon(AppAssets.iconLock),
                   label: const Text('Manage API Access'),
                 ),
                 if (_partner!.hasOutboundIntegration)
                   OutlinedButton.icon(
                     onPressed: _testConnection,
-                    icon: const Icon(Icons.wifi_tethering),
+                    icon: const TraqIcon(AppAssets.iconWifi),
                     label: const Text('Test Connection'),
                   ),
               ],
@@ -860,7 +863,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
     );
   }
 
-  Widget _buildChip(String label, IconData icon, Color color) {
+  Widget _buildChip(String label, String iconAsset, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -870,7 +873,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          TraqIcon(iconAsset, size: 14, color: color),
           const SizedBox(width: 4),
           Text(label, style: TextStyle(fontSize: 12, color: color)),
         ],
@@ -879,24 +882,24 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   }
 
   Widget _buildSyncDirectionChip(SyncDirection direction) {
-    IconData icon;
+    String iconAsset;
     Color color;
-    
+
     switch (direction) {
       case SyncDirection.inbound:
-        icon = Icons.arrow_downward;
+        iconAsset = AppAssets.iconArrowD;
         color = Colors.blue;
         break;
       case SyncDirection.outbound:
-        icon = Icons.arrow_upward;
+        iconAsset = AppAssets.iconArrowUpR;
         color = Colors.orange;
         break;
       case SyncDirection.bidirectional:
-        icon = Icons.swap_vert;
+        iconAsset = AppAssets.iconSwapVert;
         color = Colors.purple;
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -907,7 +910,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          TraqIcon(iconAsset, size: 14, color: color),
           const SizedBox(width: 4),
           Text(direction.displayName, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
         ],
@@ -933,7 +936,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
     );
   }
 
-  Widget _buildStatusItem(String label, String value, IconData icon, {Color? color}) {
+  Widget _buildStatusItem(String label, String value, String iconAsset, {Color? color}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -941,7 +944,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
         const SizedBox(height: 4),
         Row(
           children: [
-            Icon(icon, size: 16, color: color ?? Colors.grey.shade700),
+            TraqIcon(iconAsset, size: 16, color: color ?? Colors.grey.shade700),
             const SizedBox(width: 4),
             Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: color)),
           ],
@@ -1006,17 +1009,13 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
       final success = await cubit.updatePartnerFull(widget.partnerId, updateData);
       
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Partner updated successfully'), backgroundColor: Colors.green),
-        );
+        context.showSuccess('Partner updated successfully');
         _loadPartner();
         setState(() => _isEditing = false);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
+        context.showError('Error: $e');
       }
     } finally {
       if (mounted) {
@@ -1026,9 +1025,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   }
 
   void _testConnection() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing connection...')),
-    );
+    context.showInfo('Testing connection...');
     // TODO: Implement connection test
   }
 }

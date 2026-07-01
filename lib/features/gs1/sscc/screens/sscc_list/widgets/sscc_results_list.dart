@@ -8,6 +8,7 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
@@ -62,7 +63,7 @@ class SsccResultsList extends StatelessWidget {
         if (state.ssccs.isEmpty) {
           return _constrainedCenter(
             Gs1ListEmptyView(
-              icon: Icons.inventory_2_outlined,
+              iconAsset: AppAssets.iconBox,
               title: SsccUiConstants.emptyListTitle,
               onClearFilters: onClearFilters,
             ),

@@ -119,6 +119,32 @@ class ReferenceDataValidationService {
     }
   }
 
+  Future<EPCValidationResult> validateGTIN(String gtinCode) async {
+    try {
+      final response = await _dioService.get(
+        '$_baseUrl/gtin/$gtinCode',
+        headers: await _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.data);
+        return EPCValidationResult.fromJson(json);
+      } else {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: 'Failed to validate GTIN: ${response.statusMessage}',
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
+      throw ApiException(message: 'Error validating GTIN: $e');
+    }
+  }
+
   Future<BatchEPCValidationResult> validateEPCs(List<String> epcs) async {
     try {
       final requestBody = {'epcs': epcs};

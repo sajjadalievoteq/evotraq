@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/models/partition_models.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
 /// Database Partitioning Dashboard Screen for Phase 3.1 implementation
@@ -91,20 +94,20 @@ class _DatabasePartitioningDashboardState
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
-            Tab(text: 'Partitions', icon: Icon(Icons.table_chart)),
-            Tab(text: 'Archive', icon: Icon(Icons.archive)),
-            Tab(text: 'Maintenance', icon: Icon(Icons.build)),
+            Tab(text: 'Overview', icon: TraqIcon(AppAssets.iconDashboard)),
+            Tab(text: 'Partitions', icon: TraqIcon(AppAssets.iconTable)),
+            Tab(text: 'Archive', icon: TraqIcon(AppAssets.iconDownload)),
+            Tab(text: 'Maintenance', icon: TraqIcon(AppAssets.iconSettings)),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: _showHelpDialog,
             tooltip: 'Help & Information',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadDashboardData,
             tooltip: 'Refresh Data',
           ),
@@ -118,7 +121,7 @@ class _DatabasePartitioningDashboardState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error, size: 64, color: Colors.red[400]),
+                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[400]),
                   const SizedBox(height: 16),
                   Text('Error: $_error'),
                   const SizedBox(height: 16),
@@ -160,7 +163,7 @@ class _DatabasePartitioningDashboardState
                   child: _buildStatCard(
                     'Total Partitions',
                     _statistics!.totalPartitions.toString(),
-                    Icons.table_chart,
+                    AppAssets.iconTable,
                     Colors.blue,
                   ),
                 ),
@@ -169,7 +172,7 @@ class _DatabasePartitioningDashboardState
                   child: _buildStatCard(
                     'Active Partitions',
                     _statistics!.activePartitions.toString(),
-                    Icons.check_circle,
+                    AppAssets.iconCheckCircle,
                     Colors.green,
                   ),
                 ),
@@ -182,7 +185,7 @@ class _DatabasePartitioningDashboardState
                   child: _buildStatCard(
                     'Archived Partitions',
                     _statistics!.archivedPartitions.toString(),
-                    Icons.archive,
+                    AppAssets.iconArchive,
                     Colors.orange,
                   ),
                 ),
@@ -191,7 +194,7 @@ class _DatabasePartitioningDashboardState
                   child: _buildStatCard(
                     'Total Size',
                     '${(_statistics!.totalSizeGb != null && _statistics!.totalSizeGb! > 0) ? _statistics!.totalSizeGb!.toStringAsFixed(6) : (_statistics!.totalSizeMb != null ? (_statistics!.totalSizeMb! / 1024).toStringAsFixed(6) : '0.000000')} GB',
-                    Icons.storage,
+                    AppAssets.iconDatabase,
                     Colors.purple,
                   ),
                 ),
@@ -276,7 +279,7 @@ class _DatabasePartitioningDashboardState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.archive, size: 64, color: Colors.grey),
+          TraqIcon(AppAssets.iconDownload, size: 64, color: Colors.grey),
           SizedBox(height: 16),
           Text('Archive Management'),
           Text('Feature implementation in progress'),
@@ -306,7 +309,7 @@ class _DatabasePartitioningDashboardState
   Widget _buildStatCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Card(
@@ -318,7 +321,7 @@ class _DatabasePartitioningDashboardState
           children: [
             Row(
               children: [
-                Icon(icon, color: color),
+                TraqIcon(iconAsset, color: color),
                 const SizedBox(width: 8),
                 Text(
                   title,
@@ -343,24 +346,24 @@ class _DatabasePartitioningDashboardState
   Widget _buildHealthStatusCard() {
     final status = _healthStatus!['overall_status'] ?? 'UNKNOWN';
     Color statusColor;
-    IconData statusIcon;
+    String statusIconAsset;
 
     switch (status) {
       case 'HEALTHY':
         statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
+        statusIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'WARNING':
         statusColor = Colors.orange;
-        statusIcon = Icons.warning;
+        statusIconAsset = AppAssets.iconAlert;
         break;
       case 'CRITICAL':
         statusColor = Colors.red;
-        statusIcon = Icons.error;
+        statusIconAsset = AppAssets.iconXCircle;
         break;
       default:
         statusColor = Colors.grey;
-        statusIcon = Icons.help;
+        statusIconAsset = AppAssets.iconHelpCircle;
     }
 
     return Card(
@@ -372,7 +375,7 @@ class _DatabasePartitioningDashboardState
           children: [
             Row(
               children: [
-                Icon(statusIcon, color: statusColor),
+                TraqIcon(statusIconAsset, color: statusColor),
                 const SizedBox(width: 8),
                 Text(
                   'System Health: $status',
@@ -437,28 +440,28 @@ class _DatabasePartitioningDashboardState
         _buildMaintenanceButton(
           'Create Future Partitions',
           'Create partitions for next 3 months (epcis_events only)',
-          Icons.add,
+          AppAssets.iconPlus,
           () => _performMaintenance('CREATE_FUTURE'),
         ),
         const SizedBox(height: 12),
         _buildMaintenanceButton(
           'Update Statistics',
           'Refresh partition statistics',
-          Icons.refresh,
+          AppAssets.iconRefresh,
           () => _performMaintenance('UPDATE_STATS'),
         ),
         const SizedBox(height: 12),
         _buildMaintenanceButton(
           'Archive Old Partitions',
           'Archive partitions older than 12 months',
-          Icons.archive,
+          AppAssets.iconArchive,
           () => _performMaintenance('ARCHIVE_OLD'),
         ),
         const SizedBox(height: 12),
         _buildMaintenanceButton(
           'Health Check',
           'Perform comprehensive health check',
-          Icons.health_and_safety,
+          AppAssets.iconSecurity,
           () => _performMaintenance('HEALTH_CHECK'),
         ),
       ],
@@ -468,12 +471,12 @@ class _DatabasePartitioningDashboardState
   Widget _buildMaintenanceButton(
     String title,
     String subtitle,
-    IconData icon,
+    String iconAsset,
     VoidCallback onPressed,
   ) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        leading: TraqIcon(iconAsset, color: Theme.of(context).primaryColor),
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: ElevatedButton(
@@ -527,23 +530,13 @@ class _DatabasePartitioningDashboardState
 
       Navigator.of(context).pop(); // Close loading dialog
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Maintenance operation completed successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccess('Maintenance operation completed successfully');
 
       _loadDashboardData(); // Refresh data
     } catch (e) {
       Navigator.of(context).pop(); // Close loading dialog
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Maintenance failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('Maintenance failed: $e');
     }
   }
 
@@ -557,24 +550,24 @@ class _DatabasePartitioningDashboardState
     final lastCheck = healthData['last_check'] ?? DateTime.now().toString();
 
     Color statusColor;
-    IconData statusIcon;
+    String statusIconAsset;
 
     switch (status) {
       case 'HEALTHY':
         statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
+        statusIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'WARNING':
         statusColor = Colors.orange;
-        statusIcon = Icons.warning;
+        statusIconAsset = AppAssets.iconAlert;
         break;
       case 'CRITICAL':
         statusColor = Colors.red;
-        statusIcon = Icons.error;
+        statusIconAsset = AppAssets.iconXCircle;
         break;
       default:
         statusColor = Colors.grey;
-        statusIcon = Icons.help;
+        statusIconAsset = AppAssets.iconHelpCircle;
     }
 
     showDialog(
@@ -582,7 +575,7 @@ class _DatabasePartitioningDashboardState
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(statusIcon, color: statusColor),
+            TraqIcon(statusIconAsset, color: statusColor),
             const SizedBox(width: 8),
             Text('Health Check Results', style: TextStyle(color: statusColor)),
           ],
@@ -604,7 +597,7 @@ class _DatabasePartitioningDashboardState
                   ),
                   child: Row(
                     children: [
-                      Icon(statusIcon, color: statusColor, size: 20),
+                      TraqIcon(statusIconAsset, color: statusColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Overall Status: $status',
@@ -644,8 +637,7 @@ class _DatabasePartitioningDashboardState
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
-                                    Icons.warning,
+                                  TraqIcon(AppAssets.iconAlert,
                                     size: 16,
                                     color: Colors.red,
                                   ),
@@ -687,11 +679,7 @@ class _DatabasePartitioningDashboardState
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
-                                    Icons.lightbulb,
-                                    size: 16,
-                                    color: Colors.blue,
-                                  ),
+                                  const TraqIcon(AppAssets.iconLightbulb, color: Colors.blue, size: 16),
                                   const SizedBox(width: 4),
                                   Expanded(child: Text(rec.toString())),
                                 ],
@@ -759,7 +747,7 @@ class _DatabasePartitioningDashboardState
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        TraqIcon(AppAssets.iconCheck, color: Colors.green, size: 20),
                         SizedBox(width: 8),
                         Text(
                           'All partitions are healthy!',
@@ -806,7 +794,7 @@ class _DatabasePartitioningDashboardState
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.help_outline, color: Colors.blue),
+            TraqIcon(AppAssets.iconInfo, color: Colors.blue),
             SizedBox(width: 8),
             Text('Database Partitioning Help'),
           ],
@@ -821,7 +809,7 @@ class _DatabasePartitioningDashboardState
                 _buildHelpSection(
                   'Partitioning Strategy Overview',
                   'TraqTrace uses a Base Table Partitioning strategy optimized for JPA inheritance. This approach ensures efficient data management while maintaining compatibility with our object-relational mapping framework.',
-                  Icons.info,
+                  AppAssets.iconInfo,
                   Colors.blue,
                 ),
                 const SizedBox(height: 16),
@@ -833,7 +821,7 @@ class _DatabasePartitioningDashboardState
                       '• JPA inheritance mapping requires the base table to handle partitioning\n'
                       '• All event data flows through epcis_events, making it the optimal partition point\n'
                       '• This reduces complexity while maximizing performance benefits',
-                  Icons.table_chart,
+                  AppAssets.iconTable,
                   Colors.green,
                 ),
                 const SizedBox(height: 16),
@@ -846,7 +834,7 @@ class _DatabasePartitioningDashboardState
                       '• Transaction Events: Data stored in epcis_events partitions, accessed via transaction_events view\n'
                       '• Transformation Events: Data stored in epcis_events partitions, accessed via transformation_events view\n\n'
                       'This inheritance-based approach ensures all event types benefit from partitioning automatically.',
-                  Icons.storage,
+                  AppAssets.iconDatabase,
                   Colors.purple,
                 ),
                 const SizedBox(height: 16),
@@ -859,7 +847,7 @@ class _DatabasePartitioningDashboardState
                       '• Frequent joins require these tables to be readily accessible\n'
                       '• Partitioning would add complexity without significant performance benefits\n'
                       '• Master data changes infrequently, so time-based partitioning is unnecessary',
-                  Icons.category,
+                  AppAssets.iconCategory,
                   Colors.orange,
                 ),
                 const SizedBox(height: 16),
@@ -872,7 +860,7 @@ class _DatabasePartitioningDashboardState
                       '• Archive Old Partitions: Moves partitions older than 12 months to archive status\n'
                       '• Health Check: Performs comprehensive analysis of partition health and performance\n\n'
                       'Regular maintenance ensures optimal database performance and prevents partition-related issues.',
-                  Icons.build,
+                  AppAssets.iconBuild,
                   Colors.red,
                 ),
                 const SizedBox(height: 16),
@@ -885,7 +873,7 @@ class _DatabasePartitioningDashboardState
                       '• Each partition contains one month of data\n'
                       '• Automatic routing based on event timestamp\n'
                       '• Enables efficient query pruning and maintenance operations',
-                  Icons.label,
+                  AppAssets.iconTag,
                   Colors.teal,
                 ),
               ],
@@ -905,7 +893,7 @@ class _DatabasePartitioningDashboardState
   Widget _buildHelpSection(
     String title,
     String content,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Card(
@@ -917,7 +905,7 @@ class _DatabasePartitioningDashboardState
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 20),
+                TraqIcon(iconAsset, color: color, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   title,

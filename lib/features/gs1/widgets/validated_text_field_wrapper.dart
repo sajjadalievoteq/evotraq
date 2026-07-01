@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ValidatedTextFieldWrapper extends StatefulWidget {
   final TextEditingController controller;
@@ -155,16 +157,14 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
     final Widget validationIcon = _validationStatus == ValidationStatus.valid
       ? Padding(
         padding: const EdgeInsets.only(right: 5),
-        child: const Icon(
-            Icons.check_circle,
+        child: TraqIcon(AppAssets.iconCheck,
             color: Colors.green,
             size: 18,
           ),
       )
       : Padding(
       padding: const EdgeInsets.only(right: 5),
-        child: const Icon(
-            Icons.error,
+        child: TraqIcon(AppAssets.iconAlert,
             color: Colors.red,
             size: 18,
           ),

@@ -12,7 +12,7 @@ DateTime _parseDateTime(String? dateStr) {
       final parts = cleanedDate.split('+');
       if (parts.length >= 2) {
         String datePart = parts[0];
-        String timezonePart = '+' + parts[1];
+        String timezonePart = '+${parts[1]}';
         
         // Try parsing with timezone first
         try {

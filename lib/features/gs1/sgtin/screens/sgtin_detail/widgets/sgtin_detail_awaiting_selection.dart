@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+
 class SgtinDetailAwaitingSelection extends StatelessWidget {
   const SgtinDetailAwaitingSelection({
     super.key,
@@ -16,8 +19,8 @@ class SgtinDetailAwaitingSelection extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.touch_app_outlined,
+          TraqIcon(
+            AppAssets.iconTarget,
             size: 64,
             color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
           ),

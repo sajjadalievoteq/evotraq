@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// ETL Management Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive ETL pipeline management and monitoring interface
@@ -231,7 +234,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
@@ -295,11 +298,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Active', activePipelines, Icons.play_circle, color: Colors.green),
+                  _buildSummaryItem('Active', activePipelines, AppAssets.iconPlay, color: Colors.green),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Total', totalPipelines, Icons.storage),
+                  _buildSummaryItem('Total', totalPipelines, AppAssets.iconDatabase),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Failed', failedPipelines, Icons.error, color: Colors.red),
+                  _buildSummaryItem('Failed', failedPipelines, AppAssets.iconXCircle, color: Colors.red),
                 ],
               ),
             ),
@@ -309,18 +312,18 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               children: [
                 ElevatedButton.icon(
                   onPressed: _showCreatePipelineDialog,
-                  icon: const Icon(Icons.add),
+                  icon: TraqIcon(AppAssets.iconPlus),
                   label: const Text('New Pipeline'),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: _refreshCurrentTab,
-                  icon: const Icon(Icons.refresh),
+                  icon: TraqIcon(AppAssets.iconRefresh),
                   tooltip: 'Refresh',
                 ),
                 IconButton(
                   onPressed: _showETLSettings,
-                  icon: const Icon(Icons.settings),
+                  icon: TraqIcon(AppAssets.iconSettings),
                   tooltip: 'ETL Settings',
                 ),
               ],
@@ -331,11 +334,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
     );
   }
 
-  Widget _buildSummaryItem(String label, int value, IconData icon, {Color? color}) {
+  Widget _buildSummaryItem(String label, int value, String iconAsset, {Color? color}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: color ?? Colors.blue),
+        TraqIcon(iconAsset, size: 20, color: color ?? Colors.blue),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -679,7 +682,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         ),
         trailing: IconButton(
           onPressed: () => _showExecutionDetails(execution),
-          icon: const Icon(Icons.info_outline),
+          icon: TraqIcon(AppAssets.iconInfo),
           tooltip: 'View Details',
         ),
       ),
@@ -806,14 +809,14 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
           Row(
             children: [
               Expanded(
-                child: _buildPerformanceCard('Throughput', '$throughput records/sec', Icons.speed),
+                child: _buildPerformanceCard('Throughput', '$throughput records/sec', AppAssets.iconGauge),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildPerformanceCard(
                   'Avg Processing Time', 
                   '${avgProcessingTime.toStringAsFixed(2)}s', 
-                  Icons.timer
+                  AppAssets.iconTimer
                 ),
               ),
             ],
@@ -825,7 +828,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 child: _buildPerformanceCard(
                   'Error Rate', 
                   '${(errorRate * 100).toStringAsFixed(2)}%', 
-                  Icons.error_outline
+                  AppAssets.iconXCircle
                 ),
               ),
               const SizedBox(width: 8),
@@ -833,7 +836,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 child: _buildPerformanceCard(
                   'Resource Usage', 
                   '${(resourceUtilization * 100).toStringAsFixed(1)}%', 
-                  Icons.memory
+                  AppAssets.iconChip
                 ),
               ),
             ],
@@ -843,13 +846,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
     );
   }
 
-  Widget _buildPerformanceCard(String title, String value, IconData icon) {
+  Widget _buildPerformanceCard(String title, String value, String iconAsset) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue),
+            TraqIcon(iconAsset, size: 32, color: Colors.blue),
             const SizedBox(height: 8),
             Text(
               title,
@@ -992,9 +995,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         _loadTransformations();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to toggle transformation: $e')),
-      );
+      context.showError('Failed to toggle transformation: $e');
     }
   }
 
@@ -1006,15 +1007,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pipeline execution started')),
-        );
+        context.showInfo('Pipeline execution started');
         _loadPipelines();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to execute pipeline: $e')),
-      );
+      context.showError('Failed to execute pipeline: $e');
     }
   }
 
@@ -1045,15 +1042,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         );
 
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pipeline deleted successfully')),
-          );
+          context.showSuccess('Pipeline deleted successfully');
           _loadPipelines();
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete pipeline: $e')),
-        );
+        context.showError('Failed to delete pipeline: $e');
       }
     }
   }
@@ -1085,15 +1078,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         );
 
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Transformation deleted successfully')),
-          );
+          context.showSuccess('Transformation deleted successfully');
           _loadTransformations();
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete transformation: $e')),
-        );
+        context.showError('Failed to delete transformation: $e');
       }
     }
   }
@@ -1110,9 +1099,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         _showTestResults(result);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to test transformation: $e')),
-      );
+      context.showError('Failed to test transformation: $e');
     }
   }
 
@@ -1178,7 +1165,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                             });
                           });
                         },
-                        icon: const Icon(Icons.add),
+                        icon: TraqIcon(AppAssets.iconPlus),
                         label: const Text('Add Rule'),
                       ),
                     ],
@@ -1211,7 +1198,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                                     'Function: ${rule['transformationFunction']}',
                                   ),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
+                                    icon: TraqIcon(AppAssets.iconTrash),
                                     onPressed: () {
                                       setState(() {
                                         transformationRules.removeAt(index);
@@ -1314,7 +1301,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                             });
                           });
                         },
-                        icon: const Icon(Icons.add),
+                        icon: TraqIcon(AppAssets.iconPlus),
                         label: const Text('Add Rule'),
                       ),
                     ],
@@ -1348,7 +1335,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                                     'Source: ${rule['sourceField']} → Target: ${rule['targetField']}',
                                   ),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
+                                    icon: TraqIcon(AppAssets.iconTrash),
                                     onPressed: () {
                                       setState(() {
                                         transformationRules.removeAt(index);
@@ -1402,7 +1389,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               const Text('Schedule automatic execution for this pipeline:'),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.schedule),
+                leading: TraqIcon(AppAssets.iconClock),
                 title: const Text('Run Every Hour'),
                 subtitle: const Text('Execute pipeline every hour'),
                 onTap: () {
@@ -1411,7 +1398,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.today),
+                leading: const TraqIcon(AppAssets.iconCalendar),
                 title: const Text('Run Daily'),
                 subtitle: const Text('Execute pipeline once per day'),
                 onTap: () {
@@ -1420,7 +1407,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.date_range),
+                leading: const TraqIcon(AppAssets.iconCalendar),
                 title: const Text('Run Weekly'),
                 subtitle: const Text('Execute pipeline once per week'),
                 onTap: () {
@@ -1429,7 +1416,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.stop_circle),
+                leading: const TraqIcon(AppAssets.iconBlock),
                 title: const Text('Remove Schedule'),
                 subtitle: const Text('Stop automatic execution'),
                 onTap: () {
@@ -1672,17 +1659,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       );
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pipeline "$pipelineName" created successfully')),
-        );
+        context.showSuccess('Pipeline "$pipelineName" created successfully');
         _loadPipelines(); // Refresh the pipelines list
       } else {
         throw Exception('Failed to create pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create pipeline: $e')),
-      );
+      context.showError('Failed to create pipeline: $e');
     }
   }
 
@@ -1695,17 +1678,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pipeline "$pipelineName" updated successfully')),
-        );
+        context.showSuccess('Pipeline "$pipelineName" updated successfully');
         _loadPipelines(); // Refresh the pipelines list
       } else {
         throw Exception('Failed to update pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update pipeline: $e')),
-      );
+      context.showError('Failed to update pipeline: $e');
     }
   }
 
@@ -1731,31 +1710,23 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       );
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pipeline scheduled to run $frequency')),
-        );
+        context.showSuccess('Pipeline scheduled to run $frequency');
         _loadPipelines();
       } else {
         throw Exception('Failed to schedule pipeline: ${response.statusCode} ${response.statusMessage}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to schedule pipeline: $e')),
-      );
+      context.showError('Failed to schedule pipeline: $e');
     }
   }
 
   Future<void> _unschedulePipeline(String pipelineId) async {
     try {
       // This would delete any scheduled jobs for this pipeline
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pipeline schedule removed')),
-      );
+      context.showSuccess('Pipeline schedule removed');
       _loadPipelines();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to remove schedule: $e')),
-      );
+      context.showError('Failed to remove schedule: $e');
     }
   }
 

@@ -17,6 +17,8 @@ import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_op
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/widgets/unpacking_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/widgets/unpacking_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to list all unpacking operations with search capabilities.
 class UnpackingOperationListScreen extends StatefulWidget {
@@ -341,7 +343,7 @@ class _UnpackingOperationListScreenState extends State<UnpackingOperationListScr
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go(Constants.opUnpackingCreateRoute),
-        label: const Icon(Icons.add),
+        label: TraqIcon(AppAssets.iconPlus),
       ),
       body: body,
     );

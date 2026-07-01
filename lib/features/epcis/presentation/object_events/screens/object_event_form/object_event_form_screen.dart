@@ -63,7 +63,6 @@ class ObjectEventFormScreen extends StatefulWidget {
 
 class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     with EventFormValidationMixin<ObjectEventFormScreen> {
-  bool _validating = false;
   List<dynamic> _validationErrors = [];
   final _formKey = GlobalKey<FormState>();
 
@@ -343,7 +342,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
   Future<void> _saveEvent() async {
     setState(() {
       _isLoading = true;
-      _validating = true;
       _errorMessage = null;
       _validationErrors = [];
     });
@@ -379,7 +377,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     if (!mounted) return;
     setState(() {
       _isLoading = false;
-      _validating = false;
       _errorMessage = result.errorMessage;
       _validationErrors = result.validationErrors;
     });
@@ -393,7 +390,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
   Future<void> _runSchemaValidationTest() async {
     setState(() {
       _isLoading = true;
-      _validating = true;
       _errorMessage = null;
       _validationErrors = [];
     });
@@ -427,7 +423,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _validating = false;
       });
 
       await ObjectEventFormEntryDialogs.showSchemaValidationTestResults(
@@ -439,7 +434,6 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _validating = false;
         _errorMessage = 'Error in validation test: ${e.toString()}';
       });
     }

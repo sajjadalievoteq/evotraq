@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class RuleEditorRouteScreen extends StatefulWidget {
   final String ruleId;
@@ -206,7 +208,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
         actions: [
           if (!widget.isNew && !widget.isPredefined)
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: TraqIcon(AppAssets.iconTrash),
               onPressed: () => _confirmDeleteRule(),
               tooltip: 'Delete rule',
             ),
@@ -444,8 +446,8 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
               label: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    severity.icon,
+                  TraqIcon(
+                    severity.iconAsset,
                     size: 18,
                     color: _severity == severity
                         ? Colors.white

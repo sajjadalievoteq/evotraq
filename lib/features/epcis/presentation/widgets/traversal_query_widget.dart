@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class TraversalQueryWidget extends StatefulWidget {
   final Function(String queryType, Map<String, dynamic> parameters)? onQueryExecuted;
@@ -46,15 +48,15 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
           indicatorColor: Theme.of(context).colorScheme.primary,
           tabs: const [
             Tab(
-              icon: Icon(Icons.route),
+              icon: TraqIcon(AppAssets.iconPin),
               text: 'Supply Chain Path',
             ),
             Tab(
-              icon: Icon(Icons.history),
+              icon: TraqIcon(AppAssets.iconClock),
               text: 'Item History',
             ),
             Tab(
-              icon: Icon(Icons.account_tree),
+              icon: TraqIcon(AppAssets.iconAggregate),
               text: 'Aggregation',
             ),
           ],
@@ -100,7 +102,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Target EPC',
                 hintText: 'urn:epc:id:sgtin:0614141.112345.400',
-                prefixIcon: Icon(Icons.qr_code),
+                prefixIcon: TraqIcon(AppAssets.iconQr),
                 border: OutlineInputBorder(),
               ),
               validator: FormBuilderValidators.compose([
@@ -113,7 +115,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               name: 'direction',
               decoration: const InputDecoration(
                 labelText: 'Traversal Direction',
-                prefixIcon: Icon(Icons.compare_arrows),
+                prefixIcon: TraqIcon(AppAssets.iconTransform),
                 border: OutlineInputBorder(),
               ),
               initialValue: 'both',
@@ -150,7 +152,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.search),
+                    : TraqIcon(AppAssets.iconSearch),
                 label: Text(widget.isLoading ? 'Tracing...' : 'Trace Supply Chain'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
@@ -189,7 +191,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Item EPC',
                 hintText: 'urn:epc:id:sgtin:0614141.112345.400',
-                prefixIcon: Icon(Icons.inventory),
+                prefixIcon: TraqIcon(AppAssets.iconSscc),
                 border: OutlineInputBorder(),
               ),
               validator: FormBuilderValidators.compose([
@@ -221,7 +223,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.history),
+                    : TraqIcon(AppAssets.iconClock),
                 label: Text(widget.isLoading ? 'Loading...' : 'Get Item History'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
@@ -260,7 +262,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Parent EPC',
                 hintText: 'urn:epc:id:sscc:0614141.1234567890',
-                prefixIcon: Icon(Icons.inventory_2),
+                prefixIcon: TraqIcon(AppAssets.iconPackage),
                 border: OutlineInputBorder(),
               ),
               validator: FormBuilderValidators.compose([
@@ -275,7 +277,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Query Timestamp (Optional)',
                 hintText: 'Leave empty for current state',
-                prefixIcon: Icon(Icons.access_time),
+                prefixIcon: TraqIcon(AppAssets.iconClock),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -296,7 +298,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.account_tree),
+                    : TraqIcon(AppAssets.iconAggregate),
                 label: Text(widget.isLoading ? 'Loading...' : 'Get Aggregation Hierarchy'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
@@ -317,7 +319,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
           inputType: InputType.both,
           decoration: const InputDecoration(
             labelText: 'Start Time (Optional)',
-            prefixIcon: Icon(Icons.schedule),
+            prefixIcon: TraqIcon(AppAssets.iconClock),
             border: OutlineInputBorder(),
           ),
         ),
@@ -327,7 +329,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
           inputType: InputType.both,
           decoration: const InputDecoration(
             labelText: 'End Time (Optional)',
-            prefixIcon: Icon(Icons.schedule),
+            prefixIcon: TraqIcon(AppAssets.iconClock),
             border: OutlineInputBorder(),
           ),
         ),

@@ -4,6 +4,8 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/features/epcis/providers/traversal_query_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/traversal_query_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/supply_chain_visualization_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class TraversalQueryScreen extends StatelessWidget {
   const TraversalQueryScreen({super.key});
@@ -23,7 +25,7 @@ class _TraversalQueryScreenContent extends StatelessWidget {
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: TraqIcon(AppAssets.iconMenu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -35,7 +37,7 @@ class _TraversalQueryScreenContent extends StatelessWidget {
           BlocBuilder<TraversalQueryCubit, TraversalQueryState>(
             builder: (context, state) {
               return IconButton(
-                icon: const Icon(Icons.refresh),
+                icon: TraqIcon(AppAssets.iconRefresh),
                 onPressed: state.isLoading
                     ? null
                     : () {
@@ -90,8 +92,7 @@ class _HeaderSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.account_tree,
+                TraqIcon(AppAssets.iconAggregate,
                   color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
@@ -192,8 +193,7 @@ class _MainContent extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.account_tree,
+                          TraqIcon(AppAssets.iconAggregate,
                             color: Theme.of(context).colorScheme.onSecondary,
                           ),
                           const SizedBox(width: 8),

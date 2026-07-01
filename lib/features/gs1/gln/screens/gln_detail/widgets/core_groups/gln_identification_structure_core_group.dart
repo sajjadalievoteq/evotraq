@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -9,9 +9,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 class GlnIdentificationStructureCoreGroup extends StatefulWidget {
@@ -301,6 +299,7 @@ class _GlnIdentificationStructureCoreGroupState
 
     return Gs1GroupCard(
       title: GlnUiConstants.sectionIdentificationStructure,
+      showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       titlePadding: const EdgeInsets.only(top: 0, bottom: 12),
       showFieldSkeleton: widget.showFieldSkeleton,

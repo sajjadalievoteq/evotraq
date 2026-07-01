@@ -11,6 +11,8 @@ import 'package:traqtrace_app/data/services/gs1_barcode_api_service.dart';
 import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Callback fired when the user confirms a scanned barcode.
 typedef GS1BarcodeCallback = void Function(
@@ -234,7 +236,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
           child: Row(
             children: [
-              Icon(Icons.qr_code_scanner, color: colorScheme.primary, size: 22),
+              TraqIcon(AppAssets.iconQr, color: colorScheme.primary, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -245,7 +247,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: TraqIcon(AppAssets.iconX),
                 tooltip: 'Close',
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -304,10 +306,10 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
                             }
                           });
                         },
-                        icon: Icon(
+                        icon: TraqIcon(
                           _isCameraActive
-                              ? Icons.camera_alt
-                              : Icons.camera_alt_outlined,
+                              ? AppAssets.iconCamera
+                              : AppAssets.iconCamera,
                           size: 16,
                         ),
                         label: Text(
@@ -339,12 +341,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
                             }
                           });
                         },
-                        icon: Icon(
-                          _isWiredActive
-                              ? Icons.keyboard
-                              : Icons.keyboard_outlined,
-                          size: 16,
-                        ),
+                        icon: TraqIcon(AppAssets.iconKeyboard, size: 16),
                         label: Text(
                           _isWiredActive ? 'Disconnect' : 'Wired Scanner',
                           style: const TextStyle(fontSize: 12),
@@ -558,7 +555,7 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
               _TypeChip(type: widget.details.type),
               if (widget.details.isValid)
                 Chip(
-                  avatar: Icon(Icons.check_circle, size: 14,
+                  avatar: TraqIcon(AppAssets.iconCheck, size: 14,
                       color: Colors.green.shade700),
                   label: Text('Valid',
                       style: TextStyle(
@@ -570,8 +567,7 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
                 )
               else
                 Chip(
-                  avatar: Icon(Icons.warning_amber_rounded, size: 14,
-                      color: Colors.orange.shade700),
+                  avatar: TraqIcon(AppAssets.iconAlert, color: Colors.orange.shade700, size: 14),
                   label: Text('Invalid GS1',
                       style: TextStyle(
                           fontSize: 12, color: Colors.orange.shade700)),
@@ -668,7 +664,7 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: widget.onScanAgain,
-                    icon: const Icon(Icons.qr_code_scanner, size: 18),
+                    icon: TraqIcon(AppAssets.iconQr, size: 18),
                     label: const Text('Scan Again'),
                   ),
                 ),
@@ -677,7 +673,7 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: widget.onUse,
-                      icon: const Icon(Icons.check, size: 18),
+                      icon: TraqIcon(AppAssets.iconCheck, size: 18),
                       label: const Text('Use Barcode'),
                     ),
                   ),
@@ -707,8 +703,8 @@ class _VerificationCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(
-              ok ? Icons.verified : Icons.info_outline,
+            TraqIcon(
+              ok ? AppAssets.iconVerified : AppAssets.iconInfo,
               color: ok ? Colors.green.shade700 : Colors.orange.shade700,
             ),
             const SizedBox(width: 10),
@@ -800,7 +796,7 @@ class _ManualInputSection extends StatelessWidget {
             decoration: const InputDecoration(
               hintText: 'e.g. (01)12345678901234(21)SN001',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.keyboard_alt_outlined),
+              prefixIcon: TraqIcon(AppAssets.iconKeyboard),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               isDense: true,
@@ -917,8 +913,7 @@ class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
                                   : colorScheme.outline)
                               .withValues(alpha: 0.08),
                         ),
-                        child: Icon(
-                          Icons.qr_code_scanner,
+                        child: TraqIcon(AppAssets.iconQr,
                           size: 48,
                           color: connected
                               ? colorScheme.primary
@@ -990,7 +985,7 @@ class _ErrorBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            Icon(Icons.error_outline,
+            TraqIcon(AppAssets.iconAlert,
                 color: colorScheme.onErrorContainer, size: 18),
             const SizedBox(width: 8),
             Expanded(
@@ -1002,7 +997,7 @@ class _ErrorBanner extends StatelessWidget {
             ),
             IconButton(
               onPressed: onDismiss,
-              icon: Icon(Icons.close,
+              icon: TraqIcon(AppAssets.iconX,
                   color: colorScheme.onErrorContainer, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -1013,4 +1008,4 @@ class _ErrorBanner extends StatelessWidget {
     );
   }
 }
-
+            

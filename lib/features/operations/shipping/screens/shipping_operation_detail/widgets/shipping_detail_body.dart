@@ -12,6 +12,7 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_production_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_reference_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_status_banner.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
 
 /// Scrollable body content for shipping operation detail.
 class ShippingDetailBody extends StatelessWidget {
@@ -20,15 +21,11 @@ class ShippingDetailBody extends StatelessWidget {
     required this.operation,
     required this.sourceGlnDetails,
     required this.destinationGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
   });
 
   final ShippingResponse operation;
   final GLN? sourceGlnDetails;
   final GLN? destinationGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +50,7 @@ class ShippingDetailBody extends StatelessWidget {
           if (ShippingDetailHelpers.hasTransportDetails(operation)) ...[
             ShippingDetailProductionCard(operation: operation),
           ],
-          ShippingDetailShippedItemsCard(
-            operation: operation,
-            showAllEpcs: showAllEpcs,
-            onShowAll: onShowAllEpcs,
-          ),
+          ShippingDetailShippedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
             ShippingDetailEventsCard(operation: operation),
           ],
@@ -68,6 +61,7 @@ class ShippingDetailBody extends StatelessWidget {
             ShippingDetailCommentsCard(operation: operation),
           ],
           ShippingDetailProcessingStatsCard(operation: operation),
+          AcceptReturnButton(operation: operation),
           const SizedBox(height: 32),
         ],
       ),

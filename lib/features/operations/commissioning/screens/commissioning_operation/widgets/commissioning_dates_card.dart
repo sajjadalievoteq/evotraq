@@ -22,6 +22,7 @@ class CommissioningDatesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Gs1GroupCard(
       title: 'Dates',
+      showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
       child: Column(
         children: [

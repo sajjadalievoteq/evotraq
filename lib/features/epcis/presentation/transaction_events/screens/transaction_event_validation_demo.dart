@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
-import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 
@@ -72,7 +74,7 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                         hintText: 'Enter transaction type',
                         border: const OutlineInputBorder(),
                         suffixIcon: PopupMenuButton<String>(
-                          icon: const Icon(Icons.arrow_drop_down),
+                          icon: const TraqIcon(AppAssets.iconChevronD),
                           onSelected: (value) {
                             setState(() {
                               _transactionTypeController.text = value;
@@ -272,11 +274,8 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
       // All fields are valid, show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validation successful! Transaction event is valid.'),
-          backgroundColor: Colors.green,
-        ),
+      context.showSuccess(
+        'Validation successful! Transaction event is valid.',
       );
       
       // Simulate API call
@@ -291,11 +290,8 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
       });
     } else {
       // Show error summary
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validation failed. Please check the form for errors.'),
-          backgroundColor: Colors.red,
-        ),
+      context.showError(
+        'Validation failed. Please check the form for errors.',
       );
     }
   }
@@ -313,10 +309,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     // Clear validation errors
     clearFieldErrors();
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Form has been reset.'),
-      ),
-    );
+    context.showInfo('Form has been reset.');
   }
 }

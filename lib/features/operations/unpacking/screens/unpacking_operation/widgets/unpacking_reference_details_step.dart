@@ -6,8 +6,6 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
 
-import 'package:traqtrace_app/core/widgets/gln_selector.dart';
-
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -19,6 +17,11 @@ import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_op
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scanning_mode_selector.dart';
 
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scanning_mode.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
 
@@ -29,8 +32,6 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
   const UnpackingReferenceDetailsStep({
 
     super.key,
-
-    required this.referenceController,
 
     required this.workOrderController,
 
@@ -58,6 +59,10 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
     required this.onClearContainer,
 
+    required this.eventTime,
+
+    required this.onEventTimeChanged,
+
     this.showPageHeader = true,
 
     this.showReferenceSection = true,
@@ -71,8 +76,6 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
   });
 
 
-
-  final TextEditingController referenceController;
 
   final TextEditingController workOrderController;
 
@@ -99,6 +102,10 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
   final VoidCallback onAddManualContainer;
 
   final VoidCallback onClearContainer;
+
+  final DateTime? eventTime;
+
+  final ValueChanged<DateTime?> onEventTimeChanged;
 
   final bool showPageHeader;
 
@@ -164,21 +171,28 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
               outlineColor: outline,
 
-              child: TextField(
+              child: Column(
 
-                controller: referenceController,
+                children: [
 
-                decoration: const InputDecoration(
+                  const OperationAutoReferenceNotice(
 
-                  labelText: 'Unpacking Reference *',
+                    operationLabel: 'Unpacking',
 
-                  hintText: 'e.g., UNPACK-2024-001',
+                  ),
+                  
 
-                  border: OutlineInputBorder(),
+                  OperationEventTimeTile(
 
-                  prefixIcon: Icon(Icons.tag),
+                    eventTime: eventTime,
 
-                ),
+                    onEventTimeChanged: onEventTimeChanged,
+
+                    lastDate: DateTime.now(),
+
+                  ),
+
+                ],
 
               ),
 
@@ -189,18 +203,17 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
             Gs1GroupCard(
 
               title: 'Unpacking Location',
+              showRequiredStar: true,
 
               outlineColor: outline,
 
-              child: GLNSelector(
+              child: OperationGlnSelector(
 
                 label: 'Unpacking Location GLN',
 
                 hintText: 'Search and select unpacking location',
 
-                initialValue: unpackingLocationGln,
-
-                isRequired: true,
+                gln: unpackingLocationGln,
 
                 errorText: unpackingLocationGlnError,
 
@@ -302,7 +315,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                       border: OutlineInputBorder(),
 
-                      prefixIcon: Icon(Icons.work),
+                      prefixIcon: TraqIcon(AppAssets.iconList),
 
                     ),
 
@@ -324,7 +337,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                       border: OutlineInputBorder(),
 
-                      prefixIcon: Icon(Icons.tag),
+                      prefixIcon: TraqIcon(AppAssets.iconPin),
 
                     ),
 
@@ -348,7 +361,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                       border: OutlineInputBorder(),
 
-                      prefixIcon: Icon(Icons.precision_manufacturing),
+                      prefixIcon: TraqIcon(AppAssets.iconPrecisionManufacturing),
 
                     ),
 

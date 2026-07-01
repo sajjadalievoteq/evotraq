@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../widgets/subscription_card.dart';
@@ -8,6 +9,8 @@ import '../widgets/create_subscription_dialog.dart';
 import '../widgets/notification_quick_guide.dart';
 
 import '../../domain/models/realtime_notification.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
@@ -59,24 +62,21 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         title: const Text('Notification Subscriptions'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: TraqIcon(AppAssets.iconPlus),
             onPressed: () => _showCreateDialog(context),
           ),
           BlocBuilder<NotificationCubit, NotificationState>(
             builder: (context, state) {
               if (state.status == NotificationStatus.webSocketConnected) {
-                return const Icon(
-                  Icons.wifi,
+                return TraqIcon(AppAssets.iconWifi,
                   color: Colors.green,
                 );
               } else if (state.status == NotificationStatus.webSocketDisconnected) {
-                return const Icon(
-                  Icons.wifi_off,
+                return TraqIcon(AppAssets.iconWifiOff,
                   color: Colors.red,
                 );
               }
-              return const Icon(
-                Icons.wifi_off,
+              return TraqIcon(AppAssets.iconWifiOff,
                 color: Colors.grey,
               );
             },
@@ -87,26 +87,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       body: BlocConsumer<NotificationCubit, NotificationState>(
         listener: (context, state) {
           if (state.status == NotificationStatus.error && state.error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error!),
-                backgroundColor: Colors.red,
-              ),
-            );
+            context.showError(state.error!);
           } else if (state.status == NotificationStatus.subscriptionCreated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Subscription created successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            context.showSuccess('Subscription created successfully');
           } else if (state.status == NotificationStatus.subscriptionDeleted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Subscription deleted successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            context.showSuccess('Subscription deleted successfully');
           } else if (state.lastRealtimeNotification != null) {
             _showRealtimeNotification(context, state.lastRealtimeNotification!);
           }
@@ -192,8 +177,8 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         children: [
           const NotificationQuickGuide(),
           const SizedBox(height: 24),
-          Icon(
-            Icons.notifications_none,
+          TraqIcon(
+            AppAssets.iconNotification,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -214,7 +199,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _showCreateDialog(context),
-            icon: const Icon(Icons.add),
+            icon: TraqIcon(AppAssets.iconPlus),
             label: const Text('Create Subscription'),
           ),
         ],
@@ -227,8 +212,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.red[400],
           ),
@@ -250,7 +234,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
             onPressed: () {
               context.read<NotificationCubit>().loadSubscriptions();
             },
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             label: const Text('Retry'),
           ),
         ],

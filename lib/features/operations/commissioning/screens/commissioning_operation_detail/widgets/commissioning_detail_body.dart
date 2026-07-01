@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_location_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_processing_stats_card.dart';
@@ -13,10 +14,12 @@ class CommissioningDetailBody extends StatelessWidget {
     super.key,
     required this.batch,
     required this.items,
+    required this.itemStatuses,
   });
 
   final CommissioningBatch batch;
   final List<CommissioningBatchItem> items;
+  final Map<String, ItemStatus> itemStatuses;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,7 @@ class CommissioningDetailBody extends StatelessWidget {
           CommissioningDetailProcessingStatsCard(batch: batch),
           if (items.isNotEmpty) ...[
             const SizedBox(height: 12),
-            CommissioningDetailSerialNumbersCard(items: items),
+            CommissioningDetailSerialNumbersCard(items: items, itemStatuses: itemStatuses),
           ],
         ],
       ),

@@ -245,29 +245,10 @@ class EPCISEvent {
     
     return data;
   }  /// Helper method to format dates with timezone information
+  /// Always converts to UTC so the ISO string carries the 'Z' suffix
+  /// and the backend deserializer never treats a local time as UTC.
   String _formatDateWithTimezone(DateTime dateTime) {
-    // Format date according to ISO 8601 with timezone
-    // This creates a format like "2025-06-20T15:30:45.123Z" for UTC
-    // or "2025-06-20T15:30:45.123+02:00" for specific timezone
-    
-    // Generate ISO string with timezone information
-    String iso8601String = dateTime.toIso8601String();
-    
-    // Check if the string already has timezone information
-    if (iso8601String.endsWith('Z') || iso8601String.contains('+') || iso8601String.contains('-', iso8601String.length - 6)) {
-      return iso8601String;
-    }
-    
-    // If the datetime doesn't have timezone information, we need to add it
-    // For local time, get the current timezone offset
-    final offset = dateTime.timeZoneOffset;
-    final hours = offset.inHours.abs();
-    final minutes = (offset.inMinutes.abs() % 60);
-    final sign = offset.isNegative ? '-' : '+';
-    final offsetString = '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    
-    // Return ISO string with timezone offset
-    return '${iso8601String}${offsetString}';
+    return dateTime.toUtc().toIso8601String();
   }
 }
 

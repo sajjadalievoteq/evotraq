@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-class CardWithBackgroundWidget extends StatefulWidget {
+class CardWithBackgroundWidget extends StatelessWidget {
   const CardWithBackgroundWidget({
     super.key,
     required this.child,
@@ -18,36 +18,19 @@ class CardWithBackgroundWidget extends StatefulWidget {
   final double? elevation;
   final EdgeInsetsGeometry? margin;
 
-  @override
-  State<CardWithBackgroundWidget> createState() =>
-      _CardWithBackgroundWidgetState();
-}
-
-class _CardWithBackgroundWidgetState extends State<CardWithBackgroundWidget> {
   static const AssetImage _backgroundImage =
       AssetImage(AppAssets.traqBackgroundPng);
-
-  bool _precacheRequested = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_precacheRequested) {
-      _precacheRequested = true;
-      precacheImage(_backgroundImage, context);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: widget.shape,
-      elevation: widget.elevation,
-      margin: widget.margin,
+      shape: shape,
+      elevation: elevation,
+      margin: margin,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: widget.isPrimary == true
+          color: isPrimary == true
               ? context.colors.primary
               : context.colors.background,
           image: const DecorationImage(
@@ -64,7 +47,7 @@ class _CardWithBackgroundWidgetState extends State<CardWithBackgroundWidget> {
                 color: Colors.black.withOpacity(0.1),
               ),
             ),
-            widget.child,
+            child,
           ],
         ),
       ),

@@ -7,6 +7,8 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/features/admin/widgets/etl_management_panel.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// ETL Management Screen for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive ETL pipeline management and monitoring interface
@@ -37,7 +39,7 @@ class ETLManagementScreen extends StatelessWidget {
             elevation: 2,
             actions: [
               IconButton(
-                icon: const Icon(Icons.help_outline),
+                icon: TraqIcon(AppAssets.iconInfo),
                 onPressed: () => _showHelpDialog(context),
                 tooltip: 'Help',
               ),
@@ -77,8 +79,7 @@ class ETLManagementScreen extends StatelessWidget {
                                     color: Colors.purple.shade100,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Icon(
-                                    Icons.transform,
+                                  child: TraqIcon(AppAssets.iconTransform,
                                     color: Colors.purple.shade700,
                                     size: 24,
                                   ),
@@ -150,7 +151,7 @@ class ETLManagementScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.help_outline, color: Colors.purple),
+            TraqIcon(AppAssets.iconInfo, color: Colors.purple),
             SizedBox(width: 8),
             Text('ETL Management Help'),
           ],

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 abstract final class AggregationEventHierarchyUtils {
-  static Icon actionIcon(String action) {
+  static Widget actionIcon(String action) {
     switch (action) {
       case 'ADD':
-        return const Icon(Icons.add_circle, color: Colors.green);
+        return TraqIcon(AppAssets.iconPlus, color: Colors.green);
       case 'DELETE':
-        return const Icon(Icons.remove_circle, color: Colors.red);
+        return TraqIcon(AppAssets.iconMinus, color: Colors.red);
       case 'OBSERVE':
-        return const Icon(Icons.visibility, color: Colors.blue);
+        return TraqIcon(AppAssets.iconEye, color: Colors.blue);
       default:
-        return const Icon(Icons.event);
+        return TraqIcon(AppAssets.iconEvent);
     }
   }
 }

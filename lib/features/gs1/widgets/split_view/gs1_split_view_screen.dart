@@ -7,7 +7,8 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
-import 'package:world_countries/helpers.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     extends StatefulWidget {
@@ -127,8 +128,8 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
         tooltip: _useEmbeddedCreate && _isCreateMode
             ? widget.fabCloseTooltip
             : widget.fabAddTooltip,
-        child: Icon(
-          _useEmbeddedCreate && _isCreateMode ? Icons.close : Icons.add,
+        child: TraqIcon(
+          _useEmbeddedCreate && _isCreateMode ? AppAssets.iconX : AppAssets.iconPlus,
           color: Colors.white,
         ),
       ),
@@ -233,7 +234,7 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
                   tooltip: widget.closeCreateTooltip,
                   color: Colors.white,
                   onPressed: () => setState(() => _isCreateMode = false),
-                  icon: const Icon(Icons.close),
+                  icon: TraqIcon(AppAssets.iconX),
                 ),
               ],
             ),

@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/models/shipping_quick_filter_result.dart';
+import 'package:traqtrace_app/data/models/operations/shipping/shipping_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/shipping/utils/shipping_ui_constants.dart';
 
 class ShippingQuickFilterDialog extends StatefulWidget {
-  const ShippingQuickFilterDialog({
-    super.key,
-    required this.initialStatus,
-  });
+  const ShippingQuickFilterDialog({super.key, required this.initialStatus});
 
   final String? initialStatus;
 
@@ -67,8 +64,8 @@ class _ShippingQuickFilterDialogState extends State<ShippingQuickFilterDialog> {
             Text(
               ShippingUiConstants.quickFiltersFooterHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -76,9 +73,9 @@ class _ShippingQuickFilterDialogState extends State<ShippingQuickFilterDialog> {
       actions: [
         CustomTextButtonWidget(
           title: ShippingUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context).pop(
-            const ShippingQuickFilterResult.cleared(),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const ShippingQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: ShippingUiConstants.buttonCancel,

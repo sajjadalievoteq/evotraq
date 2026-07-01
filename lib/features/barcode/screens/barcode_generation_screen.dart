@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 
 import '../../../data/services/barcode_generation_service.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
 class BarcodeGenerationScreen extends StatefulWidget {
@@ -320,7 +323,7 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
                   labelText: 'Expiry Date (YYMMDD)',
                   border: OutlineInputBorder(),
                   hintText: '240531',
-                  suffixIcon: Icon(Icons.calendar_today),
+                  suffixIcon: TraqIcon(AppAssets.iconClock),
                 ),
               ),
             ),
@@ -524,26 +527,18 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
               ElevatedButton.icon(
                 onPressed: () {
                   // TODO: Save barcode image to device
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Saving barcode is not implemented yet'),
-                    ),
-                  );
+                  context.showInfo('Saving barcode is not implemented yet');
                 },
-                icon: const Icon(Icons.save_alt),
+                icon: TraqIcon(AppAssets.iconDownload),
                 label: const Text('Save'),
               ),
               const SizedBox(width: 16),
               ElevatedButton.icon(
                 onPressed: () {
                   // TODO: Print barcode
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Printing is not implemented yet'),
-                    ),
-                  );
+                  context.showInfo('Printing is not implemented yet');
                 },
-                icon: const Icon(Icons.print),
+                icon: TraqIcon(AppAssets.iconDownload),
                 label: const Text('Print'),
               ),
             ],

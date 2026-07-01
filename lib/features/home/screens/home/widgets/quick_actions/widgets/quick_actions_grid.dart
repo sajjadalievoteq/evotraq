@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/quick_actions/widgets/dashboard_quick_action_card.dart';
@@ -10,7 +11,7 @@ class QuickActionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const actions = [
       DashboardQuickAction(
-        icon: Icons.qr_code,
+        iconAsset: AppAssets.iconGtin,
         title: HomeStrings.quickActionGtinTitle,
         subtitle: HomeStrings.quickActionGtinSubtitle,
         color: Colors.blue,
@@ -18,52 +19,70 @@ class QuickActionsGrid extends StatelessWidget {
         isDisabled: false,
       ),
       DashboardQuickAction(
-        icon: Icons.location_on,
+        iconAsset: AppAssets.iconGln,
         title: HomeStrings.quickActionGlnTitle,
         color: Colors.green,
         route: HomeNavigation.gs1Glns,
       ),
       DashboardQuickAction(
-        icon: Icons.qr_code_scanner,
+        iconAsset: AppAssets.iconSgtin,
         title: HomeStrings.quickActionSgtinTitle,
         color: Colors.orange,
         route: HomeNavigation.gs1Sgtins,
       ),
       DashboardQuickAction(
-        icon: Icons.inventory,
+        iconAsset: AppAssets.iconSscc,
         title: HomeStrings.quickActionSsccTitle,
         color: Colors.purple,
         route: HomeNavigation.gs1Ssccs,
       ),
       DashboardQuickAction(
-        icon: Icons.local_shipping,
+        iconAsset: AppAssets.iconShipment,
         title: HomeStrings.quickActionCreateShipment,
         color: Colors.indigo,
         route: HomeNavigation.opShippingCreate,
       ),
       DashboardQuickAction(
-        icon: Icons.download,
+        iconAsset: AppAssets.iconReceive,
         title: HomeStrings.quickActionReceiveShipment,
         color: Colors.teal,
-        route: HomeNavigation.opReceiving,
+        route: HomeNavigation.opReceivingCreate,
       ),
       DashboardQuickAction(
-        icon: Icons.inventory_2,
+        iconAsset: AppAssets.iconArrowUpR,
+        title: HomeStrings.quickActionReturnShipping,
+        color: Colors.blueGrey,
+        route: HomeNavigation.opReturnShippingCreate,
+      ),
+      DashboardQuickAction(
+        iconAsset: AppAssets.iconReceive,
+        title: HomeStrings.quickActionReturnReceiving,
+        color: Colors.blueGrey,
+        route: HomeNavigation.opReturnReceivingCreate,
+      ),
+      DashboardQuickAction(
+        iconAsset: AppAssets.iconAggregate,
         title: HomeStrings.quickActionPacking,
         color: Colors.deepOrange,
-        route: HomeNavigation.opPacking,
+        route: HomeNavigation.opPackingCreate,
       ),
       DashboardQuickAction(
-        icon: Icons.unarchive_outlined,
+        iconAsset: AppAssets.iconTransform,
         title: HomeStrings.quickActionUnpacking,
         color: Colors.brown,
-        route: HomeNavigation.opUnpacking,
+        route: HomeNavigation.opUnpackingCreate,
       ),
       DashboardQuickAction(
-        icon: Icons.play_for_work,
+        iconAsset: AppAssets.iconSparkle,
         title: HomeStrings.quickActionCommissioning,
         color: Colors.cyan,
-        route: HomeNavigation.opCommissioning,
+        route: HomeNavigation.opCommissioningNew,
+      ),
+      DashboardQuickAction(
+        iconAsset: AppAssets.iconTrash,
+        title: HomeStrings.quickActionDecommissioning,
+        color: Colors.redAccent,
+        route: HomeNavigation.opDecommissioningCreate,
       ),
     ];
 

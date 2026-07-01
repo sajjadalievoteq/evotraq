@@ -7,6 +7,8 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:intl/intl.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class CommissioningStep3Review extends StatelessWidget {
   const CommissioningStep3Review({
@@ -158,7 +160,7 @@ class CommissioningStep3Review extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.info, color: Colors.blue[700]),
+                  TraqIcon(AppAssets.iconInfo, color: Colors.blue[700]),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

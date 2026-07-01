@@ -1,8 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
 import 'package:traqtrace_app/features/operations/receiving/utils/receiving_status_utils.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// List card for a single Receiving operation.
 class ReceivingOperationCard extends StatelessWidget {
@@ -79,7 +81,7 @@ class ReceivingOperationCard extends StatelessWidget {
               if (op.sourceGLN != null)
                 Row(
                   children: [
-                    const Icon(Icons.flight_takeoff, size: 16, color: Colors.green),
+                    const TraqIcon(AppAssets.iconAirplaneUp, color: Colors.green, size: 16),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -94,7 +96,7 @@ class ReceivingOperationCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.flight_land, size: 16, color: Colors.red),
+                    const TraqIcon(AppAssets.iconAirplaneD, color: Colors.red, size: 16),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -112,7 +114,7 @@ class ReceivingOperationCard extends StatelessWidget {
                 Row(
                   children: [
                     if (op.carrier != null && op.carrier!.isNotEmpty) ...[
-                      const Icon(Icons.local_shipping, size: 16, color: Colors.orange),
+                      TraqIcon(AppAssets.iconShipment, size: 16, color: Colors.orange),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -124,7 +126,7 @@ class ReceivingOperationCard extends StatelessWidget {
                     ],
                     if (op.trackingNumber != null && op.trackingNumber!.isNotEmpty) ...[
                       const SizedBox(width: 8),
-                      const Icon(Icons.qr_code_2, size: 16, color: Colors.blue),
+                      TraqIcon(AppAssets.iconQr, size: 16, color: Colors.blue),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(

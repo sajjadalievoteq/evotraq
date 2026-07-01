@@ -1,0 +1,130 @@
+import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_status.dart';
+
+class ReturnShippingResponse {
+  ReturnShippingResponse({
+    this.returnShippingOperationId,
+    this.returnReference,
+    this.eventIds,
+    this.shippedEpcsCount,
+    this.epcList,
+    this.status,
+    this.processedAt,
+    this.sourceGLN,
+    this.destinationGLN,
+    this.carrier,
+    this.trackingNumber,
+    this.billOfLadingNumber,
+    this.purchaseOrderNumber,
+    this.despatchAdviceNumber,
+    this.comments,
+    this.messages,
+    this.processingTimeMs,
+    this.metadata,
+  });
+
+  String? returnShippingOperationId;
+  String? returnReference;
+  List<String>? eventIds;
+  int? shippedEpcsCount;
+  List<String>? epcList;
+  ReturnShippingStatus? status;
+  DateTime? processedAt;
+  String? sourceGLN;
+  String? destinationGLN;
+  String? carrier;
+  String? trackingNumber;
+  String? billOfLadingNumber;
+  String? purchaseOrderNumber;
+  String? despatchAdviceNumber;
+  String? comments;
+  List<String>? messages;
+  int? processingTimeMs;
+  Map<String, dynamic>? metadata;
+
+  factory ReturnShippingResponse.fromJson(Map<String, dynamic> json) {
+    final metadata = json['metadata'] is Map
+        ? Map<String, dynamic>.from(json['metadata'] as Map)
+        : null;
+
+    final eventIds = json['eventIds'] != null
+        ? List<String>.from((json['eventIds'] as List).map((e) => e.toString()))
+        : null;
+
+    final epcList = (json['epcList'] as List?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
+
+    return ReturnShippingResponse(
+      returnShippingOperationId: _readNonEmptyString(json['returnShippingOperationId']) ??
+          _readNonEmptyString(json['operationId']) ??
+          _readNonEmptyString(json['id']) ??
+          _readNonEmptyString(metadata?['return_shipping_operation_id']) ??
+          _readNonEmptyString(metadata?['return_shipping_operation_id']) ??
+          _firstNonEmptyString(eventIds) ??
+          _readNonEmptyString(metadata?['event_id']) ??
+          _readNonEmptyString(metadata?['eventId']),
+      returnReference: _readNonEmptyString(json['returnReference']),
+      eventIds: eventIds,
+      shippedEpcsCount: (json['shippedEpcsCount'] as num?)?.toInt() ??
+          (json['processedEpcsCount'] as num?)?.toInt() ??
+          (json['shippedItemsCount'] as num?)?.toInt() ??
+          epcList?.length,
+      epcList: epcList,
+      status: json['status'] != null
+          ? parseReturnShippingStatus(json['status'].toString())
+          : null,
+      processedAt: json['processedAt'] != null
+          ? DateTime.tryParse(json['processedAt'].toString())
+          : null,
+      sourceGLN: _readNonEmptyString(json['sourceGLN']),
+      destinationGLN: _readNonEmptyString(json['destinationGLN']),
+      carrier: _readNonEmptyString(json['carrier']),
+      trackingNumber: _readNonEmptyString(json['trackingNumber']),
+      billOfLadingNumber: _readNonEmptyString(json['billOfLadingNumber']),
+      purchaseOrderNumber: _readNonEmptyString(json['purchaseOrderNumber']),
+      despatchAdviceNumber: _readNonEmptyString(json['despatchAdviceNumber']),
+      comments: _readNonEmptyString(json['comments']),
+      messages: (json['messages'] as List?)?.map((e) => e.toString()).toList(),
+      processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),
+      metadata: metadata,
+    );
+  }
+
+  static String? _readNonEmptyString(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    return text.isEmpty ? null : text;
+  }
+
+  static String? _firstNonEmptyString(List<String>? values) {
+    if (values == null || values.isEmpty) return null;
+    for (final value in values) {
+      final text = _readNonEmptyString(value);
+      if (text != null) return text;
+    }
+    return null;
+  }
+
+  String? get operationId => returnShippingOperationId;
+
+  /// ID used for list selection and detail navigation.
+  String? get navigableOperationId {
+    final id = _readNonEmptyString(returnShippingOperationId);
+    if (id != null) return id;
+    final eventId = _firstNonEmptyString(eventIds);
+    if (eventId != null) return eventId;
+    return _readNonEmptyString(metadata?['event_id']) ??
+        _readNonEmptyString(metadata?['eventId']);
+  }
+
+  // Legacy compatibility aliases.
+  int? get shippedItemsCount => shippedEpcsCount;
+  List<String>? get childEpcList => epcList;
+
+  bool get isSuccess => status == ReturnShippingStatus.success;
+  bool get isSuccessOrPartial =>
+      status == ReturnShippingStatus.success || status == ReturnShippingStatus.partialSuccess;
+  bool get hasErrors =>
+      status == ReturnShippingStatus.failed || status == ReturnShippingStatus.validationError;
+}

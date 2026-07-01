@@ -7,6 +7,8 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_rules_text.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_parent_pack_mode.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class AggregationParentPackSection extends StatefulWidget {
   const AggregationParentPackSection({
@@ -161,12 +163,12 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 ButtonSegment(
                   value: AggregationParentPackMode.sscc,
                   label: Text('SSCC'),
-                  icon: Icon(Icons.inventory_2_outlined, size: 18),
+                  icon: TraqIcon(AppAssets.iconPackage, size: 18),
                 ),
                 ButtonSegment(
                   value: AggregationParentPackMode.sgtin,
                   label: Text('GTIN + Serial'),
-                  icon: Icon(Icons.qr_code_2_outlined, size: 18),
+                  icon: TraqIcon(AppAssets.iconQr, size: 18),
                 ),
               ],
               selected: {_mode},
@@ -261,3 +263,4 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
     );
   }
 }
+  

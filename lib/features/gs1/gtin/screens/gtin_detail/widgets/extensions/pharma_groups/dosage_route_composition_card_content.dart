@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_form_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharma_groups/pharma_group_dosage_route_ingredient_row.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class DosageRouteCompositionCardContent extends StatelessWidget {
   const DosageRouteCompositionCardContent({
@@ -134,7 +136,7 @@ class DosageRouteCompositionCardContent extends StatelessWidget {
                         onPressed: isEditing
                             ? () => onRemoveIngredientRow(index)
                             : null,
-                        icon: const Icon(Icons.delete_outline),
+                        icon: const TraqIcon(AppAssets.iconTrash),
                       ),
                     ],
                   ),
@@ -206,7 +208,7 @@ class DosageRouteCompositionCardContent extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: onAddIngredientRow,
-              icon: const Icon(Icons.add),
+              icon: TraqIcon(AppAssets.iconPlus),
               label: const Text('Add active ingredient row'),
             ),
           ),
@@ -215,7 +217,6 @@ class DosageRouteCompositionCardContent extends StatelessWidget {
           fieldName: 'inactiveIngredients',
           label: 'Inactive ingredients',
           isEditing: isEditing,
-          helperText: 'Excipients / non-active components (free text)',
           maxLines: 4,
           maxLength: 2000,
         ),

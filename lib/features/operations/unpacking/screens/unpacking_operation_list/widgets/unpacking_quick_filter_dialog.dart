@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/models/unpacking_quick_filter_result.dart';
+import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_ui_constants.dart';
 
 class UnpackingQuickFilterDialog extends StatefulWidget {
-  const UnpackingQuickFilterDialog({
-    super.key,
-    required this.initialStatus,
-  });
+  const UnpackingQuickFilterDialog({super.key, required this.initialStatus});
 
   final String? initialStatus;
 
@@ -28,7 +25,8 @@ class UnpackingQuickFilterDialog extends StatefulWidget {
       _UnpackingQuickFilterDialogState();
 }
 
-class _UnpackingQuickFilterDialogState extends State<UnpackingQuickFilterDialog> {
+class _UnpackingQuickFilterDialogState
+    extends State<UnpackingQuickFilterDialog> {
   late String _status;
 
   @override
@@ -67,8 +65,8 @@ class _UnpackingQuickFilterDialogState extends State<UnpackingQuickFilterDialog>
             Text(
               UnpackingUiConstants.quickFiltersFooterHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -76,9 +74,9 @@ class _UnpackingQuickFilterDialogState extends State<UnpackingQuickFilterDialog>
       actions: [
         CustomTextButtonWidget(
           title: UnpackingUiConstants.buttonClearFilters,
-          onTap: () => Navigator.of(context).pop(
-            const UnpackingQuickFilterResult.cleared(),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(const UnpackingQuickFilterResult.cleared()),
         ),
         CustomOutlinedButtonWidget(
           title: UnpackingUiConstants.buttonCancel,
@@ -87,7 +85,9 @@ class _UnpackingQuickFilterDialogState extends State<UnpackingQuickFilterDialog>
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             UnpackingQuickFilterResult.applied(
-              status: _status == UnpackingUiConstants.filterAll ? null : _status,
+              status: _status == UnpackingUiConstants.filterAll
+                  ? null
+                  : _status,
             ),
           ),
           child: const Text(UnpackingUiConstants.buttonApply),

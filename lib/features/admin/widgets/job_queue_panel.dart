@@ -5,9 +5,12 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/web/web_download_stub.dart'
     if (dart.library.html) 'package:traqtrace_app/core/web/web_download_web.dart' as web_download;
 import '../../../core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Job Queue Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive job queue monitoring and management interface
@@ -255,7 +258,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
@@ -303,23 +306,23 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
                     tabs: [
                       Tab(
-                        icon: Icon(Icons.dashboard),
+                        icon: TraqIcon(AppAssets.iconDashboard),
                         text: 'Dashboard',
                       ),
                       Tab(
-                        icon: Icon(Icons.play_circle_filled),
+                        icon: TraqIcon(AppAssets.iconArrowR),
                         text: 'Active Jobs',
                       ),
                       Tab(
-                        icon: Icon(Icons.queue),
+                        icon: TraqIcon(AppAssets.iconList),
                         text: 'Queue',
                       ),
                       Tab(
-                        icon: Icon(Icons.history),
+                        icon: TraqIcon(AppAssets.iconClock),
                         text: 'History',
                       ),
                       Tab(
-                        icon: Icon(Icons.groups),
+                        icon: TraqIcon(AppAssets.iconUsers),
                         text: 'Workers',
                       ),
                     ],
@@ -371,8 +374,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    isHealthy ? Icons.check_circle : Icons.error,
+                  TraqIcon(
+                    isHealthy ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                     color: isHealthy ? Colors.green : Colors.red,
                     size: 16,
                   ),
@@ -393,14 +396,14 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Queued', queuedJobs, Icons.queue),
+                  _buildSummaryItem('Queued', queuedJobs, AppAssets.iconQueue),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Active', activeJobs, Icons.play_circle_fill),
+                  _buildSummaryItem('Active', activeJobs, AppAssets.iconPlay),
                   const SizedBox(width: 24),
                   _buildSummaryItem(
                     'Status', 
                     processingPaused ? 'Paused' : 'Running',
-                    processingPaused ? Icons.pause_circle : Icons.play_circle,
+                    processingPaused ? AppAssets.iconPause : AppAssets.iconPlay,
                     color: processingPaused ? Colors.orange : Colors.green,
                   ),
                 ],
@@ -412,12 +415,12 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               children: [
                 IconButton(
                   onPressed: _refreshCurrentTab,
-                  icon: const Icon(Icons.refresh),
+                  icon: TraqIcon(AppAssets.iconRefresh),
                   tooltip: 'Refresh',
                 ),
                 IconButton(
                   onPressed: _showControlPanel,
-                  icon: const Icon(Icons.settings),
+                  icon: TraqIcon(AppAssets.iconSettings),
                   tooltip: 'Control Panel',
                 ),
               ],
@@ -428,11 +431,11 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     );
   }
 
-  Widget _buildSummaryItem(String label, dynamic value, IconData icon, {Color? color}) {
+  Widget _buildSummaryItem(String label, dynamic value, String iconAsset, {Color? color}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: color ?? Colors.blue),
+        TraqIcon(iconAsset, size: 20, color: color ?? Colors.blue),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,7 +500,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     // Schedule Job Button - More Prominent
                     ElevatedButton.icon(
                       onPressed: _showScheduleJobDialog,
-                      icon: Icon(Icons.schedule, color: Colors.white),
+                      icon: TraqIcon(AppAssets.iconClock, color: Colors.white),
                       label: Text(
                         'Schedule Job',
                         style: TextStyle(
@@ -520,7 +523,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     // Refresh Button - Better Styling
                     ElevatedButton.icon(
                       onPressed: _loadJobData,
-                      icon: Icon(Icons.refresh, color: Colors.white),
+                      icon: TraqIcon(AppAssets.iconRefresh, color: Colors.white),
                       label: Text(
                         'Refresh',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
@@ -539,7 +542,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     // Settings Button
                     IconButton(
                       onPressed: () => _showQueueSettings(),
-                      icon: Icon(Icons.settings, color: Colors.indigo.shade600),
+                      icon: TraqIcon(AppAssets.iconSettings, color: Colors.indigo.shade600),
                       tooltip: 'Queue Settings',
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -562,7 +565,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: _buildEnhancedStatusCard(
                   'Active Jobs',
                   '${_activeJobs.length}',
-                  Icons.play_circle_filled,
+                  AppAssets.iconPlay,
                   Colors.green.shade600,
                   Colors.green.shade50,
                 ),
@@ -573,7 +576,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: _buildEnhancedStatusCard(
                   'Queued Jobs',
                   '${_queuedJobs.length}',
-                  Icons.queue,
+                  AppAssets.iconQueue,
                   Colors.orange.shade600,
                   Colors.orange.shade50,
                 ),
@@ -584,7 +587,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: _buildEnhancedStatusCard(
                   'Total Jobs',
                   '${_activeJobs.length + _queuedJobs.length + _jobHistory.length}',
-                  Icons.work,
+                  AppAssets.iconWork,
                   Colors.blue.shade600,
                   Colors.blue.shade50,
                 ),
@@ -595,7 +598,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: _buildEnhancedStatusCard(
                   'Workers',
                   '${_workerPoolStats['active'] ?? 0}/${_workerPoolStats['total'] ?? 0}',
-                  Icons.groups,
+                  AppAssets.iconUsers,
                   Colors.purple.shade600,
                   Colors.purple.shade50,
                 ),
@@ -625,7 +628,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               children: [
                 Row(
                   children: [
-                    Icon(Icons.health_and_safety, color: Colors.teal.shade600),
+                    TraqIcon(AppAssets.iconSecurity, color: Colors.teal.shade600),
                     SizedBox(width: 8),
                     Text(
                       'Queue Health Status',
@@ -821,7 +824,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: _showWorkerPoolConfig,
-                icon: const Icon(Icons.settings),
+                icon: TraqIcon(AppAssets.iconSettings),
                 label: const Text('Configure'),
               ),
             ],
@@ -879,7 +882,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () => _cancelJob(job['jobId']),
-                  icon: const Icon(Icons.stop, color: Colors.red),
+                  icon: TraqIcon(AppAssets.iconX, color: Colors.red),
                   tooltip: 'Cancel Job',
                 ),
               ],
@@ -952,12 +955,12 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
           children: [
             IconButton(
               onPressed: () => _showJobDetails(job),
-              icon: const Icon(Icons.info_outline),
+              icon: TraqIcon(AppAssets.iconInfo),
               tooltip: 'Job Details',
             ),
             IconButton(
               onPressed: () => _cancelJob(job['jobId']),
-              icon: const Icon(Icons.cancel, color: Colors.red),
+              icon: TraqIcon(AppAssets.iconX, color: Colors.red),
               tooltip: 'Cancel Job',
             ),
           ],
@@ -1029,19 +1032,19 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
           children: [
             IconButton(
               onPressed: () => _showJobDetails(job),
-              icon: const Icon(Icons.info_outline),
+              icon: TraqIcon(AppAssets.iconInfo),
               tooltip: 'Job Details',
             ),
             if (status == 'FAILED')
               IconButton(
                 onPressed: () => _retryJob(job['jobId']),
-                icon: const Icon(Icons.refresh, color: Colors.orange),
+                icon: TraqIcon(AppAssets.iconRefresh, color: Colors.orange),
                 tooltip: 'Retry Job',
               ),
             if (status == 'COMPLETED' && (jobType == 'DATA_EXPORT' || jobType == 'EXPORT'))
               IconButton(
                 onPressed: () => _downloadJobResult(job['jobId']),
-                icon: const Icon(Icons.download, color: Colors.green),
+                icon: TraqIcon(AppAssets.iconDownload, color: Colors.green),
                 tooltip: 'Download Result',
               ),
           ],
@@ -1222,8 +1225,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                Icon(
-                  healthy ? Icons.check_circle : Icons.warning,
+                TraqIcon(
+                  healthy ? AppAssets.iconCheckCircle : AppAssets.iconAlert,
                   color: healthy ? Colors.green : Colors.orange,
                 ),
               ],
@@ -1336,15 +1339,11 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Job cancelled successfully')),
-        );
+        context.showSuccess('Job cancelled successfully');
         _refreshCurrentTab();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to cancel job: $e')),
-      );
+      context.showError('Failed to cancel job: $e');
     }
   }
 
@@ -1356,15 +1355,11 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Job resubmitted successfully')),
-        );
+        context.showSuccess('Job resubmitted successfully');
         _refreshCurrentTab();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to retry job: $e')),
-      );
+      context.showError('Failed to retry job: $e');
     }
   }
 
@@ -1413,7 +1408,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.pause),
+              leading: TraqIcon(AppAssets.iconMinus),
               title: const Text('Pause Processing'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -1421,7 +1416,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               },
             ),
             ListTile(
-              leading: const Icon(Icons.play_arrow),
+              leading: TraqIcon(AppAssets.iconArrowR),
               title: const Text('Resume Processing'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -1429,7 +1424,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
+              leading: TraqIcon(AppAssets.iconSettings),
               title: const Text('Configure Worker Pool'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -1437,7 +1432,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete),
+              leading: TraqIcon(AppAssets.iconTrash),
               title: const Text('Purge Old Jobs'),
               onTap: () {
                 Navigator.of(context).pop();
@@ -1486,15 +1481,11 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Job processing paused')),
-        );
+        context.showInfo('Job processing paused');
         _loadDashboardData();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pause processing: $e')),
-      );
+      context.showError('Failed to pause processing: $e');
     }
   }
 
@@ -1506,20 +1497,16 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Job processing resumed')),
-        );
+        context.showInfo('Job processing resumed');
         _loadDashboardData();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resume processing: $e')),
-      );
+      context.showError('Failed to resume processing: $e');
     }
   }
 
   // Enhanced UI Helper Methods
-  Widget _buildEnhancedStatusCard(String title, String value, IconData icon, Color primaryColor, Color backgroundColor) {
+  Widget _buildEnhancedStatusCard(String title, String value, String iconAsset, Color primaryColor, Color backgroundColor) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -1539,7 +1526,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         children: [
           Row(
             children: [
-              Icon(icon, color: primaryColor, size: 24),
+              TraqIcon(iconAsset, color: primaryColor, size: 24),
               Spacer(),
               Text(
                 value,
@@ -1586,22 +1573,22 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.settings, color: Colors.indigo.shade600),
+              TraqIcon(AppAssets.iconSettings, color: Colors.indigo.shade600),
               SizedBox(width: 8),
               Text('Queue Settings'),
             ],
           ),
-          content: Container(
+          content: SizedBox(
             width: 400,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Worker Pool Settings
                 ListTile(
-                  leading: Icon(Icons.groups, color: Colors.purple.shade600),
+                  leading: TraqIcon(AppAssets.iconUsers, color: Colors.purple.shade600),
                   title: Text('Worker Pool Size'),
                   subtitle: Text('Current: ${_workerPoolStats['total'] ?? 0} workers'),
-                  trailing: Icon(Icons.arrow_forward_ios),
+                  trailing: TraqIcon(AppAssets.iconChevronR),
                   onTap: () {
                     // Implement worker pool configuration
                   },
@@ -1609,10 +1596,10 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 Divider(),
                 // Queue Limits
                 ListTile(
-                  leading: Icon(Icons.queue, color: Colors.orange.shade600),
+                  leading: TraqIcon(AppAssets.iconList, color: Colors.orange.shade600),
                   title: Text('Queue Limits'),
                   subtitle: Text('Max queue size and priority settings'),
-                  trailing: Icon(Icons.arrow_forward_ios),
+                  trailing: TraqIcon(AppAssets.iconChevronR),
                   onTap: () {
                     // Implement queue limit configuration
                   },
@@ -1620,7 +1607,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 Divider(),
                 // Auto-refresh Settings
                 ListTile(
-                  leading: Icon(Icons.refresh, color: Colors.blue.shade600),
+                  leading: TraqIcon(AppAssets.iconRefresh, color: Colors.blue.shade600),
                   title: Text('Auto Refresh'),
                   subtitle: Text('Currently: Every 5 seconds'),
                   trailing: Switch(
@@ -1686,12 +1673,12 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             return AlertDialog(
               title: Row(
                 children: [
-                  Icon(Icons.schedule, color: Colors.green.shade600),
+                  TraqIcon(AppAssets.iconClock, color: Colors.green.shade600),
                   SizedBox(width: 8),
                   Text('Schedule New Job'),
                 ],
               ),
-              content: Container(
+              content: SizedBox(
                 width: 500,
                 height: 600,
                 child: SingleChildScrollView(
@@ -1772,7 +1759,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       if (selectedScheduleType == 'ONCE' || selectedScheduleType == 'RECURRING') ...[
                         ListTile(
                           title: Text('Start Date/Time: ${selectedDateTime?.toString().split('.')[0] ?? 'Not set'}'),
-                          trailing: Icon(Icons.calendar_today),
+                          trailing: TraqIcon(AppAssets.iconClock),
                           onTap: () async {
                             final date = await showDatePicker(
                               context: context,
@@ -1821,7 +1808,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                         SizedBox(height: 12),
                         ListTile(
                           title: Text('End Date (Optional): ${endDateTime?.toString().split('.')[0] ?? 'Never'}'),
-                          trailing: Icon(Icons.calendar_today),
+                          trailing: TraqIcon(AppAssets.iconClock),
                           onTap: () async {
                             final date = await showDatePicker(
                               context: context,
@@ -1889,7 +1876,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                                   ),
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.remove_circle, color: Colors.red),
+                                  icon: TraqIcon(AppAssets.iconRemoveCircle, color: Colors.red),
                                   onPressed: () => setState(() => parameters.removeAt(index)),
                                 ),
                               ],
@@ -1900,7 +1887,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       
                       ElevatedButton.icon(
                         onPressed: () => setState(() => parameters.add({'key': '', 'value': ''})),
-                        icon: Icon(Icons.add),
+                        icon: TraqIcon(AppAssets.iconPlus),
                         label: Text('Add Parameter'),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade100),
                       ),
@@ -1954,15 +1941,15 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   bool _validateJobForm(String jobName, String jobType, String scheduleType, DateTime? dateTime, String cronExpression) {
     if (jobName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Job name is required')));
+      context.showError('Job name is required');
       return false;
     }
     if (scheduleType == 'ONCE' && dateTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Date/time is required for one-time jobs')));
+      context.showError('Date/time is required for one-time jobs');
       return false;
     }
     if (scheduleType == 'CRON' && cronExpression.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cron expression is required')));
+      context.showError('Cron expression is required');
       return false;
     }
     return true;
@@ -1996,7 +1983,9 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         'name': jobName,
         'description': description,
         'scheduleType': scheduleType,
-        'parameters': Map.fromIterable(parameters, key: (p) => p['key'], value: (p) => p['value']),
+        'parameters': {
+          for (final p in parameters) p['key']: p['value'],
+        },
       };
 
       // Add job-specific configuration based on job type
@@ -2063,17 +2052,13 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Job "$jobName" scheduled successfully!'), backgroundColor: Colors.green),
-        );
+        context.showSuccess('Job "$jobName" scheduled successfully!');
         _loadInitialData();
       } else {
         throw Exception('Failed to schedule job: ${response.statusCode}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to schedule job: $e'), backgroundColor: Colors.red),
-      );
+      context.showError('Failed to schedule job: $e');
     }
   }
 
@@ -2087,7 +2072,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Data Type to Export',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.storage),
+              prefixIcon: TraqIcon(AppAssets.iconList),
             ),
             value: 'EVENTS',
             items: [
@@ -2104,7 +2089,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Export Format',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.file_download),
+              prefixIcon: TraqIcon(AppAssets.iconDownload),
             ),
             value: 'CSV',
             items: [
@@ -2122,7 +2107,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: ListTile(
                   title: Text('From Date'),
                   subtitle: Text(DateTime.now().subtract(Duration(days: 30)).toString().split(' ')[0]),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: TraqIcon(AppAssets.iconClock),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -2141,7 +2126,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: ListTile(
                   title: Text('To Date'),
                   subtitle: Text(DateTime.now().toString().split(' ')[0]),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: TraqIcon(AppAssets.iconClock),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -2167,7 +2152,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Source Table',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.input),
+              prefixIcon: TraqIcon(AppAssets.iconArrowR),
             ),
             value: 'EPCIS_EVENTS',
             items: [
@@ -2183,7 +2168,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Target Table',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.output),
+              prefixIcon: TraqIcon(AppAssets.iconArrowD),
             ),
             value: 'PROCESSED_EVENTS',
             items: [
@@ -2199,7 +2184,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Transformation Rules (Optional)',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.transform),
+              prefixIcon: TraqIcon(AppAssets.iconTransform),
               hintText: 'Enter transformation logic or rule IDs',
             ),
             maxLines: 2,
@@ -2214,7 +2199,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Data Source Type',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.cloud_upload),
+              prefixIcon: TraqIcon(AppAssets.iconCloudUpload),
             ),
             value: 'CSV_FILE',
             items: [
@@ -2231,7 +2216,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Source Path/URL',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.link),
+              prefixIcon: TraqIcon(AppAssets.iconAggregate),
               hintText: 'File path or API endpoint URL',
             ),
           ),
@@ -2240,7 +2225,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Target Table',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.table_chart),
+              prefixIcon: TraqIcon(AppAssets.iconTable),
             ),
             value: 'EPCIS_EVENTS',
             items: [
@@ -2261,7 +2246,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Report Type',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.analytics),
+              prefixIcon: TraqIcon(AppAssets.iconBarChart),
             ),
             value: 'SUMMARY',
             items: [
@@ -2280,7 +2265,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: ListTile(
                   title: Text('Report Period From'),
                   subtitle: Text(DateTime.now().subtract(Duration(days: 7)).toString().split(' ')[0]),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: TraqIcon(AppAssets.iconClock),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -2299,7 +2284,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: ListTile(
                   title: Text('Report Period To'),
                   subtitle: Text(DateTime.now().toString().split(' ')[0]),
-                  trailing: Icon(Icons.calendar_today),
+                  trailing: TraqIcon(AppAssets.iconClock),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -2325,7 +2310,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Maintenance Type',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.build),
+              prefixIcon: TraqIcon(AppAssets.iconSettings),
             ),
             value: 'DATABASE_CLEANUP',
             items: [
@@ -2342,7 +2327,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Retention Days (for cleanup tasks)',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.schedule),
+              prefixIcon: TraqIcon(AppAssets.iconClock),
               hintText: '30',
             ),
             keyboardType: TextInputType.number,
@@ -2401,35 +2386,15 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             : Uint8List.fromList(List<int>.from(raw as List));
         web_download.downloadBytes(bytes: bytes, filename: filename);
 
-        _showSuccessSnackBar('File downloaded successfully: $filename');
+        context.showSuccess('File downloaded successfully: $filename', duration: const Duration(seconds: 3));
       } else if (response.statusCode == 404) {
-        _showErrorSnackBar('File not found. The export may have been cleaned up.');
+        context.showError('File not found. The export may have been cleaned up.', duration: const Duration(seconds: 4));
       } else {
-        _showErrorSnackBar('Failed to download file: ${response.statusCode}');
+        context.showError('Failed to download file: ${response.statusCode}', duration: const Duration(seconds: 4));
       }
     } catch (e) {
       Navigator.of(context).pop(); // Close loading dialog if still open
-      _showErrorSnackBar('Error downloading file: $e');
+      context.showError('Error downloading file: $e', duration: const Duration(seconds: 4));
     }
-  }
-
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 4),
-      ),
-    );
   }
 }

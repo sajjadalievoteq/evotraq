@@ -11,6 +11,7 @@ class TransformationEvent extends EPCISEvent {
   final List<Map<String, dynamic>> inputQuantityList;
   final List<Map<String, dynamic>> outputQuantityList;
   final Map<String, dynamic> ilmd;
+  @override
   final List<CertificationInfo>? certificationInfo;
     /// Constructor for TransformationEvent
   TransformationEvent({
@@ -31,11 +32,11 @@ class TransformationEvent extends EPCISEvent {
     List<Map<String, dynamic>>? outputQuantityList,
     Map<String, dynamic>? ilmd,
     this.certificationInfo,
-  }) : this.inputEPCList = inputEPCList ?? [],
-       this.outputEPCList = outputEPCList ?? [],
-       this.inputQuantityList = inputQuantityList ?? [],
-       this.outputQuantityList = outputQuantityList ?? [],
-       this.ilmd = ilmd ?? {},
+  }) : inputEPCList = inputEPCList ?? [],
+       outputEPCList = outputEPCList ?? [],
+       inputQuantityList = inputQuantityList ?? [],
+       outputQuantityList = outputQuantityList ?? [],
+       ilmd = ilmd ?? {},
        super(
          id: id,
          eventId: eventId,
@@ -170,11 +171,11 @@ class TransformationEvent extends EPCISEvent {
       eventId: eventId ?? this.eventId,
       eventTime: eventTime ?? this.eventTime,
       recordTime: recordTime ?? this.recordTime,
-      eventTimeZoneOffset: eventTimeZoneOffset ?? this.eventTimeZone,
-      bizStep: bizStep ?? this.businessStep,
+      eventTimeZoneOffset: eventTimeZoneOffset ?? eventTimeZone,
+      bizStep: bizStep ?? businessStep,
       disposition: disposition ?? this.disposition,
       readPoint: readPoint ?? this.readPoint,
-      bizLocation: bizLocation ?? this.businessLocation,
+      bizLocation: bizLocation ?? businessLocation,
       bizData: bizData ?? this.bizData,
       transformationID: transformationID ?? this.transformationID,
       inputEPCList: inputEPCList ?? this.inputEPCList,

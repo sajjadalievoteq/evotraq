@@ -4,6 +4,8 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_status_chip.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SgtinListItemCard extends StatelessWidget {
   const SgtinListItemCard({
@@ -30,14 +32,14 @@ class SgtinListItemCard extends StatelessWidget {
             ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
             : const EdgeInsets.all(16);
 
-        Widget infoRow(IconData icon, String text) {
+        Widget infoRow(String iconAsset, String text) {
           final rowColor =
               Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Row(
               children: [
-                Icon(icon, size: 14, color: rowColor),
+                TraqIcon(iconAsset, size: 14, color: rowColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -85,23 +87,23 @@ class SgtinListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         infoRow(
-                          Icons.qr_code,
+                          AppAssets.iconQr,
                           '${SgtinUiConstants.listCardGtinPrefix}${sgtin.gtinCode}',
                         ),
                         if (sgtin.batchLotNumber != null)
                           infoRow(
-                            Icons.batch_prediction,
+                            AppAssets.iconTag,
                             '${SgtinUiConstants.listCardBatchPrefix}${sgtin.batchLotNumber}',
                           ),
                         if (sgtin.expiryDate != null)
                           infoRow(
-                            Icons.event,
+                            AppAssets.iconCalendar,
                             '${SgtinUiConstants.listCardExpiryPrefix}'
                             '${DateFormat('MMM dd, yyyy').format(sgtin.expiryDate!)}',
                           ),
                         if (sgtin.currentLocation != null)
                           infoRow(
-                            Icons.location_on,
+                            AppAssets.iconMapPin,
                             '${SgtinUiConstants.listCardLocationPrefix}'
                             '${sgtin.currentLocation!.locationName}',
                           ),

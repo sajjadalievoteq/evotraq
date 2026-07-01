@@ -1,7 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
-
-import '../../../../../../core/consts/app_consts.dart';
 
 class GlnDetailFormSkeleton extends StatelessWidget {
   const GlnDetailFormSkeleton({super.key});

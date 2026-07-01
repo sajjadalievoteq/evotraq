@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
 
 
@@ -19,8 +20,6 @@ class UnpackingReviewStep extends StatelessWidget {
   const UnpackingReviewStep({
 
     super.key,
-
-    required this.unpackingReference,
 
     required this.unpackingLocationGln,
 
@@ -34,13 +33,15 @@ class UnpackingReviewStep extends StatelessWidget {
 
     required this.scannedEpcs,
 
+    required this.unpackingScope,
+
+    this.eventTime,
+
     this.showPageHeader = true,
 
   });
 
 
-
-  final String unpackingReference;
 
   final GLN? unpackingLocationGln;
 
@@ -53,6 +54,10 @@ class UnpackingReviewStep extends StatelessWidget {
   final String? parentContainerId;
 
   final List<String> scannedEpcs;
+
+  final UnpackingScope unpackingScope;
+
+  final DateTime? eventTime;
 
   final bool showPageHeader;
 
@@ -106,7 +111,16 @@ class UnpackingReviewStep extends StatelessWidget {
 
               children: [
 
-                SgtinInfoRow('Unpacking Reference', unpackingReference),
+                SgtinInfoRow('Unpacking Reference', 'Auto-generated on submit'),
+
+                const SizedBox(height: 12),
+
+                SgtinInfoRow(
+                  'Event Time',
+                  eventTime != null
+                      ? '${eventTime!.toLocal()}'.substring(0, 16)
+                      : 'At time of submission',
+                ),
 
                 const SizedBox(height: 12),
 
@@ -129,6 +143,20 @@ class UnpackingReviewStep extends StatelessWidget {
                   parentContainerId,
 
                   monospace: true,
+
+                ),
+
+                const SizedBox(height: 12),
+
+                SgtinInfoRow(
+
+                  'Unpack scope',
+
+                  unpackingScope == UnpackingScope.wholeContainer
+
+                      ? 'Whole container (${scannedEpcs.length} items)'
+
+                      : 'Partial (${scannedEpcs.length} items)',
 
                 ),
 

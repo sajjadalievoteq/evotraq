@@ -20,14 +20,10 @@ class PackingDetailBody extends StatelessWidget {
     super.key,
     required this.operation,
     required this.locationGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
   });
 
   final PackingResponse operation;
   final GLN? locationGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +48,7 @@ class PackingDetailBody extends StatelessWidget {
             PackingDetailProductionCard(operation: operation),
           ],
 
-          PackingDetailPackedItemsCard(
-            operation: operation,
-            showAllEpcs: showAllEpcs,
-            onShowAll: onShowAllEpcs,
-          ),
+          PackingDetailPackedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
 
             PackingDetailEventsCard(operation: operation),

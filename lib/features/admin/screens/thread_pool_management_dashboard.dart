@@ -5,6 +5,8 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class ThreadPoolManagementDashboard extends StatefulWidget {
   const ThreadPoolManagementDashboard({Key? key}) : super(key: key);
@@ -206,7 +208,7 @@ class _ThreadPoolManagementDashboardState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadAllData,
             tooltip: 'Refresh Data',
           ),
@@ -220,10 +222,10 @@ class _ThreadPoolManagementDashboardState
                 children: [
                   const TabBar(
                     tabs: [
-                      Tab(icon: Icon(Icons.dashboard), text: 'Metrics'),
-                      Tab(icon: Icon(Icons.warning), text: 'Contention'),
-                      Tab(icon: Icon(Icons.settings), text: 'Backpressure'),
-                      Tab(icon: Icon(Icons.tune), text: 'Optimization'),
+                      Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Metrics'),
+                      Tab(icon: TraqIcon(AppAssets.iconAlert), text: 'Contention'),
+                      Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Backpressure'),
+                      Tab(icon: TraqIcon(AppAssets.iconFilter), text: 'Optimization'),
                     ],
                   ),
                   Expanded(
@@ -323,7 +325,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Active Threads',
                 activeThreads.toString(),
-                Icons.play_arrow,
+                AppAssets.iconPlay,
                 Colors.green,
               ),
             ),
@@ -332,7 +334,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Core Pool Size',
                 corePoolSize.toString(),
-                Icons.settings,
+                AppAssets.iconSettings,
                 Colors.blue,
               ),
             ),
@@ -345,7 +347,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Max Pool Size',
                 maximumPoolSize.toString(),
-                Icons.storage,
+                AppAssets.iconDatabase,
                 Colors.purple,
               ),
             ),
@@ -354,7 +356,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Queue Size',
                 queueSize.toString(),
-                Icons.queue,
+                AppAssets.iconQueue,
                 Colors.orange,
               ),
             ),
@@ -457,7 +459,7 @@ class _ThreadPoolManagementDashboardState
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.settings),
+                          : TraqIcon(AppAssets.iconSettings),
                       label: Text(
                         _isLoading
                             ? 'Configuring...'
@@ -577,7 +579,7 @@ class _ThreadPoolManagementDashboardState
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.tune),
+                          : TraqIcon(AppAssets.iconFilter),
                       label: Text(
                         _isLoading ? 'Optimizing...' : 'Optimize Thread Pools',
                       ),
@@ -598,7 +600,7 @@ class _ThreadPoolManagementDashboardState
   Widget _buildMetricCard(
     String title,
     String value,
-    IconData icon,
+    String iconAsset,
     Color color,
   ) {
     return Container(
@@ -610,7 +612,7 @@ class _ThreadPoolManagementDashboardState
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          TraqIcon(iconAsset, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             title,
@@ -637,7 +639,7 @@ class _ThreadPoolManagementDashboardState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             'Error',

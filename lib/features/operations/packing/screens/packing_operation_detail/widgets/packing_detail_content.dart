@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_body.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_error_view.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_skeleton.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
 
 /// Resolves which detail view to show based on loading/selection state.
 class PackingDetailContent extends StatelessWidget {
@@ -16,8 +16,6 @@ class PackingDetailContent extends StatelessWidget {
     required this.errorMessage,
     required this.operation,
     required this.locationGlnDetails,
-    required this.showAllEpcs,
-    required this.onShowAllEpcs,
     required this.onRetry,
   });
 
@@ -27,29 +25,23 @@ class PackingDetailContent extends StatelessWidget {
   final String? errorMessage;
   final PackingResponse? operation;
   final GLN? locationGlnDetails;
-  final bool showAllEpcs;
-  final VoidCallback onShowAllEpcs;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    if (awaitingSelection) {
-      return PackingDetailAwaitingSelection(listLoading: listLoading);
+    if (awaitingSelection || isLoading) {
+      return const OperationDetailLoadingSkeleton();
     }
-    if (isLoading) return const PackingDetailSkeleton();
     if (errorMessage != null) {
       return PackingDetailErrorView(
         errorMessage: errorMessage!,
         onRetry: onRetry,
       );
     }
-    if (operation == null) return const PackingDetailSkeleton();
-
+    if (operation == null) return SizedBox(child: Text('Empty'),);
     return PackingDetailBody(
       operation: operation!,
       locationGlnDetails: locationGlnDetails,
-      showAllEpcs: showAllEpcs,
-      onShowAllEpcs: onShowAllEpcs,
     );
   }
 }

@@ -4,9 +4,12 @@ import '../../../core/di/injection.dart';
 import '../../../data/services/cache_service.dart';
 import '../../cache/models/cache_statistics.dart';
 import '../../cache/models/cache_health.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/error_message.dart';
 import '../../../core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Cache Management Screen for Phase 3.2 Caching Layer
 /// Provides comprehensive cache monitoring and management interface
@@ -74,19 +77,13 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     try {
       final success = await action();
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$actionName completed successfully')),
-        );
+        context.showSuccess('$actionName completed successfully');
         await _loadCacheData();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$actionName failed')),
-        );
+        context.showError('$actionName failed');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error during $actionName: $e')),
-      );
+      context.showError('Error during $actionName: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -100,18 +97,18 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
         title: const Text('Cache Management'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: _loadCacheData,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
-            Tab(text: 'Statistics', icon: Icon(Icons.analytics)),
-            Tab(text: 'Management', icon: Icon(Icons.settings)),
-            Tab(text: 'Health', icon: Icon(Icons.health_and_safety)),
-            Tab(text: 'Help', icon: Icon(Icons.help_outline)),
+            Tab(text: 'Overview', icon: TraqIcon(AppAssets.iconDashboard)),
+            Tab(text: 'Statistics', icon: TraqIcon(AppAssets.iconBarChart)),
+            Tab(text: 'Management', icon: TraqIcon(AppAssets.iconSettings)),
+            Tab(text: 'Health', icon: TraqIcon(AppAssets.iconSecurity)),
+            Tab(text: 'Help', icon: TraqIcon(AppAssets.iconInfo)),
           ],
         ),
       ),
@@ -160,8 +157,8 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(
-                        _health!.isUp ? Icons.check_circle : Icons.error,
+                      TraqIcon(
+                        _health!.isUp ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                         color: _health!.isUp ? Colors.green : Colors.red,
                       ),
                       const SizedBox(width: 8),
@@ -206,19 +203,19 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                         _buildStatCard(
                           'Hit Ratio',
                           '${(_statistics!.overallHitRatio * 100).toStringAsFixed(1)}%',
-                          Icons.track_changes,
+                          AppAssets.iconTarget,
                           Colors.blue,
                         ),
                         _buildStatCard(
                           'Total Hits',
                           _statistics!.totalHits.toString(),
-                          Icons.thumb_up,
+                          AppAssets.iconThumbUp,
                           Colors.green,
                         ),
                         _buildStatCard(
                           'Total Misses',
                           _statistics!.totalMisses.toString(),
-                          Icons.thumb_down,
+                          AppAssets.iconThumbDown,
                           Colors.orange,
                         ),
                       ],
@@ -231,19 +228,19 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                         _buildStatCard(
                           'Cache Entries',
                           _statistics!.totalCacheEntries.toString(),
-                          Icons.storage,
+                          AppAssets.iconDatabase,
                           Colors.purple,
                         ),
                         _buildStatCard(
                           'Master Data',
                           _statistics!.masterDataEntries.toString(),
-                          Icons.data_object,
+                          AppAssets.iconBraces,
                           Colors.blue,
                         ),
                         _buildStatCard(
                           'Hot Data',
                           _statistics!.hotDataEntries.toString(),
-                          Icons.whatshot,
+                          AppAssets.iconFlame,
                           Colors.orange,
                         ),
                       ],
@@ -257,7 +254,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info, color: Colors.blue, size: 16),
+                          TraqIcon(AppAssets.iconInfo, color: Colors.blue, size: 16),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -296,11 +293,11 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     const SizedBox(height: 8),
                     _buildCacheTypeRow('Hot Data', _statistics!.hotDataHitRatio, _statistics!.hotDataHits, _statistics!.hotDataMisses),
                   ] else ...[
-                    _buildCacheSizeRow('Query Results', _statistics!.queryResultsEntries, Icons.search, Colors.blue),
+                    _buildCacheSizeRow('Query Results', _statistics!.queryResultsEntries, AppAssets.iconSearch, Colors.blue),
                     const SizedBox(height: 8),
-                    _buildCacheSizeRow('Master Data', _statistics!.masterDataEntries, Icons.data_object, Colors.green),
+                    _buildCacheSizeRow('Master Data', _statistics!.masterDataEntries, AppAssets.iconBraces, Colors.green),
                     const SizedBox(height: 8),
-                    _buildCacheSizeRow('Hot Data', _statistics!.hotDataEntries, Icons.whatshot, Colors.orange),
+                    _buildCacheSizeRow('Hot Data', _statistics!.hotDataEntries, AppAssets.iconFlame, Colors.orange),
                   ],
                 ],
               ),
@@ -311,10 +308,10 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(String title, String value, String iconAsset, Color color) {
     return Column(
       children: [
-        Icon(icon, size: 32, color: color),
+        TraqIcon(iconAsset, size: 32, color: color),
         const SizedBox(height: 8),
         Text(
           value,
@@ -356,10 +353,10 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     );
   }
 
-  Widget _buildCacheSizeRow(String type, int entries, IconData icon, Color color) {
+  Widget _buildCacheSizeRow(String type, int entries, String iconAsset, Color color) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: color),
+        TraqIcon(iconAsset, size: 20, color: color),
         const SizedBox(width: 8),
         Expanded(
           flex: 2,
@@ -494,7 +491,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                           _cacheService.warmUpCache,
                           'Cache Warm-up',
                         ),
-                        icon: const Icon(Icons.whatshot),
+                        icon: const TraqIcon(AppAssets.iconFlame),
                         label: const Text('Warm Up Cache'),
                       ),
                       ElevatedButton.icon(
@@ -502,7 +499,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                           _cacheService.synchronizeCache,
                           'Cache Synchronization',
                         ),
-                        icon: const Icon(Icons.sync),
+                        icon: const TraqIcon(AppAssets.iconRefresh),
                         label: const Text('Synchronize'),
                       ),
                       ElevatedButton.icon(
@@ -510,7 +507,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                           _cacheService.identifyAndCacheHotData,
                           'Hot Data Identification',
                         ),
-                        icon: const Icon(Icons.whatshot),
+                        icon: const TraqIcon(AppAssets.iconFlame),
                         label: const Text('Identify Hot Data'),
                       ),
                     ],
@@ -537,33 +534,33 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                   _buildManagementAction(
                     'Clear Query Results Cache',
                     'Remove all cached query results',
-                    Icons.query_stats,
+                    AppAssets.iconBarChart,
                     () => _cacheService.clearQueryResultCache(),
                   ),
                   _buildManagementAction(
                     'Refresh Master Data Cache',
                     'Reload all master data into cache',
-                    Icons.refresh,
+                    AppAssets.iconRefresh,
                     () => _cacheService.refreshMasterDataCache(),
                   ),
                   _buildManagementAction(
                     'Clear Master Data Cache',
                     'Remove all cached master data (does not warm up)',
-                    Icons.cleaning_services,
+                    AppAssets.iconSparkle,
                     () => _cacheService.clearAllMasterDataCache(),
                     isDestructive: true,
                   ),
                   _buildManagementAction(
                     'Clear Hot Data Cache',
                     'Remove all cached hot data',
-                    Icons.local_fire_department,
+                    AppAssets.iconFlash,
                     () => _cacheService.clearHotDataCache(),
                   ),
                   const Divider(),
                   _buildManagementAction(
                     'Clear All Caches',
                     'Remove all cached data (Use with caution)',
-                    Icons.delete_sweep,
+                    AppAssets.iconTrash,
                     () => _cacheService.clearAllCaches(),
                     isDestructive: true,
                   ),
@@ -623,13 +620,13 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
   Widget _buildManagementAction(
     String title,
     String description,
-    IconData icon,
+    String iconAsset,
     Future<bool> Function() action, {
     bool isDestructive = false,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
+      leading: TraqIcon(
+        iconAsset,
         color: isDestructive ? Colors.red : null,
       ),
       title: Text(
@@ -653,7 +650,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
   Widget _buildMasterDataAction(String dataType) {
     return ListTile(
-      leading: const Icon(Icons.storage),
+      leading: TraqIcon(AppAssets.iconList),
       title: Text('${dataType.toUpperCase()} Cache'),
       subtitle: Text('Manage $dataType master data cache'),
       trailing: ElevatedButton(
@@ -668,7 +665,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
   Widget _buildEventDataAction(String eventType) {
     return ListTile(
-      leading: const Icon(Icons.event),
+      leading: TraqIcon(AppAssets.iconEvent),
       title: Text('${eventType.replaceAll('-', ' ').toUpperCase()} Cache'),
       subtitle: Text('Manage $eventType hot data cache'),
       trailing: ElevatedButton(
@@ -774,8 +771,8 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           ),
           Row(
             children: [
-              Icon(
-                isHealthy ? Icons.check_circle : Icons.error,
+              TraqIcon(
+                isHealthy ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                 size: 16,
                 color: isHealthy ? Colors.green : Colors.red,
               ),
@@ -819,7 +816,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.memory, color: Colors.white, size: 32),
+                      TraqIcon(AppAssets.iconRefresh, color: Colors.white, size: 32),
                       const SizedBox(width: 12),
                       Text(
                         'TraqTrace Cache Management System',
@@ -847,7 +844,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // System Overview
           _buildHelpSection(
             'System Overview',
-            Icons.architecture,
+            AppAssets.iconArchitecture,
             Colors.blue,
             [
               'The TraqTrace caching system implements a multi-tier caching strategy designed to optimize performance for pharmaceutical track and trace operations.',
@@ -861,7 +858,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Cache Types
           _buildHelpSection(
             'Cache Types Implemented',
-            Icons.layers,
+            AppAssets.iconLayers,
             Colors.green,
             [
               '🔵 Query Results Cache (15-minute TTL): Stores complex EPCIS query results for fast retrieval',
@@ -876,7 +873,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Implementation Details
           _buildHelpSection(
             'Technical Implementation',
-            Icons.code,
+            AppAssets.iconCode,
             Colors.orange,
             [
               '• Spring Cache Integration: @Cacheable, @CacheEvict, and @CachePut annotations',
@@ -893,7 +890,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Services Covered
           _buildHelpSection(
             'Cached Services Coverage',
-            Icons.settings,
+            AppAssets.iconSettings,
             Colors.purple,
             [
               '✅ GS1 Identifier Services: GTIN, GLN, SSCC, SGTIN services',
@@ -909,7 +906,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Development Environment
           _buildHelpSection(
             'Development Environment (Current)',
-            Icons.computer,
+            AppAssets.iconComputer,
             Colors.teal,
             [
               '🐳 Docker Redis (required for default backend profile)',
@@ -940,7 +937,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Production Environment
           _buildHelpSection(
             'Production Environment (Azure)',
-            Icons.cloud,
+            AppAssets.iconCloud,
             Colors.deepPurple,
             [
               '☁️ Azure Redis Cache (Managed Service)',
@@ -967,7 +964,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Performance Benefits
           _buildHelpSection(
             'Performance Benefits',
-            Icons.speed,
+            AppAssets.iconGauge,
             Colors.red,
             [
               '🚀 Response Time Reduction: Up to 90% faster for cached queries',
@@ -983,7 +980,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Management Operations
           _buildHelpSection(
             'Available Management Operations',
-            Icons.admin_panel_settings,
+            AppAssets.iconSecurity,
             Colors.indigo,
             [
               '🔄 Cache Warm-up: Pre-populate cache with frequently accessed data',
@@ -1000,7 +997,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Best Practices
           _buildHelpSection(
             'Best Practices & Guidelines',
-            Icons.thumb_up,
+            AppAssets.iconThumbUp,
             Colors.green[700]!,
             [
               '• Monitor cache hit ratios regularly (target: >80%)',
@@ -1018,7 +1015,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           // Troubleshooting
           _buildHelpSection(
             'Troubleshooting Common Issues',
-            Icons.bug_report,
+            AppAssets.iconBug,
             Colors.red[700]!,
             [
               '🔥 "Unable to connect to Redis" or cache health DOWN:',
@@ -1058,7 +1055,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
             ),
             child: Column(
               children: [
-                Icon(Icons.info_outline, color: Colors.blue[700], size: 24),
+                TraqIcon(AppAssets.iconInfo, color: Colors.blue[700], size: 24),
                 const SizedBox(height: 8),
                 Text(
                   'Cache Management System v3.2',
@@ -1081,7 +1078,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     );
   }
 
-  Widget _buildHelpSection(String title, IconData icon, Color color, List<String> items) {
+  Widget _buildHelpSection(String title, String iconAsset, Color color, List<String> items) {
     return Card(
       elevation: 1,
       child: Padding(
@@ -1091,7 +1088,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 24),
+                TraqIcon(iconAsset, color: color, size: 24),
                 const SizedBox(width: 12),
                 Text(
                   title,

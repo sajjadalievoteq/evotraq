@@ -41,6 +41,10 @@ abstract final class TraqThemeInputs {
   static InputDecorationTheme inputDecoration(TraqColors c, TraqText text) =>
       InputDecorationTheme(
         filled: true,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 32,
+          minHeight: 32,
+        ),
         fillColor: c.background,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         hintStyle: text.body.copyWith(color: c.textFaint),
@@ -53,6 +57,7 @@ abstract final class TraqThemeInputs {
           borderRadius: TraqRadius.input,
           borderSide: BorderSide(color: c.border),
         ),
+
         focusedBorder: OutlineInputBorder(
           borderRadius: TraqRadius.input,
           borderSide: BorderSide(color: c.primary, width: 1.5),

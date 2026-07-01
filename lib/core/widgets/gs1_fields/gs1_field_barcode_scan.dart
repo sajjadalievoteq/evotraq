@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
@@ -7,6 +8,8 @@ import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// GS1 identifier fields that support camera barcode scanning.
 enum Gs1FieldScanKind { gln, gtin, sgtin, sscc }
@@ -149,9 +152,7 @@ abstract final class Gs1FieldBarcodeScan {
   }
 
   static void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    context.showError(message);
   }
 
   static Widget scanSuffixIcon({
@@ -160,7 +161,7 @@ abstract final class Gs1FieldBarcodeScan {
     required ValueChanged<String> onScanned,
   }) {
     return IconButton(
-      icon: const Icon(Icons.qr_code_scanner),
+      icon: TraqIcon(AppAssets.iconQr),
       tooltip: 'Scan barcode',
       onPressed: () async {
         final value = await scan(context, kind);

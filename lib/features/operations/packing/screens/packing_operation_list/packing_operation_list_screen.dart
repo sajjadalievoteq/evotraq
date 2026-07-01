@@ -17,6 +17,8 @@ import 'package:traqtrace_app/features/operations/packing/screens/packing_operat
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/packing/utils/packing_ui_constants.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 /// Screen to list all packing operations with search capabilities.
 class PackingOperationListScreen extends StatefulWidget {
@@ -341,7 +343,7 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go(Constants.opPackingCreateRoute),
-        label: const Icon(Icons.add),
+        label: TraqIcon(AppAssets.iconPlus),
       ),
       body: body,
     );

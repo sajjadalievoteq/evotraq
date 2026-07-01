@@ -42,6 +42,7 @@ class ObjectEventDetailUiConstants {
   static const String labelExpiryDate = 'Expiry Date';
 
   static const String sectionIdentification = 'Event Identification';
+  static const String labelEpcInstances = 'EPC Instances';
   static const String sectionEpcs = 'EPCs & Quantities';
   static const String sectionLocation = 'Location & Timing';
   static const String sectionBizStep = 'Business Context';

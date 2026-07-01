@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:traqtrace_app/core/debug/operation_api_debug_trace.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
+
 class ApiException implements Exception {
   final int? statusCode;
   
@@ -9,11 +12,15 @@ class ApiException implements Exception {
   
   final String? responseBody;
 
+  /// Full request/response capture for troubleshooting (when available).
+  final OperationApiDebugTrace? debugTrace;
+
   ApiException({
     this.statusCode,
     required this.message,
     this.originalException,
     this.responseBody,
+    this.debugTrace,
   });
 
   @override
@@ -31,6 +38,12 @@ class ApiException implements Exception {
 
     final parsed = _parseResponseBody();
     if (parsed != null) {
+      if (OperationApiErrorMessage.isStructuredErrorBody(parsed)) {
+        final fromStructured = OperationApiErrorMessage.fromJsonMap(parsed);
+        if (fromStructured != null && fromStructured.isNotEmpty) {
+          return fromStructured;
+        }
+      }
       final fromStructured = _messageFromStructuredBody(parsed);
       if (fromStructured != null && fromStructured.isNotEmpty) {
         return fromStructured;
@@ -39,7 +52,8 @@ class ApiException implements Exception {
 
     if (message.isNotEmpty &&
         !message.startsWith('ApiException:') &&
-        message != 'Failed to create object event') {
+        message != 'Failed to create object event' &&
+        statusCode != 500) {
       return message;
     }
 
@@ -54,10 +68,20 @@ class ApiException implements Exception {
         return 'The requested resource was not found.';
       case 409:
         return 'There was a conflict with the current state of the resource. The GTIN code may already exist.';
+      case 422:
+        return message.isNotEmpty
+            ? message
+            : 'The request could not be processed. Check your inputs and try again.';
       case 500:
       case 502:
       case 503:
       case 504:
+        final parsed500 = _parseResponseBody();
+        final errorId = parsed500?['errorId']?.toString();
+        if (errorId != null && errorId.isNotEmpty) {
+          return 'A server error occurred (ref: $errorId). '
+              'Check the backend log for details or try again.';
+        }
         return 'A server error occurred. Please try again later.';
       default:
         return message;

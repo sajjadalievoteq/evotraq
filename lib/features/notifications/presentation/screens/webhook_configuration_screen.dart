@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../widgets/create_subscription_dialog.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class WebhookConfigurationScreen extends StatefulWidget {
   const WebhookConfigurationScreen({super.key});
@@ -55,12 +58,12 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         title: const Text('Webhook Configuration'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: TraqIcon(AppAssets.iconInfo),
             onPressed: () => _showHelpDialog(context),
             tooltip: 'Help',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: TraqIcon(AppAssets.iconRefresh),
             onPressed: () {
               context.read<NotificationCubit>().loadSubscriptions(page: 0);
             },
@@ -118,7 +121,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateWebhookDialog(context),
-        icon: const Icon(Icons.webhook),
+        icon: TraqIcon(AppAssets.iconSettings),
         label: const Text('New Webhook'),
       ),
     );
@@ -133,7 +136,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           children: [
             Row(
               children: [
-                const Icon(Icons.bug_report, color: Colors.orange),
+                TraqIcon(AppAssets.iconFlask, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text(
                   'Test Webhook Endpoint',
@@ -150,7 +153,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
                 hintText: 'https://your-api.com/webhooks/traqtrace',
                 labelText: 'Webhook URL',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.link),
+                prefixIcon: TraqIcon(AppAssets.iconAggregate),
               ),
             ),
             const SizedBox(height: 12),
@@ -158,13 +161,13 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
               children: [
                 ElevatedButton.icon(
                   onPressed: _testWebhook,
-                  icon: const Icon(Icons.send),
+                  icon: TraqIcon(AppAssets.iconArrowR),
                   label: const Text('Test Webhook'),
                 ),
                 const SizedBox(width: 12),
                 TextButton.icon(
                   onPressed: _showWebhookDocumentation,
-                  icon: const Icon(Icons.description),
+                  icon: TraqIcon(AppAssets.iconList),
                   label: const Text('Documentation'),
                 ),
               ],
@@ -321,21 +324,21 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
 
   Widget _buildWebhookStatusChip(String status, bool hasErrors) {
     Color color;
-    IconData icon;
-    
+    String iconAsset;
+
     if (hasErrors) {
       color = Colors.orange;
-      icon = Icons.warning;
+      iconAsset = AppAssets.iconAlert;
     } else if (status == 'ACTIVE') {
       color = Colors.green;
-      icon = Icons.check_circle;
+      iconAsset = AppAssets.iconCheckCircle;
     } else {
       color = Colors.grey;
-      icon = Icons.pause_circle;
+      iconAsset = AppAssets.iconPause;
     }
 
     return Chip(
-      avatar: Icon(icon, color: Colors.white, size: 16),
+      avatar: TraqIcon(iconAsset, color: Colors.white, size: 16),
       label: Text(
         hasErrors ? 'ERRORS' : status,
         style: const TextStyle(color: Colors.white, fontSize: 12),
@@ -351,7 +354,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         const PopupMenuItem(
           value: 'test',
           child: ListTile(
-            leading: Icon(Icons.send),
+            leading: TraqIcon(AppAssets.iconArrowR),
             title: Text('Test Webhook'),
             contentPadding: EdgeInsets.zero,
           ),
@@ -359,7 +362,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         const PopupMenuItem(
           value: 'edit',
           child: ListTile(
-            leading: Icon(Icons.edit),
+            leading: TraqIcon(AppAssets.iconEdit),
             title: Text('Edit'),
             contentPadding: EdgeInsets.zero,
           ),
@@ -367,7 +370,11 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         PopupMenuItem(
           value: subscription.status == 'ACTIVE' ? 'pause' : 'resume',
           child: ListTile(
-            leading: Icon(subscription.status == 'ACTIVE' ? Icons.pause : Icons.play_arrow),
+            leading: TraqIcon(
+              subscription.status == 'ACTIVE'
+                  ? AppAssets.iconPause
+                  : AppAssets.iconPlay,
+            ),
             title: Text(subscription.status == 'ACTIVE' ? 'Pause' : 'Resume'),
             contentPadding: EdgeInsets.zero,
           ),
@@ -375,7 +382,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         const PopupMenuItem(
           value: 'history',
           child: ListTile(
-            leading: Icon(Icons.history),
+            leading: TraqIcon(AppAssets.iconClock),
             title: Text('View History'),
             contentPadding: EdgeInsets.zero,
           ),
@@ -383,7 +390,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         const PopupMenuItem(
           value: 'delete',
           child: ListTile(
-            leading: Icon(Icons.delete, color: Colors.red),
+            leading: TraqIcon(AppAssets.iconTrash, color: Colors.red),
             title: Text('Delete', style: TextStyle(color: Colors.red)),
             contentPadding: EdgeInsets.zero,
           ),
@@ -408,8 +415,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.webhook,
+          TraqIcon(AppAssets.iconSettings,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -431,7 +437,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _showCreateWebhookDialog(context),
-            icon: const Icon(Icons.webhook),
+            icon: TraqIcon(AppAssets.iconSettings),
             label: const Text('Create Webhook'),
           ),
         ],
@@ -444,8 +450,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
+          TraqIcon(AppAssets.iconAlert,
             size: 64,
             color: Colors.red[300],
           ),
@@ -482,16 +487,12 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
   void _testWebhook() {
     final url = _webhookUrlController.text.trim();
     if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a webhook URL')),
-      );
+      context.showWarning('Please enter a webhook URL');
       return;
     }
 
     context.read<NotificationCubit>().testWebhook(url);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing webhook...')),
-    );
+    context.showInfo('Testing webhook...');
   }
 
   void _showWebhookDocumentation() {
@@ -574,9 +575,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
     switch (action) {
       case 'test':
         context.read<NotificationCubit>().testWebhook(subscription.webhookUrl);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Testing webhook...')),
-        );
+        context.showInfo('Testing webhook...');
         break;
       case 'edit':
         context.go('/notifications/${subscription.id}');

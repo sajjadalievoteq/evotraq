@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_list_item_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -77,9 +77,14 @@ class GlnResultsList extends StatelessWidget {
 
         if (state.glns.isEmpty) {
           return _constrainedCenter(
-            Gs1ListEmptyView(
+            EmptyListView(
               iconAsset: AppAssets.iconMapPin,
               title: GlnUiConstants.emptyListTitle,
+              subtitle: 'Try adjusting your search criteria or filters',
+              filteredTitle: GlnUiConstants.emptyListTitle,
+              filteredSubtitle: 'Try adjusting your search criteria or filters',
+              hasItems: true,
+              hasActiveFilters: true,
               onClearFilters: onClearFilters,
             ),
           );

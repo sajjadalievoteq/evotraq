@@ -3,8 +3,9 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_card.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_empty_view.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_operation_list_error_view.dart';
 
 class CommissioningOperationListResults extends StatelessWidget {
@@ -59,9 +60,14 @@ class CommissioningOperationListResults extends StatelessWidget {
     }
 
     if (filteredOperations.isEmpty && !isLoadingMore) {
-      return CommissioningOperationListEmptyView(
-        hasOperations: operations.isNotEmpty,
-        hasActiveFilters: hasActiveFilters,
+      return EmptyListView(
+        iconAsset: AppAssets.iconDownload,
+        title: 'No commissioning operations found',
+        subtitle: 'Create your first commissioning operation',
+        filteredTitle: 'No operations match your search or filters',
+        filteredSubtitle: 'Try a different search term or clear filters',
+        hasItems: operations.isNotEmpty,
+        hasActiveFilters: hasActiveFilters || operations.isNotEmpty,
         onClearFilters: onClearFilters,
       );
     }

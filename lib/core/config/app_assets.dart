@@ -26,6 +26,7 @@ class AppAssets {
   static const String iconEyeOff = '$_traqIcons/eye-off.svg';
   static const String iconFactory = '$_traqIcons/factory.svg';
   static const String iconFilter = '$_traqIcons/filter.svg';
+  static const String iconAdvancedFilter = '$_traqIcons/filter-advanced.svg';
   static const String iconFlask = '$_traqIcons/flask.svg';
   static const String iconGln = '$_traqIcons/gln.svg';
   static const String iconGlobe = '$_traqIcons/globe.svg';

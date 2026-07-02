@@ -6,7 +6,6 @@ import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
@@ -17,12 +16,9 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class DrawerScrollMemory {
   DrawerScrollMemory._();
-
   static double _savedOffset = 0.0;
   static bool _pendingRestore = false;
-
   static final openNotifier = ValueNotifier<int>(0);
-
   static void saveForRestore(double offset) {
     _savedOffset = offset;
     _pendingRestore = true;
@@ -453,17 +449,22 @@ class _AppDrawerState extends State<AppDrawer> {
                     ExpansionTile(
                       leading: _svgLeading(AppAssets.iconRefresh),
                       title: const Text('Lifecycle'),
+
                       children: [
-                        ListTile(
-                          trailing: _svgTrailingChevron(),
-                          leading: _svgLeading(AppAssets.iconSparkle),
-                          title: const Text('Commissioning'),
-                          onTap: () =>
-                              _navigate(Constants.opCommissioningRoute),
-                        ),
+                     ListTile(
+                       contentPadding:
+                       const EdgeInsets.only(left: 32.0),
+                    
+                     leading: _svgLeading(AppAssets.iconSparkle),
+                     title: const Text('Commissioning'),
+                     onTap: () =>
+                         _navigate(Constants.opCommissioningRoute),
+                                          ),
 
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+
                           leading: _svgLeading(AppAssets.iconTrash),
                           title: const Text('Decommissioning'),
                           onTap: () =>
@@ -476,14 +477,18 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: const Text('Packaging'),
                       children: [
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+
                           leading: _svgLeading(AppAssets.iconAggregate),
                           title: const Text('Packing'),
                           onTap: () => _navigate(Constants.opPackingRoute),
                         ),
 
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+
                           leading: _svgLeading(AppAssets.iconTransform),
                           title: const Text('Unpacking'),
                           onTap: () => _navigate(Constants.opUnpackingRoute),
@@ -495,35 +500,47 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: const Text('Returns'),
                       children: [
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+
                           leading: _svgLeading(AppAssets.iconShipment),
                           title: const Text('Return Shipping'),
                           onTap: () => _navigate(Constants.opReturnShippingRoute),
                         ),
 
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+
                           leading: _svgLeading(AppAssets.iconReceive),
                           title: const Text('Return Receiving'),
                           onTap: () => _navigate(Constants.opReturnReceivingRoute),
                         ),
+                        ListTile(
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(AppAssets.iconXCircle),
+                          title: const Text('Cancel Shipping'),
+                          onTap: () => _navigate(Constants.opCancelShippingRoute),
+                        ),
                       ],
                     ),
-
-
                     ExpansionTile(
                       leading: _svgLeading(AppAssets.iconTruck),
                       title: const Text('Logistics'),
                       children: [
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
                           leading: _svgLeading(AppAssets.iconShipment),
                           title: const Text('Shipping'),
                           onTap: () =>
                               _navigate(Constants.opShippingRoute),
                         ),
                         ListTile(
-                          trailing: _svgTrailingChevron(),
+                          contentPadding:
+                          const EdgeInsets.only(left: 32.0),
                           leading: _svgLeading(AppAssets.iconReceive),
                           title: const Text('Receiving'),
                           onTap: () =>

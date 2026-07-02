@@ -5,8 +5,9 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_operation_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_operation_list_empty_view.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_operation_list_error_view.dart';
 
 /// List results area for shipping operation list screen.
@@ -66,9 +67,15 @@ class ShippingOperationListResults extends StatelessWidget {
     }
 
     if (filteredOperations.isEmpty) {
-      return ShippingOperationListEmptyView(
-        hasOperations: operations.isNotEmpty,
-        hasActiveFilters: hasActiveFilters,
+      return EmptyListView(
+        iconAsset: AppAssets.iconPackage,
+        title: 'No shipping operations yet',
+        subtitle: 'Tap the + button to create your first shipping operation.',
+        filteredTitle: 'No operations match your search or filters.',
+        filteredSubtitle:
+            'Try a different search term, or clear your filters to see all operations.',
+        hasItems: operations.isNotEmpty,
+        hasActiveFilters: hasActiveFilters || operations.isNotEmpty,
         onClearFilters: onClearFilters,
       );
     }

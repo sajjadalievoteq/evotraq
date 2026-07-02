@@ -6,7 +6,7 @@ import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_events_list/widgets/aggregation_event_list_item_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -61,9 +61,14 @@ class AggregationEventsResultsList extends StatelessWidget {
 
         if (state.aggregationEvents.isEmpty) {
           return _constrainedCenter(
-            Gs1ListEmptyView(
+            EmptyListView(
               iconAsset: AppAssets.iconLayers,
               title: AggregationEventUiConstants.emptyListTitle,
+              subtitle: 'Try adjusting your search criteria or filters',
+              filteredTitle: AggregationEventUiConstants.emptyListTitle,
+              filteredSubtitle: 'Try adjusting your search criteria or filters',
+              hasItems: true,
+              hasActiveFilters: true,
               onClearFilters: onClearFilters,
             ),
           );

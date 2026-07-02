@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -59,9 +59,14 @@ class SgtinResultsList extends StatelessWidget {
         final sgtins = state.sgtins;
         if (sgtins == null || sgtins.isEmpty) {
           return _constrainedCenter(
-            Gs1ListEmptyView(
+            EmptyListView(
               iconAsset: AppAssets.iconQr,
               title: SgtinUiConstants.emptyListTitle,
+              subtitle: 'Try adjusting your search criteria or filters',
+              filteredTitle: SgtinUiConstants.emptyListTitle,
+              filteredSubtitle: 'Try adjusting your search criteria or filters',
+              hasItems: true,
+              hasActiveFilters: true,
               onClearFilters: onClearFilters,
             ),
           );

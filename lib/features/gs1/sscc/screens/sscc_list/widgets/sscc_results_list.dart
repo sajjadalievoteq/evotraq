@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_empty_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -62,9 +62,14 @@ class SsccResultsList extends StatelessWidget {
 
         if (state.ssccs.isEmpty) {
           return _constrainedCenter(
-            Gs1ListEmptyView(
+            EmptyListView(
               iconAsset: AppAssets.iconBox,
               title: SsccUiConstants.emptyListTitle,
+              subtitle: 'Try adjusting your search criteria or filters',
+              filteredTitle: SsccUiConstants.emptyListTitle,
+              filteredSubtitle: 'Try adjusting your search criteria or filters',
+              hasItems: true,
+              hasActiveFilters: true,
               onClearFilters: onClearFilters,
             ),
           );

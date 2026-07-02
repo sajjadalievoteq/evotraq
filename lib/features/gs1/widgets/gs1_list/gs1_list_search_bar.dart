@@ -126,7 +126,7 @@ class Gs1ListSearchBar extends StatelessWidget {
                                 onPressed: onToggleAdvancedFilters,
                                 iconSize: _fieldIconSize,
                                 icon: TraqIcon(
-                                  AppAssets.iconFilter,
+                                  AppAssets.iconAdvancedFilter,
                                   size: _fieldIconSize,
                                 ),
                                 color: fieldIconColor,

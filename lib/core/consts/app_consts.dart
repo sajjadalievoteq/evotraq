@@ -154,6 +154,11 @@ class Constants {
   static const String opReturnReceivingCreateRoute = '/operations/return-receiving/create';
   static const String opReturnReceivingDetailRoute =
       '/operations/return-receiving/:operationId';
+  static const String opCancelShippingRoute = '/operations/cancel-shipping';
+  static const String opCancelShippingCreateRoute =
+      '/operations/cancel-shipping/create';
+  static const String opCancelShippingDetailRoute =
+      '/operations/cancel-shipping/:operationId';
 
   static const String opPackingRoute = '/operations/packing';
   static const String opPackingCreateRoute = '/operations/packing/create';

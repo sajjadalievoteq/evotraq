@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class ReturnShippingRequest {
@@ -6,6 +7,8 @@ class ReturnShippingRequest {
     required this.epcs,
     required this.sourceGLN,
     required this.destinationGLN,
+    this.sourceLocation,
+    this.destinationLocation,
     this.purchaseOrderNumber,
     this.despatchAdviceNumber,
     this.billOfLadingNumber,
@@ -24,6 +27,8 @@ class ReturnShippingRequest {
   List<String> epcs;
   String sourceGLN;
   String destinationGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? destinationLocation;
   String? purchaseOrderNumber;
   String? despatchAdviceNumber;
   String? billOfLadingNumber;
@@ -45,6 +50,9 @@ class ReturnShippingRequest {
       'epcs': epcs,
       'sourceGLN': sourceGLN,
       'destinationGLN': destinationGLN,
+      if (sourceLocation != null) 'sourceLocation': sourceLocation!.toJson(),
+      if (destinationLocation != null)
+        'destinationLocation': destinationLocation!.toJson(),
       'purchaseOrderNumber': purchaseOrderNumber,
       'despatchAdviceNumber': despatchAdviceNumber,
       'billOfLadingNumber': billOfLadingNumber,

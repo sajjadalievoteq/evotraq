@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class UnpackingRequest {
@@ -5,6 +6,7 @@ class UnpackingRequest {
   String parentContainerId;
   List<String> childEpcs;
   String unpackingLocationGLN;
+  OperationGlnDisplay? operationLocation;
   String? readPointGLN;
   DateTime? eventTime;
   String? eventTimeZoneOffset;
@@ -18,6 +20,7 @@ class UnpackingRequest {
     required this.parentContainerId,
     required this.childEpcs,
     required this.unpackingLocationGLN,
+    this.operationLocation,
     this.readPointGLN,
     this.eventTime,
     this.eventTimeZoneOffset,
@@ -35,6 +38,8 @@ class UnpackingRequest {
       'parentContainerId': parentContainerId,
       'childEpcs': childEpcs,
       'unpackingLocationGLN': unpackingLocationGLN,
+      if (operationLocation != null)
+        'operationLocation': operationLocation!.toJson(),
       'readPointGLN': readPointGLN,
       'eventTime': eventFields['eventTime'],
       'eventTimeZoneOffset':

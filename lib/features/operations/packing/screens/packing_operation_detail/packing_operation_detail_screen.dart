@@ -5,9 +5,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_content.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -37,7 +35,6 @@ class _PackingOperationDetailScreenState
   PackingResponse? _operation;
   bool _isLoading = false;
   String? _errorMessage;
-  GLN? _locationGLNDetails;
 
   @override
   void initState() {
@@ -64,7 +61,6 @@ class _PackingOperationDetailScreenState
     _isLoading = true;
     _errorMessage = null;
     _operation = null;
-    _locationGLNDetails = null;
     _loadOperationDetails();
   }
 
@@ -76,14 +72,12 @@ class _PackingOperationDetailScreenState
       _isLoading = true;
       _errorMessage = null;
       _operation = null;
-      _locationGLNDetails = null;
     });
 
     try {
-      final packingService = getIt<PackingOperationService>();
-      final operation = await packingService.getPackingOperation(id);
+      final service = getIt<PackingOperationService>();
+      final operation = await service.getPackingOperation(id);
       setState(() => _operation = operation);
-      await _loadGLNDetails();
     } on ApiException catch (e) {
       setState(() {
         _errorMessage = e.getUserFriendlyMessage();
@@ -99,19 +93,6 @@ class _PackingOperationDetailScreenState
     }
   }
 
-  Future<void> _loadGLNDetails() async {
-    if (_operation?.packingLocationGLN == null) return;
-
-    try {
-      final glnService = getIt<GLNService>();
-      final locationGLN =
-          await glnService.getGLNByCode(_operation!.packingLocationGLN!);
-      if (mounted) setState(() => _locationGLNDetails = locationGLN);
-    } catch (_) {
-      // GLN not found in master data — display code only.
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final content = PackingDetailContent(
@@ -120,7 +101,6 @@ class _PackingOperationDetailScreenState
       isLoading: _isLoading,
       errorMessage: _errorMessage,
       operation: _operation,
-      locationGlnDetails: _locationGLNDetails,
       onRetry: _loadOperationDetails,
     );
 

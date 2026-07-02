@@ -39,19 +39,108 @@ class DioService {
 
   String get baseUrl => _dio.options.baseUrl;
 
-  String _stringify(dynamic data) {
-    if (data == null) return '';
-    if (data is String) return data;
+  String _formatBody(dynamic data) {
+    if (data == null) return '(none)';
+    if (data is FormData) {
+      return 'FormData('
+          'fields: ${data.fields}, '
+          'files: ${data.files.map((f) => f.key).toList()})';
+    }
+    if (data is String) {
+      final trimmed = data.trim();
+      if (trimmed.isEmpty) return '(empty)';
+      try {
+        final decoded = jsonDecode(trimmed);
+        return const JsonEncoder.withIndent('  ').convert(decoded);
+      } catch (_) {
+        return data;
+      }
+    }
     try {
-      return jsonEncode(data);
+      return const JsonEncoder.withIndent('  ').convert(data);
     } catch (_) {
       return data.toString();
     }
   }
 
-  String _truncate(String value, {int max = 2000}) {
-    if (value.length <= max) return value;
-    return '${value.substring(0, max)}...(truncated)';
+  String _requestUrl(RequestOptions options) => options.uri.toString();
+
+  Map<String, dynamic> _redactedHeaders(Map<String, dynamic> headers) {
+    return headers.map((key, value) {
+      if (key.toLowerCase() == 'authorization') {
+        return MapEntry(key, '***');
+      }
+      return MapEntry(key, value);
+    });
+  }
+
+  void _logRequest(RequestOptions options) {
+    if (!kDebugMode) return;
+
+    final buffer = StringBuffer()
+      ..writeln('──────── API REQUEST ────────')
+      ..writeln('${options.method} ${_requestUrl(options)}');
+
+    if (options.queryParameters.isNotEmpty) {
+      buffer.writeln('Query: ${options.queryParameters}');
+    }
+
+    if (options.headers.isNotEmpty) {
+      buffer.writeln('Headers: ${_redactedHeaders(options.headers)}');
+    }
+
+    buffer
+      ..writeln('Body:')
+      ..writeln(_formatBody(options.data))
+      ..writeln('──────────────────────────────');
+
+    debugPrint(buffer.toString());
+  }
+
+  void _logResponse(Response<dynamic> response) {
+    if (!kDebugMode) return;
+
+    final buffer = StringBuffer()
+      ..writeln('──────── API RESPONSE ────────')
+      ..writeln(
+        '${response.requestOptions.method} '
+        '${_requestUrl(response.requestOptions)}',
+      )
+      ..writeln('Status: ${response.statusCode}')
+      ..writeln('Body:')
+      ..writeln(_formatBody(response.data))
+      ..writeln('──────────────────────────────');
+
+    debugPrint(buffer.toString());
+  }
+
+  void _logError(DioException error) {
+    if (!kDebugMode) return;
+
+    final options = error.requestOptions;
+    final buffer = StringBuffer()
+      ..writeln('──────── API ERROR ────────')
+      ..writeln('${options.method} ${_requestUrl(options)}')
+      ..writeln('Type: ${error.type}')
+      ..writeln('Message: ${error.message}');
+
+    if (options.data != null) {
+      buffer
+        ..writeln('Request body:')
+        ..writeln(_formatBody(options.data));
+    }
+
+    if (error.response != null) {
+      buffer
+        ..writeln('Status: ${error.response?.statusCode}')
+        ..writeln('Response body:')
+        ..writeln(_formatBody(error.response?.data));
+    } else if (error.error != null) {
+      buffer.writeln('Error object: ${error.error}');
+    }
+
+    buffer.writeln('──────────────────────────────');
+    debugPrint(buffer.toString());
   }
 
   void _setupInterceptors() {
@@ -67,40 +156,17 @@ class DioService {
             }
           }
 
-          if (kDebugMode) {
-            print('REQUEST[${options.method}] => PATH: ${options.path}');
-          }
+          _logRequest(options);
 
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          if (kDebugMode) {
-            print(
-              'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
-            );
-          }
+          _logResponse(response);
 
           return handler.next(response);
         },
         onError: (DioException e, handler) {
-          if (kDebugMode) {
-            final status = e.response?.statusCode;
-            final method = e.requestOptions.method;
-            final path = e.requestOptions.path;
-            print(
-              'ERROR[$status] => $method $path (type: ${e.type}) (message: ${e.message})',
-            );
-            final error = e.error;
-            if (error != null) {
-              print('ERROR_OBJECT => $error');
-            }
-            final responseData = e.response?.data;
-            if (responseData != null) {
-              print(
-                'ERROR_RESPONSE_BODY => ${_truncate(_stringify(responseData))}',
-              );
-            }
-          }
+          _logError(e);
 
           return handler.next(e);
         },

@@ -70,6 +70,9 @@ import 'package:traqtrace_app/features/operations/return_shipping/screens/return
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping/cancel_shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/cancel_shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/cancel_shipping_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving/cancel_receiving_screen.dart';
+import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/cancel_receiving_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/cancel_receiving_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving/return_receiving_screen.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation/return_receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/return_receiving_operation_detail_screen.dart';
@@ -1798,6 +1801,54 @@ class AppRouter {
           return TraqRouterTransitions.page(
             key: state.pageKey,
             child: CancelShippingOperationDetailScreen(
+              operationId: operationId,
+            ),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+
+      GoRoute(
+        path: Constants.opCancelReceivingRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const CancelReceivingScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opCancelReceivingCreateRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const CancelReceivingOperationScreen(),
+        ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.opCancelReceivingDetailRoute,
+        pageBuilder: (context, state) {
+          final operationId = state.pathParameters['operationId']!;
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: CancelReceivingOperationDetailScreen(
               operationId: operationId,
             ),
           );

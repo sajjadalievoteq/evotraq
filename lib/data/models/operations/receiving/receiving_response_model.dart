@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
 class ReceivingResponse {
@@ -12,6 +13,8 @@ class ReceivingResponse {
     this.processedAt,
     this.sourceGLN,
     this.receivingGLN,
+    this.sourceLocation,
+    this.receivingLocation,
     this.purchaseOrderNumber,
     this.despatchAdviceNumber,
     this.receivingAdviceNumber,
@@ -36,6 +39,8 @@ class ReceivingResponse {
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? receivingLocation;
   String? purchaseOrderNumber;
   String? despatchAdviceNumber;
   String? receivingAdviceNumber;
@@ -85,6 +90,8 @@ class ReceivingResponse {
             json['destinationGLN'] ??
             json['destinationGln'],
       ),
+      sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
+      receivingLocation: OperationGlnDisplay.fromJson(json['receivingLocation']),
       purchaseOrderNumber: _str(json['purchaseOrderNumber']),
       despatchAdviceNumber: _str(json['despatchAdviceNumber']),
       receivingAdviceNumber: _str(json['receivingAdviceNumber']),

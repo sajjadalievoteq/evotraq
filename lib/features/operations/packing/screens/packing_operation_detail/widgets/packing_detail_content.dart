@@ -1,7 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_body.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
@@ -15,7 +13,6 @@ class PackingDetailContent extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
     required this.operation,
-    required this.locationGlnDetails,
     required this.onRetry,
   });
 
@@ -24,7 +21,6 @@ class PackingDetailContent extends StatelessWidget {
   final bool isLoading;
   final String? errorMessage;
   final PackingResponse? operation;
-  final GLN? locationGlnDetails;
   final VoidCallback onRetry;
 
   @override
@@ -39,9 +35,6 @@ class PackingDetailContent extends StatelessWidget {
       );
     }
     if (operation == null) return SizedBox(child: Text('Empty'),);
-    return PackingDetailBody(
-      operation: operation!,
-      locationGlnDetails: locationGlnDetails,
-    );
+    return PackingDetailBody(operation: operation!);
   }
 }

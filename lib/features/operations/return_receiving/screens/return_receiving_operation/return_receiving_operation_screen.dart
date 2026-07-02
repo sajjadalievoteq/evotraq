@@ -10,6 +10,7 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_status.dart';
 import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
@@ -303,6 +304,8 @@ class _ReturnReceivingOperationScreenState extends State<ReturnReceivingOperatio
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
         receivingGLN: _receivingGln!.glnCode,
+        sourceLocation: OperationGlnDisplay.fromGln(_sourceGln),
+        receivingLocation: OperationGlnDisplay.fromGln(_receivingGln),
         returnAuthorizationNumber:
             _returnAuthorizationController.text.trim().isNotEmpty
                 ? _returnAuthorizationController.text.trim()

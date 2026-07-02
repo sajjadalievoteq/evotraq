@@ -10,6 +10,7 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_status.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
@@ -304,6 +305,8 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
         destinationGLN: _destinationGln!.glnCode,
+        sourceLocation: OperationGlnDisplay.fromGln(_sourceGln),
+        destinationLocation: OperationGlnDisplay.fromGln(_destinationGln),
         returnAuthorizationNumber:
             _returnAuthorizationController.text.trim().isNotEmpty
                 ? _returnAuthorizationController.text.trim()

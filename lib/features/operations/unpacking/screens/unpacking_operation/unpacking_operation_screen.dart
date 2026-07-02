@@ -10,6 +10,7 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_status.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
@@ -290,6 +291,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
         parentContainerId: containerEpc,
         childEpcs: epcUris,
         unpackingLocationGLN: _unpackingLocationGLN!.glnCode,
+        operationLocation: OperationGlnDisplay.fromGln(_unpackingLocationGLN),
         workOrderNumber: _workOrderController.text.trim().isNotEmpty
             ? _workOrderController.text.trim()
             : null,

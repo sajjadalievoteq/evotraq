@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/utils/return_shipping_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/widgets/return_shipping_detail_comments_card.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/widgets/return_shipping_detail_events_card.dart';
@@ -18,13 +17,9 @@ class ReturnShippingDetailBody extends StatelessWidget {
   const ReturnShippingDetailBody({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.destinationGlnDetails,
   });
 
   final ReturnShippingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? destinationGlnDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +36,7 @@ class ReturnShippingDetailBody extends StatelessWidget {
           ReturnShippingDetailStatusBanner(operation: operation),
           const SizedBox(height: 16),
           ReturnShippingDetailReferenceCard(operation: operation),
-          ReturnShippingDetailLocationCard(
-            operation: operation,
-            sourceGlnDetails: sourceGlnDetails,
-            destinationGlnDetails: destinationGlnDetails,
-          ),
+          ReturnShippingDetailLocationCard(operation: operation),
           if (ReturnShippingDetailHelpers.hasTransportDetails(operation)) ...[
             ReturnShippingDetailProductionCard(operation: operation),
           ],

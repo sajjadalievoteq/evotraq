@@ -9,6 +9,7 @@ import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_status.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
@@ -257,6 +258,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         parentContainerId: containerEpc,
         childEpcs: epcUris,
         packingLocationGLN: _packingLocationGLN!.glnCode,
+        operationLocation: OperationGlnDisplay.fromGln(_packingLocationGLN),
         closeContainer: _closeContainer,
         workOrderNumber: _workOrderController.text.trim().isNotEmpty
             ? _workOrderController.text.trim()

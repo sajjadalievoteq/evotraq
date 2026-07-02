@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class ReturnReceivingRequest {
@@ -11,6 +12,10 @@ class ReturnReceivingRequest {
     required this.sourceGLN,
 
     required this.receivingGLN,
+
+    this.sourceLocation,
+
+    this.receivingLocation,
 
     this.purchaseOrderNumber,
 
@@ -53,6 +58,10 @@ class ReturnReceivingRequest {
   String sourceGLN;
 
   String receivingGLN;
+
+  OperationGlnDisplay? sourceLocation;
+
+  OperationGlnDisplay? receivingLocation;
 
   String? purchaseOrderNumber;
 
@@ -173,6 +182,11 @@ class ReturnReceivingRequest {
       'sourceGLN': sourceGLN,
 
       'receivingGLN': receivingGLN,
+
+      if (sourceLocation != null) 'sourceLocation': sourceLocation!.toJson(),
+
+      if (receivingLocation != null)
+        'receivingLocation': receivingLocation!.toJson(),
 
       'purchaseOrderNumber': purchaseOrderNumber,
 

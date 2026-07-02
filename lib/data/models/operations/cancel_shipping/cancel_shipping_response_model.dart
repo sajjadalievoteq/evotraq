@@ -1,4 +1,5 @@
 ﻿import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class CancelShippingResponse {
   CancelShippingResponse({
@@ -11,6 +12,8 @@ class CancelShippingResponse {
     this.processedAt,
     this.sourceGLN,
     this.destinationGLN,
+    this.sourceLocation,
+    this.destinationLocation,
     this.cancelReason,
     this.originalShippingReference,
     this.comments,
@@ -28,6 +31,8 @@ class CancelShippingResponse {
   DateTime? processedAt;
   String? sourceGLN;
   String? destinationGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? destinationLocation;
   String? cancelReason;
   String? originalShippingReference;
   String? comments;
@@ -71,6 +76,9 @@ class CancelShippingResponse {
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       destinationGLN: _readNonEmptyString(json['destinationGLN']),
+      sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
+      destinationLocation:
+          OperationGlnDisplay.fromJson(json['destinationLocation']),
       cancelReason: _readNonEmptyString(json['cancelReason']),
       originalShippingReference:
           _readNonEmptyString(json['originalShippingReference']),

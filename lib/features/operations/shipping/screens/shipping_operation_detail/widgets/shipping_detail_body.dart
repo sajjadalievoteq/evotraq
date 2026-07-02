@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/utils/shipping_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_comments_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_events_card.dart';
@@ -19,13 +18,9 @@ class ShippingDetailBody extends StatelessWidget {
   const ShippingDetailBody({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.destinationGlnDetails,
   });
 
   final ShippingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? destinationGlnDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +37,7 @@ class ShippingDetailBody extends StatelessWidget {
           ShippingDetailStatusBanner(operation: operation),
           const SizedBox(height: 16),
           ShippingDetailReferenceCard(operation: operation),
-          ShippingDetailLocationCard(
-            operation: operation,
-            sourceGlnDetails: sourceGlnDetails,
-            destinationGlnDetails: destinationGlnDetails,
-          ),
+          ShippingDetailLocationCard(operation: operation),
           if (ShippingDetailHelpers.hasTransportDetails(operation)) ...[
             ShippingDetailProductionCard(operation: operation),
           ],

@@ -1,21 +1,16 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/debug/operation_api_debug_console.dart';
-import 'package:traqtrace_app/core/debug/operation_api_debug_trace.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/decommissioning/decommissioning_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/decommissioning/decommissioning_status.dart';
 import 'package:traqtrace_app/data/services/operations/decommissioning/decommissioning_operation_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
@@ -29,7 +24,6 @@ import 'package:traqtrace_app/features/operations/decommissioning/screens/decomm
 import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation/widgets/decommissioning_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation/widgets/decommissioning_review_step.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/features/operations/decommissioning/utils/decommissioning_request_debug.dart';
 import 'package:traqtrace_app/features/operations/decommissioning/utils/decommissioning_submit_error_message.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
@@ -137,41 +131,6 @@ class _DecommissioningOperationScreenState
       eventTime: _eventTime,
       scannedEpcs: _scannedEpcs,
       showPageHeader: !embeddedInPanel,
-      onPreviewApiPayload: kDebugMode ? _previewDecommissioningApiPayload : null,
-    );
-  }
-
-  Future<void> _previewDecommissioningApiPayload() async {
-    final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEpcs);
-    final epcUris = List<String>.from(conversionResult['successful'] ?? []);
-    final request = DecommissioningRequest(
-      epcs: epcUris,
-      locationGLN: _locationGln?.glnCode ?? '',
-      disposition: _selectedDisposition?.code ?? '',
-      reason: _reasonController.text.trim(),
-      comments: _commentsController.text.trim().isNotEmpty
-          ? _commentsController.text.trim()
-          : null,
-      eventTime: _eventTime,
-    );
-    final dio = getIt<DioService>();
-    final trace = OperationApiDebugTrace(
-      operation: 'Decommissioning create (preview — not sent)',
-      method: 'POST',
-      url: '${dio.baseUrl}/operations/decommissioning',
-      timestamp: DateTime.now(),
-      requestBody: jsonEncode(request.toJson()),
-      validationNotes: DecommissioningRequestDebug.validateRequest(request),
-      extra: {
-        'epcCount': request.epcs.length.toString(),
-        'failedConversions':
-            (conversionResult['failed'] as List?)?.length.toString() ?? '0',
-      },
-    );
-    await OperationApiDebugConsole.show(
-      context,
-      trace,
-      title: 'Decommissioning API Preview',
     );
   }
 
@@ -253,6 +212,7 @@ class _DecommissioningOperationScreenState
       final request = DecommissioningRequest(
         epcs: epcUris,
         locationGLN: _locationGln!.glnCode,
+        operationLocation: OperationGlnDisplay.fromGln(_locationGln),
         disposition: _selectedDisposition!.code,
         reason: _reasonController.text.trim(),
         comments: _commentsController.text.trim().isNotEmpty
@@ -293,15 +253,6 @@ class _DecommissioningOperationScreenState
         );
       }
     } on ApiException catch (e) {
-      final trace = e.debugTrace ?? OperationApiDebugTrace.last;
-      if (trace != null && mounted) {
-        await OperationApiDebugConsole.show(
-          context,
-          trace,
-          title: 'Decommissioning API Debug',
-        );
-      }
-      if (!mounted) return;
       _showOperationError(
         DecommissioningSubmitErrorMessage.fromApiException(e),
       );

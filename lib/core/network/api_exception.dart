@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:traqtrace_app/core/debug/operation_api_debug_trace.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
 class ApiException implements Exception {
@@ -12,15 +11,11 @@ class ApiException implements Exception {
   
   final String? responseBody;
 
-  /// Full request/response capture for troubleshooting (when available).
-  final OperationApiDebugTrace? debugTrace;
-
   ApiException({
     this.statusCode,
     required this.message,
     this.originalException,
     this.responseBody,
-    this.debugTrace,
   });
 
   @override

@@ -5,9 +5,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_content.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -37,8 +35,6 @@ class _ShippingOperationDetailScreenState
   ShippingResponse? _operation;
   bool _isLoading = false;
   String? _errorMessage;
-  GLN? _sourceGLNDetails;
-  GLN? _destinationGLNDetails;
 
   @override
   void initState() {
@@ -65,8 +61,6 @@ class _ShippingOperationDetailScreenState
     _isLoading = true;
     _errorMessage = null;
     _operation = null;
-    _sourceGLNDetails = null;
-    _destinationGLNDetails = null;
     _loadOperationDetails();
   }
 
@@ -78,15 +72,12 @@ class _ShippingOperationDetailScreenState
       _isLoading = true;
       _errorMessage = null;
       _operation = null;
-      _sourceGLNDetails = null;
-      _destinationGLNDetails = null;
     });
 
     try {
       final shippingService = getIt<ShippingOperationService>();
       final operation = await shippingService.getShippingOperation(id);
       setState(() => _operation = operation);
-      await _loadGLNDetails();
     } on ApiException catch (e) {
       setState(() {
         _errorMessage = e.getUserFriendlyMessage();
@@ -102,30 +93,6 @@ class _ShippingOperationDetailScreenState
     }
   }
 
-  Future<void> _loadGLNDetails() async {
-    if (_operation == null) return;
-
-    try {
-      final glnService = getIt<GLNService>();
-      GLN? source;
-      GLN? destination;
-      if (_operation!.sourceGLN != null) {
-        source = await glnService.getGLNByCode(_operation!.sourceGLN!);
-      }
-      if (_operation!.destinationGLN != null) {
-        destination = await glnService.getGLNByCode(_operation!.destinationGLN!);
-      }
-      if (mounted) {
-        setState(() {
-          _sourceGLNDetails = source;
-          _destinationGLNDetails = destination;
-        });
-      }
-    } catch (_) {
-      // GLN not found in master data — display code only.
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final content = ShippingDetailContent(
@@ -134,8 +101,6 @@ class _ShippingOperationDetailScreenState
       isLoading: _isLoading,
       errorMessage: _errorMessage,
       operation: _operation,
-      sourceGlnDetails: _sourceGLNDetails,
-      destinationGlnDetails: _destinationGLNDetails,
       onRetry: _loadOperationDetails,
     );
 

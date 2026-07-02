@@ -19,7 +19,6 @@ class DecommissioningReviewStep extends StatelessWidget {
     required this.eventTime,
     required this.scannedEpcs,
     this.showPageHeader = true,
-    this.onPreviewApiPayload,
   });
 
   final GLN? locationGln;
@@ -29,7 +28,6 @@ class DecommissioningReviewStep extends StatelessWidget {
   final DateTime? eventTime;
   final List<String> scannedEpcs;
   final bool showPageHeader;
-  final VoidCallback? onPreviewApiPayload;
 
   static final DateFormat _eventTimeFormat = DateFormat('yyyy-MM-dd HH:mm');
 
@@ -52,17 +50,6 @@ class DecommissioningReviewStep extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          if (onPreviewApiPayload != null) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: onPreviewApiPayload,
-                icon: TraqIcon(AppAssets.iconFlask, size: 18),
-                label: const Text('Preview API payload'),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
           Gs1GroupCard(
             title: 'Operation Details',
             outlineColor: outline,

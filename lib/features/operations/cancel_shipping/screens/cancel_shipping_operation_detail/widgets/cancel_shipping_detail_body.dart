@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_comments_card.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_events_card.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_location_card.dart';
@@ -16,13 +15,9 @@ class CancelShippingDetailBody extends StatelessWidget {
   const CancelShippingDetailBody({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.destinationGlnDetails,
   });
 
   final CancelShippingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? destinationGlnDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +34,7 @@ class CancelShippingDetailBody extends StatelessWidget {
           CancelShippingDetailStatusBanner(operation: operation),
           const SizedBox(height: 16),
           CancelShippingDetailReferenceCard(operation: operation),
-          CancelShippingDetailLocationCard(
-            operation: operation,
-            sourceGlnDetails: sourceGlnDetails,
-            destinationGlnDetails: destinationGlnDetails,
-          ),
+          CancelShippingDetailLocationCard(operation: operation),
           CancelShippingDetailShippedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
             CancelShippingDetailEventsCard(operation: operation),

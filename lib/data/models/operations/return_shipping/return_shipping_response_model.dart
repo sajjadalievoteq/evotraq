@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ReturnShippingResponse {
   ReturnShippingResponse({
@@ -11,6 +12,8 @@ class ReturnShippingResponse {
     this.processedAt,
     this.sourceGLN,
     this.destinationGLN,
+    this.sourceLocation,
+    this.destinationLocation,
     this.carrier,
     this.trackingNumber,
     this.billOfLadingNumber,
@@ -31,6 +34,8 @@ class ReturnShippingResponse {
   DateTime? processedAt;
   String? sourceGLN;
   String? destinationGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? destinationLocation;
   String? carrier;
   String? trackingNumber;
   String? billOfLadingNumber;
@@ -79,6 +84,9 @@ class ReturnShippingResponse {
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       destinationGLN: _readNonEmptyString(json['destinationGLN']),
+      sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
+      destinationLocation:
+          OperationGlnDisplay.fromJson(json['destinationLocation']),
       carrier: _readNonEmptyString(json['carrier']),
       trackingNumber: _readNonEmptyString(json['trackingNumber']),
       billOfLadingNumber: _readNonEmptyString(json['billOfLadingNumber']),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_info_row.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_info_row_copy.dart';
@@ -10,35 +9,45 @@ class ShippingDetailLocationCard extends StatelessWidget {
   const ShippingDetailLocationCard({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.destinationGlnDetails,
   });
 
   final ShippingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? destinationGlnDetails;
 
   @override
   Widget build(BuildContext context) {
+    final sourceGlnCode =
+        operation.sourceGLN ?? operation.sourceLocation?.glnCode;
+    final destinationGlnCode =
+        operation.destinationGLN ?? operation.destinationLocation?.glnCode;
+
     return ShippingDetailGroupCard(
       title: 'Shipping Locations',
       children: [
-        if (operation.sourceGLN != null)
-          ShippingDetailInfoRowCopy(label: 'Ship From GLN', value: operation.sourceGLN!),
-        if (sourceGlnDetails?.locationName.isNotEmpty == true)
-          ShippingDetailInfoRow(label: 'From Facility', value: sourceGlnDetails!.locationName),
-        if (sourceGlnDetails?.city.isNotEmpty == true)
-          ShippingDetailInfoRow(label: 'From City', value: sourceGlnDetails!.city),
+        if (sourceGlnCode != null)
+          ShippingDetailInfoRowCopy(label: 'Ship From GLN', value: sourceGlnCode),
+        if (operation.sourceLocation?.locationName?.isNotEmpty == true)
+          ShippingDetailInfoRow(
+            label: 'From Facility',
+            value: operation.sourceLocation!.locationName!,
+          ),
+        if (operation.sourceLocation?.city?.isNotEmpty == true)
+          ShippingDetailInfoRow(
+            label: 'From City',
+            value: operation.sourceLocation!.city!,
+          ),
         const ShippingDetailInfoRow(label: 'Direction', value: 'From -> To'),
-        if (operation.destinationGLN != null)
-          ShippingDetailInfoRowCopy(label: 'Ship To GLN', value: operation.destinationGLN!),
-        if (destinationGlnDetails?.locationName.isNotEmpty == true)
+        if (destinationGlnCode != null)
+          ShippingDetailInfoRowCopy(label: 'Ship To GLN', value: destinationGlnCode),
+        if (operation.destinationLocation?.locationName?.isNotEmpty == true)
           ShippingDetailInfoRow(
             label: 'To Facility',
-            value: destinationGlnDetails!.locationName,
+            value: operation.destinationLocation!.locationName!,
           ),
-        if (destinationGlnDetails?.city.isNotEmpty == true)
-          ShippingDetailInfoRow(label: 'To City', value: destinationGlnDetails!.city),
+        if (operation.destinationLocation?.city?.isNotEmpty == true)
+          ShippingDetailInfoRow(
+            label: 'To City',
+            value: operation.destinationLocation!.city!,
+          ),
       ],
     );
   }

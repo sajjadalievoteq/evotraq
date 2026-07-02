@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class PackingRequest {
@@ -5,6 +6,7 @@ class PackingRequest {
   String parentContainerId;
   List<String> childEpcs;
   String? packingLocationGLN;
+  OperationGlnDisplay? operationLocation;
   String? readPointGLN;
   DateTime? eventTime;
   String? eventTimeZoneOffset;
@@ -19,6 +21,7 @@ class PackingRequest {
     required this.parentContainerId,
     required this.childEpcs,
     this.packingLocationGLN,
+    this.operationLocation,
     this.readPointGLN,
     this.eventTime,
     this.eventTimeZoneOffset,
@@ -37,6 +40,8 @@ class PackingRequest {
       'parentContainerId': parentContainerId,
       'childEpcs': childEpcs,
       'packingLocationGLN': packingLocationGLN,
+      if (operationLocation != null)
+        'operationLocation': operationLocation!.toJson(),
       'readPointGLN': readPointGLN,
       'eventTime': eventFields['eventTime'],
       'eventTimeZoneOffset':

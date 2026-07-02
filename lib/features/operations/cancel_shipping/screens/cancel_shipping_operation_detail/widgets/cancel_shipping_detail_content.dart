@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_body.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
@@ -14,8 +13,6 @@ class CancelShippingDetailContent extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.destinationGlnDetails,
     required this.onRetry,
   });
 
@@ -24,8 +21,6 @@ class CancelShippingDetailContent extends StatelessWidget {
   final bool isLoading;
   final String? errorMessage;
   final CancelShippingResponse? operation;
-  final GLN? sourceGlnDetails;
-  final GLN? destinationGlnDetails;
   final VoidCallback onRetry;
 
   @override
@@ -41,10 +36,6 @@ class CancelShippingDetailContent extends StatelessWidget {
     }
     if (operation == null) return const OperationDetailLoadingSkeleton();
 
-    return CancelShippingDetailBody(
-      operation: operation!,
-      sourceGlnDetails: sourceGlnDetails,
-      destinationGlnDetails: destinationGlnDetails,
-    );
+    return CancelShippingDetailBody(operation: operation!);
   }
 }

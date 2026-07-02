@@ -1,7 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_body.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
@@ -15,8 +13,6 @@ class ReturnReceivingDetailContent extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.receivingGlnDetails,
     required this.onRetry,
   });
 
@@ -25,8 +21,6 @@ class ReturnReceivingDetailContent extends StatelessWidget {
   final bool isLoading;
   final String? errorMessage;
   final ReturnReceivingResponse? operation;
-  final GLN? sourceGlnDetails;
-  final GLN? receivingGlnDetails;
   final VoidCallback onRetry;
 
   @override
@@ -42,11 +36,6 @@ class ReturnReceivingDetailContent extends StatelessWidget {
     }
     if (operation == null) return const OperationDetailLoadingSkeleton();
 
-    return ReturnReceivingDetailBody(
-      operation: operation!,
-      sourceGlnDetails: sourceGlnDetails,
-      receivingGlnDetails: receivingGlnDetails,
-    );
+    return ReturnReceivingDetailBody(operation: operation!);
   }
 }
-

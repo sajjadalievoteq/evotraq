@@ -5,14 +5,12 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/widgets/return_shipping_detail_content.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen to display shipping operation details.
+/// Screen to display return shipping operation details.
 class ReturnShippingOperationDetailScreen extends StatefulWidget {
   const ReturnShippingOperationDetailScreen({
     super.key,
@@ -37,8 +35,6 @@ class _ReturnShippingOperationDetailScreenState
   ReturnShippingResponse? _operation;
   bool _isLoading = false;
   String? _errorMessage;
-  GLN? _sourceGLNDetails;
-  GLN? _destinationGLNDetails;
 
   @override
   void initState() {
@@ -65,8 +61,6 @@ class _ReturnShippingOperationDetailScreenState
     _isLoading = true;
     _errorMessage = null;
     _operation = null;
-    _sourceGLNDetails = null;
-    _destinationGLNDetails = null;
     _loadOperationDetails();
   }
 
@@ -78,51 +72,24 @@ class _ReturnShippingOperationDetailScreenState
       _isLoading = true;
       _errorMessage = null;
       _operation = null;
-      _sourceGLNDetails = null;
-      _destinationGLNDetails = null;
     });
 
     try {
-      final shippingService = getIt<ReturnShippingOperationService>();
-      final operation = await shippingService.getReturnShippingOperation(id);
+      final service = getIt<ReturnShippingOperationService>();
+      final operation = await service.getReturnShippingOperation(id);
       setState(() => _operation = operation);
-      await _loadGLNDetails();
     } on ApiException catch (e) {
       setState(() {
         _errorMessage = e.getUserFriendlyMessage();
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Unable to load this shipping operation. '
+        _errorMessage = 'Unable to load this return shipping operation. '
             'Check your connection and tap Retry. '
             'If the problem continues, the record may have been deleted or you may not have access to it.';
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _loadGLNDetails() async {
-    if (_operation == null) return;
-
-    try {
-      final glnService = getIt<GLNService>();
-      GLN? source;
-      GLN? destination;
-      if (_operation!.sourceGLN != null) {
-        source = await glnService.getGLNByCode(_operation!.sourceGLN!);
-      }
-      if (_operation!.destinationGLN != null) {
-        destination = await glnService.getGLNByCode(_operation!.destinationGLN!);
-      }
-      if (mounted) {
-        setState(() {
-          _sourceGLNDetails = source;
-          _destinationGLNDetails = destination;
-        });
-      }
-    } catch (_) {
-      // GLN not found in master data — display code only.
     }
   }
 
@@ -134,8 +101,6 @@ class _ReturnShippingOperationDetailScreenState
       isLoading: _isLoading,
       errorMessage: _errorMessage,
       operation: _operation,
-      sourceGlnDetails: _sourceGLNDetails,
-      destinationGlnDetails: _destinationGLNDetails,
       onRetry: _loadOperationDetails,
     );
 

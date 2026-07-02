@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/decommissioning/decommissioning_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class DecommissioningResponse {
   DecommissioningResponse({
@@ -10,6 +11,7 @@ class DecommissioningResponse {
     this.status,
     this.processedAt,
     this.locationGLN,
+    this.operationLocation,
     this.disposition,
     this.reason,
     this.comments,
@@ -25,6 +27,7 @@ class DecommissioningResponse {
   DecommissioningStatus? status;
   DateTime? processedAt;
   String? locationGLN;
+  OperationGlnDisplay? operationLocation;
   String? disposition;
   String? reason;
   String? comments;
@@ -59,6 +62,7 @@ class DecommissioningResponse {
           ? DateTime.tryParse(json['processedAt'].toString())
           : null,
       locationGLN: _readNonEmptyString(json['locationGLN']),
+      operationLocation: OperationGlnDisplay.fromJson(json['operationLocation']),
       disposition: _readNonEmptyString(json['disposition']),
       reason: _readNonEmptyString(json['reason']),
       comments: _readNonEmptyString(json['comments']),

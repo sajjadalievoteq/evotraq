@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_body.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
@@ -15,7 +13,6 @@ class UnpackingDetailContent extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
     required this.operation,
-    required this.locationGlnDetails,
     required this.onRetry,
   });
 
@@ -24,7 +21,6 @@ class UnpackingDetailContent extends StatelessWidget {
   final bool isLoading;
   final String? errorMessage;
   final UnpackingResponse? operation;
-  final GLN? locationGlnDetails;
   final VoidCallback onRetry;
 
   @override
@@ -41,9 +37,6 @@ class UnpackingDetailContent extends StatelessWidget {
     }
     if (operation == null) return const OperationDetailLoadingSkeleton();
 
-    return UnpackingDetailBody(
-      operation: operation!,
-      locationGlnDetails: locationGlnDetails,
-    );
+    return UnpackingDetailBody(operation: operation!);
   }
 }

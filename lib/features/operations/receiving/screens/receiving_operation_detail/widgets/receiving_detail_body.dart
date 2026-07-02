@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/utils/receiving_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_comments_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_events_card.dart';
@@ -19,14 +18,10 @@ class ReceivingDetailBody extends StatelessWidget {
   const ReceivingDetailBody({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.receivingGlnDetails,
     this.onOperationUpdated,
   });
 
   final ReceivingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? receivingGlnDetails;
   final ValueChanged<ReceivingResponse>? onOperationUpdated;
 
   @override
@@ -44,11 +39,7 @@ class ReceivingDetailBody extends StatelessWidget {
           ReceivingDetailStatusBanner(operation: operation),
           const SizedBox(height: 16),
           ReceivingDetailReferenceCard(operation: operation),
-          ReceivingDetailLocationCard(
-            operation: operation,
-            sourceGlnDetails: sourceGlnDetails,
-            receivingGlnDetails: receivingGlnDetails,
-          ),
+          ReceivingDetailLocationCard(operation: operation),
           if (ReceivingDetailHelpers.hasTransportDetails(operation)) ...[
             ReceivingDetailProductionCard(operation: operation),
           ],

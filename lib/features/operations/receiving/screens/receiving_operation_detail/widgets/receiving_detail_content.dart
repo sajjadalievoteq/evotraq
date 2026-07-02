@@ -1,7 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_body.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_detail_loading_skeleton.dart';
@@ -15,8 +13,6 @@ class ReceivingDetailContent extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.receivingGlnDetails,
     required this.onRetry,
     this.onOperationUpdated,
   });
@@ -26,8 +22,6 @@ class ReceivingDetailContent extends StatelessWidget {
   final bool isLoading;
   final String? errorMessage;
   final ReceivingResponse? operation;
-  final GLN? sourceGlnDetails;
-  final GLN? receivingGlnDetails;
   final VoidCallback onRetry;
   final ValueChanged<ReceivingResponse>? onOperationUpdated;
 
@@ -47,8 +41,6 @@ class ReceivingDetailContent extends StatelessWidget {
 
     return ReceivingDetailBody(
       operation: operation!,
-      sourceGlnDetails: sourceGlnDetails,
-      receivingGlnDetails: receivingGlnDetails,
       onOperationUpdated: onOperationUpdated,
     );
   }

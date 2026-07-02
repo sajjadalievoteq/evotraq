@@ -48,6 +48,7 @@ import 'package:traqtrace_app/data/services/operations/shipping/shipping_operati
 import 'package:traqtrace_app/data/services/operations/decommissioning/decommissioning_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
@@ -171,6 +172,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<CancelShippingOperationService>(
     () => CancelShippingOperationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<CancelReceivingOperationService>(
+    () => CancelReceivingOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ReturnReceivingOperationService>(

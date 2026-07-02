@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/packing/packing_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class PackingResponse {
   String? packingOperationId;
@@ -10,6 +11,7 @@ class PackingResponse {
   PackingStatus? status;
   DateTime? processedAt;
   String? packingLocationGLN;
+  OperationGlnDisplay? operationLocation;
   String? workOrderNumber;
   String? batchNumber;
   String? productionOrder;
@@ -30,6 +32,7 @@ class PackingResponse {
     this.status,
     this.processedAt,
     this.packingLocationGLN,
+    this.operationLocation,
     this.workOrderNumber,
     this.batchNumber,
     this.productionOrder,
@@ -73,6 +76,7 @@ class PackingResponse {
           ? DateTime.parse(json['processedAt'])
           : null,
       packingLocationGLN: json['packingLocationGLN'],
+      operationLocation: OperationGlnDisplay.fromJson(json['operationLocation']),
       workOrderNumber: json['workOrderNumber'],
       batchNumber: json['batchNumber'],
       productionOrder: json['productionOrder'],

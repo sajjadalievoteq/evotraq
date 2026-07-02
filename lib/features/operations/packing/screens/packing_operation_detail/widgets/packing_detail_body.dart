@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/utils/packing_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_comments_card.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/widgets/packing_detail_container_card.dart';
@@ -19,11 +18,9 @@ class PackingDetailBody extends StatelessWidget {
   const PackingDetailBody({
     super.key,
     required this.operation,
-    required this.locationGlnDetails,
   });
 
   final PackingResponse operation;
-  final GLN? locationGlnDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +36,7 @@ class PackingDetailBody extends StatelessWidget {
 
           PackingDetailContainerCard(operation: operation),
 
-          PackingDetailLocationCard(
-            operation: operation,
-            locationGlnDetails: locationGlnDetails,
-          ),
+          PackingDetailLocationCard(operation: operation),
           if (PackingDetailHelpers.hasProductionDetails(operation)) ...[
 
             PackingDetailProductionCard(operation: operation),

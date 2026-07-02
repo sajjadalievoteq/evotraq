@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/utils/receiving_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_info_row.dart';
@@ -11,45 +10,46 @@ class ReceivingDetailLocationCard extends StatelessWidget {
   const ReceivingDetailLocationCard({
     super.key,
     required this.operation,
-    required this.sourceGlnDetails,
-    required this.receivingGlnDetails,
   });
 
   final ReceivingResponse operation;
-  final GLN? sourceGlnDetails;
-  final GLN? receivingGlnDetails;
 
   @override
   Widget build(BuildContext context) {
-    final receivingGlnCode = ReceivingDetailHelpers.receivingGlnCode(
-      operation,
-      receivingGlnDetails: receivingGlnDetails,
-    );
+    final sourceGlnCode =
+        operation.sourceGLN ?? operation.sourceLocation?.glnCode;
+    final receivingGlnCode = ReceivingDetailHelpers.receivingGlnCode(operation);
 
     return ReceivingDetailGroupCard(
       title: 'Receiving Locations',
       children: [
-        if (operation.sourceGLN != null)
-          ReceivingDetailInfoRowCopy(label: 'Ship From GLN', value: operation.sourceGLN!),
-        if (sourceGlnDetails?.locationName.isNotEmpty == true)
-          ReceivingDetailInfoRow(label: 'From Facility', value: sourceGlnDetails!.locationName),
-        if (sourceGlnDetails?.city.isNotEmpty == true)
-          ReceivingDetailInfoRow(label: 'From City', value: sourceGlnDetails!.city),
+        if (sourceGlnCode != null)
+          ReceivingDetailInfoRowCopy(label: 'Ship From GLN', value: sourceGlnCode),
+        if (operation.sourceLocation?.locationName?.isNotEmpty == true)
+          ReceivingDetailInfoRow(
+            label: 'From Facility',
+            value: operation.sourceLocation!.locationName!,
+          ),
+        if (operation.sourceLocation?.city?.isNotEmpty == true)
+          ReceivingDetailInfoRow(
+            label: 'From City',
+            value: operation.sourceLocation!.city!,
+          ),
         const ReceivingDetailInfoRow(label: 'Direction', value: 'From -> To'),
         if (receivingGlnCode != null)
           ReceivingDetailInfoRowCopy(
             label: 'Receiving GLN',
             value: receivingGlnCode,
           ),
-        if (receivingGlnDetails?.locationName.isNotEmpty == true)
+        if (operation.receivingLocation?.locationName?.isNotEmpty == true)
           ReceivingDetailInfoRow(
             label: 'Receiving Facility',
-            value: receivingGlnDetails!.locationName,
+            value: operation.receivingLocation!.locationName!,
           ),
-        if (receivingGlnDetails?.city.isNotEmpty == true)
+        if (operation.receivingLocation?.city?.isNotEmpty == true)
           ReceivingDetailInfoRow(
             label: 'Receiving City',
-            value: receivingGlnDetails!.city,
+            value: operation.receivingLocation!.city!,
           ),
       ],
     );

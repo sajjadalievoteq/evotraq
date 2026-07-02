@@ -5,10 +5,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
-import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_content.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -38,8 +35,6 @@ class _ReceivingOperationDetailScreenState
   ReceivingResponse? _operation;
   bool _isLoading = false;
   String? _errorMessage;
-  GLN? _sourceGLNDetails;
-  GLN? _receivingGlnDetails;
 
   @override
   void initState() {
@@ -66,8 +61,6 @@ class _ReceivingOperationDetailScreenState
     _isLoading = true;
     _errorMessage = null;
     _operation = null;
-    _sourceGLNDetails = null;
-    _receivingGlnDetails = null;
     _loadOperationDetails();
   }
 
@@ -79,15 +72,12 @@ class _ReceivingOperationDetailScreenState
       _isLoading = true;
       _errorMessage = null;
       _operation = null;
-      _sourceGLNDetails = null;
-      _receivingGlnDetails = null;
     });
 
     try {
       final receivingService = getIt<ReceivingOperationService>();
       final operation = await receivingService.getReceivingOperation(id);
       setState(() => _operation = operation);
-      await _loadGLNDetails();
     } on ApiException catch (e) {
       setState(() {
         _errorMessage = e.getUserFriendlyMessage();
@@ -105,37 +95,6 @@ class _ReceivingOperationDetailScreenState
 
   void _onOperationUpdated(ReceivingResponse updated) {
     setState(() => _operation = updated);
-    _loadGLNDetails();
-  }
-
-  Future<void> _loadGLNDetails() async {
-    if (_operation == null) return;
-
-    try {
-      final glnService = getIt<GLNService>();
-      GLN? source;
-      GLN? destination;
-      final sourceCode = _operation!.sourceGLN != null
-          ? EpcisGlnValidators.parseGlnToCode(_operation!.sourceGLN!)
-          : null;
-      final receivingCode = _operation!.receivingGLN != null
-          ? EpcisGlnValidators.parseGlnToCode(_operation!.receivingGLN!)
-          : null;
-      if (sourceCode != null && sourceCode.isNotEmpty) {
-        source = await glnService.getGLNByCode(sourceCode);
-      }
-      if (receivingCode != null && receivingCode.isNotEmpty) {
-        destination = await glnService.getGLNByCode(receivingCode);
-      }
-      if (mounted) {
-        setState(() {
-          _sourceGLNDetails = source;
-          _receivingGlnDetails = destination;
-        });
-      }
-    } catch (_) {
-      // GLN not found in master data — display code only.
-    }
   }
 
   @override
@@ -146,8 +105,6 @@ class _ReceivingOperationDetailScreenState
       isLoading: _isLoading,
       errorMessage: _errorMessage,
       operation: _operation,
-      sourceGlnDetails: _sourceGLNDetails,
-      receivingGlnDetails: _receivingGlnDetails,
       onRetry: _loadOperationDetails,
       onOperationUpdated: _onOperationUpdated,
     );

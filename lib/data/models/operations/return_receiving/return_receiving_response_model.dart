@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ReturnReceivingResponse {
   ReturnReceivingResponse({
@@ -11,6 +12,8 @@ class ReturnReceivingResponse {
     this.processedAt,
     this.sourceGLN,
     this.receivingGLN,
+    this.sourceLocation,
+    this.receivingLocation,
     this.purchaseOrderNumber,
     this.despatchAdviceNumber,
     this.receivingAdviceNumber,
@@ -32,6 +35,8 @@ class ReturnReceivingResponse {
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? receivingLocation;
   String? purchaseOrderNumber;
   String? despatchAdviceNumber;
   String? receivingAdviceNumber;
@@ -73,6 +78,8 @@ class ReturnReceivingResponse {
           : null,
       sourceGLN: _str(json['sourceGLN']),
       receivingGLN: _str(json['receivingGLN']),
+      sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
+      receivingLocation: OperationGlnDisplay.fromJson(json['receivingLocation']),
       purchaseOrderNumber: _str(json['purchaseOrderNumber']),
       despatchAdviceNumber: _str(json['despatchAdviceNumber']),
       receivingAdviceNumber: _str(json['receivingAdviceNumber']),

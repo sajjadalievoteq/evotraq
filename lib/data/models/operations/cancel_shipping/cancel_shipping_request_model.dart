@@ -1,10 +1,13 @@
-﻿import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
+﻿import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class CancelShippingRequest {
   const CancelShippingRequest({
     required this.epcs,
     required this.sourceGLN,
     required this.destinationGLN,
+    this.sourceLocation,
+    this.destinationLocation,
     required this.cancelReason,
     this.originalShippingReference,
     this.comments,
@@ -15,6 +18,8 @@ class CancelShippingRequest {
   final List<String> epcs;
   final String sourceGLN;
   final String destinationGLN;
+  final OperationGlnDisplay? sourceLocation;
+  final OperationGlnDisplay? destinationLocation;
   final String cancelReason;
   final String? originalShippingReference;
   final String? comments;
@@ -27,6 +32,9 @@ class CancelShippingRequest {
       'epcs': epcs,
       'sourceGLN': sourceGLN,
       'destinationGLN': destinationGLN,
+      if (sourceLocation != null) 'sourceLocation': sourceLocation!.toJson(),
+      if (destinationLocation != null)
+        'destinationLocation': destinationLocation!.toJson(),
       'cancelReason': cancelReason,
       if (originalShippingReference != null &&
           originalShippingReference!.isNotEmpty)

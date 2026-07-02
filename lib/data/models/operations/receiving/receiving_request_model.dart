@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 
 class ReceivingRequest {
@@ -6,6 +7,8 @@ class ReceivingRequest {
     required this.epcs,
     required this.sourceGLN,
     required this.receivingGLN,
+    this.sourceLocation,
+    this.receivingLocation,
     this.purchaseOrderNumber,
     this.despatchAdviceNumber,
     this.receivingAdviceNumber,
@@ -22,6 +25,8 @@ class ReceivingRequest {
   List<String> epcs;
   String sourceGLN;
   String receivingGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? receivingLocation;
   String? purchaseOrderNumber;
   String? despatchAdviceNumber;
   String? receivingAdviceNumber;
@@ -38,6 +43,8 @@ class ReceivingRequest {
     List<String>? epcs,
     String? sourceGLN,
     String? receivingGLN,
+    OperationGlnDisplay? sourceLocation,
+    OperationGlnDisplay? receivingLocation,
     String? purchaseOrderNumber,
     String? despatchAdviceNumber,
     String? receivingAdviceNumber,
@@ -54,6 +61,8 @@ class ReceivingRequest {
       epcs: epcs ?? this.epcs,
       sourceGLN: sourceGLN ?? this.sourceGLN,
       receivingGLN: receivingGLN ?? this.receivingGLN,
+      sourceLocation: sourceLocation ?? this.sourceLocation,
+      receivingLocation: receivingLocation ?? this.receivingLocation,
       purchaseOrderNumber: purchaseOrderNumber ?? this.purchaseOrderNumber,
       despatchAdviceNumber: despatchAdviceNumber ?? this.despatchAdviceNumber,
       receivingAdviceNumber:
@@ -76,6 +85,9 @@ class ReceivingRequest {
       'epcs': epcs,
       'sourceGLN': sourceGLN,
       'receivingGLN': receivingGLN,
+      if (sourceLocation != null) 'sourceLocation': sourceLocation!.toJson(),
+      if (receivingLocation != null)
+        'receivingLocation': receivingLocation!.toJson(),
       'purchaseOrderNumber': purchaseOrderNumber,
       'despatchAdviceNumber': despatchAdviceNumber,
       'receivingAdviceNumber': receivingAdviceNumber,

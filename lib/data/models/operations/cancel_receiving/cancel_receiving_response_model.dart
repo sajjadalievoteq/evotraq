@@ -1,9 +1,10 @@
-﻿import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class CancelReceivingResponse {
   CancelReceivingResponse({
-    this.cancelShippingOperationId,
-    this.cancelShippingReference,
+    this.cancelReceivingOperationId,
+    this.cancelReceivingReference,
     this.eventIds,
     this.cancelledEpcsCount,
     this.epcList,
@@ -11,6 +12,8 @@ class CancelReceivingResponse {
     this.processedAt,
     this.sourceGLN,
     this.receivingGLN,
+    this.sourceLocation,
+    this.receivingLocation,
     this.cancelReason,
     this.originalReceivingReference,
     this.comments,
@@ -19,8 +22,8 @@ class CancelReceivingResponse {
     this.metadata,
   });
 
-  String? cancelShippingOperationId;
-  String? cancelShippingReference;
+  String? cancelReceivingOperationId;
+  String? cancelReceivingReference;
   List<String>? eventIds;
   int? cancelledEpcsCount;
   List<String>? epcList;
@@ -28,6 +31,8 @@ class CancelReceivingResponse {
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
+  OperationGlnDisplay? sourceLocation;
+  OperationGlnDisplay? receivingLocation;
   String? cancelReason;
   String? originalReceivingReference;
   String? comments;
@@ -50,14 +55,16 @@ class CancelReceivingResponse {
         (json['childEpcList'] as List?)?.map((e) => e.toString()).toList();
 
     return CancelReceivingResponse(
-      cancelShippingOperationId: _readNonEmptyString(json['cancelShippingOperationId']) ??
-          _readNonEmptyString(json['operationId']) ??
-          _readNonEmptyString(json['id']) ??
-          _readNonEmptyString(metadata?['cancel_receiving_operation_id']) ??
-          _firstNonEmptyString(eventIds) ??
-          _readNonEmptyString(metadata?['event_id']) ??
-          _readNonEmptyString(metadata?['eventId']),
-      cancelShippingReference: _readNonEmptyString(json['cancelShippingReference']),
+      cancelReceivingOperationId:
+          _readNonEmptyString(json['cancelReceivingOperationId']) ??
+              _readNonEmptyString(json['operationId']) ??
+              _readNonEmptyString(json['id']) ??
+              _readNonEmptyString(metadata?['cancel_receiving_operation_id']) ??
+              _firstNonEmptyString(eventIds) ??
+              _readNonEmptyString(metadata?['event_id']) ??
+              _readNonEmptyString(metadata?['eventId']),
+      cancelReceivingReference:
+          _readNonEmptyString(json['cancelReceivingReference']),
       eventIds: eventIds,
       cancelledEpcsCount: (json['cancelledEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
@@ -71,6 +78,8 @@ class CancelReceivingResponse {
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       receivingGLN: _readNonEmptyString(json['receivingGLN']),
+      sourceLocation: OperationGlnDisplay.fromJson(json['sourceLocation']),
+      receivingLocation: OperationGlnDisplay.fromJson(json['receivingLocation']),
       cancelReason: _readNonEmptyString(json['cancelReason']),
       originalReceivingReference:
           _readNonEmptyString(json['originalReceivingReference']),
@@ -96,10 +105,10 @@ class CancelReceivingResponse {
     return null;
   }
 
-  String? get operationId => cancelShippingOperationId;
+  String? get operationId => cancelReceivingOperationId;
 
   String? get navigableOperationId {
-    final id = _readNonEmptyString(cancelShippingOperationId);
+    final id = _readNonEmptyString(cancelReceivingOperationId);
     if (id != null) return id;
     final eventId = _firstNonEmptyString(eventIds);
     if (eventId != null) return eventId;

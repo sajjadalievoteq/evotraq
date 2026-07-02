@@ -11,6 +11,7 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_status.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
@@ -246,6 +247,8 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
         destinationGLN: _destinationGln!.glnCode,
+        sourceLocation: OperationGlnDisplay.fromGln(_sourceGln),
+        destinationLocation: OperationGlnDisplay.fromGln(_destinationGln),
         cancelReason: _cancelReasonController.text.trim(),
         originalShippingReference:
             _originalReferenceController.text.trim().isNotEmpty

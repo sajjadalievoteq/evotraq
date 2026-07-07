@@ -225,7 +225,7 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
               controller: _controller,
               label: widget.label ?? 'Item Barcode',
               hintText: widget.placeholder ??
-                  'Enter GTIN, SGTIN, SSCC, or barcode',
+                  'Enter SGTIN or SSCC barcode',
               validator: _fieldValidator,
               onChanged: _tryParse,
               onEditingComplete: () => _handleAdd(),

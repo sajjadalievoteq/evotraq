@@ -17,6 +17,7 @@
 /// - Legacy prefixes:    `urn:epc:class:`, `urn:epc:idpat:`, `urn:epc:tag:`
 /// - GS1 AI notation:    `(01)…(21)…` etc. (normalised first)
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
 // ---------------------------------------------------------------------------
 // Patterns — GS1 file-safe character set (TDS 2.3, Table A-1, file-7):
@@ -160,13 +161,5 @@ bool _validateSgtinDlCheckDigit(String uri) {
 
 /// GS1 Mod-10 (Luhn-variant) check digit validation.
 bool _isValidGtinCheckDigit(String digits) {
-  if (digits.length < 2) return false;
-  int sum = 0;
-  for (int i = 0; i < digits.length - 1; i++) {
-    final d = int.parse(digits[i]);
-    // Weights alternate 3, 1 from left for GTIN-14
-    sum += (i % 2 == 0) ? d * 3 : d;
-  }
-  final check = (10 - (sum % 10)) % 10;
-  return check == int.parse(digits[digits.length - 1]);
+  return CheckDigitUtils.isValidMod10(digits);
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/home/utils/home_strings.dart';
+import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class DashboardRecentEventTile extends StatelessWidget {
   const DashboardRecentEventTile({super.key, required this.event});
@@ -13,24 +14,7 @@ class DashboardRecentEventTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeAgo = _formatTimeAgo(event.eventTime);
 
-    Color eventColor;
-
-    switch (event.eventType.toLowerCase()) {
-      case 'objectevent':
-        eventColor = Colors.blue;
-        break;
-      case 'aggregationevent':
-        eventColor = Colors.green;
-        break;
-      case 'transactionevent':
-        eventColor = Colors.orange;
-        break;
-      case 'transformationevent':
-        eventColor = Colors.purple;
-        break;
-      default:
-        eventColor = Colors.grey;
-    }
+    final eventColor = EpcisEventUiUtils.eventTypeColor(event.eventType);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -154,16 +138,6 @@ class DashboardRecentEventTile extends StatelessWidget {
   }
 
   String _formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return HomeStrings.recentEventDaysAgo(difference.inDays);
-    } else if (difference.inHours > 0) {
-      return HomeStrings.recentEventHoursAgo(difference.inHours);
-    } else if (difference.inMinutes > 0) {
-      return HomeStrings.recentEventMinutesAgo(difference.inMinutes);
-    }
-    return HomeStrings.recentEventJustNow;
+    return RelativeTimeUtils.compactAgo(dateTime);
   }
 }

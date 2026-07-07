@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class BulkJobsPanel extends StatefulWidget {
   final List<BulkJobStatus> jobs;
@@ -191,8 +193,8 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             Row(
               children: [
                 TraqIcon(
-                  _getStatusIcon(job.status),
-                  color: _getStatusColor(job.status),
+                  AdminHelperMappers.bulkJobStatusIcon(job.status),
+                  color: AdminHelperMappers.bulkJobStatusColor(job.status),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -224,7 +226,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               value: job.progressPercentage / 100,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(
-                _getStatusColor(job.status),
+                AdminHelperMappers.bulkJobStatusColor(job.status),
               ),
             ),
             const SizedBox(height: 8),
@@ -247,7 +249,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 TraqIcon(AppAssets.iconClock, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  'Started: ${_formatDateTime(job.startTime)}',
+                  'Started: ${DisplayDateUtils.dmHm(job.startTime)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -258,7 +260,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                   TraqIcon(AppAssets.iconClock, size: 14, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
-                    'Completed: ${_formatDateTime(job.endTime!)}',
+                    'Completed: ${DisplayDateUtils.dmHm(job.endTime!)}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -332,53 +334,21 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.1),
+        color: AdminHelperMappers.bulkJobStatusColor(status).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getStatusColor(status).withOpacity(0.3)),
+        border: Border.all(
+          color: AdminHelperMappers.bulkJobStatusColor(status).withOpacity(0.3),
+        ),
       ),
       child: Text(
         status,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: _getStatusColor(status),
+          color: AdminHelperMappers.bulkJobStatusColor(status),
         ),
       ),
     );
-  }
-
-  String _getStatusIcon(String status) {
-    switch (status.toUpperCase()) {
-      case 'RUNNING':
-        return AppAssets.iconPlay;
-      case 'COMPLETED':
-        return AppAssets.iconCheckCircle;
-      case 'FAILED':
-        return AppAssets.iconXCircle;
-      case 'PENDING':
-        return AppAssets.iconClock;
-      case 'CANCELLED':
-        return AppAssets.iconXCircle;
-      default:
-        return AppAssets.iconHelpCircle;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'RUNNING':
-        return Colors.blue;
-      case 'COMPLETED':
-        return Colors.green;
-      case 'FAILED':
-        return Colors.red;
-      case 'PENDING':
-        return Colors.orange;
-      case 'CANCELLED':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
   }
 
   List<BulkJobStatus> _getFilteredJobs() {
@@ -386,10 +356,6 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
       return widget.jobs;
     }
     return widget.jobs.where((job) => job.status == _selectedFilter).toList();
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   void _showJobDetails(BulkJobStatus job) {
@@ -406,8 +372,8 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               Row(
                 children: [
                   TraqIcon(
-                    _getStatusIcon(job.status),
-                    color: _getStatusColor(job.status),
+                    AdminHelperMappers.bulkJobStatusIcon(job.status),
+                    color: AdminHelperMappers.bulkJobStatusColor(job.status),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -431,9 +397,9 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               _buildDetailRow('Status', job.status),
               _buildDetailRow('Progress', '${job.progressPercentage.toStringAsFixed(1)}%'),
               _buildDetailRow('Records Processed', '${job.processedEvents}/${job.totalEvents}'),
-              _buildDetailRow('Started', _formatDateTime(job.startTime)),
+              _buildDetailRow('Started', DisplayDateUtils.dmHm(job.startTime)),
               if (job.endTime != null)
-                _buildDetailRow('Completed', _formatDateTime(job.endTime!)),
+                _buildDetailRow('Completed', DisplayDateUtils.dmHm(job.endTime!)),
               if (job.errors.isNotEmpty)
                 _buildDetailRow('Errors', job.errors.join(', ')),
               if (job.metadata.isNotEmpty) ...[

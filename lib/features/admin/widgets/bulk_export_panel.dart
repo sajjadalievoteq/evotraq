@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/utils/number_format_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 /// Bulk Export Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive bulk export management and monitoring interface
@@ -493,7 +495,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status),
+                    color: AdminHelperMappers.exportJobStatusColor(status),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -509,7 +511,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getFormatColor(format),
+                    color: AdminHelperMappers.exportFormatColor(format),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -565,7 +567,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
               LinearProgressIndicator(
                 value: progress / 100.0,
                 backgroundColor: Colors.grey.shade300,
-                valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AdminHelperMappers.exportJobStatusColor(status),
+                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -611,7 +615,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getFormatColor(format),
+            color: AdminHelperMappers.exportFormatColor(format),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -688,7 +692,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getFormatColor(format),
+            color: AdminHelperMappers.exportFormatColor(format),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -706,7 +710,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _getStatusColor(status),
+                color: AdminHelperMappers.exportJobStatusColor(status),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -831,7 +835,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                             width: 12,
                             height: 12,
                             decoration: BoxDecoration(
-                              color: _getFormatColor(format),
+                              color: AdminHelperMappers.exportFormatColor(format),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -844,7 +848,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                             child: LinearProgressIndicator(
                               value: percentage / 100,
                               backgroundColor: Colors.grey.shade300,
-                              valueColor: AlwaysStoppedAnimation<Color>(_getFormatColor(format)),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AdminHelperMappers.exportFormatColor(format),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -929,47 +935,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'COMPLETED':
-        return Colors.green;
-      case 'PROCESSING':
-        return Colors.blue;
-      case 'FAILED':
-        return Colors.red;
-      case 'CANCELLED':
-        return Colors.orange;
-      case 'PENDING':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getFormatColor(String format) {
-    switch (format) {
-      case 'CSV':
-        return Colors.green;
-      case 'JSON':
-        return Colors.blue;
-      case 'XML':
-        return Colors.purple;
-      case 'EPCIS':
-        return Colors.orange;
-      case 'GS1_DIGITAL_LINK':
-        return Colors.teal;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
+    return NumberFormatUtils.compactKilo(number);
   }
 
   String _formatFileSize(int bytes) {

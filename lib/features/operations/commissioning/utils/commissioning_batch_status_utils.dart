@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
 abstract final class CommissioningBatchStatusUtils {
   static Color color(CommissioningBatchStatus status) {
-    return switch (status) {
-      CommissioningBatchStatus.success => Colors.green,
-      CommissioningBatchStatus.partialSuccess => Colors.orange,
-      CommissioningBatchStatus.failed => Colors.red,
-      CommissioningBatchStatus.pending => Colors.blue,
-      CommissioningBatchStatus.inProgress => Colors.teal,
-    };
+    return AppColorMapper.commissioningBatchStatus(status);
   }
 
   static String label(CommissioningBatchStatus status) {

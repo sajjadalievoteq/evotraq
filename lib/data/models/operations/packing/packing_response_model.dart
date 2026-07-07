@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/packing/packing_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class PackingResponse {
@@ -8,7 +8,7 @@ class PackingResponse {
   String? parentContainerId;
   int? packedItemsCount;
   List<String>? childEpcList;
-  PackingStatus? status;
+  OperationStatus? status;
   DateTime? processedAt;
   String? packingLocationGLN;
   OperationGlnDisplay? operationLocation;
@@ -70,10 +70,10 @@ class PackingResponse {
           ? List<String>.from(json['childEpcList'])
           : null,
       status: json['status'] != null
-          ? parsePackingStatus(json['status'])
+          ? parseOperationStatus(json['status'])
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.parse(json['processedAt'])
+          ? DateTime.parse(json['processedAt']).toLocal()
           : null,
       packingLocationGLN: json['packingLocationGLN'],
       operationLocation: OperationGlnDisplay.fromJson(json['operationLocation']),
@@ -118,9 +118,9 @@ class PackingResponse {
         _readNonEmptyString(metadata?['eventId']);
   }
 
-  bool get isSuccess => status == PackingStatus.success;
+  bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == PackingStatus.success || status == PackingStatus.partialSuccess;
+      status == OperationStatus.success || status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == PackingStatus.failed || status == PackingStatus.validationError;
+      status == OperationStatus.failed || status == OperationStatus.validationError;
 }

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,17 +12,17 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_request_model.dart';
-import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/cubit/cancel_receiving_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/utils/cancel_receiving_operation_step_validator.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/utils/cancel_receiving_pharma_readiness_checker.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/widgets/cancel_receiving_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/widgets/cancel_receiving_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/widgets/cancel_receiving_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/widgets/cancel_receiving_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/widgets/cancel_receiving_review_step.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
@@ -61,6 +62,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
   String? _receivingGlnError;
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
+  final Map<String, String> _itemWarnings = {};
   bool _isLoading = false;
 
   void _onReferenceFieldChanged() {
@@ -100,17 +102,32 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
     );
   }
 
-  CancelReceivingItemScanStep _itemScanStep({
+  OperationItemScanStep _itemScanStep({
     bool embeddedInPanel = false,
     bool? fillHeight,
   }) {
-    return CancelReceivingItemScanStep(
+    return OperationItemScanStep(
       scannedEpcs: _scannedEpcs,
       onItemAdded: _onItemAdded,
-      onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
-      onClearAll: () => setState(() => _scannedEpcs.clear()),
+      onRemoveItem: (index) => setState(() {
+        final removed = _scannedEpcs.removeAt(index);
+        _itemWarnings.remove(removed);
+      }),
+      onClearAll: () => setState(() {
+        _scannedEpcs.clear();
+        _itemWarnings.clear();
+      }),
+      groupCardTitle: 'Add EPCs to Cancel',
+      pageHeaderTitle: 'Scan Items to Cancel',
+      pageHeaderSubtitle:
+          'Scan serialized SGTINs or SSCCs only. Lot-based GTINs (lgtin) are not valid for cancel receiving under DSCSA/FMD.',
+      scannedListTitle: 'Items to Ship',
+      scannedQueuedLabel: 'queued for shipping',
+      hierarchyScreenTitle: 'Return Shipment Hierarchy',
+      allowedTypes: const [EPCType.sgtin, EPCType.sscc],
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
+      itemWarnings: _itemWarnings,
     );
   }
 
@@ -265,7 +282,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
           .createCancelReceivingOperation(request);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == CancelReceivingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Cancel receiving submitted with warnings. Open the record for details.',
           );
@@ -277,7 +294,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
             context
-                .read<CancelReceivingOperationsCubit>()
+                .read<OperationSplitCubit>()
                 .setCreatedId(response.navigableOperationId);
           }
           widget.onEmbeddedActionSuccess!();
@@ -307,7 +324,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
     }
   }
 
-  void _onItemAdded(EPCParseResult result) {
+  Future<void> _onItemAdded(EPCParseResult result) async {
     final epc = result.epc;
     if (epc.startsWith('urn:epc:class:lgtin:')) {
       context.showError(
@@ -322,6 +339,22 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       return;
     }
     setState(() => _scannedEpcs.add(epc));
+    await _checkEpcStatus(epc);
+  }
+
+  Future<void> _checkEpcStatus(String epc) async {
+    try {
+      final statusService = getIt<OperationEpcStatusService>();
+      final status = await statusService.getEpcStatus(epc);
+      if (!mounted || status == null) return;
+      if (!status.compatibleWithShipping) {
+        setState(() => _itemWarnings[epc] = status.status);
+      } else {
+        setState(() => _itemWarnings.remove(epc));
+      }
+    } catch (_) {
+      // Non-fatal: badge is cosmetic; backend enforces on submit.
+    }
   }
 
   @override
@@ -330,7 +363,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       builder: (context, layout) {
         final usePanelLayout = widget.embedded || layout.isDesktopUp;
         if (usePanelLayout) {
-          return CancelReceivingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _scannedEpcs.isNotEmpty,
@@ -338,10 +371,12 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
             itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitCancelReceivingOperation,
+            appBarTitle: 'New Cancel Receiving',
+            submitLabel: 'Cancel Receiving',
           );
         }
 
-        return CancelReceivingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -350,6 +385,8 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitCancelReceivingOperation,
+          appBarTitle: 'Cancel Receiving',
+          submitLabel: 'Cancel Receiving',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

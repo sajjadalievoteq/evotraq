@@ -4,13 +4,12 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_widget.dar
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_manual_entry_card.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_contents_table.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_summary_banner.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_item_manual_entry_card.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scanning_mode_selector.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_container_summary_banner.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scope_selector.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
-import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scanning_mode.dart';
 
 /// Step 2: view packed contents, select rows, or add items via scan / manual EPC.
 class UnpackingItemScanStep extends StatelessWidget {
@@ -41,8 +40,8 @@ class UnpackingItemScanStep extends StatelessWidget {
   final List<HierarchyNode> containerContents;
   final Set<String> selectedEpcs;
   final void Function(String epc, bool selected) onItemSelectionChanged;
-  final UnpackingScanningMode itemScanningMode;
-  final ValueChanged<UnpackingScanningMode> onItemScanningModeChanged;
+  final OperationScanningMode itemScanningMode;
+  final ValueChanged<OperationScanningMode> onItemScanningModeChanged;
   final TextEditingController itemManualEntryController;
   final void Function(EPCParseResult result) onItemAdded;
   final VoidCallback onAddManualItem;
@@ -58,7 +57,7 @@ class UnpackingItemScanStep extends StatelessWidget {
     final outline = Theme.of(context).colorScheme.outlineVariant;
     final isPartial = scope == UnpackingScope.partial;
     final allowed = allowedTypes ??
-        const [EPCType.sgtin, EPCType.sscc, EPCType.gtin];
+        const [EPCType.sgtin, EPCType.sscc];
 
     final scopeCard = Gs1GroupCard(
       title: 'Unpack scope',
@@ -112,15 +111,15 @@ class UnpackingItemScanStep extends StatelessWidget {
                 //   onModeChanged: onItemScanningModeChanged,
                 // ),
                 const SizedBox(height: 16),
-                if (itemScanningMode == UnpackingScanningMode.scanner)
+                if (itemScanningMode == OperationScanningMode.scanner)
                   EPCInputWidget(
                     label: 'Item Barcode',
-                    placeholder: 'Scan GTIN, SGTIN, SSCC, or barcode',
+                    placeholder: 'Scan SGTIN or SSCC barcode',
                     allowedTypes: allowed,
                     onItemAdded: onItemAdded,
                   )
                 else
-                  UnpackingItemManualEntryCard(
+                  OperationItemManualEntryCard(
                     controller: itemManualEntryController,
                     onAdd: onAddManualItem,
                   ),
@@ -164,7 +163,7 @@ class UnpackingItemScanStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          UnpackingContainerSummaryBanner(
+          OperationContainerSummaryBanner(
             parentContainerId: parentContainerId,
           ),
           const SizedBox(height: 16),

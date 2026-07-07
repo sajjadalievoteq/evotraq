@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_response_model.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/utils/cancel_receiving_detail_formatters.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/widgets/cancel_receiving_detail_group_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/widgets/cancel_receiving_detail_info_row.dart';
-import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/widgets/cancel_receiving_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 class CancelReceivingDetailReferenceCard extends StatelessWidget {
   const CancelReceivingDetailReferenceCard({
@@ -15,33 +15,33 @@ class CancelReceivingDetailReferenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CancelReceivingDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Reference Details',
       children: [
         if (operation.cancelReceivingReference != null)
-          CancelReceivingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Cancel Receiving Reference',
             value: operation.cancelReceivingReference!,
           ),
         if (operation.originalReceivingReference != null)
-          CancelReceivingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Original GINC',
             value: operation.originalReceivingReference!,
           ),
         if (operation.cancelReason != null)
-          CancelReceivingDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Cancellation Reason',
             value: operation.cancelReason!,
           ),
         if (operation.cancelReceivingOperationId != null)
-          CancelReceivingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Operation ID',
             value: operation.cancelReceivingOperationId!,
           ),
         if (operation.processedAt != null)
-          CancelReceivingDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Processed At',
-            value: CancelReceivingDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
           ),
       ],
     );

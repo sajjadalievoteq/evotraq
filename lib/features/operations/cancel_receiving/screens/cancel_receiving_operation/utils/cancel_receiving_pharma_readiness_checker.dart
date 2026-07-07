@@ -1,5 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/operations/shared/utils/gln_check_digit_validator.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_pharma_readiness_checker.dart';
 
 class CancelReceivingPharmaReadinessChecker {
   CancelReceivingPharmaReadinessChecker._();
@@ -11,47 +11,26 @@ class CancelReceivingPharmaReadinessChecker {
     required String cancelReason,
     required String? originalReceivingReference,
   }) {
-    final issues = <String>[];
-
-    if (sourceGln == null) {
-      issues.add('Sender (Ship-From) GLN is required. '
-          'The cancel receiving event must identify the original sender (CBV 2.0 §8.5).');
-    } else if (!GlnCheckDigitValidator.isValid(sourceGln.glnCode)) {
-      issues.add('Sender (Ship-From) GLN "${sourceGln.glnCode}" has an invalid GS1 check digit.');
-    }
-
-    if (receivingGln == null) {
-      issues.add('Receive-At GLN is required. '
-          'The receiver\'s site must be recorded for the DSCSA audit trail.');
-    } else if (!GlnCheckDigitValidator.isValid(receivingGln.glnCode)) {
-      issues.add('Receive-At GLN "${receivingGln.glnCode}" has an invalid GS1 check digit.');
-    }
-
-    if (sourceGln != null &&
-        receivingGln != null &&
-        sourceGln.glnCode == receivingGln.glnCode) {
-      issues.add('Sender (Ship-From) and Receive-At GLNs are identical. '
-          'A cancel receiving event requires two distinct trading-partner locations.');
-    }
-
-    if (epcs.isEmpty) {
-      issues.add('No EPCs captured. At least one serialized SGTIN or SSCC is required.');
-    }
-
-    for (final epc in epcs) {
-      if (epc.startsWith('urn:epc:class:lgtin:')) {
-        issues.add('"$epc" is a lot-based GTIN (lgtin). '
-            'Only serialized SGTINs (urn:epc:id:sgtin:…) and SSCCs are valid for cancel receiving '
-            'under DSCSA and EU FMD.');
-      } else if (!epc.startsWith('urn:epc:id:sgtin:') &&
-          !epc.startsWith('urn:epc:id:sscc:')) {
-        issues.add('"$epc" is not a valid GS1 EPC URI for a cancel receiving event.');
-      }
-    }
-
-    if (epcs.toSet().length != epcs.length) {
-      issues.add('Duplicate EPCs detected. Each item may only appear once per cancel event.');
-    }
+    final issues = OperationPharmaReadinessChecker.twoGlnIssues(
+      sourceGln: sourceGln,
+      destinationGln: receivingGln,
+      epcs: epcs,
+      sourceLabel: 'Sender (Ship-From) GLN',
+      destinationLabel: 'Receive-At GLN',
+      sourceRequiredMessage:
+          'Sender (Ship-From) GLN is required. '
+          'The cancel receiving event must identify the original sender (CBV 2.0 §8.5).',
+      destinationRequiredMessage:
+          'Receive-At GLN is required. '
+          'The receiver\'s site must be recorded for the DSCSA audit trail.',
+      sameLocationMessage:
+          'Sender (Ship-From) and Receive-At GLNs are identical. '
+          'A cancel receiving event requires two distinct trading-partner locations.',
+      emptyEpcsMessage:
+          'No EPCs captured. At least one serialized SGTIN or SSCC is required.',
+      duplicateEpcsMessage:
+          'Duplicate EPCs detected. Each item may only appear once per cancel event.',
+    );
 
     if (cancelReason.trim().isEmpty) {
       issues.add('A cancellation reason is required (DSCSA §582 / FMD Art. 22).');

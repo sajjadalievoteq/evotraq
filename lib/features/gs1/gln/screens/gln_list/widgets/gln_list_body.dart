@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_record_info_section.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_results_list.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 
 class GlnListBody extends StatelessWidget {
   const GlnListBody({
@@ -26,7 +23,7 @@ class GlnListBody extends StatelessWidget {
     required this.onShowFilterDialog,
     required this.onShowAdvancedFiltersDialog,
     required this.onPageSizeChanged,
-    required this.onToggleSortOrder,
+    required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapGln,
@@ -47,7 +44,7 @@ class GlnListBody extends StatelessWidget {
   final VoidCallback onShowFilterDialog;
   final VoidCallback onShowAdvancedFiltersDialog;
   final ValueChanged<int> onPageSizeChanged;
-  final VoidCallback onToggleSortOrder;
+  final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapGln;
@@ -79,6 +76,17 @@ class GlnListBody extends StatelessWidget {
                       onRefresh: onSearchImmediate,
                       onQuickFilters: onShowFilterDialog,
                       onToggleAdvancedFilters: onShowAdvancedFiltersDialog,
+                      sortTooltip: GlnUiConstants.sortByLine(
+                        sortFieldLabel,
+                        sortOrder == 'asc'
+                            ? GlnUiConstants.sortAscendingLabel
+                            : GlnUiConstants.sortDescendingLabel,
+                      ),
+                      sortOrder: sortOrder,
+                      onSortOrderChanged: onSortOrderChanged,
+                      pageSize: pageSize,
+                      pageSizeOptions: GlnUiConstants.pageSizeOptions,
+                      onPageSizeChanged: onPageSizeChanged,
                       onClear: () {
                         searchDebouncer.cancel();
                         searchController.clear();
@@ -86,21 +94,6 @@ class GlnListBody extends StatelessWidget {
                       },
                     );
                   },
-                ),
-                GlnRecordInfoSection(
-                  pageSize: pageSize,
-                  onPageSizeChanged: onPageSizeChanged,
-                ),
-                SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: GlnUiConstants.sortByLine(
-                    sortFieldLabel,
-                    sortOrder == 'asc'
-                        ? GlnUiConstants.sortAscendingLabel
-                        : GlnUiConstants.sortDescendingLabel,
-                  ),
-                  sortOrder: sortOrder,
-                  onToggleSortOrder: onToggleSortOrder,
                 ),
               ],
             ),

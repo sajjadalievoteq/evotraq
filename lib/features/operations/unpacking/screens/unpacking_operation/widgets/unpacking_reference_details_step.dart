@@ -10,13 +10,13 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_manual_entry_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_container_manual_entry_card.dart';
 
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_container_selected_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_container_selected_card.dart';
 
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scanning_mode_selector.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_scanning_mode_selector.dart';
 
-import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scanning_mode.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
@@ -91,11 +91,11 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
   final String? parentContainerId;
 
-  final UnpackingScanningMode scanningMode;
+  final OperationScanningMode scanningMode;
 
   final TextEditingController manualEntryController;
 
-  final ValueChanged<UnpackingScanningMode> onScanningModeChanged;
+  final ValueChanged<OperationScanningMode> onScanningModeChanged;
 
   final void Function(ScanResult result) onContainerScanResult;
 
@@ -239,7 +239,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                   if (parentContainerId != null) ...[
 
-                    UnpackingContainerSelectedCard(
+                    OperationContainerSelectedCard(
 
                       containerId: parentContainerId!,
 
@@ -251,7 +251,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                   ],
 
-                  UnpackingScanningModeSelector(
+                  OperationScanningModeSelector(
 
                     selectedMode: scanningMode,
 
@@ -261,7 +261,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  if (scanningMode == UnpackingScanningMode.scanner)
+                  if (scanningMode == OperationScanningMode.scanner)
 
                     BarcodeScanner(
 
@@ -275,7 +275,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                   else
 
-                    UnpackingContainerManualEntryCard(
+                    OperationContainerManualEntryCard(
 
                       controller: manualEntryController,
 

@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/models/service_account.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -330,7 +331,7 @@ class _ServiceAccountManagementScreenState
                   ),
                 if (account.expiresAt != null)
                   _buildInfoChip(
-                    'Expires: ${_formatDate(account.expiresAt!)}',
+                    'Expires: ${ApiUiUtils.formatDate(account.expiresAt!)}',
                     AppAssets.iconEvent,
                     color: account.isExpired ? Colors.red : null,
                   ),
@@ -340,13 +341,13 @@ class _ServiceAccountManagementScreenState
             Row(
               children: [
                 Text(
-                  'Created: ${_formatDate(account.createdAt)}',
+                  'Created: ${ApiUiUtils.formatDate(account.createdAt)}',
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                 ),
                 if (account.lastUsedAt != null) ...[
                   const Text(' • ', style: TextStyle(color: Colors.grey)),
                   Text(
-                    'Last used: ${_formatDate(account.lastUsedAt!)}',
+                    'Last used: ${ApiUiUtils.formatDate(account.lastUsedAt!)}',
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                   ),
                 ],
@@ -398,10 +399,6 @@ class _ServiceAccountManagementScreenState
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   void _handleAccountAction(String action, ServiceAccount account) {

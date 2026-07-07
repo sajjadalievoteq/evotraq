@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/shipping/shipping_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ShippingResponse {
@@ -19,6 +19,7 @@ class ShippingResponse {
     this.billOfLadingNumber,
     this.purchaseOrderNumber,
     this.despatchAdviceNumber,
+    this.gincNumber,
     this.comments,
     this.messages,
     this.processingTimeMs,
@@ -30,7 +31,7 @@ class ShippingResponse {
   List<String>? eventIds;
   int? shippedEpcsCount;
   List<String>? epcList;
-  ShippingStatus? status;
+  OperationStatus? status;
   DateTime? processedAt;
   String? sourceGLN;
   String? destinationGLN;
@@ -41,6 +42,7 @@ class ShippingResponse {
   String? billOfLadingNumber;
   String? purchaseOrderNumber;
   String? despatchAdviceNumber;
+  String? gincNumber;
   String? comments;
   List<String>? messages;
   int? processingTimeMs;
@@ -77,10 +79,10 @@ class ShippingResponse {
           epcList?.length,
       epcList: epcList,
       status: json['status'] != null
-          ? parseShippingStatus(json['status'].toString())
+          ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())
+          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       destinationGLN: _readNonEmptyString(json['destinationGLN']),
@@ -92,6 +94,7 @@ class ShippingResponse {
       billOfLadingNumber: _readNonEmptyString(json['billOfLadingNumber']),
       purchaseOrderNumber: _readNonEmptyString(json['purchaseOrderNumber']),
       despatchAdviceNumber: _readNonEmptyString(json['despatchAdviceNumber']),
+      gincNumber: _readNonEmptyString(json['gincNumber']),
       comments: _readNonEmptyString(json['comments']),
       messages: (json['messages'] as List?)?.map((e) => e.toString()).toList(),
       processingTimeMs: (json['processingTimeMs'] as num?)?.toInt(),
@@ -130,9 +133,9 @@ class ShippingResponse {
   int? get shippedItemsCount => shippedEpcsCount;
   List<String>? get childEpcList => epcList;
 
-  bool get isSuccess => status == ShippingStatus.success;
+  bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == ShippingStatus.success || status == ShippingStatus.partialSuccess;
+      status == OperationStatus.success || status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == ShippingStatus.failed || status == ShippingStatus.validationError;
+      status == OperationStatus.failed || status == OperationStatus.validationError;
 }

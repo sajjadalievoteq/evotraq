@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../models/api_collection.dart';
 import '../cubit/api_collection_cubit.dart';
 import '../cubit/api_collection_state.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -471,7 +472,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
   }
 
   Widget _buildApiCard(ApiDefinition api, String collectionId) {
-    final methodColor = _getMethodColor(api.httpMethod);
+    final methodColor = ApiUiUtils.methodColor(api.httpMethod);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -580,23 +581,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
         ],
       ),
     );
-  }
-
-  Color _getMethodColor(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return Colors.blue;
-      case 'POST':
-        return Colors.green;
-      case 'PUT':
-        return Colors.orange;
-      case 'PATCH':
-        return Colors.teal;
-      case 'DELETE':
-        return Colors.red;
-      default:
-        return Colors.purple;
-    }
   }
 
   void _handleCollectionAction(String action, ApiCollection collection) async {

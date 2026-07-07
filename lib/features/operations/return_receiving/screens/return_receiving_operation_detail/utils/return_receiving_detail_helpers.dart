@@ -11,7 +11,8 @@ class ReturnReceivingDetailHelpers {
         operation.purchaseOrderNumber != null ||
         operation.despatchAdviceNumber != null ||
         operation.receivingAdviceNumber != null ||
-        operation.invoiceNumber != null;
+        operation.invoiceNumber != null ||
+        operation.gincNumber != null;
   }
 }
 

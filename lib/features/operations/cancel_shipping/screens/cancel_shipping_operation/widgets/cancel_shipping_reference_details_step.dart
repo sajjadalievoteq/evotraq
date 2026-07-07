@@ -5,8 +5,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/shipment_reference_details_step.dart';
 
-import '../../../../../../core/utils/responsive_utils.dart';
-
 class CancelShippingReferenceDetailsStep extends StatelessWidget {
   const CancelShippingReferenceDetailsStep({
     super.key,

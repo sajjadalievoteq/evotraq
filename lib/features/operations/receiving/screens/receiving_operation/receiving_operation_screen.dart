@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
@@ -11,17 +12,17 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_confi
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
-import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/receiving/cubit/receiving_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/utils/receiving_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/utils/receiving_operation_step_validator.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_review_step.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -67,6 +68,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   String? _receivingGlnError;
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
+  final Map<String, String> _itemWarnings = {};
   bool _isLoading = false;
 
   @override
@@ -115,17 +117,30 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     );
   }
 
-  ReceivingItemScanStep _itemScanStep({
+  OperationItemScanStep _itemScanStep({
     bool embeddedInPanel = false,
     bool? fillHeight,
   }) {
-    return ReceivingItemScanStep(
+    return OperationItemScanStep(
       scannedEpcs: _scannedEpcs,
       onItemAdded: _onItemAdded,
-      onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
-      onClearAll: () => setState(() => _scannedEpcs.clear()),
+      onRemoveItem: (index) => setState(() {
+        final removed = _scannedEpcs.removeAt(index);
+        _itemWarnings.remove(removed);
+      }),
+      onClearAll: () => setState(() {
+        _scannedEpcs.clear();
+        _itemWarnings.clear();
+      }),
+      groupCardTitle: 'Add EPCs to Receive',
+      pageHeaderTitle: 'Scan Items to Ship',
+      pageHeaderSubtitle: 'Scan SGTIN or SSCC labels for this receipt.',
+      scannedListTitle: 'Items to Receive',
+      scannedQueuedLabel: 'queued for receiving',
+      hierarchyScreenTitle: 'Receiving Hierarchy',
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
+      itemWarnings: _itemWarnings,
     );
   }
 
@@ -294,7 +309,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           await receivingService.createReceivingOperation(receivingRequest);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == ReceivingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Receiving submitted with warnings. Open the record for details.',
           );
@@ -308,7 +323,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
             context
-                .read<ReceivingOperationsCubit>()
+                .read<OperationSplitCubit>()
                 .setCreatedId(response.navigableOperationId);
           }
           widget.onEmbeddedActionSuccess!();
@@ -337,11 +352,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
   }
 
-  void _onItemAdded(EPCParseResult result) {
-    _addEpc(result.epc, showSuccessToast: true);
+  Future<void> _onItemAdded(EPCParseResult result) async {
+    await _addEpc(result.epc, showSuccessToast: true);
   }
 
-  bool _addEpc(String barcode, {bool showSuccessToast = false}) {
+  Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
     final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
     if (duplicate != null) {
       context.showError(
@@ -351,18 +366,32 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
 
     final type = OperationEpcScanValidator.resolveEpcType(barcode);
-    if (type == OperationScanItemType.unknown) {
-      context.showError(
-        'Only SGTIN, SSCC, and GTIN (lot-based) values are allowed for receiving.',
-      );
+    if (isRejectedOperationScanType(type)) {
+      context.showError(kSerializedEpcRequiredMessage);
       return false;
     }
 
     setState(() => _scannedEpcs.add(barcode));
+    await _loadSoftWarning(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
     }
     return true;
+  }
+
+  Future<void> _loadSoftWarning(String epc) async {
+    try {
+      final statusService = getIt<OperationEpcStatusService>();
+      final status = await statusService.getEpcStatus(epc);
+      if (!mounted || status == null) return;
+      if (!status.compatibleWithReceiving) {
+        setState(() => _itemWarnings[epc] = status.status);
+      } else {
+        setState(() => _itemWarnings.remove(epc));
+      }
+    } catch (_) {
+      // Soft warning is best-effort only.
+    }
   }
 
   @override
@@ -371,7 +400,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
       builder: (context, layout) {
         final usePanelLayout = widget.embedded || layout.isDesktopUp;
         if (usePanelLayout) {
-          return ReceivingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _scannedEpcs.isNotEmpty,
@@ -379,10 +408,12 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
             itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitReceivingOperation,
+            appBarTitle: 'New Receiving Operation',
+            submitLabel: 'Create Receiving Operation',
           );
         }
 
-        return ReceivingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -391,6 +422,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitReceivingOperation,
+          appBarTitle: 'Receiving Operation',
+          submitLabel: 'Create Receiving Operation',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

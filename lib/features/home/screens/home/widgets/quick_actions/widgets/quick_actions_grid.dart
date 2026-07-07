@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
@@ -80,9 +80,9 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       DashboardQuickAction(
         iconAsset: AppAssets.iconTrash,
-        title: HomeStrings.quickActionDecommissioning,
+        title: HomeStrings.quickActionUpdateStatus,
         color: Colors.redAccent,
-        route: HomeNavigation.opDecommissioningCreate,
+        route: HomeNavigation.opUpdateStatusCreate,
       ),
     ];
 

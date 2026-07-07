@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -756,7 +757,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                 _buildStatusItem(
                   'Last Sync',
                   _partner!.lastSyncAt != null 
-                      ? _formatDateTime(_partner!.lastSyncAt!)
+                      ? ApiUiUtils.formatDisplayDateTime(_partner!.lastSyncAt!)
                       : 'Never',
                   AppAssets.iconClock,
                 ),
@@ -770,14 +771,14 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                 const SizedBox(width: 32),
                 _buildStatusItem(
                   'Created',
-                  _formatDateTime(_partner!.createdAt),
+                  ApiUiUtils.formatDisplayDateTime(_partner!.createdAt),
                   AppAssets.iconCalendar,
                 ),
                 if (_partner!.updatedAt != null) ...[
                   const SizedBox(width: 32),
                   _buildStatusItem(
                     'Last Updated',
-                    _formatDateTime(_partner!.updatedAt!),
+                    ApiUiUtils.formatDisplayDateTime(_partner!.updatedAt!),
                     AppAssets.iconRefresh,
                   ),
                 ],
@@ -951,10 +952,6 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
         ),
       ],
     );
-  }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   void _savePartner() async {

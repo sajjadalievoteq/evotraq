@@ -22,7 +22,7 @@ import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_spli
 ///   @override
 ///   Widget build(BuildContext context) => OperationDesktopSplitScreen(
 ///     title: 'Decommissioning',
-///     createRoute: Constants.opDecommissioningCreateRoute,
+///     createRoute: Constants.opUpdateStatusCreateRoute,
 ///     listBuilder: ({
 ///       required embedded,
 ///       required selectedId,

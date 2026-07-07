@@ -1,4 +1,4 @@
-abstract final class HomeStrings {
+﻿abstract final class HomeStrings {
   static const appBarTitle = 'Home';
   static const unknownError = 'Unknown error';
   static const retry = 'Retry';
@@ -34,7 +34,7 @@ abstract final class HomeStrings {
   static const quickActionPacking = 'Packing';
   static const quickActionUnpacking = 'Unpacking';
   static const quickActionCommissioning = 'Commissioning';
-  static const quickActionDecommissioning = 'Decommissioning';
+  static const quickActionUpdateStatus = 'Update Status';
   static const quickActionUnavailable =
       'This action is not available right now.';
 

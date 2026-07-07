@@ -1,5 +1,5 @@
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 
 /// Utility class to handle EPC formatting between GS1 barcode format and EPC URI format
 class EPCFormatter {
@@ -19,11 +19,11 @@ class EPCFormatter {
     }
 
     if (trimmed.contains('(21)')) {
-      final parsed = GS1BarcodeParser.parseAIString(trimmed);
+      final parsed = Gs1Parser.parseAiString(trimmed);
       if (parsed != null &&
           parsed['GTIN'] != null &&
           parsed['SERIAL'] != null) {
-        return EPCURIConverter.convertGTINSerialToEPCUri(
+        return Gs1Converter.gtinSerialToEpc(
           parsed['GTIN']!,
           parsed['SERIAL']!,
         );

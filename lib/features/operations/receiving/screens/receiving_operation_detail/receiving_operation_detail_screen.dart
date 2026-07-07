@@ -1,146 +1,49 @@
-﻿import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
+﻿import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_content.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
-/// Screen to display Receiving operation details.
-class ReceivingOperationDetailScreen extends StatefulWidget {
-  const ReceivingOperationDetailScreen({
+final _receivingDetailConfig = OperationDetailScreenConfig<ReceivingResponse>(
+  loader: (id) => getIt<ReceivingOperationService>().getReceivingOperation(id),
+  contentBuilder: (
+    context, {
+    required awaitingSelection,
+    required listLoading,
+    required isLoading,
+    required errorMessage,
+    required operation,
+    required onRetry,
+    onOperationUpdated,
+  }) =>
+      ReceivingDetailContent(
+    awaitingSelection: awaitingSelection,
+    listLoading: listLoading,
+    isLoading: isLoading,
+    errorMessage: errorMessage,
+    operation: operation,
+    onRetry: onRetry,
+    onOperationUpdated: onOperationUpdated,
+  ),
+  titleBuilder: (op) => op.receivingReference ?? 'Receiving Detail',
+  listRoute: Constants.opReceivingRoute,
+  defaultTitle: 'Receiving Detail',
+  fallbackErrorMessage:
+      'Unable to load this Receiving operation. '
+      'Check your connection and tap Retry. '
+      'If the problem continues, the record may have been deleted or you may not have access to it.',
+);
+
+/// Screen to display receiving operation details.
+class ReceivingOperationDetailScreen
+    extends GenericOperationDetailScreen<ReceivingResponse> {
+  ReceivingOperationDetailScreen({
     super.key,
-    this.operationId,
-    this.embedded = false,
-    this.awaitingSelection = false,
-    this.listLoading = false,
-  });
-
-  final String? operationId;
-  final bool embedded;
-  final bool awaitingSelection;
-  final bool listLoading;
-
-  @override
-  State<ReceivingOperationDetailScreen> createState() =>
-      _ReceivingOperationDetailScreenState();
-}
-
-class _ReceivingOperationDetailScreenState
-    extends State<ReceivingOperationDetailScreen> {
-  ReceivingResponse? _operation;
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _startLoadIfNeeded();
-  }
-
-  @override
-  void didUpdateWidget(ReceivingOperationDetailScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final idChanged = oldWidget.operationId != widget.operationId;
-    final selectionOpened =
-        oldWidget.awaitingSelection && !widget.awaitingSelection;
-    if ((idChanged || selectionOpened) &&
-        widget.operationId != null &&
-        !widget.awaitingSelection) {
-      _startLoadIfNeeded(force: true);
-    }
-  }
-
-  void _startLoadIfNeeded({bool force = false}) {
-    if (widget.operationId == null || widget.awaitingSelection) return;
-    if (!force && _isLoading) return;
-    _isLoading = true;
-    _errorMessage = null;
-    _operation = null;
-    _loadOperationDetails();
-  }
-
-  Future<void> _loadOperationDetails() async {
-    final id = widget.operationId;
-    if (id == null) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _operation = null;
-    });
-
-    try {
-      final receivingService = getIt<ReceivingOperationService>();
-      final operation = await receivingService.getReceivingOperation(id);
-      setState(() => _operation = operation);
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Unable to load this Receiving operation. '
-            'Check your connection and tap Retry. '
-            'If the problem continues, the record may have been deleted or you may not have access to it.';
-      });
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  void _onOperationUpdated(ReceivingResponse updated) {
-    setState(() => _operation = updated);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final content = ReceivingDetailContent(
-      awaitingSelection: widget.awaitingSelection,
-      listLoading: widget.listLoading,
-      isLoading: _isLoading,
-      errorMessage: _errorMessage,
-      operation: _operation,
-      onRetry: _loadOperationDetails,
-      onOperationUpdated: _onOperationUpdated,
-    );
-
-    if (widget.embedded) return content;
-
-    if (_isLoading && _operation == null && _errorMessage == null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Loading…')),
-        body: content,
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Error')),
-        body: content,
-      );
-    }
-
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        leading: IconButton(
-          icon: TraqIcon(AppAssets.iconChevronL),
-          onPressed: () => context.go(Constants.opReceivingRoute),
-        ),
-        title: Text(_operation?.receivingReference ?? 'Receiving Detail'),
-        actions: [
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadOperationDetails,
-          ),
-        ],
-      ),
-      body: content,
-    );
-  }
+    super.operationId,
+    super.embedded = false,
+    super.awaitingSelection = false,
+    super.listLoading = false,
+  }) : super(config: _receivingDetailConfig);
 }

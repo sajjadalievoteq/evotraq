@@ -74,6 +74,22 @@ abstract final class OperationApiErrorMessage {
     return exception.getUserFriendlyMessage();
   }
 
+  static String epcConversionFailures(List<String> failedBarcodes) {
+    if (failedBarcodes.isEmpty) {
+      return 'One or more scanned values could not be converted to EPC URIs.';
+    }
+    final preview = failedBarcodes.take(5).join('\n• ');
+    final suffix = failedBarcodes.length > 5
+        ? '\n… and ${failedBarcodes.length - 5} more'
+        : '';
+    return 'Could not convert ${failedBarcodes.length} scan(s) to EPC URIs. '
+        'Use a registered SGTIN (GTIN + serial), SSCC, or lot-based GTIN barcode.\n'
+        '• $preview$suffix';
+  }
+
+  static String unexpected(String operationName, Object error) =>
+      'An unexpected error occurred while submitting $operationName: $error';
+
   /// Cleans a single backend validation line for display.
   static String? cleanLine(String? raw) {
     if (raw == null) return null;

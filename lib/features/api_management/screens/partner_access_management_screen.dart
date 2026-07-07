@@ -5,6 +5,7 @@ import '../models/api_collection.dart';
 import '../providers/partner_access_provider.dart';
 import '../cubit/api_collection_cubit.dart';
 import '../cubit/api_management_cubit.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -344,7 +345,7 @@ class _PartnerAccessManagementScreenState
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: _getMethodColor(access.httpMethod),
+                              color: ApiUiUtils.methodColor(access.httpMethod),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -535,27 +536,6 @@ class _PartnerAccessManagementScreenState
         access.collectionId,
       );
     }
-  }
-
-  Color _getMethodColor(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return Colors.blue;
-      case 'POST':
-        return Colors.green;
-      case 'PUT':
-        return Colors.orange;
-      case 'PATCH':
-        return Colors.teal;
-      case 'DELETE':
-        return Colors.red;
-      default:
-        return Colors.purple;
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   void _showGrantCollectionAccessDialog() {
@@ -780,7 +760,7 @@ class _PartnerAccessManagementScreenState
                                                       vertical: 2,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: _getMethodColor(
+                                                  color: ApiUiUtils.methodColor(
                                                     api.httpMethod,
                                                   ),
                                                   borderRadius:
@@ -853,7 +833,7 @@ class _PartnerAccessManagementScreenState
                             icon: TraqIcon(AppAssets.iconClock),
                             label: Text(
                               validFrom != null
-                                  ? _formatDate(validFrom!)
+                                  ? ApiUiUtils.formatDate(validFrom!)
                                   : 'Valid From',
                             ),
                           ),
@@ -879,7 +859,7 @@ class _PartnerAccessManagementScreenState
                             icon: const TraqIcon(AppAssets.iconCalendar),
                             label: Text(
                               validUntil != null
-                                  ? _formatDate(validUntil!)
+                                  ? ApiUiUtils.formatDate(validUntil!)
                                   : 'Valid Until',
                             ),
                           ),
@@ -1141,14 +1121,16 @@ class _ExpandableCollectionAccessCardState
                     if (access.validFrom != null)
                       Chip(
                         avatar: TraqIcon(AppAssets.iconClock, size: 16),
-                        label: Text('From: ${_formatDate(access.validFrom!)}'),
+                        label: Text(
+                          'From: ${ApiUiUtils.formatDate(access.validFrom!)}',
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                     if (access.validUntil != null)
                       Chip(
                         avatar: const TraqIcon(AppAssets.iconCalendar, size: 16),
                         label: Text(
-                          'Until: ${_formatDate(access.validUntil!)}',
+                          'Until: ${ApiUiUtils.formatDate(access.validUntil!)}',
                         ),
                         visualDensity: VisualDensity.compact,
                       ),
@@ -1292,7 +1274,7 @@ class _ExpandableCollectionAccessCardState
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: _getMethodColor(api.httpMethod),
+                        color: ApiUiUtils.methodColor(api.httpMethod),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -1447,7 +1429,7 @@ class _ExpandableCollectionAccessCardState
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: _getMethodColor(api.httpMethod),
+                                color: ApiUiUtils.methodColor(api.httpMethod),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1512,24 +1494,4 @@ class _ExpandableCollectionAccessCardState
     );
   }
 
-  Color _getMethodColor(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return Colors.blue;
-      case 'POST':
-        return Colors.green;
-      case 'PUT':
-        return Colors.orange;
-      case 'PATCH':
-        return Colors.teal;
-      case 'DELETE':
-        return Colors.red;
-      default:
-        return Colors.purple;
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
 }

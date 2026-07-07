@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
-import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_record_info_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/widgets/sscc_results_list.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 
 class SsccListBody extends StatelessWidget {
   const SsccListBody({
@@ -27,7 +24,7 @@ class SsccListBody extends StatelessWidget {
     required this.onShowFilterDialog,
     required this.onShowAdvancedFiltersDialog,
     required this.onPageSizeChanged,
-    required this.onToggleSortDirection,
+    required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapSscc,
@@ -49,7 +46,7 @@ class SsccListBody extends StatelessWidget {
   final VoidCallback onShowFilterDialog;
   final VoidCallback onShowAdvancedFiltersDialog;
   final ValueChanged<int> onPageSizeChanged;
-  final VoidCallback onToggleSortDirection;
+  final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapSscc;
@@ -81,6 +78,12 @@ class SsccListBody extends StatelessWidget {
                       onRefresh: onSearchImmediate,
                       onQuickFilters: onShowFilterDialog,
                       onToggleAdvancedFilters: onShowAdvancedFiltersDialog,
+                      sortTooltip: sortLabel,
+                      sortOrder: sortDirection.toLowerCase(),
+                      onSortOrderChanged: onSortOrderChanged,
+                      pageSize: pageSize,
+                      pageSizeOptions: SsccUiConstants.pageSizeOptions,
+                      onPageSizeChanged: onPageSizeChanged,
                       onClear: () {
                         searchDebouncer.cancel();
                         searchController.clear();
@@ -88,16 +91,6 @@ class SsccListBody extends StatelessWidget {
                       },
                     );
                   },
-                ),
-                SsccRecordInfoSection(
-                  pageSize: pageSize,
-                  onPageSizeChanged: onPageSizeChanged,
-                ),
-                SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: sortLabel,
-                  sortOrder: sortDirection.toLowerCase(),
-                  onToggleSortOrder: onToggleSortDirection,
                 ),
               ],
             ),

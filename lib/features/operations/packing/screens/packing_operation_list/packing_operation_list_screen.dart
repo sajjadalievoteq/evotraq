@@ -1,27 +1,29 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/utils/packing_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_advanced_filters_panel.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_operation_list_results.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_quick_filter_dialog.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/widgets/packing_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/packing/utils/packing_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 /// Screen to list all packing operations with search capabilities.
-class PackingOperationListScreen extends StatefulWidget {
+class PackingOperationListScreen extends StatelessWidget {
   const PackingOperationListScreen({
     super.key,
     this.embedded = false,
@@ -36,34 +38,63 @@ class PackingOperationListScreen extends StatefulWidget {
   final ValueChanged<bool>? onLoadingChanged;
 
   @override
-  State<PackingOperationListScreen> createState() =>
-      _PackingOperationListScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OperationsCubit<Operation>(
+        loadErrorMessage:
+            'Could not load packing operations. Check your connection and tap Retry.',
+        loadMoreErrorMessage:
+            'Could not load more operations. Check your connection and try again.',
+        fetchList: ({required int page, required int size}) async {
+          final pageResult = await getIt<PackingOperationService>()
+              .getPackingOperationsPage(page: page, size: size);
+          return pageResult.map((r) => r.toOperation());
+        },
+      )..loadInitial(),
+      child: _PackingOperationListBody(
+        embedded: embedded,
+        onSelectOperation: onSelectOperation,
+        selectedOperationId: selectedOperationId,
+        onLoadingChanged: onLoadingChanged,
+      ),
+    );
+  }
 }
 
-class _PackingOperationListScreenState extends State<PackingOperationListScreen> {
+class _PackingOperationListBody extends StatefulWidget {
+  const _PackingOperationListBody({
+    required this.embedded,
+    this.onSelectOperation,
+    this.selectedOperationId,
+    this.onLoadingChanged,
+  });
+
+  final bool embedded;
+  final ValueChanged<String>? onSelectOperation;
+  final String? selectedOperationId;
+  final ValueChanged<bool>? onLoadingChanged;
+
+  @override
+  State<_PackingOperationListBody> createState() =>
+      _PackingOperationListBodyState();
+}
+
+class _PackingOperationListBodyState extends State<_PackingOperationListBody> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _containerFilterController =
       TextEditingController();
   final _scrollController = ScrollController();
 
-  List<PackingResponse> _operations = [];
-  int _totalRecords = 0;
-  List<PackingResponse> _filteredOperations = [];
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
-  bool _isLoading = false;
-  bool _isLoadingMore = false;
-  bool _hasMore = false;
-  int _currentPage = 0;
   bool _initialLoadDone = false;
-  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterOperations);
-    _loadOperations();
+    _searchController.addListener(_onFiltersChanged);
+    _containerFilterController.addListener(_onFiltersChanged);
   }
 
   @override
@@ -74,7 +105,7 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
       return;
     }
     if (!widget.embedded) {
-      _loadOperations();
+      context.read<OperationsCubit<Operation>>().refresh();
     }
   }
 
@@ -84,6 +115,21 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
     _containerFilterController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onFiltersChanged() => setState(() {});
+
+  void _filterOperations() => setState(() {});
+
+  List<Operation> _filteredOperations(List<Operation> operations) {
+    return PackingOperationListFilter.applyToOperations(
+      operations: operations,
+      query: _searchController.text,
+      statusFilter: _selectedStatus,
+      containerFilter: _containerFilterController.text,
+      sortBy: _sortBy,
+      sortDir: _sortDir,
+    );
   }
 
   void _showFilterDialog() {
@@ -133,13 +179,6 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
     );
   }
 
-  void _toggleSortDirection() {
-    setState(() {
-      _sortDir = _sortDir == 'asc' ? 'desc' : 'asc';
-    });
-    _filterOperations();
-  }
-
   String _sortFieldDisplayLabel() {
     return PackingUiConstants.sortFieldLabels[_sortBy] ??
         PackingUiConstants.sortFieldFallback;
@@ -156,92 +195,7 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
     _filterOperations();
   }
 
-  Future<void> _loadOperations() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _currentPage = 0;
-    });
-    widget.onLoadingChanged?.call(true);
-
-    try {
-      final packingService = getIt<PackingOperationService>();
-      final page = await packingService.getPackingOperationsPage(page: 0);
-      setState(() {
-        _operations = page.operations;
-        _totalRecords = page.total;
-        _hasMore = page.totalPages > 1;
-      });
-      _filterOperations();
-      if (widget.embedded &&
-          widget.selectedOperationId == null &&
-          _filteredOperations.isNotEmpty) {
-        final firstId = _filteredOperations.first.navigableOperationId;
-        if (firstId != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            widget.onSelectOperation?.call(firstId);
-          });
-        }
-      }
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load packing operations. Check your connection and tap Retry.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
-      widget.onLoadingChanged?.call(false);
-    }
-  }
-
-  Future<void> _loadMoreOperations() async {
-    if (_isLoadingMore || !_hasMore) return;
-    setState(() => _isLoadingMore = true);
-
-    try {
-      final packingService = getIt<PackingOperationService>();
-      final nextPage = _currentPage + 1;
-      final page = await packingService.getPackingOperationsPage(page: nextPage);
-      setState(() {
-        _operations = [..._operations, ...page.operations];
-        _totalRecords = page.total;
-        _currentPage = nextPage;
-        _hasMore = nextPage + 1 < page.totalPages;
-      });
-      _filterOperations();
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load more operations. Check your connection and try again.';
-      });
-    } finally {
-      setState(() => _isLoadingMore = false);
-    }
-  }
-
-  void _filterOperations() {
-    setState(() {
-      _filteredOperations = PackingOperationListFilter.apply(
-        operations: _operations,
-        query: _searchController.text,
-        statusFilter: _selectedStatus,
-        containerFilter: _containerFilterController.text,
-        sortBy: _sortBy,
-        sortDir: _sortDir,
-      );
-    });
-  }
-
-  void _navigateToDetail(PackingResponse operation) {
+  void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
     if (widget.embedded && widget.onSelectOperation != null) {
@@ -258,94 +212,125 @@ class _PackingOperationListScreenState extends State<PackingOperationListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final body = Gs1MasterListBody(
-      toolbar: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: context.horizontalPadding.left,
-              left: context.horizontalPadding.left,
-              right: context.horizontalPadding.left,
-            ),
-            child: Column(
-              children: [
-                ListenableBuilder(
-                  listenable: Listenable.merge([
-                    _searchController,
-                    _containerFilterController,
-                  ]),
-                  builder: (context, _) {
-                    return Gs1ListSearchBar(
-                      hintText: PackingUiConstants.listSearchHint,
-                      controller: _searchController,
-                      showAdvancedFilters: _hasActiveAdvancedFilters ||
-                          _selectedStatus != null,
-                      onSearch: _filterOperations,
-                      onQueryChanged: (_) => _filterOperations(),
-                      onRefresh: _loadOperations,
-                      onQuickFilters: _showFilterDialog,
-                      onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                      onClear: () {
-                        _searchController.clear();
-                        _filterOperations();
+    return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      listener: (context, state) {
+        widget.onLoadingChanged?.call(state.isLoading);
+
+        if (widget.embedded &&
+            widget.selectedOperationId == null &&
+            !state.isLoading &&
+            state.errorMessage == null) {
+          final filtered = _filteredOperations(state.items);
+          if (filtered.isNotEmpty) {
+            final firstId = filtered.first.navigableOperationId;
+            if (firstId != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                widget.onSelectOperation?.call(firstId);
+              });
+            }
+          }
+        }
+      },
+      builder: (context, state) {
+        final filtered = _filteredOperations(state.items);
+        final cubit = context.read<OperationsCubit<Operation>>();
+
+        final body = Gs1MasterListBody(
+          toolbar: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  top: context.horizontalPadding.left,
+                  left: context.horizontalPadding.left,
+                  right: context.horizontalPadding.left,
+                ),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _searchController,
+                        _containerFilterController,
+                      ]),
+                      builder: (context, _) {
+                        return Gs1ListSearchBar(
+                          hintText: PackingUiConstants.listSearchHint,
+                          controller: _searchController,
+                          showAdvancedFilters: _hasActiveAdvancedFilters ||
+                              _selectedStatus != null,
+                          onSearch: _filterOperations,
+                          onQueryChanged: (_) => _filterOperations(),
+                          onRefresh: cubit.refresh,
+                          onQuickFilters: _showFilterDialog,
+                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                          onClear: () {
+                            _searchController.clear();
+                            _filterOperations();
+                          },
+                          sortTooltip: PackingUiConstants.sortByLine(
+                            _sortFieldDisplayLabel(),
+                            _sortDir == 'asc'
+                                ? PackingUiConstants.sortAscendingLabel
+                                : PackingUiConstants.sortDescendingLabel,
+                          ),
+                          sortOrder: _sortDir,
+                          onSortOrderChanged: (order) {
+                            if (_sortDir != order) {
+                              setState(() => _sortDir = order);
+                              _filterOperations();
+                            }
+                          },
+                        );
                       },
-                    );
-                  },
+                    ),
+                  ],
                 ),
-                PackingRecordInfoSection(
-                  loadedRecords: _operations.length,
-                  filteredRecords: _filteredOperations.length,
-                  totalRecords: _totalRecords,
-                ),
-                const SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: PackingUiConstants.sortByLine(
-                    _sortFieldDisplayLabel(),
-                    _sortDir == 'asc'
-                        ? PackingUiConstants.sortAscendingLabel
-                        : PackingUiConstants.sortDescendingLabel,
-                  ),
-                  sortOrder: _sortDir,
-                  onToggleSortOrder: _toggleSortDirection,
-                ),
-              ],
+              ),
+            ],
+          ),
+          results: OperationListResults<Operation>(
+            scrollController: _scrollController,
+            isLoading: state.isLoading,
+            errorMessage: state.errorMessage,
+            operations: state.items,
+            filteredOperations: filtered,
+            hasActiveFilters:
+                _selectedStatus != null || _hasActiveAdvancedFilters,
+            onRetry: cubit.refresh,
+            onRefresh: cubit.refresh,
+            onClearFilters: _clearAllFilters,
+            emptyTitle: 'No packing operations yet',
+            emptySubtitle:
+                'Tap the + button to create your first packing operation.',
+            hasMore: state.hasMore,
+            isLoadingMore: state.isLoadingMore,
+            onLoadMore: cubit.loadMore,
+            itemBuilder: (context, operation) =>
+                OperationListCardBuilders.forOperation(
+              operation: operation,
+              isSelected: widget.embedded &&
+                  operation.navigableOperationId != null &&
+                  operation.navigableOperationId ==
+                      widget.selectedOperationId,
+              onTap: () => _navigateToDetail(operation),
             ),
           ),
-        ],
-      ),
-      results: PackingOperationListResults(
-        scrollController: _scrollController,
-        isLoading: _isLoading,
-        errorMessage: _errorMessage,
-        operations: _operations,
-        filteredOperations: _filteredOperations,
-        hasActiveFilters:
-            _selectedStatus != null || _hasActiveAdvancedFilters,
-        embedded: widget.embedded,
-        selectedOperationId: widget.selectedOperationId,
-        onRetry: _loadOperations,
-        onRefresh: _loadOperations,
-        onClearFilters: _clearAllFilters,
-        onOperationTap: _navigateToDetail,
-        hasMore: _hasMore,
-        isLoadingMore: _isLoadingMore,
-        onLoadMore: _loadMoreOperations,
-      ),
-    );
+        );
 
-    if (widget.embedded) return body;
+        if (widget.embedded) return body;
 
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        title: const Text('Packing Operation'),
-      ),
-      drawer: const AppDrawer(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go(Constants.opPackingCreateRoute),
-        label: TraqIcon(AppAssets.iconPlus),
-      ),
-      body: body,
+        return Scaffold(
+          appBar: TraqAppBar(
+            context,
+            title: const Text('Packing Operation'),
+          ),
+          drawer: const AppDrawer(),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => context.go(Constants.opPackingCreateRoute),
+            label: TraqIcon(AppAssets.iconPlus),
+          ),
+          body: body,
+        );
+      },
     );
   }
 }

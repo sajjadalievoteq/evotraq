@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_serial_item_row.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 
 class CommissioningDetailSerialNumbersCard extends StatefulWidget {
   const CommissioningDetailSerialNumbersCard({
@@ -35,7 +35,7 @@ class _CommissioningDetailSerialNumbersCardState
         ? widget.items
         : widget.items.take(widget.initialDisplayCount).toList();
 
-    return CommissioningDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Serial Numbers (${widget.items.length})',
       children: [
         if (failedItems.isNotEmpty)

@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
-import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_type_utils.dart';
 
 /// Step 3: review all Receiving details before submission.
 class ReceivingReviewStep extends StatelessWidget {
@@ -41,24 +41,6 @@ class ReceivingReviewStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
-    String epcTypeLabel(String value) {
-      return switch (OperationEpcScanValidator.resolveEpcType(value)) {
-        OperationScanItemType.sgtin => 'SGTIN',
-        OperationScanItemType.sscc => 'SSCC',
-        OperationScanItemType.gtin => 'GTIN',
-        OperationScanItemType.unknown => 'EPC',
-      };
-    }
-
-    Color epcTypeColor(String value) {
-      return switch (OperationEpcScanValidator.resolveEpcType(value)) {
-        OperationScanItemType.sgtin => Colors.blue,
-        OperationScanItemType.sscc => Colors.teal,
-        OperationScanItemType.gtin => Colors.orange,
-        OperationScanItemType.unknown => Colors.grey,
-      };
-    }
-
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       padding: ResponsiveUtils.paddingAll(context),
@@ -158,7 +140,9 @@ class ReceivingReviewStep extends StatelessWidget {
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final epc = scannedEpcs[index];
-                        final badgeColor = epcTypeColor(epc);
+                        final badgeColor = OperationEpcTypeUtils.colorFromValue(
+                          epc,
+                        );
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -192,7 +176,7 @@ class ReceivingReviewStep extends StatelessWidget {
                                       ),
                                     ),
                                     child: Text(
-                                      epcTypeLabel(epc),
+                                      OperationEpcTypeUtils.labelFromValue(epc),
                                       style: TextStyle(
                                         color: badgeColor,
                                         fontWeight: FontWeight.w600,

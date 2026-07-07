@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -78,7 +79,7 @@ class StorageUtilizationChart extends StatelessWidget {
           return _buildLegendItem(
             entry.key,
             entry.value,
-            _getEventTypeColor(entry.key),
+            AdminEventVisualizationUtils.eventTypeColor(entry.key),
           );
         }).toList(),
       ],
@@ -237,7 +238,7 @@ class StorageUtilizationChart extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: _getPartitionColor(entry.key),
+                    color: AdminEventVisualizationUtils.partitionColor(entry.key),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -254,34 +255,6 @@ class StorageUtilizationChart extends StatelessWidget {
     );
   }
 
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toUpperCase()) {
-      case 'OBJECT':
-        return Colors.blue;
-      case 'AGGREGATION':
-        return Colors.green;
-      case 'TRANSACTION':
-        return Colors.red;
-      case 'TRANSFORMATION':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getPartitionColor(String partition) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.red,
-      Colors.purple,
-      Colors.orange,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-    ];
-    return colors[partition.hashCode % colors.length];
-  }
 }
 
 class PieChartPainter extends CustomPainter {
@@ -303,7 +276,7 @@ class PieChartPainter extends CustomPainter {
     for (final entry in eventTypeDistribution.entries) {
       final sweepAngle = (entry.value / 100) * 2 * 3.14159;
       
-      paint.color = _getEventTypeColor(entry.key);
+      paint.color = AdminEventVisualizationUtils.eventTypeColor(entry.key);
       
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
@@ -362,21 +335,6 @@ class PieChartPainter extends CustomPainter {
     return textPainter;
   }
 
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toUpperCase()) {
-      case 'OBJECT':
-        return Colors.blue;
-      case 'AGGREGATION':
-        return Colors.green;
-      case 'TRANSACTION':
-        return Colors.red;
-      case 'TRANSFORMATION':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
@@ -402,7 +360,7 @@ class PartitionBarChartPainter extends CustomPainter {
       final x = index * (barWidth + barSpacing) + barSpacing / 2;
       final y = size.height - barHeight - 10;
 
-      paint.color = _getPartitionColor(entry.key);
+      paint.color = AdminEventVisualizationUtils.partitionColor(entry.key);
 
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -414,20 +372,6 @@ class PartitionBarChartPainter extends CustomPainter {
 
       index++;
     }
-  }
-
-  Color _getPartitionColor(String partition) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.red,
-      Colors.purple,
-      Colors.orange,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-    ];
-    return colors[partition.hashCode % colors.length];
   }
 
   @override

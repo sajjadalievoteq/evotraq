@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
@@ -38,7 +39,7 @@ class CommissioningOperationService {
           DateTime.now().difference(startTime).inMilliseconds;
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = jsonDecode(response.data) as Map<String, dynamic>;
+        final data = decodeApiResponseMap(response.data);
 
         final rawItems = data['itemResults'] as List<dynamic>? ?? [];
         final itemResults = rawItems.map((item) {
@@ -107,7 +108,7 @@ class CommissioningOperationService {
       } else {
         String errorMsg;
         try {
-          final errorData = jsonDecode(response.data) as Map<String, dynamic>;
+          final errorData = decodeApiResponseMap(response.data);
           errorMsg = errorData['message'] as String? ??
               errorData['error'] as String? ??
               'Commissioning failed (HTTP ${response.statusCode})';
@@ -160,7 +161,7 @@ class CommissioningOperationService {
         acceptAllStatusCodes: true,
       );
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.data) as Map<String, dynamic>;
+        final data = decodeApiResponseMap(response.data);
         final content = data['content'] as List<dynamic>? ?? [];
         final isLast = data['last'] as bool? ?? true;
         final batches = content
@@ -176,7 +177,7 @@ class CommissioningOperationService {
   }
 
   Future<List<CommissioningResponse>> getCommissioningOperations() async {
-    const bizStep = 'urn:epcglobal:cbv:bizstep:commissioning';
+    const bizStep = 'commissioning'; // short name — backend normalises to both URI forms
     try {
       final response = await _dioService.get(
         '$_baseUrl/events/object/business-step/$bizStep',
@@ -186,7 +187,7 @@ class CommissioningOperationService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.data);
+        final data = decodeApiResponseBody(response.data);
         final List<dynamic> content = data is List ? data : (data['content'] ?? []);
 
         return content
@@ -212,7 +213,7 @@ class CommissioningOperationService {
       );
 
       if (response.statusCode == 200) {
-        final event = jsonDecode(response.data);
+        final event = decodeApiResponseBody(response.data);
         return _parseObjectEventToCommissioningResponse(event);
       }
       return null;
@@ -311,7 +312,7 @@ class CommissioningOperationService {
         acceptAllStatusCodes: true,
       );
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.data) as Map<String, dynamic>;
+        final data = decodeApiResponseMap(response.data);
         return CommissioningBatch.fromJson(data);
       }
       return null;
@@ -330,7 +331,7 @@ class CommissioningOperationService {
         acceptAllStatusCodes: true,
       );
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.data) as List<dynamic>;
+        final data = decodeApiResponseList(response.data);
         return data
             .map((e) => CommissioningBatchItem.fromJson(e as Map<String, dynamic>))
             .toList();

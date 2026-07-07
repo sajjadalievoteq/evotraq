@@ -35,7 +35,7 @@ abstract final class HomeNavigation {
   static const String opUnpackingCreate = Constants.opUnpackingCreateRoute;
   static const String opCommissioning = Constants.opCommissioningRoute;
   static const String opCommissioningNew = Constants.opCommissioningNewRoute;
-  static const String opDecommissioning = Constants.opDecommissioningRoute;
-  static const String opDecommissioningCreate =
-      Constants.opDecommissioningCreateRoute;
+  static const String opUpdateStatus = Constants.opUpdateStatusRoute;
+  static const String opUpdateStatusCreate =
+      Constants.opUpdateStatusCreateRoute;
 }

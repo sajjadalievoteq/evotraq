@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
@@ -39,17 +39,18 @@ import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
-import '../../data/services/product_journey_service.dart';
+import 'package:traqtrace_app/data/services/product_journey/product_journey_service.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/operations/decommissioning/decommissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/update_status/update_status_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
@@ -181,6 +182,9 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<ReturnReceivingOperationService>(
     () => ReturnReceivingOperationService(dioService: getIt<DioService>()),
   );
+  getIt.registerLazySingleton<OperationEpcStatusService>(
+    () => OperationEpcStatusService(dioService: getIt<DioService>()),
+  );
 
   getIt.registerLazySingleton<HierarchyService>(
     () => HierarchyService(dioService: getIt<DioService>()),
@@ -194,8 +198,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => UnpackingOperationService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<DecommissioningOperationService>(
-    () => DecommissioningOperationService(dioService: getIt<DioService>()),
+  getIt.registerLazySingleton<UpdateStatusOperationService>(
+    () => UpdateStatusOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<CommissioningOperationService>(

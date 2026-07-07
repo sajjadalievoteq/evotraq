@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -68,7 +69,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
             icon: const TraqIcon(AppAssets.iconCalendar, color: Colors.white),
             label: Text(
               _dateRange != null
-                  ? '${_formatDate(_dateRange!.start)} - ${_formatDate(_dateRange!.end)}'
+                  ? '${ApiUiUtils.formatDate(_dateRange!.start)} - ${ApiUiUtils.formatDate(_dateRange!.end)}'
                   : 'Select Range',
               style: const TextStyle(color: Colors.white),
             ),
@@ -394,7 +395,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: _getMethodColor(log.httpMethod).withOpacity(0.1),
+            color: ApiUiUtils.methodColor(log.httpMethod).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -403,7 +404,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 10,
-                color: _getMethodColor(log.httpMethod),
+                color: ApiUiUtils.methodColor(log.httpMethod),
               ),
             ),
           ),
@@ -437,7 +438,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
         subtitle: Row(
           children: [
             Text(
-              _formatDateTime(log.timestamp),
+              ApiUiUtils.formatDateTime(log.timestamp),
               style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
             ),
             const SizedBox(width: 8),
@@ -507,31 +508,6 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
         fontWeight: FontWeight.bold,
       ),
     );
-  }
-
-  Color _getMethodColor(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return Colors.blue;
-      case 'POST':
-        return Colors.green;
-      case 'PUT':
-        return Colors.orange;
-      case 'DELETE':
-        return Colors.red;
-      case 'PATCH':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${_formatDate(dateTime)} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _selectDateRange() async {

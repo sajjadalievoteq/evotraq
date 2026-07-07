@@ -169,4 +169,17 @@ class AppAssets {
   static const String iconBrokenImage = '$_traqIcons/broken-image.svg';
   static const String iconArchitecture = '$_traqIcons/architecture.svg';
   static const String iconSensorsOff = '$_traqIcons/sensors-off.svg';
+
+  // Product journey — biz-step icons
+  static const String iconUnpacking = '$_traqIcons/unpacking.svg';
+  static const String iconPackingSealed = '$_traqIcons/packing-sealed.svg';
+  static const String iconAccepting = '$_traqIcons/accepting.svg';
+  static const String iconReturning = '$_traqIcons/returning.svg';
+  static const String iconReceivingInbound = '$_traqIcons/receiving-inbound.svg';
+  static const String iconInspecting = '$_traqIcons/inspecting.svg';
+  static const String iconLoadingCargo = '$_traqIcons/loading-cargo.svg';
+  static const String iconUnloadingCargo = '$_traqIcons/unloading-cargo.svg';
+  static const String iconDecommissioning = '$_traqIcons/decommissioning.svg';
+  static const String iconHolding = '$_traqIcons/holding.svg';
+  static const String iconDispatching = '$_traqIcons/dispatching.svg';
 }

@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class ReturnReceivingResponse {
@@ -19,6 +19,7 @@ class ReturnReceivingResponse {
     this.receivingAdviceNumber,
     this.invoiceNumber,
     this.billOfLadingNumber,
+    this.gincNumber,
     this.carrier,
     this.trackingNumber,
     this.comments,
@@ -31,7 +32,7 @@ class ReturnReceivingResponse {
   List<String>? eventIds;
   int? processedEpcsCount;
   List<String>? epcList;
-  ReturnReceivingStatus? status;
+  OperationStatus? status;
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
@@ -42,6 +43,7 @@ class ReturnReceivingResponse {
   String? receivingAdviceNumber;
   String? invoiceNumber;
   String? billOfLadingNumber;
+  String? gincNumber;
   String? carrier;
   String? trackingNumber;
   String? comments;
@@ -71,10 +73,10 @@ class ReturnReceivingResponse {
           epcList?.length,
       epcList: epcList,
       status: json['status'] != null
-          ? parseReturnReceivingStatus(json['status'].toString())
+          ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())
+          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
           : null,
       sourceGLN: _str(json['sourceGLN']),
       receivingGLN: _str(json['receivingGLN']),
@@ -85,6 +87,7 @@ class ReturnReceivingResponse {
       receivingAdviceNumber: _str(json['receivingAdviceNumber']),
       invoiceNumber: _str(json['invoiceNumber']),
       billOfLadingNumber: _str(json['billOfLadingNumber']),
+      gincNumber: _str(json['gincNumber']),
       carrier: _str(json['carrier']),
       trackingNumber: _str(json['trackingNumber']),
       comments: _str(json['comments']),
@@ -106,11 +109,11 @@ class ReturnReceivingResponse {
     return eventIds?.isNotEmpty == true ? _str(eventIds!.first) : null;
   }
 
-  bool get isSuccess => status == ReturnReceivingStatus.success;
+  bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == ReturnReceivingStatus.success ||
-      status == ReturnReceivingStatus.partialSuccess;
+      status == OperationStatus.success ||
+      status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == ReturnReceivingStatus.failed ||
-      status == ReturnReceivingStatus.validationError;
+      status == OperationStatus.failed ||
+      status == OperationStatus.validationError;
 }

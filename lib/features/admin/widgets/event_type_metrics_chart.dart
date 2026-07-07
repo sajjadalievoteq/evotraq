@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
 import '../models/monitoring_models.dart';
 
 class EventTypeMetricsChart extends StatelessWidget {
@@ -134,7 +136,7 @@ class EventTypeMetricsChart extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: _getEventTypeColor(eventType),
+              color: AdminEventVisualizationUtils.eventTypeColor(eventType),
               shape: BoxShape.circle,
             ),
           ),
@@ -190,7 +192,9 @@ class EventTypeMetricsChart extends StatelessWidget {
                   '${metrics.successRate.toStringAsFixed(1)}%',
                   style: TextStyle(
                     fontSize: 12,
-                    color: _getSuccessRateColor(metrics.successRate),
+                    color: AdminHelperMappers.successRateColor(
+                      metrics.successRate,
+                    ),
                   ),
                 ),
                 Text(
@@ -248,26 +252,6 @@ class EventTypeMetricsChart extends StatelessWidget {
     );
   }
 
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toUpperCase()) {
-      case 'OBJECT':
-        return Colors.blue;
-      case 'AGGREGATION':
-        return Colors.green;
-      case 'TRANSACTION':
-        return Colors.red;
-      case 'TRANSFORMATION':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getSuccessRateColor(double successRate) {
-    if (successRate >= 95) return Colors.green;
-    if (successRate >= 90) return Colors.orange;
-    return Colors.red;
-  }
 }
 
 class BarChartPainter extends CustomPainter {
@@ -322,7 +306,7 @@ class BarChartPainter extends CustomPainter {
       final x = 60 + (chartWidth / eventTypes.length) * i + barSpacing / 2;
       final y = chartHeight + 10 - barHeight;
 
-      paint.color = _getEventTypeColor(eventType);
+      paint.color = AdminEventVisualizationUtils.eventTypeColor(eventType);
 
       final rect = Rect.fromLTWH(x, y, barWidth, barHeight);
       canvas.drawRRect(
@@ -406,21 +390,6 @@ class BarChartPainter extends CustomPainter {
     return eventType.length > 8 
         ? '${eventType.substring(0, 8)}...' 
         : eventType;
-  }
-
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toUpperCase()) {
-      case 'OBJECT':
-        return Colors.blue;
-      case 'AGGREGATION':
-        return Colors.green;
-      case 'TRANSACTION':
-        return Colors.red;
-      case 'TRANSFORMATION':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
   }
 
   @override

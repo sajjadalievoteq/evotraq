@@ -1,22 +1,22 @@
-import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
 
 abstract final class CommissioningUiConstants {
   static const entityPluralOperations = 'operations';
-  static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;  static const filterAll = 'ALL';
-
   static const listSearchHint =
       'Search by reference, GTIN, lot number, location...';
-
-  static const quickFiltersTitle = 'Quick Filters';
-  static const advancedFiltersTitle = 'Advanced Filters';
-  static const filterSectionStatus = 'Status';
-
-  static const buttonApply = 'Apply';
-  static const buttonCancel = 'Cancel';
-  static const buttonClearFilters = 'Clear Filters';
-
   static const quickFiltersFooterHint =
       'Status filters apply to loaded results. Use Advanced Filters to filter by GTIN on the server.';
+
+  static const List<int> pageSizeOptions = OperationUiConstants.pageSizeOptions;
+  static const filterAll = OperationUiConstants.filterAll;
+
+  static const quickFiltersTitle = OperationUiConstants.quickFiltersTitle;
+  static const advancedFiltersTitle = OperationUiConstants.advancedFiltersTitle;
+  static const filterSectionStatus = OperationUiConstants.filterSectionStatus;
+
+  static const buttonApply = OperationUiConstants.buttonApply;
+  static const buttonCancel = OperationUiConstants.buttonCancel;
+  static const buttonClearFilters = OperationUiConstants.buttonClearFilters;
 
   static const statusFilterOptions = <String>[
     filterAll,
@@ -39,10 +39,10 @@ abstract final class CommissioningUiConstants {
     };
   }
 
-  static const sortAscendingLabel = 'Oldest';
-  static const sortDescendingLabel = 'Newest';
+  static const sortAscendingLabel = OperationUiConstants.sortAscendingLabel;
+  static const sortDescendingLabel = OperationUiConstants.sortDescendingLabel;
   static const sortFieldFallback = 'date created';
-  static const labelSortResultsBy = 'Sort results by';
+  static const labelSortResultsBy = OperationUiConstants.labelSortResultsBy;
 
   static const Map<String, String> sortFieldLabels = {
     'createdAt': 'Date Created',
@@ -53,5 +53,5 @@ abstract final class CommissioningUiConstants {
   };
 
   static String sortByLine(String fieldLabel, String orderSpan) =>
-      'Sort by $fieldLabel ($orderSpan)';
+      OperationUiConstants.sortByLine(fieldLabel, orderSpan);
 }

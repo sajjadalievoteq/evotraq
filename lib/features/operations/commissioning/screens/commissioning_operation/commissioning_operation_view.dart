@@ -3,22 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
-import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
-import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_field_validators.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_clear_serials_dialog.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_gtin_not_found_dialog.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_step1_product_details.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_submit_error_message.dart';
@@ -28,8 +26,6 @@ import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.d
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_partial_success_choice.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_partial_success_result.dart';
 import 'widgets/commissioning_partial_success_dialog.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
 class CommissioningOperationView extends StatefulWidget {
   const CommissioningOperationView({super.key});
@@ -634,49 +630,46 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        title: Text(
-          'Commissioning',
-          style: context.text.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-          ),
-        ),
-      ),
-      drawer: const AppDrawer(),
-      body: LoadingOverlay(
-        isLoading: _isLoading,
-        child: AppLayoutBuilder(
-          builder: (context, layout) => layout.isDesktopUp
-              ? CommissioningOperationDesktopLayout(
-                  step1Complete: _isStep1Valid,
-                  step2Complete: _isStep2Valid,
-                  step1Widget: _step1Widget,
-                  step2Widget: _step2Widget,
-                  step3Widget: _step3Widget,
-                  serialCount: _serialNumbers.length,
-                  onSubmit: _submit,
-                )
-              : CommissioningOperationMobileLayout(
-                  currentStep: _currentStep,
-                  wizardSteps: _wizardSteps,
-                  pageController: _pageController,
-                  scanningMode: _scanningMode,
-                  wiredScannerFocusNode: _wiredScannerFocusNode,
-                  step1Widget: _step1Widget,
-                  step2Widget: _step2Widget,
-                  step3Widget: _step3Widget,
-                  serialCount: _serialNumbers.length,
-                  onPageChanged: (page) => setState(() => _currentStep = page),
-                  onPrevious: _previousStep,
-                  onNext: _nextStep,
-                  onSubmit: _submit,
-                ),
-        ),
-      ),
+    final submitLabel = 'Commission ${_serialNumbers.length} Items';
+
+    return AppLayoutBuilder(
+      builder: (context, layout) => layout.isDesktopUp
+          ? OperationDesktopLayout(
+              isLoading: _isLoading,
+              appBarTitle: 'New Commissioning Operation',
+              submitLabel: submitLabel,
+              step1Title: 'Product Details',
+              step2Title: 'Serial Numbers',
+              step1Complete: _isStep1Valid,
+              step2Complete: _isStep2Valid,
+              detailsStep: _step1Widget,
+              itemsStep: _step2Widget,
+              reviewStep: _step3Widget,
+              onSubmit: _submit,
+            )
+          : OperationMobileLayout(
+              isLoading: _isLoading,
+              appBarTitle: 'Commissioning',
+              submitLabel: submitLabel,
+              currentStep: _currentStep,
+              steps: _wizardSteps,
+              pageController: _pageController,
+              onPageChanged: (page) {
+                setState(() => _currentStep = page);
+                if (page == 1 &&
+                    _scanningMode == CommissioningScanningMode.wired) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _wiredScannerFocusNode.requestFocus(),
+                  );
+                }
+              },
+              onPrevious: _previousStep,
+              onNext: () {
+                _nextStep();
+              },
+              onSubmit: _submit,
+              stepPages: [_step1Widget, _step2Widget, _step3Widget],
+            ),
     );
   }
 }

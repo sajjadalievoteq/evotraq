@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/utils/unpacking_detail_formatters.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_group_card.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_info_row.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 /// Reference details card for unpacking operation detail.
 class UnpackingDetailReferenceCard extends StatelessWidget {
@@ -16,20 +16,20 @@ class UnpackingDetailReferenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return UnpackingDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Reference Details',
       children: [
         if (operation.unpackingReference != null)
-          UnpackingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Unpacking Reference',
             value: operation.unpackingReference!,
           ),
         if (operation.operatorId != null)
-          UnpackingDetailInfoRow(label: 'Operator ID', value: operation.operatorId!),
+          OperationDetailInfoRow(label: 'Operator ID', value: operation.operatorId!),
         if (operation.processedAt != null)
-          UnpackingDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Processed At',
-            value: UnpackingDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
           ),
       ],
     );

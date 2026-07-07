@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/widgets/create_partner_dialog.dart';
@@ -406,7 +407,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         if (partner.lastSyncAt != null) ...[
           const SizedBox(width: 8),
           Text(
-            '• Last: ${_formatDateTime(partner.lastSyncAt!)}',
+            '• Last: ${RelativeTimeUtils.compactAgo(partner.lastSyncAt!)}',
             style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
           ),
         ],
@@ -419,16 +420,6 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         ],
       ],
     );
-  }
-
-  String _formatDateTime(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
   }
 
   void _handlePartnerAction(String action, Partner partner) {

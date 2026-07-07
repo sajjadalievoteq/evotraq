@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../cubit/notification_cubit.dart';
@@ -310,7 +311,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
               ],
               const SizedBox(height: 8),
               Text(
-                'Created: ${_formatDate(subscription.createdAt)}',
+                'Created: ${DisplayDateUtils.dmy(subscription.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -477,11 +478,6 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime? dateTime) {
-    if (dateTime == null) return 'Unknown';
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   void _testWebhook() {

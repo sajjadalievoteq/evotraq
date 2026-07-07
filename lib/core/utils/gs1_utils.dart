@@ -1,6 +1,4 @@
-
-
-
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
 class GS1Utils {
   static const Map<String, int> _aiLengths = {
@@ -142,29 +140,12 @@ class GS1Utils {
   }
 
   static String calculateCheckDigit(String digits) {
-    int sum = 0;
-    int factor;
-    
-    for (int i = digits.length - 1; i >= 0; i--) {
-      final int digit = int.parse(digits[i]);
-      
-      factor = ((digits.length - i) % 2 == 0) ? 3 : 1;
-      sum += digit * factor;
-    }
-    
-    final int checkDigit = (10 - (sum % 10)) % 10;
-    return checkDigit.toString();
+    return CheckDigitUtils.calculateMod10String(digits);
   }
 
   static bool validateCheckDigit(String identifier) {
     if (identifier.isEmpty) return false;
-    
-    final String mainDigits = identifier.substring(0, identifier.length - 1);
-    final String providedCheckDigit = identifier[identifier.length - 1];
-    
-    final String calculatedCheckDigit = calculateCheckDigit(mainDigits);
-    
-    return providedCheckDigit == calculatedCheckDigit;
+    return CheckDigitUtils.isValidMod10(identifier);
   }
 
   /// Alias used by EPCIS GLN parsing and SSCC utilities.

@@ -1,29 +1,30 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
-import 'package:traqtrace_app/features/operations/receiving/cubit/receiving_operations_cubit.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/utils/receiving_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_advanced_filters_panel.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_operation_list_results.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_quick_filter_dialog.dart';
-import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_list/widgets/receiving_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/receiving/utils/receiving_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 /// Screen to list all Receiving operations with search capabilities.
-class ReceivingOperationListScreen extends StatefulWidget {
+class ReceivingOperationListScreen extends StatelessWidget {
   const ReceivingOperationListScreen({
     super.key,
     this.embedded = false,
@@ -42,46 +43,88 @@ class ReceivingOperationListScreen extends StatefulWidget {
   final VoidCallback? onEmbeddedCreate;
 
   @override
-  State<ReceivingOperationListScreen> createState() =>
-      _ReceivingOperationListScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OperationsCubit<Operation>(
+        loadErrorMessage:
+            'Could not load Receiving operations. Check your connection and tap Retry.',
+        loadMoreErrorMessage:
+            'Could not load more operations. Check your connection and try again.',
+        fetchList: ({required int page, required int size}) async {
+          final pageResult = await getIt<ReceivingOperationService>()
+              .getReceivingOperationsPage(page: page, size: size);
+          return pageResult.map((r) => r.toOperation());
+        },
+      )..loadInitial(),
+      child: _ReceivingOperationListBody(
+        embedded: embedded,
+        onSelectOperation: onSelectOperation,
+        selectedOperationId: selectedOperationId,
+        onLoadingChanged: onLoadingChanged,
+        onBindRefresh: onBindRefresh,
+        onEmbeddedCreate: onEmbeddedCreate,
+      ),
+    );
+  }
 }
 
-class _ReceivingOperationListScreenState extends State<ReceivingOperationListScreen> {
+class _ReceivingOperationListBody extends StatefulWidget {
+  const _ReceivingOperationListBody({
+    required this.embedded,
+    this.onSelectOperation,
+    this.selectedOperationId,
+    this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
+  });
+
+  final bool embedded;
+  final ValueChanged<String>? onSelectOperation;
+  final String? selectedOperationId;
+  final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
+
+  @override
+  State<_ReceivingOperationListBody> createState() =>
+      _ReceivingOperationListBodyState();
+}
+
+class _ReceivingOperationListBodyState
+    extends State<_ReceivingOperationListBody> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _trackingFilterController =
       TextEditingController();
   final _scrollController = ScrollController();
 
-  List<ReceivingResponse> _operations = [];
-  int _totalRecords = 0;
-  List<ReceivingResponse> _filteredOperations = [];
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
-  bool _isLoading = false;
-  bool _isLoadingMore = false;
-  bool _hasMore = false;
-  int _currentPage = 0;
   bool _initialLoadDone = false;
-  String? _errorMessage;
+  bool _bindRefreshDone = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterOperations);
-    _loadOperations();
-    widget.onBindRefresh?.call(_loadOperations);
+    _searchController.addListener(_onFiltersChanged);
+    _trackingFilterController.addListener(_onFiltersChanged);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_bindRefreshDone) {
+      _bindRefreshDone = true;
+      widget.onBindRefresh?.call(
+        () => context.read<OperationsCubit<Operation>>().refresh(),
+      );
+    }
     if (!_initialLoadDone) {
       _initialLoadDone = true;
       return;
     }
     if (!widget.embedded) {
-      _loadOperations();
+      context.read<OperationsCubit<Operation>>().refresh();
     }
   }
 
@@ -91,6 +134,32 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
     _trackingFilterController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onFiltersChanged() => setState(() {});
+
+  void _filterOperations() => setState(() {});
+
+  List<Operation> _filteredOperations(List<Operation> operations) {
+    return ReceivingOperationListFilter.applyToOperations(
+      operations: operations,
+      query: _searchController.text,
+      statusFilter: _selectedStatus,
+      trackingFilter: _trackingFilterController.text,
+      sortBy: _sortBy,
+      sortDir: _sortDir,
+    );
+  }
+
+  void _syncEmbeddedOperationIds(List<Operation> filtered) {
+    if (!widget.embedded) return;
+    final ids = filtered
+        .map((op) => op.navigableOperationId)
+        .whereType<String>()
+        .toList();
+    context
+        .read<OperationSplitCubit>()
+        .updateOperationIds(ids, isEmpty: ids.isEmpty);
   }
 
   void _showFilterDialog() {
@@ -140,13 +209,6 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
     );
   }
 
-  void _toggleSortDirection() {
-    setState(() {
-      _sortDir = _sortDir == 'asc' ? 'desc' : 'asc';
-    });
-    _filterOperations();
-  }
-
   String _sortFieldDisplayLabel() {
     return ReceivingUiConstants.sortFieldLabels[_sortBy] ??
         ReceivingUiConstants.sortFieldFallback;
@@ -163,104 +225,7 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
     _filterOperations();
   }
 
-  Future<void> _loadOperations() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _currentPage = 0;
-    });
-    widget.onLoadingChanged?.call(true);
-
-    try {
-      final receivingService = getIt<ReceivingOperationService>();
-      final page = await receivingService.getReceivingOperationsPage(page: 0);
-      setState(() {
-        _operations = page.operations;
-        _totalRecords = page.total;
-        _hasMore = page.totalPages > 1;
-      });
-      _filterOperations();
-      if (widget.embedded &&
-          widget.selectedOperationId == null &&
-          _filteredOperations.isNotEmpty) {
-        final firstId = _filteredOperations.first.navigableOperationId;
-        if (firstId != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            widget.onSelectOperation?.call(firstId);
-          });
-        }
-      }
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load Receiving operations. Check your connection and tap Retry.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
-      widget.onLoadingChanged?.call(false);
-    }
-  }
-
-  Future<void> _loadMoreOperations() async {
-    if (_isLoadingMore || !_hasMore) return;
-    setState(() => _isLoadingMore = true);
-
-    try {
-      final receivingService = getIt<ReceivingOperationService>();
-      final nextPage = _currentPage + 1;
-      final page = await receivingService.getReceivingOperationsPage(page: nextPage);
-      setState(() {
-        _operations = [..._operations, ...page.operations];
-        _totalRecords = page.total;
-        _currentPage = nextPage;
-        _hasMore = nextPage + 1 < page.totalPages;
-      });
-      _filterOperations();
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load more operations. Check your connection and try again.';
-      });
-    } finally {
-      setState(() => _isLoadingMore = false);
-    }
-  }
-
-  void _syncEmbeddedOperationIds() {
-    if (!widget.embedded) return;
-    final ids = _filteredOperations
-        .map((op) => op.navigableOperationId)
-        .whereType<String>()
-        .toList();
-    context
-        .read<ReceivingOperationsCubit>()
-        .updateOperationIds(ids, isEmpty: ids.isEmpty);
-  }
-
-  void _filterOperations() {
-    setState(() {
-      _filteredOperations = ReceivingOperationListFilter.apply(
-        operations: _operations,
-        query: _searchController.text,
-        statusFilter: _selectedStatus,
-        trackingFilter: _trackingFilterController.text,
-        sortBy: _sortBy,
-        sortDir: _sortDir,
-      );
-    });
-    _syncEmbeddedOperationIds();
-  }
-
-  void _navigateToDetail(ReceivingResponse operation) {
+  void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
     if (widget.embedded && widget.onSelectOperation != null) {
@@ -277,96 +242,128 @@ class _ReceivingOperationListScreenState extends State<ReceivingOperationListScr
 
   @override
   Widget build(BuildContext context) {
-    final body = Gs1MasterListBody(
-      toolbar: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: context.horizontalPadding.left,
-              left: context.horizontalPadding.left,
-              right: context.horizontalPadding.left,
-            ),
-            child: Column(
-              children: [
-                ListenableBuilder(
-                  listenable: Listenable.merge([
-                    _searchController,
-                    _trackingFilterController,
-                  ]),
-                  builder: (context, _) {
-                    return Gs1ListSearchBar(
-                      hintText: ReceivingUiConstants.listSearchHint,
-                      controller: _searchController,
-                      showAdvancedFilters: _hasActiveAdvancedFilters ||
-                          _selectedStatus != null,
-                      onSearch: _filterOperations,
-                      onQueryChanged: (_) => _filterOperations(),
-                      onRefresh: _loadOperations,
-                      onQuickFilters: _showFilterDialog,
-                      onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                      onClear: () {
-                        _searchController.clear();
-                        _filterOperations();
+    return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      listener: (context, state) {
+        widget.onLoadingChanged?.call(state.isLoading);
+
+        final filtered = _filteredOperations(state.items);
+        _syncEmbeddedOperationIds(filtered);
+
+        if (widget.embedded &&
+            widget.selectedOperationId == null &&
+            !state.isLoading &&
+            state.errorMessage == null &&
+            filtered.isNotEmpty) {
+          final firstId = filtered.first.navigableOperationId;
+          if (firstId != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              widget.onSelectOperation?.call(firstId);
+            });
+          }
+        }
+      },
+      builder: (context, state) {
+        final filtered = _filteredOperations(state.items);
+        final cubit = context.read<OperationsCubit<Operation>>();
+
+        final body = Gs1MasterListBody(
+          toolbar: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  top: context.horizontalPadding.left,
+                  left: context.horizontalPadding.left,
+                  right: context.horizontalPadding.left,
+                ),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _searchController,
+                        _trackingFilterController,
+                      ]),
+                      builder: (context, _) {
+                        return Gs1ListSearchBar(
+                          hintText: ReceivingUiConstants.listSearchHint,
+                          controller: _searchController,
+                          showAdvancedFilters: _hasActiveAdvancedFilters ||
+                              _selectedStatus != null,
+                          onSearch: _filterOperations,
+                          onQueryChanged: (_) => _filterOperations(),
+                          onRefresh: cubit.refresh,
+                          onQuickFilters: _showFilterDialog,
+                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                          onClear: () {
+                            _searchController.clear();
+                            _filterOperations();
+                          },
+                          sortTooltip: ReceivingUiConstants.sortByLine(
+                            _sortFieldDisplayLabel(),
+                            _sortDir == 'asc'
+                                ? ReceivingUiConstants.sortAscendingLabel
+                                : ReceivingUiConstants.sortDescendingLabel,
+                          ),
+                          sortOrder: _sortDir,
+                          onSortOrderChanged: (order) {
+                            if (_sortDir != order) {
+                              setState(() => _sortDir = order);
+                              _filterOperations();
+                            }
+                          },
+                        );
                       },
-                    );
-                  },
+                    ),
+                  ],
                 ),
-                ReceivingRecordInfoSection(
-                  loadedRecords: _operations.length,
-                  filteredRecords: _filteredOperations.length,
-                  totalRecords: _totalRecords,
-                ),
-                const SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: ReceivingUiConstants.sortByLine(
-                    _sortFieldDisplayLabel(),
-                    _sortDir == 'asc'
-                        ? ReceivingUiConstants.sortAscendingLabel
-                        : ReceivingUiConstants.sortDescendingLabel,
-                  ),
-                  sortOrder: _sortDir,
-                  onToggleSortOrder: _toggleSortDirection,
-                ),
-              ],
+              ),
+            ],
+          ),
+          results: OperationListResults<Operation>(
+            scrollController: _scrollController,
+            isLoading: state.isLoading,
+            errorMessage: state.errorMessage,
+            operations: state.items,
+            filteredOperations: filtered,
+            hasActiveFilters:
+                _selectedStatus != null || _hasActiveAdvancedFilters,
+            onRetry: cubit.refresh,
+            onRefresh: cubit.refresh,
+            onClearFilters: _clearAllFilters,
+            emptyTitle: 'No Receiving operations yet',
+            emptySubtitle:
+                'Tap the + button to create your first Receiving operation.',
+            hasMore: state.hasMore,
+            isLoadingMore: state.isLoadingMore,
+            onLoadMore: cubit.loadMore,
+            itemBuilder: (context, operation) =>
+                OperationListCardBuilders.forOperation(
+              operation: operation,
+              isSelected: widget.embedded &&
+                  operation.navigableOperationId != null &&
+                  operation.navigableOperationId ==
+                      widget.selectedOperationId,
+              onTap: () => _navigateToDetail(operation),
             ),
           ),
-        ],
-      ),
-      results: ReceivingOperationListResults(
-        scrollController: _scrollController,
-        isLoading: _isLoading,
-        errorMessage: _errorMessage,
-        operations: _operations,
-        filteredOperations: _filteredOperations,
-        hasActiveFilters:
-            _selectedStatus != null || _hasActiveAdvancedFilters,
-        embedded: widget.embedded,
-        selectedOperationId: widget.selectedOperationId,
-        onRetry: _loadOperations,
-        onRefresh: _loadOperations,
-        onClearFilters: _clearAllFilters,
-        onOperationTap: _navigateToDetail,
-        hasMore: _hasMore,
-        isLoadingMore: _isLoadingMore,
-        onLoadMore: _loadMoreOperations,
-      ),
-    );
+        );
 
-    if (widget.embedded) return body;
+        if (widget.embedded) return body;
 
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        title: const Text('Receiving Operation'),
-      ),
-      drawer: const AppDrawer(),
-      floatingActionButton: widget.onEmbeddedCreate != null
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () => context.go(Constants.opReceivingCreateRoute),
-              label: TraqIcon(AppAssets.iconPlus),
-            ),
-      body: body,
+        return Scaffold(
+          appBar: TraqAppBar(
+            context,
+            title: const Text('Receiving Operation'),
+          ),
+          drawer: const AppDrawer(),
+          floatingActionButton: widget.onEmbeddedCreate != null
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () => context.go(Constants.opReceivingCreateRoute),
+                  label: TraqIcon(AppAssets.iconPlus),
+                ),
+          body: body,
+        );
+      },
     );
   }
 }

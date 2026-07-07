@@ -8,6 +8,7 @@ import '../../../data/services/data_consistency_service.dart';
 import '../../../data/services/error_correction_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 
 
@@ -630,7 +631,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Consistency Score',
                     '${score.toStringAsFixed(1)}%',
-                    _getScoreColor(score),
+                    AdminHelperMappers.scoreColor(score),
                     AppAssets.iconScore,
                   ),
                 ),
@@ -698,7 +699,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ExpansionTile(
         leading: TraqIcon(AppAssets.iconAlert,
-          color: _getSeverityColor(severity),
+          color: AdminHelperMappers.dashboardSeverityColor(severity),
         ),
         title: Text(type),
         subtitle: Text(description),
@@ -707,8 +708,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           children: [
             Chip(
               label: Text(severity),
-              backgroundColor: _getSeverityColor(severity).withOpacity(0.1),
-              labelStyle: TextStyle(color: _getSeverityColor(severity)),
+              backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                severity,
+              ).withOpacity(0.1),
+              labelStyle: TextStyle(
+                color: AdminHelperMappers.dashboardSeverityColor(severity),
+              ),
             ),
             const SizedBox(width: 8),
             ElevatedButton.icon(
@@ -824,7 +829,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
         leading: TraqIcon(AppAssets.iconAlert,
-          color: _getSeverityColor(severity),
+          color: AdminHelperMappers.dashboardSeverityColor(severity),
         ),
         title: Text(
           type,
@@ -861,8 +866,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   children: [
                     Chip(
                       label: Text(severity),
-                      backgroundColor: _getSeverityColor(severity).withOpacity(0.1),
-                      labelStyle: TextStyle(color: _getSeverityColor(severity)),
+                      backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                        severity,
+                      ).withOpacity(0.1),
+                      labelStyle: TextStyle(
+                        color: AdminHelperMappers.dashboardSeverityColor(
+                          severity,
+                        ),
+                      ),
                     ),
                     const Spacer(),
                     Text(
@@ -1013,7 +1024,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Approval Rate',
                     '${approvalRate.toStringAsFixed(1)}%',
-                    _getScoreColor(approvalRate),
+                    AdminHelperMappers.scoreColor(approvalRate),
                     AppAssets.iconCheck,
                   ),
                 ),
@@ -1065,8 +1076,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               children: [
                 Chip(
                   label: Text(severity),
-                  backgroundColor: _getSeverityColor(severity).withOpacity(0.1),
-                  labelStyle: TextStyle(color: _getSeverityColor(severity)),
+                  backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                    severity,
+                  ).withOpacity(0.1),
+                  labelStyle: TextStyle(
+                    color: AdminHelperMappers.dashboardSeverityColor(severity),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Chip(
@@ -1571,26 +1586,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 90) return Colors.green;
-    if (score >= 70) return Colors.orange;
-    return Colors.red;
-  }
-
-  Color _getSeverityColor(String severity) {
-    switch (severity.toUpperCase()) {
-      case 'LOW':
-        return Colors.green;
-      case 'MEDIUM':
-        return Colors.orange;
-      case 'HIGH':
-      case 'CRITICAL':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   void _showFiltersDialog() {
     showDialog(
       context: context,
@@ -1939,9 +1934,9 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getWorkflowStatusColor(status),
+          backgroundColor: AdminHelperMappers.workflowStatusColor(status),
           child: TraqIcon(
-            _getWorkflowStatusIcon(status),
+            AdminHelperMappers.workflowStatusIcon(status),
             color: Colors.white,
             size: 20,
           ),
@@ -1967,7 +1962,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               status,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: _getWorkflowStatusColor(status),
+                color: AdminHelperMappers.workflowStatusColor(status),
               ),
             ),
             if (completionTime != null)
@@ -1980,38 +1975,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         onTap: () => _showWorkflowDetails(workflow),
       ),
     );
-  }
-
-  Color _getWorkflowStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'COMPLETED':
-        return Colors.green;
-      case 'IN_PROGRESS':
-      case 'PENDING':
-        return Colors.blue;
-      case 'AWAITING_APPROVAL':
-        return Colors.orange;
-      case 'FAILED':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getWorkflowStatusIcon(String status) {
-    switch (status.toUpperCase()) {
-      case 'COMPLETED':
-        return AppAssets.iconCheckCircle;
-      case 'IN_PROGRESS':
-        return AppAssets.iconSettings;
-      case 'PENDING':
-      case 'AWAITING_APPROVAL':
-        return AppAssets.iconPending;
-      case 'FAILED':
-        return AppAssets.iconXCircle;
-      default:
-        return AppAssets.iconHelpCircle;
-    }
   }
 
   void _showWorkflowDetails(Map<String, dynamic> workflow) {

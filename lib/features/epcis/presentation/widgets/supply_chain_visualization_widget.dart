@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class SupplyChainVisualizationWidget extends StatefulWidget {
   final Map<String, dynamic>? traversalResult;
@@ -426,7 +427,9 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: _getEventColor(event['eventType']?.toString()),
+                  color: EpcisEventUiUtils.eventTypeColor(
+                    event['eventType']?.toString() ?? '',
+                  ),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -524,14 +527,14 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           dense: true,
           leading: TraqIcon(
             _getItemIcon(epcType),
-            color: _getStatusColor(status),
+            color: EpcisEventUiUtils.supplyChainStatusColor(status),
           ),
           title: Text(epc),
           subtitle: Text('$epcType - Level $hierarchyLevel'),
           trailing: Text(
             status,
             style: TextStyle(
-              color: _getStatusColor(status),
+              color: EpcisEventUiUtils.supplyChainStatusColor(status),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -557,62 +560,12 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     }
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
-        return Colors.green;
-      case 'INACTIVE':
-        return Colors.red;
-      case 'PENDING':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
   Color _getNodeColor(String? type) {
-    switch (type) {
-      case 'manufacturer':
-        return Colors.blue;
-      case 'distributor':
-        return Colors.green;
-      case 'retailer':
-        return Colors.orange;
-      case 'warehouse':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+    return EpcisEventUiUtils.supplyChainNodeColor(type);
   }
 
   String _getNodeIcon(String? type) {
-    switch (type) {
-      case 'manufacturer':
-        return AppAssets.iconFactory;
-      case 'distributor':
-        return AppAssets.iconTruck;
-      case 'retailer':
-        return AppAssets.iconStore;
-      case 'warehouse':
-        return AppAssets.iconWarehouse;
-      default:
-        return AppAssets.iconBusiness;
-    }
-  }
-
-  Color _getEventColor(String? eventType) {
-    switch (eventType) {
-      case 'ObjectEvent':
-        return Colors.blue;
-      case 'AggregationEvent':
-        return Colors.green;
-      case 'TransactionEvent':
-        return Colors.orange;
-      case 'TransformationEvent':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+    return EpcisEventUiUtils.supplyChainNodeIcon(type);
   }
 
   String _formatTimestamp(dynamic timestamp) {

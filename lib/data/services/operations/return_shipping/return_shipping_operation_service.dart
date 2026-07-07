@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_page_response.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_response_model.dart';
 
@@ -42,7 +43,7 @@ class ReturnShippingOperationService {
           response.statusCode == 200 ||
           response.statusCode == 207 ||
           response.statusCode == 422) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReturnShippingResponse.fromJson(responseData);
       }
 
@@ -78,7 +79,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReturnShippingResponse.fromJson(responseData);
       }
 
@@ -118,7 +119,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as Map<String, dynamic>;
+        final responseData = decodeApiResponseMap(response.data);
         final operations = responseData['operations'] as List;
         return operations.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
@@ -158,7 +159,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
@@ -197,7 +198,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
@@ -236,7 +237,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
@@ -275,7 +276,7 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 422) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReturnShippingResponse.fromJson(responseData);
       }
 
@@ -300,7 +301,7 @@ class ReturnShippingOperationService {
     }
   }
 
-  Future<ReturnShippingPageResponse> getReturnShippingOperationsPage({
+  Future<OperationPage<ReturnShippingResponse>> getReturnShippingOperationsPage({
     int page = 0,
     int size = 20,
   }) async {
@@ -315,8 +316,8 @@ class ReturnShippingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as Map<String, dynamic>;
-        return ReturnShippingPageResponse.fromJson(responseData);
+        final responseData = decodeApiResponseMap(response.data);
+        return OperationPage.fromJson(responseData, ReturnShippingResponse.fromJson);
       }
 
       throw _apiExceptionFromResponse(

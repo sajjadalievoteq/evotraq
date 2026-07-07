@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 
 /// Central EPC URI Conversion Service
@@ -290,15 +291,7 @@ class EPCURIConverter {
         final itemRef = indicatorPlusRef.substring(1);
         final body = '$indicator$gcp$itemRef';
 
-        // GS1 Mod-10: rightmost digit × 3, alternating left
-        int sum = 0;
-        bool x3 = true;
-        for (int i = body.length - 1; i >= 0; i--) {
-          final d = int.parse(body[i]);
-          sum += x3 ? d * 3 : d;
-          x3 = !x3;
-        }
-        final checkDigit = (10 - (sum % 10)) % 10;
+        final checkDigit = CheckDigitUtils.calculateMod10(body);
 
         return '$body$checkDigit';
       }

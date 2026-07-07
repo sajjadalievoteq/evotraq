@@ -328,10 +328,9 @@ class _GLNListScreenState extends State<GLNListScreen> {
     );
   }
 
-  void _toggleSortOrder() {
-    setState(() {
-      _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
-    });
+  void _onSortOrderChanged(String order) {
+    if (_sortOrder == order) return;
+    setState(() => _sortOrder = order);
     _searchImmediate();
   }
 
@@ -380,7 +379,7 @@ class _GLNListScreenState extends State<GLNListScreen> {
             });
             _searchImmediate();
           },
-          onToggleSortOrder: _toggleSortOrder,
+          onSortOrderChanged: _onSortOrderChanged,
           onRefresh: _refresh,
           onClearFilters: _clearAllFilters,
           onTapGln: _openGlnDetail,

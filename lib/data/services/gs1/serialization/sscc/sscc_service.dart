@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregatio
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
 class SSCCService {
@@ -742,12 +743,7 @@ class SSCCService {
   }
 
   String _calculateGS1CheckDigit(String digits) {
-    int sum = 0;
-    for (int i = 0; i < digits.length; i++) {
-      final digit = int.parse(digits[digits.length - 1 - i]);
-      sum += (i % 2 == 0) ? digit * 3 : digit;
-    }
-    return ((10 - (sum % 10)) % 10).toString();
+    return CheckDigitUtils.calculateMod10String(digits);
   }
 
   static void _normalizeFields(Map<String, dynamic> data) {

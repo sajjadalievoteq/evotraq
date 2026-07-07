@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
@@ -78,15 +78,15 @@ import 'package:traqtrace_app/features/operations/return_receiving/screens/retur
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/return_receiving_operation_detail_screen.dart';
 
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/hierarchy_screen.dart';
-import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing/packing_screen.dart';
+import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/packing_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/packing_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/unpacking_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking/unpacking_screen.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/unpacking_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation/decommissioning_operation_screen.dart';
-import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning/decommissioning_screen.dart';
-import 'package:traqtrace_app/features/operations/decommissioning/screens/decommissioning_operation_detail/decommissioning_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation/update_status_operation_screen.dart';
+import 'package:traqtrace_app/features/operations/update_status/screens/update_status/update_status_screen.dart';
+import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_detail/update_status_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/commissioning_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning/commissioning_screen.dart';
@@ -96,7 +96,7 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/subscr
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
-import 'package:traqtrace_app/features/dashboards/screens/product_journey_screen.dart';
+import 'package:traqtrace_app/features/product_journey/screens/journey/journey_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_detail_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/credential_management_screen.dart';
@@ -324,7 +324,7 @@ class AppRouter {
           final epc = state.uri.queryParameters['epc'];
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: ProductJourneyScreen(initialEpc: epc),
+            child: JourneyScreen(initialEpc: epc),
           );
         },
         redirect: (context, state) {
@@ -1930,7 +1930,7 @@ class AppRouter {
         path: Constants.opPackingCreateRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const PackingOperationScreen(),
+          child: PackingOperationScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -2024,10 +2024,10 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: Constants.opDecommissioningRoute,
+        path: Constants.opUpdateStatusRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const DecommissioningScreen(),
+          child: const UpdateStatusScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -2038,10 +2038,10 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: Constants.opDecommissioningCreateRoute,
+        path: Constants.opUpdateStatusCreateRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(
           key: state.pageKey,
-          child: const DecommissioningOperationScreen(),
+          child: const UpdateStatusOperationScreen(),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -2052,12 +2052,12 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: Constants.opDecommissioningDetailRoute,
+        path: Constants.opUpdateStatusDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: DecommissioningOperationDetailScreen(operationId: operationId),
+            child: UpdateStatusOperationDetailScreen(operationId: operationId),
           );
         },
         redirect: (context, state) {

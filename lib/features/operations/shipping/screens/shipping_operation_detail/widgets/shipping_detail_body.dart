@@ -1,17 +1,18 @@
+import 'package:traqtrace_app/features/operations/shared/utils/operation_status_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/utils/shipping_detail_helpers.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_comments_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_events_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_location_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_messages_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_shipped_items_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_processing_stats_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_production_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_reference_card.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_status_banner.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_comments_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_events_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_messages_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_processing_stats_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/utils/shipping_detail_helpers.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_two_gln_location_card.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_shipped_items_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_transport_card.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_reference_card.dart';
 
 /// Scrollable body content for shipping operation detail.
 class ShippingDetailBody extends StatelessWidget {
@@ -34,24 +35,50 @@ class ShippingDetailBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ShippingDetailStatusBanner(operation: operation),
+          OperationDetailStatusBanner(
+            title: operation.shippingReference ?? 'Shipping Operation',
+            operationId: operation.shippingOperationId,
+            itemCount: operation.shippedItemsCount,
+          ),
           const SizedBox(height: 16),
           ShippingDetailReferenceCard(operation: operation),
-          ShippingDetailLocationCard(operation: operation),
+          OperationDetailTwoGlnLocationCard(
+            cardTitle: 'Shipping Locations',
+            sourceGlnLabel: 'Ship From GLN',
+            destinationGlnLabel: 'Ship To GLN',
+            sourceGln: operation.sourceGLN ?? operation.sourceLocation?.glnCode,
+            destinationGln:
+                operation.destinationGLN ?? operation.destinationLocation?.glnCode,
+            sourceLocationName: operation.sourceLocation?.locationName,
+            sourceCity: operation.sourceLocation?.city,
+            destinationLocationName: operation.destinationLocation?.locationName,
+            destinationCity: operation.destinationLocation?.city,
+          ),
           if (ShippingDetailHelpers.hasTransportDetails(operation)) ...[
-            ShippingDetailProductionCard(operation: operation),
+            OperationDetailTransportCard(
+              title: 'Shipment Group Details',
+              carrier: operation.carrier,
+              trackingNumber: operation.trackingNumber,
+              billOfLadingNumber: operation.billOfLadingNumber,
+              purchaseOrderNumber: operation.purchaseOrderNumber,
+              despatchAdviceNumber: operation.despatchAdviceNumber,
+              gincNumber: operation.gincNumber,
+            ),
           ],
           ShippingDetailShippedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
-            ShippingDetailEventsCard(operation: operation),
+            OperationDetailEventsCard(eventIds: operation.eventIds!),
           ],
           if (operation.messages != null && operation.messages!.isNotEmpty) ...[
-            ShippingDetailMessagesCard(operation: operation),
+            OperationDetailMessagesCard(messages: operation.messages!),
           ],
           if (operation.comments != null && operation.comments!.isNotEmpty) ...[
-            ShippingDetailCommentsCard(operation: operation),
+            OperationDetailCommentsCard(comments: operation.comments!),
           ],
-          ShippingDetailProcessingStatsCard(operation: operation),
+          OperationDetailProcessingStatsCard(
+            statusLabel: OperationStatusUtils.detailLabel(operation.status),
+            processingTimeMs: operation.processingTimeMs,
+          ),
           AcceptReturnButton(operation: operation),
           const SizedBox(height: 32),
         ],

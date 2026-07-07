@@ -1,6 +1,6 @@
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
-import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
 abstract final class CancelShippingSubmitErrorMessage {
@@ -10,18 +10,8 @@ abstract final class CancelShippingSubmitErrorMessage {
   static String missingGinc() =>
       'Original shipping reference (GINC) is required for DSCSA compliance.';
 
-  static String epcConversionFailures(List<String> failedBarcodes) {
-    if (failedBarcodes.isEmpty) {
-      return 'One or more scanned values could not be converted to EPC URIs.';
-    }
-    final preview = failedBarcodes.take(5).join('\n• ');
-    final suffix = failedBarcodes.length > 5
-        ? '\n… and ${failedBarcodes.length - 5} more'
-        : '';
-    return 'Could not convert ${failedBarcodes.length} scan(s) to EPC URIs. '
-        'Use a registered SGTIN (GTIN + serial) or SSCC.\n'
-        '• $preview$suffix';
-  }
+  static String epcConversionFailures(List<String> failedBarcodes) =>
+      OperationApiErrorMessage.epcConversionFailures(failedBarcodes);
 
   static String emptyEpcList() =>
       'No valid items to cancel. Scan at least one SGTIN or SSCC.';
@@ -37,9 +27,9 @@ abstract final class CancelShippingSubmitErrorMessage {
     }
 
     return switch (response.status) {
-      CancelShippingStatus.validationError =>
+      OperationStatus.validationError =>
         'Cancel shipping validation failed. Check locations, cancellation reason, and scanned items.',
-      CancelShippingStatus.failed =>
+      OperationStatus.failed =>
         'Cancel shipping could not be completed. Review scanned items and location details.',
       _ =>
         'The cancel shipping operation could not be completed. Check your inputs and try again.',
@@ -50,5 +40,5 @@ abstract final class CancelShippingSubmitErrorMessage {
       OperationApiErrorMessage.fromApiException(exception);
 
   static String unexpected(Object error) =>
-      'An unexpected error occurred while submitting cancel shipping: $error';
+      OperationApiErrorMessage.unexpected('cancel shipping', error);
 }

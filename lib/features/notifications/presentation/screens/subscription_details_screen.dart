@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../../domain/models/notification_subscription.dart';
@@ -233,10 +234,10 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           _buildSection(
             'Timing & Delivery',
             [
-              _buildDetailRow('Created', _formatDate(subscription.createdAt)),
+              _buildDetailRow('Created', DisplayDateUtils.dmyHm(subscription.createdAt)),
               _buildDetailRow('Last Modified', 
                 subscription.updatedAt != null 
-                    ? _formatDate(subscription.updatedAt!) 
+                    ? DisplayDateUtils.dmyHm(subscription.updatedAt!) 
                     : 'Never'),
               _buildDetailRow('Next Scheduled', subscription.status == 'ACTIVE' ? 'Real-time' : 'Paused'),
             ],
@@ -251,7 +252,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                   ? '${(stats.successRate * 100).toStringAsFixed(1)}%' 
                   : 'Loading...'),
               _buildDetailRow('Last Notification', stats?.lastNotificationSent != null 
-                  ? _formatDate(stats!.lastNotificationSent!) 
+                  ? DisplayDateUtils.dmyHm(stats!.lastNotificationSent!) 
                   : 'None'),
             ],
           ),
@@ -340,10 +341,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       ),
       backgroundColor: chipColor,
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   void _editSubscription(NotificationSubscription subscription) {

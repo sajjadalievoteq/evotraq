@@ -334,36 +334,44 @@ class _GLNSelectorBodyState extends State<_GLNSelectorBody> {
                   itemCount: _filteredGLNs.length,
                   itemBuilder: (context, index) {
                     final gln = _filteredGLNs[index];
-                    return ListTile(
-                      dense: true,
-                      leading: TraqIcon(AppAssets.iconGln, size: 20),
-                      title: Text(
-                        gln.glnCode,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            gln.locationName,
-                            style: const TextStyle(fontSize: 13),
+                    final isSelected = _selectedGLN?.glnCode == gln.glnCode;
+                    return Material(
+                      color: isSelected
+                          ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          : Theme.of(context).cardColor,
+                      child: ListTile(
+                        dense: true,
+                        leading: TraqIcon(AppAssets.iconGln, size: 20),
+                        title: Text(
+                          gln.glnCode,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
-                          if (gln.city.isNotEmpty)
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              '${gln.city}, ${gln.stateProvince}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
-                              ),
+                              gln.locationName,
+                              style: const TextStyle(fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                        ],
+                            if (gln.city.isNotEmpty)
+                              Text(
+                                '${gln.city}, ${gln.stateProvince}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        ),
+                        onTap: () => _selectGLN(gln),
+                        selected: isSelected,
                       ),
-                      onTap: () => _selectGLN(gln),
-                      selected: _selectedGLN?.glnCode == gln.glnCode,
-                      selectedTileColor: Theme.of(context).primaryColor.withOpacity(0.1),
                     );
                   },
                 ),

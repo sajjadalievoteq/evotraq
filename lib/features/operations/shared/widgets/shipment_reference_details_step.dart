@@ -56,6 +56,7 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
     this.productQuantity,
     this.productDescription,
     this.productEpcs = const [],
+    this.gincNumberController,
     this.extraContent,
   });
 
@@ -110,6 +111,8 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
   final String? productDescription;
   final List<String> productEpcs;
 
+  final TextEditingController? gincNumberController;
+
   final Widget? extraContent;
 
   @override
@@ -143,6 +146,25 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
               child: Column(
                 children: [
                   OperationAutoReferenceNotice(operationLabel: operationLabel),
+                  if (gincNumberController != null) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: gincNumberController,
+                      decoration: InputDecoration(
+                        labelText: 'Consignment Reference (GINC)',
+                        hintText:
+                            'e.g. GINC-2026-0001 or urn:epc:id:ginc:0614141.xyz…',
+                        helperText:
+                            'Optional but recommended for DSCSA traceability.',
+                        helperMaxLines: 2,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: outline),
+                        ),
+                        prefixIcon: const TraqIcon(AppAssets.iconShipment),
+                      ),
+                    ),
+                  ],
                   OperationEventTimeTile(
                     title: eventTimeLabel,
                     nowLabel: eventTimeEmptyLabel,

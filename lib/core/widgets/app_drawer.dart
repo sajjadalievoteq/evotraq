@@ -466,9 +466,9 @@ class _AppDrawerState extends State<AppDrawer> {
                           const EdgeInsets.only(left: 32.0),
 
                           leading: _svgLeading(AppAssets.iconTrash),
-                          title: const Text('Decommissioning'),
+                          title: const Text('Update Status'),
                           onTap: () =>
-                              _navigate(Constants.opDecommissioningRoute),
+                              _navigate(Constants.opUpdateStatusRoute),
                         ),
                       ],
                     ),
@@ -504,6 +504,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       childrenPadding: EdgeInsets.only(left: 22),
                       children: [
                         ExpansionTile(
+                          backgroundColor: context.colors.surface,
                           leading: _svgLeading(AppAssets.iconArrowUpR),
                           title: const Text('Shippings'),
                           children: [
@@ -525,7 +526,7 @@ class _AppDrawerState extends State<AppDrawer> {
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              trailing: _svgTrailingChevron(),
+
                               leading: _svgLeading(AppAssets.iconXCircle),
                               title: const Text('Cancel Shipping'),
                               onTap: () => _navigate(Constants.opCancelShippingRoute),

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_record_info_section.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_results_list.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 
 class SgtinListBody extends StatelessWidget {
   const SgtinListBody({
@@ -26,7 +23,7 @@ class SgtinListBody extends StatelessWidget {
     required this.onShowFilterDialog,
     required this.onShowAdvancedFiltersDialog,
     required this.onPageSizeChanged,
-    required this.onToggleSortDirection,
+    required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
     required this.onTapSgtin,
@@ -47,7 +44,7 @@ class SgtinListBody extends StatelessWidget {
   final VoidCallback onShowFilterDialog;
   final VoidCallback onShowAdvancedFiltersDialog;
   final ValueChanged<int> onPageSizeChanged;
-  final VoidCallback onToggleSortDirection;
+  final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
   final ValueChanged<String> onTapSgtin;
@@ -78,6 +75,12 @@ class SgtinListBody extends StatelessWidget {
                       onRefresh: onSearchImmediate,
                       onQuickFilters: onShowFilterDialog,
                       onToggleAdvancedFilters: onShowAdvancedFiltersDialog,
+                      sortTooltip: sortLabel,
+                      sortOrder: sortDirection.toLowerCase(),
+                      onSortOrderChanged: onSortOrderChanged,
+                      pageSize: pageSize,
+                      pageSizeOptions: SgtinUiConstants.pageSizeOptions,
+                      onPageSizeChanged: onPageSizeChanged,
                       onClear: () {
                         searchDebouncer.cancel();
                         searchController.clear();
@@ -85,16 +88,6 @@ class SgtinListBody extends StatelessWidget {
                       },
                     );
                   },
-                ),
-                SgtinRecordInfoSection(
-                  pageSize: pageSize,
-                  onPageSizeChanged: onPageSizeChanged,
-                ),
-                SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: sortLabel,
-                  sortOrder: sortDirection.toLowerCase(),
-                  onToggleSortOrder: onToggleSortDirection,
                 ),
               ],
             ),

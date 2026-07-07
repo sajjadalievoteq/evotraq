@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
+import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -256,7 +257,7 @@ class _CredentialManagementScreenState
                 if (credential.expiresAt != null) ...[
                   const SizedBox(width: 8),
                   _buildInfoChip(
-                    'Expires: ${_formatDate(credential.expiresAt!)}',
+                    'Expires: ${ApiUiUtils.formatDate(credential.expiresAt!)}',
                     AppAssets.iconEvent,
                     color: credential.isExpired ? Colors.red : null,
                   ),
@@ -265,7 +266,7 @@ class _CredentialManagementScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Created: ${_formatDate(credential.createdAt)}',
+              'Created: ${ApiUiUtils.formatDate(credential.createdAt)}',
               style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
             ),
           ],
@@ -314,10 +315,6 @@ class _CredentialManagementScreenState
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   void _handleCredentialAction(String action, PartnerCredential credential) {
@@ -794,8 +791,8 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
                       }
                     });
                   },
-                  selectedColor: _getScopeColor(scope).withOpacity(0.2),
-                  checkmarkColor: _getScopeColor(scope),
+                  selectedColor: ApiUiUtils.scopeColor(scope).withOpacity(0.2),
+                  checkmarkColor: ApiUiUtils.scopeColor(scope),
                 );
               }).toList(),
             ),
@@ -865,19 +862,6 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
         ),
       ],
     );
-  }
-
-  Color _getScopeColor(String scope) {
-    switch (scope) {
-      case 'read':
-        return Colors.blue;
-      case 'write':
-        return Colors.green;
-      case 'admin':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
   }
 
   Future<void> _updateCredential() async {

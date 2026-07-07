@@ -19,6 +19,7 @@ class ReturnShippingReferenceDetailsStep extends StatelessWidget {
     required this.billOfLadingController,
     required this.carrierController,
     required this.trackingController,
+    required this.gincNumberController,
     required this.eventTime,
     required this.onEventTimeChanged,
     this.showPageHeader = true,
@@ -49,6 +50,7 @@ class ReturnShippingReferenceDetailsStep extends StatelessWidget {
   final TextEditingController billOfLadingController;
   final TextEditingController carrierController;
   final TextEditingController trackingController;
+  final TextEditingController gincNumberController;
   final DateTime? eventTime;
   final ValueChanged<DateTime?> onEventTimeChanged;
   final bool showPageHeader;
@@ -99,6 +101,7 @@ class ReturnShippingReferenceDetailsStep extends StatelessWidget {
         billOfLadingController: billOfLadingController,
         carrierController: carrierController,
         trackingController: trackingController,
+        gincNumberController: gincNumberController,
         showReturnReasonField: showReturnReasonField,
         selectedReturnReason: selectedReturnReason,
         onReturnReasonChanged: onReturnReasonChanged,

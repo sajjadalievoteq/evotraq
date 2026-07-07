@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
@@ -12,16 +13,16 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_confi
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
-import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_status.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/cubit/cancel_shipping_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/utils/cancel_shipping_operation_step_validator.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/utils/cancel_shipping_pharma_readiness_checker.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/widgets/cancel_shipping_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/widgets/cancel_shipping_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/widgets/cancel_shipping_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/widgets/cancel_shipping_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/widgets/cancel_shipping_review_step.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
@@ -61,6 +62,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
   String? _destinationGlnError;
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
+  final Map<String, String> _itemWarnings = {};
   bool _isLoading = false;
 
   late final VoidCallback _onReferenceFieldChanged = () {
@@ -100,17 +102,32 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
     );
   }
 
-  CancelShippingItemScanStep _itemScanStep({
+  OperationItemScanStep _itemScanStep({
     bool embeddedInPanel = false,
     bool? fillHeight,
   }) {
-    return CancelShippingItemScanStep(
+    return OperationItemScanStep(
       scannedEpcs: _scannedEpcs,
       onItemAdded: _onItemAdded,
-      onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
-      onClearAll: () => setState(() => _scannedEpcs.clear()),
+      onRemoveItem: (index) => setState(() {
+        final removed = _scannedEpcs.removeAt(index);
+        _itemWarnings.remove(removed);
+      }),
+      onClearAll: () => setState(() {
+        _scannedEpcs.clear();
+        _itemWarnings.clear();
+      }),
+      groupCardTitle: 'Add EPCs to Cancel',
+      pageHeaderTitle: 'Scan Items to Cancel',
+      pageHeaderSubtitle:
+          'Scan serialized SGTINs or SSCCs only. Lot-based GTINs (lgtin) are not valid for cancel shipping under DSCSA/FMD.',
+      scannedListTitle: 'Items to Ship',
+      scannedQueuedLabel: 'queued for shipping',
+      hierarchyScreenTitle: 'Return Shipment Hierarchy',
+      allowedTypes: const [EPCType.sgtin, EPCType.sscc],
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
+      itemWarnings: _itemWarnings,
     );
   }
 
@@ -264,7 +281,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
           .createCancelShippingOperation(request);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == CancelShippingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Cancel shipping submitted with warnings. Open the record for details.',
           );
@@ -276,7 +293,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
             context
-                .read<CancelShippingOperationsCubit>()
+                .read<OperationSplitCubit>()
                 .setCreatedId(response.navigableOperationId);
           }
           widget.onEmbeddedActionSuccess!();
@@ -306,7 +323,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
     }
   }
 
-  void _onItemAdded(EPCParseResult result) {
+  Future<void> _onItemAdded(EPCParseResult result) async {
     final epc = result.epc;
     if (epc.startsWith('urn:epc:class:lgtin:')) {
       context.showError(
@@ -321,6 +338,22 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
       return;
     }
     setState(() => _scannedEpcs.add(epc));
+    await _checkEpcStatus(epc);
+  }
+
+  Future<void> _checkEpcStatus(String epc) async {
+    try {
+      final statusService = getIt<OperationEpcStatusService>();
+      final status = await statusService.getEpcStatus(epc);
+      if (!mounted || status == null) return;
+      if (!status.compatibleWithReceiving) {
+        setState(() => _itemWarnings[epc] = status.status);
+      } else {
+        setState(() => _itemWarnings.remove(epc));
+      }
+    } catch (_) {
+      // Non-fatal: badge is cosmetic; backend enforces on submit.
+    }
   }
 
   @override
@@ -329,7 +362,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
       builder: (context, layout) {
         final usePanelLayout = widget.embedded || layout.isDesktopUp;
         if (usePanelLayout) {
-          return CancelShippingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _scannedEpcs.isNotEmpty,
@@ -337,10 +370,12 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
             itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitCancelShippingOperation,
+            appBarTitle: 'New Cancel Shipping',
+            submitLabel: 'Cancel Shipment',
           );
         }
 
-        return CancelShippingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -349,6 +384,8 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitCancelShippingOperation,
+          appBarTitle: 'Cancel Shipping',
+          submitLabel: 'Cancel Shipment',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

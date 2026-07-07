@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class AlertsPanel extends StatelessWidget {
   final List<PerformanceAlert> alerts;
@@ -18,9 +19,11 @@ class AlertsPanel extends StatelessWidget {
     if (alerts.isEmpty) {
       return const SizedBox.shrink();
     }
+    final highestSeverity = _getHighestSeverity();
+    final highestSeverityColor = AdminHelperMappers.severityColor(highestSeverity);
 
     return Card(
-      color: _getAlertBackgroundColor(),
+      color: highestSeverityColor.withOpacity(0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -29,7 +32,7 @@ class AlertsPanel extends StatelessWidget {
             Row(
               children: [
                 TraqIcon(AppAssets.iconAlert,
-                  color: _getHighestSeverityColor(),
+                  color: highestSeverityColor,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -38,7 +41,7 @@ class AlertsPanel extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: _getHighestSeverityColor(),
+                    color: highestSeverityColor,
                   ),
                 ),
                 const Spacer(),
@@ -75,14 +78,14 @@ class AlertsPanel extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getSeverityColor(alert.severity).withOpacity(0.3),
+          color: AdminHelperMappers.severityColor(alert.severity).withOpacity(0.3),
         ),
       ),
       child: Row(
         children: [
           TraqIcon(
-            _getSeverityIcon(alert.severity),
-            color: _getSeverityColor(alert.severity),
+            AdminHelperMappers.severityIcon(alert.severity),
+            color: AdminHelperMappers.severityColor(alert.severity),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -125,16 +128,6 @@ class AlertsPanel extends StatelessWidget {
     );
   }
 
-  Color _getAlertBackgroundColor() {
-    final highestSeverity = _getHighestSeverity();
-    return _getSeverityColor(highestSeverity).withOpacity(0.05);
-  }
-
-  Color _getHighestSeverityColor() {
-    final highestSeverity = _getHighestSeverity();
-    return _getSeverityColor(highestSeverity);
-  }
-
   String _getHighestSeverity() {
     if (alerts.any((alert) => alert.severity.toUpperCase() == 'CRITICAL')) {
       return 'CRITICAL';
@@ -146,36 +139,6 @@ class AlertsPanel extends StatelessWidget {
       return 'MEDIUM';
     }
     return 'LOW';
-  }
-
-  Color _getSeverityColor(String severity) {
-    switch (severity.toUpperCase()) {
-      case 'CRITICAL':
-        return Colors.red[800]!;
-      case 'HIGH':
-        return Colors.red;
-      case 'MEDIUM':
-        return Colors.orange;
-      case 'LOW':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getSeverityIcon(String severity) {
-    switch (severity.toUpperCase()) {
-      case 'CRITICAL':
-        return AppAssets.iconDangerous;
-      case 'HIGH':
-        return AppAssets.iconXCircle;
-      case 'MEDIUM':
-        return AppAssets.iconAlert;
-      case 'LOW':
-        return AppAssets.iconInfo;
-      default:
-        return AppAssets.iconHelpCircle;
-    }
   }
 
   String _formatTime(DateTime dateTime) {
@@ -222,15 +185,15 @@ class AlertsPanel extends StatelessWidget {
                             Row(
                               children: [
                                 TraqIcon(
-                                  _getSeverityIcon(alert.severity),
-                                  color: _getSeverityColor(alert.severity),
+                                  AdminHelperMappers.severityIcon(alert.severity),
+                                  color: AdminHelperMappers.severityColor(alert.severity),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   alert.severity.toUpperCase(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: _getSeverityColor(alert.severity),
+                                    color: AdminHelperMappers.severityColor(alert.severity),
                                   ),
                                 ),
                                 const Spacer(),

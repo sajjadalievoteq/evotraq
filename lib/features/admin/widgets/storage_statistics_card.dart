@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/number_format_utils.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -198,7 +200,9 @@ class StorageStatisticsCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage / 100,
               backgroundColor: Colors.grey.withOpacity(0.3),
-              valueColor: AlwaysStoppedAnimation(_getEventTypeColor(eventType)),
+              valueColor: AlwaysStoppedAnimation(
+                EpcisEventUiUtils.eventTypeColor(eventType),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -255,28 +259,8 @@ class StorageStatisticsCard extends StatelessWidget {
     );
   }
 
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toLowerCase()) {
-      case 'object_event':
-        return Colors.blue;
-      case 'aggregation_event':
-        return Colors.green;
-      case 'transaction_event':
-        return Colors.orange;
-      case 'transformation_event':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
+    return NumberFormatUtils.compactKilo(number);
   }
 
   String _formatDate(DateTime dateTime) {

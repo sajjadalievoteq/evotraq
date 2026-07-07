@@ -221,7 +221,7 @@ class BarcodeApiService {
   Future<Map<String, dynamic>> createObjectEvent({
     required String gs1ElementString,
     required String locationGLN,
-    String businessStep = 'urn:epcglobal:cbv:bizstep:observing',
+    String businessStep = 'urn:epcglobal:cbv:bizstep:sensor_reporting',
     String disposition = 'urn:epcglobal:cbv:disp:active',
   }) async {
     final headers = await _getHeaders();

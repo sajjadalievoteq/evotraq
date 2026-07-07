@@ -174,11 +174,11 @@ class Constants {
   static const String opUnpackingCreateRoute = '/operations/unpacking/create';
   static const String opUnpackingDetailRoute =
       '/operations/unpacking/:operationId';
-  static const String opDecommissioningRoute = '/operations/decommissioning';
-  static const String opDecommissioningCreateRoute =
-      '/operations/decommissioning/create';
-  static const String opDecommissioningDetailRoute =
-      '/operations/decommissioning/:operationId';
+  static const String opUpdateStatusRoute = '/operations/update-status';
+  static const String opUpdateStatusCreateRoute =
+      '/operations/update-status/create';
+  static const String opUpdateStatusDetailRoute =
+      '/operations/update-status/:operationId';
 
   static const String opCommissioningRoute = '/operations/commissioning';
   static const String opCommissioningNewRoute = '/operations/commissioning/new';

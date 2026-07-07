@@ -1,141 +1,50 @@
-﻿import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
+﻿import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
 import 'package:traqtrace_app/features/operations/return_receiving/screens/return_receiving_operation_detail/widgets/return_receiving_detail_content.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
+
+final _returnReceivingDetailConfig =
+    OperationDetailScreenConfig<ReturnReceivingResponse>(
+  loader: (id) =>
+      getIt<ReturnReceivingOperationService>().getReturnReceivingOperation(id),
+  contentBuilder: (
+    context, {
+    required awaitingSelection,
+    required listLoading,
+    required isLoading,
+    required errorMessage,
+    required operation,
+    required onRetry,
+    onOperationUpdated,
+  }) =>
+      ReturnReceivingDetailContent(
+    awaitingSelection: awaitingSelection,
+    listLoading: listLoading,
+    isLoading: isLoading,
+    errorMessage: errorMessage,
+    operation: operation,
+    onRetry: onRetry,
+  ),
+  titleBuilder: (op) => op.returnReceivingReference ?? 'Return Receiving Detail',
+  listRoute: Constants.opReturnReceivingRoute,
+  defaultTitle: 'Return Receiving Detail',
+  fallbackErrorMessage:
+      'Unable to load this return receiving operation. '
+      'Check your connection and tap Retry. '
+      'If the problem continues, the record may have been deleted or you may not have access to it.',
+);
 
 /// Screen to display return receiving operation details.
-class ReturnReceivingOperationDetailScreen extends StatefulWidget {
-  const ReturnReceivingOperationDetailScreen({
+class ReturnReceivingOperationDetailScreen
+    extends GenericOperationDetailScreen<ReturnReceivingResponse> {
+  ReturnReceivingOperationDetailScreen({
     super.key,
-    this.operationId,
-    this.embedded = false,
-    this.awaitingSelection = false,
-    this.listLoading = false,
-  });
-
-  final String? operationId;
-  final bool embedded;
-  final bool awaitingSelection;
-  final bool listLoading;
-
-  @override
-  State<ReturnReceivingOperationDetailScreen> createState() =>
-      _ReturnReceivingOperationDetailScreenState();
-}
-
-class _ReturnReceivingOperationDetailScreenState
-    extends State<ReturnReceivingOperationDetailScreen> {
-  ReturnReceivingResponse? _operation;
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _startLoadIfNeeded();
-  }
-
-  @override
-  void didUpdateWidget(ReturnReceivingOperationDetailScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final idChanged = oldWidget.operationId != widget.operationId;
-    final selectionOpened =
-        oldWidget.awaitingSelection && !widget.awaitingSelection;
-    if ((idChanged || selectionOpened) &&
-        widget.operationId != null &&
-        !widget.awaitingSelection) {
-      _startLoadIfNeeded(force: true);
-    }
-  }
-
-  void _startLoadIfNeeded({bool force = false}) {
-    if (widget.operationId == null || widget.awaitingSelection) return;
-    if (!force && _isLoading) return;
-    _isLoading = true;
-    _errorMessage = null;
-    _operation = null;
-    _loadOperationDetails();
-  }
-
-  Future<void> _loadOperationDetails() async {
-    final id = widget.operationId;
-    if (id == null) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _operation = null;
-    });
-
-    try {
-      final service = getIt<ReturnReceivingOperationService>();
-      final operation = await service.getReturnReceivingOperation(id);
-      setState(() => _operation = operation);
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Unable to load this return receiving operation. '
-            'Check your connection and tap Retry. '
-            'If the problem continues, the record may have been deleted or you may not have access to it.';
-      });
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final content = ReturnReceivingDetailContent(
-      awaitingSelection: widget.awaitingSelection,
-      listLoading: widget.listLoading,
-      isLoading: _isLoading,
-      errorMessage: _errorMessage,
-      operation: _operation,
-      onRetry: _loadOperationDetails,
-    );
-
-    if (widget.embedded) return content;
-
-    if (_isLoading && _operation == null && _errorMessage == null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Loading…')),
-        body: content,
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Error')),
-        body: content,
-      );
-    }
-
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        leading: IconButton(
-          icon: TraqIcon(AppAssets.iconChevronL),
-          onPressed: () => context.go(Constants.opReturnReceivingRoute),
-        ),
-        title: Text(_operation?.returnReceivingReference ?? 'Return Receiving Detail'),
-        actions: [
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadOperationDetails,
-          ),
-        ],
-      ),
-      body: content,
-    );
-  }
+    super.operationId,
+    super.embedded = false,
+    super.awaitingSelection = false,
+    super.listLoading = false,
+  }) : super(config: _returnReceivingDetailConfig);
 }

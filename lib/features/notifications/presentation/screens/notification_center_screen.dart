@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -515,22 +516,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
 
   String _formatDate(DateTime? dateTime) {
     if (dateTime == null) return 'Unknown';
-    
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-    
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    }
+    return RelativeTimeUtils.recentWithYesterdayOrDate(dateTime);
   }
 
   void _toggleWebSocketConnection() {

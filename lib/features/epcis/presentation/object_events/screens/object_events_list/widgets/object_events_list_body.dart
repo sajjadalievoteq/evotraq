@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
-import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/widgets/object_event_record_info_section.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/widgets/object_events_results_list.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 
 class ObjectEventsListBody extends StatelessWidget {
   const ObjectEventsListBody({
@@ -47,73 +44,56 @@ class ObjectEventsListBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ObjectEventsCubit, ObjectEventsState>(
-      buildWhen: (prev, curr) => prev.sortOrder != curr.sortOrder,
-      builder: (context, state) {
-        final toolbar = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                context.padding.top,
-                context.padding.top,
-                context.padding.top,
-                0,
-              ),
-              child: Gs1ListSearchBar(
-                hintText: ObjectEventListUiConstants.searchHint,
-                controller: searchController,
-                showAdvancedFilters: showAdvancedFilters,
-                onSearch: onSearchImmediate,
-                onQueryChanged: onSearchTextChanged,
-                onToggleAdvancedFilters: onToggleAdvancedFilters,
-                onClear: onClearFilters,
-                onRefresh: onSearchImmediate,
-                onQuickFilters: onQuickFilters,
-              ),
+    return Gs1MasterListBody(
+      toolbar: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              context.padding.top,
+              context.padding.top,
+              context.padding.top,
+              0,
             ),
-            const SizedBox(height: Constants.spacing),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                context.padding.top,
-                0,
-                context.padding.top,
-                0,
-              ),
-              child: ObjectEventRecordInfoSection(
-                pageSize: pageSize,
-                onPageSizeChanged: onPageSizeChanged,
-              ),
+            child: BlocSelector<ObjectEventsCubit, ObjectEventsState, String>(
+              selector: (state) => state.sortOrder,
+              builder: (context, sortOrder) {
+                return Gs1ListSearchBar(
+                  hintText: ObjectEventListUiConstants.searchHint,
+                  controller: searchController,
+                  showAdvancedFilters: showAdvancedFilters,
+                  onSearch: onSearchImmediate,
+                  onQueryChanged: onSearchTextChanged,
+                  onToggleAdvancedFilters: onToggleAdvancedFilters,
+                  onClear: onClearFilters,
+                  onRefresh: onSearchImmediate,
+                  onQuickFilters: onQuickFilters,
+                  sortTooltip: ObjectEventListUiConstants.sortLabelEventTime,
+                  sortOrder: sortOrder.toLowerCase(),
+                  onSortOrderChanged: (order) {
+                    final cubit = context.read<ObjectEventsCubit>();
+                    final target = order.toUpperCase();
+                    if (cubit.state.sortOrder != target) {
+                      cubit.toggleSortOrder();
+                    }
+                  },
+                  pageSize: pageSize,
+                  pageSizeOptions: ObjectEventListUiConstants.pageSizeOptions,
+                  onPageSizeChanged: onPageSizeChanged,
+                );
+              },
             ),
-            const SizedBox(height: Constants.spacing),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                context.padding.top,
-                0,
-                context.padding.top,
-                0,
-              ),
-              child: Gs1ListSortingControls(
-                label: ObjectEventListUiConstants.sortLabelEventTime,
-                sortOrder: state.sortOrder.toLowerCase(),
-                onToggleSortOrder: () =>
-                    context.read<ObjectEventsCubit>().toggleSortOrder(),
-              ),
-            ),
-          ],
-        );
-
-        final results = ObjectEventsResultsList(
-          scrollController: scrollController,
-          selectedEventId: selectedEventId,
-          onRefresh: onRefresh,
-          onClearFilters: onClearFilters,
-          onTapEvent: onTapEvent,
-          onLoadMore: onLoadMore,
-        );
-
-        return Gs1MasterListBody(toolbar: toolbar, results: results);
-      },
+          ),
+        ],
+      ),
+      results: ObjectEventsResultsList(
+        scrollController: scrollController,
+        selectedEventId: selectedEventId,
+        onRefresh: onRefresh,
+        onClearFilters: onClearFilters,
+        onTapEvent: onTapEvent,
+        onLoadMore: onLoadMore,
+      ),
     );
   }
 }

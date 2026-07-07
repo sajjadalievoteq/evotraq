@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_performance_data_utils.dart';
 
 class AdvancedPerformanceOptimizationDashboard extends StatefulWidget {
   const AdvancedPerformanceOptimizationDashboard({Key? key}) : super(key: key);
@@ -585,31 +586,15 @@ class _AdvancedPerformanceOptimizationDashboardState
     );
   }
 
-  String _getMemoryUsage(Map<String, dynamic> systemResources) {
-    final memory = systemResources['memory'] ?? {};
-    return memory['usagePercentage']?.toString() ?? '0%';
-  }
+  String _getMemoryUsage(Map<String, dynamic> systemResources) =>
+      AdminPerformanceDataUtils.memoryUsage(systemResources);
 
-  String _getCpuUsage(Map<String, dynamic> systemResources) {
-    final cpu = systemResources['cpu'] ?? {};
-    final cpuLoad = cpu['systemCpuLoad'] ?? 0;
-    return '${(cpuLoad * 100).toStringAsFixed(1)}%';
-  }
+  String _getCpuUsage(Map<String, dynamic> systemResources) =>
+      AdminPerformanceDataUtils.cpuUsage(systemResources);
 
-  String _getActiveConnections(Map<String, dynamic> connectionPool) {
-    return connectionPool['activeConnections']?.toString() ?? '0';
-  }
+  String _getActiveConnections(Map<String, dynamic> connectionPool) =>
+      AdminPerformanceDataUtils.activeConnections(connectionPool);
 
-  String _getActiveThreads(Map<String, dynamic> threadPools) {
-    if (threadPools.isEmpty) return '0';
-    final direct = threadPools['activeThreads'] ?? threadPools['activeCount'];
-    if (direct != null) return direct.toString();
-    var total = 0;
-    for (final value in threadPools.values) {
-      if (value is Map) {
-        total += (value['activeThreads'] as num?)?.toInt() ?? 0;
-      }
-    }
-    return total.toString();
-  }
+  String _getActiveThreads(Map<String, dynamic> threadPools) =>
+      AdminPerformanceDataUtils.activeThreads(threadPools);
 }

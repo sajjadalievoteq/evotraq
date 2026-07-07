@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class IntegrityStatisticsCard extends StatelessWidget {
   final IntegrityStatistics integrity;
@@ -31,14 +34,22 @@ class IntegrityStatisticsCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getIntegrityColor().withOpacity(0.1),
+                    color: AdminHelperMappers.integrityScoreColor(
+                      integrity.overallIntegrityScore,
+                    ).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: _getIntegrityColor()),
+                    border: Border.all(
+                      color: AdminHelperMappers.integrityScoreColor(
+                        integrity.overallIntegrityScore,
+                      ),
+                    ),
                   ),
                   child: Text(
                     'Score: ${integrity.overallIntegrityScore.toStringAsFixed(1)}%',
                     style: TextStyle(
-                      color: _getIntegrityColor(),
+                      color: AdminHelperMappers.integrityScoreColor(
+                        integrity.overallIntegrityScore,
+                      ),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -156,7 +167,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Last integrity check: ${_formatDateTime(integrity.lastIntegrityCheck)}',
+                    'Last integrity check: ${DisplayDateUtils.dmHm(integrity.lastIntegrityCheck)}',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   const Spacer(),
@@ -252,7 +263,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: _getEventTypeColor(eventType),
+              color: EpcisEventUiUtils.eventTypeColor(eventType),
               shape: BoxShape.circle,
             ),
           ),
@@ -282,8 +293,8 @@ class IntegrityStatisticsCard extends StatelessWidget {
         child: Row(
           children: [
             TraqIcon(
-              _getSeverityIcon(violation.severity),
-              color: _getSeverityColor(violation.severity),
+              AdminHelperMappers.severityIcon(violation.severity),
+              color: AdminHelperMappers.severityColor(violation.severity),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -313,7 +324,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
               ),
             ),
             Text(
-              _formatDateTime(violation.detectedAt),
+              DisplayDateUtils.dmHm(violation.detectedAt),
               style: TextStyle(
                 fontSize: 10,
                 color: Colors.grey[500],
@@ -323,57 +334,6 @@ class IntegrityStatisticsCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getIntegrityColor() {
-    if (integrity.overallIntegrityScore >= 95) return Colors.green;
-    if (integrity.overallIntegrityScore >= 85) return Colors.orange;
-    return Colors.red;
-  }
-
-  Color _getEventTypeColor(String eventType) {
-    switch (eventType.toLowerCase()) {
-      case 'object_event':
-        return Colors.blue;
-      case 'aggregation_event':
-        return Colors.green;
-      case 'transaction_event':
-        return Colors.orange;
-      case 'transformation_event':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getSeverityIcon(String severity) {
-    switch (severity.toUpperCase()) {
-      case 'HIGH':
-        return AppAssets.iconXCircle;
-      case 'MEDIUM':
-        return AppAssets.iconAlert;
-      case 'LOW':
-        return AppAssets.iconInfo;
-      default:
-        return AppAssets.iconHelpCircle;
-    }
-  }
-
-  Color _getSeverityColor(String severity) {
-    switch (severity.toUpperCase()) {
-      case 'HIGH':
-        return Colors.red;
-      case 'MEDIUM':
-        return Colors.orange;
-      case 'LOW':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   void _showVerifyDialog(BuildContext context) {

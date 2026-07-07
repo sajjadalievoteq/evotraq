@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_group_card.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 
 class CommissioningDetailLocationCard extends StatelessWidget {
   const CommissioningDetailLocationCard({
@@ -16,10 +16,10 @@ class CommissioningDetailLocationCard extends StatelessWidget {
     final gln = batch.commissioningLocationGLN;
     if (gln == null) return const SizedBox.shrink();
 
-    return CommissioningDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Location',
       children: [
-        CommissioningDetailInfoRowCopy(label: 'Location GLN', value: gln),
+        OperationDetailInfoRowCopy(label: 'Location GLN', value: gln),
       ],
     );
   }

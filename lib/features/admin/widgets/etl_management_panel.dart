@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 /// ETL Management Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive ETL pipeline management and monitoring interface
@@ -520,7 +521,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status),
+                    color: AdminHelperMappers.etlStatusColor(status),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -611,7 +612,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getTransformationTypeColor(type),
+            color: AdminHelperMappers.transformationTypeColor(type),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -659,7 +660,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getStatusColor(status),
+            color: AdminHelperMappers.etlStatusColor(status),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -716,7 +717,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _getQualityColor(overallScore),
+                        color: AdminHelperMappers.qualityScoreColor(overallScore),
                         width: 8,
                       ),
                     ),
@@ -726,7 +727,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _getQualityColor(overallScore),
+                          color: AdminHelperMappers.qualityScoreColor(overallScore),
                         ),
                       ),
                     ),
@@ -780,7 +781,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
             LinearProgressIndicator(
               value: score,
               backgroundColor: Colors.grey.shade300,
-              valueColor: AlwaysStoppedAnimation<Color>(_getQualityColor(score)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AdminHelperMappers.qualityScoreColor(score),
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -788,7 +791,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: _getQualityColor(score),
+                color: AdminHelperMappers.qualityScoreColor(score),
               ),
             ),
           ],
@@ -908,44 +911,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         _loadTransformations();
       },
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'ACTIVE':
-      case 'COMPLETED':
-        return Colors.green;
-      case 'RUNNING':
-        return Colors.blue;
-      case 'FAILED':
-        return Colors.red;
-      case 'INACTIVE':
-      case 'SCHEDULED':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getTransformationTypeColor(String type) {
-    switch (type) {
-      case 'VALIDATION':
-        return Colors.blue;
-      case 'ENRICHMENT':
-        return Colors.green;
-      case 'NORMALIZATION':
-        return Colors.purple;
-      case 'AGGREGATION':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getQualityColor(double score) {
-    if (score >= 0.9) return Colors.green;
-    if (score >= 0.7) return Colors.orange;
-    return Colors.red;
   }
 
   void _handlePipelineAction(String action, Map<String, dynamic> pipeline) {

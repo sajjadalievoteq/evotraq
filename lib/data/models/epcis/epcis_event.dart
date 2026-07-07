@@ -2,6 +2,7 @@ import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_event_time_codec.dart';
 import 'package:uuid/uuid.dart';
 
 /// Base class for EPCIS event models
@@ -126,8 +127,8 @@ class EPCISEvent {
       eventId: (json['eventId'] != null && json['eventId'].toString().isNotEmpty)
             ? json['eventId'] 
             : 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}',
-      eventTime: DateTime.parse(json['eventTime']),
-      recordTime: DateTime.parse(json['recordTime']),
+      eventTime: DateTime.parse(json['eventTime']).toLocal(),
+      recordTime: DateTime.parse(json['recordTime']).toLocal(),
       eventTimeZone: json['eventTimeZone'] ?? json['eventTimeZoneOffset'] ?? '+00:00',
       epcisVersion: json['epcisVersion'] != null 
           ? (json['epcisVersion'].toString() == '1.3' 
@@ -244,11 +245,13 @@ class EPCISEvent {
     }
     
     return data;
-  }  /// Helper method to format dates with timezone information
-  /// Always converts to UTC so the ISO string carries the 'Z' suffix
-  /// and the backend deserializer never treats a local time as UTC.
+  }
+
+  /// Formats the date-time preserving the device's local offset.
+  /// Produces e.g. "2024-01-15T14:00:00+03:00" instead of "2024-01-15T11:00:00Z".
+  /// Uses the same codec as the operation request models for consistency.
   String _formatDateWithTimezone(DateTime dateTime) {
-    return dateTime.toUtc().toIso8601String();
+    return OperationEventTimeCodec.encodeLocal(dateTime);
   }
 }
 

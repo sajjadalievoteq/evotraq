@@ -15,6 +15,7 @@ class ShippingRequest {
     this.carrier,
     this.trackingNumber,
     this.comments,
+    this.gincNumber,
     this.eventTime,
     this.eventTimeZoneOffset,
   });
@@ -31,6 +32,7 @@ class ShippingRequest {
   String? carrier;
   String? trackingNumber;
   String? comments;
+  String? gincNumber;
   DateTime? eventTime;
   String? eventTimeZoneOffset;
 
@@ -51,6 +53,7 @@ class ShippingRequest {
       'carrier': carrier,
       'trackingNumber': trackingNumber,
       'comments': comments,
+      if (gincNumber != null && gincNumber!.isNotEmpty) 'gincNumber': gincNumber,
       'eventTime': eventFields['eventTime'],
       'eventTimeZoneOffset':
           eventTimeZoneOffset ?? eventFields['eventTimeZoneOffset'],
@@ -71,6 +74,7 @@ class ShippingRequest {
       carrier: json['carrier']?.toString(),
       trackingNumber: json['trackingNumber']?.toString(),
       comments: json['comments']?.toString(),
+      gincNumber: json['gincNumber']?.toString(),
       eventTime: json['eventTime'] != null
           ? DateTime.tryParse(json['eventTime'].toString())
           : null,

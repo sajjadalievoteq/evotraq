@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
 class CancelReceivingResponse {
@@ -27,7 +27,7 @@ class CancelReceivingResponse {
   List<String>? eventIds;
   int? cancelledEpcsCount;
   List<String>? epcList;
-  CancelReceivingStatus? status;
+  OperationStatus? status;
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
@@ -71,10 +71,10 @@ class CancelReceivingResponse {
           epcList?.length,
       epcList: epcList,
       status: json['status'] != null
-          ? parseCancelReceivingStatus(json['status'].toString())
+          ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())
+          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
           : null,
       sourceGLN: _readNonEmptyString(json['sourceGLN']),
       receivingGLN: _readNonEmptyString(json['receivingGLN']),
@@ -119,11 +119,11 @@ class CancelReceivingResponse {
   int? get shippedItemsCount => cancelledEpcsCount;
   List<String>? get childEpcList => epcList;
 
-  bool get isSuccess => status == CancelReceivingStatus.success;
+  bool get isSuccess => status == OperationStatus.success;
   bool get isSuccessOrPartial =>
-      status == CancelReceivingStatus.success ||
-      status == CancelReceivingStatus.partialSuccess;
+      status == OperationStatus.success ||
+      status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == CancelReceivingStatus.failed ||
-      status == CancelReceivingStatus.validationError;
+      status == OperationStatus.failed ||
+      status == OperationStatus.validationError;
 }

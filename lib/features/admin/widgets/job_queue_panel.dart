@@ -11,6 +11,7 @@ import 'package:traqtrace_app/core/web/web_download_stub.dart'
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 /// Job Queue Panel for Phase 3.3 Batch Processing Capabilities
 /// Provides comprehensive job queue monitoring and management interface
@@ -648,11 +649,15 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: _getHealthColor(),
+                        color: AdminHelperMappers.queueHealthColor(
+                          _dashboardData['queue_health'] ?? 'Healthy',
+                        ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _getHealthColor().withOpacity(0.3),
+                            color: AdminHelperMappers.queueHealthColor(
+                              _dashboardData['queue_health'] ?? 'Healthy',
+                            ).withOpacity(0.3),
                             blurRadius: 4,
                             spreadRadius: 1,
                           ),
@@ -857,7 +862,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getJobTypeColor(jobType),
+                    color: AdminHelperMappers.jobTypeColor(jobType),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -891,7 +896,9 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             LinearProgressIndicator(
               value: progress / 100.0,
               backgroundColor: Colors.grey.shade300,
-              valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AdminHelperMappers.queueJobStatusColor(status),
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -926,7 +933,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getJobTypeColor(jobType),
+            color: AdminHelperMappers.jobTypeColor(jobType),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -981,7 +988,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: _getJobTypeColor(jobType),
+            color: AdminHelperMappers.jobTypeColor(jobType),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -1002,7 +1009,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status),
+                    color: AdminHelperMappers.queueJobStatusColor(status),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1156,7 +1163,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: _getJobTypeColor(jobType),
+                        color: AdminHelperMappers.jobTypeColor(jobType),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -1297,38 +1304,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         ),
       ),
     );
-  }
-
-  Color _getJobTypeColor(String jobType) {
-    switch (jobType) {
-      case 'ETL':
-        return Colors.purple;
-      case 'EXPORT':
-        return Colors.blue;
-      case 'BULK_IMPORT':
-        return Colors.green;
-      case 'NOTIFICATION_BATCH':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'COMPLETED':
-        return Colors.green;
-      case 'RUNNING':
-        return Colors.blue;
-      case 'FAILED':
-        return Colors.red;
-      case 'CANCELLED':
-        return Colors.orange;
-      case 'QUEUED':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
   }
 
   Future<void> _cancelJob(String jobId) async {
@@ -1550,20 +1525,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         ],
       ),
     );
-  }
-
-  Color _getHealthColor() {
-    String health = _dashboardData['queue_health'] ?? 'Healthy';
-    switch (health.toLowerCase()) {
-      case 'healthy':
-        return Colors.green;
-      case 'warning':
-        return Colors.orange;
-      case 'critical':
-        return Colors.red;
-      default:
-        return Colors.green;
-    }
   }
 
   void _showQueueSettings() {

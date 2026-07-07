@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class ResourceManagementDashboard extends StatefulWidget {
   const ResourceManagementDashboard({Key? key}) : super(key: key);
@@ -377,7 +378,7 @@ class _ResourceManagementDashboardState
                 'Memory Usage',
                 '${memoryUsage.toStringAsFixed(1)}%',
                 AppAssets.iconChip,
-                _getUsageColor(memoryUsage.toDouble()),
+                AdminHelperMappers.usageColor(memoryUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
@@ -386,7 +387,7 @@ class _ResourceManagementDashboardState
                 'CPU Usage',
                 '${cpuUsage.toStringAsFixed(1)}%',
                 AppAssets.iconGauge,
-                _getUsageColor(cpuUsage.toDouble()),
+                AdminHelperMappers.usageColor(cpuUsage.toDouble()),
               ),
             ),
           ],
@@ -399,7 +400,7 @@ class _ResourceManagementDashboardState
                 'Disk Usage',
                 '${diskUsage.toStringAsFixed(1)}%',
                 AppAssets.iconDatabase,
-                _getUsageColor(diskUsage.toDouble()),
+                AdminHelperMappers.usageColor(diskUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
@@ -408,19 +409,13 @@ class _ResourceManagementDashboardState
                 'Network Load',
                 '${networkLoad.toStringAsFixed(1)}%',
                 AppAssets.iconNetworkCheck,
-                _getUsageColor(networkLoad.toDouble()),
+                AdminHelperMappers.usageColor(networkLoad.toDouble()),
               ),
             ),
           ],
         ),
       ],
     );
-  }
-
-  Color _getUsageColor(double usage) {
-    if (usage < 50) return Colors.green;
-    if (usage < 80) return Colors.orange;
-    return Colors.red;
   }
 
   Widget _buildOptimizationTab() {

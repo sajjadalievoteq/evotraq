@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -31,7 +33,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Updated: ${_formatTime(performance.timestamp)}',
+                  'Updated: ${DisplayDateUtils.hms(performance.timestamp)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodySmall?.color,
@@ -49,7 +51,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Events/Second',
                     performance.eventsPerSecond.toStringAsFixed(2),
                     AppAssets.iconGauge,
-                    _getPerformanceColor(performance.eventsPerSecond, 100, 50),
+                    AdminHelperMappers.performanceColor(
+                      performance.eventsPerSecond,
+                      100,
+                      50,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -58,7 +64,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Avg Processing Time',
                     '${performance.averageProcessingTimeMs.toStringAsFixed(1)}ms',
                     AppAssets.iconTimer,
-                    _getPerformanceColor(performance.averageProcessingTimeMs, 100, 500, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.averageProcessingTimeMs,
+                      100,
+                      500,
+                      inverted: true,
+                    ),
                   ),
                 ),
               ],
@@ -73,7 +84,11 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Success Rate',
                     '${performance.successRate.toStringAsFixed(1)}%',
                     AppAssets.iconCheckCircle,
-                    _getPerformanceColor(performance.successRate, 95, 90),
+                    AdminHelperMappers.performanceColor(
+                      performance.successRate,
+                      95,
+                      90,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -82,7 +97,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Error Rate',
                     '${performance.errorRate.toStringAsFixed(2)}%',
                     AppAssets.iconXCircle,
-                    _getPerformanceColor(performance.errorRate, 1, 5, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.errorRate,
+                      1,
+                      5,
+                      inverted: true,
+                    ),
                   ),
                 ),
               ],
@@ -98,7 +118,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Memory Usage',
                     '${performance.memoryUsagePercentage.toStringAsFixed(1)}%',
                     AppAssets.iconChip,
-                    _getPerformanceColor(performance.memoryUsagePercentage, 70, 85, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.memoryUsagePercentage,
+                      70,
+                      85,
+                      inverted: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -107,7 +132,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'CPU Usage',
                     '${performance.cpuUsagePercentage.toStringAsFixed(1)}%',
                     AppAssets.iconChip,
-                    _getPerformanceColor(performance.cpuUsagePercentage, 70, 85, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.cpuUsagePercentage,
+                      70,
+                      85,
+                      inverted: true,
+                    ),
                   ),
                 ),
               ],
@@ -123,7 +153,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'DB Connections',
                     '${performance.activeConnections}',
                     AppAssets.iconDatabase,
-                    _getPerformanceColor(performance.databaseConnectionUtilization, 70, 85, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.databaseConnectionUtilization,
+                      70,
+                      85,
+                      inverted: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -132,7 +167,12 @@ class PerformanceMetricsCard extends StatelessWidget {
                     'Queued Transactions',
                     '${performance.queuedTransactions}',
                     AppAssets.iconQueue,
-                    _getPerformanceColor(performance.queuedTransactions.toDouble(), 5, 20, inverted: true),
+                    AdminHelperMappers.performanceColor(
+                      performance.queuedTransactions.toDouble(),
+                      5,
+                      20,
+                      inverted: true,
+                    ),
                   ),
                 ),
               ],
@@ -194,24 +234,6 @@ class PerformanceMetricsCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getPerformanceColor(double value, double good, double warning, {bool inverted = false}) {
-    if (inverted) {
-      if (value <= good) return Colors.green;
-      if (value <= warning) return Colors.orange;
-      return Colors.red;
-    } else {
-      if (value >= good) return Colors.green;
-      if (value >= warning) return Colors.orange;
-      return Colors.red;
-    }
-  }
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:'
-           '${dateTime.minute.toString().padLeft(2, '0')}:'
-           '${dateTime.second.toString().padLeft(2, '0')}';
   }
 
   void _showIsolationDialog(BuildContext context) {

@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/operations/packing/packing_page_response.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
 
@@ -39,7 +40,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return PackingResponse.fromJson(responseData);
       }
 
@@ -75,7 +76,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return PackingResponse.fromJson(responseData);
       }
 
@@ -115,7 +116,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         final operations = responseData['operations'] as List;
         return operations.map((op) => PackingResponse.fromJson(op)).toList();
       }
@@ -155,7 +156,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
@@ -194,7 +195,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
@@ -233,7 +234,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as List;
+        final responseData = decodeApiResponseList(response.data);
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
@@ -272,7 +273,7 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 422) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return PackingResponse.fromJson(responseData);
       }
 
@@ -297,7 +298,7 @@ class PackingOperationService {
     }
   }
 
-  Future<PackingPageResponse> getPackingOperationsPage({
+  Future<OperationPage<PackingResponse>> getPackingOperationsPage({
     int page = 0,
     int size = 20,
   }) async {
@@ -312,8 +313,8 @@ class PackingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as Map<String, dynamic>;
-        return PackingPageResponse.fromJson(responseData);
+        final responseData = decodeApiResponseMap(response.data);
+        return OperationPage.fromJson(responseData, PackingResponse.fromJson);
       }
 
       throw _apiExceptionFromResponse(

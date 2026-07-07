@@ -35,6 +35,8 @@ class ReturnReceivingRequest {
 
     this.comments,
 
+    this.gincNumber,
+
     this.eventTime,
 
     this.eventTimeZoneOffset,
@@ -80,6 +82,8 @@ class ReturnReceivingRequest {
   String? returnAuthorizationNumber;
 
   String? comments;
+
+  String? gincNumber;
 
   DateTime? eventTime;
 
@@ -206,6 +210,8 @@ class ReturnReceivingRequest {
 
       'comments': comments,
 
+      if (gincNumber != null && gincNumber!.isNotEmpty) 'gincNumber': gincNumber,
+
       'eventTime': eventFields['eventTime'],
 
       'eventTimeZoneOffset':
@@ -258,6 +264,8 @@ class ReturnReceivingRequest {
       returnAuthorizationNumber: json['returnAuthorizationNumber']?.toString(),
 
       comments: json['comments']?.toString(),
+
+      gincNumber: json['gincNumber']?.toString(),
 
       eventTime: json['eventTime'] != null
           ? DateTime.tryParse(json['eventTime'].toString())

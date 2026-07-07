@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -63,7 +64,7 @@ class SubscriptionCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Created: ${_formatDate(subscription.createdAt)}',
+                'Created: ${DisplayDateUtils.dmy(subscription.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -269,7 +270,4 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

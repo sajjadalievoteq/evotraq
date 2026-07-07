@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_group_card.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_info_row.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
 class CommissioningDetailReferenceCard extends StatelessWidget {
   const CommissioningDetailReferenceCard({
@@ -15,35 +15,35 @@ class CommissioningDetailReferenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommissioningDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Reference Details',
       children: [
-        CommissioningDetailInfoRowCopy(label: 'Operation ID', value: batch.batchId),
+        OperationDetailInfoRowCopy(label: 'Operation ID', value: batch.batchId),
         if (batch.commissioningReference != null)
-          CommissioningDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Reference',
             value: batch.commissioningReference!,
           ),
         if (batch.epcisEventId != null)
-          CommissioningDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'EPCIS Event ID',
             value: batch.epcisEventId!,
           ),
         if (batch.createdAt != null)
-          CommissioningDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Created At',
             value: DateFormat('MMM dd, yyyy HH:mm:ss').format(batch.createdAt!),
           ),
         if (batch.completedAt != null)
-          CommissioningDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Completed At',
             value:
                 DateFormat('MMM dd, yyyy HH:mm:ss').format(batch.completedAt!),
           ),
         if (batch.createdBy != null)
-          CommissioningDetailInfoRow(label: 'Created By', value: batch.createdBy!),
+          OperationDetailInfoRow(label: 'Created By', value: batch.createdBy!),
         if (batch.operatorId != null)
-          CommissioningDetailInfoRow(label: 'Operator ID', value: batch.operatorId!),
+          OperationDetailInfoRow(label: 'Operator ID', value: batch.operatorId!),
       ],
     );
   }

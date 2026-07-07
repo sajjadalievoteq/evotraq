@@ -1,47 +1,32 @@
-﻿import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
+﻿import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
 
 abstract final class ReturnReceivingUiConstants {
   static const entityPluralOperations = 'ReturnReceiving operations';
-  static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;
-  static const filterAll = 'ALL';
-
   static const listSearchHint =
       'Search by reference, source GLN, or receiving GLN…';
-
-  static const quickFiltersTitle = 'Quick Filters';
-  static const advancedFiltersTitle = 'Advanced Filters';
-  static const filterSectionStatus = 'Status';
-
-  static const buttonApply = 'Apply';
-  static const buttonCancel = 'Cancel';
-  static const buttonClearFilters = 'Clear Filters';
-
   static const quickFiltersFooterHint =
       'Status filters apply to loaded results. Use Advanced Filters for tracking and sort options.';
 
-  static const statusFilterOptions = <String>[
-    filterAll,
-    'success',
-    'partialSuccess',
-    'failed',
-    'validationError',
-  ];
+  static const List<int> pageSizeOptions = OperationUiConstants.pageSizeOptions;
+  static const filterAll = OperationUiConstants.filterAll;
 
-  static String statusFilterLabel(String value) {
-    return switch (value) {
-      filterAll => 'All',
-      'success' => 'Success',
-      'partialSuccess' => 'Partial',
-      'failed' => 'Failed',
-      'validationError' => 'Validation Error',
-      _ => value,
-    };
-  }
+  static const quickFiltersTitle = OperationUiConstants.quickFiltersTitle;
+  static const advancedFiltersTitle = OperationUiConstants.advancedFiltersTitle;
+  static const filterSectionStatus = OperationUiConstants.filterSectionStatus;
 
-  static const sortAscendingLabel = 'Oldest';
-  static const sortDescendingLabel = 'Newest';
+  static const buttonApply = OperationUiConstants.buttonApply;
+  static const buttonCancel = OperationUiConstants.buttonCancel;
+  static const buttonClearFilters = OperationUiConstants.buttonClearFilters;
+
+  static const statusFilterOptions =
+      OperationUiConstants.standardStatusFilterOptions;
+  static String statusFilterLabel(String v) =>
+      OperationUiConstants.standardStatusFilterLabel(v);
+
+  static const sortAscendingLabel = OperationUiConstants.sortAscendingLabel;
+  static const sortDescendingLabel = OperationUiConstants.sortDescendingLabel;
   static const sortFieldFallback = 'date processed';
-  static const labelSortResultsBy = 'Sort results by';
+  static const labelSortResultsBy = OperationUiConstants.labelSortResultsBy;
 
   static const Map<String, String> sortFieldLabels = {
     'processedAt': 'Date Processed',
@@ -53,5 +38,5 @@ abstract final class ReturnReceivingUiConstants {
   };
 
   static String sortByLine(String fieldLabel, String orderSpan) =>
-      'Sort by $fieldLabel ($orderSpan)';
+      OperationUiConstants.sortByLine(fieldLabel, orderSpan);
 }

@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_sorting_controls.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
-import 'package:traqtrace_app/features/operations/shipping/cubit/shipping_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/utils/shipping_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_advanced_filters_panel.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_operation_list_results.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_quick_filter_dialog.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_list/widgets/shipping_record_info_section.dart';
 import 'package:traqtrace_app/features/operations/shipping/utils/shipping_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 /// Screen to list all shipping operations with search capabilities.
-class ShippingOperationListScreen extends StatefulWidget {
+class ShippingOperationListScreen extends StatelessWidget {
   const ShippingOperationListScreen({
     super.key,
     this.embedded = false,
@@ -42,46 +43,87 @@ class ShippingOperationListScreen extends StatefulWidget {
   final VoidCallback? onEmbeddedCreate;
 
   @override
-  State<ShippingOperationListScreen> createState() =>
-      _ShippingOperationListScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OperationsCubit<Operation>(
+        loadErrorMessage:
+            'Could not load shipping operations. Check your connection and tap Retry.',
+        loadMoreErrorMessage:
+            'Could not load more operations. Check your connection and try again.',
+        fetchList: ({required int page, required int size}) async {
+          final pageResult = await getIt<ShippingOperationService>()
+              .getShippingOperationsPage(page: page, size: size);
+          return pageResult.map((r) => r.toOperation());
+        },
+      )..loadInitial(),
+      child: _ShippingOperationListBody(
+        embedded: embedded,
+        onSelectOperation: onSelectOperation,
+        selectedOperationId: selectedOperationId,
+        onLoadingChanged: onLoadingChanged,
+        onBindRefresh: onBindRefresh,
+        onEmbeddedCreate: onEmbeddedCreate,
+      ),
+    );
+  }
 }
 
-class _ShippingOperationListScreenState extends State<ShippingOperationListScreen> {
+class _ShippingOperationListBody extends StatefulWidget {
+  const _ShippingOperationListBody({
+    required this.embedded,
+    this.onSelectOperation,
+    this.selectedOperationId,
+    this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
+  });
+
+  final bool embedded;
+  final ValueChanged<String>? onSelectOperation;
+  final String? selectedOperationId;
+  final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
+
+  @override
+  State<_ShippingOperationListBody> createState() =>
+      _ShippingOperationListBodyState();
+}
+
+class _ShippingOperationListBodyState extends State<_ShippingOperationListBody> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _trackingFilterController =
       TextEditingController();
   final _scrollController = ScrollController();
 
-  List<ShippingResponse> _operations = [];
-  int _totalRecords = 0;
-  List<ShippingResponse> _filteredOperations = [];
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
-  bool _isLoading = false;
-  bool _isLoadingMore = false;
-  bool _hasMore = false;
-  int _currentPage = 0;
   bool _initialLoadDone = false;
-  String? _errorMessage;
+  bool _bindRefreshDone = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterOperations);
-    _loadOperations();
-    widget.onBindRefresh?.call(_loadOperations);
+    _searchController.addListener(_onFiltersChanged);
+    _trackingFilterController.addListener(_onFiltersChanged);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_bindRefreshDone) {
+      _bindRefreshDone = true;
+      widget.onBindRefresh?.call(
+        () => context.read<OperationsCubit<Operation>>().refresh(),
+      );
+    }
     if (!_initialLoadDone) {
       _initialLoadDone = true;
       return;
     }
     if (!widget.embedded) {
-      _loadOperations();
+      context.read<OperationsCubit<Operation>>().refresh();
     }
   }
 
@@ -91,6 +133,32 @@ class _ShippingOperationListScreenState extends State<ShippingOperationListScree
     _trackingFilterController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onFiltersChanged() => setState(() {});
+
+  void _filterOperations() => setState(() {});
+
+  List<Operation> _filteredOperations(List<Operation> operations) {
+    return ShippingOperationListFilter.applyToOperations(
+      operations: operations,
+      query: _searchController.text,
+      statusFilter: _selectedStatus,
+      trackingFilter: _trackingFilterController.text,
+      sortBy: _sortBy,
+      sortDir: _sortDir,
+    );
+  }
+
+  void _syncEmbeddedOperationIds(List<Operation> filtered) {
+    if (!widget.embedded) return;
+    final ids = filtered
+        .map((op) => op.navigableOperationId)
+        .whereType<String>()
+        .toList();
+    context
+        .read<OperationSplitCubit>()
+        .updateOperationIds(ids, isEmpty: ids.isEmpty);
   }
 
   void _showFilterDialog() {
@@ -140,13 +208,6 @@ class _ShippingOperationListScreenState extends State<ShippingOperationListScree
     );
   }
 
-  void _toggleSortDirection() {
-    setState(() {
-      _sortDir = _sortDir == 'asc' ? 'desc' : 'asc';
-    });
-    _filterOperations();
-  }
-
   String _sortFieldDisplayLabel() {
     return ShippingUiConstants.sortFieldLabels[_sortBy] ??
         ShippingUiConstants.sortFieldFallback;
@@ -163,104 +224,7 @@ class _ShippingOperationListScreenState extends State<ShippingOperationListScree
     _filterOperations();
   }
 
-  Future<void> _loadOperations() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _currentPage = 0;
-    });
-    widget.onLoadingChanged?.call(true);
-
-    try {
-      final shippingService = getIt<ShippingOperationService>();
-      final page = await shippingService.getShippingOperationsPage(page: 0);
-      setState(() {
-        _operations = page.operations;
-        _totalRecords = page.total;
-        _hasMore = page.totalPages > 1;
-      });
-      _filterOperations();
-      if (widget.embedded &&
-          widget.selectedOperationId == null &&
-          _filteredOperations.isNotEmpty) {
-        final firstId = _filteredOperations.first.navigableOperationId;
-        if (firstId != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            widget.onSelectOperation?.call(firstId);
-          });
-        }
-      }
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load shipping operations. Check your connection and tap Retry.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
-      widget.onLoadingChanged?.call(false);
-    }
-  }
-
-  Future<void> _loadMoreOperations() async {
-    if (_isLoadingMore || !_hasMore) return;
-    setState(() => _isLoadingMore = true);
-
-    try {
-      final shippingService = getIt<ShippingOperationService>();
-      final nextPage = _currentPage + 1;
-      final page = await shippingService.getShippingOperationsPage(page: nextPage);
-      setState(() {
-        _operations = [..._operations, ...page.operations];
-        _totalRecords = page.total;
-        _currentPage = nextPage;
-        _hasMore = nextPage + 1 < page.totalPages;
-      });
-      _filterOperations();
-    } on ApiException catch (e) {
-      setState(() {
-        _errorMessage = e.getUserFriendlyMessage();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-            'Could not load more operations. Check your connection and try again.';
-      });
-    } finally {
-      setState(() => _isLoadingMore = false);
-    }
-  }
-
-  void _syncEmbeddedOperationIds() {
-    if (!widget.embedded) return;
-    final ids = _filteredOperations
-        .map((op) => op.navigableOperationId)
-        .whereType<String>()
-        .toList();
-    context
-        .read<ShippingOperationsCubit>()
-        .updateOperationIds(ids, isEmpty: ids.isEmpty);
-  }
-
-  void _filterOperations() {
-    setState(() {
-      _filteredOperations = ShippingOperationListFilter.apply(
-        operations: _operations,
-        query: _searchController.text,
-        statusFilter: _selectedStatus,
-        trackingFilter: _trackingFilterController.text,
-        sortBy: _sortBy,
-        sortDir: _sortDir,
-      );
-    });
-    _syncEmbeddedOperationIds();
-  }
-
-  void _navigateToDetail(ShippingResponse operation) {
+  void _navigateToDetail(Operation operation) {
     final id = operation.navigableOperationId;
     if (id == null) return;
     if (widget.embedded && widget.onSelectOperation != null) {
@@ -277,96 +241,128 @@ class _ShippingOperationListScreenState extends State<ShippingOperationListScree
 
   @override
   Widget build(BuildContext context) {
-    final body = Gs1MasterListBody(
-      toolbar: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: context.horizontalPadding.left,
-              left: context.horizontalPadding.left,
-              right: context.horizontalPadding.left,
-            ),
-            child: Column(
-              children: [
-                ListenableBuilder(
-                  listenable: Listenable.merge([
-                    _searchController,
-                    _trackingFilterController,
-                  ]),
-                  builder: (context, _) {
-                    return Gs1ListSearchBar(
-                      hintText: ShippingUiConstants.listSearchHint,
-                      controller: _searchController,
-                      showAdvancedFilters: _hasActiveAdvancedFilters ||
-                          _selectedStatus != null,
-                      onSearch: _filterOperations,
-                      onQueryChanged: (_) => _filterOperations(),
-                      onRefresh: _loadOperations,
-                      onQuickFilters: _showFilterDialog,
-                      onToggleAdvancedFilters: _showAdvancedFiltersDialog,
-                      onClear: () {
-                        _searchController.clear();
-                        _filterOperations();
+    return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      listener: (context, state) {
+        widget.onLoadingChanged?.call(state.isLoading);
+
+        final filtered = _filteredOperations(state.items);
+        _syncEmbeddedOperationIds(filtered);
+
+        if (widget.embedded &&
+            widget.selectedOperationId == null &&
+            !state.isLoading &&
+            state.errorMessage == null &&
+            filtered.isNotEmpty) {
+          final firstId = filtered.first.navigableOperationId;
+          if (firstId != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              widget.onSelectOperation?.call(firstId);
+            });
+          }
+        }
+      },
+      builder: (context, state) {
+        final filtered = _filteredOperations(state.items);
+        final cubit = context.read<OperationsCubit<Operation>>();
+
+        final body = Gs1MasterListBody(
+          toolbar: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  top: context.horizontalPadding.left,
+                  left: context.horizontalPadding.left,
+                  right: context.horizontalPadding.left,
+                ),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _searchController,
+                        _trackingFilterController,
+                      ]),
+                      builder: (context, _) {
+                        return Gs1ListSearchBar(
+                          hintText: ShippingUiConstants.listSearchHint,
+                          controller: _searchController,
+                          showAdvancedFilters: _hasActiveAdvancedFilters ||
+                              _selectedStatus != null,
+                          onSearch: _filterOperations,
+                          onQueryChanged: (_) => _filterOperations(),
+                          onRefresh: cubit.refresh,
+                          onQuickFilters: _showFilterDialog,
+                          onToggleAdvancedFilters: _showAdvancedFiltersDialog,
+                          onClear: () {
+                            _searchController.clear();
+                            _filterOperations();
+                          },
+                          sortTooltip: ShippingUiConstants.sortByLine(
+                            _sortFieldDisplayLabel(),
+                            _sortDir == 'asc'
+                                ? ShippingUiConstants.sortAscendingLabel
+                                : ShippingUiConstants.sortDescendingLabel,
+                          ),
+                          sortOrder: _sortDir,
+                          onSortOrderChanged: (order) {
+                            if (_sortDir != order) {
+                              setState(() => _sortDir = order);
+                              _filterOperations();
+                            }
+                          },
+                        );
                       },
-                    );
-                  },
+                    ),
+                  ],
                 ),
-                ShippingRecordInfoSection(
-                  loadedRecords: _operations.length,
-                  filteredRecords: _filteredOperations.length,
-                  totalRecords: _totalRecords,
-                ),
-                const SizedBox(height: Constants.spacing),
-                Gs1ListSortingControls(
-                  label: ShippingUiConstants.sortByLine(
-                    _sortFieldDisplayLabel(),
-                    _sortDir == 'asc'
-                        ? ShippingUiConstants.sortAscendingLabel
-                        : ShippingUiConstants.sortDescendingLabel,
-                  ),
-                  sortOrder: _sortDir,
-                  onToggleSortOrder: _toggleSortDirection,
-                ),
-              ],
+              ),
+            ],
+          ),
+          results: OperationListResults<Operation>(
+            scrollController: _scrollController,
+            isLoading: state.isLoading,
+            errorMessage: state.errorMessage,
+            operations: state.items,
+            filteredOperations: filtered,
+            hasActiveFilters:
+                _selectedStatus != null || _hasActiveAdvancedFilters,
+            onRetry: cubit.refresh,
+            onRefresh: cubit.refresh,
+            onClearFilters: _clearAllFilters,
+            emptyTitle: 'No shipping operations yet',
+            emptySubtitle:
+                'Tap the + button to create your first shipping operation.',
+            hasMore: state.hasMore,
+            isLoadingMore: state.isLoadingMore,
+            onLoadMore: cubit.loadMore,
+            itemBuilder: (context, operation) =>
+                OperationListCardBuilders.forOperation(
+              operation: operation,
+              isSelected: widget.embedded &&
+                  operation.navigableOperationId != null &&
+                  operation.navigableOperationId ==
+                      widget.selectedOperationId,
+              onTap: () => _navigateToDetail(operation),
             ),
           ),
-        ],
-      ),
-      results: ShippingOperationListResults(
-        scrollController: _scrollController,
-        isLoading: _isLoading,
-        errorMessage: _errorMessage,
-        operations: _operations,
-        filteredOperations: _filteredOperations,
-        hasActiveFilters:
-            _selectedStatus != null || _hasActiveAdvancedFilters,
-        embedded: widget.embedded,
-        selectedOperationId: widget.selectedOperationId,
-        onRetry: _loadOperations,
-        onRefresh: _loadOperations,
-        onClearFilters: _clearAllFilters,
-        onOperationTap: _navigateToDetail,
-        hasMore: _hasMore,
-        isLoadingMore: _isLoadingMore,
-        onLoadMore: _loadMoreOperations,
-      ),
-    );
+        );
 
-    if (widget.embedded) return body;
+        if (widget.embedded) return body;
 
-    return Scaffold(
-      appBar: TraqAppBar(
-        context,
-        title: const Text('Shipping Operation'),
-      ),
-      drawer: const AppDrawer(),
-      floatingActionButton: widget.onEmbeddedCreate != null
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () => context.go(Constants.opShippingCreateRoute),
-              label: TraqIcon(AppAssets.iconPlus),
-            ),
-      body: body,
+        return Scaffold(
+          appBar: TraqAppBar(
+            context,
+            title: const Text('Shipping Operation'),
+          ),
+          drawer: const AppDrawer(),
+          floatingActionButton: widget.onEmbeddedCreate != null
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () => context.go(Constants.opShippingCreateRoute),
+                  label: TraqIcon(AppAssets.iconPlus),
+                ),
+          body: body,
+        );
+      },
     );
   }
 }

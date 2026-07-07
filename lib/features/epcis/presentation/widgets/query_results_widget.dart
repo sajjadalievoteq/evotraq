@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class QueryResultsWidget extends StatelessWidget {
   final AdvancedQueryResult? result;
@@ -321,7 +322,13 @@ class QueryResultsWidget extends StatelessWidget {
         children: [
           Chip(
             label: Text(event.eventType ?? 'Unknown'),
-            backgroundColor: _getEventTypeColor(context, event.eventType ?? 'Unknown'),
+            backgroundColor: (() {
+              final color =
+                  EpcisEventUiUtils.eventTypeColor(event.eventType ?? 'Unknown');
+              return color == Colors.grey
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : color;
+            })(),
           ),
           const SizedBox(width: 8),
           if (event.disposition != null)
@@ -407,18 +414,4 @@ class QueryResultsWidget extends StatelessWidget {
     );
   }
 
-  Color _getEventTypeColor(BuildContext context, String eventType) {
-    switch (eventType.toLowerCase()) {
-      case 'objectevent':
-        return Colors.blue;
-      case 'aggregationevent':
-        return Colors.green;
-      case 'transactionevent':
-        return Colors.orange;
-      case 'transformationevent':
-        return Colors.purple;
-      default:
-        return Theme.of(context).colorScheme.surfaceContainerHighest;
-    }
-  }
 }

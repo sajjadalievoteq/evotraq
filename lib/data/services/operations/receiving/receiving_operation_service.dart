@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/operations/receiving/receiving_page_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 
@@ -41,7 +42,7 @@ class ReceivingOperationService {
       if (response.statusCode == 201 ||
           response.statusCode == 200 ||
           response.statusCode == 207) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReceivingResponse.fromJson(responseData);
       }
 
@@ -79,7 +80,7 @@ class ReceivingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReceivingResponse.fromJson(responseData);
       }
 
@@ -104,7 +105,7 @@ class ReceivingOperationService {
     }
   }
 
-  Future<ReceivingPage> getReceivingOperationsPage({
+  Future<OperationPage<ReceivingResponse>> getReceivingOperationsPage({
     int page = 0,
     int size = 20,
   }) async {
@@ -119,21 +120,8 @@ class ReceivingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as Map<String, dynamic>;
-        final operations = (responseData['operations'] as List? ?? const [])
-            .map((op) => ReceivingResponse.fromJson(op as Map<String, dynamic>))
-            .toList();
-        final total = (responseData['total'] as num?)?.toInt() ??
-            (responseData['totalElements'] as num?)?.toInt() ??
-            operations.length;
-        final pageSize = (responseData['size'] as num?)?.toInt() ?? size;
-        final totalPages = (responseData['totalPages'] as num?)?.toInt() ??
-            (pageSize > 0 ? (total / pageSize).ceil() : (total > 0 ? 1 : 0));
-        return ReceivingPage(
-          operations: operations,
-          total: total,
-          totalPages: totalPages,
-        );
+        final responseData = decodeApiResponseMap(response.data);
+        return OperationPage.fromJson(responseData, ReceivingResponse.fromJson);
       }
 
       throw _apiExceptionFromResponse(
@@ -176,7 +164,7 @@ class ReceivingOperationService {
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return ReceivingResponse.fromJson(responseData);
       }
 

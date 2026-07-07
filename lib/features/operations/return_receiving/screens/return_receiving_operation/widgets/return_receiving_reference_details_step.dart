@@ -21,6 +21,7 @@ class ReturnReceivingReferenceDetailsStep extends StatelessWidget {
     required this.carrierController,
     required this.trackingController,
     required this.notesController,
+    required this.gincNumberController,
     required this.eventTime,
     required this.onEventTimeChanged,
     this.showPageHeader = true,
@@ -52,6 +53,7 @@ class ReturnReceivingReferenceDetailsStep extends StatelessWidget {
   final TextEditingController carrierController;
   final TextEditingController trackingController;
   final TextEditingController notesController;
+  final TextEditingController gincNumberController;
   final DateTime? eventTime;
   final ValueChanged<DateTime?> onEventTimeChanged;
   final bool showPageHeader;
@@ -102,6 +104,7 @@ class ReturnReceivingReferenceDetailsStep extends StatelessWidget {
         carrierController: carrierController,
         trackingController: trackingController,
         notesController: notesController,
+        gincNumberController: gincNumberController,
         returnReasonLabel: returnReasonLabel,
         productGtin: productGtin,
         productLotNumber: productLotNumber,

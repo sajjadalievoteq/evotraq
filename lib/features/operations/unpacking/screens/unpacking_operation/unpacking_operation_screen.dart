@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
@@ -11,7 +12,6 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_confi
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
-import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_status.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
@@ -26,13 +26,13 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_container_contents_loader.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_operation_step_validator.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_operation_items_step_content.dart';
-import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_items_step_content.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_review_step.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
-import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scanning_mode.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
@@ -71,8 +71,8 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
   bool _isLoading = false;
   DateTime? _eventTime;
 
-  UnpackingScanningMode _containerScanningMode = UnpackingScanningMode.scanner;
-  UnpackingScanningMode _itemScanningMode = UnpackingScanningMode.scanner;
+  OperationScanningMode _containerScanningMode = OperationScanningMode.scanner;
+  OperationScanningMode _itemScanningMode = OperationScanningMode.scanner;
 
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
 
@@ -308,7 +308,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
           await unpackingService.createUnpackingOperation(unpackingRequest);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == UnpackingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Unpacking submitted with warnings — some items were not processed. '
             'Open the operation record to see which items need attention.',
@@ -527,7 +527,7 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
     return AppLayoutBuilder(
       builder: (context, layout) {
         if (layout.isDesktopUp) {
-          return UnpackingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _hasItemsToUnpack,
@@ -535,8 +535,8 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
               embeddedInPanel: true,
               showContainerSection: false,
             ),
-            itemsStep: UnpackingOperationItemsStepContent(
-              containerStep: _referenceDetailsStep(
+            itemsStep: OperationItemsStepContent(
+              detailsStep: _referenceDetailsStep(
                 embeddedInPanel: true,
                 showReferenceSection: false,
                 showLocationSection: false,
@@ -546,10 +546,12 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
             ),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitUnpackingOperation,
+            appBarTitle: 'New Unpacking Operation',
+            submitLabel: 'Create Unpacking Operation',
           );
         }
 
-        return UnpackingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -558,6 +560,8 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitUnpackingOperation,
+          appBarTitle: 'Unpacking Operation',
+          submitLabel: 'Create Unpacking Operation',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

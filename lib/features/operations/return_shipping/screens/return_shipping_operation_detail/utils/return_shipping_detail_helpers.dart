@@ -9,6 +9,7 @@ class ReturnShippingDetailHelpers {
         operation.trackingNumber != null ||
         operation.billOfLadingNumber != null ||
         operation.purchaseOrderNumber != null ||
-        operation.despatchAdviceNumber != null;
+        operation.despatchAdviceNumber != null ||
+        operation.gincNumber != null;
   }
 }

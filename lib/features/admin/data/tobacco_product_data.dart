@@ -1,24 +1,12 @@
 /// Real tobacco product data for UAE market
 /// Based on actual brands and specifications available in the region
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+
 class TobaccoProductData {
   /// Calculate GS1 check digit using standard modulo 10 algorithm
   /// This matches the backend calculation exactly
   static int _calculateCheckDigit(String digits) {
-    int sum = 0;
-    bool multiplyBy3 = true;
-    
-    // Process from right to left (same as backend)
-    for (int i = digits.length - 1; i >= 0; i--) {
-      int digit = int.parse(digits[i]);
-      if (multiplyBy3) {
-        sum += digit * 3;
-      } else {
-        sum += digit;
-      }
-      multiplyBy3 = !multiplyBy3;
-    }
-    
-    return (10 - (sum % 10)) % 10;
+    return CheckDigitUtils.calculateMod10(digits);
   }
   
   /// Generate a valid GTIN-14 with correct check digit

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,18 +12,18 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_confi
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
-import 'package:traqtrace_app/data/models/operations/shipping/shipping_status.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/shipping/cubit/shipping_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/utils/shipping_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/utils/shipping_operation_step_validator.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/widgets/shipping_review_step.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -69,6 +70,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   final _billOfLadingController = TextEditingController();
   final _carrierController = TextEditingController();
   final _trackingController = TextEditingController();
+  final _gincNumberController = TextEditingController();
 
   GLN? _sourceGln;
   GLN? _destinationGln;
@@ -76,6 +78,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
   String? _destinationGlnError;
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
+  final Map<String, String> _itemWarnings = {};
   bool _isLoading = false;
   bool _isAddingEpc = false;
 
@@ -116,6 +119,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
       billOfLadingController: _billOfLadingController,
       carrierController: _carrierController,
       trackingController: _trackingController,
+      gincNumberController: _gincNumberController,
       eventTime: _eventTime,
       onEventTimeChanged: (dt) => setState(() => _eventTime = dt),
       showPageHeader: !embeddedInPanel,
@@ -125,17 +129,30 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     );
   }
 
-  ShippingItemScanStep _itemScanStep({
+  OperationItemScanStep _itemScanStep({
     bool embeddedInPanel = false,
     bool? fillHeight,
   }) {
-    return ShippingItemScanStep(
+    return OperationItemScanStep(
       scannedEpcs: _scannedEpcs,
       onItemAdded: _onItemAdded,
-      onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
-      onClearAll: () => setState(() => _scannedEpcs.clear()),
+      onRemoveItem: (index) => setState(() {
+        final removed = _scannedEpcs.removeAt(index);
+        _itemWarnings.remove(removed);
+      }),
+      onClearAll: () => setState(() {
+        _scannedEpcs.clear();
+        _itemWarnings.clear();
+      }),
+      groupCardTitle: 'Add EPCs to Shipment',
+      pageHeaderTitle: 'Scan Items to Ship',
+      pageHeaderSubtitle: 'Scan SGTIN or SSCC labels for this shipment.',
+      scannedListTitle: 'Items to Ship',
+      scannedQueuedLabel: 'queued for shipping',
+      hierarchyScreenTitle: 'Shipment Hierarchy',
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
+      itemWarnings: _itemWarnings,
     );
   }
 
@@ -162,6 +179,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     _billOfLadingController.dispose();
     _carrierController.dispose();
     _trackingController.dispose();
+    _gincNumberController.dispose();
     super.dispose();
   }
 
@@ -281,13 +299,16 @@ _showOperationError(
         trackingNumber: _trackingController.text.trim().isNotEmpty
             ? _trackingController.text.trim()
             : null,
+        gincNumber: _gincNumberController.text.trim().isNotEmpty
+            ? _gincNumberController.text.trim()
+            : null,
         eventTime: _eventTime,
       );
 
       final response = await shippingService.createShippingOperation(shippingRequest);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == ShippingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Shipping submitted with warnings. Open the record for details.',
           );
@@ -301,7 +322,7 @@ _showOperationError(
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
             context
-                .read<ShippingOperationsCubit>()
+                .read<OperationSplitCubit>()
                 .setCreatedId(response.navigableOperationId);
           }
           widget.onEmbeddedActionSuccess!();
@@ -344,18 +365,19 @@ _showOperationError(
         barcode,
         alreadyScanned: _scannedEpcs,
         operationLabel: 'shipping',
-        allowGtin: true,
+        allowGtin: false,
       );
       if (!outcome.success) {
-_showOperationError(
+        _showOperationError(
           outcome.errorMessage ??
-              'This scan is not valid for shipping. Use SGTIN, SSCC, or lot-based GTIN.',
+              'This scan is not valid for shipping. Use SGTIN or SSCC only.',
         );
         return false;
       }
 
       if (!mounted) return false;
       setState(() => _scannedEpcs.add(outcome.rawBarcode));
+      await _loadSoftWarning(outcome.rawBarcode);
       if (showSuccessToast) {
         context.showSuccess('Item added');
       }
@@ -365,13 +387,28 @@ _showOperationError(
     }
   }
 
+  Future<void> _loadSoftWarning(String epc) async {
+    try {
+      final statusService = getIt<OperationEpcStatusService>();
+      final status = await statusService.getEpcStatus(epc);
+      if (!mounted || status == null) return;
+      if (!status.compatibleWithShipping) {
+        setState(() => _itemWarnings[epc] = status.status);
+      } else {
+        setState(() => _itemWarnings.remove(epc));
+      }
+    } catch (_) {
+      // Soft warning is best-effort only.
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppLayoutBuilder(
       builder: (context, layout) {
         final usePanelLayout = widget.embedded || layout.isDesktopUp;
         if (usePanelLayout) {
-          return ShippingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _scannedEpcs.isNotEmpty,
@@ -379,10 +416,12 @@ _showOperationError(
             itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitShippingOperation,
+            appBarTitle: 'New Shipping Operation',
+            submitLabel: 'Create Shipping Operation',
           );
         }
 
-        return ShippingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -391,6 +430,8 @@ _showOperationError(
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitShippingOperation,
+          appBarTitle: 'Shipping Operation',
+          submitLabel: 'Create Shipping Operation',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

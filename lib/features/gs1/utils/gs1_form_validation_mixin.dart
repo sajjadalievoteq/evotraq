@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 
@@ -208,16 +209,7 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
   }
 
   int _calculateGS1CheckDigit(String digits) {
-    int sum = 0;
-
-    for (int i = 0; i < digits.length; i++) {
-      final digit = int.parse(digits[digits.length - 1 - i]);
-      sum += (i % 2 == 0) ? digit * 3 : digit;
-    }
-
-    final remainder = sum % 10;
-
-    return (remainder == 0) ? 0 : 10 - remainder;
+    return CheckDigitUtils.calculateMod10(digits);
   }
 
   String? validateEPCURI(String? value) {

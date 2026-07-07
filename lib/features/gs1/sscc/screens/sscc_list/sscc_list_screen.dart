@@ -354,10 +354,10 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
     _searchImmediate();
   }
 
-  void _toggleSortDirection() {
-    setState(() {
-      _sortDirection = _sortDirection == 'DESC' ? 'ASC' : 'DESC';
-    });
+  void _onSortOrderChanged(String order) {
+    final target = order.toUpperCase();
+    if (_sortDirection == target) return;
+    setState(() => _sortDirection = target);
     _searchImmediate();
   }
 
@@ -383,7 +383,7 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
             setState(() => _pageSize = newSize);
             _searchImmediate();
           },
-          onToggleSortDirection: _toggleSortDirection,
+          onSortOrderChanged: _onSortOrderChanged,
           onRefresh: _refresh,
           onClearFilters: _clearAllFilters,
           onTapSscc: _navigateToDetails,

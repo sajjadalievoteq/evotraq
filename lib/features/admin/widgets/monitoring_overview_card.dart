@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class MonitoringOverviewCard extends StatelessWidget {
   final PerformanceMetrics? performance;
@@ -19,6 +20,9 @@ class MonitoringOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final overallStatus = _getOverallStatus();
+    final overallStatusColor =
+        AdminHelperMappers.monitoringOverallStatusColor(overallStatus);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -28,8 +32,8 @@ class MonitoringOverviewCard extends StatelessWidget {
             Row(
               children: [
                 TraqIcon(
-                  _getOverallStatusIcon(),
-                  color: _getOverallStatusColor(),
+                  AdminHelperMappers.monitoringOverallStatusIcon(overallStatus),
+                  color: overallStatusColor,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -44,14 +48,14 @@ class MonitoringOverviewCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getOverallStatusColor().withOpacity(0.1),
+                    color: overallStatusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _getOverallStatusColor().withOpacity(0.3)),
+                    border: Border.all(color: overallStatusColor.withOpacity(0.3)),
                   ),
                   child: Text(
-                    _getOverallStatus(),
+                    overallStatus,
                     style: TextStyle(
-                      color: _getOverallStatusColor(),
+                      color: overallStatusColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -62,13 +66,45 @@ class MonitoringOverviewCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildMetricCard('Performance', _getPerformanceStatus(), _getPerformanceColor())),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Performance',
+                    _getPerformanceStatus(),
+                    AdminHelperMappers.monitoringPerformanceStatusColor(
+                      _getPerformanceStatus(),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: _buildMetricCard('Storage', _getStorageStatus(), _getStorageColor())),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Storage',
+                    _getStorageStatus(),
+                    AdminHelperMappers.monitoringStorageStatusColor(
+                      _getStorageStatus(),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: _buildMetricCard('Integrity', _getIntegrityStatus(), _getIntegrityColor())),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Integrity',
+                    _getIntegrityStatus(),
+                    AdminHelperMappers.monitoringIntegrityStatusColor(
+                      _getIntegrityStatus(),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: _buildMetricCard('Alerts', _getAlertsStatus(), _getAlertsColor())),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Alerts',
+                    _getAlertsStatus(),
+                    AdminHelperMappers.monitoringAlertsStatusColor(
+                      _getAlertsStatus(),
+                    ),
+                  ),
+                ),
               ],
             ),
             if (alerts.isNotEmpty) ...[
@@ -215,60 +251,12 @@ class MonitoringOverviewCard extends StatelessWidget {
     return 'HEALTHY';
   }
 
-  Color _getOverallStatusColor() {
-    final status = _getOverallStatus();
-    switch (status) {
-      case 'CRITICAL':
-        return Colors.red[800]!;
-      case 'WARNING':
-        return Colors.orange;
-      case 'DEGRADED':
-        return Colors.yellow[700]!;
-      case 'HEALTHY':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getOverallStatusIcon() {
-    final status = _getOverallStatus();
-    switch (status) {
-      case 'CRITICAL':
-        return AppAssets.iconDangerous;
-      case 'WARNING':
-        return AppAssets.iconAlert;
-      case 'DEGRADED':
-        return AppAssets.iconInfo;
-      case 'HEALTHY':
-        return AppAssets.iconCheckCircle;
-      default:
-        return AppAssets.iconHelpCircle;
-    }
-  }
-
   String _getPerformanceStatus() {
     if (performance == null) return 'UNKNOWN';
     if (performance!.successRate < 90) return 'POOR';
     if (performance!.successRate < 95) return 'FAIR';
     if (performance!.averageProcessingTimeMs > 1000) return 'SLOW';
     return 'GOOD';
-  }
-
-  Color _getPerformanceColor() {
-    final status = _getPerformanceStatus();
-    switch (status) {
-      case 'POOR':
-        return Colors.red;
-      case 'FAIR':
-        return Colors.orange;
-      case 'SLOW':
-        return Colors.yellow[700]!;
-      case 'GOOD':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
   }
 
   String _getStorageStatus() {
@@ -279,41 +267,11 @@ class MonitoringOverviewCard extends StatelessWidget {
     return 'LOW';
   }
 
-  Color _getStorageColor() {
-    final status = _getStorageStatus();
-    switch (status) {
-      case 'CRITICAL':
-        return Colors.red;
-      case 'HIGH':
-        return Colors.orange;
-      case 'MODERATE':
-        return Colors.yellow[700]!;
-      case 'LOW':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String _getIntegrityStatus() {
     if (integrity == null) return 'UNKNOWN';
     if (integrity!.overallIntegrityScore < 70) return 'POOR';
     if (integrity!.overallIntegrityScore < 90) return 'FAIR';
     return 'EXCELLENT';
-  }
-
-  Color _getIntegrityColor() {
-    final status = _getIntegrityStatus();
-    switch (status) {
-      case 'POOR':
-        return Colors.red;
-      case 'FAIR':
-        return Colors.orange;
-      case 'EXCELLENT':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
   }
 
   String _getAlertsStatus() {
@@ -323,19 +281,4 @@ class MonitoringOverviewCard extends StatelessWidget {
     return 'ACTIVE';
   }
 
-  Color _getAlertsColor() {
-    final status = _getAlertsStatus();
-    switch (status) {
-      case 'NONE':
-        return Colors.green;
-      case 'CRITICAL':
-        return Colors.red;
-      case 'HIGH':
-        return Colors.orange;
-      case 'ACTIVE':
-        return Colors.yellow[700]!;
-      default:
-        return Colors.grey;
-    }
-  }
 }

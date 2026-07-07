@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/receiving/receiving_status.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
@@ -35,7 +35,7 @@ class ReceivingResponse {
   List<String>? eventIds;
   int? processedEpcsCount;
   List<String>? epcList;
-  ReceivingStatus? status;
+  OperationStatus? status;
   DateTime? processedAt;
   String? sourceGLN;
   String? receivingGLN;
@@ -78,10 +78,10 @@ class ReceivingResponse {
           epcList?.length,
       epcList: epcList,
       status: json['status'] != null
-          ? parseReceivingStatus(json['status'].toString())
+          ? parseOperationStatus(json['status'].toString())
           : null,
       processedAt: json['processedAt'] != null
-          ? DateTime.tryParse(json['processedAt'].toString())
+          ? DateTime.tryParse(json['processedAt'].toString())?.toLocal()
           : null,
       sourceGLN: _parseGln(json['sourceGLN'] ?? json['sourceGln']),
       receivingGLN: _parseGln(
@@ -128,9 +128,9 @@ class ReceivingResponse {
     return eventIds?.isNotEmpty == true ? _str(eventIds!.first) : null;
   }
 
-  bool get isSuccess => status == ReceivingStatus.success;
+  bool get isSuccess => status == OperationStatus.success;
   bool get isAccepted =>
-      status == ReceivingStatus.accepted ||
+      status == OperationStatus.accepted ||
       acceptanceStatus?.toUpperCase() == 'ACCEPTED';
   bool get isAwaitingAcceptance {
     if (isAccepted) return false;
@@ -139,9 +139,9 @@ class ReceivingResponse {
   }
 
   bool get isSuccessOrPartial =>
-      status == ReceivingStatus.success ||
-      status == ReceivingStatus.partialSuccess;
+      status == OperationStatus.success ||
+      status == OperationStatus.partialSuccess;
   bool get hasErrors =>
-      status == ReceivingStatus.failed ||
-      status == ReceivingStatus.validationError;
+      status == OperationStatus.failed ||
+      status == OperationStatus.validationError;
 }

@@ -1,14 +1,15 @@
-﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_status_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_comments_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_events_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_location_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_messages_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_two_gln_location_card.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_shipped_items_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_processing_stats_card.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_reference_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_status_banner.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_comments_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_events_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_messages_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_processing_stats_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
 /// Scrollable body content for shipping operation detail.
 class CancelShippingDetailBody extends StatelessWidget {
@@ -31,21 +32,39 @@ class CancelShippingDetailBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          CancelShippingDetailStatusBanner(operation: operation),
+          OperationDetailStatusBanner(
+            title: operation.cancelShippingReference ?? 'Cancel Shipping Operation',
+            operationId: operation.cancelShippingOperationId,
+            itemCount: operation.shippedItemsCount,
+          ),
           const SizedBox(height: 16),
           CancelShippingDetailReferenceCard(operation: operation),
-          CancelShippingDetailLocationCard(operation: operation),
+          OperationDetailTwoGlnLocationCard(
+            cardTitle: 'Cancel Shipping Locations',
+            sourceGlnLabel: 'Ship From GLN',
+            destinationGlnLabel: 'Ship To GLN',
+            sourceGln: operation.sourceGLN ?? operation.sourceLocation?.glnCode,
+            destinationGln:
+                operation.destinationGLN ?? operation.destinationLocation?.glnCode,
+            sourceLocationName: operation.sourceLocation?.locationName,
+            sourceCity: operation.sourceLocation?.city,
+            destinationLocationName: operation.destinationLocation?.locationName,
+            destinationCity: operation.destinationLocation?.city,
+          ),
           CancelShippingDetailShippedItemsCard(operation: operation),
           if (operation.eventIds != null && operation.eventIds!.isNotEmpty) ...[
-            CancelShippingDetailEventsCard(operation: operation),
+            OperationDetailEventsCard(eventIds: operation.eventIds!),
           ],
           if (operation.messages != null && operation.messages!.isNotEmpty) ...[
-            CancelShippingDetailMessagesCard(operation: operation),
+            OperationDetailMessagesCard(messages: operation.messages!),
           ],
           if (operation.comments != null && operation.comments!.isNotEmpty) ...[
-            CancelShippingDetailCommentsCard(operation: operation),
+            OperationDetailCommentsCard(comments: operation.comments!),
           ],
-          CancelShippingDetailProcessingStatsCard(operation: operation),
+          OperationDetailProcessingStatsCard(
+            statusLabel: OperationStatusUtils.detailLabel(operation.status),
+            processingTimeMs: operation.processingTimeMs,
+          ),
           const SizedBox(height: 32),
         ],
       ),

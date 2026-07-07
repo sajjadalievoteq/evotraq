@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/utils/cancel_shipping_detail_formatters.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_group_card.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_info_row.dart';
-import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
 class CancelShippingDetailReferenceCard extends StatelessWidget {
   const CancelShippingDetailReferenceCard({
@@ -15,33 +15,33 @@ class CancelShippingDetailReferenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CancelShippingDetailGroupCard(
+    return OperationDetailGroupCard(
       title: 'Reference Details',
       children: [
         if (operation.cancelShippingReference != null)
-          CancelShippingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Cancel Shipping Reference',
             value: operation.cancelShippingReference!,
           ),
         if (operation.originalShippingReference != null)
-          CancelShippingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Original GINC',
             value: operation.originalShippingReference!,
           ),
         if (operation.cancelReason != null)
-          CancelShippingDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Cancellation Reason',
             value: operation.cancelReason!,
           ),
         if (operation.cancelShippingOperationId != null)
-          CancelShippingDetailInfoRowCopy(
+          OperationDetailInfoRowCopy(
             label: 'Operation ID',
             value: operation.cancelShippingOperationId!,
           ),
         if (operation.processedAt != null)
-          CancelShippingDetailInfoRow(
+          OperationDetailInfoRow(
             label: 'Processed At',
-            value: CancelShippingDetailFormatters.formatDateTime(operation.processedAt!),
+            value: OperationDetailFormatters.formatDateTime(operation.processedAt!),
           ),
       ],
     );

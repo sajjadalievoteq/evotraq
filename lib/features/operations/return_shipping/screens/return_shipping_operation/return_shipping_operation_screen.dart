@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
@@ -11,17 +12,17 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_confi
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
-import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_status.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
-import 'package:traqtrace_app/features/operations/return_shipping/cubit/return_shipping_operations_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/utils/return_shipping_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/utils/return_shipping_operation_step_validator.dart';
-import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_item_scan_step.dart';
-import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_operation_desktop_layout.dart';
-import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_operation_mobile_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/widgets/return_shipping_review_step.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -68,6 +69,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
   final _billOfLadingController = TextEditingController();
   final _carrierController = TextEditingController();
   final _trackingController = TextEditingController();
+  final _gincNumberController = TextEditingController();
 
   GLN? _sourceGln;
   GLN? _destinationGln;
@@ -75,6 +77,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
   String? _destinationGlnError;
   DateTime? _eventTime;
   final List<String> _scannedEpcs = [];
+  final Map<String, String> _itemWarnings = {};
   bool _isLoading = false;
   PharmaReturnContext? _pharmaContext;
   PharmaReturnReason? _selectedReturnReason;
@@ -137,6 +140,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       billOfLadingController: _billOfLadingController,
       carrierController: _carrierController,
       trackingController: _trackingController,
+      gincNumberController: _gincNumberController,
       eventTime: _eventTime,
       onEventTimeChanged: (dt) => setState(() => _eventTime = dt),
       showPageHeader: !embeddedInPanel,
@@ -157,18 +161,34 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     );
   }
 
-  ReturnShippingItemScanStep _itemScanStep({
+  OperationItemScanStep _itemScanStep({
     bool embeddedInPanel = false,
     bool? fillHeight,
   }) {
-    return ReturnShippingItemScanStep(
+    return OperationItemScanStep(
       scannedEpcs: _scannedEpcs,
       onItemAdded: _onItemAdded,
-      onRemoveItem: (index) => setState(() => _scannedEpcs.removeAt(index)),
-      onClearAll: () => setState(() => _scannedEpcs.clear()),
+      onRemoveItem: (index) => setState(() {
+        final removed = _scannedEpcs.removeAt(index);
+        _itemWarnings.remove(removed);
+      }),
+      onClearAll: () => setState(() {
+        _scannedEpcs.clear();
+        _itemWarnings.clear();
+      }),
+      groupCardTitle: 'Add EPCs to Shipment',
+      pageHeaderTitle:
+          _isPrefilled ? 'Returned Items' : 'Scan Items to Return',
+      pageHeaderSubtitle: _isPrefilled
+          ? 'Serial numbers from the return shipment (read-only).'
+          : 'Scan SGTIN or SSCC labels for this return shipment.',
+      scannedListTitle: 'Items to Ship',
+      scannedQueuedLabel: 'queued for shipping',
+      hierarchyScreenTitle: 'Return Shipment Hierarchy',
       fillHeight: fillHeight ?? embeddedInPanel,
       showPageHeader: !embeddedInPanel,
-      itemsReadOnly: _isPrefilled,
+      showScanInput: !_isPrefilled,
+      itemWarnings: _itemWarnings,
     );
   }
 
@@ -197,6 +217,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     _billOfLadingController.dispose();
     _carrierController.dispose();
     _trackingController.dispose();
+    _gincNumberController.dispose();
     super.dispose();
   }
 
@@ -326,6 +347,9 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         trackingNumber: _trackingController.text.trim().isNotEmpty
             ? _trackingController.text.trim()
             : null,
+        gincNumber: _gincNumberController.text.trim().isNotEmpty
+            ? _gincNumberController.text.trim()
+            : null,
         eventTime: _eventTime,
         sourceEventId: _pharmaContext?.sourceEventId,
         returnReason: _selectedReturnReason?.code,
@@ -339,7 +363,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       final response = await shippingService.createReturnShippingOperation(shippingRequest);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == ReturnShippingStatus.partialSuccess) {
+        if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
             'Return shipping submitted with warnings. Open the record for details.',
           );
@@ -353,7 +377,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
           if (response.navigableOperationId != null) {
             context
-                .read<ReturnShippingOperationsCubit>()
+                .read<OperationSplitCubit>()
                 .setCreatedId(response.navigableOperationId);
           }
           widget.onEmbeddedActionSuccess!();
@@ -382,11 +406,11 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     }
   }
 
-  void _onItemAdded(EPCParseResult result) {
-    _addEpc(result.epc, showSuccessToast: true);
+  Future<void> _onItemAdded(EPCParseResult result) async {
+    await _addEpc(result.epc, showSuccessToast: true);
   }
 
-  bool _addEpc(String barcode, {bool showSuccessToast = false}) {
+  Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
     final duplicate = OperationEpcScanValidator.checkDuplicate(barcode, _scannedEpcs);
     if (duplicate != null) {
           context.showError(
@@ -396,18 +420,32 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     }
 
     final type = OperationEpcScanValidator.resolveEpcType(barcode);
-    if (type == OperationScanItemType.unknown) {
-          context.showError(
-        'Only SGTIN, SSCC, and GTIN (lot-based) values are allowed for shipping.',
-      );
+    if (isRejectedOperationScanType(type)) {
+      context.showError(kSerializedEpcRequiredMessage);
       return false;
     }
 
     setState(() => _scannedEpcs.add(barcode));
+    await _checkEpcStatus(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
     }
     return true;
+  }
+
+  Future<void> _checkEpcStatus(String epc) async {
+    try {
+      final statusService = getIt<OperationEpcStatusService>();
+      final status = await statusService.getEpcStatus(epc);
+      if (!mounted || status == null) return;
+      if (!status.compatibleWithReceiving) {
+        setState(() => _itemWarnings[epc] = status.status);
+      } else {
+        setState(() => _itemWarnings.remove(epc));
+      }
+    } catch (_) {
+      // Non-fatal: badge is cosmetic; backend enforces on submit.
+    }
   }
 
   @override
@@ -416,7 +454,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       builder: (context, layout) {
         final usePanelLayout = widget.embedded || layout.isDesktopUp;
         if (usePanelLayout) {
-          return ReturnShippingOperationDesktopLayout(
+          return OperationDesktopLayout(
             isLoading: _isLoading,
             step1Complete: _validateStep0Silent(),
             step2Complete: _scannedEpcs.isNotEmpty,
@@ -424,10 +462,12 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
             itemsStep: _itemScanStep(embeddedInPanel: true, fillHeight: false),
             reviewStep: _reviewStep(embeddedInPanel: true),
             onSubmit: _submitReturnShippingOperation,
+            appBarTitle: 'New Return Shipping',
+            submitLabel: 'Create Return Shipping',
           );
         }
 
-        return ReturnShippingOperationMobileLayout(
+        return OperationMobileLayout(
           isLoading: _isLoading,
           currentStep: _currentStep,
           steps: _wizardSteps,
@@ -436,6 +476,8 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
           onPrevious: _previousStep,
           onNext: _nextStep,
           onSubmit: _submitReturnShippingOperation,
+          appBarTitle: 'Return Shipping',
+          submitLabel: 'Create Return Shipping',
           stepPages: [
             _referenceDetailsStep(),
             _itemScanStep(),

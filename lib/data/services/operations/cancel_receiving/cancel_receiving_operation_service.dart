@@ -3,8 +3,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_page_response.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_receiving_response_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
@@ -97,7 +98,7 @@ class CancelReceivingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data);
+        final responseData = decodeApiResponseBody(response.data);
         return CancelReceivingResponse.fromJson(responseData);
       }
 
@@ -122,7 +123,7 @@ class CancelReceivingOperationService {
     }
   }
 
-  Future<CancelReceivingPageResponse> getCancelReceivingOperationsPage({
+  Future<OperationPage<CancelReceivingResponse>> getCancelReceivingOperationsPage({
     int page = 0,
     int size = 20,
   }) async {
@@ -137,8 +138,8 @@ class CancelReceivingOperationService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.data) as Map<String, dynamic>;
-        return CancelReceivingPageResponse.fromJson(responseData);
+        final responseData = decodeApiResponseMap(response.data);
+        return OperationPage.fromJson(responseData, CancelReceivingResponse.fromJson);
       }
 
       throw _apiExceptionFromResponse(

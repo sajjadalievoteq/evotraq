@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 
-/// Typed accessors for operation-specific fields stored in [Operation.metadata].
 extension OperationMetadata on Operation {
   String? get sourceGLN => metadataString('sourceGLN');
   String? get destinationGLN => metadataString('destinationGLN');

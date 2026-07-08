@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
@@ -21,6 +22,7 @@ abstract final class CancelShippingSubmitErrorMessage {
         ?.map(OperationApiErrorMessage.cleanLine)
         .whereType<String>()
         .where((m) => m.isNotEmpty)
+        .map((m) => OperationErrorTranslator.translate(m, fallback: m))
         .toList();
     if (messages != null && messages.isNotEmpty) {
       return messages.join('\n');

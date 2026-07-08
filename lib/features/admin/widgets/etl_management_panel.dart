@@ -9,8 +9,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
-/// ETL Management Panel for Phase 3.3 Batch Processing Capabilities
-/// Provides comprehensive ETL pipeline management and monitoring interface
 class ETLManagementPanel extends StatefulWidget {
   final String baseUrl;
   final TokenManager tokenManager;
@@ -295,7 +293,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // ETL Status Overview
             Expanded(
               child: Row(
                 children: [
@@ -308,7 +305,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               ),
             ),
             
-            // Action Buttons
             Row(
               children: [
                 ElevatedButton.icon(
@@ -700,7 +696,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Overall Quality Score
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -738,7 +733,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
           ),
           const SizedBox(height: 16),
           
-          // Quality Dimensions
           Row(
             children: [
               Expanded(
@@ -1421,9 +1415,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
     String selectedSourceField = rule['sourceField'] ?? '';
     String selectedTargetField = rule['targetField'] ?? '';
     
-    // EPCIS Field options based on event types
     final epcisFields = [
-      // Common EPCIS Event fields
       'eventId',
       'eventTime',
       'eventTimeZoneOffset', 
@@ -1435,7 +1427,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       'businessLocation',
       'bizData',
       
-      // ObjectEvent specific fields
       'epcList',
       'action',
       'quantityList',
@@ -1444,23 +1435,19 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
       'ilmd',
       'persistentDisposition',
       
-      // TransformationEvent specific fields
       'inputEPCList',
       'outputEPCList', 
       'inputQuantityList',
       'outputQuantityList',
       'transformationID',
       
-      // TransactionEvent specific fields
       'parentID',
       'childEPCs',
       'bizTransactionList',
       
-      // EPCIS 2.0 extensions
       'sensorElementList',
       'certificationInfo',
       
-      // Custom business data fields
       'bizData.lotNumber',
       'bizData.batchId',
       'bizData.expirationDate',
@@ -1625,7 +1612,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
       if (response.statusCode == 201) {
         context.showSuccess('Pipeline "$pipelineName" created successfully');
-        _loadPipelines(); // Refresh the pipelines list
+        _loadPipelines();
       } else {
         throw Exception('Failed to create pipeline: ${response.statusCode} ${response.statusMessage}');
       }
@@ -1644,7 +1631,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
       if (response.statusCode == 200) {
         context.showSuccess('Pipeline "$pipelineName" updated successfully');
-        _loadPipelines(); // Refresh the pipelines list
+        _loadPipelines();
       } else {
         throw Exception('Failed to update pipeline: ${response.statusCode} ${response.statusMessage}');
       }
@@ -1687,7 +1674,6 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _unschedulePipeline(String pipelineId) async {
     try {
-      // This would delete any scheduled jobs for this pipeline
       context.showSuccess('Pipeline schedule removed');
       _loadPipelines();
     } catch (e) {
@@ -1698,13 +1684,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
   String _getScheduleExpression(String frequency) {
     switch (frequency) {
       case 'HOURLY':
-        return '0 0 * * * ?'; // Every hour
+        return '0 0 * * * ?';
       case 'DAILY':
-        return '0 0 0 * * ?'; // Every day at midnight
+        return '0 0 0 * * ?';
       case 'WEEKLY':
-        return '0 0 0 ? * SUN'; // Every Sunday at midnight
+        return '0 0 0 ? * SUN';
       default:
-        return '0 0 0 * * ?'; // Default to daily
+        return '0 0 0 * * ?';
     }
   }
 

@@ -5,9 +5,7 @@ import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 
-/// A demonstration screen for the validation features
 class ValidationRuleDemoRoute extends StatefulWidget {
-  /// Constructor
   const ValidationRuleDemoRoute({Key? key}) : super(key: key);
 
   @override
@@ -65,7 +63,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
             ),
             const SizedBox(height: 24),
             
-            // Demo form
             Form(
               key: _formKey,
               child: Column(
@@ -147,7 +144,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Demo controls
                   const Text(
                     'Demo Controls',
                     style: TextStyle(
@@ -157,7 +153,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                   ),
                   const SizedBox(height: 8),
                   
-                  // Severity selector
                   const Text('Error Severity Level:'),
                   Wrap(
                     spacing: 8,
@@ -178,7 +173,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Animation toggle
                   SwitchListTile(
                     title: const Text('Animate Validation Feedback'),
                     subtitle: const Text('Show validation results as you type'),
@@ -191,11 +185,9 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Validation display demo
                   const Text('Validation Indicator Examples:'),
                   const SizedBox(height: 8),
                   
-                  // Sample indicators for different states
                   Row(
                     children: const [
                       Expanded(
@@ -239,7 +231,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                   ),
                   const SizedBox(height: 8),
                   
-                  // Sample indicators for different severity levels
                   Row(
                     children: [
                       Expanded(
@@ -336,11 +327,9 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
   
   String? _validateBusinessStep(String? value) {
     if (value == null || value.isEmpty) {
-      // For demo purposes, we'll use the selected severity for this field
       if (_selectedSeverity.failsValidation) {
         return 'Business step is required';
       } else {
-        // This is a warning, not an error
         return 'Business step is recommended';
       }
     }
@@ -354,7 +343,6 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
   
   String? _validateDisposition(String? value) {
     if (value == null || value.isEmpty) {
-      // Optional field, so no error
       return null;
     }
     
@@ -385,15 +373,12 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
     return null;
   }
   
-  /// Create the route for navigation
   static Route<dynamic> route() {
     return MaterialPageRoute(
       builder: (context) => const ValidationRuleDemoRoute(),
     );
   }
 
-  /// Navigate to this screen
-  // ignore: unused_element
   static void navigate(BuildContext context) {
     Navigator.of(context).push(route());
   }

@@ -25,16 +25,12 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    // Load notifications first
     context.read<NotificationCubit>().loadSubscriptions();
-    // Don't auto-connect to WebSocket to avoid connection errors
-    // User can manually connect if needed
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    // Only disconnect if we're connected
     if (_isConnected) {
       context.read<NotificationCubit>().disconnectWebSocket();
     }
@@ -98,7 +94,6 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // Status and Filter Section
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -125,13 +120,11 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Filter chips
                 _buildFilterChips(),
               ],
             ),
           ),
           const Divider(height: 1),
-          // Notifications List
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
@@ -224,8 +217,6 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
   }
 
   Widget _buildNotificationsList(NotificationState state) {
-    // For now, we'll show subscription activity as notifications
-    // In a full implementation, this would show actual received notifications
     final filteredData = _filterNotifications(state);
     
     if (filteredData.isEmpty) {
@@ -261,7 +252,6 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     final now = DateTime.now();
     final subscriptions = state.subscriptions;
 
-    // Filter based on selected criteria
     switch (_selectedFilter) {
       case 'today':
         return subscriptions.where((sub) {

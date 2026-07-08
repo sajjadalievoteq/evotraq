@@ -73,7 +73,6 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // Filter and Stats Section
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -93,13 +92,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Filter chips
                 _buildFilterChips(),
               ],
             ),
           ),
           const Divider(height: 1),
-          // Subscription List
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
@@ -282,7 +279,6 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       context: context,
       builder: (context) => const CreateSubscriptionDialog(),
     ).then((_) {
-      // Refresh subscriptions after dialog closes
       context.read<NotificationCubit>().loadSubscriptions(page: 0);
     });
   }

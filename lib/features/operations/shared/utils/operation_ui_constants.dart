@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_page_sizes.dart';
 
-/// Shared UI constants for all operation list and filter screens.
 abstract final class OperationUiConstants {
   static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;
   static const String filterAll = 'ALL';

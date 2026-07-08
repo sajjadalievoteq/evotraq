@@ -14,7 +14,6 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_transport_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_reference_card.dart';
 
-/// Scrollable body content for shipping operation detail.
 class ShippingDetailBody extends StatelessWidget {
   const ShippingDetailBody({
     super.key,

@@ -11,8 +11,6 @@ import '../../../core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Cache Management Screen for Phase 3.2 Caching Layer
-/// Provides comprehensive cache monitoring and management interface
 class CacheManagementScreen extends StatefulWidget {
   const CacheManagementScreen({super.key});
 
@@ -143,7 +141,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Cache Health Status
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -183,7 +180,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Overall Statistics
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -195,7 +191,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  // Show hit/miss stats if available, otherwise show cache sizes
                   if (_statistics!.totalHits > 0 || _statistics!.totalMisses > 0) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -221,7 +216,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                       ],
                     ),
                   ] else ...[
-                    // Show cache entry counts when hit/miss data is not available
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -273,7 +267,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Cache Types Performance
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -285,7 +278,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  // Show hit/miss performance if available, otherwise show cache sizes
                   if (_statistics!.totalHits > 0 || _statistics!.totalMisses > 0) ...[
                     _buildCacheTypeRow('Query Results', _statistics!.queryResultsHitRatio, _statistics!.queryResultsHits, _statistics!.queryResultsMisses),
                     const SizedBox(height: 8),
@@ -470,7 +462,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Quick Actions
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -519,7 +510,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Cache Management Actions
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -571,7 +561,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Master Data Management
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -593,7 +582,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Event Data Management
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -683,7 +671,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Cache Health Status
           if (_health != null)
             Card(
               child: Padding(
@@ -708,7 +695,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Distributed Cache Health
           if (_distributedHealth != null)
             Card(
               child: Padding(
@@ -733,7 +719,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // System Information
           if (_statistics != null)
             Card(
               child: Padding(
@@ -797,7 +782,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Card(
             elevation: 2,
             child: Container(
@@ -841,7 +825,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 24),
 
-          // System Overview
           _buildHelpSection(
             'System Overview',
             AppAssets.iconArchitecture,
@@ -855,7 +838,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Cache Types
           _buildHelpSection(
             'Cache Types Implemented',
             AppAssets.iconLayers,
@@ -870,7 +852,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Implementation Details
           _buildHelpSection(
             'Technical Implementation',
             AppAssets.iconCode,
@@ -887,7 +868,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Services Covered
           _buildHelpSection(
             'Cached Services Coverage',
             AppAssets.iconSettings,
@@ -903,7 +883,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Development Environment
           _buildHelpSection(
             'Development Environment (Current)',
             AppAssets.iconComputer,
@@ -934,7 +913,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Production Environment
           _buildHelpSection(
             'Production Environment (Azure)',
             AppAssets.iconCloud,
@@ -961,7 +939,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Performance Benefits
           _buildHelpSection(
             'Performance Benefits',
             AppAssets.iconGauge,
@@ -977,7 +954,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Management Operations
           _buildHelpSection(
             'Available Management Operations',
             AppAssets.iconSecurity,
@@ -994,7 +970,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Best Practices
           _buildHelpSection(
             'Best Practices & Guidelines',
             AppAssets.iconThumbUp,
@@ -1012,7 +987,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 16),
 
-          // Troubleshooting
           _buildHelpSection(
             'Troubleshooting Common Issues',
             AppAssets.iconBug,
@@ -1044,7 +1018,6 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           const SizedBox(height: 24),
 
-          // Footer
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),

@@ -1,8 +1,6 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_pharma_readiness_checker.dart';
 
-/// GS1 pharma / DSCSA readiness checks for shipping operations.
-/// Returns a list of human-readable issue strings. Empty list = ready.
 class ShippingPharmaReadinessChecker {
   ShippingPharmaReadinessChecker._();
 

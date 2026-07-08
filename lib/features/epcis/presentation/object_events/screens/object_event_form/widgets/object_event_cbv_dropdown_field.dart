@@ -56,8 +56,6 @@ class ObjectEventCbvDropdownField extends StatelessWidget {
       );
     }
 
-    // Treat the value as unset if it is not in the current standardValues list
-    // (e.g. after action changes the allowed bizStep list).
     final dropdownValue =
         (value != null && standardValues.contains(value)) ? value : null;
 

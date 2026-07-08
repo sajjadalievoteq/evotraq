@@ -1,4 +1,3 @@
-/// Generic paginated operation list wrapper shared by all operation services.
 class OperationPage<T> {
   const OperationPage({
     required this.operations,

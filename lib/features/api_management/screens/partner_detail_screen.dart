@@ -10,7 +10,6 @@ import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for viewing and editing partner details
 class PartnerDetailScreen extends StatefulWidget {
   final String partnerId;
 
@@ -28,7 +27,6 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   Partner? _partner;
   String? _errorMessage;
 
-  // Form controllers
   late TextEditingController _companyNameController;
   late TextEditingController _glnController;
   late TextEditingController _webhookUrlController;
@@ -37,7 +35,6 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   late TextEditingController _contactPhoneController;
   late TextEditingController _syncIntervalController;
   
-  // Outbound connection controllers
   late TextEditingController _outboundApiUrlController;
   late TextEditingController _outboundEventsEndpointController;
   late TextEditingController _outboundMasterdataEndpointController;
@@ -51,7 +48,6 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   late TextEditingController _outboundTimeoutController;
   late TextEditingController _outboundRetryCountController;
 
-  // Form values
   PartnerType _selectedPartnerType = PartnerType.other;
   DataFormat _selectedDataFormat = DataFormat.epcisJson;
   SyncDirection _selectedSyncDirection = SyncDirection.inbound;
@@ -983,7 +979,6 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
         'outboundRetryCount': int.tryParse(_outboundRetryCountController.text) ?? 3,
       };
 
-      // Add auth-specific fields
       if (_selectedOutboundAuthType == OutboundAuthType.apiKey && _outboundApiKeyController.text.isNotEmpty) {
         updateData['outboundApiKey'] = _outboundApiKeyController.text;
       }
@@ -1023,6 +1018,5 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
 
   void _testConnection() async {
     context.showInfo('Testing connection...');
-    // TODO: Implement connection test
   }
 }

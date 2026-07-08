@@ -98,18 +98,13 @@ class _RuleEditorRouteScreenState extends State<RuleEditorRouteScreen> {
   }
 }
 
-/// A screen for editing validation rules
 class RuleEditorScreen extends StatefulWidget {
-  /// The rule to edit
   final ValidationRule rule;
 
-  /// Whether this is a predefined rule
   final bool isPredefined;
 
-  /// Whether this is a new rule
   final bool isNew;
 
-  /// Constructor
   const RuleEditorScreen({
     Key? key,
     required this.rule,
@@ -164,7 +159,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
     _severity = widget.rule.severity;
     _enabled = widget.rule.enabled;
 
-    // Add listeners to detect changes
     _nameController.addListener(_markAsChanged);
     _descriptionController.addListener(_markAsChanged);
     _fieldController.addListener(_markAsChanged);
@@ -226,7 +220,7 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                   const Padding(
                     padding: EdgeInsets.only(bottom: 16.0),
                     child: Card(
-                      color: Color(0xFFFFF9C4), // Light yellow background
+                      color: Color(0xFFFFF9C4),
                       child: Padding(
                         padding: EdgeInsets.all(12.0),
                         child: Text(
@@ -287,7 +281,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Rule Expression - Advanced validation logic
                 TextFormField(
                   controller: _ruleExpressionController,
                   decoration: const InputDecoration(
@@ -302,7 +295,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Error Message - Custom error message when validation fails
                 TextFormField(
                   controller: _errorMessageController,
                   decoration: const InputDecoration(
@@ -315,7 +307,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Category - Business categorization
                 TextFormField(
                   controller: _categoryController,
                   decoration: const InputDecoration(
@@ -329,7 +320,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Tags - For organization and filtering
                 TextFormField(
                   controller: _tagsController,
                   decoration: const InputDecoration(
@@ -342,7 +332,6 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Priority - Execution order
                 TextFormField(
                   controller: _priorityController,
                   decoration: const InputDecoration(
@@ -546,13 +535,12 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
     }
   }
 
-  /// Maps backend EventType values to dropdown values
   String? _mapBackendEventTypeToDropdownValue(EventType? eventType) {
     if (eventType == null) return null;
 
     switch (eventType) {
       case EventType.ALL:
-        return null; // "All Event Types" option in dropdown
+        return null;
       case EventType.ObjectEvent:
         return 'ObjectEvent';
       case EventType.AggregationEvent:

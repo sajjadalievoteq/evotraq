@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Help screen for Validation Rules Management
 class ValidationRulesHelpScreen extends StatelessWidget {
-  /// Constructor
   const ValidationRulesHelpScreen({Key? key}) : super(key: key);
 
   @override
@@ -43,7 +41,6 @@ class ValidationRulesHelpScreen extends StatelessWidget {
     );
   }
 
-  /// Launch a URL
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
@@ -51,7 +48,6 @@ class ValidationRulesHelpScreen extends StatelessWidget {
     }
   }
 
-  /// Help text content in Markdown format
   static const String _helpText = '''
 # Validation Rules Management
 

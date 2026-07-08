@@ -25,24 +25,20 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Common state
   bool _isLoading = false;
   String? _errorMessage;
   Uint8List? _barcodeImage;
   double _barcodeWidth = 300;
   double _barcodeHeight = 300;
 
-  // GS1 DataMatrix form controllers
   final _gs1ElementStringController = TextEditingController();
 
-  // SGTIN form controllers
   final _gtinController = TextEditingController();
   final _serialNumberController = TextEditingController();
   final _expiryDateController = TextEditingController();
   final _batchLotController = TextEditingController();
   DateTime? _expiryDate;
 
-  // SSCC form controllers
   final _ssccController = TextEditingController();
   String _ssccBarcodeFormat = 'gs1-128';
 
@@ -53,7 +49,6 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
     _tabController.addListener(_resetBarcodeOnTabChange);
   }
 
-  // Access the service provided by the wrapper
   BarcodeGenerationService get _barcodeService =>
       getIt<BarcodeGenerationService>();
 
@@ -89,7 +84,6 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
     if (picked != null) {
       setState(() {
         _expiryDate = picked;
-        // Format as YYMMDD for GS1
         _expiryDateController.text = DateFormat('yyMMdd').format(picked);
       });
     }
@@ -526,7 +520,6 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Save barcode image to device
                   context.showInfo('Saving barcode is not implemented yet');
                 },
                 icon: TraqIcon(AppAssets.iconDownload),
@@ -535,7 +528,6 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
               const SizedBox(width: 16),
               ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Print barcode
                   context.showInfo('Printing is not implemented yet');
                 },
                 icon: TraqIcon(AppAssets.iconDownload),

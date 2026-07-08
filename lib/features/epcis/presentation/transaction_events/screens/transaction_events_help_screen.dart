@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Help screen for Transaction Events
 class TransactionEventsHelpScreen extends StatelessWidget {
-  /// Constructor
   const TransactionEventsHelpScreen({Key? key}) : super(key: key);
 
   @override
@@ -34,7 +32,6 @@ class TransactionEventsHelpScreen extends StatelessWidget {
     );
   }
 
-  /// Launch a URL
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
@@ -42,7 +39,6 @@ class TransactionEventsHelpScreen extends StatelessWidget {
     }
   }
 
-  /// Help text content in Markdown format
   static const String _helpText = '''
 # Transaction Events
 

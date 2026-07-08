@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_field_validators.dart';
 
-/// Shared GLN parsing/validation for EPCIS event forms.
 abstract final class EpcisGlnValidators {
   static String parseGlnToCode(String input) {
     final clean = input.trim();

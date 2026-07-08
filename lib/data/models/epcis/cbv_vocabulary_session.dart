@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 
 
-
 class CbvVocabularySession {
 
   final List<CbvVocabularyItem> bizSteps;
@@ -9,21 +8,10 @@ class CbvVocabularySession {
   final List<CbvVocabularyItem> dispositions;
 
 
-
-  /// Pair matrix from the backend: bizStep short code → list of valid
-
-  /// disposition short codes (in the backend's preferred order).
-
-  /// Empty when the server hasn't returned the field yet (older API version).
-
   final Map<String, List<String>> bizStepValidDispositions;
 
 
-
-  /// Action → allowed bizStep codes for the ObjectEvent form (from backend).
-
   final Map<String, List<String>> actionBizStepCodes;
-
 
 
   const CbvVocabularySession({
@@ -39,16 +27,12 @@ class CbvVocabularySession {
   });
 
 
-
   factory CbvVocabularySession.fromJson(Map<String, dynamic> json) {
 
     final bizStepsJson = json['bizSteps'] as List? ?? [];
 
     final dispositionsJson = json['dispositions'] as List? ?? [];
 
-
-
-    // Parse the optional pair matrix — gracefully absent on older API versions.
 
     final pairMapJson =
 
@@ -77,7 +61,6 @@ class CbvVocabularySession {
     }
 
 
-
     final actionMapJson = json['actionBizStepCodes'] as Map<String, dynamic>?;
 
     final Map<String, List<String>> actionMap;
@@ -95,7 +78,6 @@ class CbvVocabularySession {
       actionMap = const {};
 
     }
-
 
 
     return CbvVocabularySession(

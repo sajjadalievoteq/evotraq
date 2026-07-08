@@ -148,7 +148,6 @@ class GS1Utils {
     return CheckDigitUtils.isValidMod10(identifier);
   }
 
-  /// Alias used by EPCIS GLN parsing and SSCC utilities.
   static String calculateGS1CheckDigit(String digits) => calculateCheckDigit(digits);
 
   static String extractCompanyPrefixFromGLN(String glnCode) {

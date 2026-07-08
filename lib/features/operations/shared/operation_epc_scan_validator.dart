@@ -7,12 +7,10 @@ import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_typ
 
 enum OperationScanItemType { sscc, sgtin, gtin, invalid, unknown }
 
-/// Message shown when a scan is not a serialised SGTIN or SSCC.
 const String kSerializedEpcRequiredMessage =
     'Only serialised items (SGTIN or SSCC) are valid. '
     'Lot-based GTINs cannot be used for this operation.';
 
-/// Returns true when the resolved scan type must be rejected for operation events.
 bool isRejectedOperationScanType(OperationScanItemType type) =>
     type == OperationScanItemType.unknown ||
     type == OperationScanItemType.gtin ||
@@ -60,7 +58,6 @@ class OperationEpcScanOutcome {
   final BarcodeDetails? details;
 }
 
-/// Shared scan validation for shipping, receiving, packing, and related flows.
 class OperationEpcScanValidator {
   OperationEpcScanValidator(this._validationService);
 
@@ -208,9 +205,6 @@ class OperationEpcScanValidator {
     );
   }
 
-  /// Duplicate-check + parse + backend validation in one call.
-  ///
-  /// [operationLabel] is shown in error messages, e.g. "shipping" or "receiving".
   Future<OperationEpcScanOutcome> validateAndAdd(
     String rawBarcode, {
     required Iterable<String> alreadyScanned,
@@ -243,9 +237,6 @@ class OperationEpcScanValidator {
       if (epcType == OperationScanItemType.sscc) {
         validationResult = await _validationService.validateSSCC(identifier);
       } else {
-        // Only EPCType.sgtin and EPCType.sscc reach this point.
-        // parseForOperation() rejects lgtin and idpat patterns before this method
-        // is called, and the guard above blocks OperationScanItemType.gtin.
         validationResult = await _validationService.validateSGTIN(identifier);
       }
     } catch (e) {

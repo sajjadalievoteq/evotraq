@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
-/// Shared transport / logistics detail card for shipment-family operations.
 class OperationDetailTransportCard extends StatelessWidget {
   const OperationDetailTransportCard({
     super.key,

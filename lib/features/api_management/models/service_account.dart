@@ -1,7 +1,3 @@
-/// Service Account model for internal M2M authentication
-/// 
-/// Service accounts are used by the Integration Layer to authenticate
-/// when calling the Core System APIs.
 
 class ServiceAccount {
   final String id;
@@ -79,17 +75,14 @@ class ServiceAccount {
     return [];
   }
 
-  /// Check if the service account is expired
   bool get isExpired => expiresAt != null && expiresAt!.isBefore(DateTime.now());
 
-  /// Get the status text
   String get statusText {
     if (!isActive) return 'Inactive';
     if (isExpired) return 'Expired';
     return 'Active';
   }
 
-  /// Check if the account is usable (active and not expired)
   bool get isUsable => isActive && !isExpired;
 
   ServiceAccount copyWith({
@@ -125,7 +118,6 @@ class ServiceAccount {
   }
 }
 
-/// Response when creating a new service account (includes unhashed secret)
 class ServiceAccountCredentials {
   final String id;
   final String clientId;

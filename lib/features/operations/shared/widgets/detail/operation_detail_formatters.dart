@@ -1,5 +1,3 @@
-/// Shared date/time formatter for all operation detail screens.
-/// Replaces 10 identical *DetailFormatters classes.
 class OperationDetailFormatters {
   OperationDetailFormatters._();
 

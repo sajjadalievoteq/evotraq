@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Read-only notice shown on operation create wizards where the GINC reference
-/// is assigned by the backend at submit time.
 class OperationAutoReferenceNotice extends StatelessWidget {
   const OperationAutoReferenceNotice({
     super.key,

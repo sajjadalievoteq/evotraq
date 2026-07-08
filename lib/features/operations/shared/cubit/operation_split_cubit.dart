@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'operation_split_state.dart';
 
-/// Split-view state for [Gs1SplitViewScreen] entry screens.
 class OperationSplitCubit extends Cubit<OperationSplitState> {
   OperationSplitCubit() : super(const OperationSplitState());
 

@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persists the logged-in user's operational GLN for supply-chain authorization checks.
 class OperationalGlnStore {
   OperationalGlnStore._();
 

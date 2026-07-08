@@ -13,8 +13,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
-/// Job Queue Panel for Phase 3.3 Batch Processing Capabilities
-/// Provides comprehensive job queue monitoring and management interface
 class JobQueuePanel extends StatefulWidget {
   final String baseUrl;
   final TokenManager tokenManager;
@@ -284,7 +282,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
           Expanded(
             child: Column(
               children: [
-                // Enhanced Tab Bar
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -330,7 +327,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     onTap: (index) => _refreshCurrentTab(),
                   ),
                 ),
-                // Tab Content
                 Expanded(
                   child: Container(
                     color: Colors.grey.shade50,
@@ -365,7 +361,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Health Status
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -393,7 +388,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             ),
             const SizedBox(width: 16),
             
-            // Queue Summary
             Expanded(
               child: Row(
                 children: [
@@ -411,7 +405,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
               ),
             ),
             
-            // Control Buttons
             Row(
               children: [
                 IconButton(
@@ -471,7 +464,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Enhanced Action Bar with better visibility
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -486,7 +478,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Title with better styling
                 Text(
                   'Job Queue Dashboard',
                   style: TextStyle(
@@ -495,10 +486,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     color: Colors.indigo.shade800,
                   ),
                 ),
-                // Enhanced Action Buttons
                 Row(
                   children: [
-                    // Schedule Job Button - More Prominent
                     ElevatedButton.icon(
                       onPressed: _showScheduleJobDialog,
                       icon: TraqIcon(AppAssets.iconClock, color: Colors.white),
@@ -521,7 +510,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       ),
                     ),
                     SizedBox(width: 12),
-                    // Refresh Button - Better Styling
                     ElevatedButton.icon(
                       onPressed: _loadJobData,
                       icon: TraqIcon(AppAssets.iconRefresh, color: Colors.white),
@@ -540,7 +528,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       ),
                     ),
                     SizedBox(width: 8),
-                    // Settings Button
                     IconButton(
                       onPressed: () => _showQueueSettings(),
                       icon: TraqIcon(AppAssets.iconSettings, color: Colors.indigo.shade600),
@@ -558,10 +545,8 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
           SizedBox(height: 20),
 
-          // Enhanced Status Cards
           Row(
             children: [
-              // Active Jobs Card
               Expanded(
                 child: _buildEnhancedStatusCard(
                   'Active Jobs',
@@ -572,7 +557,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 ),
               ),
               SizedBox(width: 12),
-              // Queued Jobs Card
               Expanded(
                 child: _buildEnhancedStatusCard(
                   'Queued Jobs',
@@ -583,7 +567,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 ),
               ),
               SizedBox(width: 12),
-              // Total Jobs Card
               Expanded(
                 child: _buildEnhancedStatusCard(
                   'Total Jobs',
@@ -594,7 +577,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 ),
               ),
               SizedBox(width: 12),
-              // Worker Pool Card
               Expanded(
                 child: _buildEnhancedStatusCard(
                   'Workers',
@@ -609,7 +591,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
           SizedBox(height: 24),
 
-          // Enhanced Queue Health Status
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -644,7 +625,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    // Health Indicator
                     Container(
                       width: 12,
                       height: 12,
@@ -674,7 +654,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       ),
                     ),
                     Spacer(),
-                    // Performance Metrics
                     Text(
                       'Avg Processing: ${_dashboardData['avg_processing_time'] ?? 'N/A'}ms',
                       style: TextStyle(
@@ -690,7 +669,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
           SizedBox(height: 20),
 
-          // Original Charts Row
           Row(
             children: [
               Expanded(
@@ -1427,7 +1405,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
   }
 
   void _showWorkerPoolConfig() {
-    // Implementation for worker pool configuration dialog
     showDialog(
       context: context,
       builder: (context) => const AlertDialog(
@@ -1438,7 +1415,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
   }
 
   void _showPurgeDialog() {
-    // Implementation for purge old jobs dialog
     showDialog(
       context: context,
       builder: (context) => const AlertDialog(
@@ -1480,7 +1456,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     }
   }
 
-  // Enhanced UI Helper Methods
   Widget _buildEnhancedStatusCard(String title, String value, String iconAsset, Color primaryColor, Color backgroundColor) {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -1544,37 +1519,31 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Worker Pool Settings
                 ListTile(
                   leading: TraqIcon(AppAssets.iconUsers, color: Colors.purple.shade600),
                   title: Text('Worker Pool Size'),
                   subtitle: Text('Current: ${_workerPoolStats['total'] ?? 0} workers'),
                   trailing: TraqIcon(AppAssets.iconChevronR),
                   onTap: () {
-                    // Implement worker pool configuration
                   },
                 ),
                 Divider(),
-                // Queue Limits
                 ListTile(
                   leading: TraqIcon(AppAssets.iconList, color: Colors.orange.shade600),
                   title: Text('Queue Limits'),
                   subtitle: Text('Max queue size and priority settings'),
                   trailing: TraqIcon(AppAssets.iconChevronR),
                   onTap: () {
-                    // Implement queue limit configuration
                   },
                 ),
                 Divider(),
-                // Auto-refresh Settings
                 ListTile(
                   leading: TraqIcon(AppAssets.iconRefresh, color: Colors.blue.shade600),
                   title: Text('Auto Refresh'),
                   subtitle: Text('Currently: Every 5 seconds'),
                   trailing: Switch(
-                    value: true, // You can make this dynamic
+                    value: true,
                     onChanged: (value) {
-                      // Implement auto-refresh toggle
                     },
                   ),
                 ),
@@ -1589,7 +1558,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Save settings
               },
               child: Text('Save Settings'),
             ),
@@ -1616,7 +1584,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     String cronExpression = '';
     List<Map<String, String>> parameters = [];
 
-    // Job-specific configuration variables
     String exportDataType = 'EVENTS';
     String exportFormat = 'CSV';
     DateTime? dataFromDate;
@@ -1646,7 +1613,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Basic Job Information
                       Text('Job Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 12),
                       
@@ -1699,7 +1665,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       ),
                       SizedBox(height: 20),
                       
-                      // Scheduling Options
                       Text('Schedule Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 12),
                       
@@ -1716,7 +1681,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       ),
                       SizedBox(height: 12),
                       
-                      // Conditional scheduling fields based on type
                       if (selectedScheduleType == 'ONCE' || selectedScheduleType == 'RECURRING') ...[
                         ListTile(
                           title: Text('Start Date/Time: ${selectedDateTime?.toString().split('.')[0] ?? 'Not set'}'),
@@ -1800,16 +1764,13 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                       
                       SizedBox(height: 20),
                       
-                      // Job-Specific Configuration
                       Text('Job Configuration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 12),
                       
-                      // Dynamic configuration based on job type
                       ..._buildJobTypeSpecificFields(selectedJobType, setState),
                       
                       SizedBox(height: 20),
                       
-                      // Additional Parameters
                       Text('Additional Parameters (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 12),
                       
@@ -1877,7 +1838,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                         recurringUnit,
                         cronExpression,
                         parameters,
-                        // Job-specific configuration
                         exportDataType,
                         exportFormat,
                         dataFromDate,
@@ -1928,7 +1888,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     String recurringUnit,
     String cronExpression,
     List<Map<String, String>> parameters,
-    // Job-specific configuration
     String exportDataType,
     String exportFormat,
     DateTime? dataFromDate,
@@ -1939,7 +1898,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
     String importDataSource,
   ) async {
     try {
-      // Build job payload for backend
       Map<String, dynamic> jobPayload = {
         'name': jobName,
         'description': description,
@@ -1949,7 +1907,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         },
       };
 
-      // Add job-specific configuration based on job type
       switch (jobType) {
         case 'DATA_EXPORT':
           jobPayload['exportConfig'] = {
@@ -1994,7 +1951,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         jobPayload['cronExpression'] = cronExpression;
       }
 
-      // Convert priority to integer
       int priorityInt = int.tryParse(priority) ?? 5;
 
       final token = await widget.tokenManager.getToken();
@@ -2305,7 +2261,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
 
   Future<void> _downloadJobResult(String jobId) async {
     try {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -2324,10 +2279,9 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         acceptAllStatusCodes: true,
       );
 
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
-        // Get filename from Content-Disposition header or use default
         String filename = 'export_data.csv';
         final cdHdr = response.headers['content-disposition'];
         final contentDisposition =
@@ -2340,7 +2294,6 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
           }
         }
 
-        // Create blob and download link (web-specific)
         final raw = response.data;
         final bytes = raw is Uint8List
             ? raw
@@ -2354,7 +2307,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
         context.showError('Failed to download file: ${response.statusCode}', duration: const Duration(seconds: 4));
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog if still open
+      Navigator.of(context).pop();
       context.showError('Error downloading file: $e', duration: const Duration(seconds: 4));
     }
   }

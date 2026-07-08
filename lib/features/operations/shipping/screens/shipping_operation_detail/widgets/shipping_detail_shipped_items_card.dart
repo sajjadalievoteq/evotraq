@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Shipped items card for shipping operation detail.
 class ShippingDetailShippedItemsCard extends StatelessWidget {
   const ShippingDetailShippedItemsCard({
     super.key,

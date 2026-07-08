@@ -1,8 +1,5 @@
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
-/// Unified GS1 conversion facade.
-///
-/// Delegates to `EPCURIConverter` to preserve exact conversion outputs.
 abstract final class Gs1Converter {
   static String? barcodeToEpc(String barcode) {
     return EPCURIConverter.convertToEPCUri(barcode);
@@ -12,16 +9,35 @@ abstract final class Gs1Converter {
     return EPCURIConverter.convertBatchToEPCUri(values);
   }
 
-  static String? gtinSerialToEpc(String gtin, String serialNumber) {
-    return EPCURIConverter.convertGTINSerialToEPCUri(gtin, serialNumber);
+  static String? gtinSerialToEpc(
+    String gtin,
+    String serialNumber, {
+    int? gcpLength,
+  }) {
+    return EPCURIConverter.convertGTINSerialToEPCUri(
+      gtin,
+      serialNumber,
+      gcpLength: gcpLength,
+    );
   }
 
-  static String? gtinToClassEpc(String gtin) {
-    return EPCURIConverter.convertGTINToClassEPCUri(gtin);
+  static String? gtinToClassEpc(String gtin, {int? gcpLength}) {
+    return EPCURIConverter.convertGTINToClassEPCUri(
+      gtin,
+      gcpLength: gcpLength,
+    );
   }
 
-  static String? gtinLotToLgtinEpc(String gtin, String lotNumber) {
-    return EPCURIConverter.convertGTINLotToLGTINEpcUri(gtin, lotNumber);
+  static String? gtinLotToLgtinEpc(
+    String gtin,
+    String lotNumber, {
+    int? gcpLength,
+  }) {
+    return EPCURIConverter.convertGTINLotToLGTINEpcUri(
+      gtin,
+      lotNumber,
+      gcpLength: gcpLength,
+    );
   }
 
   static String? ssccToEpc(String sscc) {
@@ -38,5 +54,9 @@ abstract final class Gs1Converter {
 
   static String? epcToSerial(String epcUri) {
     return EPCURIConverter.extractSerialFromEPCUri(epcUri);
+  }
+
+  static String? epcType(String epcUri) {
+    return EPCURIConverter.getEPCType(epcUri);
   }
 }

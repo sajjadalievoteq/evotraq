@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Shared Column wrapper for desktop wizard steps that combine details + items.
 class OperationItemsStepContent extends StatelessWidget {
   const OperationItemsStepContent({
     super.key,

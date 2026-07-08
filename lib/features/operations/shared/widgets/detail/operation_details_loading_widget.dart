@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Shared shimmer skeleton placeholder for operation detail screens.
 class OperationDetailsLoadingWidget extends StatelessWidget {
   const OperationDetailsLoadingWidget({super.key});
 

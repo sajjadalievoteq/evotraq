@@ -11,11 +11,6 @@ import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/widget
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-// ---------------------------------------------------------------------------
-// Flat-list item types — the visible tree is projected into a linear list so
-// the entire UI can be driven by a single ListView.builder (O(1) per frame).
-// ---------------------------------------------------------------------------
-
 sealed class _HierarchyItem {
   const _HierarchyItem();
 }
@@ -32,7 +27,6 @@ class _SentinelItem extends _HierarchyItem {
   final int depth;
 }
 
-// Recursively walks the expanded tree and produces a flat, ordered list.
 List<_HierarchyItem> _flatten(HierarchyTreeNodeState node, int depth) {
   final items = <_HierarchyItem>[_NodeItem(node, depth)];
   if (node.isExpanded) {
@@ -46,7 +40,6 @@ List<_HierarchyItem> _flatten(HierarchyTreeNodeState node, int depth) {
   return items;
 }
 
-// ---------------------------------------------------------------------------
 
 class HierarchyScreen extends StatelessWidget {
   const HierarchyScreen({
@@ -85,7 +78,6 @@ class _HierarchyView extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
 
-            // Brief spinner while the backend walks upward to the root ancestor
             HierarchyResolvingRoot() => const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -182,7 +174,6 @@ class _HierarchyView extends StatelessWidget {
   }
 }
 
-/// Compact banner shown above the tree displaying aggregate counts.
 class _HierarchySummaryBanner extends StatelessWidget {
   const _HierarchySummaryBanner({required this.summary});
 
@@ -243,11 +234,6 @@ class _HierarchySummaryBanner extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Auto-load sentinel — triggers the next page when scrolled into view.
-// No button; fires automatically via initState (post-frame callback).
-// ---------------------------------------------------------------------------
 
 class _AutoLoadSentinel extends StatefulWidget {
   const _AutoLoadSentinel({

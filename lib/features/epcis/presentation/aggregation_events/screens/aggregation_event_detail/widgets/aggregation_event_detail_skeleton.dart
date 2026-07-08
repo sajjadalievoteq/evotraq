@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Loading skeleton for [AggregationEventDetailContent] layout.
 class AggregationEventDetailSkeleton extends StatelessWidget {
   const AggregationEventDetailSkeleton({super.key});
 

@@ -109,7 +109,7 @@ class GtinDetailFormBody extends StatelessWidget {
             gtin: gtin,
             gtinCodeText: gtinCodeController.text,
           ),
-          GtinSupplyChainCard(gtin: gtin),
+
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: gtinCodeController,
@@ -158,6 +158,7 @@ class GtinDetailFormBody extends StatelessWidget {
             isReadOnly: formFieldsReadOnly,
             showFieldSkeleton: false,
           ),
+          GtinSupplyChainCard(gtin: gtin),
           LifecycleAvailabilityStatusCoreGroup(
             key: lifecycleKey,
             isReadOnly: formFieldsReadOnly,

@@ -31,7 +31,6 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
   }
 
 
-
   @override
   void dispose() {
     _cubit.close();

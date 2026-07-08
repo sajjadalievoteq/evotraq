@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_route_constants.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
@@ -262,8 +262,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     if (_glnCatalogLoadStarted) return;
     _glnCatalogLoadStarted = true;
     try {
-      final catalog =
-          await getIt<GLNService>().getAllGLNs(page: 0, size: 500);
+      final catalog = await getIt<GlnPickerCatalog>().ensureLoaded();
       if (!mounted) return;
       setState(() => _glnPickerCatalog = catalog);
       _applyGlnCatalogToFields();
@@ -743,7 +742,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   void _syncExtensionDigitFromSscc(String ssccCode) {
     final digits = ssccCode.replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return;
-    // Full SSCC: extension is digit 0; while typing manually, preview from first digit.
     _extensionDigitController.text = digits[0];
   }
 

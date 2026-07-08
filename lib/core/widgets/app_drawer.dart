@@ -312,22 +312,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           onTap: () => _navigate(
                               Constants.epcisAggregationEventsRoute),
                         ),
-                        // ListTile(
-                        //   leading: const TraqIcon(AppAssets.iconReceipt),
-                        //   title: const Text('Transaction Events'),
-                        //   contentPadding:
-                        //       const EdgeInsets.only(left: 32.0),
-                        //   onTap: () => _navigate(
-                        //       Constants.epcisTransactionEventsRoute),
-                        // ),
-                        // ListTile(
-                        //   leading: TraqIcon(AppAssets.iconTransform),
-                        //   title: const Text('Transformation Events'),
-                        //   contentPadding:
-                        //       const EdgeInsets.only(left: 32.0),
-                        //   onTap: () => _navigate(
-                        //       Constants.epcisTransformationEventsRoute),
-                        // ),
                       ],
                     ),
 
@@ -397,15 +381,6 @@ class _AppDrawerState extends State<AppDrawer> {
                             );
                           },
                         ),
-                        //needs to be removed completely including components
-                        // ListTile(
-                        //   leading: TraqIcon(AppAssets.iconList),
-                        //   title: const Text('Transaction Documents'),
-                        //   contentPadding:
-                        //       const EdgeInsets.only(left: 32.0),
-                        //   onTap: () => _navigate(
-                        //       Constants.epcisTransactionDocumentsRoute),
-                        // ),
                         ListTile(
                           leading: _svgLeading(AppAssets.iconFilter),
                           title: const Text('Advanced Query'),
@@ -495,7 +470,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ],
                     ),
-
 
 
                     ExpansionTile(
@@ -927,7 +901,6 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 }
 
-/// Responsive drawer width and shape.
 abstract final class AppDrawerMetrics {
   AppDrawerMetrics._();
 

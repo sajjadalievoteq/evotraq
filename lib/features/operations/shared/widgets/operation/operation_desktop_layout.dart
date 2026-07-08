@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_panel
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_wizard_nav_buttons.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
-/// Shared three-column desktop wizard layout for operation screens.
 class OperationDesktopLayout extends StatelessWidget {
   const OperationDesktopLayout({
     super.key,

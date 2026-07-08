@@ -1,4 +1,3 @@
-/// Allowed reason values when status = Sample (non_sellable_other).
 abstract final class SampleReasonOptions {
   static const List<String> values = [
     'Consumer Report',
@@ -15,7 +14,6 @@ abstract final class SampleReasonOptions {
   ];
 }
 
-/// Allowed reason values when status = Damaged (damaged).
 abstract final class DamagedReasonOptions {
   static const List<String> values = [
     '2D Matrix not readable',

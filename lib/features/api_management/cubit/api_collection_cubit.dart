@@ -20,7 +20,6 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
             ),
         super(const ApiCollectionState());
 
-  // ==================== Collection Operations ====================
 
   Future<void> loadCollections({bool activeOnly = false}) async {
     emit(state.copyWith(status: ApiCollectionStatus.loading, error: null));
@@ -236,7 +235,6 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
     }
   }
 
-  // ==================== API Operations ====================
 
   Future<ApiDefinition?> createApi(String collectionId, {
     required String code,
@@ -369,23 +367,19 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
     }
   }
 
-  // ==================== Utility ====================
 
   void clearError() {
     emit(state.copyWith(error: null));
   }
 
-  /// Export a collection as a Postman collection and trigger file download
   Future<void> exportPostmanCollection(String collectionId) async {
     final jsonString = await _service.exportPostmanCollection(collectionId);
     
-    // Parse to get collection name for filename
     final Map<String, dynamic> postmanData = json.decode(jsonString);
     final String collectionName = postmanData['info']?['name'] ?? 'collection';
     final String safeName = collectionName.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_');
     final String filename = '${safeName}_postman_collection.json';
     
-    // Trigger file download
     final bytes = utf8.encode(jsonString);
     final blob = html.Blob([bytes], 'application/json');
     final url = html.Url.createObjectUrlFromBlob(blob);

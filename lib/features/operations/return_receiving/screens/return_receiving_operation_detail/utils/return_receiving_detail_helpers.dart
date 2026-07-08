@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
 
-/// Return Receiving Detail display helpers.
 class ReturnReceivingDetailHelpers {
   ReturnReceivingDetailHelpers._();
 

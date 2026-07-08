@@ -1,6 +1,6 @@
 class HierarchyNode {
   final String epc;
-  final String type; // 'SSCC' | 'SGTIN' | 'UNKNOWN'
+  final String type;
   final bool hasChildren;
 
   const HierarchyNode({
@@ -12,7 +12,6 @@ class HierarchyNode {
   bool get isSscc => type == 'SSCC';
   bool get isSgtin => type == 'SGTIN';
 
-  /// Returns a shortened display label: last 12 chars of the EPC.
   String get shortEpc {
     if (epc.length <= 12) return epc;
     return '…${epc.substring(epc.length - 12)}';

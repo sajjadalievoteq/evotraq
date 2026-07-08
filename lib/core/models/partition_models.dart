@@ -1,10 +1,9 @@
-/// Data models for Database Partitioning according to Phase 3.1 requirements
 
 class PartitionMetadata {
   final int? id;
   final String tableName;
   final String partitionName;
-  final String partitionType; // 'TIME_BASED', 'EVENT_TYPE', 'HYBRID'
+  final String partitionType;
   final String? partitionKey;
   final String? partitionExpression;
   final String? startRange;
@@ -17,7 +16,7 @@ class PartitionMetadata {
   final bool compressionEnabled;
   final bool archived;
   final DateTime? archiveDate;
-  final String status; // 'ACTIVE', 'ARCHIVED', 'DROPPED'
+  final String status;
 
   PartitionMetadata({
     this.id,
@@ -107,7 +106,7 @@ class PartitionStatistics {
   final List<PartitionMetadata> largestPartitions;
   final List<String> maintenanceRecommendations;
   final Map<String, dynamic> performanceMetrics;
-  final String healthStatus; // 'HEALTHY', 'WARNING', 'CRITICAL'
+  final String healthStatus;
   final DateTime lastUpdated;
 
   PartitionStatistics({
@@ -186,7 +185,7 @@ class ArchiveMetadata {
   final int retrievalCount;
   final DateTime? lastAccessed;
   final String? checksum;
-  final String status; // 'ARCHIVED', 'VERIFIED', 'CORRUPTED'
+  final String status;
   final double? spaceSavingsPercent;
 
   ArchiveMetadata({
@@ -238,10 +237,10 @@ class ArchiveMetadata {
 
 class PartitionMaintenance {
   final String operationId;
-  final String maintenanceType; // 'REINDEX', 'VACUUM', 'ANALYZE', 'COMPRESS', 'ARCHIVE'
+  final String maintenanceType;
   final String? targetTable;
   final List<String> targetPartitions;
-  final String operationStatus; // 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED'
+  final String operationStatus;
   final DateTime? startTime;
   final DateTime? endTime;
   final int? durationSeconds;

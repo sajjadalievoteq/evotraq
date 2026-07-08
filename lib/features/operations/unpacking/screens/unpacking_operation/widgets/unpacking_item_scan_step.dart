@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_scope_selector.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
-/// Step 2: view packed contents, select rows, or add items via scan / manual EPC.
 class UnpackingItemScanStep extends StatelessWidget {
   const UnpackingItemScanStep({
     super.key,
@@ -23,9 +22,7 @@ class UnpackingItemScanStep extends StatelessWidget {
     required this.onItemSelectionChanged,
     required this.itemScanningMode,
     required this.onItemScanningModeChanged,
-    required this.itemManualEntryController,
     required this.onItemAdded,
-    required this.onAddManualItem,
     this.isLoadingContents = false,
     this.contentsLoadError,
     this.onRetryLoadContents,
@@ -42,9 +39,7 @@ class UnpackingItemScanStep extends StatelessWidget {
   final void Function(String epc, bool selected) onItemSelectionChanged;
   final OperationScanningMode itemScanningMode;
   final ValueChanged<OperationScanningMode> onItemScanningModeChanged;
-  final TextEditingController itemManualEntryController;
   final void Function(EPCParseResult result) onItemAdded;
-  final VoidCallback onAddManualItem;
   final bool isLoadingContents;
   final String? contentsLoadError;
   final VoidCallback? onRetryLoadContents;
@@ -106,10 +101,6 @@ class UnpackingItemScanStep extends StatelessWidget {
                   style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                 ),
                 const SizedBox(height: 12),
-                // UnpackingScanningModeSelector(
-                //   selectedMode: itemScanningMode,
-                //   onModeChanged: onItemScanningModeChanged,
-                // ),
                 const SizedBox(height: 16),
                 if (itemScanningMode == OperationScanningMode.scanner)
                   EPCInputWidget(
@@ -120,8 +111,8 @@ class UnpackingItemScanStep extends StatelessWidget {
                   )
                 else
                   OperationItemManualEntryCard(
-                    controller: itemManualEntryController,
-                    onAdd: onAddManualItem,
+                    onItemAdded: onItemAdded,
+                    allowedTypes: allowed,
                   ),
               ],
             ),

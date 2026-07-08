@@ -29,8 +29,6 @@ enum CustomSnackBarVariant {
   }
 }
 
-/// Tracks the last pointer interaction on wide layouts so snackbars can anchor
-/// to the control the user clicked without every call site passing a context.
 class SnackBarAnchorTracker {
   SnackBarAnchorTracker._();
 
@@ -113,7 +111,6 @@ class SnackBarAnchorTracker {
   static void clear() => _lastInteractionRect = null;
 }
 
-/// Wrap the app shell so desktop/web snackbars can anchor to recent interactions.
 class SnackBarInteractionScope extends StatelessWidget {
   const SnackBarInteractionScope({super.key, required this.child});
 
@@ -242,8 +239,6 @@ class CustomSnackBarPresenter {
     );
   }
 
-  /// Computes anchored snackbar position, preferring below the anchor and
-  /// flipping above when the full [snackbarHeight] would not fit underneath.
   @visibleForTesting
   static ({double top, double left, double width}) layoutForAnchor({
     required Rect anchorRect,
@@ -321,8 +316,6 @@ final class _AnchoredSnackBarLayer {
   }
 }
 
-/// Measures snackbar height after layout so positioning can flip above the
-/// anchor when the full content would not fit below.
 class _AnchoredSnackBarPositioned extends StatefulWidget {
   const _AnchoredSnackBarPositioned({
     required this.anchorRect,
@@ -447,7 +440,6 @@ extension CustomSnackBarExtension on BuildContext {
         anchor: anchor,
       );
 
-  /// Plain [SnackBar] (e.g. with [SnackBarAction]) via the nearest scaffold messenger.
   void showSnackBar(SnackBar snackBar) {
     _AnchoredSnackBarLayer.dismiss();
     final messenger = ScaffoldMessenger.maybeOf(this);

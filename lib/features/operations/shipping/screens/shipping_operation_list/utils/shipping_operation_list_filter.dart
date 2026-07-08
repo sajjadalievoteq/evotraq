@@ -2,7 +2,6 @@ import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 
-/// Filters and sorts shipping operations for the list screen.
 class ShippingOperationListFilter {
   ShippingOperationListFilter._();
 

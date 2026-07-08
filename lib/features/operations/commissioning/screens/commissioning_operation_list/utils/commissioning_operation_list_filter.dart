@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
-/// Client-side search and status filters for commissioning operation list.
 class CommissioningOperationListFilter {
   CommissioningOperationListFilter._();
 

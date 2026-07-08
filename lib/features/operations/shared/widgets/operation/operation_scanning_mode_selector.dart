@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 
-/// Shared scanner/manual segmented control for operation wizard screens.
 class OperationScanningModeSelector extends StatelessWidget {
   const OperationScanningModeSelector({
     super.key,

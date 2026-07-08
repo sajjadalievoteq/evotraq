@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared selected-container display card.
 class OperationContainerSelectedCard extends StatelessWidget {
   const OperationContainerSelectedCard({
     super.key,

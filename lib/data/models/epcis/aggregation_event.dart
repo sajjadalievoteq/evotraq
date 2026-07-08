@@ -2,8 +2,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 
-/// AggregationEvent represents EPCIS events that establish parent-child relationships
-/// between containers (like pallets, cases) and their contents
 class AggregationEvent extends EPCISEvent {
   final String parentID;
   final List<String> childEPCs;
@@ -62,15 +60,11 @@ class AggregationEvent extends EPCISEvent {
     }
     json['action'] = action;
     
-    // Handle oneOf constraint: only include one of childEPCs or childQuantityList, never both
     if (childEPCs.isNotEmpty) {
       json['childEPCs'] = childEPCs;
-      // Do NOT include childQuantityList to satisfy oneOf constraint
     } else if (childQuantityList != null && childQuantityList!.isNotEmpty) {
       json['childQuantityList'] = childQuantityList;
-      // Do NOT include childEPCs to satisfy oneOf constraint
     } else if (action == 'DELETE') {
-      // For DELETE action, include childEPCs even if empty (per schema)
       json['childEPCs'] = childEPCs;
     }
     
@@ -87,9 +81,8 @@ class AggregationEvent extends EPCISEvent {
     }
     
     return json;
-  }  /// Create an AggregationEvent from a JSON object
+  }
   factory AggregationEvent.fromJson(Map<String, dynamic> json) {
-    // Handle GLN objects for locations
     GLN? readPointGln;
     if (json['readPoint'] != null) {
       if (json['readPoint'] is String) {
@@ -113,7 +106,6 @@ class AggregationEvent extends EPCISEvent {
         businessLocationGln = GLN.fromJson(Map<String, dynamic>.from(json['bizLocation']));
       }
     } else if (json['locationGLN'] != null && json['locationGLN'] is String) {
-      // Use locationGLN as fallback if it exists
       businessLocationGln = GLN.fromCode(json['locationGLN']);
     }
     
@@ -155,7 +147,6 @@ class AggregationEvent extends EPCISEvent {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     );
   }
-    /// Create a copy of this AggregationEvent with the given fields replaced
   AggregationEvent copyWith({
     String? id,
     String? eventId,

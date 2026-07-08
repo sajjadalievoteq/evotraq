@@ -5,9 +5,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Unified GS1 validation facade.
-///
-/// Delegates to existing validators to keep behavior unchanged.
 abstract final class Gs1Validator {
   static bool isValidGTIN(String? value) {
     if (value == null || value.isEmpty) return false;
@@ -29,12 +26,10 @@ abstract final class Gs1Validator {
     return sgtin_validators.validateSerialNumber(serialNumber) == null;
   }
 
-  /// Validates with the modern full EPC URI validator.
   static bool isValidEpcUri(String value) {
     return epc_validators.isValidEpcUri(value);
   }
 
-  /// Validates only GS1 Digital Link that maps to an SGTIN URI.
   static bool isValidDigitalLink(String value) {
     return sgtin_validators.validateGs1DigitalLinkUri(value) == null;
   }

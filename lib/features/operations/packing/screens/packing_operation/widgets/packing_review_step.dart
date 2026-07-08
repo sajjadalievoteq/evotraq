@@ -11,9 +11,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 
 
-
-/// Step 3: review all packing details before submission.
-
 class PackingReviewStep extends StatelessWidget {
 
   const PackingReviewStep({
@@ -43,7 +40,6 @@ class PackingReviewStep extends StatelessWidget {
   });
 
 
-
   final GLN? packingLocationGln;
 
   final String workOrder;
@@ -65,13 +61,11 @@ class PackingReviewStep extends StatelessWidget {
   final bool showPageHeader;
 
 
-
   @override
 
   Widget build(BuildContext context) {
 
     final outline = Theme.of(context).colorScheme.outlineVariant;
-
 
 
     return SingleChildScrollView(

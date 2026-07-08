@@ -153,7 +153,7 @@ class _TechProductCodedGroupWidgetState
       ),
     );
     return Gs1GroupCard(
-      title: 'Technical specification â€” product & coded attributes',
+      title: 'Technical specification of product & coded attributes',
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

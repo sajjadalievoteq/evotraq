@@ -9,14 +9,6 @@ import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Biz-step + disposition dropdowns for an Aggregation Event form.
-///
-/// Vocabulary is read from the app-wide [CbvVocabularyCubit] — no API call
-/// is made here; the cubit is loaded once at the splash screen.
-///
-/// Biz steps are filtered by the provided [action] using
-/// [CbvVocabularyState.actionBizStepCodes]. Dispositions are then filtered by
-/// the selected biz step via [CbvVocabularyState.bizStepValidDispositions].
 class AggregationCbvPicker extends StatefulWidget {
   final String? action;
   final String? initialBizStep;
@@ -43,7 +35,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
   String? _selectedBizStep;
   String? _selectedDisposition;
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
 
   String _version() =>
       widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
@@ -54,7 +45,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
   String _fmtDisposition(String urn) =>
       CbvVocabularyFormatter.formatDisposition(_version(), urn);
 
-  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -81,15 +71,11 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     }
   }
 
-  // ─── Auto-selection ───────────────────────────────────────────────────────
 
-  /// Ensures a valid biz step and disposition are selected.
-  /// Auto-selects the first available item if nothing valid is chosen yet.
   void _applyDefaults(CbvVocabularyState state) {
     final bizSteps = _bizStepsFor(widget.action, state);
     if (bizSteps.isEmpty) return;
 
-    // Determine currently selected biz step formatted value.
     final selectable = bizSteps.map((i) => _fmtBizStep(i.urn)).toList();
     String? bizVal = _selectedBizStep != null && selectable.contains(_selectedBizStep)
         ? _selectedBizStep
@@ -101,7 +87,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
       widget.onBizStepChanged(bizVal);
     }
 
-    // Determine the biz step short code to look up valid dispositions.
     final bizCode = CbvVocabularyFormatter.shortName(
       CbvVocabularyFormatter.canonicalBizStepUrn(bizVal),
     );
@@ -128,10 +113,7 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
     return codes.map((c) => byCode[c]).whereType<CbvVocabularyItem>().toList();
   }
 
-  // ─── Disposition filtering ────────────────────────────────────────────────
 
-  /// Returns the valid dispositions for [bizCode] using the backend pair matrix.
-  /// Falls back to the full disposition list when no pairs are defined for the step.
   List<CbvVocabularyItem> _dispositionsFor(
       String? bizCode, CbvVocabularyState state) {
     if (bizCode == null) return [];
@@ -145,11 +127,9 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
           .toList();
     }
 
-    // No pairing data — show all enabled dispositions.
     return state.dispositions;
   }
 
-  // ─── Skeleton ─────────────────────────────────────────────────────────────
 
   Widget _skeleton() => AppShimmer(
         child: Container(
@@ -163,7 +143,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
         ),
       );
 
-  // ─── Dropdown helpers ─────────────────────────────────────────────────────
 
   List<DropdownMenuItem<String>> _menuItems({
     required List<CbvVocabularyItem> items,
@@ -178,7 +157,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
           )
           .toList();
 
-  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +253,6 @@ class _AggregationCbvPickerState extends State<AggregationCbvPicker> {
           widget.onBizStepChanged(selected);
           widget.onDispositionChanged(null);
         });
-        // Re-apply to auto-select a valid disposition for the new biz step.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _applyDefaults(context.read<CbvVocabularyCubit>().state);

@@ -1,40 +1,30 @@
 import 'package:equatable/equatable.dart';
 
-/// Model class representing geospatial coordinates in EPCIS 2.0
 class GeospatialCoordinates extends Equatable {
-  /// Latitude in decimal degrees
   final double latitude;
   
-  /// Longitude in decimal degrees
   final double longitude;
   
-  /// Altitude in meters (optional)
   final double? altitude;
   
-  /// Coordinate system or datum (e.g., WGS84)
   final String? coordinateSystem;
   
-  /// Horizontal accuracy in meters
   final double? horizontalAccuracy;
   
-  /// Vertical accuracy in meters
   final double? verticalAccuracy;
   
-  /// Location name or label
   final String? name;
   
-  /// Creates a new GeospatialCoordinates instance
   const GeospatialCoordinates({
     required this.latitude,
     required this.longitude,
     this.altitude,
-    this.coordinateSystem = 'WGS84', // Default to WGS84
+    this.coordinateSystem = 'WGS84',
     this.horizontalAccuracy,
     this.verticalAccuracy,
     this.name,
   });
 
-  /// Creates a copy with the given fields replaced with new values
   GeospatialCoordinates copyWith({
     double? latitude,
     double? longitude,
@@ -55,7 +45,6 @@ class GeospatialCoordinates extends Equatable {
     );
   }
 
-  /// Convert from JSON
   factory GeospatialCoordinates.fromJson(Map<String, dynamic> json) {
     return GeospatialCoordinates(
       latitude: (json['latitude'] is String) ? 
@@ -76,7 +65,6 @@ class GeospatialCoordinates extends Equatable {
     );
   }
 
-  /// Convert to JSON
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     
@@ -97,18 +85,14 @@ class GeospatialCoordinates extends Equatable {
     horizontalAccuracy, verticalAccuracy, name
   ];
   
-  /// Calculate distance to another location in kilometers using the haversine formula
   double distanceTo(GeospatialCoordinates other) {
-    // Earth's radius in kilometers
     const double earthRadius = 6371.0;
     
-    // Convert latitude and longitude from degrees to radians
     final double lat1 = _degreesToRadians(latitude);
     final double lon1 = _degreesToRadians(longitude);
     final double lat2 = _degreesToRadians(other.latitude);
     final double lon2 = _degreesToRadians(other.longitude);
     
-    // Haversine formula
     final double dlon = lon2 - lon1;
     final double dlat = lat2 - lat1;
     final double a = _sin2(dlat / 2.0) +
@@ -119,31 +103,24 @@ class GeospatialCoordinates extends Equatable {
     return distance;
   }
   
-  /// Convert degrees to radians
   double _degreesToRadians(double degrees) {
     return degrees * (3.141592653589793 / 180.0);
   }
   
-  /// Sine of an angle in radians
   double _sin(double radians) {
     return _sincos(radians, true);
   }
   
-  /// Square of sine
   double _sin2(double radians) {
     final double s = _sin(radians);
     return s * s;
   }
   
-  /// Cosine of an angle in radians
   double _cos(double radians) {
     return _sincos(radians, false);
   }
   
-  /// Calculate sin or cos using Taylor series
   double _sincos(double radians, bool isSin) {
-    // For better precision, use Dart's math library instead of custom implementation
-    // This is a simple implementation for illustration
     if (isSin) {
       return radians - (radians * radians * radians) / 6 + 
           (radians * radians * radians * radians * radians) / 120;
@@ -153,7 +130,6 @@ class GeospatialCoordinates extends Equatable {
     }
   }
   
-  /// Square root approximation
   double _sqrt(double x) {
     if (x <= 0) return 0;
     double r = x / 2;
@@ -163,9 +139,7 @@ class GeospatialCoordinates extends Equatable {
     return r;
   }
   
-  /// Arctangent of y/x
   double _atan2(double y, double x) {
-    // Simple approximation - in a real app, import dart:math instead
     if (x > 0) {
       return _atan(y / x);
     } else if (x < 0) {
@@ -175,9 +149,7 @@ class GeospatialCoordinates extends Equatable {
     }
   }
   
-  /// Arctangent approximation
   double _atan(double x) {
-    // Simple approximation
     return x / (1 + 0.28 * x * x);
   }
 }

@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 
-/// Widget that displays/edits tobacco extension data for a GTIN
-/// Can be embedded in GTIN detail screens or used standalone
 class TobaccoExtensionWidget extends StatefulWidget {
   final int? gtinId;
   final String? gtinCode;
@@ -33,13 +31,11 @@ class TobaccoExtensionWidget extends StatefulWidget {
   State<TobaccoExtensionWidget> createState() => TobaccoExtensionWidgetState();
 }
 
-/// State class for TobaccoExtensionWidget - made public to allow GlobalKey access
 class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
   GTINTobaccoExtension? _extension;
   bool _isLoading = true;
   bool _hasExtension = false;
 
-  // Country options (ISO 3166-1 alpha-3) - common tobacco-related countries
   static const Map<String, String> _countryOptions = {
     'USA': 'United States',
     'CHN': 'China',
@@ -95,7 +91,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
     'MWI': 'Malawi',
   };
 
-  // Form controllers
   final _brandFamilyController = TextEditingController();
   final _brandVariantController = TextEditingController();
   final _nicotineController = TextEditingController();
@@ -111,7 +106,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
   final _moistureContentController = TextEditingController();
   final _qualityGradeController = TextEditingController();
 
-  // Country dropdowns (replacing text controllers)
   String? _countryOfOrigin;
   String? _intendedMarket;
 
@@ -215,20 +209,15 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
     _qualityGradeController.text = ext.qualityGrade ?? '';
   }
 
-  /// Check if user has entered any tobacco data
   bool get hasData => _category != null || _brandFamilyController.text.isNotEmpty;
 
-  /// Validate the tobacco extension form
-  /// Returns null if valid, error message if invalid
   String? validate() {
-    if (!hasData) return null; // No data entered, nothing to validate
+    if (!hasData) return null;
     if (_category == null) return 'Tobacco Category is required';
     if (_brandFamilyController.text.isEmpty) return 'Brand Family is required';
     return null;
   }
 
-  /// Build the extension object from form data
-  /// Returns null if no data has been entered
   GTINTobaccoExtension? buildExtension({int? gtinId, String? gtinCode}) {
     if (!hasData) return null;
     
@@ -263,16 +252,11 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if system is in tobacco mode OR user has license access
-    // Use listen: false to avoid rebuilding when provider changes and to prevent
-    // "Looking up a deactivated widget's ancestor" errors during navigation
-    // Wrap in try-catch to handle case when widget is deactivated during mode change
     bool hasAccess = false;
     try {
       final settings = context.read<SystemSettingsCubit>().state.settings;
       hasAccess = settings.isTobaccoMode;
     } catch (e) {
-      // Widget is deactivated, return empty
       return const SizedBox.shrink();
     }
     
@@ -295,7 +279,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         collapsedBackgroundColor: Colors.brown.shade700,
         collapsedTextColor: Colors.white,
         collapsedIconColor: Colors.white,
-        // Default expanded [shape] uses [ThemeData.dividerColor] top/bottom — removes that line.
         shape: const Border(
           top: BorderSide(color: Colors.transparent),
           bottom: BorderSide(color: Colors.transparent),
@@ -317,9 +300,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        //subtitle: _hasExtension
-        //    ? Text('${_extension?.tobaccoCategory.displayName ?? ''} - ${_brandFamilyController.text}')
-        //    : const Text('No tobacco extension'),
         initiallyExpanded: _hasExtension,
         children: [
           Padding(
@@ -327,9 +307,7 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Form content
                 widget.isEditing ? _buildEditForm() : _buildReadOnlyView(),
-                // Note: Save button removed - tobacco extension is saved with the main GTIN form
               ],
             ),
           ),
@@ -446,7 +424,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category
         DropdownButtonFormField<TobaccoProductCategory>(
           decoration: const InputDecoration(
             labelText: 'Product Category *',
@@ -463,7 +440,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Brand Family
         TextFormField(
           controller: _brandFamilyController,
           decoration: const InputDecoration(
@@ -476,7 +452,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Brand Variant
         TextFormField(
           controller: _brandVariantController,
           decoration: const InputDecoration(
@@ -491,7 +466,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
 
         _buildSectionTitle('Chemical Content'),
 
-        // Nicotine, Tar, CO in a row
         Row(
           children: [
             Expanded(
@@ -532,7 +506,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
 
         _buildSectionTitle('Physical Properties'),
 
-        // Units per pack and Pack type
         Row(
           children: [
             Expanded(
@@ -566,7 +539,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Checkboxes
         Row(
           children: [
             Expanded(
@@ -597,7 +569,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Filter type and Length
         Row(
           children: [
             Expanded(
@@ -628,7 +599,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
 
         _buildSectionTitle('Market & Tax Information'),
 
-        // Country of origin and intended market
         Row(
           children: [
             Expanded(
@@ -680,7 +650,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Max retail price and tax category
         Row(
           children: [
             Expanded(
@@ -721,7 +690,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
 
         _buildSectionTitle('Tobacco Information'),
 
-        // Curing method
         DropdownButtonFormField<TobaccoCuringMethod>(
           decoration: const InputDecoration(
             labelText: 'Curing Method',
@@ -738,7 +706,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Leaf origin countries
         TextFormField(
           controller: _leafOriginCountriesController,
           decoration: const InputDecoration(
@@ -749,7 +716,6 @@ class TobaccoExtensionWidgetState extends State<TobaccoExtensionWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Moisture and quality
         Row(
           children: [
             Expanded(

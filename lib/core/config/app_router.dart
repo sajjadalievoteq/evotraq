@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
@@ -96,7 +96,7 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/subscr
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
-import 'package:traqtrace_app/features/product_journey/screens/journey/journey_screen.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/journey_dashboard_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_detail_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/credential_management_screen.dart';
@@ -324,7 +324,7 @@ class AppRouter {
           final epc = state.uri.queryParameters['epc'];
           return TraqRouterTransitions.page(
             key: state.pageKey,
-            child: JourneyScreen(initialEpc: epc),
+            child: JourneyDashboardScreen(initialEpc: epc),
           );
         },
         redirect: (context, state) {
@@ -1186,6 +1186,23 @@ class AppRouter {
           key: state.pageKey,
           child: const SGTINDetailScreen(isEditing: true),
         ),
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.gs1SgtinByEpcRoute,
+        pageBuilder: (context, state) {
+          final epcUri = state.extra as String? ?? '';
+          return TraqRouterTransitions.page(
+            key: state.pageKey,
+            child: SGTINDetailScreen(epcUri: epcUri.isNotEmpty ? epcUri : null, isEditing: false),
+          );
+        },
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {

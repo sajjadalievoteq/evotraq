@@ -273,13 +273,11 @@ class BarChartPainter extends CustomPainter {
 
     final paint = Paint()..style = PaintingStyle.fill;
 
-    // Calculate dimensions
-    final chartHeight = size.height - 60; // Leave space for labels
-    final chartWidth = size.width - 80; // Leave space for Y-axis labels
+    final chartHeight = size.height - 60;
+    final chartWidth = size.width - 80;
     final barWidth = chartWidth / eventTypes.length * 0.7;
     final barSpacing = chartWidth / eventTypes.length * 0.3;
 
-    // Draw Y-axis
     final axisPaint = Paint()
       ..color = Colors.grey[400]!
       ..strokeWidth = 1;
@@ -290,14 +288,12 @@ class BarChartPainter extends CustomPainter {
       axisPaint,
     );
 
-    // Draw X-axis
     canvas.drawLine(
       Offset(60, chartHeight + 10),
       Offset(size.width - 10, chartHeight + 10),
       axisPaint,
     );
 
-    // Draw bars
     for (int i = 0; i < eventTypes.length; i++) {
       final eventType = eventTypes[i];
       final value = values[i];
@@ -314,7 +310,6 @@ class BarChartPainter extends CustomPainter {
         paint,
       );
 
-      // Draw value on top of bar
       final textPainter = _createTextPainter(
         _formatValue(value),
         const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -324,7 +319,6 @@ class BarChartPainter extends CustomPainter {
         Offset(x + barWidth / 2 - textPainter.width / 2, y - 20),
       );
 
-      // Draw event type label
       final labelPainter = _createTextPainter(
         _formatEventType(eventType),
         const TextStyle(fontSize: 10),
@@ -335,7 +329,6 @@ class BarChartPainter extends CustomPainter {
       );
     }
 
-    // Draw Y-axis labels
     for (int i = 0; i <= 5; i++) {
       final value = (maxValue / 5) * i;
       final y = chartHeight + 10 - (chartHeight / 5) * i;
@@ -349,7 +342,6 @@ class BarChartPainter extends CustomPainter {
         Offset(55 - labelPainter.width, y - labelPainter.height / 2),
       );
 
-      // Draw grid line
       final gridPaint = Paint()
         ..color = Colors.grey[300]!
         ..strokeWidth = 0.5;

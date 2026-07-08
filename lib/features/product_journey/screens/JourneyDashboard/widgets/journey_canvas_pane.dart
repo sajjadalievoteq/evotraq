@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
+import 'package:traqtrace_app/features/product_journey/cubit/journey_cubit.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_empty_state.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_canvas_skeleton.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_event_filter_chips.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_pin_canvas.dart';
+import 'package:traqtrace_app/features/product_journey/widgets/journey_timeline_header.dart';
+
+class JourneyCanvasPane extends StatelessWidget {
+  const JourneyCanvasPane({
+    super.key,
+    required this.state,
+    required this.onStepTapped,
+  });
+
+  final JourneyState state;
+  final ValueChanged<JourneyStep> onStepTapped;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.isLoaded && state.journey != null) {
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeOut,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+        child: Stack(
+          key: ValueKey(state.journey!.identifier),
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: JourneyPinsCanvas(
+                journey: state.journey!,
+                selectedStep: state.selectedStep,
+                onStepTapped: onStepTapped,
+                eventFilter: state.eventFilter,
+              ),
+            ),
+            Positioned(
+              top: context.padding.top,
+              left: context.padding.top,
+              right: context.padding.top,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  JourneyTimelineHeader(journey: state.journey!),
+                  const SizedBox(height: TraqSpacing.sm),
+                  JourneyEventFilterChips(
+                    selected: state.eventFilter,
+                    onSelected: (filter) =>
+                        context.read<JourneyCubit>().setEventFilter(filter),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.isLoading) {
+      return const JourneyCanvasSkeleton();
+    }
+
+    return Stack(
+      children: [
+        if (!state.hasError && state.journey == null)
+          const Center(child: JourneyEmptyState()),
+      ],
+    );
+  }
+}

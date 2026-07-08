@@ -4,26 +4,6 @@ import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gs1_field_barcode_scan.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-/// Universal EPC entry field for all GS1 EPC URI schemes.
-///
-/// **Accepted input formats:**
-///
-/// | Format | Example |
-/// |---|---|
-/// | GS1 AI bracket notation (SGTIN) | `(01)00629200080027(21)KOPLYPIEKV3GX70C7WMN` |
-/// | GS1 AI bracket notation (SSCC)  | `(00)003664798000000011` |
-/// | GS1 AI bracket notation (LGTIN) | `(01)00629200080027(10)BATCH01` |
-/// | SGTIN URN | `urn:epc:id:sgtin:0629200.0080027.SN123` |
-/// | SGTIN GS1 Digital Link | `https://id.gs1.org/01/00629200080027/21/SN123` |
-/// | SSCC URN / DL | `urn:epc:id:sscc:…` or `https://id.gs1.org/00/…` |
-/// | LGTIN URN / DL | `urn:epc:id:lgtin:…` or `https://id.gs1.org/01/…/10/…` |
-/// | GRAI / GIAI URN | `urn:epc:id:grai:…` / `urn:epc:id:giai:…` |
-///
-/// GS1 AI bracket notation is automatically converted to a `urn:epc:…` URI
-/// when the user leaves the field (focus lost or submit). The field
-/// text is updated in-place and a helper text note is shown.
-///
-/// Drop-in replacement for the old SGTIN-only `EpcEntryField`.
 class EpcEntryField extends StatefulWidget {
   const EpcEntryField({
     super.key,
@@ -83,9 +63,6 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Auto-normalize on focus lost
-  // ---------------------------------------------------------------------------
 
   void _onFocusChange() {
     if (!_focusNode.hasFocus) {
@@ -98,7 +75,7 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     if (trimmed.isEmpty || !isGS1AiNotation(trimmed)) return;
 
     final converted = gs1AiToEpcUri(trimmed);
-    if (converted == null) return; // Let the validator show the error
+    if (converted == null) return;
 
     widget.controller.text = converted;
     widget.onChanged?.call(converted);
@@ -107,16 +84,10 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     if (mounted) setState(() => _wasConverted = true);
   }
 
-  // ---------------------------------------------------------------------------
-  // Validation
-  // ---------------------------------------------------------------------------
 
   String? _defaultValidator(String? value) =>
       validateEpcUriField(value?.trim(), required: widget.required);
 
-  // ---------------------------------------------------------------------------
-  // Scan callback — normalize immediately so the user sees the canonical URI
-  // ---------------------------------------------------------------------------
 
   void _applyScannedValue(String value) {
     widget.controller.text = value;
@@ -125,20 +96,14 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
     _tryNormalize(value);
   }
 
-  // ---------------------------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
-    // When the user edits manually, clear the conversion notice so stale
-    // "converted" text doesn't persist after they type something new.
     void onUserChanged(String v) {
       if (_wasConverted && mounted) setState(() => _wasConverted = false);
       widget.onChanged?.call(v);
     }
 
-    // Helper text: show conversion notice if applicable, otherwise caller's.
     final String? effectiveHelper = _wasConverted
         ? '✓ Converted from GS1 barcode to EPC URI'
         : widget.helperText;

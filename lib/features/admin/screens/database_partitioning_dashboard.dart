@@ -9,7 +9,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
-/// Database Partitioning Dashboard Screen for Phase 3.1 implementation
 class DatabasePartitioningDashboard extends StatefulWidget {
   const DatabasePartitioningDashboard({Key? key}) : super(key: key);
 
@@ -43,7 +42,6 @@ class _DatabasePartitioningDashboardState
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
 
-    // Initialize service with proper dependencies
     _partitioningService = DatabasePartitioningService(
       dioService: getIt<DioService>(),
     );
@@ -202,7 +200,6 @@ class _DatabasePartitioningDashboardState
             ),
             const SizedBox(height: 24),
 
-            // Health Status
             if (_healthStatus != null) _buildHealthStatusCard(),
           ],
         ],
@@ -222,7 +219,6 @@ class _DatabasePartitioningDashboardState
           ),
           const SizedBox(height: 20),
 
-          // Partition Data Summary
           if (_statistics != null) ...[
             Card(
               color: Colors.blue.withOpacity(0.1),
@@ -523,18 +519,18 @@ class _DatabasePartitioningDashboardState
         case 'HEALTH_CHECK':
           final healthData = await _partitioningService
               .getPartitionHealthStatus();
-          Navigator.of(context).pop(); // Close loading dialog
+          Navigator.of(context).pop();
           _showHealthCheckResults(healthData);
-          return; // Don't show generic success message
+          return;
       }
 
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
 
       context.showSuccess('Maintenance operation completed successfully');
 
-      _loadDashboardData(); // Refresh data
+      _loadDashboardData();
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
 
       context.showError('Maintenance failed: $e');
     }
@@ -587,7 +583,6 @@ class _DatabasePartitioningDashboardState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Overall Status
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -611,7 +606,6 @@ class _DatabasePartitioningDashboardState
                 ),
                 const SizedBox(height: 16),
 
-                // Issues Section
                 if (issues.isNotEmpty) ...[
                   const Text(
                     'Issues Found:',
@@ -653,7 +647,6 @@ class _DatabasePartitioningDashboardState
                   const SizedBox(height: 16),
                 ],
 
-                // Recommendations Section
                 if (recommendations.isNotEmpty) ...[
                   const Text(
                     'Recommendations:',
@@ -692,7 +685,6 @@ class _DatabasePartitioningDashboardState
                   const SizedBox(height: 16),
                 ],
 
-                // Table Health Details
                 if (tableHealth.isNotEmpty) ...[
                   const Text(
                     'Table Health Details:',
@@ -736,7 +728,6 @@ class _DatabasePartitioningDashboardState
                   const SizedBox(height: 16),
                 ],
 
-                // No issues message
                 if (issues.isEmpty && recommendations.isEmpty) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -762,7 +753,6 @@ class _DatabasePartitioningDashboardState
                   const SizedBox(height: 16),
                 ],
 
-                // Timestamp
                 Text(
                   'Last checked: ${DateTime.tryParse(lastCheck)?.toLocal().toString() ?? lastCheck}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -775,7 +765,7 @@ class _DatabasePartitioningDashboardState
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _loadDashboardData(); // Refresh the dashboard data
+              _loadDashboardData();
             },
             child: const Text('Refresh Dashboard'),
           ),

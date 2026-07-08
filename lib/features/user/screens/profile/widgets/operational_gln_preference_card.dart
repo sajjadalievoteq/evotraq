@@ -7,7 +7,6 @@ import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 
-/// Lets the user pick the GLN used for pharma return authorization checks.
 class OperationalGlnPreferenceCard extends StatefulWidget {
   const OperationalGlnPreferenceCard({super.key});
 

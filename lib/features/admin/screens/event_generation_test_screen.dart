@@ -24,19 +24,16 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   String? _errorMessage;
   late TabController _tabController;
 
-  // Event generation state
   String _selectedEventType = 'OBJECT';
   final Map<String, dynamic> _eventParams = {};
   bool _isBulkGeneration = false;
   int _bulkCount = 100;
   BulkGenerationResult? _lastBulkResult;
 
-  // Simulation state
   SimulationSession? _activeSimulation;
   SimulationStatus? _simulationStatus;
   final Map<String, dynamic> _simulationParams = {};
 
-  // Data management state
   TestDataStatistics? _dataStatistics;
   TestEnvironment? _activeEnvironment;
 
@@ -62,17 +59,15 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   }
 
   void _initializeDefaults() {
-    // Event generation defaults
     _eventParams['businessStep'] = 'urn:epcglobal:cbv:bizstep:commissioning';
     _eventParams['disposition'] = 'urn:epcglobal:cbv:disp:active';
     _eventParams['readPoint'] = 'urn:epc:id:sgln:0614141.00001.0';
     _eventParams['bizLocation'] = 'urn:epc:id:sgln:0614141.00001.0';
 
-    // Simulation defaults
-    _simulationParams['duration'] = 300; // 5 minutes
-    _simulationParams['eventInterval'] = 1000; // 1 second
+    _simulationParams['duration'] = 300;
+    _simulationParams['eventInterval'] = 1000;
     _simulationParams['includeAnomalies'] = false;
-    _simulationParams['anomalyRate'] = 0.05; // 5%
+    _simulationParams['anomalyRate'] = 0.05;
   }
 
   Future<void> _loadDataManagementData() async {
@@ -248,7 +243,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
         Future.delayed(const Duration(seconds: 2), _pollSimulationStatus);
       }
     } catch (e) {
-      // Silently handle polling errors
     }
   }
 
@@ -696,7 +690,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   Future<void> _cleanAllSSCCData() async {
     if (_testService == null) return;
 
-    // First confirmation dialog with strong warning
     final firstConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -722,7 +715,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
 
     if (firstConfirmed != true) return;
 
-    // Second confirmation dialog for extra safety
     final secondConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -740,7 +732,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              // Show text input dialog
               final textController = TextEditingController();
               final textConfirmed = await showDialog<bool>(
                 context: context,
@@ -876,7 +867,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // Event type selection
                   DropdownButtonFormField<String>(
                     value: _selectedEventType,
                     decoration: const InputDecoration(
@@ -911,7 +901,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // Generation type toggle
                   SwitchListTile(
                     title: const Text('Bulk Generation'),
                     subtitle: const Text('Generate multiple events at once'),
@@ -941,7 +930,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
 
                   const SizedBox(height: 24),
 
-                  // Action buttons
                   Row(
                     children: [
                       ElevatedButton.icon(
@@ -964,7 +952,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
             ),
           ),
 
-          // Results cards
           if (_lastBulkResult != null) ...[
             const SizedBox(height: 16),
             _buildBulkResultCard(),
@@ -1142,7 +1129,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ],
                     ),
                   ] else ...[
-                    // Simulation parameters
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'Duration (seconds)',
@@ -1231,7 +1217,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Statistics card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -1339,7 +1324,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
 
           const SizedBox(height: 16),
 
-          // Actions card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -1445,7 +1429,6 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
             ),
           ),
 
-          // Active environment card
           if (_activeEnvironment != null) ...[
             const SizedBox(height: 16),
             Card(

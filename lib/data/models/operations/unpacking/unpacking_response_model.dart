@@ -108,7 +108,6 @@ class UnpackingResponse {
 
   String? get operationId => unpackingOperationId;
 
-  /// ID used for list selection and detail navigation.
   String? get navigableOperationId {
     final id = _readNonEmptyString(unpackingOperationId);
     if (id != null) return id;

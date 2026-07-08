@@ -18,7 +18,6 @@ class ApiCollectionState extends Equatable {
     this.error,
   });
 
-  // Statistics getters (migrated from Provider)
   int get totalCollections => collections.length;
   int get activeCollections => collections.where((c) => c.isActive).length;
   int get publicCollections => collections.where((c) => c.isPublic).length;
@@ -40,7 +39,6 @@ class ApiCollectionState extends Equatable {
     );
   }
 
-  // Helper methods for filtering (migrated from Provider)
   List<ApiCollection> filterByCategory(String category) {
     return collections.where((c) => c.category == category).toList();
   }

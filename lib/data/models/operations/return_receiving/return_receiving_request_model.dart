@@ -52,7 +52,6 @@ class ReturnReceivingRequest {
   });
 
 
-
   String? returnReceivingReference;
 
   List<String> epcs;
@@ -96,7 +95,6 @@ class ReturnReceivingRequest {
   String? actingGln;
 
   String? returnShippingEventId;
-
 
 
   ReturnReceivingRequest copyWith({
@@ -168,7 +166,6 @@ class ReturnReceivingRequest {
   }
 
 
-
   Map<String, dynamic> toJson() {
 
     final eventFields = OperationEventTimeCodec.fieldsForRequest(eventTime);
@@ -228,7 +225,6 @@ class ReturnReceivingRequest {
     };
 
   }
-
 
 
   factory ReturnReceivingRequest.fromJson(Map<String, dynamic> json) {

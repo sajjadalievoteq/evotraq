@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
 import 'package:traqtrace_app/data/services/product_journey/product_journey_service.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 
 part 'journey_state.dart';
 
@@ -28,14 +29,16 @@ class JourneyCubit extends Cubit<JourneyState> {
       selectedStep: null,
       errorMessage: null,
       searchResults: const [],
+      eventFilter: JourneyEventFilter.all,
     ));
     try {
-      final journey = await _service.getJourneyByEpc(identifier.trim());
+      final journey = await _service.getJourneyByIdentifier(identifier.trim());
       if (journey == null || journey.steps.isEmpty) {
         emit(state.copyWith(
           status: JourneyStatus.error,
           journey: null,
-          errorMessage: 'No journey data found for "$identifier".',
+          errorMessage:
+              'No journey data found for "$identifier". Try a full SGTIN, SSCC, or EPC URI.',
         ));
       } else {
         emit(state.copyWith(
@@ -69,6 +72,9 @@ class JourneyCubit extends Cubit<JourneyState> {
 
   void selectStep(JourneyStep? step) =>
       emit(state.copyWith(selectedStep: step));
+
+  void setEventFilter(JourneyEventFilter filter) =>
+      emit(state.copyWith(eventFilter: filter));
 
   void clearSuggestions() => emit(state.copyWith(searchResults: const []));
 

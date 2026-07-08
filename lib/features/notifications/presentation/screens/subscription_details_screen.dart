@@ -166,7 +166,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -206,7 +205,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Contact Information
           _buildSection(
             'Contact Information',
             [
@@ -217,7 +215,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             ],
           ),
 
-          // Event Filters
           _buildSection(
             'Subscription Configuration',
             [
@@ -230,7 +227,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             ],
           ),
 
-          // Timing Configuration
           _buildSection(
             'Timing & Delivery',
             [
@@ -243,7 +239,6 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             ],
           ),
 
-          // Statistics
           _buildSection(
             'Statistics',
             [

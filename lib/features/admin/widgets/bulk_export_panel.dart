@@ -10,8 +10,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
-/// Bulk Export Panel for Phase 3.3 Batch Processing Capabilities
-/// Provides comprehensive bulk export management and monitoring interface
 class BulkExportPanel extends StatefulWidget {
   final String baseUrl;
   final TokenManager tokenManager;
@@ -273,7 +271,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Export Status Overview
             Expanded(
               child: Row(
                 children: [
@@ -286,7 +283,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
               ),
             ),
             
-            // Action Buttons
             Row(
               children: [
                 ElevatedButton.icon(
@@ -474,7 +470,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     final status = job['status'] ?? '';
     final format = job['format'] ?? '';
     final progress = job['progress'] ?? 0;
-    // Extract record count from nested structure
     int recordCount = 0;
     if (job['execution_result'] != null && 
         job['execution_result']['export_result'] != null) {
@@ -670,7 +665,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
   Widget _buildHistoryCard(Map<String, dynamic> export) {
     final format = export['format'] ?? '';
     final status = export['status'] ?? '';
-    // Extract record count from nested structure
     int recordCount = 0;
     if (export['execution_result'] != null && 
         export['execution_result']['export_result'] != null) {
@@ -679,7 +673,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     final createdAt = export['createdAt'] ?? '';
     final completedAt = export['completedAt'] ?? '';
     final duration = export['duration'] ?? '';
-    // Extract file size from nested structure
     int fileSize = 0;
     if (export['execution_result'] != null && 
         export['execution_result']['export_result'] != null) {
@@ -772,7 +765,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Overview Cards
           Row(
             children: [
               Expanded(
@@ -810,7 +802,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           ),
           const SizedBox(height: 16),
           
-          // Format Distribution
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1025,7 +1016,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _downloadExport(String jobId) async {
     try {
-      // First get the job details to find the file ID
       final jobResponse = await _dio.get(
         '/bulk-export/jobs',
         headers: await _getHeaders(),
@@ -1040,7 +1030,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             job['execution_result']?['export_result']?['file_id'] != null) {
           final fileId = job['execution_result']['export_result']['file_id'];
 
-          // Use the file download endpoint from the API response
           final downloadUrl = job['execution_result']['export_result']['download_url'];
           final response = await _dio.get(
             '${widget.baseUrl}$downloadUrl',
@@ -1048,7 +1037,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           );
 
           if (response.statusCode == 200) {
-            // In a real implementation, this would trigger file download
             context.showSuccess('Download started for file: $fileId');
           }
         } else {
@@ -1242,7 +1230,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
   }
 
   void _showExportDetails(Map<String, dynamic> export) {
-    // Extract values from nested structure
     int recordCount = 0;
     int fileSize = 0;
     if (export['execution_result'] != null && 
@@ -1299,7 +1286,6 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
   }
 }
 
-// Create Export Dialog Widget
 class CreateExportDialog extends StatefulWidget {
   final String? initialTemplateId;
   final VoidCallback onExportCreated;
@@ -1349,7 +1335,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
     super.initState();
     _selectedTemplateId = widget.initialTemplateId;
     
-    // Set default date range to last 30 days
     _endDate = DateTime.now();
     _startDate = _endDate!.subtract(const Duration(days: 30));
     
@@ -1388,26 +1373,22 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
       Map<String, dynamic> exportData;
 
       if (_selectedTemplateId != null) {
-        // Prepare parameters for template application
         Map<String, dynamic> templateParams = {
           'name': _exportName,
           'format': _selectedFormat,
           ..._exportConfig,
         };
         
-        // Add date range if specified
         if (_startDate != null && _endDate != null) {
           templateParams['start_date'] = _startDate!.toIso8601String();
           templateParams['end_date'] = _endDate!.toIso8601String();
         } else {
-          // Set default date range to last 30 days if no dates specified
           final now = DateTime.now();
           final thirtyDaysAgo = now.subtract(const Duration(days: 30));
           templateParams['start_date'] = thirtyDaysAgo.toIso8601String();
           templateParams['end_date'] = now.toIso8601String();
         }
         
-        // Use template
         final token = await widget.tokenManager.getToken();
         final response = await _dio.post(
           '/bulk-export/templates/$_selectedTemplateId/apply',
@@ -1424,7 +1405,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
           throw Exception('Failed to create export from template');
         }
       } else {
-        // Create custom export job
         final token = await widget.tokenManager.getToken();
         final response = await _dio.post(
           '/bulk-export/jobs',
@@ -1436,7 +1416,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
             'name': _exportName,
             'format': _selectedFormat,
             'configuration': _exportConfig,
-            'schedule': null, // One-time export
+            'schedule': null,
           }),
         );
 
@@ -1477,7 +1457,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Export Name
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Export Name',
@@ -1488,7 +1467,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Template Selection (if not pre-selected)
                 if (widget.initialTemplateId == null) ...[
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
@@ -1513,7 +1491,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                   const SizedBox(height: 16),
                 ],
 
-                // Format Selection
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     labelText: 'Export Format',
@@ -1530,7 +1507,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Date Range Selection
                 const Text(
                   'Date Range (Optional)',
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -1538,7 +1514,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    // Start Date
                     Expanded(
                       child: TextFormField(
                         decoration: const InputDecoration(
@@ -1564,7 +1539,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // End Date
                     Expanded(
                       child: TextFormField(
                         decoration: const InputDecoration(
@@ -1603,7 +1577,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Configuration Options
                 ExpansionTile(
                   title: const Text('Advanced Configuration'),
                   children: [
@@ -1650,7 +1623,6 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
   }
 }
 
-// Bulk Export Dialog Widget
 class BulkExportDialog extends StatefulWidget {
   final VoidCallback onExportCreated;
   final String baseUrl;
@@ -1702,7 +1674,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
     });
 
     try {
-      // Prepare query parameters
       Map<String, dynamic> queryData = {
         'name': _exportName,
         ..._queryParams,
@@ -1713,7 +1684,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
         queryData['end_date'] = _endDate!.toIso8601String();
       }
 
-      // Choose API endpoint based on export type
       String endpoint;
       Map<String, dynamic> requestBody;
 
@@ -1773,7 +1743,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Export Name
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Export Name',
@@ -1784,7 +1753,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Export Type
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     labelText: 'Export Type',
@@ -1799,7 +1767,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Format Selection
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     labelText: 'Export Format',
@@ -1816,7 +1783,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Date Range
                 Row(
                   children: [
                     Expanded(
@@ -1872,7 +1838,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Page Size (for paginated exports)
                 if (_exportType == 'paginated') ...[
                   TextFormField(
                     decoration: const InputDecoration(
@@ -1893,7 +1858,6 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
                   const SizedBox(height: 16),
                 ],
 
-                // Advanced Options
                 ExpansionTile(
                   title: const Text('Advanced Options'),
                   children: [

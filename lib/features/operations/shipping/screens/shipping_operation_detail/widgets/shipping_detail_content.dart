@@ -4,7 +4,6 @@ import 'package:traqtrace_app/features/operations/shipping/screens/shipping_oper
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_details_loading_widget.dart';
 
-/// Resolves which detail view to show based on loading/selection state.
 class ShippingDetailContent extends StatelessWidget {
   const ShippingDetailContent({
     super.key,

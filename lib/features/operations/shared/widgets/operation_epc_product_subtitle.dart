@@ -5,7 +5,6 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_servic
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
-/// Resolves and displays GTIN product name for SGTIN/SSCC scans in operation lists.
 class OperationEpcProductSubtitle extends StatelessWidget {
   const OperationEpcProductSubtitle({super.key, required this.epc});
 

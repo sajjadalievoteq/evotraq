@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -37,7 +38,10 @@ class DashboardRecentEventTile extends StatelessWidget {
           ),
 
           title: Text(
-            _formatBizStep(event.bizStep) ?? event.eventType,
+            CbvDisplayUtils.displayBizStep(
+                  event.bizStep,
+                  fallback: event.eventType,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.text.body.copyWith(
@@ -126,15 +130,6 @@ class DashboardRecentEventTile extends StatelessWidget {
       }
     }
     return epc.length > 20 ? '…${epc.substring(epc.length - 16)}' : epc;
-  }
-
-  String? _formatBizStep(String? bizStep) {
-    if (bizStep == null || bizStep.isEmpty) return null;
-    final raw = bizStep.contains('BizStep-')
-        ? bizStep.split('BizStep-').last
-        : bizStep.split(':').last;
-    if (raw.isEmpty) return null;
-    return raw[0].toUpperCase() + raw.substring(1).replaceAll('-', ' ');
   }
 
   String _formatTimeAgo(DateTime dateTime) {

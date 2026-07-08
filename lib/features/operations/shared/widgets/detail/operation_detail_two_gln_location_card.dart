@@ -3,7 +3,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 
-/// Shared location card for operations with a source and destination GLN.
 class OperationDetailTwoGlnLocationCard extends StatelessWidget {
   const OperationDetailTwoGlnLocationCard({
     super.key,

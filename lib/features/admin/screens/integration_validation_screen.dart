@@ -26,14 +26,12 @@ class _IntegrationValidationScreenState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Initialize the service
     _validationService ??= IntegrationValidationService(
       dioService: getIt<DioService>(),
     );
   }
 
   Future<void> _runAllTests() async {
-    // Make sure service is initialized
     if (_validationService == null) return;
 
     setState(() {
@@ -388,7 +386,6 @@ class _IntegrationValidationScreenState
 
     stepWidgets.add(const SizedBox(height: 12));
 
-    // Add summary
     stepWidgets.add(
       Padding(
         padding: const EdgeInsets.only(left: 8, bottom: 16),
@@ -399,7 +396,6 @@ class _IntegrationValidationScreenState
       ),
     );
 
-    // Add all steps
     for (final step in result.validationSteps) {
       final bool isPassed = result.passedSteps.contains(step);
       final bool isFailed = result.failedSteps.contains(step);

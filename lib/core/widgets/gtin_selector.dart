@@ -5,26 +5,15 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
-import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// A reusable widget for selecting GTINs from available system GTINs.
-/// Provides a searchable dropdown interface with GTIN code and product name.
-///
-/// In [readOnly] mode a plain disabled field is rendered showing the GTIN code
-/// (from [initialValue] or [initialGtinCode]), without the picker dropdown.
 class GtinSelector extends StatelessWidget {
   final String label;
   final String? hintText;
-
-  /// Pre-selected GTIN object — used when opening the picker in create mode.
   final GTIN? initialValue;
-
-  /// GTIN code string to display when [readOnly] is true and no [initialValue]
-  /// is available (e.g. when displaying an existing SGTIN).
   final String? initialGtinCode;
-
+  final List<GTIN>? initialGtins;
   final Function(GTIN?) onChanged;
   final bool isRequired;
   final String? errorText;
@@ -36,6 +25,7 @@ class GtinSelector extends StatelessWidget {
     this.hintText,
     this.initialValue,
     this.initialGtinCode,
+    this.initialGtins,
     required this.onChanged,
     this.isRequired = false,
     this.errorText,
@@ -67,6 +57,7 @@ class GtinSelector extends StatelessWidget {
         label: label,
         hintText: hintText,
         initialValue: initialValue,
+        initialGtins: initialGtins,
         onChanged: onChanged,
         isRequired: isRequired,
         errorText: errorText,
@@ -79,6 +70,7 @@ class _GtinSelectorBody extends StatefulWidget {
   final String label;
   final String? hintText;
   final GTIN? initialValue;
+  final List<GTIN>? initialGtins;
   final Function(GTIN?) onChanged;
   final bool isRequired;
   final String? errorText;
@@ -87,6 +79,7 @@ class _GtinSelectorBody extends StatefulWidget {
     required this.label,
     this.hintText,
     this.initialValue,
+    this.initialGtins,
     required this.onChanged,
     this.isRequired = false,
     this.errorText,
@@ -100,6 +93,7 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isDropdownOpen = false;
+  bool _isLoadingGTINs = false;
   List<GTIN> _filteredGTINs = [];
   List<GTIN> _allGTINs = [];
   GTIN? _selectedGTIN;
@@ -111,7 +105,45 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
     if (_selectedGTIN != null) {
       _searchController.text = _getDisplayText(_selectedGTIN!);
     }
-    _loadGTINs();
+    if (widget.initialGtins != null && widget.initialGtins!.isNotEmpty) {
+      _allGTINs = widget.initialGtins!;
+      _filteredGTINs = widget.initialGtins!;
+    } else {
+      _loadGTINs();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_GtinSelectorBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.initialGtins != null &&
+        widget.initialGtins != oldWidget.initialGtins) {
+      setState(() {
+        _allGTINs = widget.initialGtins!;
+        final q = _searchController.text.toLowerCase();
+        _filteredGTINs = q.isEmpty
+            ? _allGTINs
+            : _allGTINs
+                .where((g) =>
+                    g.gtinCode.toLowerCase().contains(q) ||
+                    g.productName.toLowerCase().contains(q) ||
+                    (g.manufacturer?.toLowerCase().contains(q) ?? false))
+                .toList();
+      });
+    }
+
+    if (widget.initialValue != oldWidget.initialValue) {
+      setState(() {
+        _selectedGTIN = widget.initialValue;
+        if (_selectedGTIN != null) {
+          _searchController.text = _getDisplayText(_selectedGTIN!);
+          _isDropdownOpen = false;
+        } else {
+          _searchController.clear();
+        }
+      });
+    }
   }
 
   @override
@@ -122,13 +154,17 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
   }
 
   void _loadGTINs() {
+    setState(() => _isLoadingGTINs = true);
     context.read<GTINCubit>().fetchGtinsForPicker().then((gtins) {
       if (mounted) {
         setState(() {
           _allGTINs = gtins;
           _filteredGTINs = gtins;
+          _isLoadingGTINs = false;
         });
       }
+    }).catchError((_) {
+      if (mounted) setState(() => _isLoadingGTINs = false);
     });
   }
 
@@ -163,161 +199,163 @@ class _GtinSelectorBodyState extends State<_GtinSelectorBody> {
     setState(() {
       _selectedGTIN = null;
       _searchController.clear();
-      _isDropdownOpen = false;
+      _filteredGTINs = _allGTINs;
+      _isDropdownOpen = _allGTINs.isNotEmpty;
     });
     widget.onChanged(null);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GTINCubit, GTINState>(
-      listener: (context, state) {},
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.label.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  widget.label + (widget.isRequired ? ' *' : ''),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-              ),
-
-            // Search / display field
-            TextFormField(
-              controller: _searchController,
-              focusNode: _focusNode,
-              decoration: InputDecoration(
-                hintText: widget.hintText ?? 'Search GTIN code or product name…',
-                prefixIcon: TraqIcon(AppAssets.iconQr),
-                suffixIcon: _selectedGTIN != null
-                    ? IconButton(
-                        icon: TraqIcon(AppAssets.iconX),
-                        onPressed: _clearSelection,
-                      )
-                    : IconButton(
-                        icon: TraqIcon(_isDropdownOpen
-                            ? AppAssets.iconChevronU
-                            : AppAssets.iconChevronD),
-                        onPressed: () {
-                          setState(() => _isDropdownOpen = !_isDropdownOpen);
-                          if (_isDropdownOpen) {
-                            _focusNode.requestFocus();
-                          } else {
-                            _focusNode.unfocus();
-                          }
-                        },
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                errorText: widget.errorText,
-              ),
-              onChanged: (value) {
-                setState(() => _isDropdownOpen = true);
-                _filterGTINs(value);
-              },
-              onTap: () => setState(() => _isDropdownOpen = true),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.label.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              widget.label + (widget.isRequired ? ' *' : ''),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
+          ),
 
-            // Dropdown list
-            if (_isDropdownOpen && _filteredGTINs.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context).cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                constraints: const BoxConstraints(maxHeight: 220),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _filteredGTINs.length,
-                  itemBuilder: (context, index) {
-                    final gtin = _filteredGTINs[index];
-                    return ListTile(
-                      dense: true,
-                      leading: TraqIcon(AppAssets.iconQr, size: 20),
-                      title: Text(
-                        gtin.gtinCode,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 14),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(gtin.productName,
-                              style: const TextStyle(fontSize: 13)),
-                          if (gtin.manufacturer != null)
-                            Text(
-                              gtin.manufacturer!,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600),
-                            ),
-                        ],
-                      ),
-                      onTap: () => _selectGTIN(gtin),
-                      selected: _selectedGTIN?.gtinCode == gtin.gtinCode,
-                      selectedTileColor:
-                          Theme.of(context).primaryColor.withOpacity(0.1),
-                    );
-                  },
-                ),
-              ),
+        TextFormField(
+          controller: _searchController,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            hintText: widget.hintText ?? 'Search GTIN code or product name…',
+            prefixIcon: TraqIcon(AppAssets.iconQr),
+            suffixIcon: _selectedGTIN != null
+                ? IconButton(
+                    icon: TraqIcon(AppAssets.iconX),
+                    onPressed: _clearSelection,
+                  )
+                : IconButton(
+                    icon: TraqIcon(_isDropdownOpen
+                        ? AppAssets.iconChevronU
+                        : AppAssets.iconChevronD),
+                    onPressed: () {
+                      setState(() => _isDropdownOpen = !_isDropdownOpen);
+                      if (_isDropdownOpen) {
+                        _focusNode.requestFocus();
+                      } else {
+                        _focusNode.unfocus();
+                      }
+                    },
+                  ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            errorText: widget.errorText,
+          ),
+          onChanged: (value) {
+            if (_selectedGTIN != null) return;
+            setState(() => _isDropdownOpen = true);
+            _filterGTINs(value);
+          },
+          onTap: () {
+            if (_selectedGTIN != null) return;
+            setState(() => _isDropdownOpen = true);
+          },
+          readOnly: _selectedGTIN != null,
+        ),
 
-            // Loading indicator
-            if (state.isGtinListLoading)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: AppShimmer(
-                  child: Column(
-                    children: List.generate(
-                      3,
-                      (index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+        if (_isLoadingGTINs)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: AppShimmer(
+              child: Column(
+                children: List.generate(
+                  3,
+                  (index) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
 
-            // No results
-            if (_isDropdownOpen && _filteredGTINs.isEmpty && _allGTINs.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context).cardColor,
+        if (!_isLoadingGTINs && _isDropdownOpen && _filteredGTINs.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                child: const Text(
-                  'No GTINs found matching your search.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-          ],
-        );
-      },
+              ],
+            ),
+            constraints: const BoxConstraints(maxHeight: 220),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _filteredGTINs.length,
+              itemBuilder: (context, index) {
+                final gtin = _filteredGTINs[index];
+                return ListTile(
+                  dense: true,
+                  leading: TraqIcon(AppAssets.iconQr, size: 20),
+                  title: Text(
+                    gtin.gtinCode,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(gtin.productName,
+                          style: const TextStyle(fontSize: 13)),
+                      if (gtin.manufacturer != null)
+                        Text(
+                          gtin.manufacturer!,
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                    ],
+                  ),
+                  onTap: () => _selectGTIN(gtin),
+                  selected: _selectedGTIN?.gtinCode == gtin.gtinCode,
+                  selectedTileColor:
+                      Theme.of(context).primaryColor.withOpacity(0.1),
+                );
+              },
+            ),
+          ),
+
+        if (!_isLoadingGTINs &&
+            _isDropdownOpen &&
+            _filteredGTINs.isEmpty &&
+            _allGTINs.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+              color: Theme.of(context).cardColor,
+            ),
+            child: const Text(
+              'No GTINs found matching your search.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+      ],
     );
   }
 }

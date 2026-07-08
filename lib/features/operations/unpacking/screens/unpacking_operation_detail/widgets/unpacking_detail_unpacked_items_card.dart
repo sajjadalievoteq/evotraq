@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_respons
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Unpacked items card for unpacking operation detail.
 class UnpackingDetailUnpackedItemsCard extends StatelessWidget {
   const UnpackingDetailUnpackedItemsCard({
     super.key,

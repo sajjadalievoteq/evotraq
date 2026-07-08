@@ -28,7 +28,6 @@ class AggregationEventService {
 
     final headers = await _getHeaders();
 
-    // Numeric database PK (legacy / direct links).
     if (RegExp(r'^\d+$').hasMatch(trimmed)) {
       final response = await _dioService.get(
         '$_baseUrl/$trimmed',
@@ -41,7 +40,6 @@ class AggregationEventService {
       }
     }
 
-    // EPCIS eventId — query param handles urn:uuid:… and client-generated ids.
     final response = await _dioService.get(
       '$_baseUrl/event-id',
       queryParameters: {'eventId': trimmed},

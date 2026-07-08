@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared awaiting-selection placeholder for operation detail screens.
-/// Replaces: ShippingDetailAwaitingSelection, ReceivingDetailAwaitingSelection, etc.
 class OperationDetailAwaitingSelection extends StatelessWidget {
   const OperationDetailAwaitingSelection({
     super.key,

@@ -6,30 +6,6 @@ import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_scree
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Universal GS1 barcode scan dialog — the single entry point for scanning
-/// anywhere in the app (forms, operations, standalone flows).
-///
-/// ```dart
-/// // Returns a parsed [ScanResult] after the user confirms.
-/// final result = await GS1BarcodeScanDialog.show(
-///   context,
-///   title: 'Scan Item',
-///   allowedFormats: const ['SGTIN'],
-/// );
-///
-/// // Returns the raw GS1 element string.
-/// final raw = await GS1BarcodeScanDialog.showRaw(context, title: 'Scan GTIN');
-///
-/// // Suffix icon for text fields.
-/// suffixIcon: GS1BarcodeScanDialog.iconButton(
-///   context: context,
-///   title: 'Scan Barcode',
-///   onResult: (result) => ...,
-/// ),
-///
-/// // Embedded trigger card for operation screens.
-/// Gs1BarcodeScanTrigger(onScanResult: ..., title: 'Scan Item'),
-/// ```
 abstract final class GS1BarcodeScanDialog {
   GS1BarcodeScanDialog._();
 
@@ -119,7 +95,6 @@ abstract final class GS1BarcodeScanDialog {
     return result.data;
   }
 
-  /// Scanner [IconButton] for [InputDecoration.suffixIcon] and toolbars.
   static Widget iconButton({
     required BuildContext context,
     required String title,
@@ -152,7 +127,6 @@ abstract final class GS1BarcodeScanDialog {
   }
 }
 
-/// Compact card with an "Open Scanner" button — embed in operation wizards.
 class Gs1BarcodeScanTrigger extends StatelessWidget {
   const Gs1BarcodeScanTrigger({
     super.key,

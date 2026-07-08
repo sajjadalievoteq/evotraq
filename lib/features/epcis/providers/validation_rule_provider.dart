@@ -28,8 +28,6 @@ class ValidationRuleState extends Equatable {
   List<Object?> get props => [validationRules, isLoading, error];
 }
 
-/// Provider for validation rule state management
-/// Phase 3: Event Validation Service - Database-backed validation rule management
 class ValidationRuleCubit extends Cubit<ValidationRuleState> {
   final ValidationRuleService _validationRuleService;
 
@@ -42,11 +40,9 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
   }) : _validationRuleService =
            validationRuleService ?? getIt<ValidationRuleService>(),
        super(ValidationRuleState.initial()) {
-    // Load rules on initialization
     loadValidationRules();
   }
 
-  // Getters
   List<ValidationRule> get validationRules =>
       List.unmodifiable(_validationRules);
   List<ValidationRule> get rules => List.unmodifiable(_validationRules);
@@ -54,11 +50,9 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
   bool get loading => _isLoading;
   String? get error => _error;
 
-  /// Get enabled validation rules
   List<ValidationRule> get enabledRules =>
       _validationRules.where((rule) => rule.enabled).toList();
 
-  /// Get validation rules by event type
   List<ValidationRule> getRulesByEventType(EventType eventType) {
     return _validationRules
         .where(
@@ -68,12 +62,10 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         .toList();
   }
 
-  /// Get validation rules by category
   List<ValidationRule> getRulesByCategory(String category) {
     return _validationRules.where((rule) => rule.category == category).toList();
   }
 
-  /// Get validation rule by ID
   ValidationRule? getRuleById(int id) {
     try {
       return _validationRules.firstWhere((rule) => rule.id == id);
@@ -82,7 +74,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Get validation rule by rule ID
   ValidationRule? getRuleByRuleId(String ruleId) {
     try {
       return _validationRules.firstWhere((rule) => rule.ruleId == ruleId);
@@ -91,13 +82,11 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Load sample rules for demonstration (when API is not available)
   Future<void> loadSampleRules() async {
     _setLoading(true);
     _setError(null);
 
     try {
-      // Simulate API delay
       await Future.delayed(const Duration(milliseconds: 500));
 
       _validationRules = getSampleAdvancedRules();
@@ -112,7 +101,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Load all validation rules from the API
   Future<void> loadValidationRules() async {
     _setLoading(true);
     _setError(null);
@@ -121,7 +109,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
       _validationRules = await _validationRuleService.getAllRules();
       _emitState();
     } catch (e) {
-      // Fallback to sample rules if API is not available
       _setError('API not available. Loading sample rules for demonstration.');
       if (kDebugMode) {
         print('Error loading validation rules from API: $e');
@@ -133,7 +120,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Toggle a validation rule's enabled status
   Future<bool> toggleValidationRule(int ruleId, bool enabled) async {
     _setLoading(true);
     _setError(null);
@@ -164,7 +150,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Create a new validation rule
   Future<ValidationRule?> createValidationRule(ValidationRule rule) async {
     _setLoading(true);
     _setError(null);
@@ -185,7 +170,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Update an existing validation rule
   Future<ValidationRule?> updateValidationRule(
     int ruleId,
     ValidationRule rule,
@@ -216,7 +200,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Delete a validation rule
   Future<bool> deleteValidationRule(int ruleId) async {
     _setLoading(true);
     _setError(null);
@@ -241,7 +224,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Search validation rules by name or description
   Future<void> searchValidationRules(String searchTerm) async {
     if (searchTerm.isEmpty) {
       await loadValidationRules();
@@ -264,14 +246,13 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Reset all validation rules to defaults
   Future<void> resetToDefaults() async {
     _setLoading(true);
     _setError(null);
 
     try {
       await _validationRuleService.resetToDefaults();
-      await loadValidationRules(); // Reload after reset
+      await loadValidationRules();
     } catch (e) {
       _setError('Failed to reset validation rules: $e');
       if (kDebugMode) {
@@ -282,14 +263,13 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Initialize predefined validation rules
   Future<void> initializePredefinedRules() async {
     _setLoading(true);
     _setError(null);
 
     try {
       await _validationRuleService.initializePredefinedRules();
-      await loadValidationRules(); // Reload after initialization
+      await loadValidationRules();
     } catch (e) {
       _setError('Failed to initialize predefined rules: $e');
       if (kDebugMode) {
@@ -300,26 +280,21 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     }
   }
 
-  /// Clear error state
   void clearError() {
     if (_error != null) {
       _setError(null);
     }
   }
 
-  /// Refresh validation rules (convenience method)
   Future<void> refresh() async {
     await loadValidationRules();
   }
 
-  /// Reload validation rules (alias for loadValidationRules)
   Future<void> reloadRules() => loadValidationRules();
 
-  /// Add a new rule (alias for createValidationRule)
   Future<ValidationRule?> addRule(ValidationRule rule) =>
       createValidationRule(rule);
 
-  /// Update a rule (alias for updateValidationRule)
   Future<ValidationRule?> updateRule(ValidationRule rule) {
     if (rule.id == null) {
       throw ArgumentError('Rule ID is required for updates');
@@ -327,7 +302,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     return updateValidationRule(rule.id!, rule);
   }
 
-  /// Delete a rule (alias for deleteValidationRule)
   Future<bool> deleteRule(ValidationRule rule) {
     if (rule.id == null) {
       throw ArgumentError('Rule ID is required for deletion');
@@ -335,20 +309,17 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
     return deleteValidationRule(rule.id!);
   }
 
-  /// Get predefined (non-custom) validation rules
   List<ValidationRule> getPredefinedRules() {
     return _validationRules.where((rule) => !rule.isCustom).toList();
   }
 
-  /// Get comprehensive sample validation rules demonstrating all capabilities
   List<ValidationRule> getSampleAdvancedRules() {
     return [
-      // Required Field Validation
       ValidationRule(
         ruleId: 'REQ_001',
         name: 'Event Time Required',
         description: 'All EPCIS events must have a valid event time',
-        eventType: null, // Applies to all event types
+        eventType: null,
         severity: RuleSeverity.ERROR,
         category: 'REQUIRED',
         tags: ['EPCIS', 'mandatory', 'time'],
@@ -360,7 +331,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Business Logic Validation
       ValidationRule(
         ruleId: 'BIZ_001',
         name: 'Valid Business Step',
@@ -378,7 +348,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Referential Integrity
       ValidationRule(
         ruleId: 'REF_001',
         name: 'Valid GLN References',
@@ -396,7 +365,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Data Quality Check
       ValidationRule(
         ruleId: 'DQ_001',
         name: 'SGTIN Serial Number Format',
@@ -414,7 +382,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Pharmaceutical Compliance
       ValidationRule(
         ruleId: 'PHARMA_001',
         name: 'Pharmaceutical Lot Tracking',
@@ -433,7 +400,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Aggregation Logic
       ValidationRule(
         ruleId: 'AGG_001',
         name: 'Parent-Child Aggregation',
@@ -453,7 +419,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Transaction Validation
       ValidationRule(
         ruleId: 'TXN_001',
         name: 'Transaction Partner GLN',
@@ -471,7 +436,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Supply Chain Security
       ValidationRule(
         ruleId: 'SEC_001',
         name: 'Secure Commissioning',
@@ -490,7 +454,6 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         isCustom: false,
       ),
 
-      // Environmental Conditions
       ValidationRule(
         ruleId: 'ENV_001',
         name: 'Temperature Monitoring',
@@ -505,11 +468,10 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
             'isColdChainProduct(epcList) ? hasSensorData(sensorElementList, "temperature") : true',
         errorMessage:
             'Cold chain products should include temperature sensor data',
-        enabled: false, // Disabled by default as it's informational
+        enabled: false,
         isCustom: false,
       ),
 
-      // Custom Business Rule Example
       ValidationRule(
         ruleId: 'CUSTOM_001',
         name: 'Manufacturing Facility Check',
@@ -524,12 +486,11 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
             'businessStep.includes("manufacturing") ? isCertifiedFacility(readPoint.id) : true',
         errorMessage: 'Manufacturing must occur at certified facilities only',
         enabled: true,
-        isCustom: true, // This shows as a custom rule
+        isCustom: true,
       ),
     ];
   }
 
-  // Private helper methods
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;

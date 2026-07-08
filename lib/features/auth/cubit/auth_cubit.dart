@@ -5,6 +5,7 @@ import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
@@ -66,8 +67,9 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
+      _preloadGlnPickerCatalog();
     } catch (e) {
-      _clearHomeOverviewSession();
+      _clearSessionCaches();
       emit(
         state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -95,6 +97,7 @@ class AuthCubit extends Cubit<AuthState> {
           registeredEmail: null,
         ),
       );
+      _preloadGlnPickerCatalog();
     } catch (e) {
       final errorMessage = _resolveErrorMessage(e, 'Authentication failed');
       final fallbackEmail = request.username.contains('@')
@@ -141,7 +144,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     await _authService.logout();
-    _clearHomeOverviewSession();
+    _clearSessionCaches();
     emit(
       state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -165,8 +168,9 @@ class AuthCubit extends Cubit<AuthState> {
           message: null,
         ),
       );
+      _preloadGlnPickerCatalog();
     } catch (e) {
-      _clearHomeOverviewSession();
+      _clearSessionCaches();
       emit(
         state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -355,5 +359,22 @@ class AuthCubit extends Cubit<AuthState> {
     if (getIt.isRegistered<HomeOverviewSessionStore>()) {
       getIt<HomeOverviewSessionStore>().clear();
     }
+  }
+
+  void _clearGlnPickerCatalog() {
+    if (getIt.isRegistered<GlnPickerCatalog>()) {
+      getIt<GlnPickerCatalog>().clear();
+    }
+  }
+
+  void _clearSessionCaches() {
+    _clearHomeOverviewSession();
+    _clearGlnPickerCatalog();
+  }
+
+  void _preloadGlnPickerCatalog() {
+    if (!getIt.isRegistered<GlnPickerCatalog>()) return;
+    // Fire-and-forget: pickers read from cache once this completes.
+    getIt<GlnPickerCatalog>().preload();
   }
 }

@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Step 3: review all Return Receiving Details before submission.
 class ReturnReceivingReviewStep extends StatelessWidget {
   const ReturnReceivingReviewStep({
     super.key,

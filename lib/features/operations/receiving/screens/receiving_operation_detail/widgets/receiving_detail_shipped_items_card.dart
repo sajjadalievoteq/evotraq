@@ -2,7 +2,6 @@
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Received items card for receiving operation detail.
 class ReceivingDetailReceivedItemsCard extends StatelessWidget {
   const ReceivingDetailReceivedItemsCard({
     super.key,

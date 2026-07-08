@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_stepper_header.dart';
 
-/// Column layout combining animated stepper, paged content, and footer navigation.
 class OperationWizard extends StatelessWidget {
   const OperationWizard({
     super.key,

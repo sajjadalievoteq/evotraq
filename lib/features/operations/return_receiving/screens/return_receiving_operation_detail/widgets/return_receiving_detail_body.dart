@@ -13,7 +13,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_processing_stats_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 
-/// Scrollable body content for ReturnReceiving operation detail.
 class ReturnReceivingDetailBody extends StatelessWidget {
   const ReturnReceivingDetailBody({
     super.key,

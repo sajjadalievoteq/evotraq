@@ -2,45 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Severity levels for validation feedback
 enum ValidationSeverity {
-  /// Information only, not an error
   info,
   
-  /// Warning that doesn't prevent submission
   warning,
   
-  /// Error that prevents submission
   error
 }
 
-/// A widget that provides visual validation feedback for form fields
 class FieldValidationIndicator extends StatefulWidget {
-  /// Whether the field is valid
   final bool isValid;
   
-  /// Whether validation has been attempted
   final bool wasValidated;
   
-  /// Error message to display
   final String? errorMessage;
   
-  /// Whether to show the error message
   final bool showError;
   
-  /// Optional help text
   final String? helpText;
   
-  /// Severity level of the validation message
   final ValidationSeverity severity;
   
-  /// Whether to animate changes
   final bool animate;
   
-  /// Duration of the animation
   final Duration animationDuration;
   
-  /// Constructor
   const FieldValidationIndicator({
     Key? key,
     this.isValid = true,
@@ -123,7 +109,6 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
 
   @override
   Widget build(BuildContext context) {
-    // If not yet validated, show nothing or just help text
     if (!widget.wasValidated) {
       if (widget.helpText != null) {
         return Padding(
@@ -142,7 +127,6 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
 
     Widget content;
     
-    // Show validation status
     if (widget.isValid) {
       content = Row(
         children: [

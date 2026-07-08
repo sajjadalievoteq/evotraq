@@ -14,31 +14,21 @@ import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widge
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Callback fired when the user confirms a scanned barcode.
 typedef GS1BarcodeCallback = void Function(
   String gs1ElementString,
   Map<String, dynamic> parsedBarcode,
   Map<String, dynamic>? verificationResult,
 );
 
-/// Central GS1 barcode scanner screen.
-///
-/// Scans a barcode (camera or manual entry), parses it with
-/// [extractBarcodeDetails], determines its type (SGTIN / GTIN / SSCC / GLN)
-/// and presents a rich detail preview before optionally firing [onBarcodeDetected].
 class GS1BarcodeScannerScreen extends StatefulWidget {
   final String? title;
 
-  /// Optional callback. When provided a "Use Barcode" confirm button is shown.
   final GS1BarcodeCallback? onBarcodeDetected;
 
-  /// Whether to verify the scanned barcode against the backend API.
   final bool verifyWithBackend;
 
-  /// Single = stop scanning after first hit. Continuous = keep scanning.
   final ScanMode scanMode;
 
-  /// When true, renders without [Scaffold] for use inside a [Dialog].
   final bool embedded;
 
   const GS1BarcodeScannerScreen({
@@ -64,27 +54,20 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
 
-  /// Changing this key forces [GS1BarcodeScannerWidget] to rebuild and
-  /// restart the camera — used by "Scan Again".
   Key _scannerKey = UniqueKey();
 
-  /// Whether the camera scanner is active (mobile only).
   bool _isCameraActive = false;
 
-  /// Whether wired scanner keyboard-listener is active.
   bool _isWiredActive = false;
 
-  /// Timer that auto-confirms the scan after 2 seconds.
   Timer? _autoConfirmTimer;
 
-  /// Buffer for wired-scanner keystrokes.
   String _wiredBuffer = '';
 
   final TextEditingController _manualController = TextEditingController();
   final FocusNode _manualFocusNode = FocusNode();
   final FocusNode _wiredFocusNode = FocusNode();
 
-  /// True only on Android / iOS — camera not supported on desktop or web.
   bool get _cameraSupported =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -98,7 +81,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
     try {
       _apiService = getIt<GS1BarcodeApiService>();
     } catch (_) {
-      // DI not configured for this service — verification skipped.
     }
 
     if (_scannerDetection.supportsWired) {
@@ -123,9 +105,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Core detection handler
-  // ---------------------------------------------------------------------------
 
   Future<void> _handleDetection(String raw, {bool fromWiredScanner = false}) async {
     if (_isProcessing) return;
@@ -211,9 +190,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
     if (Navigator.canPop(context)) Navigator.pop(context);
   }
 
-  // ---------------------------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +334,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
               ),
             ),
 
-          // ── Camera view ──────────────────────────────────────────────
           if (_isCameraActive && _cameraSupported)
             Expanded(
               flex: 3,
@@ -384,14 +359,12 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
               ),
             ),
 
-          // ── Error strip ───────────────────────────────────────────────
           if (_errorMessage != null)
             _ErrorBanner(
               message: _errorMessage!,
               onDismiss: () => setState(() => _errorMessage = null),
             ),
 
-          // ── Manual input — always visible ─────────────────────────────
           _ManualInputSection(
             controller: _manualController,
             focusNode: _manualFocusNode,
@@ -415,9 +388,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   }
 }
 
-// =============================================================================
-// Type chip
-// =============================================================================
 
 class _TypeChip extends StatelessWidget {
   const _TypeChip({required this.type});
@@ -461,9 +431,6 @@ class _TypeChip extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// Details view
-// =============================================================================
 
 class _BarcodeDetailsView extends StatefulWidget {
   const _BarcodeDetailsView({
@@ -519,7 +486,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Auto-confirm countdown bar ───────────────────────────────
           if (widget.autoConfirm) ...[
             AnimatedBuilder(
               animation: _countdownController,
@@ -547,7 +513,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
             const SizedBox(height: 12),
           ],
 
-          // ── Type + validity badges ───────────────────────────────────
           Wrap(
             spacing: 8,
             runSpacing: 6,
@@ -580,7 +545,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
           ),
           const SizedBox(height: 6),
 
-          // GS1 element string (monospace, subtle)
           SelectableText(
             widget.details.gs1ElementString,
             style: TextStyle(
@@ -591,7 +555,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
           ),
           const SizedBox(height: 16),
 
-          // ── Detail rows ─────────────────────────────────────────────
           Card(
             child: rows.isEmpty
                 ? const Padding(
@@ -647,7 +610,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
                   ),
           ),
 
-          // ── Backend verification ─────────────────────────────────────
           if (widget.verificationResult != null) ...[
             const SizedBox(height: 12),
             _VerificationCard(result: widget.verificationResult!),
@@ -655,7 +617,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
 
           const SizedBox(height: 24),
 
-          // ── Action buttons ───────────────────────────────────────────
           if (widget.isProcessing)
             const Center(child: CircularProgressIndicator())
           else
@@ -686,9 +647,6 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
   }
 }
 
-// =============================================================================
-// Verification card
-// =============================================================================
 
 class _VerificationCard extends StatelessWidget {
   const _VerificationCard({required this.result});
@@ -737,9 +695,6 @@ class _VerificationCard extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// Manual input section
-// =============================================================================
 
 class _ManualInputSection extends StatelessWidget {
   const _ManualInputSection({
@@ -830,9 +785,6 @@ class _ManualInputSection extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// Wired scanner ready view
-// =============================================================================
 
 class _WiredScannerReadyView extends StatefulWidget {
   const _WiredScannerReadyView({
@@ -967,9 +919,6 @@ class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
   }
 }
 
-// =============================================================================
-// Error banner
-// =============================================================================
 
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.message, required this.onDismiss});

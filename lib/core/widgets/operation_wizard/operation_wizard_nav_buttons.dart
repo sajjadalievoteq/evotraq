@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Previous / Next / Submit navigation bar for operation wizards.
 class OperationWizardNavButtons extends StatelessWidget {
   const OperationWizardNavButtons({
     super.key,

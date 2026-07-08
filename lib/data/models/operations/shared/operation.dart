@@ -2,10 +2,6 @@ import 'package:traqtrace_app/data/models/operations/shared/operation_gln_displa
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 
-/// Unified operation record for list, detail, and cross-operation views.
-///
-/// Operation-specific fields live in [metadata]; typed response models remain
-/// the source of truth for API deserialization.
 class Operation {
   const Operation({
     this.operationId,

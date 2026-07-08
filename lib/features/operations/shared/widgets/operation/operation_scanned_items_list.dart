@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_epc_product_subtitle.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_hierarchy_row.dart';
 
-/// Shared scanned-items list with remove and clear-all actions.
 class OperationScannedItemsList extends StatelessWidget {
   const OperationScannedItemsList({
     super.key,

@@ -3,8 +3,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Full-screen loading skeleton for the CBV Vocabulary Management screen.
-/// Matches the real layout: stats header → search bar → tabs → content rows.
 class CbvVocabularySkeleton extends StatelessWidget {
   const CbvVocabularySkeleton({super.key});
 
@@ -22,15 +20,12 @@ class CbvVocabularySkeleton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Stats header ─────────────────────────────────────────────
               _SkeletonStatCards(base: base),
               const SizedBox(height: TraqSpacing.lg),
 
-              // ── Search bar ───────────────────────────────────────────────
               _SkeletonBox(base: base, height: 44, radius: 8),
               const SizedBox(height: TraqSpacing.md),
 
-              // ── Fake tab bar ─────────────────────────────────────────────
               Row(
                 children: [
                   _SkeletonBox(base: base, width: 80, height: 20, radius: 4),
@@ -42,7 +37,6 @@ class CbvVocabularySkeleton extends StatelessWidget {
               ),
               const Divider(height: TraqSpacing.xl),
 
-              // ── Pairing rows ─────────────────────────────────────────────
               for (var i = 0; i < 10; i++) ...[
                 _SkeletonPairingRow(base: base, chipCount: 2 + (i % 4)),
                 const Divider(height: 1),
@@ -56,10 +50,6 @@ class CbvVocabularySkeleton extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Stat cards (matches CbvStatisticsHeader — 2 side-by-side cards)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _SkeletonStatCards extends StatelessWidget {
   const _SkeletonStatCards({required this.base});
@@ -98,14 +88,12 @@ class _SkeletonStatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // title row
             Row(children: [
               _SkeletonBox(base: base, width: 20, height: 20, radius: 4),
               const SizedBox(width: TraqSpacing.sm),
               _SkeletonBox(base: base, width: 90, height: 14, radius: 4),
             ]),
             const SizedBox(height: TraqSpacing.md),
-            // stat numbers row
             Row(children: [
               Expanded(child: _SkeletonStatBlock(base: base)),
               Expanded(child: _SkeletonStatBlock(base: base)),
@@ -134,10 +122,6 @@ class _SkeletonStatBlock extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// One pairing row (biz step label + disposition chips)
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _SkeletonPairingRow extends StatelessWidget {
   const _SkeletonPairingRow({required this.base, required this.chipCount});
   final Color base;
@@ -150,7 +134,6 @@ class _SkeletonPairingRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // biz step label column
           SizedBox(
             width: 180,
             child: Column(
@@ -163,7 +146,6 @@ class _SkeletonPairingRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: TraqSpacing.lg),
-          // disposition chips
           Expanded(
             child: Wrap(
               spacing: TraqSpacing.sm,
@@ -185,9 +167,6 @@ class _SkeletonPairingRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Primitive building block
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _SkeletonBox extends StatelessWidget {
   const _SkeletonBox({

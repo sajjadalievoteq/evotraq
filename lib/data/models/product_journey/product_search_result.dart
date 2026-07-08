@@ -14,4 +14,15 @@ class ProductSearchResult {
   final String? gtin;
   final String? serialNumber;
   final String? description;
+
+  factory ProductSearchResult.fromBackendJson(Map<String, dynamic> json) {
+    return ProductSearchResult(
+      identifier: json['identifier']?.toString() ?? '',
+      displayName: json['displayName']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      gtin: json['gtin']?.toString(),
+      serialNumber: json['serialNumber']?.toString(),
+      description: json['description']?.toString(),
+    );
+  }
 }

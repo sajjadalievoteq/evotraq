@@ -340,7 +340,6 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
   void _executeQuery(String queryType) {
     GlobalKey<FormBuilderState> formKey;
     
-    // Select the appropriate form key based on query type
     switch (queryType) {
       case 'supplyChainPath':
         formKey = _supplyChainFormKey;
@@ -352,18 +351,16 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
         formKey = _aggregationFormKey;
         break;
       default:
-        formKey = _supplyChainFormKey; // Default fallback
+        formKey = _supplyChainFormKey;
     }
     
     if (formKey.currentState?.saveAndValidate() ?? false) {
       final formData = formKey.currentState!.value;
       
-      // Convert form data to appropriate format
       final parameters = <String, dynamic>{
         ...formData,
       };
 
-      // Convert DateTime objects to ISO strings if present
       if (parameters['startTime'] is DateTime) {
         parameters['startTime'] = (parameters['startTime'] as DateTime);
       }

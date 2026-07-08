@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 
-/// Shared label/value row for operation detail screens.
 class OperationDetailInfoRow extends StatelessWidget {
   const OperationDetailInfoRow({
     super.key,

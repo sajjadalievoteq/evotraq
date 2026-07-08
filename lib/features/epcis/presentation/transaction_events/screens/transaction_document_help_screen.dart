@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Help screen for Transaction Document operations
 class TransactionDocumentHelpScreen extends StatelessWidget {
-  /// Constructor
   const TransactionDocumentHelpScreen({Key? key}) : super(key: key);
 
   @override

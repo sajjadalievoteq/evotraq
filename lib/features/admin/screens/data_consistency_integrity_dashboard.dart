@@ -11,7 +11,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 
-
 class DataConsistencyIntegrityDashboard extends StatefulWidget {
   const DataConsistencyIntegrityDashboard({Key? key}) : super(key: key);
 
@@ -27,7 +26,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   late ErrorCorrectionService _correctionService;
   late DataConsistencyPersistenceService _persistenceService;
   
-  // Data state
   Map<String, dynamic>? _consistencyReport;
   List<dynamic> _detectableAnomalies = [];
   List<dynamic> _correctableErrors = [];
@@ -35,14 +33,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   List<dynamic> _integrityJobs = [];
   List<Map<String, dynamic>> _correctionWorkflows = [];
   
-  // UI state
   bool _isLoading = false;
   bool _isGeneratingReport = false;
   bool _isDetectingAnomalies = false;
   bool _isIdentifyingErrors = false;
   String? _errorMessage;
   
-  // Filters
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _endDate = DateTime.now();
   List<String> _selectedEventTypes = ['ObjectEvent', 'AggregationEvent', 'TransactionEvent', 'TransformationEvent'];
@@ -58,10 +54,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     _persistenceService = DataConsistencyPersistenceService();
     _initializeServices();
     
-    // Listen to persistence service changes
     _persistenceService.addListener(_onPersistenceUpdate);
     
-    // Load persisted data
     _integrityJobs = _persistenceService.integrityJobs;
     _correctionWorkflows = _persistenceService.correctionWorkflows;
     print('DEBUG: initState - Loaded persisted workflows: ${_correctionWorkflows.length}');
@@ -246,7 +240,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         _correctionStatistics = statistics;
       });
     } catch (e) {
-      // Handle error silently for statistics
       print('Failed to load correction statistics: $e');
     }
   }
@@ -255,12 +248,10 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     context.showError(message, duration: const Duration(seconds: 5));
   }
 
-  // Consistency violation correction methods
   Future<void> _correctConsistencyViolation(Map<String, dynamic> violation) async {
     final violationType = violation['violation_type'] ?? 'UNKNOWN';
     final description = violation['description'] ?? '';
     
-    // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -291,7 +282,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
 
     if (confirmed == true) {
       try {
-        // Register the violation as a correctable error
         final errorId = await _correctionService.registerRealError(
           violationType,
           description,
@@ -303,7 +293,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           },
         );
 
-        // Create correction workflow
         final workflowId = await _correctionService.initiateErrorCorrectionWorkflow(
           errorId,
           'MANUAL',
@@ -317,7 +306,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
 
         context.showSuccess('Correction workflow $workflowId created successfully!');
 
-        // Refresh workflow data
         await _loadWorkflowData();
       } catch (e) {
         _showErrorSnackBar('Failed to create correction workflow: $e');
@@ -354,12 +342,10 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     );
   }
 
-  // Anomaly correction methods
   Future<void> _correctAnomaly(Map<String, dynamic> anomaly) async {
     final anomalyType = anomaly['anomaly_type'] ?? 'UNKNOWN';
     final description = anomaly['description'] ?? '';
     
-    // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -392,7 +378,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
 
     if (confirmed == true) {
       try {
-        // Register the anomaly as a correctable error
         final errorId = await _correctionService.registerRealError(
           anomalyType,
           description,
@@ -405,7 +390,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           },
         );
 
-        // Create correction workflow
         final workflowId = await _correctionService.initiateErrorCorrectionWorkflow(
           errorId,
           'MANUAL',
@@ -419,7 +403,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
 
         context.showSuccess('Correction workflow $workflowId created successfully!');
 
-        // Refresh workflow data
         await _loadWorkflowData();
       } catch (e) {
         _showErrorSnackBar('Failed to create correction workflow: $e');
@@ -933,11 +916,9 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Statistics Card
           if (_correctionStatistics != null) _buildCorrectionStatisticsCard(),
           const SizedBox(height: 16),
           
-          // Correctable Errors Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1327,10 +1308,9 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _startCorrectionWorkflow(String jobId, Map<String, dynamic> results) async {
-    Navigator.of(context).pop(); // Close the violations dialog first
+    Navigator.of(context).pop();
     
     try {
-      // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -1347,10 +1327,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         },
       );
 
-      // Create a summary error ID from the job ID
       final errorId = 'INTEGRITY_VIOLATIONS_$jobId';
       
-      // Prepare violation data for registration
       final violations = [
         {
           'type': 'MISSING_EVENT_CHAIN',
@@ -1375,26 +1353,22 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         },
       ];
 
-      // First, register the integrity violations as a correctable error
       await _correctionService.registerIntegrityViolations(
         jobId,
         violations,
         results['overall_integrity_score']?.toDouble() ?? 0.0,
       );
       
-      // Prepare correction data based on violation types
       final proposedCorrection = {
         'source_job_id': jobId,
         'correction_type': 'BULK_INTEGRITY_CORRECTION',
         'requested_by': 'system_integrity_check',
         'urgency': results['integrity_violations'] > 5 ? 'HIGH' : 'NORMAL',
-        'auto_approve': results['integrity_violations'] <= 2, // Auto-approve minor violations
+        'auto_approve': results['integrity_violations'] <= 2,
       };
 
-      // Get current user ID (you might want to get this from auth context)
-      const currentUserId = 'admin_user'; // Replace with actual user context
+      const currentUserId = 'admin_user';
 
-      // Initiate the correction workflow
       final workflowResult = await _correctionService.initiateErrorCorrectionWorkflow(
         errorId,
         'INTEGRITY_VIOLATION_CORRECTION',
@@ -1402,17 +1376,15 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         currentUserId,
       );
 
-      // Close loading dialog
       Navigator.of(context).pop();
 
-      // Add workflow to our tracking list (check for duplicates first)
       setState(() {
         final workflowId = workflowResult['workflow_id'];
         final existingIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
         
         final newWorkflow = {
           'workflow_id': workflowId,
-          'status': workflowResult['status'], // initiate returns 'status'
+          'status': workflowResult['status'],
           'source_job_id': jobId,
           'violation_count': results['integrity_violations'],
           'created_time': DateTime.now(),
@@ -1420,18 +1392,15 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         };
         
         if (existingIndex >= 0) {
-          // Update existing workflow
           _correctionWorkflows[existingIndex] = newWorkflow;
         } else {
-          // Add new workflow
           _correctionWorkflows.insert(0, newWorkflow);
         }
       });
       
-      // Also persist the workflow
       final persistedWorkflow = {
         'workflow_id': workflowResult['workflow_id'],
-        'status': workflowResult['status'], // initiate returns 'status'
+        'status': workflowResult['status'],
         'source_job_id': jobId,
         'violation_count': results['integrity_violations'],
         'created_time': DateTime.now(),
@@ -1439,10 +1408,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       };
       _persistenceService.addCorrectionWorkflow(persistedWorkflow);
       
-      // Start polling for workflow status  
       _pollWorkflowStatus(workflowResult['workflow_id']);
 
-      // Show success dialog with workflow details
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -1488,10 +1455,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       );
 
     } catch (e) {
-      // Close loading dialog if open
       Navigator.of(context).pop();
       
-      // Show error dialog
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -1517,8 +1482,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _navigateToWorkflowDetails(String workflowId) {
-    // For now, show a placeholder. In a full implementation, this would
-    // navigate to a workflow details screen or add a workflow tracking section
     context.showSnackBar(
       SnackBar(
         content: Text('Workflow $workflowId created. Check the Error Correction section for progress.'),
@@ -1602,7 +1565,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date Range
               const Text('Date Range', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Row(
@@ -1643,7 +1605,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               ),
               const SizedBox(height: 16),
               
-              // Event Types
               const Text('Event Types', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               ...[
@@ -1726,12 +1687,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         error['error_id'],
         error['correction_type'],
         error['proposed_correction'] ?? {},
-        'current_user', // In real app, get from authentication
+        'current_user',
       );
       
       context.showSuccess('Correction workflow initiated: ${result['workflow_id']}');
       
-      // Refresh the correctable errors list
       _identifyCorrectableErrors();
     } catch (e) {
       _showErrorSnackBar('Failed to initiate correction workflow: $e');
@@ -1757,7 +1717,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         });
       });
       
-      // Also persist the job
       _persistenceService.addIntegrityJob({
         'job_id': result['job_id'],
         'status': 'RUNNING',
@@ -1766,7 +1725,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       
       context.showInfo('Integrity verification job started: ${result['job_id']}');
       
-      // Start polling for job status
       _pollJobStatus(result['job_id']);
     } catch (e) {
       _showErrorSnackBar('Failed to start integrity job: $e');
@@ -1785,7 +1743,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           }
         });
         
-        // Also update in persistence service
         _persistenceService.updateIntegrityJob(jobId, status);
         
         if (status['status'] == 'COMPLETED' || status['status'] == 'FAILED') {
@@ -1925,7 +1882,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     final status = workflow['status'] ?? 'UNKNOWN';
     final sourceJobId = workflow['source_job_id'] ?? 'UNKNOWN';
     final workflowType = workflow['workflow_type'] ?? 'UNKNOWN';
-    final currentStep = workflow['violation_count'] ?? 0; // This is actually current_step from API
+    final currentStep = workflow['violation_count'] ?? 0;
     final createdTime = workflow['created_time'] as DateTime?;
     final completionTime = workflow['completion_time'];
     final executionResults = workflow['execution_results'];
@@ -2041,7 +1998,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // TODO: Navigate to approval interface
                   context.showInfo('Approval interface coming soon');
                 },
                 child: const Text('Review for Approval'),
@@ -2070,17 +2026,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           }
         });
         
-        // Also update in persistence service
         final workflowIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
         if (workflowIndex >= 0) {
           _persistenceService.updateCorrectionWorkflow(workflowId, _correctionWorkflows[workflowIndex]);
         }
         
-        // Stop polling if workflow is completed or failed
         if (status['workflow_status'] == 'COMPLETED' || status['workflow_status'] == 'FAILED') {
           timer.cancel();
           
-          // If completed successfully, refresh the correctable errors list
           if (status['workflow_status'] == 'COMPLETED') {
             _identifyCorrectableErrors();
           }

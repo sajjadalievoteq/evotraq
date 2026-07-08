@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
-/// Shared helpers for human-readable operation EPC type labels.
 abstract final class OperationEpcTypeUtils {
   static String labelFromValue(String value) {
     return label(OperationEpcScanValidator.resolveEpcType(value));

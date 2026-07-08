@@ -19,9 +19,7 @@ import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for creating or editing Transaction Events
 class TransactionEventFormScreen extends StatefulWidget {
-  /// The ID of the transaction event to edit, null for new events
   final String? transactionEventId;
 
   const TransactionEventFormScreen({Key? key, this.transactionEventId})
@@ -36,29 +34,24 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     with EventFormValidationMixin<TransactionEventFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers for form fields
   final _bizTransactionTypeController = TextEditingController();
   final _bizTransactionIdController = TextEditingController();
   final _epcsController = TextEditingController();
   final _locationGLNController = TextEditingController();
 
-  // String variables for dropdown values
   String? _businessStep;
   String? _disposition;
   String? _bizTransactionType;
 
-  // Business data key-value pairs
   final List<MapEntry<TextEditingController, TextEditingController>>
   _bizDataControllers = [];
-  // Other form state
   String _selectedAction = 'ADD';
   bool _isEdit = false;
   DateTime _eventTime = DateTime.now().subtract(
     const Duration(seconds: 5),
-  ); // Set to 5 seconds ago to avoid future time error
-  String _eventTimeZoneOffset = '+00:00'; // ISO 8601 timezone format
+  );
+  String _eventTimeZoneOffset = '+00:00';
 
-  // GS1 standard business steps
   final List<String> _standardBusinessSteps = [
     'urn:epcglobal:cbv:bizstep:commissioning',
     'urn:epcglobal:cbv:bizstep:shipping',
@@ -82,7 +75,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     'urn:epcglobal:cbv:bizstep:encoding',
   ];
 
-  // GS1 standard dispositions
   final List<String> _standardDispositions = [
     'urn:epcglobal:cbv:disp:active',
     'urn:epcglobal:cbv:disp:available',
@@ -109,32 +101,29 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     'urn:epcglobal:cbv:disp:unknown',
   ];
 
-  // Standard business transaction types from GS1 CBV
   final List<String> _standardBizTransactionTypes = [
-    'urn:epcglobal:cbv:btt:po', // Purchase Order
-    'urn:epcglobal:cbv:btt:desadv', // Despatch Advice
-    'urn:epcglobal:cbv:btt:inv', // Invoice
-    'urn:epcglobal:cbv:btt:pedigree', // Pedigree
-    'urn:epcglobal:cbv:btt:receipt', // Receipt Advice
-    'urn:epcglobal:cbv:btt:prodorder', // Production Order
-    'urn:epcglobal:cbv:btt:transdoc', // Transport Document
-    'urn:epcglobal:cbv:btt:cert', // Certificate
-    'urn:epcglobal:cbv:btt:bol', // Bill of Lading
-    'urn:epcglobal:cbv:btt:customs', // Customs Declaration
-    'urn:epcglobal:cbv:btt:contract', // Contract
+    'urn:epcglobal:cbv:btt:po',
+    'urn:epcglobal:cbv:btt:desadv',
+    'urn:epcglobal:cbv:btt:inv',
+    'urn:epcglobal:cbv:btt:pedigree',
+    'urn:epcglobal:cbv:btt:receipt',
+    'urn:epcglobal:cbv:btt:prodorder',
+    'urn:epcglobal:cbv:btt:transdoc',
+    'urn:epcglobal:cbv:btt:cert',
+    'urn:epcglobal:cbv:btt:bol',
+    'urn:epcglobal:cbv:btt:customs',
+    'urn:epcglobal:cbv:btt:contract',
   ];
   @override
   void initState() {
     super.initState();
     _isEdit = widget.transactionEventId != null;
 
-    // Format timezone offset in the ISO 8601 format
     final offset = DateTime.now().timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
     final sign = offset.isNegative ? '-' : '+';
 
-    // Format as +/-HH:MM for standard ISO 8601 timezone format
     _eventTimeZoneOffset =
         '$sign${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
@@ -143,7 +132,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         _loadTransactionEvent();
       });
     } else {
-      // Add initial business data field
       _addBizDataField();
     }
   }
@@ -163,7 +151,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     super.dispose();
   }
 
-  /// Load transaction event data for editing
   Future<void> _loadTransactionEvent() async {
     if (widget.transactionEventId == null) return;
 
@@ -173,34 +160,26 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
     if (event != null) {
       setState(() {
-        // Fill form fields with event data
         _selectedAction = event.action;
         _eventTime = event.eventTime;
 
-        // Get first business transaction if available
         if (event.bizTransactionList.isNotEmpty) {
           final entry = event.bizTransactionList.entries.first;
           _bizTransactionTypeController.text = entry.key;
           _bizTransactionIdController.text = entry.value;
-          // Set the dropdown value for business transaction type
           if (_standardBizTransactionTypes.contains(entry.key)) {
             _bizTransactionType = entry.key;
           }
         }
 
-        // Join EPCs with comma
         _epcsController.text = event.epcList?.join(', ') ?? '';
 
-        // Use businessLocation GLN code if available
         _locationGLNController.text = event.businessLocation?.glnCode ?? '';
 
-        // Business Step now uses businessStep property from EPCISEvent
         _businessStep = event.businessStep;
 
-        // Disposition from base class
         _disposition = event.disposition;
 
-        // Set business data
         _bizDataControllers.clear();
         if (event.bizData != null && event.bizData!.isNotEmpty) {
           event.bizData!.forEach((key, value) {
@@ -215,7 +194,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     }
   }
 
-  /// Add a new business data field
   void _addBizDataField() {
     setState(() {
       _bizDataControllers.add(
@@ -224,7 +202,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     });
   }
 
-  /// Remove a business data field
   void _removeBizDataField(int index) {
     setState(() {
       final entry = _bizDataControllers.removeAt(index);
@@ -233,7 +210,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     });
   }
 
-  /// Save transaction event
   Future<void> _saveTransactionEvent() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -241,7 +217,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
     final cubit = context.read<TransactionEventsCubit>();
 
-    // Collect form data
     final bizTransactionType =
         _bizTransactionType ?? _bizTransactionTypeController.text.trim();
     final bizTransactionId = _bizTransactionIdController.text.trim();
@@ -251,13 +226,12 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
         .where((e) => e.isNotEmpty)
         .map(
           (e) => EPCFormatter.formatToEPCUri(e) ?? e,
-        ) // Format to EPC URI if needed
+        )
         .toList();
     final locationGLN = _locationGLNController.text.trim();
     final businessStep = _businessStep ?? '';
     final disposition = _disposition ?? '';
 
-    // Build business data
     final bizData = <String, String>{};
     for (var entry in _bizDataControllers) {
       final key = entry.key.text.trim();
@@ -269,9 +243,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
     try {
       if (_isEdit) {
-        // For editing, we'd need the full event object
-        // For editing, we'd need the full event object
-        // Use a time that's definitely in the past to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
 
         final event = TransactionEvent(
@@ -280,7 +251,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
           eventTime: eventTime,
           recordTime: DateTime.now(),
           eventTimeZoneOffset:
-              _eventTimeZoneOffset, // Use our formatted timezone
+              _eventTimeZoneOffset,
           epcisVersion: EPCISVersion.v2_0,
           action: _selectedAction,
           disposition: disposition.isEmpty ? null : disposition,
@@ -297,8 +268,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
 
         await cubit.updateTransactionEvent(event);
       } else {
-        // For creating a new event
-        // Use a time that's definitely in the past (60 seconds ago) to avoid validation errors
         final eventTime = DateTime.now().subtract(const Duration(seconds: 60));
 
         if (_selectedAction == 'ADD') {
@@ -324,7 +293,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
             eventTime: eventTime,
           );
         } else if (_selectedAction == 'OBSERVE') {
-          // Use the dedicated method for creating OBSERVE events
           await cubit.createObserveTransactionEvent(
             bizTransactionType: bizTransactionType,
             bizTransactionId: bizTransactionId,
@@ -349,7 +317,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     }
   }
 
-  /// Show help screen
   void _showHelpScreen(BuildContext context) {
     context.push('/epcis/transaction-events/help');
   }
@@ -382,7 +349,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Event Action
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Action *',
@@ -409,7 +375,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16), // Business Transaction Type
+                  const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Business Transaction Type *',
@@ -442,7 +408,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Business Transaction ID
                   TextFormField(
                     controller: _bizTransactionIdController,
                     decoration: const InputDecoration(
@@ -456,7 +421,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16), // EPCs
+                  const SizedBox(height: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -490,7 +455,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // Generate a random SGTIN
                               final sgtin = GS1Generator.generateRandomSGTIN(
                                 '0614141',
                                 '112345',
@@ -511,7 +475,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () {
-                              // Generate batch of SGTINs
                               final batch = GS1Generator.generateBatchSGTINs(
                                 '0614141',
                                 '112345',
@@ -534,7 +497,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16), // Location GLN
+                  const SizedBox(height: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -549,7 +512,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () {
-                          // Generate a GLN
                           final gln = GS1Generator.generateGLN(
                             '0614141',
                             '00001',
@@ -563,7 +525,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Business Step
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Business Step *',
@@ -593,7 +554,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Disposition
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Disposition *',
@@ -624,7 +584,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // Event Time
                   ListTile(
                     title: const Text('Event Time'),
                     subtitle: Text(
@@ -659,7 +618,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // Business Data
                   const Text(
                     'Business Data',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -675,7 +633,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                   ),
                   const SizedBox(height: 24),
 
-                  // Save Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -700,7 +657,6 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
     );
   }
 
-  /// Build business data key-value fields
   List<Widget> _buildBizDataFields() {
     return List.generate(
       _bizDataControllers.length,

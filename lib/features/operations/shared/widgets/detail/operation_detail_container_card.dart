@@ -3,7 +3,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row_copy.dart';
 
-/// Shared SSCC container card for packing and unpacking detail screens.
 class OperationDetailContainerCard extends StatelessWidget {
   const OperationDetailContainerCard({super.key, this.sscc});
 

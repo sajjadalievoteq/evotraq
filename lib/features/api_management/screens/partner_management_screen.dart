@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/api_management/widgets/create_partner_dia
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for managing B2B API partners
 class PartnerManagementScreen extends StatefulWidget {
   const PartnerManagementScreen({super.key});
 

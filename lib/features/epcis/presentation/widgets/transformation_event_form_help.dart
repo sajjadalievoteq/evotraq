@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Help widget shown on the transformation event form screen
 class TransformationEventFormHelp extends StatelessWidget {
-  /// Standard constructor
   const TransformationEventFormHelp({Key? key}) : super(key: key);
 
   @override

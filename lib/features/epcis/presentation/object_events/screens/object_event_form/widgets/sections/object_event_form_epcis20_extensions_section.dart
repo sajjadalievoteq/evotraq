@@ -37,26 +37,6 @@ class ObjectEventFormEpcis20ExtensionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Padding(
-        //   padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-        //   child: Row(
-        //     children: [
-        //       Expanded(child: Divider(color: Colors.grey[400])),
-        //       Padding(
-        //         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        //         child: Text(
-        //           'EPCIS 2.0 Extensions',
-        //           style: TextStyle(
-        //             fontSize: 16,
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.grey[600],
-        //           ),
-        //         ),
-        //       ),
-        //       Expanded(child: Divider(color: Colors.grey[400])),
-        //     ],
-        //   ),
-        // ),
         ObjectEventFormSensorDataSection(
           sensorElements: sensorElementList,
           isViewOnly: isViewOnly,

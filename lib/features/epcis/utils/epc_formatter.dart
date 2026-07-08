@@ -1,11 +1,7 @@
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 
-/// Utility class to handle EPC formatting between GS1 barcode format and EPC URI format
 class EPCFormatter {
-  /// Convert GS1 barcode or bare SGTIN body to an item-level EPC URI.
-  ///
-  /// Returns null when the input cannot be converted to a serialised SGTIN URI.
   static String? formatToEPCUri(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return null;
@@ -34,12 +30,10 @@ class EPCFormatter {
     return null;
   }
 
-  /// Convert a list of EPCs from GS1 barcode format to EPC URI format if needed
   static List<String> formatListToEPCUri(List<String> inputs) {
     return inputs.map((input) => formatToEPCUri(input) ?? input).toList();
   }
 
-  /// Try to determine if the input string is likely a GS1 barcode
   static bool isLikelyGS1Barcode(String input) {
     if (input.contains(RegExp(r'\(\d{2}\)'))) {
       return true;

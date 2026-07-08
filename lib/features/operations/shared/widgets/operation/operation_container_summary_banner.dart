@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared context banner showing the selected parent container.
 class OperationContainerSummaryBanner extends StatelessWidget {
   const OperationContainerSummaryBanner({
     super.key,

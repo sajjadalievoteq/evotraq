@@ -3,7 +3,7 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
@@ -57,7 +57,7 @@ class AggregationPharmaReadinessChecker {
     SGTIN? parentSgtin;
     final parentUri = _resolveEpcUri(parentEpcUri);
     if (parentUri != null) {
-      final type = EPCURIConverter.getEPCType(parentUri);
+      final type = Gs1Converter.epcType(parentUri);
       if (type == 'sscc') {
         parentSscc = await _loadSscc(parentUri);
         if (parentSscc != null) {
@@ -85,7 +85,7 @@ class AggregationPharmaReadinessChecker {
     for (final rawChild in childEpcUris) {
       final childUri = _resolveEpcUri(rawChild);
       if (childUri == null) continue;
-      if (EPCURIConverter.getEPCType(childUri) != 'sgtin') continue;
+      if (Gs1Converter.epcType(childUri) != 'sgtin') continue;
 
       final child = await _loadSgtin(childUri);
       if (child == null) continue;
@@ -242,13 +242,12 @@ class AggregationPharmaReadinessChecker {
   }
 
   Future<SGTIN?> _loadSgtin(String epcUri) async {
-    final serial = EPCURIConverter.extractSerialFromEPCUri(epcUri);
-    final gtin = EPCURIConverter.extractGTINFromEPCUri(epcUri);
+    final serial = Gs1Converter.epcToSerial(epcUri);
+    final gtin = Gs1Converter.epcToGTIN(epcUri);
     if (serial != null) {
       try {
         return await _sgtinService.getSGTINBySerialNumber(serial);
       } catch (_) {
-        // Fall through to GTIN + serial lookup.
       }
     }
     if (gtin != null && serial != null) {
@@ -288,7 +287,7 @@ class AggregationPharmaReadinessChecker {
     if (raw == null || raw.trim().isEmpty) return null;
     final trimmed = raw.trim();
     if (trimmed.startsWith('urn:epc:id:')) return trimmed;
-    return EPCURIConverter.convertToEPCUri(trimmed) ??
+    return Gs1Converter.barcodeToEpc(trimmed) ??
         EPCFormatter.formatToEPCUri(trimmed);
   }
 

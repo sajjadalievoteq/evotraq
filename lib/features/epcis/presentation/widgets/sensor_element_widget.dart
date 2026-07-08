@@ -3,18 +3,13 @@ import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget for displaying and editing sensor data in EPCIS events
 class SensorElementWidget extends StatefulWidget {
-  /// List of sensor elements to display/edit
   final List<SensorElement> sensorElements;
   
-  /// Callback when sensor elements are updated
   final void Function(List<SensorElement> sensorElements)? onSensorElementsChanged;
   
-  /// Whether the widget is in view-only mode
   final bool isViewOnly;
 
-  /// Constructor
   const SensorElementWidget({
     Key? key,
     required this.sensorElements,
@@ -34,15 +29,12 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
     super.initState();
     
     try {
-      // Create a clean copy of sensor elements
       _sensorElements = widget.sensorElements.map((sensorElement) {
-        // Convert to and from JSON to ensure clean objects
         try {
           final Map<String, dynamic> json = sensorElement.toJson();
           return SensorElement.fromJson(json);
         } catch (e) {
           print("Error processing sensor element in widget: $e");
-          // Return a default element if conversion fails
           return SensorElement(measurements: []);
         }
       }).toList();
@@ -193,7 +185,6 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
   void _addSensorElement() {
     if (widget.isViewOnly) return;
     
-    // Show dialog to add a new sensor element
     showDialog(
       context: context,
       builder: (context) => SensorElementDialog(
@@ -227,7 +218,6 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
   void _removeSensorElement(int index) {
     if (widget.isViewOnly) return;
     
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -254,15 +244,11 @@ class _SensorElementWidgetState extends State<SensorElementWidget> {
   }
 }
 
-/// Dialog for adding/editing a sensor element
 class SensorElementDialog extends StatefulWidget {
-  /// Sensor element to edit, or null for a new one
   final SensorElement? sensorElement;
   
-  /// Callback when the sensor element is saved
   final void Function(SensorElement sensorElement) onSave;
 
-  /// Constructor
   const SensorElementDialog({
     Key? key,
     this.sensorElement,
@@ -285,7 +271,6 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
   void initState() {
     super.initState();
     
-    // Initialize with existing data if editing
     final sensorElement = widget.sensorElement;
     _deviceIdController = TextEditingController(text: sensorElement?.deviceId ?? '');
     _deviceMetadataController = TextEditingController(text: sensorElement?.deviceMetadata ?? '');
@@ -436,7 +421,6 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
   }
   
   void _addMeasurement() {
-    // Show dialog to add a new measurement
     showDialog(
       context: context,
       builder: (context) => MeasurementDialog(
@@ -475,7 +459,7 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
         deviceId: _deviceIdController.text.isEmpty ? null : _deviceIdController.text,
         deviceMetadata: _deviceMetadataController.text.isEmpty ? null : _deviceMetadataController.text,
         time: _time,
-        rawData: null, // Not using this field for now
+        rawData: null,
         measurements: _measurements,
       );
       
@@ -485,15 +469,11 @@ class _SensorElementDialogState extends State<SensorElementDialog> {
   }
 }
 
-/// Dialog for adding/editing a sensor measurement
 class MeasurementDialog extends StatefulWidget {
-  /// Measurement to edit, or null for a new one
   final SensorMeasurement? measurement;
   
-  /// Callback when the measurement is saved
   final void Function(SensorMeasurement measurement) onSave;
 
-  /// Constructor
   const MeasurementDialog({
     Key? key,
     this.measurement,
@@ -527,7 +507,6 @@ class _MeasurementDialogState extends State<MeasurementDialog> {
   void initState() {
     super.initState();
     
-    // Initialize with existing data if editing
     final measurement = widget.measurement;
     _typeController = TextEditingController(text: measurement?.type ?? '');
     _valueController = TextEditingController(text: measurement?.value?.toString() ?? '');
@@ -577,7 +556,6 @@ class _MeasurementDialogState extends State<MeasurementDialog> {
                 onChanged: (value) {
                   if (value != null) {
                     _typeController.text = value;
-                    // Set some reasonable default UOM based on type
                     if (value == 'Temperature' && _uomController.text.isEmpty) {
                       _uomController.text = '°C';
                     } else if (value == 'Humidity' && _uomController.text.isEmpty) {

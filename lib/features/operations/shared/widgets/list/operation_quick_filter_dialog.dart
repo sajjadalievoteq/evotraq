@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_quick_filter_result.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
 
-/// Shared quick status filter dialog for operation list screens.
 class OperationQuickFilterDialog extends StatefulWidget {
   const OperationQuickFilterDialog({
     super.key,

@@ -22,7 +22,6 @@ class CbvVocabularyItemCard extends StatelessWidget {
   final ValueChanged<bool> onToggle;
   final bool isAdmin;
 
-  /// Non-null only for custom items when the user is admin.
   final VoidCallback? onDelete;
 
   @override
@@ -58,7 +57,6 @@ class CbvVocabularyItemCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Label row with SYSTEM/CUSTOM chip
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -100,7 +98,6 @@ class CbvVocabularyItemCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: TraqSpacing.xs),
-                      // Toggle + optional delete menu
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -116,7 +113,6 @@ class CbvVocabularyItemCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Audit metadata (only when available)
                   if (item.isCustom &&
                       (item.createdAt != null || item.createdBy != null))
                     _AuditRow(item: item),
@@ -126,10 +122,6 @@ class CbvVocabularyItemCard extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Type chip — SYSTEM (neutral) / CUSTOM (accent)
-// ---------------------------------------------------------------------------
 
 class _TypeChip extends StatelessWidget {
   const _TypeChip({required this.isCustom});
@@ -163,9 +155,6 @@ class _TypeChip extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Group badge
-// ---------------------------------------------------------------------------
 
 class _GroupBadge extends StatelessWidget {
   const _GroupBadge({required this.group});
@@ -196,9 +185,6 @@ class _GroupBadge extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle control
-// ---------------------------------------------------------------------------
 
 class _ToggleControl extends StatelessWidget {
   const _ToggleControl({
@@ -210,7 +196,6 @@ class _ToggleControl extends StatelessWidget {
   final bool enabled;
   final bool isToggling;
 
-  /// Null = non-admin; disable interaction.
   final ValueChanged<bool>? onToggle;
 
   @override
@@ -228,10 +213,6 @@ class _ToggleControl extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Delete button (overflow menu)
-// ---------------------------------------------------------------------------
 
 class _DeleteButton extends StatelessWidget {
   const _DeleteButton({required this.onDelete});
@@ -264,9 +245,6 @@ class _DeleteButton extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Audit metadata row
-// ---------------------------------------------------------------------------
 
 final _dateFmt = DateFormat('yyyy-MM-dd HH:mm');
 
@@ -304,9 +282,6 @@ class _AuditRow extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Deleting overlay
-// ---------------------------------------------------------------------------
 
 class _DeletingOverlay extends StatelessWidget {
   const _DeletingOverlay({required this.label});

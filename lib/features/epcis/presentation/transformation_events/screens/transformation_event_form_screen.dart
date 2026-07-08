@@ -22,17 +22,11 @@ import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for creating and editing Transformation Events with support for GS1 EPCIS 2.0
-/// Transformation Events represent a process that takes one set of objects (inputs) and 
-/// produces a new set of objects (outputs)
 class TransformationEventFormScreen extends StatefulWidget {
-  /// Transformation event to edit, null for creation
   final TransformationEvent? event;
   
-  /// Event ID for editing an existing event
   final String? transformationEventId;
 
-  /// Constructor
   const TransformationEventFormScreen({
     Key? key, 
     this.event,
@@ -45,20 +39,17 @@ class TransformationEventFormScreen extends StatefulWidget {
 
 class _TransformationEventFormScreenState extends State<TransformationEventFormScreen> with EventFormValidationMixin<TransformationEventFormScreen> {
   final _formKey = GlobalKey<FormState>();
-    // Form fields
   late DateTime _eventTime;
   String _eventTimeZoneOffset = '+00:00';
   Map<String, String> _bizData = {};
   
-  // Store the last known GLN code in case the backend doesn't return it in bizData
   String? _lastKnownGLNCode;
   
   bool _isLoading = false;
   bool _isEdit = false;
-  bool _hasTriedToSubmit = false; // Track if user has tried to submit the form
-  Timer? _validationTimer; // Debounce timer for validation
+  bool _hasTriedToSubmit = false;
+  Timer? _validationTimer;
   
-  // Controllers for text fields
   final _transformationIdController = TextEditingController();
   final _inputEpcsController = TextEditingController();
   final _outputEpcsController = TextEditingController();
@@ -66,13 +57,11 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   final _dispositionController = TextEditingController();
   final _locationGLNController = TextEditingController();
   
-  // Certification info controllers
   final _certificateNumberController = TextEditingController();
   final _certificationStandardController = TextEditingController();
   final _certificationAgencyController = TextEditingController();
   final _certificationTypeController = TextEditingController();
   
-  // Valid business steps for transformation events as per backend validation
   final List<String> _standardBusinessSteps = [
     'transforming',
     'producing', 
@@ -98,7 +87,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     'brewing'
   ];
   
-  // Valid dispositions for transformation events as per backend validation
   final List<String> _standardDispositions = [
     'active',
     'in_progress',
@@ -127,16 +115,13 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   void initState() {
     super.initState();
     
-    // Initialize date and time zone
     _eventTime = DateTime.now();
-    // Format the timezone offset correctly (e.g. +01:00, -05:00)
     final now = DateTime.now();
     final offset = now.timeZoneOffset;
     final hours = offset.inHours.abs().toString().padLeft(2, '0');
     final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
     _eventTimeZoneOffset = "${offset.isNegative ? '-' : '+'}$hours:$minutes";
     
-    // Add listeners to clear validation errors when user types
     _transformationIdController.addListener(_clearFieldErrors);
     _inputEpcsController.addListener(_clearFieldErrors);
     _outputEpcsController.addListener(_clearFieldErrors);
@@ -149,7 +134,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     if (_isEdit && widget.event != null) {
       _initializeWithEvent(widget.event!);
     } else if (_isEdit && widget.transformationEventId != null) {
-      // Load event data from API if we have an ID
       _loadEventData();
     }
   }
@@ -161,7 +145,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           .read<TransformationEventsCubit>()
           .getTransformationEventById(widget.transformationEventId!);
       
-      // Debug logging to see what values we're receiving
       print('==== Event Data Received ====');
       print('Event ID: ${event.id}');
       print('Event Type: Transformation');
@@ -173,7 +156,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       
       _initializeWithEvent(event);
       
-      // If bizData is null, try to restore GLN from backend
       if (event.bizData == null) {
         await _tryRestoreGLNFromBackend(event.eventId);
       }
@@ -197,9 +179,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     _inputEpcsController.text = event.inputEPCList.join(', ');
     _outputEpcsController.text = event.outputEPCList.join(', ');
     
-    // Set business step - should already be a simple value from backend
     if (event.businessStep != null && event.businessStep!.isNotEmpty) {
-      // Backend should return simple values like "transforming", but handle URN format just in case
       if (event.businessStep!.contains(':')) {
         final parts = event.businessStep!.split(':');
         _bizStepController.text = parts.last;
@@ -207,13 +187,10 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         _bizStepController.text = event.businessStep!;
       }
       
-      // Debug logging
       print('Setting business step to: ${_bizStepController.text}');
     }
     
-    // Set disposition - should already be a simple value from backend
     if (event.disposition != null && event.disposition!.isNotEmpty) {
-      // Backend should return simple values like "active", but handle URN format just in case
       if (event.disposition!.contains(':')) {
         final parts = event.disposition!.split(':');
         _dispositionController.text = parts.last;
@@ -221,18 +198,14 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         _dispositionController.text = event.disposition!;
       }
       
-      // Debug logging
       print('Setting disposition to: ${_dispositionController.text}');
-    }    // Handle business location extraction from multiple possible sources
+    }
     String? glnCode;
     
-    // First try to get GLN from businessLocation if it exists
     if (event.businessLocation != null) {
-      // Try to extract GLN code based on the type of businessLocation
       if (event.businessLocation is Map && (event.businessLocation as Map).containsKey('glnCode')) {
         glnCode = (event.businessLocation as Map)['glnCode']?.toString();
       } else {
-        // Try to access the glnCode property via dynamic access
         try {
           final dynamic location = event.businessLocation;
           final dynamic locationGlnCode = location.glnCode;
@@ -245,16 +218,13 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       }
     }
     
-    // If GLN not found in businessLocation, check bizData
     if (glnCode == null && event.bizData != null) {
-      // Check for various possible keys for GLN
       final possibleKeys = ['locationGLNCode', 'glnCode', 'businessLocationGLN', 'bizLocationGLN'];
       for (final key in possibleKeys) {
         if (event.bizData!.containsKey(key) && event.bizData![key] != null) {
           glnCode = event.bizData![key];
           print('Found GLN code in bizData with key $key: $glnCode');
           
-          // Remember this GLN code for future reference
           _lastKnownGLNCode = glnCode;
           
           break;
@@ -262,23 +232,19 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       }
     }
     
-    // Use last known GLN code as a fallback if bizData is null in the response
     if (glnCode == null && _lastKnownGLNCode != null) {
       glnCode = _lastKnownGLNCode;
       print('Using cached GLN code: $glnCode (bizData was null in response)');
     }
     
-    // Set the GLN code in the text field if found
     if (glnCode != null) {
       _locationGLNController.text = glnCode;
     } else {
       print('No GLN code found in event data');
     }
     
-    // Keep existing bizData if available, or create new if null
     _bizData = event.bizData != null ? Map.from(event.bizData!) : {};
     
-    // Initialize certification info if available
     if (event.certificationInfo != null && event.certificationInfo!.isNotEmpty) {
       final firstCert = event.certificationInfo!.first;
       _certificateNumberController.text = firstCert.certificateId ?? '';
@@ -288,14 +254,10 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     }
   }
   
-  /// Clear field validation errors when user types in any field
   void _clearFieldErrors() {
-    // Only validate if user has already tried to submit the form
     if (_hasTriedToSubmit) {
-      // Cancel previous timer
       _validationTimer?.cancel();
       
-      // Start new timer for debounced validation
       _validationTimer = Timer(const Duration(milliseconds: 500), () {
         if (_formKey.currentState != null && mounted) {
           _formKey.currentState!.validate();
@@ -303,16 +265,13 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       });
     }
     
-    // Clear general error message when user starts typing
     context.read<ValidationCubit>().clearValidation();
   }
   
   @override
   void dispose() {
-    // Cancel validation timer
     _validationTimer?.cancel();
     
-    // Remove listeners before disposing controllers
     _transformationIdController.removeListener(_clearFieldErrors);
     _inputEpcsController.removeListener(_clearFieldErrors);
     _outputEpcsController.removeListener(_clearFieldErrors);
@@ -320,7 +279,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     _dispositionController.removeListener(_clearFieldErrors);
     _locationGLNController.removeListener(_clearFieldErrors);
     
-    // Dispose controllers
     _transformationIdController.dispose();
     _inputEpcsController.dispose();
     _outputEpcsController.dispose();
@@ -344,7 +302,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   }
   
   Future<void> _saveEvent() async {
-    // Mark that user has tried to submit
     setState(() {
       _hasTriedToSubmit = true;
     });
@@ -361,7 +318,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       final cubit = context.read<TransformationEventsCubit>();
       final validationCubit = context.read<ValidationCubit>();
       
-      // Parse comma-separated EPCs and convert any GS1 barcode format to EPC URI format
       final inputEpcs = _inputEpcsController.text
           .split(',')
           .map((e) => e.trim())
@@ -376,43 +332,33 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           .map((e) => EPCFormatter.formatToEPCUri(e) ?? e)
           .toList();
 
-      // Initialize bizData map with the existing data
       final Map<String, String> bizData = Map.from(_bizData);
       
-      // Include GLN code in bizData for reference
       final String locationGLN = _locationGLNController.text.trim();
       if (locationGLN.isNotEmpty) {
         bizData['locationGLNCode'] = locationGLN;
         
-        // ALSO store location as a GLN object that the backend might use
         bizData['businessLocationGLN'] = locationGLN;
         bizData['bizLocationGLN'] = locationGLN;
       }
       
-      // Format transformationID into proper URN format if needed
       String transformationId = _transformationIdController.text;
-      // If it's not already in URI format, convert it to URN
       if (!transformationId.startsWith('urn:') && 
           !transformationId.startsWith('http://') && 
           !transformationId.startsWith('https://')) {
         transformationId = 'urn:traqtrace:transformation:$transformationId';
       }
       
-      // Use business step and disposition as plain values without URN prefixes
-      // The backend expects plain values like "transforming" not URN format
       String? bizStep = _bizStepController.text.isNotEmpty ? _bizStepController.text : null;
       String? disposition = _dispositionController.text.isNotEmpty ? _dispositionController.text : null;
       
-      // Create GLN object from string if provided
       GLN? businessLocationGLN;
       GLN? readPointGLN;
       if (locationGLN.isNotEmpty) {
         businessLocationGLN = GLN.fromCode(locationGLN);
-        // For transformation events, readPoint is typically the same as businessLocation
         readPointGLN = GLN.fromCode(locationGLN);
       }
       
-      // Create certification info if provided
       List<CertificationInfo>? certificationInfo;
       if (_certificateNumberController.text.isNotEmpty ||
           _certificationStandardController.text.isNotEmpty ||
@@ -428,7 +374,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         ];
       }
       
-      // Create a new transformation event
       final event = TransformationEvent(
         id: _isEdit ? widget.event?.id : null,
         eventId: _isEdit ? widget.event?.eventId ?? '' : const Uuid().v4(),
@@ -437,8 +382,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         eventTimeZoneOffset: _eventTimeZoneOffset,
         bizStep: bizStep,
         disposition: disposition,
-        readPoint: readPointGLN, // Set readPoint to the same as businessLocation
-        bizLocation: businessLocationGLN, // Pass GLN object instead of string
+        readPoint: readPointGLN,
+        bizLocation: businessLocationGLN,
         bizData: bizData,
         transformationID: transformationId,
         inputEPCList: inputEpcs,
@@ -446,7 +391,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         certificationInfo: certificationInfo,
       );
       
-      // Perform validation before saving
       final isValid = await validationCubit.validateTransformationEvent(event);
       
       if (!isValid && mounted) {
@@ -462,7 +406,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         await cubit.createTransformationEvent(event);
       }
       
-      // Return to the previous screen
       if (mounted) {
         context.showSuccess(
           'Transformation event ${_isEdit ? "updated" : "created"} successfully',
@@ -505,7 +448,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   }
 
   void _generateSampleOutputEPC() {
-    // For output EPCs, use a different item reference to simulate transformation
     final sgtin = GS1Generator.generateRandomSGTIN('0614141', '207346');
     setState(() {
       final existingEpcs = _outputEpcsController.text.trim();
@@ -518,7 +460,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   }
 
   void _generateBatchOutputEPCs() {
-    // For output EPCs, use a different item reference to simulate transformation
     final batch = GS1Generator.generateBatchSGTINs('0614141', '207346', 3);
     setState(() {
       final existingEpcs = _outputEpcsController.text.trim();
@@ -672,7 +613,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
                 return 'Transformation ID is required';
               }
               
-              // Check format
               if (value.contains(' ')) {
                 return 'Transformation ID should not contain spaces';
               }
@@ -696,7 +636,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
                       return 'At least one input EPC is required';
                     }
                     
-                    // Check EPC format
                     final epcList = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
                     for (final epc in epcList) {
                       if (!epc.startsWith('urn:epc:id:') && !RegExp(r'\(\d+\)').hasMatch(epc)) {
@@ -739,7 +678,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
                       return 'At least one output EPC is required';
                     }
                     
-                    // Check EPC format
                     final epcList = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
                     for (final epc in epcList) {
                       if (!epc.startsWith('urn:epc:id:') && !RegExp(r'\(\d+\)').hasMatch(epc)) {
@@ -779,7 +717,6 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
               if (value != null && value.isNotEmpty) {
                 setState(() {
                   _bizStepController.text = value;
-                  // Reset disposition when business step changes
                   _dispositionController.text = '';
                 });
               }
@@ -898,10 +835,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
     String? helperText,
     void Function(String?)? onChanged,
   }) {
-    // Get the selected value from the controller
     String? selectedValue = controller.text.isEmpty ? null : controller.text;
     
-    // Check if the value is in the options list
     if (selectedValue != null && !options.contains(selectedValue)) {
       selectedValue = null;
     }
@@ -918,7 +853,7 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       items: options.map((String value) {
         return DropdownMenuItem<String>(
           value: value,
-          child: Text(_formatForDisplay(value)), // Format display text nicely
+          child: Text(_formatForDisplay(value)),
         );
       }).toList(),
       onChanged: onChanged,
@@ -988,22 +923,17 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       ],
     );
   }
-    // Helper method to format business steps and dispositions for display
   String _formatForDisplay(String value) {
-    // Convert underscores to spaces and capitalize words
     return value.split('_')
         .map((word) => word.substring(0, 1).toUpperCase() + word.substring(1))
         .join(' ');
   }
   
-  // Get valid dispositions based on the selected business step
   List<String> _getValidDispositionsForCurrentBusinessStep() {
-    // If no business step is selected, return all dispositions
     if (_bizStepController.text.isEmpty) {
       return _standardDispositions;
     }
 
-    // Define which dispositions are valid for each business step
     Map<String, List<String>> businessStepToDispositions = {
       'transforming': ['in_progress', 'transformed', 'active'],
       'producing': ['produced', 'active', 'in_progress', 'created'],
@@ -1022,31 +952,18 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
       'brewing': ['active', 'in_progress', 'produced'],
     };
     
-    // Return valid dispositions for current business step or default to all if not in mapping
     String currentBusinessStep = _bizStepController.text;
     if (businessStepToDispositions.containsKey(currentBusinessStep)) {
       return businessStepToDispositions[currentBusinessStep]!;
     } else {
-      // Default to a safe subset if no mapping exists
       return ['active', 'in_progress', 'created', 'transformed'];
     }
   }
   
-  // This method is called after loading an event by ID to manually handle the 
-  // case where bizData is null in the backend response but we need to retrieve the GLN
   Future<void> _tryRestoreGLNFromBackend(String eventId) async {
     try {
-      // Try to get the GLN from a different API endpoint if available
-      // This could be a dedicated endpoint for location data or other business context
-      // For now, we'll use the event ID to query for additional data from saved preferences or cache
       print('Trying to restore GLN code for event ID: $eventId');
       
-      // In a real implementation, you might have:
-      // final locationInfo = await provider.getEventLocationInfo(eventId);
-      // if (locationInfo != null && locationInfo['glnCode'] != null) {
-      //   _locationGLNController.text = locationInfo['glnCode'];
-      //   _lastKnownGLNCode = locationInfo['glnCode'];
-      // }
     } catch (e) {
       print('Failed to restore GLN from backend: ${e.toString()}');
     }

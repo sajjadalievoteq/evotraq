@@ -12,9 +12,6 @@ import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
 
-
-/// Step 3: review all unpacking details before submission.
-
 class UnpackingReviewStep extends StatelessWidget {
 
   const UnpackingReviewStep({
@@ -42,7 +39,6 @@ class UnpackingReviewStep extends StatelessWidget {
   });
 
 
-
   final GLN? unpackingLocationGln;
 
   final String workOrder;
@@ -62,13 +58,11 @@ class UnpackingReviewStep extends StatelessWidget {
   final bool showPageHeader;
 
 
-
   @override
 
   Widget build(BuildContext context) {
 
     final outline = Theme.of(context).colorScheme.outlineVariant;
-
 
 
     return SingleChildScrollView(

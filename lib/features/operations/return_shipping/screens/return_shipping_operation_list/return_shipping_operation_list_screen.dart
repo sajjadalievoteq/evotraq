@@ -23,7 +23,6 @@ import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
-/// Screen to list all return shipping operations with search capabilities.
 class ReturnShippingOperationListScreen extends StatelessWidget {
   const ReturnShippingOperationListScreen({
     super.key,

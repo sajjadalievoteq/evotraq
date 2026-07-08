@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
-/// Shared helper mappers for admin widget status/severity presentation.
 abstract final class AdminHelperMappers {
   static Color bulkJobStatusColor(String status) {
     switch (status.toUpperCase()) {

@@ -31,9 +31,8 @@ class PerformanceChart extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Remove Expanded and use a fixed height container instead
         SizedBox(
-          height: 200, // Fixed height for chart area
+          height: 200,
           child: _buildChart(),
         ),
         const SizedBox(height: 4),
@@ -77,7 +76,7 @@ class PerformanceChart extends StatelessWidget {
 
   Widget _buildLegend() {
     return SizedBox(
-      height: 20, // Fixed height for legend
+      height: 20,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -132,23 +131,18 @@ class LineChartPainter extends CustomPainter {
     final pointPaint = Paint()
       ..style = PaintingStyle.fill;
 
-    // Calculate bounds
     final double maxY = _getMaxValue();
     final double minY = _getMinValue();
     final double rangeY = maxY - minY;
 
     if (rangeY == 0) return;
 
-    // Draw grid lines
     _drawGrid(canvas, size);
 
-    // Draw axes
     _drawAxes(canvas, size);
 
-    // Draw data lines
     _drawDataLines(canvas, size, paint, pointPaint, minY, rangeY);
 
-    // Draw labels
     _drawLabels(canvas, size, minY, maxY);
   }
 
@@ -157,7 +151,6 @@ class LineChartPainter extends CustomPainter {
       ..color = Colors.grey.withOpacity(0.3)
       ..strokeWidth = 0.5;
 
-    // Horizontal grid lines
     for (int i = 0; i <= 5; i++) {
       final y = size.height * i / 5;
       canvas.drawLine(
@@ -167,7 +160,6 @@ class LineChartPainter extends CustomPainter {
       );
     }
 
-    // Vertical grid lines
     for (int i = 0; i <= 10; i++) {
       final x = 40 + (size.width - 60) * i / 10;
       canvas.drawLine(
@@ -183,14 +175,12 @@ class LineChartPainter extends CustomPainter {
       ..color = Colors.black
       ..strokeWidth = 1;
 
-    // Y-axis
     canvas.drawLine(
       const Offset(40, 0),
       Offset(40, size.height - 30),
       axisPaint,
     );
 
-    // X-axis
     canvas.drawLine(
       Offset(40, size.height - 30),
       Offset(size.width - 20, size.height - 30),
@@ -224,7 +214,6 @@ class LineChartPainter extends CustomPainter {
           path.lineTo(x, y);
         }
 
-        // Draw point
         canvas.drawCircle(Offset(x, y), 3, pointPaint);
       }
 
@@ -238,7 +227,6 @@ class LineChartPainter extends CustomPainter {
       fontSize: 10,
     );
 
-    // Y-axis labels
     for (int i = 0; i <= 5; i++) {
       final value = minY + (maxY - minY) * i / 5;
       final y = size.height - 30 - (size.height - 30) * i / 5;

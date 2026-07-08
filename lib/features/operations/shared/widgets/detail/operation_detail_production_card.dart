@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 
-/// Shared production-line detail card for packing/unpacking operations.
 class OperationDetailProductionCard extends StatelessWidget {
   const OperationDetailProductionCard({
     super.key,

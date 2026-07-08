@@ -6,7 +6,9 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
@@ -15,7 +17,6 @@ import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_rec
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/utils/cancel_receiving_operation_step_validator.dart';
@@ -225,7 +226,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
     setState(() => _isLoading = true);
 
     try {
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEpcs);
+      final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
@@ -308,10 +309,11 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
           }
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true
-            ? response.messages!.first
-            : 'The cancel receiving operation could not be completed. Check your inputs and try again.';
-        context.showError(errorMessage);
+        context.showError(OperationErrorTranslator.translateMessages(
+          response.messages,
+          fallback:
+              'The cancel receiving operation could not be completed. Check your inputs and try again.',
+        ));
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -353,7 +355,6 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         setState(() => _itemWarnings.remove(epc));
       }
     } catch (_) {
-      // Non-fatal: badge is cosmetic; backend enforces on submit.
     }
   }
 

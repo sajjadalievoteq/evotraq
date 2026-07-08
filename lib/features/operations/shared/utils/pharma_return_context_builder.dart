@@ -13,7 +13,6 @@ import 'package:traqtrace_app/features/operations/shared/models/pharma_return_re
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 
-/// Builds [PharmaReturnContext] from shipping / receiving operations.
 class PharmaReturnContextBuilder {
   PharmaReturnContextBuilder({
     ObjectEventService? objectEventService,
@@ -45,8 +44,6 @@ class PharmaReturnContextBuilder {
       if (!accepted) return null;
     }
 
-    // Hide the button if a return shipping is already in transit — the return
-    // has already been initiated and should not be duplicated.
     final alreadyReturnShipped = await _hasReturnShippingInTransit(epcs);
     if (alreadyReturnShipped) return null;
 
@@ -83,10 +80,6 @@ class PharmaReturnContextBuilder {
     String? resolvedReturnShippingEventId = returnShippingEventId;
 
     if (resolvedReason == null) {
-      // The ReturnShipping event's ILMD stores sourceEventID = receivingEventId
-      // (not the shipping event ID), so we cannot search by ILMD from here.
-      // Instead, find all events that carry any of the shipping EPCs and filter
-      // for returning+in_transit — EPCs carry over exactly through the chain.
       ObjectEvent? inTransitEvent;
       for (final epc in epcs) {
         try {
@@ -112,8 +105,6 @@ class PharmaReturnContextBuilder {
       if (resolvedReason == null) return null;
     }
 
-    // Hide the button if the return has already been received — the full return
-    // cycle (ReturnShipping → ReturnReceiving) is complete.
     final alreadyReceived = await _hasReturnAlreadyReceived(epcs);
     if (alreadyReceived) return null;
 
@@ -160,8 +151,6 @@ class PharmaReturnContextBuilder {
     }
   }
 
-  /// Returns true when any of [epcs] already has a returning+in_transit event,
-  /// meaning the return shipping cycle has already been initiated.
   Future<bool> _hasReturnShippingInTransit(List<String> epcs) async {
     for (final epc in epcs) {
       try {
@@ -180,8 +169,6 @@ class PharmaReturnContextBuilder {
     return false;
   }
 
-  /// Returns true when any of [epcs] already has an accepting+returned/recalled/
-  /// damaged event, meaning the full return cycle is complete.
   Future<bool> _hasReturnAlreadyReceived(List<String> epcs) async {
     for (final epc in epcs) {
       try {

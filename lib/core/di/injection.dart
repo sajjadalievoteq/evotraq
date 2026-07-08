@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
@@ -9,6 +9,7 @@ import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
 import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
@@ -27,6 +28,7 @@ import '../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 import '../../data/services/barcode_generation_service.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
+import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/pharma_service.dart';
 import '../../features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
@@ -137,6 +139,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => GLNService(dioService: getIt<DioService>()),
   );
 
+  getIt.registerLazySingleton<GlnPickerCatalog>(
+    () => GlnPickerCatalog(glnService: getIt<GLNService>()),
+  );
+
   getIt.registerLazySingleton<EPCConversionService>(
     () => EPCConversionService(dioService: getIt<DioService>()),
   );
@@ -202,12 +208,21 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => UpdateStatusOperationService(dioService: getIt<DioService>()),
   );
 
+  getIt.registerLazySingleton<PharmaService>(
+    () => PharmaService(dioService: getIt<DioService>()),
+  );
+
   getIt.registerLazySingleton<CommissioningOperationService>(
     () => CommissioningOperationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerFactory<CommissioningOperationCubit>(
-    () => CommissioningOperationCubit(getIt<CommissioningOperationService>()),
+    () => CommissioningOperationCubit(
+      commissioningService: getIt<CommissioningOperationService>(),
+      pharmaService: getIt<PharmaService>(),
+      gtinService: getIt<GTINService>(),
+      pharmaceuticalService: getIt<PharmaceuticalService>(),
+    ),
   );
 
   getIt.registerLazySingleton<TransactionDocumentService>(

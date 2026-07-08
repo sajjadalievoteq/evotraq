@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
@@ -11,7 +11,6 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// GS1 identifier fields that support camera barcode scanning.
 enum Gs1FieldScanKind { gln, gtin, sgtin, sscc }
 
 abstract final class Gs1FieldBarcodeScan {
@@ -41,7 +40,6 @@ abstract final class Gs1FieldBarcodeScan {
     }
   }
 
-  /// Opens the camera scanner and returns a value formatted for the target field.
   static Future<String?> scan(
     BuildContext context,
     Gs1FieldScanKind kind,
@@ -114,7 +112,7 @@ abstract final class Gs1FieldBarcodeScan {
           return epc;
         }
         if (details.gtin != null && details.serial != null) {
-          return EPCURIConverter.convertGTINSerialToEPCUri(
+          return Gs1Converter.gtinSerialToEpc(
             details.gtin!,
             details.serial!,
           );

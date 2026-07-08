@@ -15,10 +15,6 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Biz-step + disposition dropdowns for an Object Event form.
-///
-/// Vocabulary is read from the app-wide [CbvVocabularyCubit] — no API call
-/// is made here. The cubit is loaded once at the splash screen.
 class CbvBizStepDispositionPicker extends StatefulWidget {
   final String? action;
   final String? initialBizStep;
@@ -55,11 +51,8 @@ class _CbvBizStepDispositionPickerState
   String? _selectedBizStep;
   String? _selectedDisposition;
 
-  /// True for exactly one frame after the action changes, while the new
-  /// defaults are being resolved. Drives the skeleton loader.
   bool _isActionChanging = false;
 
-  // ─── Helpers ───────────────────────────────────────────────────────────────
 
   String _versionString() =>
       widget.epcisVersion == EPCISVersion.v2_0 ? '2.0' : '1.3';
@@ -70,7 +63,6 @@ class _CbvBizStepDispositionPickerState
   String _fmtDisposition(String urn) =>
       CbvVocabularyFormatter.formatDisposition(_versionString(), urn);
 
-  // ─── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -97,17 +89,11 @@ class _CbvBizStepDispositionPickerState
     }
 
     if (oldWidget.action != widget.action) {
-      // Clear local state and show skeleton. setState is safe in didUpdateWidget
-      // because Flutter re-queues this widget in the same frame.
       setState(() {
         _selectedBizStep = null;
         _selectedDisposition = null;
         _isActionChanging = true;
       });
-      // Parent callbacks must NOT be called here — didUpdateWidget runs inside
-      // Flutter's build phase and calling the parent's onChanged would trigger
-      // setState on an ancestor widget mid-build, causing the
-      // "setState() called during build" assertion. Defer everything.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         widget.onBizStepChanged(null);
@@ -118,7 +104,6 @@ class _CbvBizStepDispositionPickerState
     }
   }
 
-  // ─── Selection logic ───────────────────────────────────────────────────────
 
   void _reformatSelectionsForVersion() {
     if (_selectedBizStep != null) {
@@ -183,7 +168,6 @@ class _CbvBizStepDispositionPickerState
     });
   }
 
-  // ─── Filtering ─────────────────────────────────────────────────────────────
 
   List<CbvVocabularyItem> _bizStepsFor(
       String? action, CbvVocabularyState state) {
@@ -192,9 +176,6 @@ class _CbvBizStepDispositionPickerState
     if (codes == null || codes.isEmpty) {
       return all;
     }
-    // System items follow the per-action allowlist from the backend.
-    // Custom items (created by admin) are appended to every action's list
-    // because they have no predefined action mapping.
     final system = all.where((b) => !b.isCustom && codes.contains(b.code));
     final custom = all.where((b) => b.isCustom);
     return [...system, ...custom];
@@ -204,15 +185,12 @@ class _CbvBizStepDispositionPickerState
       String? bizCode, List<CbvVocabularyItem> all) {
     if (bizCode == null) return [];
 
-    // Use the live pair matrix from the backend — the vocabulary management
-    // screen is the single source of truth for bizStep × disposition pairings.
     final liveCodes = context
         .read<CbvVocabularyCubit>()
         .state
         .bizStepValidDispositions[bizCode];
 
     if (liveCodes != null && liveCodes.isNotEmpty) {
-      // Preserve backend order; skip any code not in the enabled session list.
       final byCode = {for (final d in all) d.code: d};
       return liveCodes
           .map((c) => byCode[c])
@@ -220,11 +198,9 @@ class _CbvBizStepDispositionPickerState
           .toList();
     }
 
-    // No pairing data for this bizStep — show all enabled dispositions.
     return all;
   }
 
-  // ─── Skeleton loader ───────────────────────────────────────────────────────
 
   Widget _buildFieldSkeleton(String label) {
     return Column(
@@ -236,7 +212,6 @@ class _CbvBizStepDispositionPickerState
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Dropdown field placeholder
               Container(
                 height: 50,
                 width: double.infinity,
@@ -253,9 +228,6 @@ class _CbvBizStepDispositionPickerState
     );
   }
 
-  // ─── Dropdown helpers ──────────────────────────────────────────────────────
-  // Flat list only — group_name is for DB/admin grouping, not shown in the picker
-  // (headers looked selectable, e.g. "Miscellaneous", "Creation & Commissioning").
 
   List<DropdownMenuItem<String>> _buildMenuItems({
     required List<CbvVocabularyItem> items,
@@ -271,7 +243,6 @@ class _CbvBizStepDispositionPickerState
         .toList();
   }
 
-  // ─── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +332,6 @@ class _CbvBizStepDispositionPickerState
             ? _selectedBizStep
             : null;
 
-    // Auto-select first item if nothing is chosen yet.
     if (dropdownValue == null && selectable.isNotEmpty) {
       dropdownValue = selectable.first;
       if (_selectedBizStep != dropdownValue) {
@@ -435,7 +405,6 @@ class _CbvBizStepDispositionPickerState
             ? _selectedDisposition
             : null;
 
-    // Auto-select first item if nothing is chosen yet.
     if (dropdownValue == null && selectable.isNotEmpty) {
       dropdownValue = selectable.first;
       if (_selectedDisposition != dropdownValue) {

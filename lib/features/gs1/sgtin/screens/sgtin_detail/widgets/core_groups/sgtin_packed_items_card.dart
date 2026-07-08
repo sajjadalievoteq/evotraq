@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Lists child EPCs packed inside an SGTIN when it acts as a container.
 class SgtinPackedItemsCard extends StatelessWidget {
   const SgtinPackedItemsCard({
     super.key,

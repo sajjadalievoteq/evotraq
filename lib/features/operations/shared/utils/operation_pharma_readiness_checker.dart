@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/gln_check_digit_validator.dart';
 
-/// Shared GS1 DSCSA pharma readiness check helpers.
 abstract final class OperationPharmaReadinessChecker {
   static List<String> twoGlnIssues({
     required GLN? sourceGln,

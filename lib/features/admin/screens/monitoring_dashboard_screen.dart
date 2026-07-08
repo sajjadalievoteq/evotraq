@@ -30,24 +30,20 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   late MonitoringService _monitoringService;
   late TabController _tabController;
   
-  // Data streams
   StreamSubscription<PerformanceMetrics>? _performanceSubscription;
   StreamSubscription<StorageStatistics>? _storageSubscription;
   StreamSubscription<IntegrityStatistics>? _integritySubscription;
   StreamSubscription<List<PerformanceAlert>>? _alertsSubscription;
   
-  // Current data
   PerformanceMetrics? _currentPerformance;
   StorageStatistics? _currentStorage;
   IntegrityStatistics? _currentIntegrity;
   List<PerformanceAlert> _currentAlerts = [];
   List<BulkJobStatus> _currentBulkJobs = [];
   
-  // Loading states
   bool _isLoading = true;
   String? _errorMessage;
   
-  // Real-time data for charts
   List<PerformanceMetrics> _performanceHistory = [];
   static const int maxHistoryLength = 50;
 
@@ -63,7 +59,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
       final dioService = getIt<DioService>();
       _monitoringService = MonitoringServiceProvider.getInstance(dioService);
       
-      // Subscribe to streams
       _performanceSubscription = _monitoringService.performanceStream.listen(
         (performance) {
           if (mounted) {
@@ -125,10 +120,8 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         },
       );
       
-      // Load initial data first
       await _loadInitialData();
       
-      // Only start real-time monitoring after initial load (with 10-second interval)
       _monitoringService.startRealTimeMonitoring(interval: const Duration(seconds: 10));
       
     } catch (e) {
@@ -143,7 +136,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
 
   Future<void> _loadInitialData() async {
     try {
-      // Load initial data
       final futures = await Future.wait([
         _monitoringService.getPerformanceMetrics(),
         _monitoringService.getStorageStatistics(),
@@ -289,7 +281,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // System overview card
           MonitoringOverviewCard(
             performance: _currentPerformance,
             storage: _currentStorage,
@@ -299,7 +290,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
           
           const SizedBox(height: 16),
           
-          // Alerts panel
           if (_currentAlerts.isNotEmpty) ...[
             AlertsPanel(
               alerts: _currentAlerts,
@@ -308,7 +298,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
             const SizedBox(height: 16),
           ],
           
-          // Real-time performance chart
           if (_performanceHistory.isNotEmpty)
             Card(
               child: Padding(
@@ -322,7 +311,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 300, // Increased height to accommodate content
+                      height: 300,
                       child: PerformanceChart(
                         metrics: _performanceHistory,
                         chartType: 'response_time',
@@ -335,7 +324,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
           
           const SizedBox(height: 16),
           
-          // Event type breakdown
           if (_currentPerformance?.eventTypeMetrics.isNotEmpty ?? false)
             Card(
               child: Padding(
@@ -377,7 +365,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
           
           const SizedBox(height: 16),
           
-          // Bulk jobs panel
           BulkJobsPanel(
             jobs: _currentBulkJobs,
             onJobCancel: _cancelBulkJob,
@@ -432,7 +419,6 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
     });
     
     try {
-      // Force refresh by fetching data manually
       await Future.wait([
         _monitoringService.getPerformanceMetrics(),
         _monitoringService.getStorageStatistics(),
@@ -487,11 +473,9 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   }
 
   void _showSettingsDialog() {
-    // TODO: Implement monitoring settings dialog
     context.showInfo('Settings dialog coming soon');
   }
 
-  // Action handlers
   void _acknowledgeAlert(String alertId) async {
     try {
       await _monitoringService.acknowledgeAlert(alertId);
@@ -552,19 +536,16 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   }
 
   void _cancelBulkJob(String jobId) async {
-    // TODO: Implement bulk job cancellation when available in monitoring service
     context.showInfo('Cancel bulk job feature coming soon');
   }
 
   void _retryBulkJob(String jobId) async {
-    // TODO: Implement bulk job retry when available in monitoring service
     context.showInfo('Retry bulk job feature coming soon');
   }
 
   void _refreshBulkJobs() async {
-    // TODO: Implement bulk jobs list refresh when available in monitoring service
     setState(() {
-      _currentBulkJobs = []; // For now, keep empty list
+      _currentBulkJobs = [];
     });
   }
 }

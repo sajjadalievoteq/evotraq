@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Help widget for Object Event Form that explains GS1 EPCIS Object Event fields
 class ObjectEventHelpWidget extends StatelessWidget {
-  /// Constructor
   const ObjectEventHelpWidget({Key? key}) : super(key: key);
 
   @override

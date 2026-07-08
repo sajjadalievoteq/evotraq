@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Event date/time picker row shared by shipping, receiving, decommissioning, etc.
 class OperationEventTimeTile extends StatelessWidget {
   const OperationEventTimeTile({
     super.key,

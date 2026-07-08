@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 
@@ -24,9 +25,6 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
 
-
-/// Step 1: packing reference, location, container, and GS1 business transactions.
-
 class PackingReferenceDetailsStep extends StatelessWidget {
 
   const PackingReferenceDetailsStep({
@@ -49,13 +47,11 @@ class PackingReferenceDetailsStep extends StatelessWidget {
 
     required this.scanningMode,
 
-    required this.manualEntryController,
-
     required this.onScanningModeChanged,
 
     required this.onContainerScanResult,
 
-    required this.onAddManualContainer,
+    required this.onContainerAdded,
 
     required this.onClearContainer,
 
@@ -76,7 +72,6 @@ class PackingReferenceDetailsStep extends StatelessWidget {
   });
 
 
-
   final TextEditingController workOrderController;
 
   final TextEditingController batchNumberController;
@@ -93,13 +88,11 @@ class PackingReferenceDetailsStep extends StatelessWidget {
 
   final OperationScanningMode scanningMode;
 
-  final TextEditingController manualEntryController;
-
   final ValueChanged<OperationScanningMode> onScanningModeChanged;
 
   final void Function(ScanResult result) onContainerScanResult;
 
-  final VoidCallback onAddManualContainer;
+  final void Function(EPCParseResult result) onContainerAdded;
 
   final VoidCallback onClearContainer;
 
@@ -118,13 +111,11 @@ class PackingReferenceDetailsStep extends StatelessWidget {
   final bool showProductionSection;
 
 
-
   @override
 
   Widget build(BuildContext context) {
 
     final outline = Theme.of(context).colorScheme.outlineVariant;
-
 
 
     return SingleChildScrollView(
@@ -180,7 +171,6 @@ class PackingReferenceDetailsStep extends StatelessWidget {
                     operationLabel: 'Packing',
 
                   ),
-
 
 
                   OperationEventTimeTile(
@@ -277,11 +267,7 @@ class PackingReferenceDetailsStep extends StatelessWidget {
                   else
 
                     OperationContainerManualEntryCard(
-
-                      controller: manualEntryController,
-
-                      onAdd: onAddManualContainer,
-
+                      onContainerAdded: onContainerAdded,
                     ),
 
                 ],

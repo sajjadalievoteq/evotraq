@@ -1,5 +1,3 @@
-/// Lightweight summary of the full recursive hierarchy returned by the
-/// traversal endpoint. Used for the summary banner; not used for tree display.
 class HierarchySummary {
   final int totalItemCount;
   final int hierarchyDepth;

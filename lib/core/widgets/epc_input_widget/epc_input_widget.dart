@@ -10,7 +10,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 
 enum _EpcInputMode { scanner, manual }
 
-/// Universal EPC / barcode input with shared parsing, validation, and scanning.
 class EPCInputWidget extends StatefulWidget {
   const EPCInputWidget({
     required this.onItemAdded,
@@ -26,7 +25,6 @@ class EPCInputWidget extends StatefulWidget {
   final String? placeholder;
   final String? label;
 
-  /// When set, overrides [ScannerDetectionService.isScannable] (e.g. in tests).
   final bool? scannerAvailable;
 
   @override

@@ -2,8 +2,6 @@ import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 
-/// TransformationEvent represents EPCIS events that track transformation processes
-/// where inputs are transformed into outputs (e.g., manufacturing, processing)
 class TransformationEvent extends EPCISEvent {
   final String transformationID;
   final List<String> inputEPCList;
@@ -13,7 +11,6 @@ class TransformationEvent extends EPCISEvent {
   final Map<String, dynamic> ilmd;
   @override
   final List<CertificationInfo>? certificationInfo;
-    /// Constructor for TransformationEvent
   TransformationEvent({
     String? id,
     required String eventId,
@@ -49,9 +46,7 @@ class TransformationEvent extends EPCISEvent {
          businessLocation: bizLocation,
          bizData: bizData,
        );
-    /// Create a TransformationEvent from JSON
   factory TransformationEvent.fromJson(Map<String, dynamic> json) {
-    // Parse certification info if available
     List<CertificationInfo>? certInfo;
     if (json['certificationInfo'] != null) {
       try {
@@ -74,13 +69,11 @@ class TransformationEvent extends EPCISEvent {
       eventTimeZoneOffset: json['eventTimeZoneOffset'] ?? json['eventTimeZone'] ?? '',
       bizStep: json['businessStep'] ?? json['bizStep'],
       disposition: json['disposition'],
-      // Handle readPoint - can be string GLN code or GLN object
       readPoint: json['readPoint'] != null
           ? (json['readPoint'] is String
               ? GLN.fromCode(json['readPoint'])
               : GLN.fromJson(json['readPoint']))
           : null,
-      // Handle businessLocation - can be string GLN code or GLN object
       bizLocation: json['businessLocation'] != null
           ? (json['businessLocation'] is String
               ? GLN.fromCode(json['businessLocation'])
@@ -101,46 +94,31 @@ class TransformationEvent extends EPCISEvent {
     );
   }
 
-  /// Convert the TransformationEvent to a JSON object
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     
-    // Add eventType for enhanced validation
     json['eventType'] = 'TransformationEvent';
     
-    // Add transformation-specific fields
     json['transformationID'] = transformationID;
 
-    // Schema validation requires EXACTLY ONE of inputEPCList OR inputQuantityList (not both, not neither)
-    // and EXACTLY ONE of outputEPCList OR outputQuantityList (not both, not neither)
-    // The fields not chosen must NOT be present in the JSON at all (not even as empty arrays)
     
-    // Handle input: either inputEPCList OR inputQuantityList (not both, not neither)
     if (inputEPCList.isNotEmpty) {
       json['inputEPCList'] = inputEPCList;
-      // Do NOT include inputQuantityList at all
     } else if (inputQuantityList.isNotEmpty) {
       json['inputQuantityList'] = inputQuantityList;
-      // Do NOT include inputEPCList at all
     } else {
-      // Must have at least one - default to a single dummy EPC to satisfy minItems: 1
       json['inputEPCList'] = ['urn:epc:id:sgtin:0000000.000000.000000000000'];
     }
     
-    // Handle output: either outputEPCList OR outputQuantityList (not both, not neither)
     if (outputEPCList.isNotEmpty) {
       json['outputEPCList'] = outputEPCList;
-      // Do NOT include outputQuantityList at all
     } else if (outputQuantityList.isNotEmpty) {
       json['outputQuantityList'] = outputQuantityList;
-      // Do NOT include outputEPCList at all
     } else {
-      // Must have at least one - default to a single dummy EPC to satisfy minItems: 1
       json['outputEPCList'] = ['urn:epc:id:sgtin:0000000.000000.000000000000'];
     }
     
-    // Include ILMD if present
     if (ilmd.isNotEmpty) {
       json['ilmd'] = ilmd;
     }
@@ -148,7 +126,6 @@ class TransformationEvent extends EPCISEvent {
     return json;
   }
   
-  /// Create a copy of this TransformationEvent with the given fields replaced
   TransformationEvent copyWith({    String? id,
     String? eventId,
     DateTime? eventTime,

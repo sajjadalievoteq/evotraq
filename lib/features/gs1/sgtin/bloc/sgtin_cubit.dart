@@ -105,6 +105,20 @@ class SGTINCubit extends Cubit<SGTINState> {
     }
   }
 
+  Future<void> fetchSGTINByEPC(String epcUri) async {
+    emit(state.copyWith(status: SGTINStatus.loading));
+    try {
+      final sgtin = await _sgtinService.getSGTINByEPC(epcUri);
+      emit(state.copyWith(
+        status: SGTINStatus.success,
+        sgtin: sgtin,
+        error: null,
+      ));
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
   Future<void> fetchSGTINBySerialNumber(String serialNumber) async {
     emit(state.copyWith(status: SGTINStatus.loading));
     try {
@@ -130,6 +144,7 @@ class SGTINCubit extends Cubit<SGTINState> {
     String sortBy = 'createdAt',
     String sortDirection = 'DESC',
     bool isLoadMore = false,
+    String? epcUri,
   }) async {
     if (page == 0 || !isLoadMore) {
       emit(state.copyWith(status: SGTINStatus.loading));
@@ -138,6 +153,27 @@ class SGTINCubit extends Cubit<SGTINState> {
     }
 
     try {
+      if (epcUri != null &&
+          epcUri.isNotEmpty &&
+          page == 0 &&
+          !isLoadMore) {
+        try {
+          final sgtin = await _sgtinService.getSGTINByEPC(epcUri);
+          emit(state.copyWith(
+            status: SGTINStatus.success,
+            sgtins: [sgtin],
+            currentPage: 0,
+            totalElements: 1,
+            totalPages: 1,
+            hasMoreData: false,
+            error: null,
+          ));
+          return;
+        } catch (_) {
+          // Fall back to GTIN/serial advanced search below.
+        }
+      }
+
       final result = await _sgtinService.searchSGTINsAdvanced(
         gtinCode: gtinCode,
         serialNumber: serialNumber,

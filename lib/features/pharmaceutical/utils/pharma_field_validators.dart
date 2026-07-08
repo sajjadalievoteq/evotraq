@@ -89,13 +89,11 @@ abstract final class PharmaFieldValidators {
   }
 
   static const Set<String> controlledSubstanceScheduleCodes = {
-    // Common US DEA schedules.
     'CI',
     'CII',
     'CIII',
     'CIV',
     'CV',
-    // Common UAE-style placeholders.
     'NARCOTIC_CLASS_A',
     'NARCOTIC_CLASS_B',
     'NARCOTIC_CLASS_C',
@@ -153,12 +151,9 @@ abstract final class PharmaFieldValidators {
     if (v.isEmpty) return null;
     final n = double.tryParse(v);
     if (n == null) return '$fieldName must be numeric';
-    // Spec uses NUMERIC(6,2); keep UI simple.
     return null;
   }
 
-  /// FDA NDC directory values are 10 digits in 3 segment patterns.
-  /// We also allow normalized 11-digit (5-4-2 equivalent) forms.
   static String? validateNdcNumber(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
@@ -171,12 +166,11 @@ abstract final class PharmaFieldValidators {
       return 'ndc_number must be 10 or 11 digits';
     }
 
-    // If hyphens are provided, enforce common 10-digit segment formats.
     if (v.contains('-')) {
       final validDashed =
-          RegExp(r'^\d{4}-\d{4}-\d{2}$').hasMatch(v) || // 4-4-2
-              RegExp(r'^\d{5}-\d{3}-\d{2}$').hasMatch(v) || // 5-3-2
-              RegExp(r'^\d{5}-\d{4}-\d{1}$').hasMatch(v); // 5-4-1
+          RegExp(r'^\d{4}-\d{4}-\d{2}$').hasMatch(v) ||
+              RegExp(r'^\d{5}-\d{3}-\d{2}$').hasMatch(v) ||
+              RegExp(r'^\d{5}-\d{4}-\d{1}$').hasMatch(v);
       if (!validDashed) {
         return 'ndc_number hyphen format must be 4-4-2, 5-3-2, or 5-4-1';
       }
@@ -184,7 +178,6 @@ abstract final class PharmaFieldValidators {
     return null;
   }
 
-  /// Health Canada DIN is an 8-digit numeric identifier.
   static String? validateDinNumber(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
@@ -194,7 +187,6 @@ abstract final class PharmaFieldValidators {
     return null;
   }
 
-  /// EAN pharma code uses GTIN-13 check-digit logic.
   static String? validateEanPharmaCode(String? value) {
     final v = (value ?? '').trim();
     if (v.isEmpty) return null;
@@ -274,8 +266,6 @@ abstract final class PharmaFieldValidators {
     'GS1_QR_CODE',
   };
 
-  /// WHO ATC codes are 7 chars in canonical form; allow up to 10 to preserve
-  /// existing tenant data while enforcing uppercase alphanumeric format.
   static String? validateAtcCode(String? value) {
     final v = (value ?? '').trim().toUpperCase();
     if (v.isEmpty) return null;

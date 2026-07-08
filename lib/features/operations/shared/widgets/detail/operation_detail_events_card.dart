@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 
-/// Shared EPCIS events card for operation detail screens.
 class OperationDetailEventsCard extends StatelessWidget {
   const OperationDetailEventsCard({super.key, required this.eventIds});
 

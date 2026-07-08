@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
@@ -15,7 +16,6 @@ import 'package:traqtrace_app/data/models/operations/shared/operation_gln_displa
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
@@ -36,10 +36,8 @@ class ShippingOperationScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
   });
 
-  /// True when rendered inside [Gs1SplitViewScreen]'s create panel.
   final bool embedded;
 
-  /// Called after successful submission in embedded mode instead of navigating.
   final VoidCallback? onEmbeddedActionSuccess;
 
   @override
@@ -244,7 +242,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
     try {
       final shippingService = getIt<ShippingOperationService>();
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEpcs);
+      final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
@@ -398,7 +396,6 @@ _showOperationError(
         setState(() => _itemWarnings.remove(epc));
       }
     } catch (_) {
-      // Soft warning is best-effort only.
     }
   }
 

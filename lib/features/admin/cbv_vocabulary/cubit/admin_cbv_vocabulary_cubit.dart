@@ -16,9 +16,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
   final CbvMasterDataService _service;
   final CbvVocabularyCubit _vocabCubit;
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Load
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> load({bool forceRefresh = false}) async {
     if (state.isLoading) return;
@@ -47,9 +44,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     }
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Toggle enabled (optimistic PATCH)
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> toggleBizStep(String code, {required bool enabled}) =>
       _toggle(
@@ -99,9 +93,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     }
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Create custom items
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> createBizStep({
     required String code,
@@ -157,9 +148,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     }
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Delete custom items (optimistic)
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> deleteBizStep(String code) async {
     if (state.deletingCodes.contains(code)) return;
@@ -209,15 +197,11 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     }
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Pair management
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> addPair(String bizCode, String dispCode) async {
     final key = '$bizCode|$dispCode';
     if (state.pairingKeys.contains(key)) return;
 
-    // Optimistic update
     final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: true);
     emit(state.copyWith(
       pairMap: updated,
@@ -244,7 +228,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     final key = '$bizCode|$dispCode';
     if (state.pairingKeys.contains(key)) return;
 
-    // Optimistic update
     final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: false);
     emit(state.copyWith(
       pairMap: updated,
@@ -287,9 +270,6 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     return copy;
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ──────────────────────────────────────────────────────────────────────────
 
   List<CbvVocabularyItem> _replaceEnabled(
     List<CbvVocabularyItem> items,

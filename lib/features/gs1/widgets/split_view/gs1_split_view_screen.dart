@@ -41,8 +41,6 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   final String fabAddTooltip;
   final String fabCloseTooltip;
 
-  /// When set, FAB navigates to this route instead of swapping in an embedded
-  /// create panel via [IndexedStack].
   final String? fabNavigateRoute;
 
   final String createHeaderText;

@@ -2,7 +2,6 @@
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Returned items card for cancel shipping operation detail.
 class CancelShippingDetailShippedItemsCard extends StatelessWidget {
   const CancelShippingDetailShippedItemsCard({
     super.key,

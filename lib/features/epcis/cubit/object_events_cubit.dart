@@ -7,33 +7,23 @@ import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 
-// ---------------------------------------------------------------------------
-// Status enum
-// ---------------------------------------------------------------------------
 
 enum ObjectEventsStatus { initial, loading, success, error }
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
 
 class ObjectEventsState extends Equatable {
   final ObjectEventsStatus status;
   final List<ObjectEvent> objectEvents;
   final ObjectEvent? selectedEvent;
 
-  // Pagination
   final bool isListLoading;
   final bool isFetchingMore;
   final bool hasMoreData;
   final int page;
   final int pageSize;
 
-  // Errors
   final String? error;
   final String? listFetchError;
 
-  // Filters
   final String? filterAction;
   final String? filterBizStep;
   final String? filterDisposition;
@@ -41,7 +31,6 @@ class ObjectEventsState extends Equatable {
   final String? filterEPC;
   final String? filterSearchText;
 
-  // Sorting
   final String sortOrder;
 
   const ObjectEventsState({
@@ -136,10 +125,6 @@ class ObjectEventsState extends Equatable {
       ];
 }
 
-// ---------------------------------------------------------------------------
-// Cubit
-// ---------------------------------------------------------------------------
-
 class ObjectEventsCubit extends Cubit<ObjectEventsState> {
   final ObjectEventService _service;
 
@@ -147,7 +132,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
       : _service = service ?? getIt<ObjectEventService>(),
         super(const ObjectEventsState());
 
-  // ── List loading ──────────────────────────────────────────────────────────
 
   Future<void> loadObjectEvents({
     int page = 0,
@@ -184,7 +168,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
           endTime != null;
 
       if (epc != null) {
-        // EPC filter: use dedicated EPC endpoint (unordered list, wrap as page-like map)
         final events = await _service.findObjectEventsByEPC(epc);
         result = {
           'content': events,
@@ -242,7 +225,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
           state.filterSearchText != null;
 
       if (state.filterEPC != null) {
-        // Already loaded all EPC results on first page; nothing more to fetch
         emit(state.copyWith(isFetchingMore: false, hasMoreData: false));
         return;
       } else if (hasFilters) {
@@ -292,7 +274,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     emit(state.copyWith(clearError: true));
   }
 
-  // ── Single event ──────────────────────────────────────────────────────────
 
   Future<ObjectEvent?> getObjectEventById(String id) async {
     emit(state.copyWith(isListLoading: true, clearError: true));
@@ -308,12 +289,10 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     }
   }
 
-  /// Legacy alias used by app_router.
   Future<void> getObjectEvent(String id) async {
     await getObjectEventById(id);
   }
 
-  // ── Create ────────────────────────────────────────────────────────────────
 
   Future<ObjectEvent> createObjectEvent({
     required String action,
@@ -379,7 +358,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     }
   }
 
-  // ── Update / delete ───────────────────────────────────────────────────────
 
   Future<void> updateObjectEvent(ObjectEvent event) async {
     emit(state.copyWith(isListLoading: true, clearError: true));
@@ -418,7 +396,6 @@ class ObjectEventsCubit extends Cubit<ObjectEventsState> {
     }
   }
 
-  // ── Batch ─────────────────────────────────────────────────────────────────
 
   Future<List<ObjectEvent>> createEventsBatch(List<ObjectEvent> events) async {
     emit(state.copyWith(isListLoading: true, clearError: true));

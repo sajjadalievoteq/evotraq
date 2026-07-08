@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
 
 abstract final class CancelShippingUiConstants {
   static const String operationLabel = 'Cancel Shipping';

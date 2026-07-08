@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// GLN code with human-readable labels snapshotted at operation post time.
 class OperationGlnDisplay {
   const OperationGlnDisplay({
     required this.glnCode,

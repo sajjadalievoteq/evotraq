@@ -29,7 +29,6 @@ import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.
 import 'package:traqtrace_app/features/epcis/cubit/advanced_query_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/traversal_query_provider.dart';
 import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
-// Notification imports
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 
@@ -37,7 +36,6 @@ import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/utils/app_screen_util.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-// Dashboard imports
 
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
@@ -59,10 +57,8 @@ void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Use path URL strategy for better web navigation
     configureUrlStrategy();
 
-    // Create app config for proper environment
     final appConfig = AppConfig(
       apiBaseUrl: const String.fromEnvironment(
         'API_BASE_URL',
@@ -73,7 +69,6 @@ void main() async {
     );
 
     debugPrint('Initializing dependencies...');
-    // Initialize dependency injection
     await initDependencies(appConfig);
     getIt.registerSingleton<AppRouter>(
       AppRouter(authCubit: getIt<AuthCubit>()),
@@ -95,7 +90,6 @@ void main() async {
     debugPrint('FATAL ERROR DURING APP START: $e');
     debugPrint(stackTrace.toString());
 
-    // Fallback UI so the screen isn't just blank
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -156,7 +150,6 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) =>
               ThemeCubit(profileCubit: context.read<ProfileCubit>()),
         ),
-        // Add SGTIN Cubit
         BlocProvider<SGTINCubit>(
           create: (context) => SGTINCubit(sgtinService: getIt<SGTINService>()),
         ),
@@ -188,7 +181,6 @@ class TraqTraceApp extends StatelessWidget {
           create: (context) =>
               SystemSettingsCubit(getIt<SystemSettingsService>()),
         ),
-        // Add Notification Cubit
         BlocProvider<NotificationCubit>(
           create: (context) => NotificationCubit(
             apiService: getIt<NotificationApiService>(),

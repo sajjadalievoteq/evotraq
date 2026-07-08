@@ -1,5 +1,3 @@
-// ValidationRule model for Phase 3: Event Validation Service
-// Matches the backend ValidationRule entity structure
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -108,7 +106,6 @@ class ValidationRule {
     this.field,
   });
 
-  /// Parse EventType from backend string values
   static EventType? _parseEventTypeFromString(String? eventTypeString) {
     if (eventTypeString == null) return null;
     
@@ -125,15 +122,14 @@ class ValidationRule {
       case 'TransformationEvent':
         return EventType.TransformationEvent;
       default:
-        return EventType.ALL; // Default fallback
+        return EventType.ALL;
     }
   }
 
-  /// Convert EventType to backend string format
   static String _eventTypeToString(EventType eventType) {
     switch (eventType) {
       case EventType.ALL:
-        return 'All'; // Backend expects "All", not "ALL"
+        return 'All';
       case EventType.ObjectEvent:
         return 'ObjectEvent';
       case EventType.AggregationEvent:
@@ -145,7 +141,6 @@ class ValidationRule {
     }
   }
 
-  // Convert from JSON (from API response)
   factory ValidationRule.fromJson(Map<String, dynamic> json) {
     return ValidationRule(
       id: json['id'],
@@ -186,7 +181,6 @@ class ValidationRule {
     );
   }
 
-  // Convert to JSON (for API requests)
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
@@ -212,7 +206,6 @@ class ValidationRule {
     };
   }
 
-  // Create a copy with updated fields
   ValidationRule copyWith({
     int? id,
     String? ruleId,

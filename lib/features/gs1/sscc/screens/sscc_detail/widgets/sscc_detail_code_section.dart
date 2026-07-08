@@ -250,11 +250,6 @@ class SsccDetailCodeSection extends StatelessWidget {
   }
 }
 
-/// Handles live edits in manual SSCC mode.
-///
-/// Only normalizes structured input (URN, Digital Link, GS1 element string) or
-/// digit strings longer than 18 characters (typical paste). Plain partial entry
-/// (1–18 digits) is left as typed so backspace and in-progress edits work.
 void _handleManualSsccCodeChange({
   required String value,
   required TextEditingController ssccCodeController,

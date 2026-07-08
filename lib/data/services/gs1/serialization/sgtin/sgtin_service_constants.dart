@@ -12,6 +12,7 @@ abstract final class SgtinServiceConstants {
 
   static String pathById(String id)                 => '$pathBase/$id';
   static String pathBySerial(String sn)             => '$pathBase/serial/$sn';
+  static String pathByEpc(String epcUri)            => '$pathBase/epc/${Uri.encodeComponent(epcUri)}';
   static String pathByGtin(String gtin)             => '$pathBase/gtin/$gtin';
   static String pathByLocation(String gln)          => '$pathBase/location/$gln';
   static String pathBySscc(String sscc)             => '$pathBase/sscc/$sscc';

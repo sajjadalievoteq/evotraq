@@ -9,9 +9,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for Transaction Document operations
 class TransactionDocumentScreen extends StatefulWidget {
-  /// Constructor
   const TransactionDocumentScreen({Key? key}) : super(key: key);
 
   @override
@@ -28,31 +26,29 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
   final _relationshipTypeController = TextEditingController();
   final _epcController = TextEditingController();
   
-  // Standard business transaction types from GS1 CBV
   final List<String> _standardDocumentTypes = [
-    'urn:epcglobal:cbv:btt:inv',          // Invoice
-    'urn:epcglobal:cbv:btt:po',           // Purchase Order
-    'urn:epcglobal:cbv:btt:desadv',       // Despatch advice / Shipping notice
-    'urn:epcglobal:cbv:btt:packing-list', // Packing list
-    'urn:epcglobal:cbv:btt:receipt',      // Receiving advice
-    'urn:epcglobal:cbv:btt:bol',          // Bill of lading
-    'urn:epcglobal:cbv:btt:cert',         // Certificate
-    'urn:epcglobal:cbv:btt:pedigree',     // Pedigree
-    'urn:epcglobal:cbv:btt:prodorder',    // Production Order
-    'urn:epcglobal:cbv:btt:transdoc',     // Transport Document
-    'urn:epcglobal:cbv:btt:customs',      // Customs Declaration
-    'urn:epcglobal:cbv:btt:contract',     // Contract
+    'urn:epcglobal:cbv:btt:inv',
+    'urn:epcglobal:cbv:btt:po',
+    'urn:epcglobal:cbv:btt:desadv',
+    'urn:epcglobal:cbv:btt:packing-list',
+    'urn:epcglobal:cbv:btt:receipt',
+    'urn:epcglobal:cbv:btt:bol',
+    'urn:epcglobal:cbv:btt:cert',
+    'urn:epcglobal:cbv:btt:pedigree',
+    'urn:epcglobal:cbv:btt:prodorder',
+    'urn:epcglobal:cbv:btt:transdoc',
+    'urn:epcglobal:cbv:btt:customs',
+    'urn:epcglobal:cbv:btt:contract',
   ];
   
-  // Standard relationship types
   final List<String> _standardRelationshipTypes = [
-    'references',  // General reference to another document
-    'replaces',    // Indicates a document that supersedes another
-    'fulfills',    // Indicates a document that fulfills a request in another document
-    'contains',    // Indicates a document that contains items from another document
-    'origin',      // Indicates the original document
-    'destination', // Indicates the destination document
-    'related',     // General relationship
+    'references',
+    'replaces',
+    'fulfills',
+    'contains',
+    'origin',
+    'destination',
+    'related',
   ];
   
   @override
@@ -374,7 +370,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
         builder: (FormFieldState<String> state) {
           return InputDecorator(
             decoration: InputDecoration(
-              //labelText: 'Document Type',
               border: const OutlineInputBorder(),
               errorText: state.errorText,
             ),
@@ -392,14 +387,11 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                   }
                 },
                 items: _standardDocumentTypes.map((String value) {
-                  // Display friendly name but use URN as value
                   String displayName = value;
                   
-                  // Extract the display name from the URN
                   if (value.startsWith('urn:epcglobal:cbv:btt:')) {
                     String shortName = value.substring('urn:epcglobal:cbv:btt:'.length);
                     
-                    // Convert to user-friendly name based on short name
                     switch (shortName) {
                       case 'inv': displayName = 'Invoice'; break;
                       case 'po': displayName = 'Purchase Order'; break;
@@ -438,7 +430,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
         builder: (FormFieldState<String> state) {
           return InputDecorator(
             decoration: InputDecoration(
-              //labelText: 'Document Type (optional)',
               border: const OutlineInputBorder(),
               errorText: state.errorText,
             ),
@@ -461,14 +452,11 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                     child: Text('Any document type'),
                   ),
                   ..._standardDocumentTypes.map((String value) {
-                    // Display friendly name but use URN as value
                     String displayName = value;
                     
-                    // Extract the display name from the URN
                     if (value.startsWith('urn:epcglobal:cbv:btt:')) {
                       String shortName = value.substring('urn:epcglobal:cbv:btt:'.length);
                       
-                      // Convert to user-friendly name based on short name
                       switch (shortName) {
                         case 'inv': displayName = 'Invoice'; break;
                         case 'po': displayName = 'Purchase Order'; break;
@@ -508,7 +496,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
         builder: (FormFieldState<String> state) {
           return InputDecorator(
             decoration: InputDecoration(
-              //labelText: label,
               border: const OutlineInputBorder(),
               errorText: state.errorText,
             ),
@@ -526,14 +513,11 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                   }
                 },
                 items: _standardDocumentTypes.map((String value) {
-                  // Display friendly name but use URN as value
                   String displayName = value;
                   
-                  // Extract the display name from the URN
                   if (value.startsWith('urn:epcglobal:cbv:btt:')) {
                     String shortName = value.substring('urn:epcglobal:cbv:btt:'.length);
                     
-                    // Convert to user-friendly name based on short name
                     switch (shortName) {
                       case 'inv': displayName = 'Invoice'; break;
                       case 'po': displayName = 'Purchase Order'; break;
@@ -572,7 +556,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
         builder: (FormFieldState<String> state) {
           return InputDecorator(
             decoration: InputDecoration(
-              //labelText: 'Relationship Type',
               border: const OutlineInputBorder(),
               errorText: state.errorText,
             ),
@@ -627,7 +610,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                   ? Text('${event.bizTransactionList.length} transactions')
                   : const Text('No transactions'),
                 onTap: () {
-                  // Show event details
                   if (event.bizTransactionList.isNotEmpty) {
                     showDialog(
                       context: context,
@@ -637,7 +619,6 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: event.bizTransactionList.entries.map((entry) {
-                            // Format the document type for display
                             String displayType = entry.key;
                             if (displayType.startsWith('urn:epcglobal:cbv:btt:')) {
                               String shortName = displayType.substring('urn:epcglobal:cbv:btt:'.length);

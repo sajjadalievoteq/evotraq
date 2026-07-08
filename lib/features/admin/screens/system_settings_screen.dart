@@ -17,19 +17,16 @@ class SystemSettingsScreen extends StatefulWidget {
 }
 
 class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
-  // User registration settings
   bool _requireEmailVerification = true;
   bool _requireAdminApproval = true;
   int _passwordMinLength = 8;
   bool _requireSpecialChars = true;
   
-  // Email settings
   String _emailSender = 'traqtrace@gmail.com';
   String _supportEmail = 'support@traqtrace.com';
   
-  // System settings
   bool _maintenanceMode = false;
-  int _sessionTimeout = 30; // minutes
+  int _sessionTimeout = 30;
   
   @override
   Widget build(BuildContext context) {
@@ -65,11 +62,9 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             ),
             const SizedBox(height: 16),
             
-            // Industry Mode settings - MOST IMPORTANT
             _buildIndustryModeCard(context),
             const SizedBox(height: 16),
             
-            // Registration settings
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -139,7 +134,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             ),
             const SizedBox(height: 16),
             
-            // Email settings
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -193,7 +187,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             ),
             const SizedBox(height: 16),
             
-            // System settings
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -243,7 +236,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                       subtitle: const Text('1.0.0'),
                       trailing: ElevatedButton(
                         onPressed: () {
-                          // Navigate to update screen or check for updates
                         },
                         child: const Text('Check Updates'),
                       ),
@@ -254,7 +246,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             ),
             const SizedBox(height: 32),
             
-            // Save button
             ElevatedButton.icon(
               onPressed: _saveSettings,
               icon: const TraqIcon(AppAssets.iconSave),
@@ -272,12 +263,10 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
   }
 
   void _saveSettings() {
-    // Here you would save the settings to your backend
     context.showSuccess('Settings saved successfully');
   }
   
   void _testEmailSettings(BuildContext context) {
-    // Show a loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -296,16 +285,13 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       ),
     );
     
-    // Simulate API call with a delay
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pop(context); // Close the loading dialog
+      Navigator.pop(context);
       
-      // Show success message
       context.showSuccess('Test email sent successfully');
     });
   }
 
-  /// Build the Industry Mode configuration card.
   Widget _buildIndustryModeCard(BuildContext context) {
     return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
       builder: (context, state) {
@@ -384,12 +370,10 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                 const Divider(),
                 const SizedBox(height: 8),
                 
-                // Mode description
                 _buildModeFeatureList(settings.industryMode),
                 
                 const SizedBox(height: 16),
                 
-                // Change Mode Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -430,7 +414,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
     );
   }
 
-  /// Build the feature list for current mode.
   Widget _buildModeFeatureList(IndustryMode mode) {
     final features = mode == IndustryMode.tobacco
         ? [
@@ -479,7 +462,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
     );
   }
 
-  /// Show dialog to confirm industry mode change.
   Future<void> _showChangeModeDialog(BuildContext context) async {
     final cubit = context.read<SystemSettingsCubit>();
     
@@ -488,7 +470,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
         ? IndustryMode.pharmaceutical 
         : IndustryMode.tobacco;
 
-    // Load data statistics first
     DataClearStatistics? stats;
     try {
       stats = await cubit.loadDataStatistics();
@@ -607,9 +588,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
         if (mounted) {
           context.showSuccess('Successfully switched to ${newMode.displayName} mode');
           
-          // Navigate to home/dashboard after mode change to avoid
-          // "Looking up a deactivated widget's ancestor" errors
-          // when widget try to rebuild with the new mode
           context.go('/');
         }
       } catch (e) {

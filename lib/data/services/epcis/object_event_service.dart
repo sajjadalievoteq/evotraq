@@ -327,7 +327,6 @@ class ObjectEventService {
         }
       }
     } catch (_) {
-      // Fall back to raw body string below.
     }
     return data.toString();
   }
@@ -947,7 +946,6 @@ class ObjectEventService {
     }
   }
 
-  /// Paginated multi-filter search — hits GET /events/object/search.
   Future<Map<String, dynamic>> searchObjectEvents({
     String? action,
     String? bizStep,
@@ -1015,7 +1013,6 @@ class ObjectEventService {
     }
   }
 
-  /// Chronological event history for an EPC — hits GET /events/object/epc/{epc}/history.
   Future<List<ObjectEvent>> getEpcHistory(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(

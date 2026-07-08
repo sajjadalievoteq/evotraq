@@ -1,7 +1,5 @@
 import 'package:traqtrace_app/features/operations/shared/models/pharma_return_reason.dart';
 
-/// Navigation payload when initiating pharma return shipping or return receiving
-/// from a completed shipping / receiving operation.
 class PharmaReturnContext {
   const PharmaReturnContext({
     required this.sourceEventId,
@@ -27,14 +25,11 @@ class PharmaReturnContext {
   final int? quantity;
   final String? productDescription;
   final PharmaReturnReason? returnReason;
-  /// Set when navigating to return receiving after a return-shipping event.
   final String? returnShippingEventId;
 
-  /// Return shipping: ship from receiver back to original sender.
   String get returnShippingSourceGln => receiverGln;
   String get returnShippingDestinationGln => senderGln;
 
-  /// Return receiving: returned from receiver, accepted at original sender.
   String get returnReceivingSourceGln => receiverGln;
   String get returnReceivingDestinationGln => senderGln;
 

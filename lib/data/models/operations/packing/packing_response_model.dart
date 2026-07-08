@@ -108,7 +108,6 @@ class PackingResponse {
 
   String? get operationId => packingOperationId;
 
-  /// ID used for list selection and detail navigation.
   String? get navigableOperationId {
     final id = _readNonEmptyString(packingOperationId);
     if (id != null) return id;

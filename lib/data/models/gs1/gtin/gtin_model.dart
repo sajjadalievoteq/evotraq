@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 
 class GTIN extends Equatable {
+  final int? id;
   final String gtinCode;
   final String productName;
   final String? manufacturer;
@@ -87,6 +88,7 @@ class GTIN extends Equatable {
   final List<String> childGtinCodes;
 
   const GTIN({
+    this.id,
     required this.gtinCode,
     required this.productName,
     this.manufacturer,
@@ -158,6 +160,7 @@ class GTIN extends Equatable {
 
   @override
   List<Object?> get props => [
+        id,
         gtinCode,
         productName,
         manufacturer,
@@ -228,6 +231,7 @@ class GTIN extends Equatable {
       ];
 
   GTIN copyWith({
+    int? id,
     String? gtinCode,
     String? productName,
     String? manufacturer,
@@ -297,6 +301,7 @@ class GTIN extends Equatable {
     List<String>? childGtinCodes,
   }) {
     return GTIN(
+      id: id ?? this.id,
       gtinCode: gtinCode ?? this.gtinCode,
       productName: productName ?? this.productName,
       manufacturer: manufacturer ?? this.manufacturer,
@@ -377,6 +382,7 @@ class GTIN extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      if (id != null) 'id': id,
       'gtin': gtinCode,
       'productName': productName,
       'manufacturer': manufacturer ?? '',
@@ -490,6 +496,7 @@ class GTIN extends Equatable {
     }
 
     return GTIN(
+      id: json['id'] != null ? int.tryParse(json['id'].toString()) : null,
       gtinCode: json['gtinCode'] ?? json['gtin'] ?? '',
       productName: json['productName'] ?? '',
       manufacturer: json['manufacturer'],

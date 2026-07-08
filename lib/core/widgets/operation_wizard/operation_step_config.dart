@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Configuration for a single step in an operation wizard stepper.
 class OperationStepConfig {
   const OperationStepConfig({
     required this.label,
@@ -10,7 +9,6 @@ class OperationStepConfig {
   final String label;
   final String iconAsset;
 
-  /// Wizard steps shared by most logistics / lifecycle operations.
   static const details = OperationStepConfig(
     label: 'Details',
     iconAsset: AppAssets.iconPin,

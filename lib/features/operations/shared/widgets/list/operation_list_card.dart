@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Status chip configuration for [OperationListCard].
 class OperationListCardStatus {
   const OperationListCardStatus({
     required this.color,
@@ -17,7 +16,6 @@ class OperationListCardStatus {
   final bool countAsBadge;
 }
 
-/// Single icon + text row in [OperationListCard].
 class OperationListCardRow {
   const OperationListCardRow({
     required this.text,
@@ -40,7 +38,6 @@ class OperationListCardRow {
   final double? fontSize;
 }
 
-/// Shared list card matching commissioning/shipping visual style.
 class OperationListCard extends StatelessWidget {
   const OperationListCard({
     super.key,

@@ -1,3 +1,5 @@
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
+
 class ObjectEventSharedUiConstants {
   ObjectEventSharedUiConstants._();
 
@@ -15,23 +17,11 @@ class ObjectEventSharedUiConstants {
 
   static const String emDash = '—';
 
-  static const String _cbvHttpsPrefix = 'https://ref.gs1.org/cbv/BizStep-';
-  static const String _cbvUrnPrefix = 'urn:epcglobal:cbv:bizstep:';
-
   static String friendlyBizStep(String? bizStep) {
-    if (bizStep == null) return emDash;
-    var s = bizStep
-        .replaceFirst(_cbvHttpsPrefix, '')
-        .replaceFirst(_cbvUrnPrefix, '')
-        .replaceAll('_', ' ');
-    if (s.isEmpty) return bizStep;
-    return s[0].toUpperCase() + s.substring(1);
+    return CbvDisplayUtils.displayBizStep(bizStep, fallback: emDash);
   }
 
   static String friendlyDisposition(String? disposition) {
-    if (disposition == null) return emDash;
-    final s = disposition.split('/').last.split(':').last.replaceAll('_', ' ');
-    if (s.isEmpty) return disposition;
-    return s[0].toUpperCase() + s.substring(1);
+    return CbvDisplayUtils.displayDisposition(disposition, fallback: emDash);
   }
 }

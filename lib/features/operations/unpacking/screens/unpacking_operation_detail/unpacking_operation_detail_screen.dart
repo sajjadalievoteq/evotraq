@@ -35,7 +35,6 @@ final _unpackingDetailConfig = OperationDetailScreenConfig<UnpackingResponse>(
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display unpacking operation details.
 class UnpackingOperationDetailScreen
     extends GenericOperationDetailScreen<UnpackingResponse> {
   UnpackingOperationDetailScreen({

@@ -45,7 +45,6 @@ class ObjectEventFormScreen extends StatefulWidget {
 
   final VoidCallback? onEmbeddedActionSuccess;
 
-  /// Current EPCIS disposition of the item being acted on (from SGTIN/item detail).
   final String? currentItemDisposition;
 
   const ObjectEventFormScreen({
@@ -382,11 +381,9 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     });
   }
 
-  // ignore: unused_element
   void _showHelpDialog() =>
       ObjectEventFormEntryDialogs.showHelpDialog(context: context);
 
-  // ignore: unused_element
   Future<void> _runSchemaValidationTest() async {
     setState(() {
       _isLoading = true;

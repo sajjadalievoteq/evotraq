@@ -5,7 +5,6 @@ import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_vali
 
 enum AppEventColorScheme { admin, epcis }
 
-/// Centralized color mapper for repeated UI status/type palettes.
 abstract final class AppColorMapper {
   static Color operationStatus(OperationStatus status) {
     return switch (status) {

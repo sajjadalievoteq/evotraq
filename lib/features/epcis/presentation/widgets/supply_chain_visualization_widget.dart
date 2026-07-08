@@ -263,7 +263,6 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     final hierarchyDepth = hierarchy['hierarchyDepth'] ?? 0;
     final totalItemCount = hierarchy['totalItemCount'] ?? 0;
     
-    // Debug the specific values being used in the UI
     print('DEBUG UI VALUES:');
     print('  - directChildren.length: ${directChildren.length}');
     print('  - totalItemCount: $totalItemCount');
@@ -374,7 +373,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white, // White text for visibility against blue background
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 4),
@@ -382,7 +381,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: Colors.white70, // Slightly transparent white for labels
+            color: Colors.white70,
           ),
         ),
       ],
@@ -488,7 +487,6 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Root parent container
         Card(
           margin: const EdgeInsets.symmetric(vertical: 2.0),
           child: ListTile(
@@ -503,7 +501,6 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
                 : null,
           ),
         ),
-        // Direct children
         ...directChildren.map((child) => _buildChildItem(child, 1)),
       ],
     );

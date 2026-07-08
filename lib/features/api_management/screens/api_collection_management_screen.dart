@@ -9,8 +9,6 @@ import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for managing API Collections
-/// Allows creating, editing, and managing API collections and their API definitions
 class ApiCollectionManagementScreen extends StatefulWidget {
   const ApiCollectionManagementScreen({super.key});
 
@@ -81,7 +79,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
           return Row(
             children: [
-              // Collections List (Left Panel)
               SizedBox(
                 width: 400,
                 child: Column(
@@ -93,7 +90,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                 ),
               ),
               const VerticalDivider(width: 1),
-              // API Details (Right Panel)
               Expanded(
                 child: state.selectedCollection != null
                     ? _buildApiDetailsPanel(state)
@@ -212,7 +208,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
   Widget _buildCollectionsList(ApiCollectionState state) {
     var collections = state.collections;
 
-    // Apply filters
     if (_searchController.text.isNotEmpty) {
       final query = _searchController.text.toLowerCase();
       collections = collections.where((c) =>
@@ -337,7 +332,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
 
     return Column(
       children: [
-        // Collection Header
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -417,7 +411,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
             ],
           ),
         ),
-        // APIs Section
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -443,7 +436,6 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
             ],
           ),
         ),
-        // APIs List
         Expanded(
           child: apis.isEmpty
               ? Center(

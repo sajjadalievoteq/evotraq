@@ -94,6 +94,7 @@ class Constants {
   static const String gs1SgtinNewRoute = '/gs1/sgtins/new';
   static const String gs1SgtinDetailRoute = '/gs1/sgtins/:id';
   static const String gs1SgtinEditRoute = '/gs1/sgtins/:id/edit';
+  static const String gs1SgtinByEpcRoute = '/gs1/sgtins/by-epc';
   static const String gs1EpcConversionRoute = '/gs1/epc-conversion';
   static const String gs1ValidationDemoRoute = '/gs1/validation-demo';
 

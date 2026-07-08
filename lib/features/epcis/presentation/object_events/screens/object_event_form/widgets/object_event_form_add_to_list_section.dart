@@ -21,7 +21,6 @@ class ObjectEventFormListItemData {
 class ObjectEventFormAddToListSection extends StatelessWidget {
   final String title;
   final bool showTitleRequiredIndicator;
-  /// When true, shows a title asterisk if any field in [requiredFieldNames] is mandatory.
   final List<String> requiredFieldNames;
   final String? action;
   final String? businessStep;

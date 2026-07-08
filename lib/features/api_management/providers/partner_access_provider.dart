@@ -84,7 +84,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
   }) : _service = service ?? PartnerAccessApiService(dioService: dioService),
        super(const PartnerAccessState.initial());
 
-  // ==================== Load Operations ====================
 
   void selectPartner(String partnerId) {
     emit(state.copyWith(selectedPartnerId: partnerId, error: null));
@@ -144,7 +143,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
     }
   }
 
-  // ==================== Collection Access Operations ====================
 
   Future<PartnerCollectionAccess?> grantCollectionAccess(
     String partnerId,
@@ -165,7 +163,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
         validUntil: validUntil,
       );
       
-      // Refresh the access list
       await loadAccessSummary(partnerId);
       return access;
     } catch (e) {
@@ -188,7 +185,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
         ),
       );
       
-      // Refresh summary
       if (state.accessSummary != null) {
         await loadAccessSummary(partnerId);
       }
@@ -200,7 +196,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
     }
   }
 
-  // ==================== Individual API Access Operations ====================
 
   Future<PartnerApiAccess?> grantApiAccess(
     String partnerId,
@@ -219,7 +214,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
         validUntil: validUntil,
       );
       
-      // Refresh the access list
       await loadAccessSummary(partnerId);
       return access;
     } catch (e) {
@@ -245,7 +239,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
         validUntil: validUntil,
       );
       
-      // Refresh the access list
       await loadAccessSummary(partnerId);
       return accessList;
     } catch (e) {
@@ -267,7 +260,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
         ),
       );
       
-      // Refresh summary
       if (state.accessSummary != null) {
         await loadAccessSummary(partnerId);
       }
@@ -279,7 +271,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
     }
   }
 
-  // ==================== Access Validation ====================
 
   Future<bool> checkApiAccess(String partnerId, String apiId) async {
     try {
@@ -299,7 +290,6 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
     }
   }
 
-  // ==================== Utility ====================
 
   void clearSelection() {
     emit(const PartnerAccessState.initial());

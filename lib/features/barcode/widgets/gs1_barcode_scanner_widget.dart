@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Camera-based GS1 barcode scanner (DataMatrix + Code 128).
 class GS1BarcodeScannerWidget extends StatefulWidget {
   const GS1BarcodeScannerWidget({
     super.key,

@@ -22,7 +22,6 @@ import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_op
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/widgets/unpacking_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_ui_constants.dart';
 
-/// Screen to list all unpacking operations with search capabilities.
 class UnpackingOperationListScreen extends StatelessWidget {
   const UnpackingOperationListScreen({
     super.key,

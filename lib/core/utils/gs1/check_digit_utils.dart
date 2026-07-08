@@ -1,6 +1,4 @@
-/// Shared GS1 Mod-10 check-digit helpers for GTIN/GLN/SSCC style identifiers.
 abstract final class CheckDigitUtils {
-  /// Calculates GS1 Mod-10 check digit for [bodyDigits] (without check digit).
   static int calculateMod10(String bodyDigits) {
     var sum = 0;
     var multiplyBy3 = true;
@@ -16,7 +14,6 @@ abstract final class CheckDigitUtils {
     return calculateMod10(bodyDigits).toString();
   }
 
-  /// Validates [identifierWithCheckDigit] using GS1 Mod-10.
   static bool isValidMod10(String identifierWithCheckDigit) {
     if (identifierWithCheckDigit.length < 2) return false;
     final body =

@@ -2,7 +2,6 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
-/// Filters and sorts packing operations for the list screen.
 class PackingOperationListFilter {
   PackingOperationListFilter._();
 

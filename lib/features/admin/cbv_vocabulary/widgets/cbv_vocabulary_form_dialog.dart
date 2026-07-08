@@ -4,9 +4,6 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public types
-// ─────────────────────────────────────────────────────────────────────────────
 
 enum CbvVocabType { bizStep, disposition }
 
@@ -28,9 +25,6 @@ class CbvVocabularyFormResult {
   final String cbvVersion;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Entry point — show the dialog and return the result
-// ─────────────────────────────────────────────────────────────────────────────
 
 Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
   required BuildContext context,
@@ -47,9 +41,6 @@ Future<CbvVocabularyFormResult?> showCbvVocabularyFormDialog({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Dialog widget
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _CbvVocabularyFormDialog extends StatefulWidget {
   const _CbvVocabularyFormDialog({
@@ -75,7 +66,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
   bool _autoGenerateCode = true;
   bool _isSaving = false;
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
 
   String get _typeName =>
       widget.type == CbvVocabType.bizStep ? 'Biz Step' : 'Disposition';
@@ -96,7 +86,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
         .replaceAll(RegExp(r'^_+|_+$'), '');
   }
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -125,7 +114,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
     setState(() {});
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -140,7 +128,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
     Navigator.of(context).pop(result);
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +153,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Label ────────────────────────────────────────────────
                 TextFormField(
                   controller: _labelController,
                   textCapitalization: TextCapitalization.words,
@@ -183,7 +169,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                 ),
                 const SizedBox(height: TraqSpacing.lg),
 
-                // ── Code ─────────────────────────────────────────────────
                 TextFormField(
                   controller: _codeController,
                   inputFormatters: [
@@ -226,7 +211,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                 ),
                 const SizedBox(height: TraqSpacing.lg),
 
-                // ── URN preview ───────────────────────────────────────────
                 if (urnPreview.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.all(TraqSpacing.md),
@@ -253,7 +237,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                   ),
                 const SizedBox(height: TraqSpacing.lg),
 
-                // ── CBV Version ───────────────────────────────────────────
                 DropdownButtonFormField<String>(
                   value: _cbvVersion,
                   decoration: const InputDecoration(
@@ -272,7 +255,6 @@ class _CbvVocabularyFormDialogState extends State<_CbvVocabularyFormDialog> {
                 ),
                 const SizedBox(height: TraqSpacing.lg),
 
-                // ── Enabled switch ────────────────────────────────────────
                 Row(
                   children: [
                     Text('Enabled by default', style: context.text.body),

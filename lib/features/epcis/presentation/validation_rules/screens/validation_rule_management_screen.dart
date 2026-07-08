@@ -10,9 +10,7 @@ import 'package:uuid/uuid.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// A screen for managing validation rules
 class ValidationRuleManagementScreen extends StatefulWidget {
-  /// Constructor
   const ValidationRuleManagementScreen({Key? key}) : super(key: key);
 
   @override
@@ -31,7 +29,6 @@ class _ValidationRuleManagementScreenState
   @override
   void initState() {
     super.initState();
-    // No need to explicitly load rules, the provider does this in its constructor
   }
 
   @override
@@ -203,7 +200,6 @@ class _ValidationRuleManagementScreenState
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Help button
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: _isFabOpen ? 56.0 : 0.0,
@@ -225,7 +221,6 @@ class _ValidationRuleManagementScreenState
                 )
               : const SizedBox.shrink(),
         ),
-        // Import rules button
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: _isFabOpen ? 56.0 : 0.0,
@@ -247,7 +242,6 @@ class _ValidationRuleManagementScreenState
                 )
               : const SizedBox.shrink(),
         ),
-        // Add rule button
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: _isFabOpen ? 56.0 : 0.0,
@@ -269,7 +263,6 @@ class _ValidationRuleManagementScreenState
                 )
               : const SizedBox.shrink(),
         ),
-        // Main FAB
         FloatingActionButton(
           heroTag: "main",
           onPressed: () {
@@ -279,7 +272,7 @@ class _ValidationRuleManagementScreenState
           },
           child: AnimatedRotation(
             duration: const Duration(milliseconds: 200),
-            turns: _isFabOpen ? 0.125 : 0.0, // 45 degrees when open
+            turns: _isFabOpen ? 0.125 : 0.0,
             child: TraqIcon(_isFabOpen ? AppAssets.iconX : AppAssets.iconMenu),
           ),
         ),
@@ -314,10 +307,8 @@ class _ValidationRuleManagementScreenState
           );
         }
 
-        // Apply filters
         List<ValidationRule> filteredRules = state.validationRules;
 
-        // Custom rules filter
         if (_showOnlyCustomRules) {
           final predefinedRuleIds = cubit
               .getPredefinedRules()
@@ -328,7 +319,6 @@ class _ValidationRuleManagementScreenState
               .toList();
         }
 
-        // Event type filter
         if (_selectedEventType.isNotEmpty) {
           if (_selectedEventType == 'Common') {
             filteredRules = filteredRules
@@ -342,14 +332,12 @@ class _ValidationRuleManagementScreenState
           }
         }
 
-        // Severity filter
         if (_selectedSeverity != null) {
           filteredRules = filteredRules
               .where((r) => r.severity == _selectedSeverity)
               .toList();
         }
 
-        // Text search
         if (_filter.isNotEmpty) {
           final searchLower = _filter.toLowerCase();
           filteredRules = filteredRules

@@ -1,5 +1,3 @@
-/// Partner model for B2B API integration
-/// Supports both inbound (partner calls us) and outbound (we call partner) integrations.
 class Partner {
   final String id;
   final String partnerCode;
@@ -15,7 +13,6 @@ class Partner {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // Sync configuration
   final SyncDirection syncDirection;
   final bool syncEnabled;
   final int syncIntervalMinutes;
@@ -23,7 +20,6 @@ class Partner {
   final String? lastSyncStatus;
   final String? lastSyncError;
 
-  // Outbound connection configuration
   final String? outboundApiUrl;
   final String? outboundEventsEndpoint;
   final String? outboundMasterdataEndpoint;
@@ -39,7 +35,6 @@ class Partner {
   final int outboundTimeoutSeconds;
   final int outboundRetryCount;
 
-  // Data filtering
   final String? syncEventTypes;
   final String? syncLocationFilter;
   final String? syncProductFilter;
@@ -59,14 +54,12 @@ class Partner {
     required this.active,
     required this.createdAt,
     this.updatedAt,
-    // Sync configuration
     this.syncDirection = SyncDirection.inbound,
     this.syncEnabled = false,
     this.syncIntervalMinutes = 60,
     this.lastSyncAt,
     this.lastSyncStatus,
     this.lastSyncError,
-    // Outbound connection
     this.outboundApiUrl,
     this.outboundEventsEndpoint,
     this.outboundMasterdataEndpoint,
@@ -81,7 +74,6 @@ class Partner {
     this.outboundPasswordConfigured = false,
     this.outboundTimeoutSeconds = 30,
     this.outboundRetryCount = 3,
-    // Data filtering
     this.syncEventTypes,
     this.syncLocationFilter,
     this.syncProductFilter,
@@ -107,7 +99,6 @@ class Partner {
       updatedAt: json['updatedAt'] != null 
           ? DateTime.parse(json['updatedAt']) 
           : null,
-      // Sync configuration
       syncDirection: SyncDirection.fromString(json['syncDirection'] ?? 'INBOUND'),
       syncEnabled: json['syncEnabled'] ?? false,
       syncIntervalMinutes: json['syncIntervalMinutes'] ?? 60,
@@ -116,7 +107,6 @@ class Partner {
           : null,
       lastSyncStatus: json['lastSyncStatus'],
       lastSyncError: json['lastSyncError'],
-      // Outbound connection
       outboundApiUrl: json['outboundApiUrl'],
       outboundEventsEndpoint: json['outboundEventsEndpoint'],
       outboundMasterdataEndpoint: json['outboundMasterdataEndpoint'],
@@ -133,7 +123,6 @@ class Partner {
       outboundPasswordConfigured: json['outboundPasswordConfigured'] ?? false,
       outboundTimeoutSeconds: json['outboundTimeoutSeconds'] ?? 30,
       outboundRetryCount: json['outboundRetryCount'] ?? 3,
-      // Data filtering
       syncEventTypes: json['syncEventTypes'],
       syncLocationFilter: json['syncLocationFilter'],
       syncProductFilter: json['syncProductFilter'],
@@ -156,11 +145,9 @@ class Partner {
       'contactName': contactName,
       'contactPhone': contactPhone,
       'active': active,
-      // Sync configuration
       'syncDirection': syncDirection.value,
       'syncEnabled': syncEnabled,
       'syncIntervalMinutes': syncIntervalMinutes,
-      // Outbound connection
       'outboundApiUrl': outboundApiUrl,
       'outboundEventsEndpoint': outboundEventsEndpoint,
       'outboundMasterdataEndpoint': outboundMasterdataEndpoint,
@@ -172,7 +159,6 @@ class Partner {
       'outboundUsername': outboundUsername,
       'outboundTimeoutSeconds': outboundTimeoutSeconds,
       'outboundRetryCount': outboundRetryCount,
-      // Data filtering
       'syncEventTypes': syncEventTypes,
       'syncLocationFilter': syncLocationFilter,
       'syncProductFilter': syncProductFilter,
@@ -180,17 +166,14 @@ class Partner {
     };
   }
 
-  /// Whether this partner has outbound integration configured
   bool get hasOutboundIntegration => 
       syncDirection == SyncDirection.outbound || 
       syncDirection == SyncDirection.bidirectional;
 
-  /// Whether this partner has inbound integration configured
   bool get hasInboundIntegration => 
       syncDirection == SyncDirection.inbound || 
       syncDirection == SyncDirection.bidirectional;
 
-  /// Get sync status display text
   String get syncStatusDisplay {
     if (!syncEnabled) return 'Disabled';
     if (lastSyncStatus == null) return 'Never synced';
@@ -211,14 +194,12 @@ class Partner {
     bool? active,
     DateTime? createdAt,
     DateTime? updatedAt,
-    // Sync configuration
     SyncDirection? syncDirection,
     bool? syncEnabled,
     int? syncIntervalMinutes,
     DateTime? lastSyncAt,
     String? lastSyncStatus,
     String? lastSyncError,
-    // Outbound connection
     String? outboundApiUrl,
     String? outboundEventsEndpoint,
     String? outboundMasterdataEndpoint,
@@ -233,7 +214,6 @@ class Partner {
     bool? outboundPasswordConfigured,
     int? outboundTimeoutSeconds,
     int? outboundRetryCount,
-    // Data filtering
     String? syncEventTypes,
     String? syncLocationFilter,
     String? syncProductFilter,
@@ -253,14 +233,12 @@ class Partner {
       active: active ?? this.active,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      // Sync configuration
       syncDirection: syncDirection ?? this.syncDirection,
       syncEnabled: syncEnabled ?? this.syncEnabled,
       syncIntervalMinutes: syncIntervalMinutes ?? this.syncIntervalMinutes,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       lastSyncStatus: lastSyncStatus ?? this.lastSyncStatus,
       lastSyncError: lastSyncError ?? this.lastSyncError,
-      // Outbound connection
       outboundApiUrl: outboundApiUrl ?? this.outboundApiUrl,
       outboundEventsEndpoint: outboundEventsEndpoint ?? this.outboundEventsEndpoint,
       outboundMasterdataEndpoint: outboundMasterdataEndpoint ?? this.outboundMasterdataEndpoint,
@@ -275,7 +253,6 @@ class Partner {
       outboundPasswordConfigured: outboundPasswordConfigured ?? this.outboundPasswordConfigured,
       outboundTimeoutSeconds: outboundTimeoutSeconds ?? this.outboundTimeoutSeconds,
       outboundRetryCount: outboundRetryCount ?? this.outboundRetryCount,
-      // Data filtering
       syncEventTypes: syncEventTypes ?? this.syncEventTypes,
       syncLocationFilter: syncLocationFilter ?? this.syncLocationFilter,
       syncProductFilter: syncProductFilter ?? this.syncProductFilter,
@@ -284,13 +261,9 @@ class Partner {
   }
 }
 
-/// Direction of data synchronization with the partner
 enum SyncDirection {
-  /// Partner calls our APIs to send/receive data
   inbound('INBOUND', 'Inbound', 'Partner calls us'),
-  /// We call partner\'s APIs to send/receive data
   outbound('OUTBOUND', 'Outbound', 'We call partner'),
-  /// Both directions
   bidirectional('BIDIRECTIONAL', 'Bidirectional', 'Both ways');
 
   final String value;
@@ -306,7 +279,6 @@ enum SyncDirection {
   }
 }
 
-/// Authentication type for outbound connections (when we call partner's APIs)
 enum OutboundAuthType {
   none('NONE', 'None', 'No authentication'),
   apiKey('API_KEY', 'API Key', 'API key in header'),

@@ -1,5 +1,4 @@
 class NotificationConstants {
-  // EPCIS Event Types
   static const List<Map<String, String>> eventTypes = [
     {
       'value': 'ObjectEvent',
@@ -28,7 +27,6 @@ class NotificationConstants {
     },
   ];
 
-  // Business Steps (CBV Standard)
   static const List<Map<String, String>> businessSteps = [
     {
       'value': 'urn:epcglobal:cbv:bizstep:accepting',
@@ -207,7 +205,6 @@ class NotificationConstants {
     },
   ];
 
-  // Dispositions (CBV Standard)
   static const List<Map<String, String>> dispositions = [
     {
       'value': 'urn:epcglobal:cbv:disp:active',
@@ -336,7 +333,6 @@ class NotificationConstants {
     },
   ];
 
-  // Subscription Types
   static const List<Map<String, String>> subscriptionTypes = [
     {
       'value': 'REALTIME',
@@ -355,7 +351,6 @@ class NotificationConstants {
     },
   ];
 
-  // Delivery Methods
   static const List<Map<String, String>> deliveryMethods = [
     {
       'value': 'WEBHOOK',
@@ -369,7 +364,6 @@ class NotificationConstants {
     },
   ];
 
-  // Notification Formats
   static const List<Map<String, String>> notificationFormats = [
     {
       'value': 'JSON',

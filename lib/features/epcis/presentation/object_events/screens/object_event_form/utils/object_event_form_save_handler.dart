@@ -189,7 +189,6 @@ class ObjectEventFormSaveHandler {
         }
       }
     } catch (_) {
-      // Fall through to ApiException message helpers.
     }
     return e.getUserFriendlyMessage();
   }

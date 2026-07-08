@@ -29,15 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      // Precache images first — before any other async work — so the
-      // background and logo are in the image cache when _assetsReady flips
-      // to true and CardWithBackgroundWidget / Image.asset first render.
       _precacheAndInit();
     }
   }
 
   Future<void> _precacheAndInit() async {
-    // Precache both assets before revealing the splash UI.
     await Future.wait([
       precacheImage(const AssetImage(AppAssets.traqBackgroundPng), context)
           .catchError((_) {}),
@@ -48,7 +44,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     setState(() => _assetsReady = true);
 
-    // Now kick off auth + vocabulary + minimum display time in parallel.
     await _initializeApp();
   }
 
@@ -111,8 +106,6 @@ class _SplashScreenState extends State<SplashScreen> {
     final size = MediaQuery.sizeOf(context);
     final displayHeight = size.height > 0 ? size.height : 800.0;
 
-    // Before assets are in the image cache, render a plain background that
-    // matches the card so there is no visible first-frame flash.
     if (!_assetsReady) {
       return Scaffold(backgroundColor: c.background, body: const SizedBox.expand());
     }

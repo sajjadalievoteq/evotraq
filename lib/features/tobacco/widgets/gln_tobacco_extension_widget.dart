@@ -8,15 +8,12 @@ import '../../../core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget that displays/edits tobacco extension data for a GLN (location)
-/// Can be embedded in GLN detail screens or used standalone
 class GLNTobaccoExtensionWidget extends StatefulWidget {
   final int? glnId;
   final String? glnCode;
   final bool isEditing;
   final Function(GLNTobaccoExtension?)? onSaved;
 
-  /// From master-data GLN GET response when present; avoids a separate extension API call.
   final GLNTobaccoExtension? initialExtension;
 
   const GLNTobaccoExtensionWidget({
@@ -33,13 +30,11 @@ class GLNTobaccoExtensionWidget extends StatefulWidget {
       GLNTobaccoExtensionWidgetState();
 }
 
-/// State class for GLNTobaccoExtensionWidget
 class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   GLNTobaccoExtension? _extension;
   bool _isLoading = true;
   bool _hasExtension = false;
 
-  // US State options (for state_tobacco_license_state - max 3 chars)
   static const Map<String, String> _usStateOptions = {
     'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
     'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
@@ -57,7 +52,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
     'PR': 'Puerto Rico', 'VI': 'Virgin Islands', 'GU': 'Guam',
   };
 
-  // Country options (ISO 3166-1 alpha-3) for WHO FCTC Party Country
   static const Map<String, String> _countryOptions = {
     'USA': 'United States', 'GBR': 'United Kingdom', 'DEU': 'Germany',
     'FRA': 'France', 'ITA': 'Italy', 'ESP': 'Spain', 'CAN': 'Canada',
@@ -74,11 +68,9 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
     'IRL': 'Ireland', 'NZL': 'New Zealand', 'HKG': 'Hong Kong', 'TWN': 'Taiwan',
   };
 
-  // State variables for dropdowns (replacing text controllers)
   String? _stateTobaccoLicenseState;
   String? _whoFctcPartyCountry;
 
-  // EU TPD Section
   final _euEconomicOperatorIdController = TextEditingController();
   final _euFacilityIdController = TextEditingController();
   bool _euTpdRegistered = false;
@@ -86,52 +78,43 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   bool _euFirstRetailOutlet = false;
   final _euImporterIdController = TextEditingController();
 
-  // Tax Stamp Authority
   final _taxStampAuthorityIdController = TextEditingController();
   final _taxStampAuthorityNameController = TextEditingController();
   DateTime? _taxStampAuthorizationDate;
   DateTime? _taxStampAuthorizationExpiry;
   final _authorizedTaxStampTypesController = TextEditingController();
 
-  // FDA Tobacco Registration
   final _fdaTobaccoEstablishmentIdController = TextEditingController();
   DateTime? _fdaTobaccoRegistrationDate;
   DateTime? _fdaTobaccoRegistrationExpiry;
   final _fdaPmtaSiteListingController = TextEditingController();
   final _fdaSeSiteListingController = TextEditingController();
 
-  // PACT Act Compliance
   bool _pactActRegistered = false;
   final _pactActRegistrationNumberController = TextEditingController();
   DateTime? _pactActRegistrationDate;
   final _pactAtfLicenseNumberController = TextEditingController();
 
-  // State Tobacco License
   final _stateTobaccoLicenseNumberController = TextEditingController();
   final _stateTobaccoLicenseTypeController = TextEditingController();
   DateTime? _stateTobaccoLicenseExpiry;
-  // _stateTobaccoLicenseState is now a dropdown state variable (defined above)
 
-  // Wholesale/Distribution
   final _tobaccoWholesaleLicenseNumberController = TextEditingController();
   DateTime? _tobaccoWholesaleLicenseExpiry;
   bool _masterSettlementAgreementParticipant = false;
   final _msaEscrowAccountStatusController = TextEditingController();
 
-  // Manufacturing
   bool _isManufacturingFacility = false;
   final _manufacturingLicenseNumberController = TextEditingController();
   DateTime? _manufacturingLicenseExpiry;
   final _manufacturingCapacityController = TextEditingController();
   final _tobaccoTypesManufacturedController = TextEditingController();
 
-  // UI Issuer
   bool _isUiIssuer = false;
   final _uiIssuerRegistrationIdController = TextEditingController();
   final _uiSystemProviderController = TextEditingController();
   final _antiTamperingDeviceProviderController = TextEditingController();
 
-  // Import/Export
   final _customsRegistrationNumberController = TextEditingController();
   bool _authorizedEconomicOperator = false;
   final _aeoCertificateNumberController = TextEditingController();
@@ -139,19 +122,16 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   bool _bondedWarehouse = false;
   final _bondedWarehouseLicenseNumberController = TextEditingController();
 
-  // Security & Compliance
   bool _hasSecurityFeatures = false;
   bool _videoSurveillance = false;
   bool _accessControlSystem = false;
   final _inventoryTrackingSystemController = TextEditingController();
 
-  // Retailer-Specific
   bool _isRetailLocation = false;
   final _ageVerificationSystemController = TextEditingController();
   final _tobaccoSalesPermitNumberController = TextEditingController();
   DateTime? _tobaccoSalesPermitExpiry;
 
-  // Operational Details
   final _receivingHoursController = TextEditingController();
   final _dispatchHoursController = TextEditingController();
   final _storageCapacityPalletsController = TextEditingController();
@@ -161,7 +141,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   final _climateControlHumidityMinController = TextEditingController();
   final _climateControlHumidityMaxController = TextEditingController();
 
-  // Responsible Persons
   final _responsiblePersonNameController = TextEditingController();
   final _responsiblePersonEmailController = TextEditingController();
   final _responsiblePersonPhoneController = TextEditingController();
@@ -172,8 +151,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
   final _regulatoryAffairsContactEmailController = TextEditingController();
   final _regulatoryAffairsContactPhoneController = TextEditingController();
 
-  // International
-  // _whoFctcPartyCountry is now a dropdown state variable (defined above)
   final _ukTobaccoTraceabilityIdController = TextEditingController();
   final _canadaTobaccoLicenseIdController = TextEditingController();
   final _australiaTobaccoLicenseIdController = TextEditingController();
@@ -261,7 +238,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
       return;
     }
 
-    // Tobacco extension is supplied by the master-data GLN response when present.
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -344,7 +320,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
     _australiaTobaccoLicenseIdController.text = ext.australiaTobaccoLicenseId ?? '';
   }
 
-  /// Check if user has entered any tobacco data
   bool get hasData =>
       _euEconomicOperatorIdController.text.isNotEmpty ||
       _euTpdRegistered ||
@@ -354,13 +329,10 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
       _isManufacturingFacility ||
       _isUiIssuer;
 
-  /// Validate the extension form
   String? validate() {
-    // All fields are optional
     return null;
   }
 
-  /// Build the extension object from form data
   GLNTobaccoExtension? buildExtension({int? glnId, String? glnCode}) {
     if (!hasData) return null;
 
@@ -525,16 +497,11 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Only show if in tobacco mode
-    // Use listen: false to avoid rebuilding when provider changes and to prevent
-    // "Looking up a deactivated widget's ancestor" errors during navigation
-    // Wrap in try-catch to handle case when widget is deactivated during mode change
     bool isTobaccoMode = false;
     try {
       final settings = context.read<SystemSettingsCubit>().state.settings;
       isTobaccoMode = settings.isTobaccoMode;
     } catch (e) {
-      // Widget is deactivated, return empty
       return const SizedBox.shrink();
     }
     
@@ -575,7 +542,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // EU TPD Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionEuTpd),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchEuTpdRegistered),
@@ -606,7 +572,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                     maxLength: 50),
                 const SizedBox(height: 16),
 
-                // Tax Stamp Authority Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionTaxStampAuthority),
                 _buildTextField(_taxStampAuthorityIdController,
                     GlnTobaccoExtensionUiConstants.labelTaxStampAuthorityId, maxLength: 50),
@@ -626,7 +591,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                     maxLength: 500),
                 const SizedBox(height: 16),
 
-                // FDA Tobacco Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionFdaTobaccoUs),
                 _buildTextField(_fdaTobaccoEstablishmentIdController,
                     GlnTobaccoExtensionUiConstants.labelFdaTobaccoEstablishmentId, maxLength: 50),
@@ -644,7 +608,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                     GlnTobaccoExtensionUiConstants.labelSeSiteListing, maxLength: 200),
                 const SizedBox(height: 16),
 
-                // PACT Act Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionPactActUs),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchPactActRegistered),
@@ -666,7 +629,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 ],
                 const SizedBox(height: 16),
 
-                // State License Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionStateTobaccoLicense),
                 _buildTextField(_stateTobaccoLicenseNumberController,
                     GlnTobaccoExtensionUiConstants.labelStateLicenseNumber, maxLength: 50),
@@ -695,7 +657,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 }),
                 const SizedBox(height: 16),
 
-                // Wholesale Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionWholesaleDistribution),
                 _buildTextField(_tobaccoWholesaleLicenseNumberController,
                     GlnTobaccoExtensionUiConstants.labelWholesaleLicenseNumber, maxLength: 50),
@@ -715,7 +676,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                       GlnTobaccoExtensionUiConstants.labelMsaEscrowAccountStatus, maxLength: 50),
                 const SizedBox(height: 16),
 
-                // Manufacturing Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionManufacturing),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchManufacturingFacility),
@@ -741,7 +701,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 ],
                 const SizedBox(height: 16),
 
-                // UI Issuer Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionUniqueIdentifierIssuance),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchUiIssuer),
@@ -761,7 +720,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 ],
                 const SizedBox(height: 16),
 
-                // Import/Export Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionImportExport),
                 _buildTextField(_customsRegistrationNumberController,
                     GlnTobaccoExtensionUiConstants.labelCustomsRegistrationNumber, maxLength: 50),
@@ -792,7 +750,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                       GlnTobaccoExtensionUiConstants.labelBondedWarehouseLicenseNumber, maxLength: 50),
                 const SizedBox(height: 16),
 
-                // Security Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionSecurityCompliance),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchHasSecurityFeatures),
@@ -819,7 +776,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                     GlnTobaccoExtensionUiConstants.labelInventoryTrackingSystem, maxLength: 200),
                 const SizedBox(height: 16),
 
-                // Retail Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionRetail),
                 SwitchListTile(
                   title: const Text(GlnTobaccoExtensionUiConstants.switchRetailLocation),
@@ -840,7 +796,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 ],
                 const SizedBox(height: 16),
 
-                // Operational Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionOperationalDetails),
                 _buildTextField(_receivingHoursController,
                     GlnTobaccoExtensionUiConstants.labelReceivingHours, maxLength: 100),
@@ -890,7 +845,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                 ],
                 const SizedBox(height: 16),
 
-                // Responsible Persons Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionResponsiblePersons),
                 _buildTextField(_responsiblePersonNameController,
                     GlnTobaccoExtensionUiConstants.labelResponsiblePersonName, maxLength: 200),
@@ -912,7 +866,6 @@ class GLNTobaccoExtensionWidgetState extends State<GLNTobaccoExtensionWidget> {
                     GlnTobaccoExtensionUiConstants.labelRegulatoryAffairsContactPhone, maxLength: 50),
                 const SizedBox(height: 16),
 
-                // International Section
                 _buildSectionHeader(GlnTobaccoExtensionUiConstants.sectionInternationalRegulatoryIds),
                 DropdownButtonFormField<String>(
                   value: _whoFctcPartyCountry,

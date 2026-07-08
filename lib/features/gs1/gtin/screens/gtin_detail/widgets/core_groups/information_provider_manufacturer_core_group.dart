@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
@@ -78,7 +78,7 @@ class InformationProviderManufacturerCoreGroupState
     if (_informationProviderGln == null && _manufacturerGln == null) return;
     try {
       final catalog =
-          await getIt<GLNService>().getAllGLNs(page: 0, size: 500);
+          await getIt<GlnPickerCatalog>().ensureLoaded();
       if (!mounted) return;
       setState(() {
         _informationProviderGln = resolveGlnForPicker(

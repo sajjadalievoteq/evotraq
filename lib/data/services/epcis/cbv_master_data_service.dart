@@ -10,8 +10,6 @@ import 'package:traqtrace_app/data/services/epcis/cbv_master_data_api_consts.dar
 class CbvMasterDataService {
   final DioService _dioService;
 
-  /// Cache for the enabled-only vocabulary session (used by event form dropdowns).
-  /// Admin "all items" calls are never cached so they always reflect the latest state.
   CbvVocabularySession? _enabledOnlyCache;
 
   CbvMasterDataService({required DioService dioService})
@@ -19,16 +17,7 @@ class CbvMasterDataService {
 
   String get _base => _dioService.baseUrl;
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Load
-  // ──────────────────────────────────────────────────────────────────────────
 
-  /// Loads the combined vocabulary session.
-  ///
-  /// [enabledOnly] — when `true` (default) returns only enabled items and
-  /// caches the result for fast repeat access (used by event form dropdowns).
-  /// Pass `enabledOnly: false` to retrieve all items including disabled ones
-  /// (admin management screen); this path is never cached.
   Future<CbvVocabularySession> loadVocabularySession({
     bool forceRefresh = false,
     bool enabledOnly = true,
@@ -68,9 +57,6 @@ class CbvMasterDataService {
     return session;
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Toggle enabled
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> toggleBizStepEnabled(String code,
       {required bool enabled}) async {
@@ -109,9 +95,6 @@ class CbvMasterDataService {
     _enabledOnlyCache = null;
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Create custom items
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<CbvVocabularyItem> createBizStep({
     required String code,
@@ -177,9 +160,6 @@ class CbvMasterDataService {
     return CbvVocabularyItem.fromJson(Map<String, dynamic>.from(decoded as Map));
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Delete custom items
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> deleteBizStep(String code) async {
     final url = '$_base${CbvMasterDataApiConsts.bizStepPath(code)}';
@@ -213,9 +193,6 @@ class CbvMasterDataService {
     _enabledOnlyCache = null;
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Pair management (admin only)
-  // ──────────────────────────────────────────────────────────────────────────
 
   Future<void> addPair(String bizStepCode, String dispCode) async {
     final url = '$_base${CbvMasterDataApiConsts.pairPath(bizStepCode, dispCode)}';

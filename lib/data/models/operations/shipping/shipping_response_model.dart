@@ -119,7 +119,6 @@ class ShippingResponse {
 
   String? get operationId => shippingOperationId;
 
-  /// ID used for list selection and detail navigation.
   String? get navigableOperationId {
     final id = _readNonEmptyString(shippingOperationId);
     if (id != null) return id;
@@ -129,7 +128,6 @@ class ShippingResponse {
         _readNonEmptyString(metadata?['eventId']);
   }
 
-  // Legacy compatibility aliases.
   int? get shippedItemsCount => shippedEpcsCount;
   List<String>? get childEpcList => epcList;
 

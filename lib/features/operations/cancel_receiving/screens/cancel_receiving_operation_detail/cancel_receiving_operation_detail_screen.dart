@@ -37,7 +37,6 @@ final _cancelReceivingDetailConfig =
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display cancel receiving operation details.
 class CancelReceivingOperationDetailScreen
     extends GenericOperationDetailScreen<CancelReceivingResponse> {
   CancelReceivingOperationDetailScreen({

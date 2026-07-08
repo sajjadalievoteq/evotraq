@@ -70,14 +70,11 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
            ),
        super(TransactionDocumentState.initial());
 
-  /// Get transaction events for a document
   Future<void> getTransactionEventsForDocument(String type, String id) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true, events: const []));
-      // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
 
-      // Log for debugging purposes
       logDocumentTypeDebug(type, standardType);
       print('Searching for document: Type="$standardType", ID="$id"');
       print(
@@ -91,7 +88,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
       print('Found ${events.length} events');
 
       if (events.isEmpty) {
-        // Try with just the short type as a fallback (for legacy data)
         final shortType = type.toLowerCase();
         print('No events found, trying fallback with short type: "$shortType"');
 
@@ -106,7 +102,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
           }
         } catch (fallbackError) {
           print('Fallback search failed: $fallbackError');
-          // Ignore fallback errors, we'll go with the original result
         }
       }
 
@@ -118,11 +113,9 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Check if a document reference is valid
   Future<bool> validateDocumentReference(String type, String id) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
       final isValid = await _service.isDocumentReferenceValid(standardType, id);
       emit(state.copyWith(isLoading: false));
@@ -133,7 +126,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Get document status
   Future<void> getDocumentStatus(String type, String id) async {
     try {
       emit(
@@ -143,7 +135,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
           documentStatus: const {},
         ),
       );
-      // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
       final status = await _service.getDocumentStatus(standardType, id);
       emit(state.copyWith(isLoading: false, documentStatus: status));
@@ -152,7 +143,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Get related documents
   Future<void> getRelatedDocuments(String type, String id) async {
     try {
       emit(
@@ -162,7 +152,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
           relatedDocuments: const {},
         ),
       );
-      // Standardize the document type to ensure proper URN format
       final standardType = standardizeDocumentType(type);
       final related = await _service.getRelatedDocuments(standardType, id);
       emit(state.copyWith(isLoading: false, relatedDocuments: related));
@@ -171,7 +160,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Create a link between documents
   Future<bool> createDocumentLink(
     String sourceType,
     String sourceId,
@@ -181,7 +169,6 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
   ) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      // Standardize both document types to ensure proper URN format
       final standardSourceType = standardizeDocumentType(sourceType);
       final standardTargetType = standardizeDocumentType(targetType);
 
@@ -200,14 +187,12 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Find original document for an EPC
   Future<Map<String, String>?> findOriginalDocumentForEPC(
     String epc, {
     String? type,
   }) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
-      // Standardize document type if provided
       String? standardType;
       if (type != null && type.isNotEmpty) {
         standardType = standardizeDocumentType(type);
@@ -225,14 +210,11 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
     }
   }
 
-  /// Map document type to standard URN format
   String standardizeDocumentType(String type) {
-    // If already in URN format, return as is
     if (type.startsWith('urn:epcglobal:cbv:btt:')) {
       return type;
     }
 
-    // Map common abbreviations and names to their URN format
     final Map<String, String> typeMap = {
       'inv': 'urn:epcglobal:cbv:btt:inv',
       'invoice': 'urn:epcglobal:cbv:btt:inv',
@@ -259,23 +241,19 @@ class TransactionDocumentCubit extends Cubit<TransactionDocumentState> {
       'contract': 'urn:epcglobal:cbv:btt:contract',
     };
 
-    // Try to map the input type to a standard URN (case insensitive)
     final lowerType = type.toLowerCase();
     final standardizedType =
         typeMap[lowerType] ?? 'urn:epcglobal:cbv:btt:$type';
 
-    // Debug logging for document type mapping
     logDocumentTypeDebug(type, standardizedType);
 
     return standardizedType;
   }
 
-  /// Clear any error message
   void clearError() {
     emit(state.copyWith(clearError: true));
   }
 
-  /// Debug function to log document details to console for troubleshooting
   void logDocumentTypeDebug(String input, String standardized) {
     print('Document Type Debug:');
     print('  Input type: "$input"');

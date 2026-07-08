@@ -27,6 +27,7 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
     required this.onRemoveSerial,
     required this.onClearAll,
     required this.onScanResult,
+    this.fillHeight = true,
   });
 
   final GTIN? selectedGTIN;
@@ -46,43 +47,70 @@ class CommissioningStep2SerialNumbers extends StatelessWidget {
   final ValueChanged<int> onRemoveSerial;
   final VoidCallback onClearAll;
   final ValueChanged<ScanResult> onScanResult;
+  final bool fillHeight;
+
+  Widget _serialListArea() {
+    if (serialNumbers.isEmpty) {
+      return const CommissioningEmptySerialHint();
+    }
+    return CommissioningSerialList(
+      serialNumbers: serialNumbers,
+      onRemove: onRemoveSerial,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CommissioningProductSummaryBanner(
+          selectedGTIN: selectedGTIN,
+          gtinController: gtinController,
+          batchLotController: batchLotController,
+        ),
+        const SizedBox(height: 16),
+        CommissioningScanInputCard(
+          scanningMode: scanningMode,
+          wiredScannerController: wiredScannerController,
+          wiredScannerFocusNode: wiredScannerFocusNode,
+          manualSerialController: manualSerialController,
+          isWiredScannerActive: isWiredScannerActive,
+          onScanningModeChanged: onScanningModeChanged,
+          onAddSerial: onAddSerial,
+          onScanResult: onScanResult,
+        ),
+        const SizedBox(height: 16),
+        CommissioningSerialListHeader(
+          count: serialNumbers.length,
+          onClearAll: serialNumbers.isNotEmpty ? onClearAll : null,
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+
+    if (fillHeight) {
+      return Padding(
+        padding: ResponsiveUtils.paddingAll(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            header,
+            Expanded(child: _serialListArea()),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
       padding: ResponsiveUtils.paddingAll(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CommissioningProductSummaryBanner(
-            selectedGTIN: selectedGTIN,
-            gtinController: gtinController,
-            batchLotController: batchLotController,
-          ),
-          const SizedBox(height: 16),
-          CommissioningScanInputCard(
-            scanningMode: scanningMode,
-            wiredScannerController: wiredScannerController,
-            wiredScannerFocusNode: wiredScannerFocusNode,
-            manualSerialController: manualSerialController,
-            isWiredScannerActive: isWiredScannerActive,
-            onScanningModeChanged: onScanningModeChanged,
-            onAddSerial: onAddSerial,
-            onScanResult: onScanResult,
-          ),
-          const SizedBox(height: 16),
-          CommissioningSerialListHeader(
-            count: serialNumbers.length,
-            onClearAll: serialNumbers.isNotEmpty ? onClearAll : null,
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: serialNumbers.isEmpty
-                ? const CommissioningEmptySerialHint()
-                : CommissioningSerialList(
-                    serialNumbers: serialNumbers,
-                    onRemove: onRemoveSerial,
-                  ),
+          header,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
+            child: _serialListArea(),
           ),
         ],
       ),

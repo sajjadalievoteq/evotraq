@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Shared group card wrapper for operation detail screens.
 class OperationDetailGroupCard extends StatelessWidget {
   const OperationDetailGroupCard({
     super.key,

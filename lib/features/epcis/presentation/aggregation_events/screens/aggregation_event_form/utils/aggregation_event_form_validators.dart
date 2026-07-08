@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
@@ -71,7 +71,7 @@ class AggregationEventFormValidators {
     }
 
     if (_gs1ElementString.hasMatch(trimmed)) {
-      final parsed = GS1BarcodeParser.parseGS1Barcode(trimmed);
+      final parsed = Gs1Parser.parseBarcode(trimmed);
       if (parsed['SSCC'] != null) {
         final sscc = parsed['SSCC'].toString();
         if (SsccFormat.isValidSscc(sscc)) return null;
@@ -180,7 +180,7 @@ class AggregationEventFormValidators {
   }
 
   static String? _validateSgtinElementString(String trimmed) {
-    final parsed = GS1BarcodeParser.parseGS1Barcode(trimmed);
+    final parsed = Gs1Parser.parseBarcode(trimmed);
     if (parsed['valid'] != true) {
       return 'Invalid GS1 element string';
     }

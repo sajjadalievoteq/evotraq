@@ -10,7 +10,6 @@ import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for managing internal Service Accounts (M2M authentication)
 class ServiceAccountManagementScreen extends StatefulWidget {
   const ServiceAccountManagementScreen({super.key});
 
@@ -28,7 +27,6 @@ class _ServiceAccountManagementScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Token is automatically retrieved from TokenManager by the service
       context.read<ServiceAccountCubit>().loadAccounts();
     });
   }
@@ -182,7 +180,6 @@ class _ServiceAccountManagementScreenState
   Widget _buildAccountsList(ServiceAccountState state) {
     var accounts = state.accounts;
 
-    // Apply search filter
     if (_searchQuery.isNotEmpty) {
       accounts = accounts
           .where(
@@ -193,7 +190,6 @@ class _ServiceAccountManagementScreenState
           .toList();
     }
 
-    // Apply status filter
     if (_statusFilter == 'active') {
       accounts = accounts.where((a) => a.isUsable).toList();
     } else if (_statusFilter == 'inactive') {
@@ -533,7 +529,6 @@ class _ServiceAccountManagementScreenState
   }
 }
 
-/// Dialog for creating a new service account
 class _CreateServiceAccountDialog extends StatefulWidget {
   const _CreateServiceAccountDialog();
 
@@ -740,7 +735,6 @@ class _CreateServiceAccountDialogState
   }
 }
 
-/// Dialog to display credentials after creation or rotation
 class _CredentialsDisplayDialog extends StatelessWidget {
   final ServiceAccountCredentials credentials;
 

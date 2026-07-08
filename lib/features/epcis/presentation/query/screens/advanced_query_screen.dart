@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/features/epcis/cubit/advanced_query_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/faceted_search_widget.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/query_parameter_widget.dart';
@@ -8,8 +9,6 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/query_results_
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for advanced EPCIS query interface with sophisticated filtering
-/// and analytical capabilities.
 class AdvancedQueryScreen extends StatefulWidget {
   const AdvancedQueryScreen({Key? key}) : super(key: key);
 
@@ -89,7 +88,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          // Left panel: Query parameters
           Expanded(
             flex: 1,
             child: Card(
@@ -163,7 +161,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
             ),
           ),
           const SizedBox(width: 16),
-          // Right panel: Query results
           Expanded(
             flex: 2,
             child: Card(
@@ -218,7 +215,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          // Left panel: Faceted search parameters
           Expanded(
             flex: 1,
             child: Card(
@@ -236,7 +232,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
             ),
           ),
           const SizedBox(width: 16),
-          // Right panel: Faceted results
           Expanded(
             flex: 2,
             child: Card(
@@ -486,7 +481,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
 
     return Column(
       children: [
-        // Facets
         if (facets.isNotEmpty) ...[
           Text('Facets', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -538,7 +532,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
           const SizedBox(height: 16),
         ],
 
-        // Events
         Text(
           'Events (${events.length})',
           style: Theme.of(context).textTheme.titleMedium,
@@ -551,7 +544,12 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
               final event = events[index];
               return ListTile(
                 title: Text(event['eventType'] ?? 'Unknown Event'),
-                subtitle: Text(event['bizStep'] ?? ''),
+                subtitle: Text(
+                  CbvDisplayUtils.displayBizStep(
+                    event['bizStep']?.toString(),
+                    fallback: '',
+                  ),
+                ),
                 trailing: Text(event['eventTime'] ?? ''),
               );
             },
@@ -584,8 +582,12 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Business Step: ${event['bizStep'] ?? 'N/A'}'),
-                      Text('Disposition: ${event['disposition'] ?? 'N/A'}'),
+                      Text(
+                        'Business Step: ${CbvDisplayUtils.displayBizStep(event['bizStep']?.toString(), fallback: 'N/A')}',
+                      ),
+                      Text(
+                        'Disposition: ${CbvDisplayUtils.displayDisposition(event['disposition']?.toString(), fallback: 'N/A')}',
+                      ),
                       Text('Location: ${event['readPoint'] ?? 'N/A'}'),
                     ],
                   ),
@@ -620,7 +622,9 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Location: ${event['readPoint'] ?? 'N/A'}'),
-                      Text('Business Step: ${event['bizStep'] ?? 'N/A'}'),
+                      Text(
+                        'Business Step: ${CbvDisplayUtils.displayBizStep(event['bizStep']?.toString(), fallback: 'N/A')}',
+                      ),
                       Text('Time: ${event['eventTime'] ?? 'N/A'}'),
                     ],
                   ),
@@ -640,7 +644,6 @@ class _AdvancedQueryScreenState extends State<AdvancedQueryScreen>
   }
 
   void _saveAsStoredQuery(AdvancedQueryCubit cubit) {
-    // Show dialog to save query
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

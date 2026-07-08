@@ -559,7 +559,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
     );
   }
 
-  // Action methods
   void _analyzeQuery(String query) async {
     if (query.isEmpty) {
       context.showError('Please enter a query to analyze');
@@ -611,7 +610,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
   }
 
   void _configureThreadPool() async {
-    // This would read from form fields and configure the thread pool
     try {
       final result = await _performanceService.configureOptimalThreadPool(
         poolName: 'default',
@@ -681,7 +679,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Summary Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -712,7 +709,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               ),
               const SizedBox(height: 16),
               
-              // Queries List
               const Text(
                 'Detected Slow Queries:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -881,7 +877,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Status Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -921,7 +916,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                 ),
                 const SizedBox(height: 16),
                 
-                // Memory Statistics
                 if (memoryStats.isNotEmpty) ...[
                   const Text(
                     'Memory Statistics:',
@@ -947,7 +941,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                   const SizedBox(height: 16),
                 ],
                 
-                // Optimizations Applied
                 const Text(
                   'Optimizations Applied:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -1016,7 +1009,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Test Info Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -1055,7 +1047,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               ),
               const SizedBox(height: 16),
               
-              // Summary Statistics
               if (summary.isNotEmpty) ...[
                 const Text(
                   'Performance Summary:',
@@ -1081,7 +1072,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                 const SizedBox(height: 16),
               ],
               
-              // Detailed Results
               const Text(
                 'Detailed Results:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -1188,7 +1178,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -1231,7 +1220,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               ),
               const SizedBox(height: 16),
               
-              // Summary Statistics
               if (summary.isNotEmpty) ...[
                 const Text(
                   'Connection Summary:',
@@ -1257,7 +1245,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
                 const SizedBox(height: 16),
               ],
               
-              // Leaks Details
               const Text(
                 'Connection Leaks:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -1401,7 +1388,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
           if (leaks.isNotEmpty)
             TextButton.icon(
               onPressed: () {
-                // Could trigger automatic leak cleanup
                 Navigator.of(context).pop();
                 context.showWarning('Automatic leak cleanup initiated...');
               },
@@ -1433,7 +1419,6 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
     );
   }
 
-  // Generic analysis dialog for other operations
   void _showAnalysisDialog(String title, Map<String, dynamic> data) {
     showDialog(
       context: context,

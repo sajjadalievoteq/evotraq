@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/return_receiving/return_receiving_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/return_receiving/return_receiving_operation_service.dart';
@@ -37,7 +37,6 @@ final _returnReceivingDetailConfig =
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display return receiving operation details.
 class ReturnReceivingOperationDetailScreen
     extends GenericOperationDetailScreen<ReturnReceivingResponse> {
   ReturnReceivingOperationDetailScreen({

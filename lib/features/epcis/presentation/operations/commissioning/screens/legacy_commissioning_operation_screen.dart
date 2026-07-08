@@ -21,13 +21,8 @@ import '../../../../../../data/models/operations/commissioning/commissioning_mod
 import '../../../../../operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-/// Scanning mode options for different input methods
 enum ScanningMode { camera, wired, manual }
 
-/// Multi-step commissioning operations screen for bulk serial number commissioning
-/// Step 1: Reference details (GTIN, batch/lot, location, dates)
-/// Step 2: Scan/enter serial numbers
-/// Step 3: Review and submit
 @Deprecated('Replaced by operations commissioning module')
 class LegacyCommissioningOperationScreen extends StatefulWidget {
   const LegacyCommissioningOperationScreen({Key? key}) : super(key: key);
@@ -42,7 +37,6 @@ class _LegacyCommissioningOperationScreenState
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
-  // Form controllers and data
   final _referenceController = TextEditingController();
   final _gtinController = TextEditingController();
   final _batchLotController = TextEditingController();
@@ -52,26 +46,21 @@ class _LegacyCommissioningOperationScreenState
   final _wiredScannerController = TextEditingController();
   final FocusNode _wiredScannerFocusNode = FocusNode();
 
-  // GTIN selection
   List<GTIN> _availableGTINs = [];
   GTIN? _selectedGTIN;
   bool _isLoadingGTINs = false;
   String? _gtinError;
 
-  // Location selection
   GLN? _commissioningLocationGLN;
   String? _locationError;
 
-  // Dates
   DateTime? _expiryDate;
   DateTime? _productionDate;
   DateTime? _bestBeforeDate;
 
-  // Serial numbers
   final List<String> _serialNumbers = [];
   bool _isLoading = false;
 
-  // Scanning mode state
   ScanningMode _scanningMode = kIsWeb
       ? ScanningMode.wired
       : ScanningMode.camera;
@@ -81,7 +70,6 @@ class _LegacyCommissioningOperationScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadGTINs());
-    // Add focus listener for wired scanner
     _wiredScannerFocusNode.addListener(() {
       setState(() {
         _isWiredScannerActive = _wiredScannerFocusNode.hasFocus;
@@ -145,7 +133,6 @@ class _LegacyCommissioningOperationScreenState
 
     switch (_currentStep) {
       case 0:
-        // Step 1: Validate reference details
         bool isValid = true;
 
         if (_selectedGTIN == null && _gtinController.text.trim().isEmpty) {
@@ -166,14 +153,12 @@ class _LegacyCommissioningOperationScreenState
         }
         return isValid;
       case 1:
-        // Step 2: Validate serial numbers
         if (_serialNumbers.isEmpty) {
           context.showError('At least one serial number is required');
           return false;
         }
         return true;
       case 2:
-        // Step 3: Review step, validation already done
         return true;
       default:
         return true;
@@ -322,7 +307,6 @@ class _LegacyCommissioningOperationScreenState
       return;
     }
 
-    // Check for duplicates
     if (_serialNumbers.contains(trimmedSerial)) {
       context.showError('Serial number already added: $trimmedSerial');
       return;
@@ -331,9 +315,7 @@ class _LegacyCommissioningOperationScreenState
     setState(() {
       _serialNumbers.add(trimmedSerial);
     });
-    //_showSuccess('Serial added: $trimmedSerial');
 
-    // Clear the input field
     _manualSerialController.clear();
     _wiredScannerController.clear();
   }
@@ -444,9 +426,7 @@ class _LegacyCommissioningOperationScreenState
         isLoading: _isLoading,
         child: Column(
           children: [
-            // Stepper header
             _buildStepperHeader(),
-            // Page content
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -466,7 +446,6 @@ class _LegacyCommissioningOperationScreenState
                 ],
               ),
             ),
-            // Navigation buttons
             _buildNavigationButtons(),
           ],
         ),
@@ -557,7 +536,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const SizedBox(height: 16),
 
-                  // GTIN Selector/Input
                   const Text(
                     'GTIN *',
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -607,7 +585,6 @@ class _LegacyCommissioningOperationScreenState
                   ],
                   const SizedBox(height: 16),
 
-                  // Batch/Lot Number
                   TextField(
                     controller: _batchLotController,
                     decoration: const InputDecoration(
@@ -618,7 +595,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const SizedBox(height: 16),
 
-                  // Commissioning Reference (optional)
                   TextField(
                     controller: _referenceController,
                     decoration: const InputDecoration(
@@ -633,7 +609,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Location Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -663,7 +638,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Dates Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -676,7 +650,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const SizedBox(height: 16),
 
-                  // Production Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: TraqIcon(AppAssets.iconClock),
@@ -704,7 +677,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const Divider(),
 
-                  // Expiry Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: TraqIcon(AppAssets.iconEvent),
@@ -731,7 +703,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const Divider(),
 
-                  // Best Before Date
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: TraqIcon(AppAssets.iconClock),
@@ -763,7 +734,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Additional Info Card (collapsed by default)
           ExpansionTile(
             title: const Text('Additional Information'),
             children: [
@@ -805,7 +775,6 @@ class _LegacyCommissioningOperationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product info summary
           Card(
             color: Theme.of(context).primaryColor.withOpacity(0.1),
             child: Padding(
@@ -832,7 +801,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Scanning mode selector
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -877,7 +845,6 @@ class _LegacyCommissioningOperationScreenState
                   ),
                   const SizedBox(height: 16),
 
-                  // Input based on mode
                   if (_scanningMode == ScanningMode.camera && !kIsWeb)
                     SizedBox(
                       height: 200,
@@ -889,8 +856,6 @@ class _LegacyCommissioningOperationScreenState
                   else if (_scanningMode == ScanningMode.wired)
                     Column(
                       children: [
-                        // Invisible focus target — captures wired-scanner keystrokes
-                        // without creating any HTML element (avoids visible input on web)
                         KeyboardListener(
                           focusNode: _wiredScannerFocusNode,
                           onKeyEvent: (event) {
@@ -911,7 +876,6 @@ class _LegacyCommissioningOperationScreenState
                           },
                           child: const SizedBox.shrink(),
                         ),
-                        // Scanner status indicator
                         GestureDetector(
                           onTap: () => _wiredScannerFocusNode.requestFocus(),
                           child: Container(
@@ -989,7 +953,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Serial numbers list header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1011,7 +974,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 8),
 
-          // Serial numbers list
           Expanded(
             child: _serialNumbers.isEmpty
                 ? Center(
@@ -1087,7 +1049,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Summary Card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1135,7 +1096,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 16),
 
-          // Serial numbers summary
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1185,7 +1145,6 @@ class _LegacyCommissioningOperationScreenState
           ),
           const SizedBox(height: 24),
 
-          // Info message
           Card(
             color: Colors.blue[50],
             child: Padding(

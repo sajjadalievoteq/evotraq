@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_hierarchy_row.dart';
 
-/// Shared EPC list card for operation and event detail screens.
-///
-/// Renders every [epcs] entry as an identical row. Hierarchy structure is
-/// resolved only when the user taps the tree icon → [HierarchyScreen].
 class EpcContentsCard extends StatefulWidget {
   const EpcContentsCard({
     super.key,

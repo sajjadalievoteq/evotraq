@@ -4,8 +4,6 @@ import 'package:traqtrace_app/features/gs1/widgets/split_view/gs1_split_view_scr
 import 'package:traqtrace_app/features/gs1/widgets/split_view/split_or_list_indexed_stack.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 
-/// Generic entry screen for operations that use the Gs1SplitViewScreen split
-/// view pattern.
 class OperationEntryScreen extends StatefulWidget {
   const OperationEntryScreen({
     super.key,

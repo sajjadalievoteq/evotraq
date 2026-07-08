@@ -2,7 +2,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
-/// Validation helpers for unpacking operation wizard steps.
 class UnpackingOperationStepValidator {
   UnpackingOperationStepValidator._();
 
@@ -19,7 +18,6 @@ class UnpackingOperationStepValidator {
     if (parentContainerId == null || parentContainerId.isEmpty) {
       return 'No container scanned yet. Scan or enter the SSCC barcode on the carton or pallet you are unpacking.';
     }
-    // GS1 EPCIS 2.0: parentID must be an SSCC EPC URI
     if (!parentContainerId.startsWith('urn:epc:id:sscc:')) {
       return 'Container ID must be a valid SSCC EPC URI (urn:epc:id:sscc:...). '
           'Use the scanner or enter the full 18-digit SSCC number.';

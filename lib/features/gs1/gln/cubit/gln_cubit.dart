@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_api_consts.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 
@@ -14,8 +16,13 @@ class GLNCubit extends Cubit<GLNState> {
     : _glnService = glnService,
       super(const GLNState());
 
-  Future<List<GLN>> fetchGlnsForPicker({int page = 0, int size = 500}) {
-    return _glnService.getAllGLNs(page: page, size: size);
+  GlnPickerCatalog get _pickerCatalog => getIt<GlnPickerCatalog>();
+
+  /// Returns the session GLN picker list (loaded at login / auth startup).
+  Future<List<GLN>> fetchGlnsForPicker({
+    bool forceRefresh = false,
+  }) {
+    return _pickerCatalog.ensureLoaded(forceRefresh: forceRefresh);
   }
 
   Future<void> fetchGLNs({int page = 0, int size = 20}) async {
@@ -189,6 +196,7 @@ class GLNCubit extends Cubit<GLNState> {
     emit(state.copyWith(status: GLNStatus.loading));
     try {
       final createdGLN = await _glnService.createGLN(gln);
+      await _pickerCatalog.refresh();
       final updatedGLNs = List<GLN>.from(state.glns)..add(createdGLN);
       emit(
         state.copyWith(
@@ -206,6 +214,7 @@ class GLNCubit extends Cubit<GLNState> {
     emit(state.copyWith(status: GLNStatus.loading));
     try {
       final updatedGLN = await _glnService.updateGLN(id, gln);
+      await _pickerCatalog.refresh();
       final updatedGLNs = state.glns.map((item) {
         return item.glnCode == updatedGLN.glnCode ? updatedGLN : item;
       }).toList();
@@ -226,6 +235,7 @@ class GLNCubit extends Cubit<GLNState> {
     try {
       final success = await _glnService.deleteGLN(id);
       if (success) {
+        await _pickerCatalog.refresh();
         final updatedGLNs = state.glns
             .where((gln) => gln.glnCode != id)
             .toList();

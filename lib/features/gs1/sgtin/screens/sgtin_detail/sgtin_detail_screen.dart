@@ -19,6 +19,7 @@ class SGTINDetailScreen extends StatefulWidget {
   const SGTINDetailScreen({
     super.key,
     this.sgtinId,
+    this.epcUri,
     required this.isEditing,
     this.embedded = false,
     this.awaitingListSelection = false,
@@ -26,6 +27,8 @@ class SGTINDetailScreen extends StatefulWidget {
   });
 
   final String? sgtinId;
+
+  final String? epcUri;
 
   final bool isEditing;
 
@@ -35,7 +38,7 @@ class SGTINDetailScreen extends StatefulWidget {
 
   final VoidCallback? onEmbeddedActionSuccess;
 
-  bool get isCreating => sgtinId == null;
+  bool get isCreating => sgtinId == null && epcUri == null;
 
   @override
   State<SGTINDetailScreen> createState() => _SGTINDetailScreenState();
@@ -83,6 +86,10 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadById(widget.sgtinId!);
       });
+    } else if (widget.epcUri != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadByEpc(widget.epcUri!);
+      });
     }
   }
 
@@ -96,6 +103,8 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       } else {
         _clearForm();
       }
+    } else if (widget.epcUri != oldWidget.epcUri && widget.epcUri != null) {
+      _loadByEpc(widget.epcUri!);
     }
   }
 
@@ -116,6 +125,14 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       _formFieldsHydrated = false;
     });
     context.read<SGTINCubit>().fetchSGTINById(id);
+  }
+
+  void _loadByEpc(String epcUri) {
+    setState(() {
+      _isLocalLoading = true;
+      _formFieldsHydrated = false;
+    });
+    context.read<SGTINCubit>().fetchSGTINByEPC(epcUri);
   }
 
   void _clearForm() {
@@ -283,6 +300,11 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
           if (widget.sgtinId != null &&
               state.sgtin!.id == widget.sgtinId &&
               state.sgtin!.id != _loadedSgtinId) {
+            _populateForm(state.sgtin!);
+          } else if (widget.epcUri != null &&
+              state.sgtin!.epcUri == widget.epcUri &&
+              state.sgtin!.id != _loadedSgtinId) {
+            // Navigated from product journey — loaded by EPC URI instead of DB PK.
             _populateForm(state.sgtin!);
           }
 

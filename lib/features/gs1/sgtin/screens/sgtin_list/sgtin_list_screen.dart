@@ -8,6 +8,8 @@ import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_list_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_quick_filter_dialog.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_search_input_resolver.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_filter_value.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_list_search_debounce.dart';
@@ -82,11 +84,16 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
   }
 
   void _search() {
+    final criteria = _buildSearchCriteria();
+    if (criteria.parseError != null) {
+      context.showError(criteria.parseError!);
+      return;
+    }
+
     context.read<SGTINCubit>().fetchSGTINList(
-      gtinCode: _gtinCodeController.text.isNotEmpty ? _gtinCodeController.text : null,
-      serialNumber: _searchController.text.isNotEmpty
-          ? _searchController.text
-          : (_serialNumberController.text.isNotEmpty ? _serialNumberController.text : null),
+      gtinCode: criteria.gtinCode,
+      serialNumber: criteria.serialNumber,
+      epcUri: criteria.epcUri,
       batchLotNumber:
           _batchLotController.text.isNotEmpty ? _batchLotController.text : null,
       status: gs1ValueUnlessAll(_selectedStatus),
@@ -110,11 +117,10 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
     final cubitState = context.read<SGTINCubit>().state;
     if (!cubitState.hasMoreData) return;
 
+    final criteria = _buildSearchCriteria();
     context.read<SGTINCubit>().fetchSGTINList(
-      gtinCode: _gtinCodeController.text.isNotEmpty ? _gtinCodeController.text : null,
-      serialNumber: _searchController.text.isNotEmpty
-          ? _searchController.text
-          : (_serialNumberController.text.isNotEmpty ? _serialNumberController.text : null),
+      gtinCode: criteria.gtinCode,
+      serialNumber: criteria.serialNumber,
       batchLotNumber:
           _batchLotController.text.isNotEmpty ? _batchLotController.text : null,
       status: gs1ValueUnlessAll(_selectedStatus),
@@ -123,6 +129,59 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
       sortBy: _selectedSortBy ?? 'createdAt',
       sortDirection: _sortDirection,
       isLoadMore: true,
+    );
+  }
+
+  ({
+    String? gtinCode,
+    String? serialNumber,
+    String? epcUri,
+    String? parseError,
+  }) _buildSearchCriteria() {
+    var gtinCode = _gtinCodeController.text.trim().isEmpty
+        ? null
+        : _gtinCodeController.text.trim();
+    var serialNumber = _serialNumberController.text.trim().isEmpty
+        ? null
+        : _serialNumberController.text.trim();
+    String? epcUri;
+
+    final rawMain = _searchController.text.trim();
+    if (rawMain.isNotEmpty) {
+      final resolved = SgtinSearchInputResolver.resolve(rawMain);
+      if (resolved.hasStructuredParseError) {
+        return (
+          gtinCode: null,
+          serialNumber: null,
+          epcUri: null,
+          parseError: resolved.parseError,
+        );
+      }
+      if (resolved.parseError != null &&
+          resolved.gtinCode == null &&
+          resolved.serialNumber == null) {
+        return (
+          gtinCode: null,
+          serialNumber: null,
+          epcUri: null,
+          parseError: resolved.parseError,
+        );
+      }
+
+      gtinCode ??= resolved.gtinCode;
+      serialNumber ??= resolved.serialNumber;
+      epcUri = resolved.epcUri;
+
+      if (serialNumber == null && gtinCode == null) {
+        serialNumber = rawMain;
+      }
+    }
+
+    return (
+      gtinCode: gtinCode,
+      serialNumber: serialNumber,
+      epcUri: epcUri,
+      parseError: null,
     );
   }
 

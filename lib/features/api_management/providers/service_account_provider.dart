@@ -60,7 +60,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
       : _service = service,
         super(const ServiceAccountState.initial());
 
-  /// Load all service accounts
   Future<void> loadAccounts() async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -73,7 +72,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Select a service account
   Future<void> selectAccount(String id) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -92,12 +90,10 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Clear selection
   void clearSelection() {
     emit(state.copyWith(selectedAccount: null, errorMessage: state.errorMessage));
   }
 
-  /// Create a new service account
   Future<ServiceAccountCredentials?> createAccount({
     required String name,
     String? description,
@@ -130,7 +126,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Update a service account
   Future<ServiceAccount?> updateAccount(
     String id, {
     String? name,
@@ -170,7 +165,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Rotate the secret for a service account
   Future<ServiceAccountCredentials?> rotateSecret(String id) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -185,7 +179,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Deactivate a service account
   Future<bool> deactivateAccount(String id) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -204,7 +197,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Reactivate a service account
   Future<bool> reactivateAccount(String id) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -223,7 +215,6 @@ class ServiceAccountCubit extends Cubit<ServiceAccountState> {
     }
   }
 
-  /// Delete a service account permanently
   Future<bool> deleteAccount(String id) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));

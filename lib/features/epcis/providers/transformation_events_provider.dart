@@ -108,7 +108,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       );
     }
   }
-    /// Create a transformation process
   Future<TransformationEvent> createTransformationProcess(
       {required String transformationId,
       required Set<String> inputEPCs,
@@ -149,7 +148,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Create a transformation event
   Future<TransformationEvent> createTransformationEvent(TransformationEvent event) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -173,7 +171,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation events by transformation ID
   Future<List<TransformationEvent>> findByTransformationId(String transformationId) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -191,7 +188,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation events by input EPC
   Future<List<TransformationEvent>> findByInputEPC(String inputEPC) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -209,7 +205,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation events by output EPC
   Future<List<TransformationEvent>> findByOutputEPC(String outputEPC) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -227,7 +222,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation events by input EPC class
   Future<List<TransformationEvent>> findByInputEPCClass(String inputEPCClass) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -245,7 +239,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation events by output EPC class
   Future<List<TransformationEvent>> findByOutputEPCClass(String outputEPCClass) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -263,7 +256,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformation history for an output EPC
   Future<List<TransformationEvent>> findTransformationHistory(String outputEPC) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -281,7 +273,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Get a transformation event by ID
   Future<TransformationEvent> getTransformationEventById(String eventId) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -298,7 +289,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
       rethrow;
     }
   }
-    /// Update a transformation event
   Future<void> updateTransformationEvent(TransformationEvent event) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -334,7 +324,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Delete a transformation event
   Future<void> deleteTransformationEvent(String id) async {
     try {
       emit(state.copyWith(isLoading: true, clearError: true));
@@ -362,7 +351,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Track transformations for a specific EPC
   Future<List<TransformationEvent>> trackTransformationsByEPC(String epc) async {
     try {
       final events = await _service.findTransformationsByEPC(epc);
@@ -372,7 +360,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Find transformations by input and output relationship
   Future<List<TransformationEvent>> findTransformationsByInputOutput(
       String inputEPC, String outputEPC) async {
     try {
@@ -383,7 +370,6 @@ class TransformationEventsCubit extends Cubit<TransformationEventsState> {
     }
   }
   
-  /// Get transformation events by transformation ID
   Future<List<TransformationEvent>> getTransformationsByTransformationId(String transformationId) async {
     try {
       final events = await _service.findTransformationEventsByTransformationId(transformationId);

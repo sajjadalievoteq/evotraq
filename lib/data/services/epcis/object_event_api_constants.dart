@@ -1,4 +1,3 @@
-/// API path segments and keys for object event HTTP calls.
 class ObjectEventApiConstants {
   ObjectEventApiConstants._();
 

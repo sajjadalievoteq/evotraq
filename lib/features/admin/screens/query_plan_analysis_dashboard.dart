@@ -77,12 +77,10 @@ class _QueryPlanAnalysisDashboardState
     });
 
     try {
-      // Analyze the query
       final analysis = await _performanceService.analyzeQuery(
         _queryController.text,
       );
 
-      // Get recommendations
       final recommendations = await _performanceService
           .getOptimizationRecommendations();
 
@@ -137,7 +135,6 @@ class _QueryPlanAnalysisDashboardState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Query Input Section
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -205,7 +202,6 @@ class _QueryPlanAnalysisDashboardState
 
             const SizedBox(height: 16),
 
-            // Error Message
             if (_errorMessage != null)
               Card(
                 color: Colors.red.shade50,
@@ -226,7 +222,6 @@ class _QueryPlanAnalysisDashboardState
                 ),
               ),
 
-            // Results Section
             Expanded(
               child: DefaultTabController(
                 length: 3,
@@ -251,13 +246,10 @@ class _QueryPlanAnalysisDashboardState
                     Expanded(
                       child: TabBarView(
                         children: [
-                          // Analysis Results Tab
                           _buildAnalysisResultsTab(),
 
-                          // Recommendations Tab
                           _buildRecommendationsTab(),
 
-                          // Problematic Queries Tab
                           _buildProblematicQueriesTab(),
                         ],
                       ),
@@ -299,7 +291,6 @@ class _QueryPlanAnalysisDashboardState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Query Plan Overview
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -321,7 +312,6 @@ class _QueryPlanAnalysisDashboardState
 
           const SizedBox(height: 16),
 
-          // Detailed Results
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -373,7 +363,6 @@ class _QueryPlanAnalysisDashboardState
   }
 
   Widget _buildAnalysisMetrics() {
-    // Extract key metrics from analysis result
     final executionTime = _analysisResult?['executionTime'] ?? 'N/A';
     final complexity = _analysisResult?['complexityScore'] ?? 'N/A';
     final nodeCount = _analysisResult?['nodeCount'] ?? 'N/A';

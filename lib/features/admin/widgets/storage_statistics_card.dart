@@ -31,7 +31,6 @@ class StorageStatisticsCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
-            // Storage overview
             Row(
               children: [
                 Expanded(
@@ -74,7 +73,6 @@ class StorageStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Event type distribution
             const Text(
               'Event Type Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -86,7 +84,6 @@ class StorageStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Partition distribution
             const Text(
               'Partition Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -99,7 +96,6 @@ class StorageStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Archive information
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -128,7 +124,6 @@ class StorageStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Action buttons
             Row(
               children: [
                 ElevatedButton.icon(
@@ -213,7 +208,6 @@ class StorageStatisticsCard extends StatelessWidget {
   }
 
   Widget _buildPartitionChart() {
-    // Simple bar chart for partition distribution
     final maxCount = storage.partitionDistribution.values.isNotEmpty 
         ? storage.partitionDistribution.values.reduce((a, b) => a > b ? a : b)
         : 1;
@@ -324,7 +318,7 @@ class StorageStatisticsCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              onCompressEvents([]); // Empty list means compress all
+              onCompressEvents([]);
             },
             child: const Text('Compress'),
           ),

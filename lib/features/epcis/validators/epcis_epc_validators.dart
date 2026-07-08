@@ -2,7 +2,6 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 
-/// Shared EPC / barcode validation for EPCIS event forms.
 abstract final class EpcisEpcValidators {
   static bool isLikelyEpc(String value) =>
       AggregationEventFormValidators.isLikelyEpc(value);

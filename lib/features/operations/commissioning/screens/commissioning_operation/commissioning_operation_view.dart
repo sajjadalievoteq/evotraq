@@ -1,12 +1,18 @@
-﻿import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_batch.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_batch_lookup_status.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -47,6 +53,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
 
   final _gtinController = TextEditingController();
   final _batchLotController = TextEditingController();
+  final _registrationQuantityController = TextEditingController();
   final _referenceController = TextEditingController();
 
   final _countryOfOriginController = TextEditingController();
@@ -67,6 +74,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   GTIN? _selectedGTIN;
   bool _isLoadingGTINs = false;
   String? _gtinError;
+  List<GLN> _availableLocations = [];
   GLN? _commissioningLocationGLN;
   String? _locationError;
   DateTime? _expiryDate;
@@ -83,7 +91,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   bool _isLoading = false;
 
   bool get _isStep1Valid =>
-      (_selectedGTIN != null || _gtinController.text.trim().isNotEmpty) &&
+      _selectedGTIN != null &&
       _batchLotController.text.trim().isNotEmpty &&
       _commissioningLocationGLN != null &&
       _expiryDate != null;
@@ -93,7 +101,11 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGTINs());
+    _batchLotController.addListener(_onBatchLotTextChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadGTINs();
+      _loadLocations();
+    });
     _wiredScannerFocusNode.addListener(() {
       setState(() => _isWiredScannerActive = _wiredScannerFocusNode.hasFocus);
     });
@@ -104,6 +116,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     _pageController.dispose();
     _gtinController.dispose();
     _batchLotController.dispose();
+    _registrationQuantityController.dispose();
     _referenceController.dispose();
     _countryOfOriginController.dispose();
     _productionOrderController.dispose();
@@ -118,22 +131,172 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     super.dispose();
   }
 
+  bool _isPharmaProduct(GTIN? gtin) => gtin?.isPharmaceuticalProduct == true;
+
+  void _onBatchLotTextChanged() {
+    if (!mounted) return;
+    context.read<CommissioningOperationCubit>().onBatchLotInputChanged(
+          gtin: _selectedGTIN,
+          batchLot: _batchLotController.text,
+        );
+    setState(() {});
+  }
+
+  void _onGtinChanged(GTIN? gtin) {
+    setState(() {
+      _selectedGTIN = gtin;
+      _gtinError = null;
+    });
+    _registrationQuantityController.clear();
+    final cubit = context.read<CommissioningOperationCubit>();
+    cubit.clearBatchState();
+    unawaited(cubit.onPharmaGtinSelected(gtin));
+    if (_isPharmaProduct(gtin) && _batchLotController.text.trim().isNotEmpty) {
+      cubit.triggerBatchLookupNow(
+        gtin: gtin,
+        batchLot: _batchLotController.text,
+      );
+    }
+  }
+
+  void _triggerBatchLookupNow() {
+    context.read<CommissioningOperationCubit>().triggerBatchLookupNow(
+          gtin: _selectedGTIN,
+          batchLot: _batchLotController.text,
+        );
+  }
+
+  DateTime? _parseBatchDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return DateTime.tryParse(value.trim());
+  }
+
+  void _applyBatchDatesFromResolved(GtinBatch batch) {
+    final expiry = _parseBatchDate(batch.expiryDate);
+    final manufacture = _parseBatchDate(batch.manufactureDate);
+    setState(() {
+      if (expiry != null && !_expiryManuallySet) {
+        _expiryDate = expiry;
+      }
+      if (manufacture != null && !_productionDateManuallySet) {
+        _productionDate = manufacture;
+      }
+    });
+  }
+
+  Future<void> _registerBatch() async {
+    final cubit = context.read<CommissioningOperationCubit>();
+    final gtin = _selectedGTIN;
+    final dbId = cubit.state.gtinDbId;
+    if (gtin == null || dbId == null) return;
+
+    final qtyText = _registrationQuantityController.text.trim();
+    cubit.setRegistrationQuantityManufactured(
+      qtyText.isEmpty ? null : int.tryParse(qtyText),
+    );
+
+    final ok = await cubit.registerBatch(
+      gtinDbId: dbId,
+      gtinCode: gtin.gtinCode,
+      batchLot: _batchLotController.text,
+    );
+    if (!mounted) return;
+    if (ok) {
+      context.showSuccess('Batch registered successfully');
+      final batch = cubit.state.resolvedBatch;
+      if (batch != null) _applyBatchDatesFromResolved(batch);
+    }
+  }
+
+  Future<void> _selectRegistrationDate(String dateType) async {
+    final cubit = context.read<CommissioningOperationCubit>();
+    final now = DateTime.now();
+    final initialDate = switch (dateType) {
+      'registrationExpiry' =>
+        cubit.state.registrationExpiryDate ?? now.add(const Duration(days: 365)),
+      _ => cubit.state.registrationManufactureDate ?? now,
+    };
+    final label = switch (dateType) {
+      'registrationExpiry' => 'Expiry',
+      _ => 'Manufacture',
+    };
+
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: dateType == 'registrationExpiry' ? now : DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 10),
+      helpText: 'Select $label Date',
+    );
+    if (selected == null || !mounted) return;
+
+    switch (dateType) {
+      case 'registrationExpiry':
+        cubit.setRegistrationExpiryDate(selected);
+      case 'registrationManufacture':
+        cubit.setRegistrationManufactureDate(selected);
+    }
+  }
+
+  void _clearRegistrationDate(String dateType) {
+    final cubit = context.read<CommissioningOperationCubit>();
+    switch (dateType) {
+      case 'registrationExpiry':
+        cubit.setRegistrationExpiryDate(null);
+      case 'registrationManufacture':
+        cubit.setRegistrationManufactureDate(null);
+    }
+  }
+
+  bool _isPharmaBatchReady(CommissioningOperationState batchState) {
+    if (!_isPharmaProduct(_selectedGTIN)) return true;
+    if (batchState.isBatchBusy) return false;
+    if (batchState.requiresBatchRegistration) return false;
+    if (_batchLotController.text.trim().isEmpty) return false;
+
+    return switch (batchState.batchLookupStatus) {
+      CommissioningBatchLookupStatus.found ||
+      CommissioningBatchLookupStatus.registered =>
+        true,
+      CommissioningBatchLookupStatus.error =>
+        true,
+      CommissioningBatchLookupStatus.idle ||
+      CommissioningBatchLookupStatus.lookingUp ||
+      CommissioningBatchLookupStatus.notFound ||
+      CommissioningBatchLookupStatus.registering =>
+        false,
+    };
+  }
+
   Future<void> _loadGTINs() async {
     setState(() => _isLoadingGTINs = true);
     try {
       final gtins = await context.read<GTINCubit>().fetchGtinsForPicker();
+      if (!mounted) return;
       setState(() {
         _availableGTINs = gtins;
         _isLoadingGTINs = false;
       });
     } catch (e) {
-      debugPrint('Error loading GTINs: $e');
+      debugPrint('Error loading GTINs for commissioning picker: $e');
+      if (!mounted) return;
       setState(() => _isLoadingGTINs = false);
     }
   }
 
+  Future<void> _loadLocations() async {
+    try {
+      final catalog = getIt<GlnPickerCatalog>();
+      final glns = await catalog.ensureLoaded();
+      if (!mounted) return;
+      setState(() => _availableLocations = glns.where((g) => g.active).toList());
+    } catch (e) {
+      debugPrint('Error loading GLNs for commissioning picker: $e');
+    }
+  }
+
   Future<void> _nextStep() async {
-    if (_currentStep < 2 && _validateCurrentStep()) {
+    if (_currentStep < 2 && await _validateCurrentStep()) {
       await _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -150,17 +313,16 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     }
   }
 
-  bool _validateCurrentStep() {
+  Future<bool> _validateCurrentStep() async {
     setState(() {
       _gtinError = null;
       _locationError = null;
     });
-
     switch (_currentStep) {
       case 0:
         final formValid = _step1FormKey.currentState?.validate() ?? false;
         bool isValid = formValid;
-        if (_selectedGTIN == null && _gtinController.text.trim().isEmpty) {
+        if (_selectedGTIN == null) {
           setState(() => _gtinError = 'GTIN is required');
           isValid = false;
         }
@@ -177,6 +339,29 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
         if (_expiryDate == null) {
           context.showError('Expiry Date is required for pharmaceutical commissioning');
           isValid = false;
+        }
+        final batchCubit = context.read<CommissioningOperationCubit>();
+        final batchState = batchCubit.state;
+        if (_isPharmaProduct(_selectedGTIN)) {
+          if (batchState.isBatchBusy) {
+            context.showWarning(
+              'Wait for batch lookup or registration to finish.',
+            );
+            isValid = false;
+          } else if (batchState.requiresBatchRegistration) {
+            context.showError(
+              'Register the batch in Batch Master before continuing.',
+            );
+            isValid = false;
+          } else if (batchState.batchLookupStatus ==
+              CommissioningBatchLookupStatus.idle) {
+            context.showInfo('Verifying batch in Batch Master…');
+            batchCubit.triggerBatchLookupNow(
+              gtin: _selectedGTIN,
+              batchLot: _batchLotController.text,
+            );
+            isValid = false;
+          }
         }
         return isValid;
       case 1:
@@ -222,7 +407,8 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     final details = extractBarcodeDetails(trimmed);
     if (details.gtin != null && details.gtin!.isNotEmpty) {
       if (!_gtinMatches(details.gtin!)) {
-        final selectedCode = _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
+        final selectedCode =
+            _selectedGTIN?.gtinCode ?? _gtinController.text.trim();
         context.showError(
           'GTIN mismatch: barcode contains ${details.gtin} '
           'but selected product is $selectedCode',
@@ -267,7 +453,16 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     setState(() {
       _serialNumbers.add(extracted);
       if (details.batchLot != null && details.batchLot!.isNotEmpty) {
-        _batchLotController.text = details.batchLot!;
+        final existingLot = _batchLotController.text.trim();
+        final scannedLot = details.batchLot!.trim();
+        if (existingLot.isEmpty) {
+          _batchLotController.text = scannedLot;
+        } else if (existingLot != scannedLot) {
+          context.showWarning(
+            'Serial barcode lot ($scannedLot) differs from entered lot '
+            '($existingLot). Keeping the lot from step 1.',
+          );
+        }
       }
       if (details.expiry != null && !_expiryManuallySet) {
         _expiryDate = details.expiry;
@@ -283,15 +478,18 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     _wiredScannerController.clear();
   }
 
-  void _removeSerial(int index) =>
-      setState(() => _serialNumbers.removeAt(index));
+  void _removeSerial(int index) {
+    setState(() => _serialNumbers.removeAt(index));
+  }
 
   Future<void> _clearAllSerials() async {
     final confirmed = await CommissioningClearSerialsDialog.show(
       context,
       _serialNumbers.length,
     );
-    if (confirmed == true) setState(() => _serialNumbers.clear());
+    if (confirmed == true) {
+      setState(() => _serialNumbers.clear());
+    }
   }
 
   Future<void> _selectDate(String dateType) async {
@@ -356,16 +554,18 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     if (raw != null && mounted) _applyBarcodeDetails(raw);
   }
 
-  void _applyBarcodeDetails(String rawBarcode) {
+  Future<void> _applyBarcodeDetails(String rawBarcode) async {
     final details = extractBarcodeDetails(rawBarcode);
 
     if (!details.isValid) {
-      context.showError('Could not decode barcode ? please enter details manually');
+      context.showError('Could not decode barcode — please enter details manually');
       return;
     }
 
     if (details.gtin == null) {
-      context.showError('Barcode does not contain a GTIN ? please enter details manually');
+      context.showError(
+        'Barcode does not contain a GTIN — please enter details manually',
+      );
       return;
     }
 
@@ -373,7 +573,6 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       (g) => g?.gtinCode == details.gtin,
       orElse: () => null,
     );
-
     if (matched == null) {
       _showGtinNotFoundDialog(details.gtin!);
       return;
@@ -396,13 +595,25 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       if (details.bestBeforeDate != null && !_bestBeforeDateManuallySet) {
         _bestBeforeDate = details.bestBeforeDate;
       }
-      if (details.countryOfOrigin != null && details.countryOfOrigin!.isNotEmpty) {
+      if (details.countryOfOrigin != null &&
+          details.countryOfOrigin!.isNotEmpty) {
         _countryOfOriginController.text = details.countryOfOrigin!;
       }
     });
 
+    final cubit = context.read<CommissioningOperationCubit>();
+    unawaited(cubit.onPharmaGtinSelected(matched));
+    if (matched.isPharmaceuticalProduct &&
+        details.batchLot != null &&
+        details.batchLot!.isNotEmpty) {
+      cubit.triggerBatchLookupNow(
+        gtin: matched,
+        batchLot: details.batchLot!,
+      );
+    }
+
     context.showSuccess(
-      'Barcode scanned ? ${details.displayRows.length} field(s) filled',
+      'Barcode scanned — ${details.displayRows.length} field(s) filled',
     );
   }
 
@@ -517,11 +728,11 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   }
 
   Future<void> _submit({bool isRetry = false}) async {
-    if (!_validateCurrentStep()) return;
+    if (!await _validateCurrentStep()) return;
     setState(() => _isLoading = true);
 
     try {
-      final cubit = getIt<CommissioningOperationCubit>();
+      final cubit = context.read<CommissioningOperationCubit>();
 
       debugPrint(
           'Commissioning: submitting ${_serialNumbers.length} serials for GTIN '
@@ -555,19 +766,25 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     }
   }
 
-  Form get _step1Widget => Form(
+  Form _buildStep1(CommissioningOperationState batchState) => Form(
         key: _step1FormKey,
         autovalidateMode: AutovalidateMode.disabled,
         child: CommissioningStep1ProductDetails(
+          gtinController: _gtinController,
           availableGTINs: _availableGTINs,
           selectedGTIN: _selectedGTIN,
           gtinError: _gtinError,
           isLoadingGTINs: _isLoadingGTINs,
-          gtinController: _gtinController,
-          batchLotController: _batchLotController,
-          referenceController: _referenceController,
+          onGtinChanged: _onGtinChanged,
           commissioningLocationGLN: _commissioningLocationGLN,
           locationError: _locationError,
+          onLocationChanged: (gln) => setState(() {
+            _commissioningLocationGLN = gln;
+            _locationError = null;
+          }),
+          availableLocations: _availableLocations,
+          batchLotController: _batchLotController,
+          referenceController: _referenceController,
           expiryDate: _expiryDate,
           productionDate: _productionDate,
           bestBeforeDate: _bestBeforeDate,
@@ -578,22 +795,33 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
           regulatoryStatusController: _regulatoryStatusController,
           operatorIdController: _operatorIdController,
           notesController: _notesController,
-          onGtinChanged: (gtin) => setState(() {
-            _selectedGTIN = gtin;
-            _gtinError = null;
-          }),
-          onLocationChanged: (gln) => setState(() {
-            _commissioningLocationGLN = gln;
-            _locationError = null;
-          }),
           onSelectDate: _selectDate,
           onClearDate: _clearDate,
+          onBatchLotEditingComplete: _triggerBatchLookupNow,
+          onBatchLotFocusLost: _triggerBatchLookupNow,
+          showPharmaBatchLookup: _isPharmaProduct(_selectedGTIN),
+          batchLookupStatus: batchState.batchLookupStatus,
+          resolvedBatch: batchState.resolvedBatch,
+          batchLookupError: batchState.batchLookupError,
+          registrationPanelExpanded: batchState.registrationPanelExpanded,
+          registrationExpiryDate: batchState.registrationExpiryDate,
+          registrationManufactureDate: batchState.registrationManufactureDate,
+          registrationQuantityController: _registrationQuantityController,
+          onSelectRegistrationDate: _selectRegistrationDate,
+          onClearRegistrationDate: _clearRegistrationDate,
+          onRegisterBatch: _registerBatch,
+          onToggleRegistrationPanel: (expanded) => context
+              .read<CommissioningOperationCubit>()
+              .setRegistrationPanelExpanded(expanded),
+          isBatchRegistering: batchState.batchLookupStatus ==
+              CommissioningBatchLookupStatus.registering,
           onScanProductBarcode: _scanProductBarcode,
         ),
       );
 
-  CommissioningStep2SerialNumbers get _step2Widget =>
+  CommissioningStep2SerialNumbers _buildStep2({required bool fillHeight}) =>
       CommissioningStep2SerialNumbers(
+        fillHeight: fillHeight,
         selectedGTIN: _selectedGTIN,
         gtinController: _gtinController,
         batchLotController: _batchLotController,
@@ -616,7 +844,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
         onScanResult: _onScanResult,
       );
 
-  CommissioningStep3Review get _step3Widget => CommissioningStep3Review(
+  CommissioningStep3Review _buildStep3() => CommissioningStep3Review(
         selectedGTIN: _selectedGTIN,
         gtinController: _gtinController,
         batchLotController: _batchLotController,
@@ -630,46 +858,66 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
 
   @override
   Widget build(BuildContext context) {
-    final submitLabel = 'Commission ${_serialNumbers.length} Items';
+    return BlocConsumer<CommissioningOperationCubit, CommissioningOperationState>(
+      listenWhen: (previous, current) =>
+          previous.resolvedBatch != current.resolvedBatch,
+      listener: (context, state) {
+        final batch = state.resolvedBatch;
+        if (batch != null) {
+          _applyBatchDatesFromResolved(batch);
+        }
+      },
+      builder: (context, batchState) {
+        final submitLabel = 'Commission ${_serialNumbers.length} Items';
+        final isBusy = _isLoading || batchState.loading;
+        final step1Complete =
+            _isStep1Valid && _isPharmaBatchReady(batchState);
 
-    return AppLayoutBuilder(
-      builder: (context, layout) => layout.isDesktopUp
-          ? OperationDesktopLayout(
-              isLoading: _isLoading,
-              appBarTitle: 'New Commissioning Operation',
-              submitLabel: submitLabel,
-              step1Title: 'Product Details',
-              step2Title: 'Serial Numbers',
-              step1Complete: _isStep1Valid,
-              step2Complete: _isStep2Valid,
-              detailsStep: _step1Widget,
-              itemsStep: _step2Widget,
-              reviewStep: _step3Widget,
-              onSubmit: _submit,
-            )
-          : OperationMobileLayout(
-              isLoading: _isLoading,
-              appBarTitle: 'Commissioning',
-              submitLabel: submitLabel,
-              currentStep: _currentStep,
-              steps: _wizardSteps,
-              pageController: _pageController,
-              onPageChanged: (page) {
-                setState(() => _currentStep = page);
-                if (page == 1 &&
-                    _scanningMode == CommissioningScanningMode.wired) {
-                  WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => _wiredScannerFocusNode.requestFocus(),
+        return AppLayoutBuilder(
+          builder: (context, layout) {
+            final isDesktop = layout.isDesktopUp;
+            final step1 = _buildStep1(batchState);
+            final step2 = _buildStep2(fillHeight: !isDesktop);
+            final step3 = _buildStep3();
+
+            return isDesktop
+                ? OperationDesktopLayout(
+                    isLoading: isBusy,
+                    appBarTitle: 'New Commissioning Operation',
+                    submitLabel: submitLabel,
+                    step1Title: 'Product Details',
+                    step2Title: 'Serial Numbers',
+                    step1Complete: step1Complete,
+                    step2Complete: _isStep2Valid,
+                    detailsStep: step1,
+                    itemsStep: step2,
+                    reviewStep: step3,
+                    onSubmit: _submit,
+                  )
+                : OperationMobileLayout(
+                    isLoading: isBusy,
+                    appBarTitle: 'Commissioning',
+                    submitLabel: submitLabel,
+                    currentStep: _currentStep,
+                    steps: _wizardSteps,
+                    pageController: _pageController,
+                    onPageChanged: (page) {
+                      setState(() => _currentStep = page);
+                      if (page == 1 &&
+                          _scanningMode == CommissioningScanningMode.wired) {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _wiredScannerFocusNode.requestFocus(),
+                        );
+                      }
+                    },
+                    onPrevious: _previousStep,
+                    onNext: _nextStep,
+                    onSubmit: _submit,
+                    stepPages: [step1, step2, step3],
                   );
-                }
-              },
-              onPrevious: _previousStep,
-              onNext: () {
-                _nextStep();
-              },
-              onSubmit: _submit,
-              stepPages: [_step1Widget, _step2Widget, _step3Widget],
-            ),
+          },
+        );
+      },
     );
   }
 }

@@ -10,13 +10,10 @@ enum UpdateStatusDisposition {
 
   const UpdateStatusDisposition(this.code, this.label);
 
-  /// GS1 CBV 2.0 disposition code sent to the backend.
   final String code;
 
-  /// Human-readable label shown in the UI.
   final String label;
 
-  /// Resolves a disposition from a short CBV code, HTTPS URI, or EPCIS 1.x URN.
   static UpdateStatusDisposition? fromCode(String? code) {
     if (code == null) return null;
     final normalised =
@@ -27,7 +24,6 @@ enum UpdateStatusDisposition {
     return null;
   }
 
-  /// User-facing status label for any stored disposition form.
   static String labelFor(String? code) =>
       fromCode(code)?.label ?? code ?? '-';
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Animated stepper header with scale transitions and connector fill animation.
 class OperationStepperHeader extends StatefulWidget {
   const OperationStepperHeader({
     super.key,

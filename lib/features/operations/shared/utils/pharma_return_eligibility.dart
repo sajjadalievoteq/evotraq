@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
-/// Disposition / GLN checks for pharma return actions.
 class PharmaReturnEligibility {
   PharmaReturnEligibility._();
 
@@ -40,9 +39,6 @@ class PharmaReturnEligibility {
     return step.contains('returning') && disp.contains('in_transit');
   }
 
-  /// True when the return has already been received by the original shipper
-  /// (accepting + returned / recalled / damaged disposition).
-  /// Used to suppress the "Accept Return" button when the cycle is complete.
   static bool isReturnAlreadyReceived({
     required String? businessStep,
     required String? disposition,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
@@ -14,7 +15,6 @@ import 'package:traqtrace_app/data/models/operations/receiving/receiving_request
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
@@ -25,6 +25,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/widgets/receiving_review_step.dart';
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class ReceivingOperationScreen extends StatefulWidget {
@@ -34,10 +35,8 @@ class ReceivingOperationScreen extends StatefulWidget {
     this.onEmbeddedActionSuccess,
   });
 
-  /// True when rendered inside [Gs1SplitViewScreen]'s create panel.
   final bool embedded;
 
-  /// Called after successful submission in embedded mode instead of navigating.
   final VoidCallback? onEmbeddedActionSuccess;
 
   @override
@@ -237,7 +236,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
 
     try {
       final receivingService = getIt<ReceivingOperationService>();
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEpcs);
+      final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
@@ -309,15 +308,43 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           await receivingService.createReceivingOperation(receivingRequest);
 
       if (response.isSuccessOrPartial) {
-        if (response.status == OperationStatus.partialSuccess) {
-          context.showSuccess(
-            'Receiving submitted with warnings. Open the record for details.',
-          );
+        // Auto-accept immediately using the receiving GLN the user selected.
+        final eventId = response.eventIds?.isNotEmpty == true
+            ? response.eventIds!.first
+            : null;
+        final receiverGln = _receivingGln?.glnCode;
+
+        if (eventId != null && receiverGln != null) {
+          try {
+            await receivingService.acceptGoods(
+              receivingEventId: eventId,
+              receiverGln: receiverGln,
+            );
+            if (mounted) {
+              context.showSuccess(
+                response.status == OperationStatus.partialSuccess
+                    ? 'Receiving submitted with warnings and goods accepted automatically.'
+                    : 'Receiving operation completed and goods accepted.',
+              );
+            }
+          } catch (_) {
+            // Auto-accept failed — still navigate, user can accept manually.
+            if (mounted) {
+              context.showSuccess(
+                'Receiving operation created. Tap "Accept Goods" on the record to complete acceptance.',
+              );
+            }
+          }
         } else {
-          context.showSuccess(
-            'Receiving operation completed successfully.',
-          );
+          if (mounted) {
+            context.showSuccess(
+              response.status == OperationStatus.partialSuccess
+                  ? 'Receiving submitted with warnings. Open the record for details.'
+                  : 'Receiving operation completed successfully.',
+            );
+          }
         }
+
         if (!mounted) return;
 
         if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
@@ -336,10 +363,11 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           }
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true
-            ? response.messages!.first
-            : 'The Receiving operation could not be completed. Check your inputs and try again.';
-        context.showError(errorMessage);
+        context.showError(OperationErrorTranslator.translateMessages(
+          response.messages,
+          fallback:
+              'The Receiving operation could not be completed. Check your inputs and try again.',
+        ));
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -390,7 +418,6 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
         setState(() => _itemWarnings.remove(epc));
       }
     } catch (_) {
-      // Soft warning is best-effort only.
     }
   }
 

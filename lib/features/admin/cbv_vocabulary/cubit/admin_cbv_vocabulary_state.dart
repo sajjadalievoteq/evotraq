@@ -20,19 +20,14 @@ class AdminCbvVocabularyState extends Equatable {
   final List<CbvVocabularyItem> bizSteps;
   final List<CbvVocabularyItem> dispositions;
 
-  /// bizStep short code → list of valid disposition short codes (from backend).
   final Map<String, List<String>> pairMap;
 
-  /// Codes currently being PATCH'd (toggle) — drives per-item spinner.
   final Set<String> togglingCodes;
 
-  /// Codes currently being DELETE'd — drives per-item spinner.
   final Set<String> deletingCodes;
 
-  /// "bizCode|dispCode" keys currently being toggled in the pair table.
   final Set<String> pairingKeys;
 
-  /// True while a POST create call is in-flight.
   final bool isCreating;
 
   final String? error;

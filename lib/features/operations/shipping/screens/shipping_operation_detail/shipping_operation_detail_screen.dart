@@ -35,7 +35,6 @@ final _shippingDetailConfig = OperationDetailScreenConfig<ShippingResponse>(
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display shipping operation details.
 class ShippingOperationDetailScreen
     extends GenericOperationDetailScreen<ShippingResponse> {
   ShippingOperationDetailScreen({

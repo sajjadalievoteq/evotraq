@@ -1,4 +1,3 @@
-/// GS1 pharma return reason codes stored in EPCIS ILMD.
 enum PharmaReturnReason {
   damaged('DAMAGED', 'Damaged'),
   expired('EXPIRED', 'Expired'),

@@ -1,4 +1,3 @@
-/// Shared status enum for all standard operation types.
 enum OperationStatus {
   success,
   partialSuccess,

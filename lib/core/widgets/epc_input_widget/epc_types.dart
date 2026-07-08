@@ -1,4 +1,3 @@
-/// Canonical EPC identifier types supported by [EPCInputWidget].
 enum EPCType {
   sgtin,
   sscc,
@@ -6,7 +5,6 @@ enum EPCType {
   unknown,
 }
 
-/// Result of parsing a barcode or EPC input string via [parseToEPC].
 class EPCParseResult {
   const EPCParseResult({
     required this.type,
@@ -16,6 +14,8 @@ class EPCParseResult {
     this.gtin,
     this.serial,
     this.sscc,
+    this.gcpLength,
+    this.companyPrefix,
   });
 
   final EPCType type;
@@ -23,6 +23,8 @@ class EPCParseResult {
   final String? gtin;
   final String? serial;
   final String? sscc;
+  final int? gcpLength;
+  final String? companyPrefix;
   final String raw;
   final String detectedFormat;
 
@@ -34,7 +36,6 @@ class EPCParseResult {
       };
 }
 
-/// Thrown when [parseToEPC] cannot recognise or validate the input.
 class EPCParseException implements Exception {
   EPCParseException(this.message);
 

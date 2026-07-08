@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field.dart';
@@ -109,7 +109,7 @@ class _TechMahAuthorizationGroupWidgetState
     if (_mahGln == null) return;
     try {
       final catalog =
-          await getIt<GLNService>().getAllGLNs(page: 0, size: 500);
+          await getIt<GlnPickerCatalog>().ensureLoaded();
       if (!mounted) return;
       final resolved = resolveGlnForPicker(
         code: _mahGln!.glnCode,
@@ -373,7 +373,7 @@ class _TechMahAuthorizationGroupWidgetState
     );
 
     return Gs1GroupCard(
-      title: 'Technical specification â MAH & authorization',
+      title: 'Technical specification of MAH & authorization',
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

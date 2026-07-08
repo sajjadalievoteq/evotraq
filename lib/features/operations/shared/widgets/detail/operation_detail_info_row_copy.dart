@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 
-/// Shared label/value row with clipboard copy button.
 class OperationDetailInfoRowCopy extends StatelessWidget {
   const OperationDetailInfoRowCopy({
     super.key,

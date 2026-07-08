@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_response_model.dart';
 
-/// Return Shipping Detail display helpers.
 class ReturnShippingDetailHelpers {
   ReturnShippingDetailHelpers._();
 

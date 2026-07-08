@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
-/// Hero banner for detail screens: primary title, optional subtitle, optional
-/// bottom-right footer (status, timestamp, location, etc.).
 class DetailHeaderBannerCard extends StatelessWidget {
   const DetailHeaderBannerCard({
     super.key,

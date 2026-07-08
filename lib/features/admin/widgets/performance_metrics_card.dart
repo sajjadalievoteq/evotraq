@@ -43,7 +43,6 @@ class PerformanceMetricsCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
-            // Key performance indicators
             Row(
               children: [
                 Expanded(
@@ -110,7 +109,6 @@ class PerformanceMetricsCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // System metrics
             Row(
               children: [
                 Expanded(
@@ -145,7 +143,6 @@ class PerformanceMetricsCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Database metrics
             Row(
               children: [
                 Expanded(
@@ -180,7 +177,6 @@ class PerformanceMetricsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Action buttons
             Wrap(
               spacing: 8,
               children: [

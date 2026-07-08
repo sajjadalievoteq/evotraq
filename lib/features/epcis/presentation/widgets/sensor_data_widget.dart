@@ -3,21 +3,15 @@ import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget to display sensor data in EPCIS events
 class SensorDataWidget extends StatelessWidget {
-  /// List of sensor elements to display
   final List<SensorElement>? sensorElements;
   
-  /// Whether the widget is displayed in collapsed mode
   final bool isCollapsed;
   
-  /// Callback when the user requests to expand the widget
   final VoidCallback? onExpand;
   
-  /// Callback when the user requests to view details of a specific sensor element
   final Function(SensorElement)? onViewDetails;
   
-  /// Constructor
   const SensorDataWidget({
     Key? key,
     this.sensorElements,
@@ -96,7 +90,6 @@ class SensorDataWidget extends StatelessWidget {
       subtitle: Text(sensorElement.deviceMetadata ?? 'No metadata'),
       leading: TraqIcon(AppAssets.iconRefresh),
       children: [
-        // Device information section
         ListTile(
           title: const Text('Device Information'),
           subtitle: Column(
@@ -117,7 +110,6 @@ class SensorDataWidget extends StatelessWidget {
           dense: true,
         ),
         
-        // Measurements section
         if (sensorElement.measurements.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 4.0),

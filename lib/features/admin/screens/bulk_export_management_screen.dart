@@ -10,8 +10,6 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Bulk Export Management Screen for Phase 3.3 Batch Processing Capabilities
-/// Provides comprehensive bulk export management and monitoring interface
 class BulkExportManagementScreen extends StatelessWidget {
   const BulkExportManagementScreen({Key? key}) : super(key: key);
 
@@ -63,7 +61,6 @@ class BulkExportManagementScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header Section
                     Card(
                       elevation: 4,
                       child: Padding(
@@ -128,7 +125,6 @@ class BulkExportManagementScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     
-                    // Main Content
                     Expanded(
                       child: BulkExportPanel(
                         baseUrl: baseUrl,

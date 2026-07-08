@@ -1,7 +1,6 @@
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/utils/object_event_form_constants.dart';
 
-/// Mirrors backend {@code ObjectEventValidationService} required-field rules.
 class ObjectEventFormMandatoryFields {
   ObjectEventFormMandatoryFields._();
 
@@ -21,7 +20,6 @@ class ObjectEventFormMandatoryFields {
     return CbvVocabularyFormatter.isBizStepName(businessStep, 'shipping');
   }
 
-  /// Field names grouped by form section (for title required indicators).
   static const certificationFields = ['certificationType', 'certificationAgency'];
   static const sourceListFields = ['sourceType', 'sourceID'];
   static const destinationListFields = ['destinationType', 'destinationID'];
@@ -67,7 +65,6 @@ class ObjectEventFormMandatoryFields {
       return true;
     }
 
-    // Form always sends bizStep/disposition; backend validates pairing when both present.
     if (['businessStep', 'disposition'].contains(fieldName)) {
       return true;
     }
@@ -98,7 +95,6 @@ class ObjectEventFormMandatoryFields {
       return requiresShippingDestination(businessStep);
     }
 
-    // Per-entry required when adding source/destination rows (backend validateSourceDestination).
     if (fieldName == 'sourceType' ||
         fieldName == 'sourceID' ||
         fieldName == 'destinationType' ||
@@ -106,7 +102,6 @@ class ObjectEventFormMandatoryFields {
       return true;
     }
 
-    // Certification fields required when user adds a certification entry.
     if (fieldName == 'certificationType' ||
         fieldName == 'certificationAgency') {
       return true;
@@ -116,7 +111,6 @@ class ObjectEventFormMandatoryFields {
       return false;
     }
 
-    // Quantity row fields when using quantityList instead of epcList.
     if (fieldName == 'quantityEpcClass' || fieldName == 'quantityValue') {
       return true;
     }

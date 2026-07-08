@@ -56,10 +56,6 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
               ],
             ),
           ),
-          // Hierarchy icon — only for successfully commissioned EPCs.
-          // Tapping opens the universal hierarchy screen which walks to the
-          // root ancestor automatically (the EPC may later be aggregated
-          // inside a packing container).
           if (item.epcUri != null)
             IconButton(
               icon: TraqIcon(AppAssets.iconAggregate, size: 16),

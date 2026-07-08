@@ -1,32 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
 
-/// A form field wrapper that provides progressive validation feedback
 class ValidatedFormField extends StatefulWidget {
-  /// The form field to wrap
   final Widget formField;
 
-  /// Validation function
   final String? Function(String?) validator;
 
   final FocusNode? focusNode;
 
-  /// Optional help text
   final String? helpText;
 
-  /// Whether to validate on change
   final bool validateOnChange;
 
-  /// Whether to validate on focus lost
   final bool validateOnBlur;
 
-  /// Initial validation state
   final bool initiallyValidated;
 
-  /// Whether to animate validation state changes
   final bool animate;
 
-  /// Constructor
   const ValidatedFormField({
     Key? key,
     required this.formField,
@@ -57,7 +48,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField> {
     _focusNode = widget.focusNode ?? FocusNode();
     _wasValidated = widget.initiallyValidated;
     if (widget.initiallyValidated) {
-      // If we want to validate initially, do it right away
       Future.microtask(() {
         _validate(_currentValue);
       });
@@ -118,7 +108,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField> {
   }
 }
 
-/// Notification class for form field value changes
 class ValidationNotification extends Notification {
   final String value;
 

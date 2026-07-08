@@ -48,7 +48,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
     final appConfig = getIt<AppConfig>();
     _performanceService = AdvancedPerformanceService(
       dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(), // Assuming this is available
+      tokenManager: getIt<TokenManager>(),
       appConfig: appConfig,
     );
   }
@@ -200,7 +200,6 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Error Message
             if (_errorMessage != null)
               Card(
                 color: Colors.red.shade50,
@@ -223,13 +222,11 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
 
             if (_errorMessage != null) const SizedBox(height: 16),
 
-            // Loading or Overview Content
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else
               Column(
                 children: [
-                  // Performance Metrics Overview
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -257,7 +254,6 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
 
                   const SizedBox(height: 16),
 
-                  // Automated Optimization Section
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -306,7 +302,6 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
 
                   const SizedBox(height: 16),
 
-                  // Comprehensive Analysis Results
                   if (_comprehensiveAnalysis != null)
                     Card(
                       child: Padding(

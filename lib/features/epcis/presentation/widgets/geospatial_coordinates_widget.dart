@@ -8,21 +8,15 @@ import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget for displaying and editing geospatial coordinates
 class GeospatialCoordinatesWidget extends StatefulWidget {
-  /// The coordinates to display or edit
   final GeospatialCoordinates? coordinates;
   
-  /// Callback when coordinates are updated
   final void Function(GeospatialCoordinates? coordinates)? onCoordinatesChanged;
   
-  /// Whether the widget is in view-only mode
   final bool isViewOnly;
   
-  /// Whether to show the map preview
   final bool showMap;
 
-  /// Constructor
   const GeospatialCoordinatesWidget({
     Key? key,
     this.coordinates,
@@ -109,7 +103,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Add name if available
           if (_coordinates!.name != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -119,7 +112,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               ),
             ),
             
-          // Main coordinates display (always shown)
           Row(
             children: [
               TraqIcon(AppAssets.iconGln, size: 16, color: Colors.red),
@@ -135,7 +127,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
           
           const SizedBox(height: 4),
           
-          // Additional details in a more compact form
           if (_coordinates!.altitude != null || _coordinates!.coordinateSystem != null)
             Padding(
               padding: const EdgeInsets.only(top: 4.0),
@@ -159,7 +150,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               ),
             ),
           
-          // Accuracy information if available
           if (_coordinates!.horizontalAccuracy != null || _coordinates!.verticalAccuracy != null)
             Padding(
               padding: const EdgeInsets.only(top: 4.0),
@@ -181,9 +171,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
   }
 
   Widget _buildMapPlaceholder() {
-    // We can use flutter_map on all platforms
     if (_coordinates != null) {
-      // Create a LatLng object for flutter_map
       final LatLng position = LatLng(
         _coordinates!.latitude,
         _coordinates!.longitude,
@@ -203,15 +191,11 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                 options: MapOptions(
                   initialCenter: position,
                   initialZoom: 13.0,
-                  // Enable interaction for better user experience
                   interactionOptions: const InteractionOptions(
                     enableMultiFingerGestureRace: true,
                   ),
                 ),
                 children: [
-                  // CARTO Voyager tile layer — no API key required.
-                  // Replaces OpenStreetMap which was returning 403 Access Blocked errors.
-                  // Terms: https://carto.com/legal/
                   TileLayer(
                     urlTemplate:
                         'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
@@ -219,7 +203,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                     tileProvider: NetworkTileProvider(),
                     userAgentPackageName: 'com.traqtrace.app',
                   ),
-                  // Add a circle for accuracy indication if available
                   if (_coordinates!.horizontalAccuracy != null)
                     CircleLayer(
                       circles: [
@@ -233,7 +216,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                         ),
                       ],
                     ),
-                  // Add the main marker
                   MarkerLayer(
                     markers: [
                       Marker(
@@ -275,7 +257,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                   ),
                 ],
               ),
-              // Overlay information
               Positioned(
                 bottom: 8,
                 left: 8,
@@ -308,7 +289,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                   ),
                 ),
               ),
-              // Add button to open in external map
               Positioned(
                 top: 8,
                 right: 8,
@@ -328,7 +308,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
         ),
       );
     } else {
-      // If no coordinates are available
       return Container(
         height: 200,
         decoration: BoxDecoration(
@@ -369,7 +348,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
     );
   }
   
-  // Method to open the coordinates in an external map application
   void _openInExternalMap() async {
     if (_coordinates == null) return;
     
@@ -377,15 +355,12 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
     final lng = _coordinates!.longitude;
     final name = Uri.encodeComponent(_coordinates!.name ?? 'Location');
     
-    // Use OpenStreetMap which works consistently across platforms
     String url = 'https://www.openstreetmap.org/?mlat=$lat&mlon=$lng&zoom=15';
     
     try {
-      // Use platform-specific apps when possible
       if (!kIsWeb) {
         try {
           if (Platform.isAndroid) {
-            // Try Google Maps first on Android
             final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
             final Uri googleUri = Uri.parse(googleUrl);
             if (await canLaunchUrl(googleUri)) {
@@ -393,7 +368,6 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               return;
             }
           } else if (Platform.isIOS) {
-            // Try Apple Maps first on iOS
             final appleUrl = 'https://maps.apple.com/?q=$name&ll=$lat,$lng';
             final Uri appleUri = Uri.parse(appleUrl);
             if (await canLaunchUrl(appleUri)) {
@@ -402,21 +376,17 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
             }
           }
         } catch (_) {
-          // Ignore platform errors and fall back to web
         }
       }
       
-      // Fallback to OpenStreetMap which works on all platforms including desktop
       final Uri osUri = Uri.parse(url);
       await launchUrl(
         osUri,
-        mode: LaunchMode.platformDefault,  // Use external browser when possible
+        mode: LaunchMode.platformDefault,
       );
     } catch (e) {
-      // Show error in console
       debugPrint('Error opening map: $e');
       
-      // Try one more fallback option - HERE Maps web
       try {
         final hereUrl = 'https://wego.here.com/directions/mix/mylocation/${lat},${lng}';
         final Uri hereUri = Uri.parse(hereUrl);
@@ -445,15 +415,11 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
   }
 }
 
-/// Dialog for adding or editing geospatial coordinates
 class _CoordinatesDialog extends StatefulWidget {
-  /// Coordinates to edit (null for adding new)
   final GeospatialCoordinates? coordinates;
   
-  /// Callback when coordinates are saved
   final void Function(GeospatialCoordinates coordinates) onSave;
 
-  /// Constructor
   const _CoordinatesDialog({
     Key? key,
     this.coordinates,

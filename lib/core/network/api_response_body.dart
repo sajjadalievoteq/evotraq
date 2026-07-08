@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-/// Decodes a Dio response body whether it is a JSON [String] or already parsed.
 dynamic decodeApiResponseBody(dynamic data) {
   if (data == null) return null;
   if (data is String) {

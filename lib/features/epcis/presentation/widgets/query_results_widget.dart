@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class QueryResultsWidget extends StatelessWidget {
@@ -305,7 +306,10 @@ class QueryResultsWidget extends StatelessWidget {
 
   Widget _buildEventCard(BuildContext context, EPCISEvent event, int index) {
     final eventTime = event.eventTime ?? 'Unknown';
-    final businessStep = event.bizStep ?? '';
+    final businessStep = CbvDisplayUtils.displayBizStep(
+      event.bizStep,
+      fallback: '',
+    );
     
     return ExpansionTile(
       leading: CircleAvatar(
@@ -333,7 +337,9 @@ class QueryResultsWidget extends StatelessWidget {
           const SizedBox(width: 8),
           if (event.disposition != null)
             Chip(
-              label: Text(event.disposition!),
+              label: Text(
+                CbvDisplayUtils.displayDisposition(event.disposition),
+              ),
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
             ),
         ],

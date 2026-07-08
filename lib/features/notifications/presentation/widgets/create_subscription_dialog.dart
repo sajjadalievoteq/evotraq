@@ -27,18 +27,16 @@ class CreateSubscriptionDialog extends StatefulWidget {
 class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
-  String _selectedDeliveryMethod = 'WEBHOOK'; // Default to webhook
+  String _selectedDeliveryMethod = 'WEBHOOK';
 
   bool get _isEditing => widget.subscription != null;
 
   List<Map<String, String>> _getAvailableFormats() {
     if (_selectedDeliveryMethod == 'EMAIL') {
-      // For email, include EMAIL_HTML and exclude JSON/XML
       return NotificationConstants.notificationFormats.where((format) => 
         format['value'] == 'SUMMARY' || format['value'] == 'EMAIL_HTML'
       ).toList();
     } else {
-      // For webhook, exclude EMAIL_HTML
       return NotificationConstants.notificationFormats.where((format) => 
         format['value'] != 'EMAIL_HTML'
       ).toList();
@@ -72,7 +70,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         ),
         content: SizedBox(
           width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.7, // Set max height
+          height: MediaQuery.of(context).size.height * 0.7,
           child: FormBuilder(
             key: _formKey,
             initialValue: _isEditing
@@ -82,15 +80,13 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                     'subscriptionType': widget.subscription!.subscriptionType,
                     'notificationFormat':
                         widget.subscription!.notificationFormat,
-                    'deliveryMethod': 'WEBHOOK', // Default for existing subscriptions
+                    'deliveryMethod': 'WEBHOOK',
                   }
                 : {
                     'subscriptionType': 'REALTIME',
                     'deliveryMethod': 'WEBHOOK',
-                    // Don't set notificationFormat here, let the keyed dropdown handle it
                   },
             onChanged: () {
-              // Update delivery method when form changes
               final formData = _formKey.currentState?.value;
               if (formData != null && formData['deliveryMethod'] != null) {
                 final newDeliveryMethod = formData['deliveryMethod'] as String;
@@ -102,7 +98,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
               }
             },
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 16), // Add bottom padding
+              padding: const EdgeInsets.only(bottom: 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -119,22 +115,19 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                       FormBuilderValidators.minLength(3),
                     ]),
                   ),
-                  const SizedBox(height: 12), // Reduced spacing
+                  const SizedBox(height: 12),
                   
-                  // Delivery Method Selection
                   _buildDropdownSection<String>(
                     'deliveryMethod',
                     'Delivery Method',
                     NotificationConstants.deliveryMethods,
                     FormBuilderValidators.required(),
                   ),
-                  const SizedBox(height: 12), // Reduced spacing
+                  const SizedBox(height: 12),
                   
-                  // Conditional webhook or email field
-                  // Debug: Current delivery method is $_selectedDeliveryMethod
                   if (_selectedDeliveryMethod == 'WEBHOOK')
                     FormBuilderTextField(
-                      key: const ValueKey('webhookUrl'), // Add unique key
+                      key: const ValueKey('webhookUrl'),
                       name: 'webhookUrl',
                       decoration: const InputDecoration(
                         labelText: 'Webhook Endpoint URL',
@@ -151,7 +144,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                     )
                   else
                     FormBuilderTextField(
-                      key: const ValueKey('emailAddress'), // Add unique key
+                      key: const ValueKey('emailAddress'),
                       name: 'emailAddress',
                       decoration: const InputDecoration(
                         labelText: 'Email Address',
@@ -166,17 +159,16 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                         FormBuilderValidators.email(),
                       ]),
                     ),
-                  const SizedBox(height: 12), // Reduced spacing
+                  const SizedBox(height: 12),
                   _buildDropdownSection<String>(
                     'subscriptionType',
                     'Subscription Type',
                     NotificationConstants.subscriptionTypes,
                     FormBuilderValidators.required(),
                   ),
-                  const SizedBox(height: 12), // Reduced spacing
-                  // Notification Format with key to force rebuild when delivery method changes
+                  const SizedBox(height: 12),
                   FormBuilderDropdown<String>(
-                    key: ValueKey('notificationFormat_$_selectedDeliveryMethod'), // Force rebuild
+                    key: ValueKey('notificationFormat_$_selectedDeliveryMethod'),
                     name: 'notificationFormat',
                     decoration: const InputDecoration(
                       labelText: 'Notification Format',
@@ -195,7 +187,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                           ),
                         )).toList(),
                   ),
-                  const SizedBox(height: 12), // Reduced spacing
+                  const SizedBox(height: 12),
                   _buildAdvancedSection(),
                 ],
               ),
@@ -242,16 +234,14 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       title: const Text('Event Filtering (Advanced)'),
       subtitle: const Text('Configure which events trigger notifications'),
       children: [
-        const SizedBox(height: 8), // Reduced spacing
-        // Event Types Multi-Select
+        const SizedBox(height: 8),
         _buildMultiSelectField(
           'eventTypes',
           'Event Types',
           NotificationConstants.eventTypes,
           'Select which EPCIS event types to monitor',
         ),
-        const SizedBox(height: 12), // Reduced spacing
-        // Business Step Dropdown
+        const SizedBox(height: 12),
         _buildEnhancedDropdown(
           'bizStep',
           'Business Step',
@@ -259,8 +249,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           'Filter by business process steps',
           isRequired: false,
         ),
-        const SizedBox(height: 12), // Reduced spacing
-        // Disposition Dropdown
+        const SizedBox(height: 12),
         _buildEnhancedDropdown(
           'disposition',
           'Disposition',
@@ -268,8 +257,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
           'Filter by item status or condition',
           isRequired: false,
         ),
-        const SizedBox(height: 12), // Reduced spacing
-        // Read Point
+        const SizedBox(height: 12),
         FormBuilderTextField(
           name: 'readPoint',
           decoration: const InputDecoration(
@@ -281,8 +269,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             helperStyle: TextStyle(fontSize: 11),
           ),
         ),
-        const SizedBox(height: 12), // Reduced spacing
-        // EPC Pattern
+        const SizedBox(height: 12),
         FormBuilderTextField(
           name: 'epcPattern',
           decoration: const InputDecoration(
@@ -311,12 +298,12 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         labelText: label,
         border: const OutlineInputBorder(),
         helperText: helperText,
-        helperMaxLines: 1, // Reduced from 2
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduce padding
-        helperStyle: const TextStyle(fontSize: 11), // Smaller helper text
+        helperMaxLines: 1,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        helperStyle: const TextStyle(fontSize: 11),
       ),
       validator: isRequired ? FormBuilderValidators.required() : null,
-      isDense: true, // Make dropdown more compact
+      isDense: true,
       items: [
         const DropdownMenuItem<String>(
           value: null,
@@ -348,14 +335,13 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
             labelText: label,
             border: const OutlineInputBorder(),
             helperText: helperText,
-            helperMaxLines: 1, // Reduced from 2
+            helperMaxLines: 1,
             errorText: field.errorText,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             helperStyle: const TextStyle(fontSize: 11),
           ),
           child: Column(
             children: [
-              // Show selected items
               if (field.value != null && field.value!.isNotEmpty)
                 Container(
                   width: double.infinity,
@@ -386,7 +372,6 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                     }).toList(),
                   ),
                 ),
-              // Selection button
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -424,17 +409,15 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduce padding
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       validator: validator,
-      isDense: true, // Make dropdown more compact
+      isDense: true,
       onChanged: (value) {
-        // Force state update for delivery method changes
         if (name == 'deliveryMethod' && value != null) {
           setState(() {
             _selectedDeliveryMethod = value as String;
           });
-          // The notification format dropdown will rebuild automatically with the correct initial value
         }
       },
       items: options.map((option) => DropdownMenuItem<T>(
@@ -609,10 +592,8 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       final formData = _formKey.currentState!.value;
       final deliveryMethod = formData['deliveryMethod'] as String;
 
-      // Build query parameters from advanced options
       final queryParameters = <String, dynamic>{};
       
-      // Handle event types (now a list from multi-select)
       if (formData['eventTypes'] != null && 
           (formData['eventTypes'] as List<String>).isNotEmpty) {
         queryParameters['eventTypes'] = formData['eventTypes'];
@@ -638,12 +619,10 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         queryParameters['epcPattern'] = formData['epcPattern'];
       }
 
-      // Get the appropriate endpoint/address based on delivery method
       final String endpointOrEmail = deliveryMethod == 'WEBHOOK' 
           ? formData['webhookUrl'] 
           : formData['emailAddress'];
       
-      // For email delivery, omit notificationFormat to let backend use default
       final String? notificationFormat = deliveryMethod == 'EMAIL' 
           ? null 
           : formData['notificationFormat'];
@@ -652,7 +631,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
         context.read<NotificationCubit>().updateSubscription(
                 id: widget.subscription!.id,
                 subscriptionName: formData['subscriptionName'],
-                webhookUrl: endpointOrEmail, // This field will be repurposed for email too
+                webhookUrl: endpointOrEmail,
                 subscriptionType: formData['subscriptionType'],
                 notificationFormat: notificationFormat,
                 queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
@@ -660,7 +639,7 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
       } else {
         context.read<NotificationCubit>().createSubscription(
                 subscriptionName: formData['subscriptionName'],
-                webhookUrl: endpointOrEmail, // This field will be repurposed for email too
+                webhookUrl: endpointOrEmail,
                 subscriptionType: formData['subscriptionType'],
                 notificationFormat: notificationFormat,
                 queryParameters: queryParameters.isNotEmpty ? queryParameters : null,

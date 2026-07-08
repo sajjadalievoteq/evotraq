@@ -131,7 +131,6 @@ class MonitoringOverviewCard extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        // Switch to alerts tab or show alerts dialog
                       },
                       child: const Text('View'),
                     ),

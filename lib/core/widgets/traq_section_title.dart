@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Uppercase section heading for dense dashboard-style layouts (home, admin
-/// summaries, etc.).
 class TraqSectionTitle extends StatelessWidget {
   const TraqSectionTitle({super.key, required this.label});
 

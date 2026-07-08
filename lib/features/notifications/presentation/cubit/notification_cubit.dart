@@ -90,7 +90,6 @@ class NotificationCubit extends Cubit<NotificationState> {
         lastCreatedSubscription: subscription,
       ));
 
-      // Reload subscriptions
       await loadSubscriptions();
     } catch (e) {
       emit(state.copyWith(
@@ -124,7 +123,6 @@ class NotificationCubit extends Cubit<NotificationState> {
         lastUpdatedSubscription: subscription,
       ));
 
-      // Reload subscriptions
       await loadSubscriptions();
     } catch (e) {
       emit(state.copyWith(
@@ -142,7 +140,6 @@ class NotificationCubit extends Cubit<NotificationState> {
         lastDeletedSubscriptionId: id,
       ));
 
-      // Reload subscriptions
       await loadSubscriptions();
     } catch (e) {
       emit(state.copyWith(
@@ -155,7 +152,6 @@ class NotificationCubit extends Cubit<NotificationState> {
   Future<void> pauseSubscription(String id) async {
     try {
       await _apiService.pauseSubscription(id);
-      // Reload subscriptions to reflect the new status
       await loadSubscriptions();
     } catch (e) {
       emit(state.copyWith(
@@ -168,7 +164,6 @@ class NotificationCubit extends Cubit<NotificationState> {
   Future<void> resumeSubscription(String id) async {
     try {
       await _apiService.resumeSubscription(id);
-      // Reload subscriptions to reflect the new status
       await loadSubscriptions();
     } catch (e) {
       emit(state.copyWith(

@@ -9,8 +9,6 @@ import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for managing Partner API Access
-/// Allows assigning collection-level and individual API access to partners
 class PartnerAccessManagementScreen extends StatefulWidget {
   final String? initialPartnerId;
 
@@ -39,7 +37,6 @@ class _PartnerAccessManagementScreenState
   }
 
   void _initializeAndLoad() {
-    // Load partners and collections
     context.read<ApiManagementCubit>().loadPartners();
     context.read<ApiCollectionCubit>().loadCollections();
 
@@ -231,7 +228,6 @@ class _PartnerAccessManagementScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Summary Cards
               Row(
                 children: [
                   _buildSummaryCard(
@@ -258,7 +254,6 @@ class _PartnerAccessManagementScreenState
               ),
               const SizedBox(height: 24),
 
-              // Quick Actions
               const Text(
                 'Quick Actions',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -280,7 +275,6 @@ class _PartnerAccessManagementScreenState
               ),
               const SizedBox(height: 24),
 
-              // Collection Access Overview
               if (state.collectionAccess.isNotEmpty) ...[
                 const Text(
                   'Collection Access',
@@ -327,7 +321,6 @@ class _PartnerAccessManagementScreenState
                 const SizedBox(height: 24),
               ],
 
-              // Individual API Access Overview
               if (state.apiAccess.isNotEmpty) ...[
                 const Text(
                   'Individual API Access',
@@ -433,7 +426,6 @@ class _PartnerAccessManagementScreenState
 
         return Column(
           children: [
-            // Actions Bar
             Container(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -455,7 +447,6 @@ class _PartnerAccessManagementScreenState
               ),
             ),
             const Divider(height: 1),
-            // List
             Expanded(
               child: accessState.collectionAccess.isEmpty
                   ? Center(
@@ -487,7 +478,6 @@ class _PartnerAccessManagementScreenState
                           allApiAccess: accessState.apiAccess,
                           partnerId: _selectedPartnerId!,
                           onEdit: () {
-                            // TODO: Implement edit
                           },
                           onRevoke: () =>
                               _confirmRevokeCollectionAccess(access),
@@ -541,7 +531,6 @@ class _PartnerAccessManagementScreenState
   void _showGrantCollectionAccessDialog() {
     if (_selectedPartnerId == null) return;
 
-    // Get collections from cubit (already loaded when screen opened)
     final collectionCubit = context.read<ApiCollectionCubit>();
     final collections = collectionCubit.state.collections;
 
@@ -551,7 +540,6 @@ class _PartnerAccessManagementScreenState
     DateTime? validFrom;
     DateTime? validUntil;
 
-    // For selective access - track APIs
     List<ApiDefinition> availableApis = [];
     List<String> selectedApiIds = [];
     bool isLoadingApis = false;
@@ -560,13 +548,11 @@ class _PartnerAccessManagementScreenState
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) {
-          // Function to load APIs when collection changes or access level changes to selective
           Future<void> loadApisForCollection(String collectionId) async {
             setState(() => isLoadingApis = true);
             await collectionCubit.loadApisInCollection(collectionId);
             setState(() {
               availableApis = collectionCubit.state.apis;
-              // Pre-select all APIs when switching to selective
               selectedApiIds = availableApis.map((api) => api.id).toList();
               isLoadingApis = false;
             });
@@ -610,7 +596,6 @@ class _PartnerAccessManagementScreenState
                             availableApis = [];
                             selectedApiIds = [];
                           });
-                          // If selective access, load APIs immediately
                           if (value != null &&
                               accessLevel == AccessLevel.selective) {
                             loadApisForCollection(value);
@@ -647,7 +632,6 @@ class _PartnerAccessManagementScreenState
                             groupValue: accessLevel,
                             onChanged: (value) {
                               setState(() => accessLevel = value!);
-                              // Load APIs if collection already selected
                               if (selectedCollectionId != null) {
                                 loadApisForCollection(selectedCollectionId!);
                               }
@@ -657,7 +641,6 @@ class _PartnerAccessManagementScreenState
                       ],
                     ),
 
-                    // Show API selection when Selective is chosen
                     if (accessLevel == AccessLevel.selective) ...[
                       const SizedBox(height: 16),
                       Container(
@@ -884,7 +867,6 @@ class _PartnerAccessManagementScreenState
                     : () async {
                         final cubit = this.context.read<PartnerAccessCubit>();
 
-                        // 1. Grant collection access
                         final collectionResult = await cubit
                             .grantCollectionAccess(
                               _selectedPartnerId!,
@@ -897,7 +879,6 @@ class _PartnerAccessManagementScreenState
                               validUntil: validUntil,
                             );
 
-                        // 2. If selective access, also grant individual API access
                         if (collectionResult != null &&
                             accessLevel == AccessLevel.selective &&
                             selectedApiIds.isNotEmpty) {
@@ -935,7 +916,6 @@ class _PartnerAccessManagementScreenState
   }
 }
 
-/// Expandable Collection Access Card - shows APIs inline for selective access
 class _ExpandableCollectionAccessCard extends StatefulWidget {
   final PartnerCollectionAccess access;
   final List<PartnerApiAccess> allApiAccess;
@@ -1055,7 +1035,6 @@ class _ExpandableCollectionAccessCardState
                   ],
                 ),
 
-                // Expandable section for selective access
                 if (isSelective) ...[
                   const SizedBox(height: 8),
                   InkWell(
@@ -1107,7 +1086,6 @@ class _ExpandableCollectionAccessCardState
                   ),
                 ],
 
-                // Metadata chips
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -1140,7 +1118,6 @@ class _ExpandableCollectionAccessCardState
             ),
           ),
 
-          // Expanded API list
           if (_isExpanded && isSelective) ...[
             const Divider(height: 1),
             _buildExpandedApiList(),
@@ -1152,7 +1129,6 @@ class _ExpandableCollectionAccessCardState
 
   void _toggleExpand() async {
     if (!_isExpanded && _collectionApis.isEmpty) {
-      // Load APIs for this collection when first expanding
       setState(() => _isLoadingApis = true);
       try {
         final collectionCubit = context.read<ApiCollectionCubit>();
@@ -1169,17 +1145,14 @@ class _ExpandableCollectionAccessCardState
   }
 
   Widget _buildExpandedApiList() {
-    // Get the granted API IDs for this partner
     final grantedApiIds = widget.allApiAccess
         .map((a) => a.apiDefinitionId)
         .toSet();
 
-    // Filter to only show APIs from this collection that are granted
     final grantedApis = _collectionApis
         .where((api) => grantedApiIds.contains(api.id))
         .toList();
 
-    // APIs available but not granted yet
     final availableApis = _collectionApis
         .where((api) => !grantedApiIds.contains(api.id))
         .toList();
@@ -1197,7 +1170,6 @@ class _ExpandableCollectionAccessCardState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with Add button
           Row(
             children: [
               Text(
@@ -1223,7 +1195,6 @@ class _ExpandableCollectionAccessCardState
           ),
           const SizedBox(height: 8),
 
-          // Empty state
           if (grantedApis.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1248,7 +1219,6 @@ class _ExpandableCollectionAccessCardState
               ),
             )
           else
-            // API list with delete buttons
             ...grantedApis.map((api) {
               final apiAccess = widget.allApiAccess.firstWhere(
                 (a) => a.apiDefinitionId == api.id,
@@ -1474,7 +1444,6 @@ class _ExpandableCollectionAccessCardState
               onPressed: selectedApiIds.isEmpty
                   ? null
                   : () async {
-                      // Grant the selected APIs
                       await context
                           .read<PartnerAccessCubit>()
                           .grantBulkApiAccess(widget.partnerId, selectedApiIds);

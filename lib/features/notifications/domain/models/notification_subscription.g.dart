@@ -1,10 +1,7 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'notification_subscription.dart';
 
-// **************************************************************************
 // JsonSerializableGenerator
-// **************************************************************************
 
 NotificationSubscription _$NotificationSubscriptionFromJson(
   Map<String, dynamic> json,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 
-/// Reusable GLN + facility rows for operation detail location cards.
 class OperationGlnLocationRows extends StatelessWidget {
   const OperationGlnLocationRows({
     super.key,

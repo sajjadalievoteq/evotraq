@@ -4,18 +4,13 @@ import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget for displaying and editing certification information in EPCIS events
 class CertificationInfoWidget extends StatefulWidget {
-  /// List of certification info records to display/edit
   final List<CertificationInfo> certifications;
   
-  /// Callback when certification info records are updated
   final void Function(List<CertificationInfo> certifications)? onCertificationsChanged;
   
-  /// Whether the widget is in view-only mode
   final bool isViewOnly;
 
-  /// Constructor
   const CertificationInfoWidget({
     Key? key,
     required this.certifications,
@@ -51,14 +46,12 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
             ),
           ),
         ),
-        // Standard empty state message
         if (_certifications.isEmpty && widget.isViewOnly)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
             child: Text('No certification information recorded for this event'),
           ),
         
-        // Regular certification cards
         ..._certifications.map((certification) => _buildCertificationCard(certification)),
         if (!widget.isViewOnly)
           Padding(
@@ -129,8 +122,6 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
                 child: Text('Issuing Agency: ${certification.certificationAgency}'),
               ),
               
-              // No need to render certificateId again as it's already shown above
-              // NOTE: This was a duplicate rendering of certificateId that we've removed
               
             Row(
               children: [
@@ -191,7 +182,6 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
                 ],
               ),
             
-            // Debug information to help diagnose issues
             if (widget.isViewOnly && _certifications.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -209,7 +199,6 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
   void _addCertification() {
     if (widget.isViewOnly) return;
     
-    // Show dialog to add a new certification
     showDialog(
       context: context,
       builder: (context) => CertificationInfoDialog(
@@ -269,15 +258,11 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
   }
 }
 
-/// Dialog for adding or editing certification information
 class CertificationInfoDialog extends StatefulWidget {
-  /// Certification to edit (null for adding new)
   final CertificationInfo? certification;
   
-  /// Callback when a certification is saved
   final void Function(CertificationInfo certification) onSave;
 
-  /// Constructor
   const CertificationInfoDialog({
     Key? key,
     this.certification,
@@ -291,7 +276,6 @@ class CertificationInfoDialog extends StatefulWidget {
 class _CertificationInfoDialogState extends State<CertificationInfoDialog> {
   final _formKey = GlobalKey<FormState>();
   
-  // Form controllers
   final _certificateIdController = TextEditingController();
   final _certificationStandardController = TextEditingController();
   final _certificationTypeController = TextEditingController();
@@ -306,7 +290,6 @@ class _CertificationInfoDialogState extends State<CertificationInfoDialog> {
   void initState() {
     super.initState();
     
-    // Pre-fill form if editing existing certification
     if (widget.certification != null) {
       _certificateIdController.text = widget.certification!.certificateId ?? '';
       _certificationStandardController.text = widget.certification!.certificationStandard ?? '';

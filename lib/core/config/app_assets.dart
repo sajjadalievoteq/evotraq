@@ -5,7 +5,6 @@ class AppAssets {
   static const String traqBackgroundPng = 'assets/images/traq_background.png';
   static const String traqBackgroundSvg = 'assets/images/traq_background.svg';
 
-  // ── Original icon set ─────────────────────────────────────────────────────
   static const String iconAddCircle = '$_traqIcons/add-circle.svg';
   static const String iconAggregate = '$_traqIcons/aggregate.svg';
   static const String iconAlert = '$_traqIcons/alert.svg';
@@ -62,7 +61,6 @@ class AppAssets {
   static const String iconUsers = '$_traqIcons/users.svg';
   static const String iconX = '$_traqIcons/x.svg';
 
-  // ── Extended icon set ─────────────────────────────────────────────────────
   static const String iconAirplaneD = '$_traqIcons/airplane-d.svg';
   static const String iconAirplaneUp = '$_traqIcons/airplane-up.svg';
   static const String iconApi = '$_traqIcons/api.svg';
@@ -170,7 +168,6 @@ class AppAssets {
   static const String iconArchitecture = '$_traqIcons/architecture.svg';
   static const String iconSensorsOff = '$_traqIcons/sensors-off.svg';
 
-  // Product journey — biz-step icons
   static const String iconUnpacking = '$_traqIcons/unpacking.svg';
   static const String iconPackingSealed = '$_traqIcons/packing-sealed.svg';
   static const String iconAccepting = '$_traqIcons/accepting.svg';

@@ -7,15 +7,12 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget that displays/edits pharmaceutical extension data for a GLN (location)
-/// Can be embedded in GLN detail screens or used standalone
 class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? glnId;
   final String? glnCode;
   final bool isEditing;
   final Function(GLNPharmaceuticalExtension?)? onSaved;
 
-  /// From master-data GLN payload (`GET .../glns/code/{code}`); avoids a separate extension API call.
   final GLNPharmaceuticalExtension? initialExtension;
 
   const GLNPharmaceuticalExtensionWidget({
@@ -32,7 +29,6 @@ class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
       GLNPharmaceuticalExtensionWidgetState();
 }
 
-// US State options (ISO 3166-2:US codes)
 const Map<String, String> _usStateOptions = {
   'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
   'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
@@ -50,35 +46,29 @@ const Map<String, String> _usStateOptions = {
   'PR': 'Puerto Rico', 'GU': 'Guam', 'VI': 'Virgin Islands',
 };
 
-/// State class for GLNPharmaceuticalExtensionWidget
 class GLNPharmaceuticalExtensionWidgetState
     extends State<GLNPharmaceuticalExtensionWidget> {
   GLNPharmaceuticalExtension? _extension;
   bool _isLoading = true;
 
-  // Healthcare Facility Type
   HealthcareFacilityType _healthcareFacilityType = HealthcareFacilityType.other;
   
-  // FDA Establishment Data
   final _fdaEstablishmentIdController = TextEditingController();
   final _fdaRegistrationNumberController = TextEditingController();
   DateTime? _fdaRegistrationDate;
   DateTime? _fdaRegistrationExpiry;
   final _fdaEstablishmentTypeController = TextEditingController();
 
-  // DEA Registration
   final _deaRegistrationNumberController = TextEditingController();
   DateTime? _deaRegistrationExpiry;
   final _deaScheduleAuthorizationController = TextEditingController();
   final _deaBusinessActivityController = TextEditingController();
 
-  // State Licenses
   final _stateLicenseNumberController = TextEditingController();
   final _stateLicenseTypeController = TextEditingController();
   DateTime? _stateLicenseExpiry;
-  String? _stateLicenseState; // Changed from TextEditingController to state variable for dropdown
+  String? _stateLicenseState;
 
-  // Wholesale/Distribution
   final _wholesaleLicenseNumberController = TextEditingController();
   DateTime? _wholesaleLicenseExpiry;
   bool _isAuthorizedTradingPartner = false;
@@ -87,7 +77,6 @@ class GLNPharmaceuticalExtensionWidgetState
   final _vawdAccreditationNumberController = TextEditingController();
   DateTime? _vawdExpiryDate;
 
-  // Cold Chain & Storage
   bool _hasColdChainCapability = false;
   final _coldStorageMinTempController = TextEditingController();
   final _coldStorageMaxTempController = TextEditingController();
@@ -104,26 +93,22 @@ class GLNPharmaceuticalExtensionWidgetState
   final _gdpCertificationNumberController = TextEditingController();
   DateTime? _gdpCertificationExpiry;
 
-  // Clinical Trials
   bool _isClinicalTrialSite = false;
   final _clinicalTrialPhaseAuthorizedController = TextEditingController();
   final _irbApprovalNumberController = TextEditingController();
   DateTime? _irbApprovalExpiry;
 
-  // DSCSA Compliance
   bool _isDscsaCompliant = false;
   DateTime? _dscsaComplianceDate;
   bool _hasSerializationCapability = false;
   bool _hasAggregationCapability = false;
   final _interoperabilitySystemController = TextEditingController();
 
-  // Healthcare IDs
   final _npiNumberController = TextEditingController();
   final _ncpdpIdController = TextEditingController();
   final _medicareProviderNumberController = TextEditingController();
   final _medicaidProviderNumberController = TextEditingController();
 
-  // Certifications
   bool _isIsoCertified = false;
   final _isoCertificationTypeController = TextEditingController();
   final _isoCertificationNumberController = TextEditingController();
@@ -132,13 +117,11 @@ class GLNPharmaceuticalExtensionWidgetState
   final _jcahoAccreditationNumberController = TextEditingController();
   DateTime? _jcahoAccreditationExpiry;
 
-  // International Regulatory
   final _emaSiteIdController = TextEditingController();
   final _pmdaSiteIdController = TextEditingController();
   final _anvisaSiteIdController = TextEditingController();
   final _nmpaSiteIdController = TextEditingController();
 
-  // Operational Details
   final _receivingHoursController = TextEditingController();
   final _dispatchHoursController = TextEditingController();
   bool _hasWeighbridge = false;
@@ -146,7 +129,6 @@ class GLNPharmaceuticalExtensionWidgetState
   bool _hasForkliftCapability = false;
   bool _canReceiveHazmat = false;
 
-  // Contact Information
   final _pharmacistInChargeController = TextEditingController();
   final _picLicenseNumberController = TextEditingController();
   final _responsiblePersonNameController = TextEditingController();
@@ -200,7 +182,6 @@ class GLNPharmaceuticalExtensionWidgetState
     _deaBusinessActivityController.dispose();
     _stateLicenseNumberController.dispose();
     _stateLicenseTypeController.dispose();
-    // _stateLicenseStateController removed - using state variable for dropdown
     _wholesaleLicenseNumberController.dispose();
     _vawdAccreditationNumberController.dispose();
     _coldStorageMinTempController.dispose();
@@ -264,7 +245,6 @@ class GLNPharmaceuticalExtensionWidgetState
       return;
     }
 
-    // Pharmaceutical extension is supplied by the master-data GLN response when present.
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -275,26 +255,22 @@ class GLNPharmaceuticalExtensionWidgetState
   void _populateFormFromExtension(GLNPharmaceuticalExtension ext) {
     _healthcareFacilityType = ext.healthcareFacilityType ?? HealthcareFacilityType.other;
     
-    // FDA
     _fdaEstablishmentIdController.text = ext.fdaEstablishmentId ?? '';
     _fdaRegistrationNumberController.text = ext.fdaRegistrationNumber ?? '';
     _fdaRegistrationDate = ext.fdaRegistrationDate;
     _fdaRegistrationExpiry = ext.fdaRegistrationExpiry;
     _fdaEstablishmentTypeController.text = ext.fdaEstablishmentType ?? '';
 
-    // DEA
     _deaRegistrationNumberController.text = ext.deaRegistrationNumber ?? '';
     _deaRegistrationExpiry = ext.deaRegistrationExpiry;
     _deaScheduleAuthorizationController.text = ext.deaScheduleAuthorization ?? '';
     _deaBusinessActivityController.text = ext.deaBusinessActivity ?? '';
 
-    // State License
     _stateLicenseNumberController.text = ext.stateLicenseNumber ?? '';
     _stateLicenseTypeController.text = ext.stateLicenseType ?? '';
     _stateLicenseExpiry = ext.stateLicenseExpiry;
     _stateLicenseState = ext.stateLicenseState;
 
-    // Wholesale
     _wholesaleLicenseNumberController.text = ext.wholesaleLicenseNumber ?? '';
     _wholesaleLicenseExpiry = ext.wholesaleLicenseExpiry;
     _isAuthorizedTradingPartner = ext.isAuthorizedTradingPartner;
@@ -303,7 +279,6 @@ class GLNPharmaceuticalExtensionWidgetState
     _vawdAccreditationNumberController.text = ext.vawdAccreditationNumber ?? '';
     _vawdExpiryDate = ext.vawdExpiryDate;
 
-    // Cold Chain
     _hasColdChainCapability = ext.hasColdChainCapability;
     _coldStorageMinTempController.text = ext.coldStorageMinTempCelsius?.toString() ?? '';
     _coldStorageMaxTempController.text = ext.coldStorageMaxTempCelsius?.toString() ?? '';
@@ -320,43 +295,36 @@ class GLNPharmaceuticalExtensionWidgetState
     _gdpCertificationNumberController.text = ext.gdpCertificationNumber ?? '';
     _gdpCertificationExpiry = ext.gdpCertificationExpiry;
 
-    // Clinical Trial
     _isClinicalTrialSite = ext.isClinicalTrialSite;
     _clinicalTrialPhaseAuthorizedController.text = ext.clinicalTrialPhaseAuthorized ?? '';
     _irbApprovalNumberController.text = ext.irbApprovalNumber ?? '';
     _irbApprovalExpiry = ext.irbApprovalExpiry;
 
-    // DSCSA
     _isDscsaCompliant = ext.isDscsaCompliant;
     _dscsaComplianceDate = ext.dscsaComplianceDate;
     _hasSerializationCapability = ext.hasSerializationCapability;
     _hasAggregationCapability = ext.hasAggregationCapability;
     _interoperabilitySystemController.text = ext.interoperabilitySystem ?? '';
 
-    // Healthcare IDs
     _npiNumberController.text = ext.npiNumber ?? '';
     _ncpdpIdController.text = ext.ncpdpId ?? '';
     _medicareProviderNumberController.text = ext.medicareProviderNumber ?? '';
     _medicaidProviderNumberController.text = ext.medicaidProviderNumber ?? '';
 
-    // ISO Certification
     _isIsoCertified = ext.isIsoCertified;
     _isoCertificationTypeController.text = ext.isoCertificationType ?? '';
     _isoCertificationNumberController.text = ext.isoCertificationNumber ?? '';
     _isoCertificationExpiry = ext.isoCertificationExpiry;
 
-    // JCAHO
     _jcahoAccredited = ext.jcahoAccredited;
     _jcahoAccreditationNumberController.text = ext.jcahoAccreditationNumber ?? '';
     _jcahoAccreditationExpiry = ext.jcahoAccreditationExpiry;
 
-    // International
     _emaSiteIdController.text = ext.emaSiteId ?? '';
     _pmdaSiteIdController.text = ext.pmdaSiteId ?? '';
     _anvisaSiteIdController.text = ext.anvisaSiteId ?? '';
     _nmpaSiteIdController.text = ext.nmpaSiteId ?? '';
 
-    // Operational
     _receivingHoursController.text = ext.receivingHours ?? '';
     _dispatchHoursController.text = ext.dispatchHours ?? '';
     _hasWeighbridge = ext.hasWeighbridge;
@@ -364,7 +332,6 @@ class GLNPharmaceuticalExtensionWidgetState
     _hasForkliftCapability = ext.hasForkliftCapability;
     _canReceiveHazmat = ext.canReceiveHazmat;
 
-    // Contacts
     _pharmacistInChargeController.text = ext.pharmacistInCharge ?? '';
     _picLicenseNumberController.text = ext.picLicenseNumber ?? '';
     _responsiblePersonNameController.text = ext.responsiblePersonName ?? '';
@@ -559,7 +526,6 @@ class GLNPharmaceuticalExtensionWidgetState
     return parts.isEmpty ? null : parts;
   }
 
-  /// Check if user has entered any pharmaceutical data
   bool get hasData =>
       _fdaEstablishmentIdController.text.isNotEmpty ||
       _fdaRegistrationNumberController.text.isNotEmpty ||
@@ -586,12 +552,10 @@ class GLNPharmaceuticalExtensionWidgetState
       _mahTargetMarketsController.text.isNotEmpty ||
       _mahRegulatoryRegistrationNumberController.text.isNotEmpty;
 
-  /// Build the extension object from form data for external callers
   GLNPharmaceuticalExtension? buildExtension({int? glnId, String? glnCode}) {
     if (!hasData) return null;
     
     final extension = _buildExtensionFromForm();
-    // Return a copy with the provided glnId and glnCode if different
     return GLNPharmaceuticalExtension(
       id: extension.id,
       glnId: glnId ?? widget.glnId ?? extension.glnId,
@@ -689,14 +653,11 @@ class GLNPharmaceuticalExtensionWidgetState
     );
   }
 
-  /// Validate the extension form
   String? validate() {
-    // All fields are optional
     return null;
   }
 
   Future<bool> save() async {
-    // Persisted with master-data GLN create/update ([GLN.toJson] → `/master-data/glns` ).
     return false;
   }
 

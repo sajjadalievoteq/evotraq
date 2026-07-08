@@ -12,7 +12,6 @@ import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for managing partner API credentials
 class CredentialManagementScreen extends StatefulWidget {
   final String partnerId;
 
@@ -381,7 +380,6 @@ class _CredentialManagementScreenState
   }
 }
 
-/// Dialog for creating a new credential
 class _CreateCredentialDialog extends StatefulWidget {
   final String partnerId;
 
@@ -399,14 +397,12 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
   DateTime? _expiresAt;
   bool _isSubmitting = false;
 
-  // For showing the generated credentials
   String? _generatedApiKey;
   String? _generatedClientId;
   String? _generatedClientSecret;
 
   @override
   Widget build(BuildContext context) {
-    // If we have generated credentials, show them
     if (_generatedApiKey != null || _generatedClientId != null) {
       return _buildCredentialResultDialog();
     }
@@ -666,7 +662,6 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
   }
 }
 
-/// Dialog for editing credential scopes and rate limit
 class _EditCredentialDialog extends StatefulWidget {
   final String partnerId;
   final PartnerCredential credential;
@@ -708,7 +703,6 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Credential info
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -750,7 +744,6 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
             ),
             const SizedBox(height: 20),
 
-            // Rate limit
             TextFormField(
               initialValue: _rateLimitPerMinute.toString(),
               decoration: const InputDecoration(
@@ -768,7 +761,6 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
             ),
             const SizedBox(height: 20),
 
-            // Scopes
             const Text(
               'Allowed Scopes:',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -798,7 +790,6 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
             ),
             const SizedBox(height: 12),
 
-            // Scope descriptions
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

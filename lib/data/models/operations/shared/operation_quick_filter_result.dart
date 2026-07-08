@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Shared quick filter result for all operation list screens.
 @immutable
 class OperationQuickFilterResult {
   const OperationQuickFilterResult.cleared()

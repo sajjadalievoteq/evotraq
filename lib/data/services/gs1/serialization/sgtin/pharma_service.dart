@@ -384,11 +384,32 @@ class PharmaService {
     return _decode(r.data, GtinBatch.fromJson);
   }
 
-  Future<GtinBatch> createBatch(String gtinId, GtinBatch batch) async {
+  /// Returns null when the batch is not registered (404). Throws on other errors.
+  Future<GtinBatch?> tryGetBatchByLot(int gtinId, String batchLot) async {
     final t = await _token();
-    final r = await _post(_P.batches(gtinId), t, batch.toJson());
-    _assertOk(r, [200, 201]);
-    return _decode(r.data, GtinBatch.fromJson);
+    final r = await _get(_P.batchByLot('$gtinId', batchLot), t);
+    if (r.statusCode == 404) return null;
+    if (r.statusCode == 200) {
+      return _decode(r.data, GtinBatch.fromJson);
+    }
+    throw ApiException(
+      statusCode: r.statusCode,
+      message: 'Failed to look up batch/lot',
+      responseBody: r.data is String ? r.data as String? : null,
+    );
+  }
+
+  Future<GtinBatch> createBatch(int gtinId, GtinBatch batch) async {
+    final t = await _token();
+    final r = await _post(_P.batches('$gtinId'), t, batch.toJson());
+    if (r.statusCode == 200 || r.statusCode == 201) {
+      return _decode(r.data, GtinBatch.fromJson);
+    }
+    throw ApiException(
+      statusCode: r.statusCode,
+      message: 'Failed to register batch',
+      responseBody: r.data is String ? r.data as String? : null,
+    );
   }
 
   Future<GtinBatch> updateBatch(String gtinId, String batchId, GtinBatch batch) async {

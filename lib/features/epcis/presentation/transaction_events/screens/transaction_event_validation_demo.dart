@@ -6,9 +6,7 @@ import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_form_field.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 
-/// Transaction Event form with integrated validation
 class TransactionEventValidationDemo extends StatefulWidget {
-  /// Constructor
   const TransactionEventValidationDemo({Key? key}) : super(key: key);
 
   @override
@@ -23,7 +21,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
   String? _selectedBizStep;
   bool _isLoading = false;
 
-  // Standard values from GS1 CBV
   final List<String> _standardBizSteps = [
     'urn:epcglobal:cbv:bizstep:shipping',
     'urn:epcglobal:cbv:bizstep:accepting',
@@ -31,7 +28,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     'urn:epcglobal:cbv:bizstep:paying',
   ];
 
-  // Transaction types from GS1 CBV
   final List<String> _standardTransactionTypes = [
     'urn:epcglobal:cbv:bizTransType:po',
     'urn:epcglobal:cbv:bizTransType:desadv',
@@ -66,7 +62,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                     _buildHeader('Transaction Information'),
                     const SizedBox(height: 16),
                     
-                    // Transaction Type with validation
                     ValidatedTextField(
                       controller: _transactionTypeController,
                       decoration: InputDecoration(
@@ -106,7 +101,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                     ),
                     const SizedBox(height: 16),
                     
-                    // Transaction ID with validation
                     ValidatedTextField(
                       controller: _transactionIdController,
                       decoration: const InputDecoration(
@@ -123,7 +117,7 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                         return null;
                       },
                       helpText: 'Example: urn:epcglobal:cbv:bt:0614141000005:PO12345',
-                      validateOnChange: false, // Only validate on blur or submit
+                      validateOnChange: false,
                       validateOnBlur: true,
                     ),
                     const SizedBox(height: 16),
@@ -131,7 +125,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                     _buildHeader('Business Context'),
                     const SizedBox(height: 16),
                     
-                    // Business Step dropdown with validation
                     ValidatedFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -167,7 +160,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                         onChanged: (value) {
                           setState(() {
                             if (value == null) {
-                              // Show dialog for custom entry
                               showDialog(
                                 context: context,
                                 builder: (context) {
@@ -201,7 +193,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                               );
                             } else {
                               _selectedBizStep = value;
-                              // Trigger validation
                               final error = _validateBizStep(value);
                               setFieldError('bizStep', error);
                             }
@@ -211,7 +202,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
                     ),
                     const SizedBox(height: 24),
                     
-                    // Action buttons
                     Row(
                       children: [
                         Expanded(
@@ -242,7 +232,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     );
   }
 
-  // Helper to create section headers
   Widget _buildHeader(String title) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +248,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     );
   }
 
-  // Validation for business step
   String? _validateBizStep(String? value) {
     if (value == null || value.isEmpty) {
       return 'Business step is required';
@@ -270,15 +258,12 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
     return null;
   }
 
-  // Form validation and submission
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
-      // All fields are valid, show success message
       context.showSuccess(
         'Validation successful! Transaction event is valid.',
       );
       
-      // Simulate API call
       setState(() {
         _isLoading = true;
       });
@@ -289,14 +274,12 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
         });
       });
     } else {
-      // Show error summary
       context.showError(
         'Validation failed. Please check the form for errors.',
       );
     }
   }
 
-  // Reset the form
   void _resetForm() {
     _formKey.currentState?.reset();
     _transactionIdController.clear();
@@ -306,7 +289,6 @@ class _TransactionEventValidationDemoState extends State<TransactionEventValidat
       _selectedBizStep = null;
     });
     
-    // Clear validation errors
     clearFieldErrors();
     
     context.showInfo('Form has been reset.');

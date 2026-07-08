@@ -37,7 +37,6 @@ final _returnShippingDetailConfig =
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display return shipping operation details.
 class ReturnShippingOperationDetailScreen
     extends GenericOperationDetailScreen<ReturnShippingResponse> {
   ReturnShippingOperationDetailScreen({

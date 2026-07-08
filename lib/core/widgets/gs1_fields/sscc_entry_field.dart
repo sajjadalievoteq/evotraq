@@ -54,8 +54,6 @@ class SsccEntryField extends StatelessWidget {
       setFieldError: setFieldError,
       focusNode: focusNode,
       onEditingComplete: onEditingComplete,
-      // Use text keyboard so URN / DL values typed or pasted render correctly.
-      // For pure-digit entry the smart formatter still restricts to max 18 digits.
       keyboardType: TextInputType.text,
       inputFormatters: Gs1InputFormatters.ssccOrUri(),
       onChanged: onChanged,

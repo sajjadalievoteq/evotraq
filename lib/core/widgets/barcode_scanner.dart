@@ -3,5 +3,4 @@ import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.d
 export 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart'
     show GS1BarcodeScanDialog, Gs1BarcodeScanTrigger;
 
-/// Backward-compatible alias — prefer [Gs1BarcodeScanTrigger].
 typedef BarcodeScanner = Gs1BarcodeScanTrigger;

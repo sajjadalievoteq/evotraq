@@ -1,5 +1,3 @@
-/// Models for API Collection Management
-/// Supports granular API access control with Collections and individual API definitions
 
 import 'dart:convert';
 
@@ -129,7 +127,6 @@ class ApiDefinition {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
-  // Documentation fields for Postman export
   final String? requestBodySchema;
   final String? requestBodyExample;
   final String? responseBodySchema;
@@ -233,7 +230,6 @@ class ApiDefinition {
     };
   }
 
-  /// Returns the external path that partners should use (includes /integration prefix)
   String get externalPath => '/integration$pathPattern';
 
   ApiDefinition copyWith({
@@ -291,24 +287,23 @@ class ApiDefinition {
   String get methodColor {
     switch (httpMethod.toUpperCase()) {
       case 'GET':
-        return '#61affe'; // Blue
+        return '#61affe';
       case 'POST':
-        return '#49cc90'; // Green
+        return '#49cc90';
       case 'PUT':
-        return '#fca130'; // Orange
+        return '#fca130';
       case 'PATCH':
-        return '#50e3c2'; // Teal
+        return '#50e3c2';
       case 'DELETE':
-        return '#f93e3e'; // Red
+        return '#f93e3e';
       default:
-        return '#9012fe'; // Purple
+        return '#9012fe';
     }
   }
 
   String get statusText => isActive ? 'Active' : 'Inactive';
 }
 
-/// Represents a query or path parameter for an API endpoint
 class ApiParameter {
   final String name;
   final String? type;
@@ -354,7 +349,6 @@ class ApiParameter {
   }
 }
 
-/// Represents a custom header for an API endpoint
 class ApiHeader {
   final String name;
   final bool required;
@@ -585,7 +579,6 @@ class PartnerApiAccess {
     return isActive;
   }
 
-  /// Returns the external path that partners should use (includes /integration prefix)
   String get externalPath => '/integration$pathPattern';
 
   String get statusText {

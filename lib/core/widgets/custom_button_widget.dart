@@ -24,7 +24,6 @@ class CustomButtonWidget extends StatelessWidget {
   final String? iconAsset;
   final Widget? iconWidget;
 
-  /// When true, renders an icon-only button.
   final bool? iconOnly;
 
   final double height;

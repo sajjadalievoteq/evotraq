@@ -61,7 +61,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
             _buildJobsSummary(filteredJobs),
             const SizedBox(height: 16),
             SizedBox(
-              height: 400, // Fixed height instead of Expanded
+              height: 400,
               child: filteredJobs.isEmpty
                   ? _buildEmptyState()
                   : _buildJobsList(filteredJobs),

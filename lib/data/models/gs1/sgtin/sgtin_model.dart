@@ -14,7 +14,6 @@ class SGTIN extends Equatable {
   final ItemStatus status;
   final GLN? currentLocation;
   final SSCC? currentSSCC;
-  /// SSCC container code when the API returns a plain string (not a nested object).
   final String? currentSsccCode;
   final String? regulatoryMarket;
   final String? regulatoryStatus;

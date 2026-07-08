@@ -11,7 +11,7 @@ abstract final class GtinPharmaceuticalExtensionUiConstants {
 abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
   static const expansionTitle = 'Regulatory Details';
 
-  static const sectionIdentifiers = 'Regulatory authority — identifiers';
+  static const sectionIdentifiers = 'Regulatory authority: identifiers';
   static const labelLocalDrugCode = 'Local drug code (MoHAP) *';
   static const helperLocalDrugCode =
       'Required when regulatory authority applies; configurable MoHAP format';
@@ -20,12 +20,12 @@ abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
   static const helperMarketingAuthorizationNumber =
       'Example format: MOHAP-12345-2026 (configurable)';
 
-  static const sectionAuthorization = 'Regulatory authority — authorization';
+  static const sectionAuthorization = 'Regulatory authority: authorization';
   static const labelLicensedAgentGlns = 'Licensed agent GLNs';
   static const helperLicensedAgentGlns =
       'Required for imported products under regulatory authority; comma/semicolon/newline separated';
 
-  static const sectionDistribution = 'Regulatory authority — distribution';
+  static const sectionDistribution = 'Regulatory authority: distribution';
   static const checkboxRegulatoryAuthorityMarket =
       'Regulatory authority market active (target market = 784)';
   static const checkboxImportedProduct =
@@ -33,7 +33,7 @@ abstract final class GtinRegulatoryAuthorityExtensionUiConstants {
   static const subtitleImportedProduct =
       'Derived from MAH country when regulatory authority market applies';
 
-  static const sectionLabeling = 'Regulatory authority — labeling';
+  static const sectionLabeling = 'Regulatory authority: labeling';
   static const labelRegulatedProductName = 'Regulated product name (English) *';
   static const helperRegulatedProductName =
       'Arabic name is mandatory under regulatory authority labeling; capture in multilingual name records';

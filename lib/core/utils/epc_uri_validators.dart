@@ -1,82 +1,40 @@
-/// Full multi-scheme GS1 EPC URI validator.
-///
-/// Mirrors the backend `EPCUriValidator.java` exactly, covering every scheme
-/// that EPCIS 2.0 / GS1 EPC TDS 2.3 defines plus GS1 AI bracket notation
-/// (which is auto-normalised before validation).
-///
-/// Supported schemes:
-/// - SGTIN URN:          `urn:epc:id:sgtin:<prefix>.<ref>.<serial>`
-/// - SGTIN Digital Link: `https://id.gs1.org/01/<14digits>/21/<serial>`
-/// - SSCC URN:           `urn:epc:id:sscc:<prefix>.<serialRef>`
-/// - SSCC Digital Link:  `https://id.gs1.org/00/<18digits>`
-/// - LGTIN URN:          `urn:epc:id:lgtin:<prefix>.<ref>.<lot>`
-/// - LGTIN Digital Link: `https://id.gs1.org/01/<14digits>/10/<lot>`
-/// - GRAI URN:           `urn:epc:id:grai:<prefix>.<assetType>.<serial>`
-/// - GIAI URN:           `urn:epc:id:giai:<prefix>.<asset>`
-/// - SGLN URN:           `urn:epc:id:sgln:<prefix>.<locRef>.<extension>`
-/// - Legacy prefixes:    `urn:epc:class:`, `urn:epc:idpat:`, `urn:epc:tag:`
-/// - GS1 AI notation:    `(01)…(21)…` etc. (normalised first)
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
-// ---------------------------------------------------------------------------
-// Patterns — GS1 file-safe character set (TDS 2.3, Table A-1, file-7):
-//   A-Z a-z 0-9 space ! " % - . / : ; < = > ? _
-// Expressed as character class: [!%-?A-Z_a-z"]  (covers ASCII 0x21–0x3F + extras)
-// ---------------------------------------------------------------------------
-
-/// SGTIN URN: `urn:epc:id:sgtin:<1-12 digits>.<1-13 digits>.<1-20 file-7 chars>`
 final _sgtinUrn = RegExp(
   r'''^urn:epc:id:sgtin:\d{1,12}\.\d{1,13}\.[!%-?A-Z_a-z"]{1,20}$''');
 
-/// SGTIN GS1 Digital Link: `https://id.gs1.org/01/<14digits>/21/<1-20 file-7 chars>`
 final _sgtinDl = RegExp(
   r'''^https://id\.gs1\.org/01/\d{14}/21/[!%-?A-Z_a-z"]{1,20}$''');
 
-/// SSCC URN: `urn:epc:id:sscc:<1-12 digits>.<1-17 digits>`
 final _ssccUrn = RegExp(
   r'''^urn:epc:id:sscc:\d{1,12}\.\d{1,17}$''');
 
-/// SSCC GS1 Digital Link: `https://id.gs1.org/00/<18digits>`
 final _ssccDl = RegExp(
   r'''^https://id\.gs1\.org/00/\d{18}$''');
 
-/// LGTIN URN: `urn:epc:id:lgtin:<1-12 digits>.<1-13 digits>.<1-20 file-7 chars>`
 final _lgtinUrn = RegExp(
   r'''^urn:epc:id:lgtin:\d{1,12}\.\d{1,13}\.[!%-?A-Z_a-z"]{1,20}$''');
 
-/// LGTIN GS1 Digital Link: `https://id.gs1.org/01/<14digits>/10/<1-20 file-7 chars>`
 final _lgtinDl = RegExp(
   r'''^https://id\.gs1\.org/01/\d{14}/10/[!%-?A-Z_a-z"]{1,20}$''');
 
-/// GRAI URN: `urn:epc:id:grai:<1-12>.<1-11>.<1-16 file-7>`
 final _graiUrn = RegExp(
   r'''^urn:epc:id:grai:\d{1,12}\.\d{1,11}\.[!%-?A-Z_a-z"]{1,16}$''');
 
-/// GIAI URN: `urn:epc:id:giai:<1-12>.<1-24 file-7>`
 final _giaiUrn = RegExp(
   r'''^urn:epc:id:giai:\d{1,12}\.[!%-?A-Z_a-z"]{1,24}$''');
 
-/// SGLN URN: `urn:epc:id:sgln:<prefix>.<locRef>.<extension>`
 final _sglnUrn = RegExp(
   r'''^urn:epc:id:sgln:\d{1,12}\.\d{1,12}\.[!%-?A-Z_a-z"0-9]{0,20}$''');
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
 
-/// Returns `true` if [input] is a valid EPC URI (any supported scheme)
-/// OR valid GS1 AI bracket notation that converts to a recognised scheme.
 bool isValidEpcUri(String input) {
   if (input.isEmpty) return false;
   final normalized = normalizeEpcInput(input);
   return _isValidNormalized(normalized);
 }
 
-/// Form-field validator for EPC URI / AI notation.
-///
-/// Returns `null` (valid) or an error message string.
-/// Pass [required]: true to reject empty values.
 String? validateEpcUriField(String? value, {bool required = false}) {
   if (value == null || value.trim().isEmpty) {
     return required ? 'EPC is required' : null;
@@ -85,7 +43,6 @@ String? validateEpcUriField(String? value, {bool required = false}) {
   final normalized = normalizeEpcInput(trimmed);
   if (_isValidNormalized(normalized)) return null;
 
-  // Give a helpful error hint based on what the input looks like
   if (trimmed.startsWith('(')) {
     return 'GS1 barcode could not be converted to a valid EPC URI — '
         'check the GTIN/SSCC digits and serial number';
@@ -103,16 +60,8 @@ String? validateEpcUriField(String? value, {bool required = false}) {
       '• urn:epc:id:sscc:<prefix>.<serialRef>  (SSCC)';
 }
 
-/// Normalizes [input] to a canonical EPC URI string.
-///
-/// - AI bracket notation → `urn:epc:…` URI
-/// - GS1 Digital Link URL → `urn:epc:…` URI when convertible
-/// - Unknown format → trimmed, unchanged (still invalid per [isValidEpcUri])
 String normalizeEpc(String input) => normalizeEpcInput(input.trim());
 
-/// Returns a human-readable type label for a valid EPC URI,
-/// e.g. `"SGTIN"`, `"SSCC"`, `"LGTIN"`, `"GRAI"`, `"GIAI"`.
-/// Returns `null` if the input is not a recognised EPC URI.
 String? epcUriType(String input) {
   final n = normalizeEpcInput(input.trim());
   if (_sgtinUrn.hasMatch(n) || _sgtinDl.hasMatch(n)) return 'SGTIN';
@@ -125,9 +74,6 @@ String? epcUriType(String input) {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
 
 bool _isValidNormalized(String n) {
   if (n.isEmpty) return false;
@@ -148,7 +94,6 @@ bool _isLegacyPrefix(String n) =>
     n.startsWith('urn:epc:idpat:') ||
     n.startsWith('urn:epc:tag:');
 
-/// Validates the GS1 Mod-10 check digit embedded in a GS1 DL SGTIN URI.
 bool _validateSgtinDlCheckDigit(String uri) {
   const prefix = 'https://id.gs1.org/01/';
   if (!uri.startsWith(prefix)) return false;
@@ -159,7 +104,6 @@ bool _validateSgtinDlCheckDigit(String uri) {
   return _isValidGtinCheckDigit(gtin14);
 }
 
-/// GS1 Mod-10 (Luhn-variant) check digit validation.
 bool _isValidGtinCheckDigit(String digits) {
   return CheckDigitUtils.isValidMod10(digits);
 }

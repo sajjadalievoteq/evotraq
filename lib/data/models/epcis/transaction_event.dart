@@ -1,32 +1,22 @@
-// Importing necessary packages and models
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:uuid/uuid.dart';
 
-/// TransactionEvent model based on EPCIS standard
 class TransactionEvent extends EPCISEvent {
-  /// Type of event - always "TransactionEvent" for transaction events
   final String eventType = "TransactionEvent";
   
-  /// Action type - ADD, OBSERVE, or DELETE
   final String action;
   
-  /// Parent identifier for hierarchy
   final String? parentID;
   
-  /// List of EPCs involved in the transaction
   final List<String>? epcList;
   
-  /// List of business transactions involved
   final Map<String, String> bizTransactionList;
   
-  /// Quantity list for class-level identification
   final List<QuantityElement>? quantityList;
   
-  /// Source and destination for products in the transaction
   final Map<String, String>? sourceList;
   final Map<String, String>? destinationList;
-    /// Constructor
   TransactionEvent({
     String? id,
     String? eventId,
@@ -50,7 +40,7 @@ class TransactionEvent extends EPCISEvent {
     DateTime? createdAt,
   }) : bizTransactionList = bizTransactionList ?? {},       super(
          id: id,
-         eventId: eventId ?? 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}', // Default unique identifier using UUID
+         eventId: eventId ?? 'urn:epcglobal:cbv:epcis:event:${Uuid().v4()}',
          eventTime: eventTime,
          recordTime: recordTime ?? DateTime.now(),
          eventTimeZone: _generateTimezoneOffset(eventTimeZoneOffset, eventTime),
@@ -64,13 +54,11 @@ class TransactionEvent extends EPCISEvent {
          createdAt: createdAt,
        );
        
-  /// Generate timezone offset string if not provided
   static String _generateTimezoneOffset(String? providedOffset, DateTime dateTime) {
     if (providedOffset != null && providedOffset.isNotEmpty) {
       return providedOffset;
     }
     
-    // Generate offset from datetime
     final offset = dateTime.timeZoneOffset;
     final hours = offset.inHours.abs();
     final minutes = (offset.inMinutes.abs() % 60);
@@ -80,14 +68,11 @@ class TransactionEvent extends EPCISEvent {
   
   @override
   Map<String, dynamic> toJson() {
-    // Start with the base class fields
     final json = super.toJson();
     
-    // Add TransactionEvent specific fields
     json['eventType'] = eventType;
     json['action'] = action;
     
-    // Only include parentID if it's not null and not empty
     if (parentID != null && parentID!.isNotEmpty) {
       json['parentID'] = parentID;
     }
@@ -133,9 +118,7 @@ class TransactionEvent extends EPCISEvent {
     return json;
   }
 
-  /// Create a TransactionEvent object from JSON
   factory TransactionEvent.fromJson(Map<String, dynamic> json) {
-    // Parse bizTransactionList
     Map<String, String> bizTransMap = {};
     if (json['bizTransactionList'] != null) {
       for (var transaction in json['bizTransactionList']) {
@@ -145,7 +128,6 @@ class TransactionEvent extends EPCISEvent {
       }
     }
     
-    // Parse quantityList
     List<QuantityElement>? quantities;
     if (json['quantityList'] != null) {
       quantities = (json['quantityList'] as List)
@@ -153,7 +135,6 @@ class TransactionEvent extends EPCISEvent {
           .toList();
     }
     
-    // Parse source list
     Map<String, String>? sourceMap;
     if (json['sourceList'] != null) {
       sourceMap = {};
@@ -164,7 +145,6 @@ class TransactionEvent extends EPCISEvent {
       }
     }
     
-    // Parse destination list
     Map<String, String>? destMap;
     if (json['destinationList'] != null) {
       destMap = {};
@@ -175,7 +155,6 @@ class TransactionEvent extends EPCISEvent {
       }
     }
 
-    // Handle GLN objects for locations
     GLN? readPointGln;
     if (json['readPoint'] != null) {
       readPointGln = json['readPoint'] is String 
@@ -219,7 +198,6 @@ class TransactionEvent extends EPCISEvent {
     );
   }
 
-  /// Create a copy of this TransactionEvent with the given fields replaced
   TransactionEvent copyWith({
     String? id,
     String? eventId,
@@ -268,25 +246,19 @@ class TransactionEvent extends EPCISEvent {
   }
 }
 
-/// Quantity element for transaction event
 class QuantityElement {
-  /// EPC class
   final String? epcClass;
   
-  /// Quantity
   final double? quantity;
   
-  /// Unit of measure
   final String? uom;
   
-  /// Constructor
   QuantityElement({
     this.epcClass,
     this.quantity,
     this.uom,
   });
   
-  /// Convert to JSON
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {};
     
@@ -297,7 +269,6 @@ class QuantityElement {
     return json;
   }
   
-  /// Create from JSON
   factory QuantityElement.fromJson(Map<String, dynamic> json) {
     return QuantityElement(
       epcClass: json['epcClass'],

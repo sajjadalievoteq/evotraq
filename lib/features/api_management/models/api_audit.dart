@@ -1,4 +1,3 @@
-/// API audit log entry for partner access tracking
 class ApiAuditLog {
   final String id;
   final String requestId;
@@ -45,16 +44,14 @@ class ApiAuditLog {
   bool get isClientError => status >= 400 && status < 500;
   bool get isServerError => status >= 500;
   
-  // Alias getters for compatibility with screens
   String get httpMethod => method;
   String get endpoint => path;
   int get httpStatus => status;
   int get responseTimeMs => processingTimeMs;
-  String? get userAgent => null; // Not currently tracked
+  String? get userAgent => null;
   String? get errorMessage => error;
 }
 
-/// API usage statistics for a partner
 class ApiUsageStats {
   final String partnerId;
   final DateTime fromDate;
@@ -90,7 +87,6 @@ class ApiUsageStats {
     this.p99ResponseTime = 0.0,
   });
   
-  // Alias getter for compatibility
   double get avgResponseTime => avgProcessingTimeMs;
 
   factory ApiUsageStats.fromJson(Map<String, dynamic> json) {
@@ -122,7 +118,6 @@ class ApiUsageStats {
   }
 }
 
-/// Daily API usage for charts
 class DailyApiUsage {
   final DateTime date;
   final int requestCount;

@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
@@ -35,7 +35,6 @@ final _packingDetailConfig = OperationDetailScreenConfig<PackingResponse>(
       'If the problem continues, the record may have been deleted or you may not have access to it.',
 );
 
-/// Screen to display packing operation details.
 class PackingOperationDetailScreen
     extends GenericOperationDetailScreen<PackingResponse> {
   PackingOperationDetailScreen({

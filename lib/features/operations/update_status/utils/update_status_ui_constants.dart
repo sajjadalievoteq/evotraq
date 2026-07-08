@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_ui_constants.dart';
 
 abstract final class UpdateStatusUiConstants {
   static const entityPluralOperations = 'Update Status operations';

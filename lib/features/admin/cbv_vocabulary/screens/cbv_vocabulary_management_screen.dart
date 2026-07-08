@@ -16,9 +16,6 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen entry point
-// ─────────────────────────────────────────────────────────────────────────────
 
 class CbvVocabularyManagementScreen extends StatelessWidget {
   const CbvVocabularyManagementScreen({super.key});
@@ -31,10 +28,6 @@ class CbvVocabularyManagementScreen extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// View
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _CbvVocabularyManagementView extends StatefulWidget {
   const _CbvVocabularyManagementView();
@@ -202,7 +195,6 @@ class _CbvVocabularyManagementViewState
             onRefresh: _refresh,
             child: Column(
               children: [
-                // ── Stats header ──────────────────────────────────────
                 Padding(
                   padding: EdgeInsets.only(
                     top: context.padding.top,
@@ -211,7 +203,6 @@ class _CbvVocabularyManagementViewState
                   ),
                   child: CbvStatisticsHeader(state: state),
                 ),
-                // ── Search bar ────────────────────────────────────────
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: context.padding.left,
@@ -241,7 +232,6 @@ class _CbvVocabularyManagementViewState
                     ),
                   ),
                 ),
-                // ── Tab views ─────────────────────────────────────────
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -350,9 +340,6 @@ class _CbvVocabularyManagementViewState
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Pairings tab — shows the bizStep ↔ disposition relation table
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _PairingsTab extends StatelessWidget {
   const _PairingsTab({
@@ -372,8 +359,6 @@ class _PairingsTab extends StatelessWidget {
     final bizStepMap = {for (final b in state.bizSteps) b.code: b};
     final dispMap = {for (final d in state.dispositions) d.code: d};
 
-    // Build a unified list of bizSteps — those with pairs appear with their
-    // dispositions, those without appear as empty rows so admin can add.
     final allBizCodes = state.bizSteps.map((b) => b.code).toList();
 
     final filtered = allBizCodes.where((biz) {
@@ -442,9 +427,6 @@ class _PairingsTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// One row in the pairings table
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _PairingRow extends StatelessWidget {
   const _PairingRow({
@@ -478,7 +460,6 @@ class _PairingRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── BizStep label ──────────────────────────────────────────────
           SizedBox(
             width: 180,
             child: Column(
@@ -513,13 +494,11 @@ class _PairingRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: TraqSpacing.lg),
-          // ── Disposition chips ──────────────────────────────────────────
           Expanded(
             child: Wrap(
               spacing: TraqSpacing.sm,
               runSpacing: TraqSpacing.xs,
               children: [
-                // Paired disposition chips (with × remove)
                 for (final dispCode in pairedCodes) ...[
                   _DispChip(
                     label: dispMap[dispCode]?.label ?? dispCode,
@@ -530,7 +509,6 @@ class _PairingRow extends StatelessWidget {
                     onRemove: () => onRemove(dispCode),
                   ),
                 ],
-                // Add pairing button (admin only)
                 if (isAdmin && unpairedDispositions.isNotEmpty)
                   _AddPairChip(
                     bizCode: bizItem.code,
@@ -552,9 +530,6 @@ class _PairingRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Disposition chip with optional remove button
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _DispChip extends StatelessWidget {
   const _DispChip({
@@ -618,9 +593,6 @@ class _DispChip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// "+" chip that opens a popup to pick a disposition to pair
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _AddPairChip extends StatelessWidget {
   const _AddPairChip({
@@ -690,10 +662,6 @@ class _AddPairChip extends StatelessWidget {
     }
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Flat vocabulary table (Biz Steps or Dispositions tab)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _VocabFlatTab extends StatelessWidget {
   const _VocabFlatTab({
@@ -788,7 +756,6 @@ class _VocabFlatTab extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Enable toggle
               if (isAdmin)
                 isToggling
                     ? const SizedBox(
@@ -808,7 +775,6 @@ class _VocabFlatTab extends StatelessWidget {
                       ? context.colors.success
                       : context.colors.error,
                 ),
-              // Delete (custom only, admin only)
               if (isAdmin && item.isCustom) ...[
                 const SizedBox(width: TraqSpacing.sm),
                 isDeleting
@@ -832,9 +798,6 @@ class _VocabFlatTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Small status chip
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, this.color});
@@ -858,9 +821,6 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Error view
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
   const _ErrorView({required this.message, required this.onRetry});

@@ -5,7 +5,6 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_scanned_items_list.dart';
 
-/// Shared item scan step for operation wizard screens.
 class OperationItemScanStep extends StatelessWidget {
   const OperationItemScanStep({
     super.key,

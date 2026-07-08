@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
-/// Table of items currently packed in the parent container.
 class UnpackingContainerContentsTable extends StatelessWidget {
   const UnpackingContainerContentsTable({
     super.key,

@@ -4,56 +4,6 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
 
-/// Generic master-detail split screen for any operation module.
-///
-/// ## Adding a new operation split view (~15 lines)
-///
-/// 1. Create a stateless `DecommissioningDesktopSplitScreen` (or similar).
-/// 2. Return [OperationDesktopSplitScreen] with `title`, `createRoute`, and two
-///    builder callbacks that map `selectedId` to whatever prop names that
-///    operation's list/detail screens expect (`operationId`, `batchId`, etc.).
-/// 3. Register the screen in the router — done.
-///
-/// Example:
-/// ```dart
-/// class DecommissioningDesktopSplitScreen extends StatelessWidget {
-///   const DecommissioningDesktopSplitScreen({super.key});
-///
-///   @override
-///   Widget build(BuildContext context) => OperationDesktopSplitScreen(
-///     title: 'Decommissioning',
-///     createRoute: Constants.opUpdateStatusCreateRoute,
-///     listBuilder: ({
-///       required embedded,
-///       required selectedId,
-///       required onSelect,
-///       required onLoadingChanged,
-///     }) =>
-///         DecommissioningOperationListScreen(
-///           embedded: embedded,
-///           selectedOperationId: selectedId,
-///           onSelectOperation: onSelect,
-///           onLoadingChanged: onLoadingChanged,
-///         ),
-///     detailBuilder: ({
-///       required selectedId,
-///       required embedded,
-///       required awaitingSelection,
-///       required listLoading,
-///     }) =>
-///         DecommissioningOperationDetailScreen(
-///           key: ValueKey(selectedId ?? '__await__'),
-///           operationId: selectedId,
-///           embedded: embedded,
-///           awaitingSelection: awaitingSelection,
-///           listLoading: listLoading,
-///         ),
-///   );
-/// }
-/// ```
-///
-/// Set [readSelectedFromQuery] to `false` when the operation does not use the
-/// `?selected=<id>` query-param workaround after form submission.
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 

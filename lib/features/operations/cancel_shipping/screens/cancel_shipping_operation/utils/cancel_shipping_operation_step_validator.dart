@@ -1,4 +1,4 @@
-﻿import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_step_validation_utils.dart';
 
 class CancelShippingOperationStepValidator {

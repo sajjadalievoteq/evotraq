@@ -7,8 +7,6 @@ import '../../../data/services/industry_test_data_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for generating industry-specific test data (Tobacco and Pharmaceutical)
-/// This creates real product data with accurate specifications for the UAE market
 class IndustryTestDataScreen extends StatefulWidget {
   const IndustryTestDataScreen({Key? key}) : super(key: key);
 
@@ -24,7 +22,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   String? _statusMessage;
   bool _isError = false;
   
-  // Progress tracking
   int _gtinProgress = 0;
   int _gtinTotal = 0;
   int _glnProgress = 0;
@@ -133,7 +130,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     setState(() {
       _isLoading = true;
       _sgtinProgress = 0;
-      _sgtinTotal = 500; // 50 GTINs × 10 SGTINs each
+      _sgtinTotal = 500;
       _statusMessage = 'Starting SGTIN generation for tobacco products...';
       _isError = false;
     });
@@ -408,7 +405,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // Status bar
           if (_statusMessage != null)
             Container(
               width: double.infinity,
@@ -441,7 +437,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               ),
             ),
           
-          // Progress bar
           if (_isLoading && (_gtinProgress > 0 || _glnProgress > 0 || _sgtinProgress > 0 || _ssccProgress > 0 || _eventProgress > 0))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -491,7 +486,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               ),
             ),
           
-          // Tab content
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -512,7 +506,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Card(
             elevation: 2,
             child: Container(
@@ -557,7 +550,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Master Data Section
           _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
           const SizedBox(height: 12),
           
@@ -591,7 +583,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Serialization Section
           _buildSectionHeader('Serialization', AppAssets.iconNumbers),
           const SizedBox(height: 12),
           
@@ -625,7 +616,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Events Section
           _buildSectionHeader('EPCIS Events - Full Supply Chain', AppAssets.iconEvent),
           const SizedBox(height: 12),
           
@@ -644,7 +634,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 16),
           
-          // Event type info chips
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -658,7 +647,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Product Info
           _buildProductInfoCard(),
         ],
       ),
@@ -671,7 +659,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Card(
             elevation: 2,
             child: Container(
@@ -715,7 +702,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Master Data Section
           _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
           const SizedBox(height: 12),
           
@@ -749,7 +735,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Serialization Section
           _buildSectionHeader('Serialization', AppAssets.iconNumbers),
           const SizedBox(height: 12),
           
@@ -783,7 +768,6 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          // Events Section
           _buildSectionHeader('EPCIS Events', AppAssets.iconEvent),
           const SizedBox(height: 12),
           

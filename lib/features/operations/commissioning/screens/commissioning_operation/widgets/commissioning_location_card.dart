@@ -9,11 +9,13 @@ class CommissioningLocationCard extends StatelessWidget {
     required this.commissioningLocationGLN,
     required this.locationError,
     required this.onLocationChanged,
+    this.pickerCatalog,
   });
 
   final GLN? commissioningLocationGLN;
   final String? locationError;
   final ValueChanged<GLN?> onLocationChanged;
+  final List<GLN>? pickerCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class CommissioningLocationCard extends StatelessWidget {
         onChanged: onLocationChanged,
         hintText: 'Select commissioning location',
         errorText: locationError,
+        pickerCatalog: pickerCatalog,
       ),
     );
   }

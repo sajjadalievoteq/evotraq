@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_missing_reference.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
@@ -96,7 +96,7 @@ class AggregationReferenceDataChecker {
     final uri = _resolveEpcUri(rawEpc);
     if (uri == null || uri.isEmpty) return;
 
-    final type = EPCURIConverter.getEPCType(uri);
+    final type = Gs1Converter.epcType(uri);
     if (type == 'sscc') {
       await _ensureSscc(uri, track, contextLabel: contextLabel);
     } else if (type == 'sgtin') {
@@ -128,8 +128,8 @@ class AggregationReferenceDataChecker {
     void Function(AggregationMissingReference item) track, {
     required String contextLabel,
   }) async {
-    final gtin = EPCURIConverter.extractGTINFromEPCUri(epcUri);
-    final serial = EPCURIConverter.extractSerialFromEPCUri(epcUri);
+    final gtin = Gs1Converter.epcToGTIN(epcUri);
+    final serial = Gs1Converter.epcToSerial(epcUri);
     if (gtin == null || serial == null) return;
 
     await _ensureGtin(gtin, track, contextLabel: contextLabel);
@@ -171,7 +171,7 @@ class AggregationReferenceDataChecker {
     if (trimmed.isEmpty) return null;
     if (trimmed.startsWith('urn:epc:id:')) return trimmed;
 
-    final fromConverter = EPCURIConverter.convertToEPCUri(trimmed);
+    final fromConverter = Gs1Converter.barcodeToEpc(trimmed);
     if (fromConverter != null) return fromConverter;
 
     return EPCFormatter.formatToEPCUri(trimmed);
@@ -225,7 +225,6 @@ class AggregationReferenceDataChecker {
           record.gtinCode.replaceAll(RegExp(r'\D'), '').padLeft(14, '0');
       if (recordGtin == normalizedGtin) return true;
     } catch (_) {
-      // Fall through to reference-data validation by EPC URI.
     }
 
     try {
@@ -240,9 +239,6 @@ class AggregationReferenceDataChecker {
   String? _ssccCodeFromEpc(String epc) {
     final lower = epc.toLowerCase();
     if (lower.startsWith('urn:epc:id:sscc:')) {
-      // Delegate to SsccInputParser which correctly reconstructs the 18-digit SSCC:
-      //   body = extensionDigit + GCP + serialRef  (not GCP + fullSerialRef)
-      // The naive parts[0]+parts[1] produces 17 digits with the wrong byte order.
       return SsccInputParser.parseToSsccCode(epc);
     }
 

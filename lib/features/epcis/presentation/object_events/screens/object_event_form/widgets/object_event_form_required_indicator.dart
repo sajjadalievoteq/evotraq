@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Primary-colored asterisk for required fields (matches TraqTrace form convention).
 class ObjectEventFormRequiredIndicator extends StatelessWidget {
   const ObjectEventFormRequiredIndicator({super.key});
 

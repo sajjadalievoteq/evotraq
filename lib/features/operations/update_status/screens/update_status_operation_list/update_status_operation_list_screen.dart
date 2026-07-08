@@ -23,7 +23,6 @@ import 'package:traqtrace_app/features/operations/update_status/screens/update_s
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_list/widgets/update_status_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/update_status/utils/update_status_ui_constants.dart';
 
-/// Screen to list all update status operations with search capabilities.
 class UpdateStatusOperationListScreen extends StatelessWidget {
   const UpdateStatusOperationListScreen({
     super.key,

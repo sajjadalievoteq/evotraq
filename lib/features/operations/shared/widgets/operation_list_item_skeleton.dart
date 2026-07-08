@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Shared shimmer skeleton placeholder for operation list items.
-///
-/// Used by: Shipping, Receiving, Packing, Unpacking,
-/// Return Shipping, Return Receiving, Decommissioning,
-/// and Commissioning list screens.
 class OperationListItemSkeleton extends StatelessWidget {
   const OperationListItemSkeleton({super.key});
 

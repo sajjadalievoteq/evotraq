@@ -4,18 +4,13 @@ import '../../../../core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Widget to display validation errors from the backend
 class ValidationErrorWidget extends StatelessWidget {
-  /// List of validation errors
   final List<dynamic> validationErrors;
   
-  /// Optional title
   final String? title;
   
-  /// Optional callback when dismissed
   final VoidCallback? onDismiss;
 
-  /// Constructor
   const ValidationErrorWidget({
     Key? key,
     required this.validationErrors,
@@ -59,7 +54,6 @@ class ValidationErrorWidget extends StatelessWidget {
             ),
             const Divider(),
             ...validationErrors.map((error) {
-              // Handle different error formats
               if (error is Map<String, dynamic>) {
                 return _buildStructuredError(error);
               } else if (error is String) {
@@ -74,7 +68,6 @@ class ValidationErrorWidget extends StatelessWidget {
     );
   }
 
-  /// Build a simple error message
   Widget _buildSimpleError(String message) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -94,7 +87,6 @@ class ValidationErrorWidget extends StatelessWidget {
     );
   }
 
-  /// Build a structured error with field and message
   Widget _buildStructuredError(Map<String, dynamic> error) {
     final field = error['field'] as String? ?? 'Unknown';
     final message = error['message'] as String? ?? 'Invalid value';

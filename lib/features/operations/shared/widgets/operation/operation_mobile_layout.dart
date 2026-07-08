@@ -7,7 +7,6 @@ import 'package:traqtrace_app/core/widgets/operation_wizard/operation_wizard.dar
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_wizard_nav_buttons.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 
-/// Shared mobile wizard layout for operation screens.
 class OperationMobileLayout extends StatelessWidget {
   const OperationMobileLayout({
     super.key,

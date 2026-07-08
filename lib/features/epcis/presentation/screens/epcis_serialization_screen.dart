@@ -35,7 +35,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
   
   final List<String> _formats = ['XML', 'JSON-LD', 'CSV', 'PDF', 'HTML'];
   
-  // Export filter state variables
   String _startDateFilter = '';
   String _endDateFilter = '';
   String _epcFilter = '';
@@ -417,7 +416,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     const Text('Configure filters to select which EPCIS events to export'),
                     const SizedBox(height: 16),
                     
-                    // Date Range Filter
                     Row(
                       children: [
                         Expanded(
@@ -449,7 +447,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     ),
                     const SizedBox(height: 16),
                     
-                    // EPC Filter
                     TextField(
                       decoration: const InputDecoration(
                         labelText: 'EPCs (Optional)',
@@ -462,7 +459,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     ),
                     const SizedBox(height: 16),
                     
-                    // Business Step Filter
                     TextField(
                       decoration: const InputDecoration(
                         labelText: 'Business Steps (Optional)',
@@ -475,7 +471,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     ),
                     const SizedBox(height: 16),
                     
-                    // Location Filter
                     TextField(
                       decoration: const InputDecoration(
                         labelText: 'Business Locations (Optional)',
@@ -488,7 +483,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     ),
                     const SizedBox(height: 16),
                     
-                    // Limit Filter
                     TextField(
                       decoration: const InputDecoration(
                         labelText: 'Max Results (Optional)',
@@ -826,7 +820,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
     });
 
     try {
-      // Build query parameters from filter inputs
       DateTime? startTime;
       DateTime? endTime;
       List<String> epcs = [];
@@ -834,7 +827,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       List<String> businessLocations = [];
       int? limit;
 
-      // Parse start date
       if (_startDateFilter.isNotEmpty) {
         try {
           startTime = DateTime.parse(_startDateFilter);
@@ -843,7 +835,6 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
         }
       }
 
-      // Parse end date
       if (_endDateFilter.isNotEmpty) {
         try {
           endTime = DateTime.parse(_endDateFilter);
@@ -852,22 +843,18 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
         }
       }
 
-      // Parse EPCs
       if (_epcFilter.isNotEmpty) {
         epcs = _epcFilter.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
       }
 
-      // Parse business steps
       if (_businessStepFilter.isNotEmpty) {
         businessSteps = _businessStepFilter.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
       }
 
-      // Parse business locations
       if (_locationFilter.isNotEmpty) {
         businessLocations = _locationFilter.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
       }
 
-      // Parse limit
       if (_limitFilter.isNotEmpty) {
         try {
           limit = int.parse(_limitFilter);

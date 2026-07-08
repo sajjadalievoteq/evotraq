@@ -177,7 +177,7 @@ class CommissioningOperationService {
   }
 
   Future<List<CommissioningResponse>> getCommissioningOperations() async {
-    const bizStep = 'commissioning'; // short name — backend normalises to both URI forms
+    const bizStep = 'commissioning';
     try {
       final response = await _dioService.get(
         '$_baseUrl/events/object/business-step/$bizStep',

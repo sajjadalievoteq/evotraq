@@ -33,7 +33,6 @@ class CacheStatistics {
     };
   }
 
-  // Helper getters for common statistics
   double get overallHitRatio => overall['overallHitRatio']?.toDouble() ?? 0.0;
   int get totalHits => overall['totalHits']?.toInt() ?? 0;
   int get totalMisses => overall['totalMisses']?.toInt() ?? 0;

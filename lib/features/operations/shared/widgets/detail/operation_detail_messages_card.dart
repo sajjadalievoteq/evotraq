@@ -3,7 +3,6 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 
-/// Shared messages card for operation detail screens.
 class OperationDetailMessagesCard extends StatelessWidget {
   const OperationDetailMessagesCard({super.key, required this.messages});
 

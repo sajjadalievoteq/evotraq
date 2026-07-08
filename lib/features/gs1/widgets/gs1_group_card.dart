@@ -28,8 +28,6 @@ class Gs1GroupCard extends StatelessWidget {
   final EdgeInsets margin;
   final double borderRadius;
   final Widget Function(Color c)? skeletonBuilder;
-  /// When true, a primary-colour * is shown next to the title to indicate
-  /// that this card contains at least one mandatory field.
   final bool showRequiredStar;
 
   @override

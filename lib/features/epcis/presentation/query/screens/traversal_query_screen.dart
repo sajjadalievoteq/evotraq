@@ -129,7 +129,6 @@ class _MainContent extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left panel: Query interface
             Expanded(
               flex: 1,
               child: Card(
@@ -173,7 +172,6 @@ class _MainContent extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            // Right panel: Visualization
             Expanded(
               flex: 2,
               child: Card(

@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/models/pharma_return_reason.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/shipment_reference_details_step.dart';
 
-/// Step 1: shipping reference and location details.
 class ReturnShippingReferenceDetailsStep extends StatelessWidget {
   const ReturnShippingReferenceDetailsStep({
     super.key,

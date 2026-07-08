@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 
 enum JourneyStepStatus { completed, inProgress, pending, failed }
@@ -87,9 +88,9 @@ class JourneyStep extends Equatable {
       eventId: json['eventId'] ?? json['id'] ?? '',
       eventType: json['eventType'] ?? _inferEventType(json),
       businessStep: json['businessStep'] ?? '',
-      businessStepLabel: _parseBusinessStep(json['businessStep']),
+      businessStepLabel: CbvDisplayUtils.displayBizStep(json['businessStep']),
       disposition: json['disposition'] ?? '',
-      dispositionLabel: _parseDisposition(json['disposition']),
+      dispositionLabel: CbvDisplayUtils.displayDisposition(json['disposition']),
       eventTime: json['eventTime'] != null
           ? DateTime.parse(json['eventTime'].toString())
           : DateTime.now(),
@@ -109,6 +110,37 @@ class JourneyStep extends Equatable {
     );
   }
 
+  factory JourneyStep.fromBackendStepJson(Map<String, dynamic> json) {
+    final businessStep = json['businessStep']?.toString() ?? '';
+    final disposition = json['disposition']?.toString() ?? '';
+    return JourneyStep(
+      eventId: json['eventId']?.toString() ?? '',
+      eventType: json['eventType']?.toString() ?? 'ObjectEvent',
+      businessStep: businessStep,
+      businessStepLabel: CbvDisplayUtils.displayBizStep(businessStep),
+      disposition: disposition,
+      dispositionLabel: CbvDisplayUtils.displayDisposition(disposition),
+      eventTime: json['eventTime'] != null
+          ? DateTime.parse(json['eventTime'].toString())
+          : DateTime.now(),
+      recordTime: json['recordTime'] != null
+          ? DateTime.parse(json['recordTime'].toString())
+          : null,
+      locationGLN: json['locationGLN']?.toString(),
+      locationName: json['locationName']?.toString(),
+      locationAddress: json['locationAddress']?.toString(),
+      action: json['action']?.toString(),
+      parentId: json['parentEpc']?.toString(),
+      childEpcs: json['epcs'] != null
+          ? List<String>.from(json['epcs'] as List)
+          : null,
+      ilmd: json['ilmd'] != null
+          ? Map<String, dynamic>.from(json['ilmd'] as Map)
+          : null,
+      status: JourneyStepStatus.completed,
+    );
+  }
+
   static String _inferEventType(Map<String, dynamic> json) {
     if (json['parentID'] != null || json['childEPCs'] != null) {
       return 'AggregationEvent';
@@ -118,36 +150,6 @@ class JourneyStep extends Equatable {
     }
     if (json['bizTransactionList'] != null) return 'TransactionEvent';
     return 'ObjectEvent';
-  }
-
-  static String _parseBusinessStep(String? bizStep) {
-    if (bizStep == null) return 'Unknown';
-    if (bizStep.contains(':')) {
-      final name = bizStep.split(':').last;
-      if (name.isEmpty) return 'Unknown';
-      return name
-          .replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'),
-            (m) => '${m.group(1)} ${m.group(2)}',
-          )
-          .replaceFirst(name[0], name[0].toUpperCase());
-    }
-    return bizStep;
-  }
-
-  static String _parseDisposition(String? disp) {
-    if (disp == null) return 'Unknown';
-    if (disp.contains(':')) {
-      final name = disp.split(':').last;
-      if (name.isEmpty) return 'Unknown';
-      return name
-          .replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'),
-            (m) => '${m.group(1)} ${m.group(2)}',
-          )
-          .replaceFirst(name[0], name[0].toUpperCase());
-    }
-    return disp;
   }
 
   @override

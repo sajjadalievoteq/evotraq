@@ -38,7 +38,6 @@ class UserManagementLoadingView extends StatelessWidget {
   }
 }
 
-// ── Filter bar skeleton ────────────────────────────────────────────────────
 
 class _UserManagementFilterSkeleton extends StatelessWidget {
   const _UserManagementFilterSkeleton({required this.baseColor});
@@ -100,7 +99,6 @@ class _UserManagementFilterSkeleton extends StatelessWidget {
   }
 }
 
-// ── List tile skeleton — mirrors _buildListCard layout ────────────────────
 
 class _UserManagementTileSkeleton extends StatelessWidget {
   const _UserManagementTileSkeleton({required this.baseColor});
@@ -119,20 +117,15 @@ class _UserManagementTileSkeleton extends StatelessWidget {
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 760;
 
-            // Details column
             final details = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Full name
                 _skeletonBox(baseColor, width: 160, height: 18, radius: r),
                 const SizedBox(height: 6),
-                // Email
                 _skeletonBox(baseColor, width: double.infinity, height: 14, radius: r),
                 const SizedBox(height: 4),
-                // Username
                 _skeletonBox(baseColor, width: 140, height: 14, radius: r),
                 const SizedBox(height: 12),
-                // Role + Status badges
                 Wrap(
                   spacing: 10,
                   runSpacing: 6,
@@ -144,7 +137,6 @@ class _UserManagementTileSkeleton extends StatelessWidget {
               ],
             );
 
-            // Action row (edit icon + toggle)
             final actions = Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -192,7 +184,6 @@ class _UserManagementTileSkeleton extends StatelessWidget {
   }
 }
 
-// ── Shared helpers ─────────────────────────────────────────────────────────
 
 Widget _skeletonBox(
   Color color, {

@@ -7,15 +7,6 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/cubit/hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 
-/// Renders a SINGLE node row in the hierarchy tree.
-///
-/// Children are NOT rendered here — the parent screen flattens the entire
-/// visible tree into a linear list and drives it with ListView.builder,
-/// so only visible rows are ever built.
-///
-/// Expand/collapse is gated on [node.hasChildren] only — no EPC-type checks.
-/// [isHighlighted] marks the EPC the user originally requested, which may be
-/// a child deep in the tree rather than the root.
 class HierarchyNodeTile extends StatelessWidget {
   const HierarchyNodeTile({
     super.key,
@@ -36,7 +27,6 @@ class HierarchyNodeTile extends StatelessWidget {
     final cubit = context.read<HierarchyCubit>();
     final node = nodeState.node;
 
-    // Color by type — display only, not used for logic
     final isSSCC = node.isSscc;
     final chipColor = isSSCC
         ? theme.colorScheme.primaryContainer
@@ -45,12 +35,10 @@ class HierarchyNodeTile extends StatelessWidget {
         ? theme.colorScheme.onPrimaryContainer
         : theme.colorScheme.onSecondaryContainer;
 
-    // Highlight background for the originally-selected EPC
     final rowColor = isHighlighted
         ? theme.colorScheme.tertiaryContainer.withOpacity(0.35)
         : Colors.transparent;
 
-    // Expand/collapse fires for ANY node that has children — no type check
     final canExpand = node.hasChildren;
 
     return Column(
@@ -74,7 +62,6 @@ class HierarchyNodeTile extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Chevron shown for any node with children, not SSCC-only
                   SizedBox(
                     width: 20,
                     height: 20,

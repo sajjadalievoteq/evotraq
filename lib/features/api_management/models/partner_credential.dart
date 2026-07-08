@@ -1,4 +1,3 @@
-/// Partner credential model for B2B API authentication
 class PartnerCredential {
   final String id;
   final String partnerId;
@@ -23,7 +22,6 @@ class PartnerCredential {
   });
 
   factory PartnerCredential.fromJson(Map<String, dynamic> json) {
-    // Parse scopes - can be a string (comma-separated) or a list
     List<String> parseScopes(dynamic scopesData) {
       if (scopesData == null) return [];
       if (scopesData is List) return List<String>.from(scopesData);
@@ -34,7 +32,6 @@ class PartnerCredential {
     return PartnerCredential(
       id: json['id'] ?? '',
       partnerId: json['partnerId'] ?? '',
-      // Backend returns 'authType', frontend model uses 'credentialType'
       credentialType: CredentialType.fromString(json['authType'] ?? json['credentialType'] ?? 'API_KEY'),
       clientId: json['clientId'],
       scopes: parseScopes(json['scopes']),
@@ -75,7 +72,6 @@ enum CredentialType {
   }
 }
 
-/// Response when creating a new API key credential
 class ApiKeyCredentialResponse {
   final String credentialId;
   final String apiKey;
@@ -92,7 +88,6 @@ class ApiKeyCredentialResponse {
   });
 
   factory ApiKeyCredentialResponse.fromJson(Map<String, dynamic> json) {
-    // Parse scopes - can be a string (comma-separated) or a list
     List<String> parseScopes(dynamic scopesData) {
       if (scopesData == null) return [];
       if (scopesData is List) return List<String>.from(scopesData);
@@ -112,7 +107,6 @@ class ApiKeyCredentialResponse {
   }
 }
 
-/// Response when creating OAuth2 credentials
 class OAuth2CredentialResponse {
   final String credentialId;
   final String clientId;
@@ -131,7 +125,6 @@ class OAuth2CredentialResponse {
   });
 
   factory OAuth2CredentialResponse.fromJson(Map<String, dynamic> json) {
-    // Parse scopes - can be a string (comma-separated) or a list
     List<String> parseScopes(dynamic scopesData) {
       if (scopesData == null) return [];
       if (scopesData is List) return List<String>.from(scopesData);

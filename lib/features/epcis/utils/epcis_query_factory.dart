@@ -1,9 +1,7 @@
 
 import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
 
-/// Factory class for creating common EPCIS query parameters
 class EPCISQueryFactory {
-  /// Create a query for events by time range
   static EPCISQueryParametersDTO createTimeRangeQuery(
     DateTime startTime,
     DateTime endTime, {
@@ -22,7 +20,6 @@ class EPCISQueryFactory {
     );
   }
 
-  /// Create a query for events by EPC
   static EPCISQueryParametersDTO createEPCQuery(
     String epc, {
     DateTime? startTime,
@@ -39,7 +36,6 @@ class EPCISQueryFactory {
     );
   }
 
-  /// Create a query for events by business step
   static EPCISQueryParametersDTO createBusinessStepQuery(
     String businessStep, {
     DateTime? startTime,
@@ -56,7 +52,6 @@ class EPCISQueryFactory {
     );
   }
 
-  /// Create a query for events by disposition
   static EPCISQueryParametersDTO createDispositionQuery(
     String disposition, {
     DateTime? startTime,
@@ -73,7 +68,6 @@ class EPCISQueryFactory {
     );
   }
 
-  /// Create a query for events by location
   static EPCISQueryParametersDTO createLocationQuery(
     String locationGLN,
     bool isReadPoint, {
@@ -92,7 +86,6 @@ class EPCISQueryFactory {
     );
   }
 
-  /// Create a complex query with multiple parameters
   static EPCISQueryParametersDTO createComplexQuery({
     List<String>? epcs,
     List<String>? businessSteps,

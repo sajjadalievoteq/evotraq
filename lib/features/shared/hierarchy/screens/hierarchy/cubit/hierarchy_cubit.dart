@@ -14,21 +14,6 @@ class HierarchyCubit extends Cubit<HierarchyState> {
   final _service = getIt<HierarchyService>();
   static const int _pageSize = 20;
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Public entry point — universal bidirectional traversal.
-  //
-  // Works for any EPC type (SSCC, SGTIN, or future types).
-  // No type checks. No SSCC/SGTIN branches. No heuristics.
-  //
-  // Algorithm:
-  //   1. Ask the backend to walk upward and return the root ancestor.
-  //      (GET /events/aggregation/child/{epc}/root-container)
-  //      If [inputEpc] has no parent the backend returns it unchanged.
-  //   2. Load the root's direct children via the existing paginated endpoint.
-  //   3. Fire the traversal summary in the background for the banner.
-  //   4. Emit [HierarchyLoaded] with [highlightEpc] = inputEpc when it
-  //      differs from the root (so the screen can mark the selected node).
-  // ─────────────────────────────────────────────────────────────────────────
   Future<void> openHierarchy(String inputEpc) async {
     emit(const HierarchyResolvingRoot());
 
@@ -37,7 +22,6 @@ class HierarchyCubit extends Cubit<HierarchyState> {
     try {
       final rootEpc = await _service.getRootContainer(normalizedInput);
 
-      // Step 2 — load root's children + fire summary in parallel
       final pageFuture    = _service.getHierarchyChildren(rootEpc, page: 0, size: _pageSize);
       final summaryFuture = _service.getHierarchySummary(rootEpc);
 
@@ -59,11 +43,9 @@ class HierarchyCubit extends Cubit<HierarchyState> {
         hasMore: page.hasMore,
       );
 
-      // Only set highlightEpc when the user's EPC differs from the root
       final highlight = (normalizedInput != rootEpc) ? normalizedInput : null;
       emit(HierarchyLoaded(rootState, highlightEpc: highlight));
 
-      // Step 3 — attach summary when it arrives (best-effort, never crashes)
       final summary = await summaryFuture;
       if (summary != null && !isClosed) {
         final current = state;
@@ -80,7 +62,6 @@ class HierarchyCubit extends Cubit<HierarchyState> {
     }
   }
 
-  /// Backward-compatible alias so existing `loadRoot(epc)` call-sites keep compiling.
   Future<void> loadRoot(String epc) => openHierarchy(epc);
 
   Future<void> expand(HierarchyTreeNodeState target) async {

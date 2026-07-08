@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 
-/// Runtime state for a single node in the rendered tree.
 class HierarchyTreeNodeState {
   final HierarchyNode node;
   bool isExpanded;

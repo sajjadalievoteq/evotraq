@@ -43,14 +43,11 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
     });
     
     try {
-      // Artificially delay to show loading
       await Future.delayed(const Duration(milliseconds: 800));
       
       final results = <String, ValidationResult>{};
       
-      // Run all the unit tests programmatically
       
-      // GTIN Tests - aligned with backend GS1ValidationUtilTest
       results['GTIN Valid 1'] = ValidationResult(
         isValid: GS1Validator.isValidGTIN('12345678901231'),
         testType: 'GTIN',
@@ -86,7 +83,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
         message: 'Invalid check digit',
       );
       
-      // GLN Tests - aligned with backend GS1ValidationUtilTest
       results['GLN Valid 1'] = ValidationResult(
         isValid: GS1Validator.isValidGLN('1234567890128'),
         testType: 'GLN',
@@ -115,8 +111,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
         message: 'Invalid check digit',
       );
       
-      // SSCC Tests - aligned with backend GS1ValidationUtilTest
-      // Testing the same value as in the backend GS1ValidationUtilTest
       results['SSCC Valid'] = ValidationResult(
         isValid: GS1Validator.isValidSSCC('106141411234567895'),
         testType: 'SSCC',
@@ -138,8 +132,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
         message: 'Invalid check digit',
       );
       
-      // SGTIN Tests - aligned with backend GS1ValidationUtilTest
-      // Using the exact same values as in the backend GS1ValidationUtilTest
       results['SGTIN Valid 1'] = ValidationResult(
         isValid: GS1Validator.isValidSGTIN('50614141123458', 'ABC123'),
         testType: 'SGTIN',
@@ -168,7 +160,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
         message: 'Empty serial number',
       );
       
-      // EPC URI Tests
       results['EPC URI Valid SGTIN'] = ValidationResult(
         isValid: GS1Validator.isValidEPCURI('urn:epc:id:sgtin:0614141.112345.ABC123'),
         testType: 'EPC URI',
@@ -204,7 +195,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
         message: 'Missing urn prefix',
       );
       
-      // Barcode Data Tests - simplified because the frontend implementation is simpler
       results['Barcode Valid Single AI'] = ValidationResult(
         isValid: GS1Validator.validateBarcodeData('(01)12345678901231') == null,
         testType: 'Barcode',
@@ -341,7 +331,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                   ),
                   const SizedBox(height: 20),
                   
-                  // Batch test button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -364,7 +353,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                   const Divider(),
                   const SizedBox(height: 10),
                   
-                  // Manual test form
                   Form(
                     key: _formKey,
                     child: Column(
@@ -379,7 +367,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // GTIN
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -398,7 +385,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                height: 56, // Match text field height
+                                height: 56,
                                 child: ElevatedButton(
                                   onPressed: () => _validateSingle('GTIN'),
                                   child: const Text('Validate'),
@@ -409,7 +396,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // GLN
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -428,7 +414,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                height: 56, // Match text field height
+                                height: 56,
                                 child: ElevatedButton(
                                   onPressed: () => _validateSingle('GLN'),
                                   child: const Text('Validate'),
@@ -439,7 +425,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // SSCC
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -458,7 +443,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                height: 56, // Match text field height
+                                height: 56,
                                 child: ElevatedButton(
                                   onPressed: () => _validateSingle('SSCC'),
                                   child: const Text('Validate'),
@@ -469,7 +454,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // SGTIN (GTIN + Serial)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -493,7 +477,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                                 Expanded(
                                   flex: 1,
                                   child: SizedBox(
-                                    height: 56, // Match text field height
+                                    height: 56,
                                     child: ElevatedButton(
                                       onPressed: () => _validateSingle('SGTIN'),
                                       child: const Text('Validate'),
@@ -506,7 +490,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // EPC URI
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -525,7 +508,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                height: 56, // Match text field height
+                                height: 56,
                                 child: ElevatedButton(
                                   onPressed: () => _validateSingle('EPC_URI'),
                                   child: const Text('Validate'),
@@ -536,7 +519,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        // Barcode Data
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -555,7 +537,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                height: 56, // Match text field height
+                                height: 56,
                                 child: ElevatedButton(
                                   onPressed: () => _validateSingle('BARCODE'),
                                   child: const Text('Validate'),
@@ -570,7 +552,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                   
                   const SizedBox(height: 30),
                   
-                  // Results section
                   if (_validationResults.isNotEmpty) ...[
                     const Divider(),
                     const SizedBox(height: 10),
@@ -583,7 +564,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // Results table
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade300),
@@ -639,7 +619,6 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                       ),
                     ),
                     
-                    // Results message
                     const SizedBox(height: 20),
                     Container(
                       width: double.infinity,

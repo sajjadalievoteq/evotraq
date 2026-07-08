@@ -78,7 +78,6 @@ final _commissioningDetailConfig =
   drawer: const AppDrawer(),
 );
 
-/// Screen to display commissioning batch details.
 class CommissioningOperationDetailScreen
     extends GenericOperationDetailScreen<CommissioningDetailData> {
   CommissioningOperationDetailScreen({

@@ -315,7 +315,7 @@ class _TechDispensingLifecycleGroupWidgetState
     );
 
     return Gs1GroupCard(
-      title: 'Technical specification — dispensing & lifecycle',
+      title: 'Technical specification: dispensing & lifecycle',
       outlineColor: outline,
       showFieldSkeleton: widget.showFieldSkeleton,
       skeletonFieldCount: 2,

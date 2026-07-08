@@ -278,7 +278,6 @@ class _ResourceManagementDashboardState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Optimization Result
             if (_lastOptimizationResult != null)
               Card(
                 color: Colors.green.shade50,

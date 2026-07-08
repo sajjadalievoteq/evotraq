@@ -1,7 +1,3 @@
-/// Encodes operation event times for EPCIS operation APIs.
-///
-/// Sends wall-clock local time with an explicit [eventTimeZoneOffset] so the
-/// backend can build a correct [ZonedDateTime] (avoids treating local time as UTC).
 abstract final class OperationEventTimeCodec {
   static String localTimezoneOffset([DateTime? reference]) {
     final offset = (reference ?? DateTime.now()).timeZoneOffset;
@@ -11,7 +7,6 @@ abstract final class OperationEventTimeCodec {
     return '$sign$hours:$minutes';
   }
 
-  /// ISO-8601 wall-clock string with explicit offset, e.g. `2026-06-30T15:30:00+04:00`.
   static String encodeLocal(DateTime local) {
     final offset = local.timeZoneOffset;
     final sign = offset.isNegative ? '-' : '+';

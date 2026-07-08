@@ -1,4 +1,3 @@
-/// Discriminator for unified [Operation] records.
 enum OperationType {
   shipping,
   receiving,

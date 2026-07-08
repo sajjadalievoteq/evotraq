@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Side-by-side desktop step column with header badge, lock overlay, and footer.
 class OperationStepPanel extends StatelessWidget {
   const OperationStepPanel({
     super.key,

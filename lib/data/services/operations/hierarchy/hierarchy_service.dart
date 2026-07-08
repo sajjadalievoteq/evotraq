@@ -64,7 +64,6 @@ class HierarchyService {
     }
   }
 
-  /// Resolves the active parent SSCC for [childEpc], or null if not aggregated.
   Future<String?> getParentContainer(String childEpc) async {
     final normalized = normalizeHierarchyEpc(childEpc);
     try {
@@ -90,9 +89,6 @@ class HierarchyService {
     }
   }
 
-  /// Walks upward from [epc] through all parent containers and returns the
-  /// root ancestor EPC. If [epc] has no parent, returns [epc] itself.
-  /// Never throws — returns [epc] as a safe fallback on any error.
   Future<String> getRootContainer(String epc) async {
     final normalized = normalizeHierarchyEpc(epc);
     try {
@@ -117,10 +113,6 @@ class HierarchyService {
     }
   }
 
-  /// Fetches the full recursive hierarchy summary for [rootEpc] via the
-  /// traversal endpoint. Returns null if the EPC has no aggregation history
-  /// (404) — callers should treat null as "no summary available" rather than
-  /// an error.
   Future<HierarchySummary?> getHierarchySummary(String rootEpc) async {
     final normalized = normalizeHierarchyEpc(rootEpc);
     try {
@@ -138,16 +130,13 @@ class HierarchyService {
         return HierarchySummary.fromJson(data);
       }
 
-      // 404 = no aggregation events for this EPC — not an error
       if (response.statusCode == 404) return null;
 
-      // Any other status: log and return null (summary is best-effort)
       debugPrint(
         '[HierarchyService] getHierarchySummary status=${response.statusCode}',
       );
       return null;
     } catch (e, st) {
-      // Summary is bonus info — never crash the screen because of it
       debugPrint('[HierarchyService] getHierarchySummary error: $e\n$st');
       return null;
     }

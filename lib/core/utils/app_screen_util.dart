@@ -2,11 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Lightweight local replacement for common `flutter_screenutil` usage.
-///
-/// Usage:
-/// - Wrap the app with [AppScreenUtilInit] once.
-/// - Then use extensions like: `16.w`, `12.h`, `14.sp`, `8.r`.
 class AppScreenUtil {
   AppScreenUtil._();
 
@@ -49,7 +44,6 @@ class AppScreenUtil {
         scale = scaleWidth;
         break;
     }
-    // Never scale fonts larger than their design size on bigger screens
     return math.min(scale, 1.0);
   }
 
@@ -162,10 +156,8 @@ extension AppScreenUtilNumExtension on num {
   double get sp => AppScreenUtil.setSp(this);
   double get r => AppScreenUtil.radius(this);
 
-  /// Percentage of current screen width. Example: `50.sw`.
   double get sw => AppScreenUtil.widthPercent(this);
 
-  /// Percentage of current screen height. Example: `50.sh`.
   double get sh => AppScreenUtil.heightPercent(this);
 }
 

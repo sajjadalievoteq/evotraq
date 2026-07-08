@@ -99,7 +99,6 @@ class _AdvancedPerformanceOptimizationDashboardState
         'All performance optimizations completed successfully',
       );
 
-      // Refresh comprehensive analysis after optimization
       await _loadComprehensiveAnalysis();
     } catch (e) {
       _showErrorDialog('Failed to perform automated optimization: $e');
@@ -173,7 +172,6 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Auto Optimization Result
                   if (_lastAutoOptimizationResult != null)
                     Card(
                       color: Colors.green.shade50,
@@ -197,7 +195,6 @@ class _AdvancedPerformanceOptimizationDashboardState
                   if (_lastAutoOptimizationResult != null)
                     const SizedBox(height: 16),
 
-                  // Error Message
                   if (_errorMessage != null)
                     Card(
                       color: Colors.red.shade50,
@@ -220,7 +217,6 @@ class _AdvancedPerformanceOptimizationDashboardState
 
                   if (_errorMessage != null) const SizedBox(height: 16),
 
-                  // Overview Section
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -249,7 +245,6 @@ class _AdvancedPerformanceOptimizationDashboardState
 
                   const SizedBox(height: 16),
 
-                  // Component Navigation Cards
                   Text(
                     'Performance Components',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -258,12 +253,10 @@ class _AdvancedPerformanceOptimizationDashboardState
                   ),
                   const SizedBox(height: 16),
 
-                  // Component Cards Grid
                   _buildComponentCards(),
 
                   const SizedBox(height: 16),
 
-                  // Automated Optimization Section
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -323,7 +316,6 @@ class _AdvancedPerformanceOptimizationDashboardState
 
                   const SizedBox(height: 16),
 
-                  // Comprehensive Analysis Section
                   if (_comprehensiveAnalysis != null)
                     Card(
                       child: Padding(
@@ -374,7 +366,6 @@ class _AdvancedPerformanceOptimizationDashboardState
       return const Text('Loading performance metrics...');
     }
 
-    // Extract key metrics from comprehensive analysis
     final systemResources = _comprehensiveAnalysis?['systemResources'] ?? {};
     final connectionPool = _comprehensiveAnalysis?['connectionPool'] ?? {};
     final threadPools = _comprehensiveAnalysis?['threadPools'] ?? {};

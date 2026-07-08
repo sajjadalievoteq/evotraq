@@ -1,16 +1,15 @@
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
-/// Loads all direct children of a parent SSCC via the hierarchy API.
 abstract final class UnpackingContainerContentsLoader {
   static Future<List<HierarchyNode>> loadDirectChildren(
     HierarchyService hierarchyService,
     String parentContainerId,
   ) async {
     final parentEpc = normalizeHierarchyEpc(
-      EPCURIConverter.convertToEPCUri(parentContainerId) ?? parentContainerId,
+      Gs1Converter.barcodeToEpc(parentContainerId) ?? parentContainerId,
     );
 
     final nodes = <HierarchyNode>[];

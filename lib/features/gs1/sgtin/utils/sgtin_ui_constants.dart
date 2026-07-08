@@ -37,7 +37,7 @@ abstract final class SgtinUiConstants {
   static const List<int> pageSizeOptions = Gs1ListPageSizes.defaults;
 
   static const String listSearchHint =
-      'Search by serial number, GTIN, or batch/lot...';
+      'EPC URI, GS1 barcode, GTIN, serial, or batch/lot…';
 
   static const appBarManagement = 'SGTIN Management';
   static const fabAddNew = 'Add New SGTIN';

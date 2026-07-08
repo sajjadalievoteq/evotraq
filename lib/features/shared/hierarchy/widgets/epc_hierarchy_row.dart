@@ -5,10 +5,6 @@ import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigati
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Universal EPC row: monospace value + hierarchy icon (+ optional copy / trailing).
-///
-/// Hierarchy role (root, parent, child, standalone) is resolved only by
-/// [HierarchyCubit.openHierarchy] via aggregation data — never here.
 class EpcHierarchyRow extends StatelessWidget {
   const EpcHierarchyRow({
     super.key,

@@ -4,34 +4,23 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/epcis/sensor_element.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 
-/// ObjectEvent represents EPCIS object events with instance or class-level identifiers
-/// Follows GS1 EPCIS 2.0/1.3 standards for tracking and tracing
 class ObjectEvent extends EPCISEvent {
-  /// List of EPCs involved in this event (instance-level identification)
   final List<String>? epcList;
   
-  /// List of EPC classes involved in this event (class-level identification)
   final List<String>? epcClassList;
   
-  /// Quantities with their respective units and EPC classes
   final List<types.QuantityElement>? quantityList;
   
-  /// Instance/Lot Master Data (for commissioning events)
   final Map<String, dynamic>? ilmd;
   
-  /// Action: ADD, OBSERVE, or DELETE (as per GS1 standard)
   final String? action;
   
-  /// Source list for products (EPCIS 2.0)
   final List<types.SourceDestination>? sourceList;
   
-  /// Destination list for products (EPCIS 2.0)
   final List<types.SourceDestination>? destinationList;
   
-  /// Persistent disposition (EPCIS 2.0)
   final String? persistentDisposition;
   
-  /// Sensor element list (EPCIS 2.0)
   @override
   final List<SensorElement>? sensorElementList;
   ObjectEvent({
@@ -64,32 +53,22 @@ class ObjectEvent extends EPCISEvent {
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     
-    // Always set the event type for ObjectEvent
     json['eventType'] = 'ObjectEvent';
     
-    // Schema has a oneOf constraint requiring either epcList or quantityList, but not both
-    // Prioritize epcList if present
     if (epcList != null && epcList!.isNotEmpty) {
       json['epcList'] = epcList;
     } else {
-      // Remove epcList field completely if empty
       json.remove('epcList');
     }
     
-    // Note: epcClassList is not sent to backend as it uses quantityList for class-level events
     
-    // Handle quantityList based on epcList presence
-    // For the schema oneOf constraint: either use epcList or quantityList, but not both
     if (epcList == null || epcList!.isEmpty) {
-      // When no epcList, always include a quantityList (never null) to satisfy schema
       if (quantityList != null && quantityList!.isNotEmpty) {
         json['quantityList'] = quantityList!.map((q) => q.toJson()).toList();
       } else {
-        json['quantityList'] = []; // Empty array instead of null or omitting
+        json['quantityList'] = [];
       }
     } else {
-      // If epcList is present, include an empty quantityList array
-      // Schema validation allows empty arrays, but not null or missing
       json['quantityList'] = [];
     }
     
@@ -101,7 +80,6 @@ class ObjectEvent extends EPCISEvent {
       json['ilmd'] = ilmd;
     }
     
-    // Handle sourceList - ensure each item has sourceType and sourceID fields as required by schema
     if (sourceList != null && sourceList!.isNotEmpty) {
       json['sourceList'] = sourceList!.map((s) => {
         'sourceType': s.type,
@@ -109,7 +87,6 @@ class ObjectEvent extends EPCISEvent {
       }).toList();
     }
     
-    // Handle destinationList - ensure each item has destinationType and destinationID fields as required by schema
     if (destinationList != null && destinationList!.isNotEmpty) {
       json['destinationList'] = destinationList!.map((d) => {
         'destinationType': d.type,
@@ -125,12 +102,9 @@ class ObjectEvent extends EPCISEvent {
       json['sensorElementList'] = sensorElementList!.map((e) => e.toJson()).toList();
     }
 
-    // For certification info, ensure it's an array of objects (not a single object)
-    // The backend expects an array of CertificationInfoDTO objects
     if (certificationInfo != null && certificationInfo!.isNotEmpty) {
       json['certificationInfo'] = certificationInfo!.map((cert) => cert.toJson()).toList();
     } else {
-      // Provide a default array with one object to satisfy schema
       json['certificationInfo'] = [{
         "certificationId": "default",
         "certificationStandard": "none",
@@ -140,14 +114,13 @@ class ObjectEvent extends EPCISEvent {
     
     return json;
   }
-    /// Create an ObjectEvent from a JSON object
   factory ObjectEvent.fromJson(Map<String, dynamic> json) {
     return ObjectEvent(
       id: json['id']?.toString(),
       eventId: json['eventId']?.toString() ?? '',
       eventTime: json['eventTime'] != null ? DateTime.parse(json['eventTime']) : DateTime.now(),
       recordTime: json['recordTime'] != null ? DateTime.parse(json['recordTime']) : DateTime.now(),
-      eventTimeZone: json['eventTimeZone']?.toString() ?? json['eventTimeZoneOffset']?.toString() ?? '+00:00', // Use same logic as parent class
+      eventTimeZone: json['eventTimeZone']?.toString() ?? json['eventTimeZoneOffset']?.toString() ?? '+00:00',
       epcisVersion: json['epcisVersion'] != null 
           ? (json['epcisVersion'].toString() == '2.0' || json['epcisVersion'].toString().toLowerCase() == 'v2_0' 
              ? EPCISVersion.v2_0 : EPCISVersion.v1_3)
@@ -192,7 +165,6 @@ class ObjectEvent extends EPCISEvent {
                   } else if (e is Map) {
                     return SensorElement.fromJson(Map<String, dynamic>.from(e));
                   } else {
-                    // Return an empty sensor element for non-map items
                     return SensorElement(measurements: []);
                   }
                 }).toList();
@@ -221,7 +193,6 @@ class ObjectEvent extends EPCISEvent {
           : null,
     );
   }
-    /// Create a copy of this ObjectEvent with the given fields replaced
   ObjectEvent copyWith({
     String? id,
     String? eventId,
@@ -274,7 +245,6 @@ class ObjectEvent extends EPCISEvent {
     );
   }
   
-  // For backward compatibility with existing service implementations
   String? get epcClass => epcClassList?.isNotEmpty == true ? epcClassList!.first : null;
   double? get quantity => quantityList?.isNotEmpty == true ? quantityList!.first.quantity : null;
   String? get uom => quantityList?.isNotEmpty == true ? quantityList!.first.uom : null;

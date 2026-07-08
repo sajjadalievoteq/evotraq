@@ -5,7 +5,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_info_row.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_formatters.dart';
 
-/// Reference details card for Return Receiving operation detail.
 class ReturnReceivingDetailReferenceCard extends StatelessWidget {
   const ReturnReceivingDetailReferenceCard({
     super.key,

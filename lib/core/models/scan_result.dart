@@ -1,18 +1,12 @@
-/// Model for scan results from barcode scanning operations
 class ScanResult {
-  /// The raw scanned data
   final String data;
   
-  /// Whether the scan result is valid
   final bool isValid;
   
-  /// Error message if scan is invalid
   final String? error;
   
-  /// Type of barcode detected (SGTIN, SSCC, etc.)
   final String? barcodeType;
   
-  /// Additional metadata from the scan
   final Map<String, dynamic>? metadata;
 
   const ScanResult({
@@ -23,7 +17,6 @@ class ScanResult {
     this.metadata,
   });
 
-  /// Create a successful scan result
   factory ScanResult.success({
     required String data,
     String? barcodeType,
@@ -37,7 +30,6 @@ class ScanResult {
     );
   }
 
-  /// Create a failed scan result
   factory ScanResult.error({
     required String data,
     required String error,

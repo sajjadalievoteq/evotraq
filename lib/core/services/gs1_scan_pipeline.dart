@@ -2,7 +2,6 @@ import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Normalizes raw scanner input through the shared GS1 barcode pipeline.
 abstract final class Gs1ScanPipeline {
   Gs1ScanPipeline._();
 

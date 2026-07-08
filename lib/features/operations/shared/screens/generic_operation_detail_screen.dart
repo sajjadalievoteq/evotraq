@@ -6,7 +6,6 @@ import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
-/// Generic operation detail screen for operations that follow the standard pattern.
 class GenericOperationDetailScreen<T> extends StatefulWidget {
   const GenericOperationDetailScreen({
     super.key,

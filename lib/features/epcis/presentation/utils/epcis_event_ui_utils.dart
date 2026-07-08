@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
-/// Shared EPCIS event-type visual mapping for presentation widgets.
 abstract final class EpcisEventUiUtils {
   static Color eventTypeColor(String eventType) {
     return AppColorMapper.eventType(

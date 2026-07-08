@@ -1,6 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// Validation helpers for packing operation wizard steps.
 class PackingOperationStepValidator {
   PackingOperationStepValidator._();
 

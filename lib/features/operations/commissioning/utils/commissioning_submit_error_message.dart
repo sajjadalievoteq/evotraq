@@ -1,6 +1,6 @@
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
-/// Resolves a user-visible message when bulk commissioning fails or partially fails.
 String commissioningSubmitErrorMessage(CommissioningResponse response) {
   final failedItems =
       response.itemResults?.where((r) => !r.success).toList() ?? const [];
@@ -22,7 +22,10 @@ String commissioningSubmitErrorMessage(CommissioningResponse response) {
   }
 
   if (response.messages != null && response.messages!.isNotEmpty) {
-    return response.messages!.first;
+    return OperationErrorTranslator.translate(
+      response.messages!.first,
+      fallback: response.messages!.first,
+    );
   }
 
   return 'No items were successfully commissioned.';

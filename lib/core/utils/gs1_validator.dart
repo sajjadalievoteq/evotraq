@@ -4,10 +4,6 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Legacy GS1 validation facade.
-///
-/// Prefer [GtinFormat], [GlnFormat], [SsccFormat], and [sgtin_validators]
-/// for new code.
 @Deprecated(
   'Use GtinFormat, GlnFormat, SsccFormat, and sgtin_validators instead.',
 )

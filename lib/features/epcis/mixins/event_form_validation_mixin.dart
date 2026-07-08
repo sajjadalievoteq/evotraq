@@ -6,13 +6,11 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_err
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Show validation errors dialog
 void showValidationErrors(
   BuildContext context,
   List<dynamic> errors, {
   String? title,
 }) {
-  // Format errors for proper display
   final formattedErrors = errors.map((error) {
     if (error is String) {
       return error;
@@ -67,18 +65,13 @@ void showValidationErrors(
   );
 }
 
-/// Mixin that adds validation capabilities to EPCIS event form screens
 mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
-  /// Field validation state
   final Map<String, String?> _fieldValidationErrors = {};
 
-  /// Get the validation provider from context
   ValidationCubit get validationProvider => context.read<ValidationCubit>();
 
-  /// Get field error by name
   String? getFieldError(String fieldName) => _fieldValidationErrors[fieldName];
 
-  /// Set field error
   void setFieldError(String fieldName, String? error) {
     if (_fieldValidationErrors[fieldName] != error) {
       setState(() {
@@ -87,14 +80,12 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// Clear all field errors
   void clearFieldErrors() {
     setState(() {
       _fieldValidationErrors.clear();
     });
   }
 
-  /// Validate a field with a specific validation function
   bool validateField(
     String fieldName,
     String value,
@@ -105,7 +96,6 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     return error == null;
   }
 
-  /// Get validation status for a field
   ValidationStatus getFieldValidationStatus(String fieldName) {
     final error = _fieldValidationErrors[fieldName];
     if (error != null) {
@@ -117,17 +107,14 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// Check if a field has been validated (either valid or invalid)
   bool hasFieldBeenValidated(String fieldName) {
     return _fieldValidationErrors.containsKey(fieldName);
   }
 
-  /// Mark field as validated without error
   void markFieldAsValid(String fieldName) {
     setFieldError(fieldName, null);
   }
 
-  /// Validate a field with progressive feedback
   bool validateFieldWithFeedback(
     String fieldName,
     String value,
@@ -143,7 +130,6 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     return error == null;
   }
 
-  /// Process validation results and map them to fields with detailed feedback
   void processValidationResult(
     Map<String, dynamic>? result,
     Map<String, String> fieldMappings,
@@ -159,18 +145,14 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     mapValidationErrorsToFields(errors, fieldMappings);
   }
 
-  /// Map validation errors to fields with custom field mappings
   void mapValidationErrorsToFields(
     List<dynamic> errors,
     Map<String, String> fieldMappings,
   ) {
-    // Clear existing errors first
     clearFieldErrors();
 
-    // Map errors to fields based on their field path or description
     for (final error in errors) {
       if (error is Map<String, dynamic>) {
-        // If the error has a field path, use it
         if (error.containsKey('field')) {
           final fieldName = _mapBackendFieldToFormField(
             error['field'].toString(),
@@ -178,28 +160,24 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
           );
           setFieldError(fieldName, error['message'].toString());
         } else if (error.containsKey('message')) {
-          // Try to extract field name from message
           final message = error['message'].toString();
           _tryExtractFieldFromMessage(message, fieldMappings);
         }
       } else if (error is String) {
-        // Try to extract field name from string message
         _tryExtractFieldFromMessage(error, fieldMappings);
       }
     }
   }
 
-  /// Try to extract field name from error message
   void _tryExtractFieldFromMessage(
     String message,
     Map<String, String> fieldMappings,
   ) {
-    // Common patterns in validation messages
     final patterns = [
-      RegExp(r'"([^"]+)"'), // Text in double quotes
-      RegExp(r"'([^']+)'"), // Text in single quotes
-      RegExp(r'field ([^ ]+)'), // "field" followed by name
-      RegExp(r'property ([^ ]+)'), // "property" followed by name
+      RegExp(r'"([^"]+)"'),
+      RegExp(r"'([^']+)'"),
+      RegExp(r'field ([^ ]+)'),
+      RegExp(r'property ([^ ]+)'),
     ];
 
     for (final pattern in patterns) {
@@ -216,27 +194,22 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
       }
     }
 
-    // If no field could be identified, store as general error
     setFieldError('_general', message);
   }
 
-  /// Map backend field names to form field names
   String _mapBackendFieldToFormField(
     String backendField,
     Map<String, String> fieldMappings,
   ) {
-    // Remove any array indexes or path separators
     final simplifiedField = backendField
         .replaceAll(RegExp(r'\[\d+\]'), '')
         .split('.')
         .last
         .toLowerCase();
 
-    // Check if we have a mapping for this field
     return fieldMappings[simplifiedField] ?? simplifiedField;
   }
 
-  /// Show validation errors in a dialog
   void showValidationErrors(
     BuildContext context,
     List<dynamic> errors, {
@@ -259,7 +232,6 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  /// Show validation errors in a snackbar
   void showValidationErrorSnackbar(BuildContext context, List<dynamic> errors) {
     context.showSnackBar(
       SnackBar(
@@ -274,7 +246,6 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  /// Display validation errors inline
   Widget buildValidationErrorsWidget(
     List<dynamic> errors, {
     VoidCallback? onDismiss,
@@ -286,26 +257,18 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
   }
 }
 
-/// Validation status for form fields
 enum ValidationStatus {
-  /// Field has not been validated yet
   notValidated,
 
-  /// Field is valid
   valid,
 
-  /// Field is invalid
   invalid,
 }
 
-/// Extension methods for ValidationStatus
 extension ValidationStatusExtension on ValidationStatus {
-  /// Whether this status represents validity
   bool get isValid => this == ValidationStatus.valid;
 
-  /// Whether this status represents invalidity
   bool get isInvalid => this == ValidationStatus.invalid;
 
-  /// Whether this status represents that validation has been attempted
   bool get wasValidated => this != ValidationStatus.notValidated;
 }

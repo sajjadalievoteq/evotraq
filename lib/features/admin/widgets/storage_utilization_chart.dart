@@ -31,9 +31,8 @@ class StorageUtilizationChart extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Fixed width for pie chart area
                 SizedBox(
-                  width: 220, // Fixed width to contain the pie chart
+                  width: 220,
                   child: _buildPieChart(),
                 ),
                 const SizedBox(width: 16),
@@ -269,7 +268,7 @@ class PieChartPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 10;
 
-    double startAngle = -90 * (3.14159 / 180); // Start from top
+    double startAngle = -90 * (3.14159 / 180);
 
     final paint = Paint()..style = PaintingStyle.fill;
 
@@ -286,7 +285,6 @@ class PieChartPainter extends CustomPainter {
         paint,
       );
 
-      // Draw white border between segments
       final borderPaint = Paint()
         ..style = PaintingStyle.stroke
         ..color = Colors.white
@@ -303,11 +301,9 @@ class PieChartPainter extends CustomPainter {
       startAngle += sweepAngle;
     }
 
-    // Draw center circle for donut effect
     final centerPaint = Paint()..color = Colors.white;
     canvas.drawCircle(center, radius * 0.4, centerPaint);
 
-    // Draw percentage in center
     final textPainter = _createTextPainter(
       '100%',
       const TextStyle(

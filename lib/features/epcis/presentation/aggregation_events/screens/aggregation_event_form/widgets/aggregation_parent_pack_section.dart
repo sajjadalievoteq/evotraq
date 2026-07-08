@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_rules_text.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_parent_pack_mode.dart';
@@ -73,18 +73,18 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
         final raw = _ssccController.text.trim();
         if (raw.isEmpty) return null;
         if (raw.startsWith('urn:epc:')) return raw;
-        final fromBarcode = EPCURIConverter.convertToEPCUri(raw);
+        final fromBarcode = Gs1Converter.barcodeToEpc(raw);
         if (fromBarcode != null) return fromBarcode;
         final digits = raw.replaceAll(RegExp(r'\D'), '');
         if (RegExp(r'^\d{18}$').hasMatch(digits)) {
-          return EPCURIConverter.convertSSCCToEPCUri(digits);
+          return Gs1Converter.ssccToEpc(digits);
         }
         return EPCFormatter.formatToEPCUri(raw) ?? raw;
       case AggregationParentPackMode.sgtin:
         final gtin = _gtinController.text.trim().replaceAll(RegExp(r'\D'), '');
         final serial = _serialController.text.trim();
         if (gtin.isEmpty || serial.isEmpty) return null;
-        return EPCURIConverter.convertGTINSerialToEPCUri(gtin, serial);
+        return Gs1Converter.gtinSerialToEpc(gtin, serial);
     }
   }
 

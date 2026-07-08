@@ -8,13 +8,23 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 
 class GTINCubit extends Cubit<GTINState> {
   final GTINService _gtinService;
+  static List<GTIN>? _pickerCache;
 
   GTINCubit({required GTINService gtinService})
     : _gtinService = gtinService,
       super(const GTINState());
 
-  Future<List<GTIN>> fetchGtinsForPicker({int page = 0, int size = 500}) {
-    return _gtinService.getGTINs(page: page, size: size);
+  Future<List<GTIN>> fetchGtinsForPicker({
+    int page = 0,
+    int size = 500,
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _pickerCache != null) {
+      return _pickerCache!;
+    }
+    final gtins = await _gtinService.getGTINs(page: page, size: size);
+    _pickerCache = gtins;
+    return gtins;
   }
 
   Future<void> fetchGTIN(String gtinCode) async {
@@ -161,6 +171,7 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final createdGtin = await _gtinService.createGTIN(gtin);
+      _pickerCache = null;
       emit(
         state.copyWith(
           status: GTINStatus.success,
@@ -178,6 +189,7 @@ class GTINCubit extends Cubit<GTINState> {
     emit(state.copyWith(status: GTINStatus.loading));
     try {
       final updatedGtin = await _gtinService.updateGTIN(gtin);
+      _pickerCache = null;
       emit(
         state.copyWith(
           status: GTINStatus.success,
@@ -196,6 +208,7 @@ class GTINCubit extends Cubit<GTINState> {
     try {
       await _gtinService.updateGTINStatus(gtinCode, status);
       final gtin = await _gtinService.getGTIN(gtinCode);
+      _pickerCache = null;
       emit(state.copyWith(status: GTINStatus.success, gtin: gtin, error: null));
     } catch (e, st) {
       _logGtinCubit('updateGTINStatus', e, st, extra: 'gtinCode=$gtinCode');

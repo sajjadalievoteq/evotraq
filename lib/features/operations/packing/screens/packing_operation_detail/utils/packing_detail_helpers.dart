@@ -1,6 +1,5 @@
 ﻿import 'package:traqtrace_app/data/models/operations/packing/packing_response_model.dart';
 
-/// Packing detail display helpers.
 class PackingDetailHelpers {
   PackingDetailHelpers._();
 

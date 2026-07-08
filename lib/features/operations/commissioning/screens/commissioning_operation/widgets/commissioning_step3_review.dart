@@ -154,27 +154,28 @@ class CommissioningStep3Review extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 24),
-       if(serialNumbers.isNotEmpty)   Card(
-            color: Colors.blue[50],
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  TraqIcon(AppAssets.iconInfo, color: Colors.blue[700]),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Submitting will create ${serialNumbers.length} SGTIN(s) with status '
-                      '"COMMISSIONED" and generate corresponding ObjectEvent(s) for EPCIS 2.0 compliance.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+          if (serialNumbers.isNotEmpty)
+            Card(
+              color: Colors.blue[50],
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    TraqIcon(AppAssets.iconInfo, color: Colors.blue[700]),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Submitting will create ${serialNumbers.length} SGTIN(s) with status '
+                        '"COMMISSIONED" and generate corresponding ObjectEvent(s) for EPCIS 2.0 compliance.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

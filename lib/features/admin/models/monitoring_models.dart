@@ -1,35 +1,27 @@
-// Helper function to parse dates with timezone information
 DateTime _parseDateTime(String? dateStr) {
   if (dateStr == null) return DateTime.now();
   
   try {
-    // Remove timezone name if present (e.g., [Asia/Dubai])
     String cleanedDate = dateStr.replaceAll(RegExp(r'\[.*?\]'), '');
     
-    // Handle different timezone formats
     if (cleanedDate.contains('+') && !cleanedDate.endsWith('Z')) {
-      // Extract just the main datetime part before timezone
       final parts = cleanedDate.split('+');
       if (parts.length >= 2) {
         String datePart = parts[0];
         String timezonePart = '+${parts[1]}';
         
-        // Try parsing with timezone first
         try {
           return DateTime.parse(datePart + timezonePart);
         } catch (e) {
-          // If that fails, just use the date part
           return DateTime.parse(datePart);
         }
       }
     }
     
-    // Handle Z timezone
     if (cleanedDate.endsWith('Z')) {
       return DateTime.parse(cleanedDate);
     }
     
-    // Default parse
     return DateTime.parse(cleanedDate);
   } catch (e) {
     print('Error parsing date "$dateStr": $e');
@@ -64,7 +56,6 @@ class StorageStatistics {
     required this.lastArchiveDate,
   });
 
-  // Legacy getter for compatibility with overview status calculation
   double get storageUtilizationGB => storageUsedGB;
 
   factory StorageStatistics.fromJson(Map<String, dynamic> json) {

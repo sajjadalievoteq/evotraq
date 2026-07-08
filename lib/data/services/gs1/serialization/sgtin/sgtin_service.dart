@@ -34,6 +34,24 @@ class SGTINService {
     );
   }
 
+  Future<SGTIN> getSGTINByEPC(String epcUri) async {
+    final response = await _dioService.get(
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathByEpc(epcUri)}',
+      headers: _headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == SgtinServiceConstants.statusOk) {
+      return SGTIN.fromJson(json.decode(response.data));
+    }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Failed to load SGTIN by EPC: ${response.statusMessage}',
+      responseBody: response.data is String ? response.data as String? : null,
+    );
+  }
+
   Future<SGTIN> getSGTINBySerialNumber(String serialNumber) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBySerial(serialNumber)}',

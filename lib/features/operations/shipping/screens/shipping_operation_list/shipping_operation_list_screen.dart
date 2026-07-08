@@ -23,7 +23,6 @@ import 'package:traqtrace_app/features/operations/shipping/utils/shipping_ui_con
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
-/// Screen to list all shipping operations with search capabilities.
 class ShippingOperationListScreen extends StatelessWidget {
   const ShippingOperationListScreen({
     super.key,

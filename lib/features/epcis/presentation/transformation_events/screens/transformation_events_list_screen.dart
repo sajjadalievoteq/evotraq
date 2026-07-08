@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation_events_help.dart';
@@ -11,9 +12,7 @@ import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for displaying a list of Transformation Events
 class TransformationEventsListScreen extends StatefulWidget {
-  /// Constructor
   const TransformationEventsListScreen({Key? key}) : super(key: key);
 
   @override
@@ -37,7 +36,6 @@ class _TransformationEventsListScreenState
   void initState() {
     super.initState();
 
-    // Load initial data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTransformationEvents();
     });
@@ -167,7 +165,6 @@ class _TransformationEventsListScreenState
   }
 
   void _navigateToEventDetails(TransformationEvent event) {
-    // Only pass the ID, not the event object, so form will load fresh data from API
     if (event.id != null) {
       context
           .push('/epcis/transformation-events/${event.id}', extra: event.id)
@@ -189,7 +186,6 @@ class _TransformationEventsListScreenState
     });
   }
 
-  // Show tracking dialog for EPCs
   Future<void> _showTrackEPCDialog() async {
     final TextEditingController epcController = TextEditingController();
     bool isSearching = false;
@@ -297,7 +293,6 @@ class _TransformationEventsListScreenState
     );
   }
 
-  // Show input-output relationship tracking dialog
   Future<void> _showInputOutputTrackingDialog() async {
     final TextEditingController inputEpcController = TextEditingController();
     final TextEditingController outputEpcController = TextEditingController();
@@ -417,9 +412,7 @@ class _TransformationEventsListScreenState
     );
   }
 
-  // View event details
   void _viewEventDetails(TransformationEvent event) {
-    // Navigate to event details or show a detailed dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -433,8 +426,12 @@ class _TransformationEventsListScreenState
               Text(
                 'Event Time: ${DateFormat.yMMMd().add_Hms().format(event.eventTime)}',
               ),
-              Text('Business Step: ${event.businessStep ?? "N/A"}'),
-              Text('Disposition: ${event.disposition ?? "N/A"}'),
+              Text(
+                'Business Step: ${CbvDisplayUtils.displayBizStep(event.businessStep, fallback: 'N/A')}',
+              ),
+              Text(
+                'Disposition: ${CbvDisplayUtils.displayDisposition(event.disposition, fallback: 'N/A')}',
+              ),
               Text(
                 'Business Location: ${event.readPoint != null ? event.readPoint.toString() : "N/A"}',
               ),
@@ -651,7 +648,9 @@ class _TransformationEventsListScreenState
           Text('Date: $formattedDate'),
           Text('$inputCount input(s) → $outputCount output(s)'),
           if (event.businessStep != null)
-            Text('Step: ${event.businessStep}'),
+            Text(
+              'Step: ${CbvDisplayUtils.displayBizStep(event.businessStep)}',
+            ),
         ],
       ),
     );

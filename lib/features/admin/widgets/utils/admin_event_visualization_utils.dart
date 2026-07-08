@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
-/// Shared visual helpers for admin event-type charts.
 abstract final class AdminEventVisualizationUtils {
   static Color eventTypeColor(String eventType) {
     return AppColorMapper.eventType(

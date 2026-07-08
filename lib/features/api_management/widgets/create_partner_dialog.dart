@@ -7,7 +7,6 @@ import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Dialog for creating a new B2B partner
 class CreatePartnerDialog extends StatefulWidget {
   const CreatePartnerDialog({super.key});
 

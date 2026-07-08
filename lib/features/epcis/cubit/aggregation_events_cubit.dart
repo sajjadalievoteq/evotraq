@@ -8,33 +8,23 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_list_utils.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
-// ---------------------------------------------------------------------------
-// Status enum
-// ---------------------------------------------------------------------------
 
 enum AggregationEventsStatus { initial, loading, success, error }
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
 
 class AggregationEventsState extends Equatable {
   final AggregationEventsStatus status;
   final List<AggregationEvent> aggregationEvents;
   final AggregationEvent? selectedEvent;
 
-  // List-loading flags (aligned with GS1 pattern)
   final bool isListLoading;
   final bool isFetchingMore;
   final bool hasMoreData;
   final int page;
   final int pageSize;
 
-  // Per-operation error vs list-fetch error
   final String? error;
   final String? listFetchError;
 
-  // Filters
   final String? filterAction;
   final String? filterBizStep;
   final String? filterDisposition;
@@ -43,7 +33,6 @@ class AggregationEventsState extends Equatable {
   final String? filterChildEPC;
   final String? filterSearchText;
 
-  // Sorting
   final String sortOrder;
 
   const AggregationEventsState({
@@ -155,16 +144,10 @@ class AggregationEventsState extends Equatable {
       ];
 }
 
-// ---------------------------------------------------------------------------
-// Cubit
-// ---------------------------------------------------------------------------
-
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   final AggregationEventService _service;
   final GLNService _glnService;
 
-  /// In-memory cache: GLN code → resolved GLN. Avoids redundant API calls
-  /// across list refreshes within the same cubit lifetime.
   final Map<String, GLN> _glnCache = {};
 
   AggregationEventsCubit({
@@ -174,17 +157,10 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         _glnService = glnService ?? getIt<GLNService>(),
         super(const AggregationEventsState());
 
-  // -------------------------------------------------------------------------
-  // GLN enrichment — resolves "Unknown Location" stubs to real location names
-  // -------------------------------------------------------------------------
 
-  /// Replaces stub GLNs (created by [GLN.fromCode]) with fully resolved ones
-  /// fetched from the backend. Results are cached so repeated fetches of the
-  /// same GLN code cost only one network round-trip.
   Future<List<AggregationEvent>> _enrichWithGlns(
     List<AggregationEvent> events,
   ) async {
-    // Collect unique codes that still need resolving
     final codesToFetch = <String>{};
     for (final e in events) {
       if (e.businessLocation != null &&
@@ -196,11 +172,8 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       }
     }
 
-    // Strip codes we already have cached
     codesToFetch.removeWhere(_glnCache.containsKey);
 
-    // Fetch remaining in parallel — failures are silently ignored so a single
-    // missing GLN doesn't break the whole list.
     if (codesToFetch.isNotEmpty) {
       final results = await Future.wait(
         codesToFetch.map((code) async {
@@ -217,7 +190,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       }
     }
 
-    // Rebuild events with resolved GLNs where available
     return events.map((e) {
       final resolvedBizLoc = (e.businessLocation != null &&
               isPlaceholderGlnLocation(e.businessLocation!))
@@ -231,7 +203,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
 
       if (resolvedBizLoc == e.businessLocation &&
           resolvedReadPt == e.readPoint) {
-        return e; // nothing changed
+        return e;
       }
       return e.copyWith(
         businessLocation: resolvedBizLoc,
@@ -240,15 +212,11 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }).toList();
   }
 
-  /// Convenience wrapper for a single event.
   Future<AggregationEvent> _enrichOne(AggregationEvent event) async {
     final enriched = await _enrichWithGlns([event]);
     return enriched.first;
   }
 
-  // -------------------------------------------------------------------------
-  // List loading — primary entry point used by the list screen
-  // -------------------------------------------------------------------------
 
   Future<void> loadAggregationEvents({
     int page = 0,
@@ -369,7 +337,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         );
       }
 
-      // Resolve "Unknown Location" stubs to real GLN names
       events = await _enrichWithGlns(events);
 
       final nextEvents = isLoadMore
@@ -429,9 +396,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     loadAggregationEvents(page: 0);
   }
 
-  // -------------------------------------------------------------------------
-  // Single-event fetch
-  // -------------------------------------------------------------------------
 
   Future<AggregationEvent?> getAggregationEventById(String id) async {
     emit(state.copyWith(
@@ -455,9 +419,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Create
-  // -------------------------------------------------------------------------
 
   Future<AggregationEvent> createAggregationEvent(
       AggregationEvent event) async {
@@ -562,9 +523,6 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Hierarchy helpers
-  // -------------------------------------------------------------------------
 
   Future<AggregationEvent?> findCurrentParentOfChild(String childEPC) async {
     try {

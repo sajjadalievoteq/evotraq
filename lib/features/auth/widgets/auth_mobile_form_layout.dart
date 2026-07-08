@@ -120,7 +120,6 @@ class AuthMobileFormLayout extends StatelessWidget {
                   )
 
 
-
                 ],
               ),
             ),

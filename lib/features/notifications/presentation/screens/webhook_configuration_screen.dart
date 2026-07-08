@@ -75,7 +75,6 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // Header Section
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -95,16 +94,13 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Webhook Test Section
                 _buildWebhookTestSection(),
                 const SizedBox(height: 16),
-                // Filter chips
                 _buildFilterChips(),
               ],
             ),
           ),
           const Divider(height: 1),
-          // Webhook List
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
@@ -241,7 +237,6 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
   }
 
   List<dynamic> _filterWebhooks(List<dynamic> subscriptions) {
-    // Filter to show only webhook subscriptions
     var webhooks = subscriptions.where((sub) => 
       sub.subscriptionType?.toUpperCase() == 'WEBHOOK' ||
       (sub.webhookUrl?.isNotEmpty == true && !sub.webhookUrl.contains('@'))
@@ -596,7 +591,6 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
   }
 
   void _showWebhookHistory(String subscriptionId) {
-    // Load webhook history
     context.read<NotificationCubit>().loadWebhookHistory(subscriptionId);
     
     showDialog(

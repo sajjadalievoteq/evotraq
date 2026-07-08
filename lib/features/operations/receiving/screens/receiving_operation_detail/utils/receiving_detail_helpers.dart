@@ -1,7 +1,6 @@
 ﻿import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 
-/// Receiving detail display helpers.
 class ReceivingDetailHelpers {
   ReceivingDetailHelpers._();
 

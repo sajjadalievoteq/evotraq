@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 
 export 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 
 BarcodeDetails extractBarcodeDetails(String rawBarcode) {
-  final parsed = GS1BarcodeParser.parseGS1Barcode(rawBarcode);
+  final parsed = Gs1Parser.parseBarcode(rawBarcode);
 
   final bool isValid = parsed['valid'] == true;
   final String gs1String =

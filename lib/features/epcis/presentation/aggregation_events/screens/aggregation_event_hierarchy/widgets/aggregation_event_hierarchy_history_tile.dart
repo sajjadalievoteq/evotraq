@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_hierarchy/utils/aggregation_event_hierarchy_utils.dart';
 
@@ -30,8 +31,12 @@ class AggregationEventHierarchyHistoryTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Parent: ${event.parentID}'),
-                Text('Business Step: ${event.businessStep}'),
-                Text('Disposition: ${event.disposition}'),
+                Text(
+                  'Business Step: ${CbvDisplayUtils.displayBizStep(event.businessStep)}',
+                ),
+                Text(
+                  'Disposition: ${CbvDisplayUtils.displayDisposition(event.disposition)}',
+                ),
                 const SizedBox(height: 8.0),
                 const Text(
                   'Child EPCs:',

@@ -22,7 +22,6 @@ import 'package:traqtrace_app/features/operations/shared/utils/operation_status_
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation/utils/update_status_disposition.dart';
 
-/// Builds [OperationListCard] display data from typed operation responses.
 abstract final class OperationListCardBuilders {
   static Widget shippingCard({
     required ShippingResponse operation,

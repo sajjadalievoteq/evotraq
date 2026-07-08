@@ -31,7 +31,6 @@ class _QueryParameterWidgetState extends State<QueryParameterWidget> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
       
-      // Properly handle eventTypes - ensure it's passed as a list when selected
       List<String>? eventTypes;
       if (values['eventTypes'] != null && values['eventTypes'].toString().trim().isNotEmpty) {
         eventTypes = [values['eventTypes'].toString()];

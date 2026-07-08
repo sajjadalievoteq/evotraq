@@ -10,7 +10,6 @@ import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
-/// Cache validation result storage class
 class _CachedValidationResult {
   final Map<String, dynamic> result;
   final int timestamp;
@@ -74,13 +73,10 @@ class ValidationState extends Equatable {
 class ValidationCubit extends Cubit<ValidationState> {
   final ValidationService _validationService;
 
-  // Cache for validation results to avoid redundant API calls
   final Map<String, _CachedValidationResult> _validationCache = {};
 
-  // Maximum cache size
   final int _maxCacheSize = 50;
 
-  /// Cache validity duration in milliseconds (5 minutes)
   final int _cacheDuration = 300000;
 
   double get cacheHitRate {
@@ -104,7 +100,6 @@ class ValidationCubit extends Cubit<ValidationState> {
            ),
        super(ValidationState.initial());
 
-  /// Validate an object event
   Future<bool> validateObjectEvent(ObjectEvent event) async {
     return _validateEvent(
       () => _validationService.validateObjectEventModel(event),
@@ -112,7 +107,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate an aggregation event
   Future<bool> validateAggregationEvent(AggregationEvent event) async {
     return _validateEvent(
       () => _validationService.validateAggregationEventModel(event),
@@ -120,7 +114,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a transaction event
   Future<bool> validateTransactionEvent(TransactionEvent event) async {
     return _validateEvent(
       () => _validationService.validateTransactionEventModel(event),
@@ -128,7 +121,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a transformation event
   Future<bool> validateTransformationEvent(TransformationEvent event) async {
     return _validateEvent(
       () => _validationService.validateTransformationEventModel(event),
@@ -136,7 +128,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a batch of object events
   Future<List<Map<String, dynamic>>> validateObjectEventBatch(
     List<ObjectEvent> events,
   ) async {
@@ -146,7 +137,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a batch of aggregation events
   Future<List<Map<String, dynamic>>> validateAggregationEventBatch(
     List<AggregationEvent> events,
   ) async {
@@ -156,7 +146,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a batch of transaction events
   Future<List<Map<String, dynamic>>> validateTransactionEventBatch(
     List<TransactionEvent> events,
   ) async {
@@ -166,7 +155,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Validate a batch of transformation events
   Future<List<Map<String, dynamic>>> validateTransformationEventBatch(
     List<TransformationEvent> events,
   ) async {
@@ -222,7 +210,6 @@ class ValidationCubit extends Cubit<ValidationState> {
     }
   }
 
-  /// Helper method to handle batch validation process with concurrency control
   Future<List<Map<String, dynamic>>> _validateBatch<T>(
     List<T> events,
     Future<Map<String, dynamic>> Function(T event) validateFunction, {
@@ -233,31 +220,26 @@ class ValidationCubit extends Cubit<ValidationState> {
     final results = <Map<String, dynamic>>[];
 
     try {
-      // Process events in batches to control concurrency
       for (int i = 0; i < events.length; i += concurrencyLimit) {
         final end = (i + concurrencyLimit < events.length)
             ? i + concurrencyLimit
             : events.length;
         final batch = events.sublist(i, end);
 
-        // Process current batch in parallel
         final batchResults = await Future.wait(
           batch.map((event) async {
             try {
-              // Generate cache key for this specific event
               final eventJson = event is Map
                   ? event
                   : (event as dynamic).toJson();
               final cacheKey = _generateEventCacheKey(eventJson, T.toString());
 
-              // Check cache
               final cachedResult = _getCachedResult(cacheKey);
               if (cachedResult != null) {
                 emit(state.copyWith(cacheHits: state.cacheHits + 1));
                 return cachedResult;
               }
 
-              // Perform validation and cache the result
               final result = await validateFunction(event);
               _cacheValidationResult(cacheKey, result);
               emit(state.copyWith(cacheMisses: state.cacheMisses + 1));
@@ -275,7 +257,6 @@ class ValidationCubit extends Cubit<ValidationState> {
         results.addAll(batchResults);
       }
 
-      // Set the last validation result to the summary of all results
       final lastValidationResult = {
         'valid': results.every((r) => r['valid'] == true),
         'validationErrors': results
@@ -305,30 +286,24 @@ class ValidationCubit extends Cubit<ValidationState> {
     }
   }
 
-  /// Clear validation state
   void clearValidation() {
     emit(state.copyWith(clearValidation: true, clearError: true));
   }
 
-  /// Get cached validation result if available
   Map<String, dynamic>? _getCachedResult(String cacheKey) {
     final cachedResult = _validationCache[cacheKey];
     if (cachedResult != null) {
-      // Check if result is still valid
       final now = DateTime.now().millisecondsSinceEpoch;
       if (now - cachedResult.timestamp <= _cacheDuration) {
         return cachedResult.result;
       } else {
-        // Cached result has expired
         _validationCache.remove(cacheKey);
       }
     }
     return null;
   }
 
-  /// Cache a validation result
   void _cacheValidationResult(String cacheKey, Map<String, dynamic> result) {
-    // Enforce maximum cache size by removing oldest entries if needed
     if (_validationCache.length >= _maxCacheSize) {
       final oldestKey = _validationCache.entries
           .reduce((a, b) => a.value.timestamp < b.value.timestamp ? a : b)
@@ -342,18 +317,15 @@ class ValidationCubit extends Cubit<ValidationState> {
     );
   }
 
-  /// Clear the validation cache
   void clearCache() {
     _validationCache.clear();
     emit(state.copyWith(cacheHits: 0, cacheMisses: 0));
   }
 
-  /// Generate a cache key for a specific event
   String _generateEventCacheKey(
     Map<String, dynamic> eventData,
     String eventType,
   ) {
-    // Generate a stable hash of the event data for caching
     final jsonStr = jsonEncode(eventData);
     final bytes = utf8.encode(jsonStr);
     final digest = md5.convert(bytes);

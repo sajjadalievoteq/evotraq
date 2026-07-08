@@ -7,9 +7,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// A demonstration screen for validation rule testing and field validation widget
 class ValidationRuleDemoScreen extends StatefulWidget {
-  /// Constructor
   const ValidationRuleDemoScreen({Key? key}) : super(key: key);
 
   @override
@@ -183,7 +181,6 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
               ),
             ),
             const SizedBox(height: 16),
-            // Example of ValidatedTextField
             ValidatedTextField(
               controller: _epcController,
               decoration: const InputDecoration(
@@ -205,7 +202,6 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
               validateOnBlur: _validateOnBlur,
             ),
             const SizedBox(height: 16),
-            // Example of ValidatedTextField with custom validation
             ValidatedTextField(
               controller: _businessStepController,
               decoration: const InputDecoration(
@@ -242,7 +238,6 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
               validateOnBlur: _validateOnBlur,
             ),
             const SizedBox(height: 16),
-            // Example using ValidatedFormField with a different child widget
             ValidatedFormField(
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -352,10 +347,8 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
   
   void _validateForm() {
     if (_formKey.currentState!.validate()) {
-      // Show success message
       context.showSuccess('Validation passed!');
     } else {
-      // Show error message
       context.showError(
         'Validation failed. Please check the form for errors.',
       );
@@ -371,7 +364,6 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
     _bizLocationController.clear();
     _eventTimeController.clear();
     
-    // Clear validation errors
     clearFieldErrors();
     
     context.showInfo('Form has been reset.');

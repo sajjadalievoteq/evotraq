@@ -8,7 +8,6 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shi
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
 
-/// Generic paginated list results for operation list screens.
 class OperationListResults<T> extends StatelessWidget {
   const OperationListResults({
     super.key,

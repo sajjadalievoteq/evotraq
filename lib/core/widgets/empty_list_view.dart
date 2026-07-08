@@ -9,6 +9,7 @@ class EmptyListView extends StatelessWidget {
     required this.iconAsset,
     required this.title,
     this.subtitle,
+    this.footer,
     this.hasItems = false,
     this.hasActiveFilters = false,
     this.filteredTitle = 'No results found',
@@ -22,6 +23,7 @@ class EmptyListView extends StatelessWidget {
   final String iconAsset;
   final String title;
   final String? subtitle;
+  final Widget? footer;
   final bool hasItems;
   final bool hasActiveFilters;
   final String filteredTitle;
@@ -76,6 +78,10 @@ class EmptyListView extends StatelessWidget {
                 iconAsset: primaryActionIconAsset,
                 onTap: onPrimaryAction!,
               ),
+            ],
+            if (footer != null) ...[
+              const SizedBox(height: 24),
+              footer!,
             ],
           ],
         ),

@@ -1,5 +1,3 @@
-/// Converts GS1 CBV business-step / disposition values between EPCIS 1.3 (URN)
-/// and EPCIS 2.0 (HTTPS URI) forms.
 class CbvVocabularyFormatter {
   CbvVocabularyFormatter._();
 

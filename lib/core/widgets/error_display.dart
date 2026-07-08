@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// A widget to display error messages with a retry button
 class ErrorDisplay extends StatelessWidget {
-  /// The error message to display
   final String message;
   
-  /// Optional callback function for the retry button
   final VoidCallback? onRetry;
 
-  /// Constructor
   const ErrorDisplay({
     Key? key,
     required this.message,

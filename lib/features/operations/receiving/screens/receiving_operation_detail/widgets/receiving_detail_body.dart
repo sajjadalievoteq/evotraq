@@ -14,7 +14,6 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
 
-/// Scrollable body content for Receiving operation detail.
 class ReceivingDetailBody extends StatelessWidget {
   const ReceivingDetailBody({
     super.key,

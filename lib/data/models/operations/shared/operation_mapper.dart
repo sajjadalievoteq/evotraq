@@ -13,7 +13,6 @@ import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/update_status/update_status_response_model.dart';
 
-/// Maps typed operation API responses into the unified [Operation] model.
 abstract final class OperationMapper {
   static Operation fromShipping(ShippingResponse r) => Operation(
         operationId: r.navigableOperationId,

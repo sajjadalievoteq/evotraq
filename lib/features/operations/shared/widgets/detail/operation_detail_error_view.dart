@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared error view for operation detail screens.
-/// Replaces: ShippingDetailErrorView, ReceivingDetailErrorView, etc.
 class OperationDetailErrorView extends StatelessWidget {
   const OperationDetailErrorView({
     super.key,

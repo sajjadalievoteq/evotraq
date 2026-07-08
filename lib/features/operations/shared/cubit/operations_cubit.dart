@@ -13,7 +13,6 @@ typedef OperationFetchList<T> = Future<OperationPage<T>> Function({
 
 typedef OperationFetchDetails<T> = Future<T> Function(String id);
 
-/// Shared list/detail cubit for operation screens.
 class OperationsCubit<T> extends Cubit<OperationsState<T>> {
   OperationsCubit({
     required OperationFetchList<T> fetchList,

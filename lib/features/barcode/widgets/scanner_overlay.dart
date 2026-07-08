@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Scanner overlay with dimmed background, transparent cutout, and corner accents.
 class ScannerOverlay extends StatelessWidget {
   const ScannerOverlay({
     super.key,

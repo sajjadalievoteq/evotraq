@@ -59,7 +59,6 @@ class IntegrityStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Coverage metrics
             Row(
               children: [
                 Expanded(
@@ -110,7 +109,6 @@ class IntegrityStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Integrity by event type
             const Text(
               'Integrity by Event Type',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -122,7 +120,6 @@ class IntegrityStatisticsCard extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Recent violations
             if (integrity.recentViolations.isNotEmpty) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,7 +149,6 @@ class IntegrityStatisticsCard extends StatelessWidget {
               const SizedBox(height: 16),
             ],
             
-            // Last integrity check
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

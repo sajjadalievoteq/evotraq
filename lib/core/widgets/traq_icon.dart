@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Renders a TraqTrace SVG icon from [assets/icons].
 class TraqIcon extends StatelessWidget {
   const TraqIcon(
     this.asset, {

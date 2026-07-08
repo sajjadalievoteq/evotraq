@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
@@ -9,9 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen for displaying a list of Transaction Events
 class TransactionEventsListScreen extends StatefulWidget {
-  /// Constructor
   const TransactionEventsListScreen({Key? key}) : super(key: key);
 
   @override
@@ -35,12 +34,10 @@ class _TransactionEventsListScreenState
   void initState() {
     super.initState();
 
-    // Load initial data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTransactionEvents();
     });
 
-    // Add scroll listener for pagination
     _scrollController.addListener(_scrollListener);
   }
 
@@ -56,7 +53,6 @@ class _TransactionEventsListScreenState
       final cubit = context.read<TransactionEventsCubit>();
       final currentState = cubit.state;
 
-      // Check if we can load more pages
       if (_currentPage < currentState.totalPages - 1 && !currentState.loading) {
         _currentPage++;
         _loadTransactionEvents(isLoadMore: true);
@@ -213,25 +209,19 @@ class _TransactionEventsListScreenState
   }
 
   void _navigateToEventDetails(TransactionEvent event) {
-    // Extract just the UUID part from the eventId
-    // The eventId is typically in format 'urn:epcglobal:cbv:epcis:event:UUID'
 
     print('DEBUG: Event database id: ${event.id}');
     print('DEBUG: Event unique identifier (eventId): ${event.eventId}');
 
-    // Determine which ID to use - preferring the database ID if available, otherwise extract UUID from eventId
     String idToUse;
 
     if (event.id != null && event.id!.isNotEmpty) {
-      // If we have a database ID, use it as it's most reliable
       idToUse = event.id!;
       print('DEBUG: Using database ID: $idToUse');
     } else if (event.eventId.contains(':')) {
-      // Extract just the UUID part from a URN format
       idToUse = event.eventId.split(':').last;
       print('DEBUG: Extracted UUID from eventId: $idToUse');
     } else {
-      // Use the eventId as is (might already be just the UUID)
       idToUse = event.eventId;
       print('DEBUG: Using eventId as is: $idToUse');
     }
@@ -246,7 +236,6 @@ class _TransactionEventsListScreenState
   }
 
   void _navigateToCreateEvent() {
-    // Use GoRouter for consistent navigation across the app
     context.push('/epcis/transaction-events/new').then((result) {
       if (result == true) {
         _refreshData();
@@ -254,7 +243,6 @@ class _TransactionEventsListScreenState
     });
   }
 
-  /// Show the help screen for Transaction Events
   void _showHelpScreen(BuildContext context) {
     context.push('/epcis/transaction-events/help');
   }
@@ -378,8 +366,12 @@ class _TransactionEventsListScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4.0),
-                        Text('Business Step: ${event.businessStep}'),
-                        Text('Disposition: ${event.disposition}'),
+                        Text(
+                          'Business Step: ${CbvDisplayUtils.displayBizStep(event.businessStep)}',
+                        ),
+                        Text(
+                          'Disposition: ${CbvDisplayUtils.displayDisposition(event.disposition)}',
+                        ),
                         Text(
                           'Time: ${DateFormat.yMd().add_Hms().format(event.eventTime)}',
                         ),

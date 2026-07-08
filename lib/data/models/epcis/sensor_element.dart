@@ -1,56 +1,38 @@
 import 'package:equatable/equatable.dart';
 
-/// Model class representing a sensor measurement
 class SensorMeasurement extends Equatable {
-  /// Type of measurement (temperature, humidity, etc.)
   final String type;
   
-  /// Numeric value of the measurement
   final double? value;
   
-  /// Unit of measurement (degrees C, %, etc.)
   final String? unitOfMeasure;
   
-  /// Component being measured (if applicable)
   final String? component;
   
-  /// String value (for non-numeric measurements)
   final String? stringValue;
   
-  /// Boolean value (for true/false measurements)
   final bool? booleanValue;
   
-  /// Hexadecimal binary value
   final String? hexBinaryValue;
   
-  /// URI value (for reference to external data)
   final String? uriValue;
   
-  /// Minimum value in a range
   final double? minValue;
   
-  /// Maximum value in a range
   final double? maxValue;
   
-  /// Mean value of multiple measurements
   final double? meanValue;
   
-  /// Standard deviation of measurements
   final double? standardDeviation;
   
-  /// Perception accuracy (0-100%)
   final double? perceptionAccuracy;
   
-  /// Time of the measurement
   final DateTime? measurementTime;
   
-  /// Microorganism detected (for biological sensors)
   final String? microorganism;
   
-  /// Chemistry value (for chemical sensors)
   final String? chemistryValue;
 
-  /// Creates a new SensorMeasurement instance
   const SensorMeasurement({
     required this.type,
     this.value,
@@ -70,7 +52,6 @@ class SensorMeasurement extends Equatable {
     this.chemistryValue,
   });
 
-  /// Creates a copy with the given fields replaced with new values
   SensorMeasurement copyWith({
     String? type,
     double? value,
@@ -109,17 +90,13 @@ class SensorMeasurement extends Equatable {
     );
   }
 
-  /// Convert from JSON
   factory SensorMeasurement.fromJson(Map<String, dynamic> json) {
-    // Use safe parsing for all fields
     return SensorMeasurement(
-      // Use fallback type to ensure we always have a valid type
       type: json['type'] ?? 'unknown',
       value: json['value'] != null ? double.tryParse(json['value'].toString()) : null,
       unitOfMeasure: json['unitOfMeasure'],
       component: json['component'],
       stringValue: json['stringValue'],
-      // Safely handle boolean values with various formats
       booleanValue: json['booleanValue'] != null ? 
         json['booleanValue'] is bool ? json['booleanValue'] : 
         json['booleanValue'].toString().toLowerCase() == 'true' : null,
@@ -132,7 +109,6 @@ class SensorMeasurement extends Equatable {
         double.tryParse(json['standardDeviation'].toString()) : null,
       perceptionAccuracy: json['perceptionAccuracy'] != null ? 
         double.tryParse(json['perceptionAccuracy'].toString()) : null,
-      // Use tryParse instead of parse to handle invalid date formats gracefully
       measurementTime: json['measurementTime'] != null ? 
         DateTime.tryParse(json['measurementTime'].toString()) : null,
       microorganism: json['microorganism'],
@@ -140,7 +116,6 @@ class SensorMeasurement extends Equatable {
     );
   }
 
-  /// Convert to JSON
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     
@@ -164,7 +139,6 @@ class SensorMeasurement extends Equatable {
     return data;
   }
 
-  /// Convert to Map for serialization
   Map<String, dynamic> toMap() {
     return {
       'type': type,
@@ -185,7 +159,6 @@ class SensorMeasurement extends Equatable {
     };
   }
   
-  /// Create from Map representation (from API)
   static SensorMeasurement fromMap(Map<String, dynamic> map) {
     return SensorMeasurement(
       type: map['type'],
@@ -215,36 +188,25 @@ class SensorMeasurement extends Equatable {
   ];
 }
 
-/// Model class representing a sensor element in EPCIS 2.0
 class SensorElement extends Equatable {
-  /// Unique identifier of the device
   final String? deviceId;
   
-  /// Metadata about the device
   final String? deviceMetadata;
   
-  /// Raw data from the sensor
   final String? rawData;
   
-  /// Time of the sensor reading
   final DateTime? time;
   
-  /// Start time of the sensor reading period
   final DateTime? startTime;
   
-  /// End time of the sensor reading period
   final DateTime? endTime;
   
-  /// Method used to process the data
   final String? dataProcessingMethod;
   
-  /// Business rules applied to the data
   final String? businessRules;
   
-  /// List of measurements from the sensor
   final List<SensorMeasurement> measurements;
 
-  /// Creates a new SensorElement instance
   const SensorElement({
     this.deviceId,
     this.deviceMetadata,
@@ -257,7 +219,6 @@ class SensorElement extends Equatable {
     required this.measurements,
   });
 
-  /// Creates a copy with the given fields replaced with new values
   SensorElement copyWith({
     String? deviceId,
     String? deviceMetadata,
@@ -282,11 +243,9 @@ class SensorElement extends Equatable {
     );
   }
 
-  /// Convert from JSON
   factory SensorElement.fromJson(Map<String, dynamic> json) {
     List<SensorMeasurement> measurements = [];
     
-    // Process measurements list safely
     if (json['measurements'] != null) {
       try {
         final measurementsList = json['measurements'] as List;
@@ -296,18 +255,15 @@ class SensorElement extends Equatable {
           } else if (measurement is Map) {
             return SensorMeasurement.fromJson(Map<String, dynamic>.from(measurement));
           } else {
-            // Default measurement for non-map types
             return SensorMeasurement(type: 'unknown');
           }
         }).toList();
       } catch (error) {
         print("Error processing measurements: $error");
-        // Ensure we have at least an empty list
         measurements = [];
       }
     }
 
-    // Create sensor element with safe parsing
     return SensorElement(
       deviceId: json['deviceId'],
       deviceMetadata: json['deviceMetadata'],
@@ -321,7 +277,6 @@ class SensorElement extends Equatable {
     );
   }
 
-  /// Convert to JSON
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     
@@ -339,7 +294,6 @@ class SensorElement extends Equatable {
     return data;
   }
 
-  /// Convert this object to a Map for API serialization
   Map<String, dynamic> toMap() {
     return {
       'type': 'Sensor',
@@ -351,11 +305,9 @@ class SensorElement extends Equatable {
     };
   }
   
-  /// Create a SensorElement from a Map (typically from API)
   static SensorElement fromMap(Map<String, dynamic> map) {
     List<SensorMeasurement> measurements = [];
     
-    // Process measurements list safely
     if (map['measurements'] != null) {
       try {
         final measurementsList = map['measurements'] as List;
@@ -365,18 +317,15 @@ class SensorElement extends Equatable {
           } else if (measurement is Map) {
             return SensorMeasurement.fromMap(Map<String, dynamic>.from(measurement));
           } else {
-            // Default measurement for non-map types
             return SensorMeasurement(type: 'unknown');
           }
         }).toList();
       } catch (error) {
         print("Error processing measurements from map: $error");
-        // Ensure we have at least an empty list
         measurements = [];
       }
     }
 
-    // Create sensor element from map
     return SensorElement(
       deviceId: map['deviceID'] as String?,
       deviceMetadata: map['deviceMetadata'] as String?,

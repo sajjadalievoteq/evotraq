@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:traqtrace_app/core/network/api_exception.dart';
 
-/// Formats backend [ApiErrorResponse] and related payloads for operation UIs.
 abstract final class OperationApiErrorMessage {
-  /// True when the JSON body is TraqTrace's standard error envelope (not an operation DTO).
   static bool isStructuredErrorBody(Map<String, dynamic> json) {
     final code = json['code'];
     final status = json['status'];
@@ -16,7 +14,6 @@ abstract final class OperationApiErrorMessage {
         !json.containsKey('packingOperationId');
   }
 
-  /// Builds a user-facing message from a parsed API error JSON body.
   static String? fromJsonMap(Map<String, dynamic> json) {
     final parts = <String>[];
 
@@ -54,7 +51,6 @@ abstract final class OperationApiErrorMessage {
     return parts.join('\n');
   }
 
-  /// Preferred message for an [ApiException] thrown from an operation API call.
   static String fromApiException(ApiException exception) {
     final parsed = _parseResponseBody(exception.responseBody);
     if (parsed != null) {
@@ -90,7 +86,6 @@ abstract final class OperationApiErrorMessage {
   static String unexpected(String operationName, Object error) =>
       'An unexpected error occurred while submitting $operationName: $error';
 
-  /// Cleans a single backend validation line for display.
   static String? cleanLine(String? raw) {
     if (raw == null) return null;
     var text = raw.trim();

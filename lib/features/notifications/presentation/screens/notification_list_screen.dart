@@ -27,8 +27,6 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     context.read<NotificationCubit>().loadSubscriptions();
-    // Don't automatically connect to WebSocket on init to avoid connection issues
-    // User can manually trigger connection if needed
   }
 
   @override

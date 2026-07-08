@@ -2,10 +2,6 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
-/// Unified GS1 formatting facade.
-///
-/// This API normalizes and strips identifier inputs through existing
-/// format-specific utilities.
 abstract final class Gs1Formatter {
   static String normalizeGTIN(String? raw) {
     return GtinFormat.stripGtinInput(raw);

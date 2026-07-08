@@ -1,4 +1,3 @@
-/// GS1 GLN check-digit validation (13-digit GLN).
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
 abstract final class GlnCheckDigitValidator {

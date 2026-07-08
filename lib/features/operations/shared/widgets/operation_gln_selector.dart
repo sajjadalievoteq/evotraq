@@ -4,7 +4,6 @@ import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 
-/// GLN field for operation wizards — searchable selector or read-only display.
 class OperationGlnSelector extends StatelessWidget {
   const OperationGlnSelector({
     super.key,

@@ -2,7 +2,6 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
 
-/// Filters and sorts ReturnReceiving operations for the list screen.
 class ReturnReceivingOperationListFilter {
   ReturnReceivingOperationListFilter._();
 

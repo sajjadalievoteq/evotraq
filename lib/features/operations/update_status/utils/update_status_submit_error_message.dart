@@ -1,9 +1,9 @@
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/data/models/operations/update_status/update_status_response_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
-/// User-facing error text for the create-Decommissioning flow.
 abstract final class UpdateStatusSubmitErrorMessage {
   static String epcConversionFailures(List<String> failedBarcodes) =>
       OperationApiErrorMessage.epcConversionFailures(failedBarcodes);
@@ -16,6 +16,7 @@ abstract final class UpdateStatusSubmitErrorMessage {
         ?.map(OperationApiErrorMessage.cleanLine)
         .whereType<String>()
         .where((m) => m.isNotEmpty)
+        .map((m) => OperationErrorTranslator.translate(m, fallback: m))
         .toList();
     if (messages != null && messages.isNotEmpty) {
       return messages.join('\n');

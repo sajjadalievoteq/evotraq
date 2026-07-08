@@ -4,7 +4,6 @@ import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_op
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_details_loading_widget.dart';
 
-/// Resolves which detail view to show based on loading/selection state.
 class UnpackingDetailContent extends StatelessWidget {
   const UnpackingDetailContent({
     super.key,

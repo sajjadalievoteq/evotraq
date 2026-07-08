@@ -4,12 +4,11 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
-/// Supply-chain location and container context for a GTIN class record.
 class GtinSupplyChainCard extends StatelessWidget {
   const GtinSupplyChainCard({super.key, required this.gtin});
 
@@ -97,7 +96,7 @@ class GtinSupplyChainCard extends StatelessWidget {
       }
     }
     if (type == OperationScanItemType.sgtin) {
-      final serial = EPCURIConverter.extractSerialFromEPCUri(epc);
+      final serial = Gs1Converter.epcToSerial(epc);
       if (serial != null && serial.isNotEmpty) {
         return '${Constants.gs1SgtinsRoute}/$serial';
       }

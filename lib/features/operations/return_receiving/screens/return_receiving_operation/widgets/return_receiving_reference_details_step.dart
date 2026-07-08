@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/shipment_reference_details_step.dart';
 
-/// Step 1: Return Receiving Reference and location details.
 class ReturnReceivingReferenceDetailsStep extends StatelessWidget {
   const ReturnReceivingReferenceDetailsStep({
     super.key,

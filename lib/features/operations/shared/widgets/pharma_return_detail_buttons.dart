@@ -16,7 +16,6 @@ import 'package:traqtrace_app/features/operations/shared/models/pharma_return_co
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 
-/// Receiver action to complete the GS1 accepting step after receiving.
 class AcceptGoodsButton extends StatefulWidget {
   const AcceptGoodsButton({
     super.key,
@@ -162,7 +161,6 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
   }
 }
 
-/// Receiver-only action on an accepted receiving operation.
 class InitiateReturnShippingButton extends StatefulWidget {
   const InitiateReturnShippingButton({super.key, required this.operation});
 
@@ -212,7 +210,6 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
     }
 
     if (!widget.operation.isAccepted) {
-      // Goods must be accepted before initiating a return — hide, not disable.
       setState(() => _loading = false);
       return;
     }
@@ -296,7 +293,6 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
   }
 }
 
-/// Original-shipper action when a return shipment is in transit.
 class AcceptReturnButton extends StatefulWidget {
   const AcceptReturnButton({super.key, required this.operation});
 
@@ -361,8 +357,6 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
       _loading = false;
       _eligible = contextData != null && contextData.isValid;
       _context = contextData;
-      // No disabledReason here — if no return-in-transit event exists yet,
-      // the button should stay hidden (receiver hasn't initiated the return).
     });
   }
 
@@ -408,7 +402,6 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
   }
 }
 
-/// Read-only product metadata shown on prefilled return flows.
 class PharmaReturnProductCard extends StatelessWidget {
   const PharmaReturnProductCard({
     super.key,

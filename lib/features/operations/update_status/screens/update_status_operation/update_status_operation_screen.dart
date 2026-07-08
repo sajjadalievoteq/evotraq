@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -14,7 +15,6 @@ import 'package:traqtrace_app/data/models/operations/update_status/update_status
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/operations/update_status/update_status_operation_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation/utils/update_status_disposition.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation/utils/update_status_operation_step_validator.dart';
@@ -207,7 +207,7 @@ class _UpdateStatusOperationScreenState
 
     try {
       final service = getIt<UpdateStatusOperationService>();
-      final conversionResult = EPCURIConverter.convertBatchToEPCUri(_scannedEpcs);
+      final conversionResult = Gs1Converter.barcodeBatchToEpc(_scannedEpcs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
       final failedConversions = List<String>.from(conversionResult['failed'] ?? []);
 
@@ -282,9 +282,6 @@ class _UpdateStatusOperationScreenState
     }
   }
 
-  /// Returns the reason string to submit.
-  /// For Sample and Damaged the user selects from a dropdown (_selectedReason).
-  /// For all other statuses, the free-text controller is used.
   String _resolveReason() {
     if (_selectedDisposition == UpdateStatusDisposition.sample ||
         _selectedDisposition == UpdateStatusDisposition.damaged) {

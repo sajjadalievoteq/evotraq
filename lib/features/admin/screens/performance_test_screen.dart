@@ -24,12 +24,10 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // It's safe to use context.read<AuthCubit>() here
     _testService ??= PerformanceTestService(dioService: getIt<DioService>());
   }
 
   Future<void> _runAllTests() async {
-    // Make sure service is initialized
     if (_testService == null) return;
 
     setState(() {
@@ -76,7 +74,6 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   }
 
   Future<void> _runFrontendTests() async {
-    // Make sure service is initialized
     if (_testService == null) return;
 
     setState(() {

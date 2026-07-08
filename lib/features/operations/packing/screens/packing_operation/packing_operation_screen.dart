@@ -5,8 +5,10 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
@@ -18,8 +20,6 @@ import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
-import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
-import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
@@ -31,10 +31,10 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation/opera
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_review_step.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
+import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
-/// Multi-step packing operations screen.
 class PackingOperationScreen extends StatefulWidget {
   const PackingOperationScreen({super.key});
 
@@ -55,7 +55,6 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   final _workOrderController = TextEditingController();
   final _batchNumberController = TextEditingController();
   final _productionOrderController = TextEditingController();
-  final _containerManualEntryController = TextEditingController();
 
   GLN? _packingLocationGLN;
   String? _packingLocationGLNError;
@@ -93,11 +92,10 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       }),
       parentContainerId: _parentContainerId,
       scanningMode: _containerScanningMode,
-      manualEntryController: _containerManualEntryController,
       onScanningModeChanged: (mode) =>
           setState(() => _containerScanningMode = mode),
       onContainerScanResult: _onContainerScanResult,
-      onAddManualContainer: _addManualContainer,
+      onContainerAdded: _onManualContainerAdded,
       onClearContainer: () => setState(() => _parentContainerId = null),
       eventTime: _eventTime,
       onEventTimeChanged: (dt) => setState(() => _eventTime = dt),
@@ -159,7 +157,6 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     _workOrderController.dispose();
     _batchNumberController.dispose();
     _productionOrderController.dispose();
-    _containerManualEntryController.dispose();
     super.dispose();
   }
 
@@ -226,7 +223,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     try {
       final packingService = getIt<PackingOperationService>();
       final conversionResult =
-      EPCURIConverter.convertBatchToEPCUri(_scannedEPCs);
+      Gs1Converter.barcodeBatchToEpc(_scannedEPCs);
       final epcUris = List<String>.from(conversionResult['successful'] ?? []);
       final failedConversions =
       List<String>.from(conversionResult['failed'] ?? []);
@@ -250,7 +247,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       }
 
       final containerEpc =
-          EPCURIConverter.convertToEPCUri(_parentContainerId!) ??
+          Gs1Converter.barcodeToEpc(_parentContainerId!) ??
               _parentContainerId!;
 
       _pharmaReadinessChecker ??= AggregationPharmaReadinessChecker(
@@ -312,11 +309,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           }
         }
       } else {
-        final errorMessage = response.messages?.isNotEmpty == true
-            ? response.messages!.first
-            : 'The packing operation could not be completed. Check your inputs and try again. '
-            'If the problem persists, contact your system administrator.';
-        context.showError(errorMessage);
+        context.showError(OperationErrorTranslator.translateMessages(
+          response.messages,
+          fallback:
+              'The packing operation could not be completed. Check your inputs and try again. '
+              'If the problem persists, contact your system administrator.',
+        ));
       }
     } on ApiException catch (e) {
       context.showError(e.getUserFriendlyMessage());
@@ -334,21 +332,22 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     if (!result.isValid) return;
 
     final barcode = result.data;
-    final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-    final ssccError = AggregationEventFormValidators.validateSsccInput(
-      parsed['SSCC'] ?? barcode,
-    );
-    if (ssccError != null) {
-      context.showError(
-        'That barcode is not a valid container label (SSCC). '
-            'Make sure you are scanning the outer carton or pallet label � not a product label.',
+    try {
+      final parsed = parseToEPC(barcode);
+      if (parsed.type != EPCType.sscc) {
+        context.showError(
+          'That barcode is not a valid container label (SSCC). '
+          'Make sure you are scanning the outer carton or pallet label — not a product label.',
+        );
+        return;
+      }
+      _onManualContainerAdded(parsed);
+      context.showSuccess(
+        'Container ready — SSCC: ${parsed.sscc ?? parsed.raw}',
       );
-      return;
+    } on EPCParseException catch (e) {
+      context.showError(e.message);
     }
-
-    final containerId = parsed['SSCC'] ?? barcode;
-    setState(() => _parentContainerId = containerId);
-    context.showSuccess('Container ready � SSCC: $containerId');
   }
 
   Future<void> _onItemAdded(EPCParseResult result) async {
@@ -400,31 +399,29 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         setState(() => _itemWarnings.remove(epc));
       }
     } catch (_) {
-      // Non-fatal: badge is cosmetic; backend enforces on submit.
     }
   }
 
-  void _addManualContainer() {
-    final barcode = _containerManualEntryController.text.trim();
-    if (barcode.isEmpty) {
-      context.showError('Please type or paste an SSCC before tapping Add.');
-      return;
-    }
-
-    final parsed = GS1BarcodeParser.parseGS1Barcode(barcode);
-    final ssccToValidate = parsed['SSCC'] ?? barcode;
-    final ssccError =
-    AggregationEventFormValidators.validateSsccInput(ssccToValidate);
-    if (ssccError != null) {
+  void _onManualContainerAdded(EPCParseResult result) {
+    if (result.type != EPCType.sscc) {
       context.showError(
-        'The value entered is not a valid SSCC. '
-            'An SSCC must be exactly 18 digits. Check the number and try again.',
+        'The value entered is not a valid SSCC container barcode.',
       );
       return;
     }
 
-    setState(() => _parentContainerId = parsed['SSCC'] ?? barcode);
-    _containerManualEntryController.clear();
+    final ssccToValidate = result.sscc ?? result.raw;
+    final ssccError =
+        AggregationEventFormValidators.validateSsccInput(ssccToValidate);
+    if (ssccError != null) {
+      context.showError(
+        'The value entered is not a valid SSCC. '
+        'An SSCC must be exactly 18 digits. Check the number and try again.',
+      );
+      return;
+    }
+
+    setState(() => _parentContainerId = result.sscc ?? ssccToValidate);
   }
 
   @override

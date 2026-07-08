@@ -10,7 +10,7 @@ class NotificationSubscription extends Equatable {
   final String webhookUrl;
   final String status;
   final String subscriptionType;
-  final String? notificationFormat; // Optional since backend doesn't always include it
+  final String? notificationFormat;
   @JsonKey(name: 'createdTime')
   final DateTime createdAt;
   @JsonKey(name: 'lastModifiedTime')
@@ -81,7 +81,7 @@ class NotificationSubscription extends Equatable {
 @JsonSerializable()
 class NotificationStats extends Equatable {
   @JsonKey(name: 'totalEventsMatched')
-  final int totalNotifications; // Map from backend's totalEventsMatched
+  final int totalNotifications;
   final int successfulNotifications;
   final int failedNotifications;
   final double successRate;

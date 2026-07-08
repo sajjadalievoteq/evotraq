@@ -1,8 +1,6 @@
-// A simple class to mock the Barcode class from google_mlkit_barcode_scanning
-// for use with wired barcode scanners
 import 'dart:typed_data';
 import 'dart:math';
-import 'dart:ui' show Rect; // Import Rect from UI package
+import 'dart:ui' show Rect;
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 
 class MockBarcode implements Barcode {

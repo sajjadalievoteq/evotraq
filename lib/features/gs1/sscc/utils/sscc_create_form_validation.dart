@@ -3,7 +3,6 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 
-/// Collects labelled validation messages for the SSCC create/edit form.
 abstract final class SsccCreateFormValidation {
   static List<String> collectErrors({
     required bool isCreating,
@@ -50,7 +49,6 @@ abstract final class SsccCreateFormValidation {
     return errors;
   }
 
-  /// Reads [FormField] error text after [FormState.validate] for labelled messages.
   static List<String> collectFormFieldErrors(GlobalKey<FormState> formKey) {
     final errors = <String>[];
     final formContext = formKey.currentContext;

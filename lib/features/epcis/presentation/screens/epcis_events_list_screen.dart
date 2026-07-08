@@ -7,12 +7,11 @@ import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/epcis_events_cubit.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/error_display.dart';
+import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
-/// Screen to display a list of EPCIS events with filtering and pagination
 class EPCISEventsListScreen extends StatefulWidget {
-  /// Constructor
   const EPCISEventsListScreen({Key? key}) : super(key: key);
 
   @override
@@ -29,11 +28,9 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
   @override
   void initState() {
     super.initState();
-    // Set default date range to last 30 days
     _endDate = DateTime.now();
     _startDate = _endDate!.subtract(const Duration(days: 30));
     
-    // Load events when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadEvents();
     });
@@ -69,32 +66,14 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
     if (picked != null) {
       setState(() {
         _startDate = picked.start;
-        _endDate = picked.end.add(const Duration(days: 1, seconds: -1)); // End of day
-        _currentPage = 0; // Reset to first page
+        _endDate = picked.end.add(const Duration(days: 1, seconds: -1));
+        _currentPage = 0;
       });
       _loadEvents();
     }
   }
   void _navigateToEventDetails(EPCISEvent event) {
-    // Navigate based on event type
-    // Using GoRouter navigation
     context.go('/epcis/events/${event.id}', extra: event);
-  }
-
-  String _formatBizStep(String bizStep) {
-    final raw = bizStep.contains('BizStep-')
-        ? bizStep.split('BizStep-').last
-        : bizStep.split(':').last;
-    if (raw.isEmpty) return bizStep;
-    return raw[0].toUpperCase() + raw.substring(1).replaceAll('-', ' ');
-  }
-
-  String _formatDisposition(String disposition) {
-    final raw = disposition.contains('Disp-')
-        ? disposition.split('Disp-').last
-        : disposition.split(':').last;
-    if (raw.isEmpty) return disposition;
-    return raw[0].toUpperCase() + raw.substring(1).replaceAll('-', ' ');
   }
 
   @override
@@ -160,7 +139,6 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
           
           return Column(
             children: [
-              // Date range display
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -169,7 +147,6 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                 ),
               ),
               
-              // Events list
               Expanded(
                 child: ListView.builder(
                   itemCount: events.length,
@@ -189,13 +166,13 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                             Text('Time: ${_dateFormat.format(event.eventTime)}'),
                             if (event.businessStep != null)
                               Text(
-                                'Step: ${_formatBizStep(event.businessStep!)}',
+                                'Step: ${CbvDisplayUtils.displayBizStep(event.businessStep)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             if (event.disposition != null)
                               Text(
-                                'Disp: ${_formatDisposition(event.disposition!)}',
+                                'Disp: ${CbvDisplayUtils.displayDisposition(event.disposition)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -213,7 +190,6 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
                 ),
               ),
               
-              // Pagination controls
               if (state.totalPages > 1)
                 Padding(
                   padding: const EdgeInsets.all(8.0),

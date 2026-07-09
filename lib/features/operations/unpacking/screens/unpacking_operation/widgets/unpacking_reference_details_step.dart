@@ -228,6 +228,16 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                 children: [
 
+                  Text(
+                    'Identify the parent logistic unit — SSCC (carton/pallet) '
+                    'or SGTIN (serialized product acting as container).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+
+                  const SizedBox(height: 12),
+
                   if (parentContainerId != null) ...[
 
                     OperationContainerSelectedCard(
@@ -258,7 +268,7 @@ class UnpackingReferenceDetailsStep extends StatelessWidget {
 
                       title: 'Scan Container',
 
-                      allowedFormats: const ['SSCC'],
+                      allowedFormats: const ['SSCC', 'SGTIN'],
 
                       onScanResult: onContainerScanResult,
 

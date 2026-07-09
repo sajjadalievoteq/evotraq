@@ -1,5 +1,6 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 
 class UnpackingOperationStepValidator {
@@ -18,9 +19,8 @@ class UnpackingOperationStepValidator {
     if (parentContainerId == null || parentContainerId.isEmpty) {
       return 'No container scanned yet. Scan or enter the SSCC barcode on the carton or pallet you are unpacking.';
     }
-    if (!parentContainerId.startsWith('urn:epc:id:sscc:')) {
-      return 'Container ID must be a valid SSCC EPC URI (urn:epc:id:sscc:...). '
-          'Use the scanner or enter the full 18-digit SSCC number.';
+    if (!isValidParentContainerId(parentContainerId)) {
+      return 'Container ID must be a valid SSCC or SGTIN EPC URI, or an 18-digit SSCC.';
     }
     return null;
   }

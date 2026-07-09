@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
 
 class JourneyStepMarker extends StatelessWidget {
@@ -24,7 +25,7 @@ class JourneyStepMarker extends StatelessWidget {
       onTap: onTap,
       child: AnimatedScale(
         scale: isSelected ? 1.3 : 1.0,
-        duration: const Duration(milliseconds: 200),
+        duration: JourneyAnimationConstants.stepMarkerScale,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -30,6 +30,12 @@ abstract final class CommissioningFieldValidators {
     return sgtin_validators.validateBatchLotNumber(v);
   }
 
+  static String? validateBatchLotNumberOptional(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return null;
+    return sgtin_validators.validateBatchLotNumber(v);
+  }
+
   static String? validateSerialNumberRequired(String? value) =>
       sgtin_validators.validateSerialNumber(value);
 
@@ -79,4 +85,13 @@ abstract final class CommissioningFieldValidators {
 
   static String? validateNotesOptional(String? value) =>
       _optionalText(value, fieldName: 'Notes', maxLen: 500);
+
+  static String? validateReadPointGlnOptional(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return null;
+    if (!RegExp(r'^\d{13}$').hasMatch(v)) {
+      return 'Read Point GLN must be exactly 13 digits';
+    }
+    return sgtin_validators.validateGln(v, fieldName: 'Read Point GLN');
+  }
 }

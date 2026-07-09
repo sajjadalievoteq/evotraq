@@ -62,11 +62,22 @@ class AggregationPharmaReadinessChecker {
         parentSscc = await _loadSscc(parentUri);
         if (parentSscc != null) {
           _checkSsccParent(parentSscc, packingGln, issues);
+        } else {
+          issues.add(
+            'The parent container ($parentUri) was not found in the system. '
+            'Commission or register the SSCC before using it for packing.',
+          );
         }
       } else if (type == 'sgtin') {
         parentSgtin = await _loadSgtin(parentUri);
         if (parentSgtin != null) {
           _checkSgtinParent(parentSgtin, packingGln, issues);
+        } else {
+          final serial = Gs1Converter.epcToSerial(parentUri);
+          issues.add(
+            'The parent item${serial != null ? ' (Serial: $serial)' : ''} was not found in the system. '
+            'Commission the case or bundle serial before using it as a parent container.',
+          );
         }
       }
     }

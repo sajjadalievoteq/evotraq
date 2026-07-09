@@ -30,6 +30,7 @@ import '../../data/services/barcode_generation_service.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/pharma_service.dart';
 import '../../features/operations/commissioning/cubit/commissioning_operation_cubit.dart';
+import '../../features/operations/commissioning/utils/commissioning_serial_pool_checker.dart';
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
@@ -216,11 +217,17 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => CommissioningOperationService(dioService: getIt<DioService>()),
   );
 
+  getIt.registerLazySingleton<CommissioningSerialPoolChecker>(
+    () => CommissioningSerialPoolChecker(
+      sgtinService: getIt<SGTINService>(),
+      ssccService: getIt<SSCCService>(),
+    ),
+  );
+
   getIt.registerFactory<CommissioningOperationCubit>(
     () => CommissioningOperationCubit(
       commissioningService: getIt<CommissioningOperationService>(),
       pharmaService: getIt<PharmaService>(),
-      gtinService: getIt<GTINService>(),
       pharmaceuticalService: getIt<PharmaceuticalService>(),
     ),
   );

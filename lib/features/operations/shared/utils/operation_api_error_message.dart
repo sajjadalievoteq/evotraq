@@ -95,6 +95,8 @@ abstract final class OperationApiErrorMessage {
       'Object Event validation failed: ',
       'Object Event entity validation failed: ',
       'Validation failed: ',
+      'Packing request validation failed',
+      'Packing could not be submitted. Please fix the issues below and try again.',
     ];
     for (final prefix in prefixes) {
       if (text.startsWith(prefix)) {
@@ -105,6 +107,15 @@ abstract final class OperationApiErrorMessage {
   }
 
   static List<String> _expandValidationText(String text) {
+    if (text.contains('\n• ') || text.contains('\n- ')) {
+      final lines = text
+          .split('\n')
+          .map(cleanLine)
+          .whereType<String>()
+          .where((line) => line.isNotEmpty)
+          .toList();
+      if (lines.isNotEmpty) return lines;
+    }
     if (!text.contains(', ') || text.length <= 120) {
       final cleaned = cleanLine(text);
       return cleaned == null ? const [] : [cleaned];
@@ -138,6 +149,7 @@ abstract final class OperationApiErrorMessage {
   static bool _isGenericServiceFallback(String message) {
     return message == 'Failed to create shipping operation' ||
         message == 'Failed to create receiving operation' ||
+        message == 'Failed to create packing operation' ||
         message.startsWith('Network error while');
   }
 }

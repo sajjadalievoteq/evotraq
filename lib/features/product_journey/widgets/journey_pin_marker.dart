@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_formatters.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
 
@@ -38,7 +39,7 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
     super.initState();
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: JourneyAnimationConstants.pinSelectedPulse,
     );
     if (widget.isSelected) _pulseCtrl.repeat(reverse: true);
   }
@@ -77,7 +78,7 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
         children: [
           AnimatedScale(
             scale: widget.isSelected ? 1.18 : 1.0,
-            duration: const Duration(milliseconds: 220),
+            duration: JourneyAnimationConstants.pinSelectedScale,
             curve: Curves.easeOutBack,
             alignment: Alignment.bottomCenter,
             child: SizedBox(

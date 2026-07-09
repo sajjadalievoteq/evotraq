@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class CommissioningProductSummaryBanner extends StatelessWidget {
   const CommissioningProductSummaryBanner({
     super.key,
-    required this.selectedGTIN,
-    required this.gtinController,
+    required this.identifiedType,
+    required this.primaryParsed,
     required this.batchLotController,
   });
 
-  final GTIN? selectedGTIN;
-  final TextEditingController gtinController;
+  final EPCType? identifiedType;
+  final EPCParseResult? primaryParsed;
   final TextEditingController batchLotController;
 
   @override
   Widget build(BuildContext context) {
+    final typeLabel = identifiedType?.name.toUpperCase() ?? 'EPC';
+    final detail = switch (identifiedType) {
+      EPCType.sgtin =>
+        'GTIN: ${primaryParsed?.gtin ?? '—'} · Batch: ${batchLotController.text}',
+      EPCType.sscc => 'SSCC: ${primaryParsed?.sscc ?? '—'}',
+      _ => primaryParsed?.epc ?? 'Identify an EPC in step 1',
+    };
+
     return Card(
       color: Theme.of(context).primaryColor,
       child: Padding(
@@ -30,14 +38,14 @@ class CommissioningProductSummaryBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'GTIN: ${selectedGTIN?.gtinCode ?? gtinController.text}',
+                    typeLabel,
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall
                         ?.copyWith(color: Colors.white),
                   ),
                   Text(
-                    'Batch: ${batchLotController.text}',
+                    detail,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,

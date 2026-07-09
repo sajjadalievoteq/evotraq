@@ -24,14 +24,16 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/utils/packing_operation_step_validator.dart';
+import 'package:traqtrace_app/features/operations/packing/utils/packing_step_validation_messages.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_items_step_content.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_mobile_layout.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_reference_details_step.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation/widgets/packing_review_step.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
-import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
+import 'package:traqtrace_app/features/operations/packing/utils/packing_submit_error_message.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
@@ -230,18 +232,14 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
 
       if (failedConversions.isNotEmpty) {
         context.showError(
-          '${failedConversions.length} item(s) could not be processed � their barcodes are not in a valid GS1 format. '
-              'Remove them from the list, check the labels, and re-scan:\n${failedConversions.join('\n')}',
+          PackingSubmitErrorMessage.epcConversionFailures(failedConversions),
         );
         setState(() => _isLoading = false);
         return;
       }
 
       if (epcUris.isEmpty) {
-        context.showError(
-          'None of the scanned items could be converted to valid EPCs. '
-              'Remove all items and re-scan using product labels that include a GTIN and serial number.',
-        );
+        context.showError(PackingSubmitErrorMessage.emptyEpcList());
         setState(() => _isLoading = false);
         return;
       }
@@ -293,7 +291,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       if (response.isSuccessOrPartial) {
         if (response.status == OperationStatus.partialSuccess) {
           context.showSuccess(
-            'Packing submitted with warnings � some items were not processed. '
+            'Packing submitted with warnings — some items were not processed. '
                 'Open the operation record to see which items need attention.',
           );
         } else {
@@ -309,20 +307,12 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           }
         }
       } else {
-        context.showError(OperationErrorTranslator.translateMessages(
-          response.messages,
-          fallback:
-              'The packing operation could not be completed. Check your inputs and try again. '
-              'If the problem persists, contact your system administrator.',
-        ));
+        context.showError(PackingSubmitErrorMessage.fromResponse(response));
       }
     } on ApiException catch (e) {
-      context.showError(e.getUserFriendlyMessage());
+      context.showError(PackingSubmitErrorMessage.fromApiException(e));
     } catch (e) {
-      context.showError(
-        'An unexpected error occurred while submitting the packing operation. '
-            'Please try again. If the problem continues, contact support.',
-      );
+      context.showError(PackingSubmitErrorMessage.unexpected(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -334,17 +324,15 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     final barcode = result.data;
     try {
       final parsed = parseToEPC(barcode);
-      if (parsed.type != EPCType.sscc) {
-        context.showError(
-          'That barcode is not a valid container label (SSCC). '
-          'Make sure you are scanning the outer carton or pallet label — not a product label.',
-        );
+      if (parsed.type != EPCType.sscc && parsed.type != EPCType.sgtin) {
+        context.showError(PackingStepValidationMessages.invalidParentType);
         return;
       }
       _onManualContainerAdded(parsed);
-      context.showSuccess(
-        'Container ready — SSCC: ${parsed.sscc ?? parsed.raw}',
-      );
+      final label = parsed.type == EPCType.sscc
+          ? 'SSCC: ${parsed.sscc ?? parsed.raw}'
+          : 'SGTIN: ${parsed.epc}';
+      context.showSuccess('Container ready — $label');
     } on EPCParseException catch (e) {
       context.showError(e.message);
     }
@@ -364,7 +352,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     if (!outcome.success) {
       context.showError(
         outcome.errorMessage ??
-            'This item is not valid for packing. Use SGTIN or SSCC only.',
+            PackingStepValidationMessages.itemAddFallback,
       );
       return false;
     }
@@ -372,10 +360,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     final epcError =
         AggregationEventFormValidators.validateChildEpcEntry(outcome.rawBarcode);
     if (epcError != null) {
-      context.showError(
-        'This barcode is not a valid child EPC. '
-        'Scan a product serial (SGTIN), lot-based GTIN, or nested SSCC label.',
-      );
+      context.showError(PackingStepValidationMessages.invalidItemEpc);
       return false;
     }
 
@@ -403,25 +388,15 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   }
 
   void _onManualContainerAdded(EPCParseResult result) {
-    if (result.type != EPCType.sscc) {
-      context.showError(
-        'The value entered is not a valid SSCC container barcode.',
-      );
+    final validationError = validateParentContainerEpc(result);
+    if (validationError != null) {
+      context.showError(validationError);
       return;
     }
 
-    final ssccToValidate = result.sscc ?? result.raw;
-    final ssccError =
-        AggregationEventFormValidators.validateSsccInput(ssccToValidate);
-    if (ssccError != null) {
-      context.showError(
-        'The value entered is not a valid SSCC. '
-        'An SSCC must be exactly 18 digits. Check the number and try again.',
-      );
-      return;
-    }
-
-    setState(() => _parentContainerId = result.sscc ?? ssccToValidate);
+    setState(
+      () => _parentContainerId = parentContainerIdFromParsed(result),
+    );
   }
 
   @override

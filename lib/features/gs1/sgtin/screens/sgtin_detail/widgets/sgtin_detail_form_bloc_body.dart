@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
@@ -23,13 +22,11 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
     required this.regulatoryMarketController,
     required this.regulatoryStatusController,
     required this.selectedGtin,
-    required this.selectedLocation,
     required this.selectedStatus,
     required this.expiryDate,
     required this.productionDate,
     required this.bestBeforeDate,
     required this.onGtinChanged,
-    required this.onLocationChanged,
     required this.onStatusChanged,
     required this.onTransitionError,
     required this.onPickExpiry,
@@ -56,14 +53,12 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
   final TextEditingController regulatoryStatusController;
 
   final gtin_model.GTIN? selectedGtin;
-  final GLN? selectedLocation;
   final ItemStatus? selectedStatus;
   final DateTime? expiryDate;
   final DateTime? productionDate;
   final DateTime? bestBeforeDate;
 
   final ValueChanged<gtin_model.GTIN?> onGtinChanged;
-  final ValueChanged<GLN?> onLocationChanged;
   final ValueChanged<ItemStatus> onStatusChanged;
   final ValueChanged<String> onTransitionError;
   final VoidCallback onPickExpiry;
@@ -101,13 +96,11 @@ class SgtinDetailFormBlocBody extends StatelessWidget {
           regulatoryMarketController: regulatoryMarketController,
           regulatoryStatusController: regulatoryStatusController,
           selectedGtin: selectedGtin,
-          selectedLocation: selectedLocation,
           selectedStatus: selectedStatus,
           expiryDate: expiryDate,
           productionDate: productionDate,
           bestBeforeDate: bestBeforeDate,
           onGtinChanged: onGtinChanged,
-          onLocationChanged: onLocationChanged,
           onStatusChanged: onStatusChanged,
           onTransitionError: onTransitionError,
           onPickExpiry: onPickExpiry,

@@ -23,6 +23,9 @@ class OperationItemScanStep extends StatelessWidget {
     this.showPageHeader = true,
     this.showScanInput = true,
     this.itemWarnings = const {},
+    this.onParseFallback,
+    this.betweenScanAndList,
+    this.itemProductNames = const {},
   });
 
   final List<String> scannedEpcs;
@@ -40,6 +43,9 @@ class OperationItemScanStep extends StatelessWidget {
   final bool showPageHeader;
   final bool showScanInput;
   final Map<String, String> itemWarnings;
+  final Future<EPCParseResult?> Function(String input)? onParseFallback;
+  final Widget? betweenScanAndList;
+  final Map<String, String> itemProductNames;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +60,7 @@ class OperationItemScanStep extends StatelessWidget {
         placeholder: 'Enter SGTIN or SSCC barcode',
         allowedTypes: allowedTypes ??
             const [EPCType.sgtin, EPCType.sscc],
+        onParseFallback: onParseFallback,
         onItemAdded: onItemAdded,
       ),
     );
@@ -66,11 +73,12 @@ class OperationItemScanStep extends StatelessWidget {
       queuedLabel: scannedQueuedLabel,
       hierarchyScreenTitle: hierarchyScreenTitle,
       itemWarnings: itemWarnings,
+      itemProductNames: itemProductNames,
     );
 
     if (!fillHeight) {
       return SingleChildScrollView(
-        padding: context.horizontalPadding,
+        padding: EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,6 +99,10 @@ class OperationItemScanStep extends StatelessWidget {
             ],
             if (showScanInput) scanInput,
             if (showScanInput) const SizedBox(height: 16),
+            if (betweenScanAndList != null) ...[
+              betweenScanAndList!,
+              const SizedBox(height: 16),
+            ],
             itemsList,
           ],
         ),
@@ -104,6 +116,9 @@ class OperationItemScanStep extends StatelessWidget {
         children: [
           if (showScanInput) scanInput,
           if (showScanInput) const SizedBox(height: 16),
+          if (betweenScanAndList != null) ...[
+            betweenScanAndList!,
+          ],
           Expanded(child: itemsList),
         ],
       ),

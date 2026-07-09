@@ -543,11 +543,24 @@ abstract final class OperationListCardBuilders {
             operation: operation,
             isSelected: isSelected,
             onTap: onTap,
-            defaultTitle: 'Return Receiving Operation',
+            defaultTitle: operation.epcList?.isNotEmpty == true
+                ? 'Return Receiving: ${operation.epcList!.first}'
+                : 'Return Receiving Operation',
             countSuffix: 'EPCs',
             fromLabel: operation.sourceGLN,
             toLabel: operation.receivingGLN,
             toPrefix: 'Return Receiving: ',
+            extraRows: operation.epcList?.isNotEmpty == true
+                ? [
+                    OperationListCardRow(
+                      text: operation.epcList!.first,
+                      iconAsset: AppAssets.iconPackage,
+                      iconColor: Colors.blueGrey,
+                      maxLines: 2,
+                      fontSize: 12,
+                    ),
+                  ]
+                : const [],
           ),
       OperationType.cancelShipping => _cancelCardFromOperation(
             operation: operation,
@@ -598,6 +611,7 @@ abstract final class OperationListCardBuilders {
     String? fromLabel,
     String? toLabel,
     String toPrefix = 'To: ',
+    List<OperationListCardRow> extraRows = const [],
   }) {
     final status = operation.status ?? OperationStatus.failed;
     final rows = <OperationListCardRow>[
@@ -617,6 +631,7 @@ abstract final class OperationListCardBuilders {
     final carrierTracking =
         _carrierTrackingRow(operation.carrier, operation.trackingNumber);
     if (carrierTracking != null) rows.add(carrierTracking);
+    if (extraRows.isNotEmpty) rows.addAll(extraRows);
 
     return OperationListCard(
       isSelected: isSelected,

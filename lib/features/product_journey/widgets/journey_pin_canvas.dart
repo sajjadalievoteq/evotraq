@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_formatters.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_pin_layout.dart';
@@ -32,16 +33,12 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
   final ScrollController _scrollController = ScrollController();
 
   // Shared entrance controller — drives both line draw and pin stagger.
-  // Total duration 900ms: line draws in 0→540ms, pins stagger from 250ms→900ms.
+  // See [JourneyAnimationConstants] for duration and stagger tuning.
   late final AnimationController _entranceCtrl;
   late final Animation<double> _lineProgress;
 
   // Tracks the journey identity so we restart the animation when a new journey loads.
   String? _lastJourneyId;
-
-  // Whether the entrance animation has been scheduled for the current journey.
-  // Prevents didUpdateWidget from restarting mid-play on unrelated rebuilds.
-  bool _entranceScheduled = false;
 
   static const double _pinR = JourneyPinLayout.pinRadius;
   static const double _pinW = JourneyPinLayout.pinWidth;
@@ -58,12 +55,15 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     super.initState();
     _entranceCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: JourneyAnimationConstants.canvasEntrance,
     );
-    // Line draws across the first 60% of the total duration.
     _lineProgress = CurvedAnimation(
       parent: _entranceCtrl,
-      curve: const Interval(0.0, 0.60, curve: Curves.easeInOut),
+      curve: Interval(
+        JourneyAnimationConstants.lineProgressStart,
+        JourneyAnimationConstants.lineProgressEnd,
+        curve: Curves.easeInOut,
+      ),
     );
     // Record the current journey so didUpdateWidget can detect a real journey change.
     _lastJourneyId = widget.journey.steps.isEmpty
@@ -75,7 +75,6 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _entranceCtrl.forward(from: 0.0);
-      _entranceScheduled = true;
     });
   }
 
@@ -88,11 +87,9 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     // Only restart when the journey itself changed — not on every BlocBuilder rebuild.
     if (newId != _lastJourneyId) {
       _lastJourneyId = newId;
-      _entranceScheduled = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _entranceCtrl.forward(from: 0.0);
-        _entranceScheduled = true;
       });
     }
   }
@@ -149,7 +146,7 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
               ),
             ),
             for (int i = 0; i < steps.length - 1; i++) ...[
-              if (_durationBetween(steps, i).inMinutes > 0)
+              if (_durationBetween(steps, i).inSeconds > 0)
                 Builder(builder: (context) {
                   final anchor = JourneyPinLayout.durationLabelAnchor(
                     centres[i],
@@ -164,7 +161,7 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
                       index: i,
                       totalCount: steps.length,
                       entranceCtrl: _entranceCtrl,
-                      startOffset: 0.38,
+                      startOffset: JourneyAnimationConstants.durationChipStaggerStartOffset,
                       dimmed: false,
                       child: _DurationChip(
                         label: JourneyFormatters.humanDuration(
@@ -267,7 +264,7 @@ class _AnimatedPin extends StatefulWidget {
     required this.entranceCtrl,
     required this.dimmed,
     required this.child,
-    this.startOffset = 0.28,
+    this.startOffset = JourneyAnimationConstants.pinStaggerStartOffset,
   });
 
   final int index;
@@ -297,7 +294,7 @@ class _AnimatedPinState extends State<_AnimatedPin>
 
     _filterBounceCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
+      duration: JourneyAnimationConstants.pinFilterBounce,
     )..value = 1.0; // start at rest — no bounce on initial load
 
     _filterBounceScale = CurvedAnimation(
@@ -326,8 +323,10 @@ class _AnimatedPinState extends State<_AnimatedPin>
     final available = 1.0 - widget.startOffset;
     final step =
         widget.totalCount > 1 ? available / widget.totalCount : available;
-    final start = (widget.startOffset + widget.index * step).clamp(0.0, 0.95);
-    final end = (start + 0.45).clamp(start + 0.01, 1.0);
+    final start = (widget.startOffset + widget.index * step)
+        .clamp(0.0, JourneyAnimationConstants.pinStaggerMaxStart);
+    final end = (start + JourneyAnimationConstants.pinStaggerWindow)
+        .clamp(start + 0.01, 1.0);
 
     return CurvedAnimation(
       parent: widget.entranceCtrl,
@@ -351,7 +350,7 @@ class _AnimatedPinState extends State<_AnimatedPin>
         alignment: Alignment.bottomCenter,
         child: AnimatedOpacity(
           opacity: widget.dimmed ? 0.22 : 1.0,
-          duration: const Duration(milliseconds: 260),
+          duration: JourneyAnimationConstants.pinFilterDim,
           curve: Curves.easeInOut,
           // Scale bounce wraps only the content — entrance ScaleTransition above
           // handles initial layout; this one plays independently on filter change.

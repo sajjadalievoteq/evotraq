@@ -39,71 +39,12 @@ class CommissioningOperationService {
           DateTime.now().difference(startTime).inMilliseconds;
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = decodeApiResponseMap(response.data);
-
-        final rawItems = data['itemResults'] as List<dynamic>? ?? [];
-        final itemResults = rawItems.map((item) {
-          final m = item as Map<String, dynamic>;
-          return CommissioningItemResult(
-            serialNumber: m['serialNumber'] as String? ?? '',
-            sgtinId: m['sgtinId']?.toString(),
-            epcUri: m['epcUri'] as String?,
-            success: m['success'] as bool? ?? false,
-            errorMessage: m['errorMessage'] as String?,
-          );
-        }).toList();
-
-        final epcisEventId = data['epcisEventId'] as String?;
-
-        CommissioningStatus status;
-        final rawStatus = data['status'] as String?;
-        switch (rawStatus) {
-          case 'SUCCESS':
-            status = CommissioningStatus.success;
-          case 'PARTIAL_SUCCESS':
-            status = CommissioningStatus.partialSuccess;
-          case 'FAILED':
-            status = CommissioningStatus.failed;
-          default:
-            status = CommissioningStatus.partialSuccess;
-        }
-
-        debugPrint(
-          'CommissioningService: Bulk commissioning complete — '
-          'event=$epcisEventId status=$rawStatus '
-          'commissioned=${data['totalCommissioned']} '
-          'failed=${data['totalFailed']}',
-        );
-
-        return CommissioningResponse(
-          commissioningOperationId:
-              data['batchId'] as String? ?? operationId,
-          commissioningReference:
-              data['commissioningReference'] as String?,
-          eventIds:
-              epcisEventId != null ? [epcisEventId] : const [],
-          createdSgtinIds: (data['commissionedEpcs'] as List<dynamic>? ?? [])
-              .map((e) => e.toString())
-              .toList(),
-          commissionedCount: data['totalCommissioned'] as int? ?? 0,
-          failedCount: data['totalFailed'] as int? ?? 0,
-          status: status,
-          processedAt: DateTime.now(),
-          gtinCode: data['gtinCode'] as String?,
-          batchLotNumber: data['batchLotNumber'] as String?,
-          commissioningLocationGLN:
-              data['commissioningLocationGLN'] as String?,
-          messages: (data['messages'] as List<dynamic>?)
-                  ?.map((e) => e.toString())
-                  .toList() ??
-              const [],
-          itemResults: itemResults,
+        return _parseBulkCommissioningResponse(
+          response.data,
+          operationId: operationId,
+          commissioningReference: request.commissioningReference,
+          totalItems: request.serialNumbers.length,
           processingTimeMs: processingTimeMs,
-          metadata: {
-            'batch_id': data['batchId'],
-            'epcis_event_id': epcisEventId,
-            'total_items': request.serialNumbers.length,
-          },
         );
       } else {
         String errorMsg;
@@ -121,6 +62,8 @@ class CommissioningOperationService {
           responseBody: response.data is String ? response.data as String : null,
         );
       }
+    } on ApiException {
+      rethrow;
     } catch (e) {
       debugPrint(
         'CommissioningService: Critical error during commissioning: $e',
@@ -136,6 +79,145 @@ class CommissioningOperationService {
         itemResults: const [],
       );
     }
+  }
+
+  Future<CommissioningResponse> createSsccCommissioningOperation(
+    SsccCommissioningRequest request,
+  ) async {
+    final startTime = DateTime.now();
+    final operationId = 'sscc_comm_${DateTime.now().millisecondsSinceEpoch}';
+
+    debugPrint(
+      'CommissioningService: Starting SSCC commissioning for ${request.epcUris.length} EPC(s)',
+    );
+
+    try {
+      final response = await _dioService.post(
+        '$_baseUrl/commissioning/sscc',
+        headers: _headers,
+        data: jsonEncode(request.toJson()),
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      final processingTimeMs =
+          DateTime.now().difference(startTime).inMilliseconds;
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return _parseBulkCommissioningResponse(
+          response.data,
+          operationId: operationId,
+          commissioningReference: request.commissioningReference,
+          totalItems: request.epcUris.length,
+          processingTimeMs: processingTimeMs,
+        );
+      } else {
+        String errorMsg;
+        try {
+          final errorData = decodeApiResponseMap(response.data);
+          errorMsg = errorData['message'] as String? ??
+              errorData['error'] as String? ??
+              'SSCC commissioning failed (HTTP ${response.statusCode})';
+        } catch (_) {
+          errorMsg =
+              'SSCC commissioning failed (HTTP ${response.statusCode})';
+        }
+        throw ApiException(
+          message: errorMsg,
+          statusCode: response.statusCode,
+          responseBody: response.data is String ? response.data as String : null,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      debugPrint(
+        'CommissioningService: Critical error during SSCC commissioning: $e',
+      );
+      return CommissioningResponse(
+        commissioningOperationId: operationId,
+        commissioningReference: request.commissioningReference,
+        status: CommissioningStatus.failed,
+        processedAt: DateTime.now(),
+        messages: ['SSCC commissioning failed: $e'],
+        commissionedCount: 0,
+        failedCount: request.epcUris.length,
+        itemResults: const [],
+      );
+    }
+  }
+
+  CommissioningResponse _parseBulkCommissioningResponse(
+    dynamic responseData, {
+    required String operationId,
+    String? commissioningReference,
+    required int totalItems,
+    required int processingTimeMs,
+  }) {
+    final data = decodeApiResponseMap(responseData);
+
+    final rawItems = data['itemResults'] as List<dynamic>? ?? [];
+    final itemResults = rawItems.map((item) {
+      final m = item as Map<String, dynamic>;
+      return CommissioningItemResult(
+        serialNumber: m['serialNumber'] as String? ?? '',
+        sgtinId: m['sgtinId']?.toString(),
+        epcUri: m['epcUri'] as String?,
+        success: m['success'] as bool? ?? false,
+        errorMessage: m['errorMessage'] as String?,
+        outcome: m['outcome'] as String?,
+      );
+    }).toList();
+
+    final epcisEventId = data['epcisEventId'] as String?;
+
+    CommissioningStatus status;
+    final rawStatus = data['status'] as String?;
+    switch (rawStatus) {
+      case 'SUCCESS':
+        status = CommissioningStatus.success;
+      case 'PARTIAL_SUCCESS':
+        status = CommissioningStatus.partialSuccess;
+      case 'FAILED':
+        status = CommissioningStatus.failed;
+      default:
+        status = CommissioningStatus.partialSuccess;
+    }
+
+    debugPrint(
+      'CommissioningService: Commissioning complete — '
+      'event=$epcisEventId status=$rawStatus '
+      'commissioned=${data['totalCommissioned']} '
+      'failed=${data['totalFailed']}',
+    );
+
+    return CommissioningResponse(
+      commissioningOperationId: data['batchId'] as String? ?? operationId,
+      commissioningReference:
+          data['commissioningReference'] as String? ?? commissioningReference,
+      eventIds: epcisEventId != null ? [epcisEventId] : const [],
+      createdSgtinIds: (data['commissionedEpcs'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      commissionedCount: data['totalCommissioned'] as int? ?? 0,
+      failedCount: data['totalFailed'] as int? ?? 0,
+      status: status,
+      processedAt: DateTime.now(),
+      gtinCode: data['gtinCode'] as String?,
+      batchLotNumber: data['batchLotNumber'] as String?,
+      commissioningLocationGLN: data['commissioningLocationGLN'] as String?,
+      messages: (data['messages'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      itemResults: itemResults,
+      processingTimeMs: processingTimeMs,
+      metadata: {
+        'batch_id': data['batchId'],
+        'epcis_event_id': epcisEventId,
+        'total_items': totalItems,
+      },
+    );
   }
 
   Future<({List<CommissioningBatch> batches, bool isLast})> listBatches({

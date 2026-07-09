@@ -14,6 +14,7 @@ class OperationScannedItemsList extends StatelessWidget {
     required this.queuedLabel,
     required this.hierarchyScreenTitle,
     this.itemWarnings = const {},
+    this.itemProductNames = const {},
   });
 
   final List<String> scannedEpcs;
@@ -23,6 +24,7 @@ class OperationScannedItemsList extends StatelessWidget {
   final String queuedLabel;
   final String hierarchyScreenTitle;
   final Map<String, String> itemWarnings;
+  final Map<String, String> itemProductNames;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +93,10 @@ class OperationScannedItemsList extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        OperationEpcProductSubtitle(epc: epc),
+                        OperationEpcProductSubtitle(
+                          epc: epc,
+                          productName: itemProductNames[epc],
+                        ),
                         if (warning != null)
                           Container(
                             margin: const EdgeInsets.only(top: 6),

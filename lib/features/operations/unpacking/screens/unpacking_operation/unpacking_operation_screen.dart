@@ -25,6 +25,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_container_contents_loader.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/utils/unpacking_operation_step_validator.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation/widgets/unpacking_item_scan_step.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_desktop_layout.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_items_step_content.dart';
@@ -342,17 +343,17 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
 
     try {
       final parsed = parseToEPC(result.data);
-      if (parsed.type != EPCType.sscc) {
+      if (parsed.type != EPCType.sscc && parsed.type != EPCType.sgtin) {
         context.showError(
-          'That barcode is not a valid container label (SSCC). '
-          'Make sure you are scanning the outer carton or pallet label — not a product label.',
+          'Parent container must be an SSCC (carton/pallet) or SGTIN (product serial).',
         );
         return;
       }
       _onManualContainerAdded(parsed);
-      context.showSuccess(
-        'Container ready — SSCC: ${parsed.sscc ?? parsed.raw}',
-      );
+      final label = parsed.type == EPCType.sscc
+          ? 'SSCC: ${parsed.sscc ?? parsed.raw}'
+          : 'SGTIN: ${parsed.epc}';
+      context.showSuccess('Container ready — $label');
     } on EPCParseException catch (e) {
       context.showError(e.message);
     }
@@ -437,25 +438,15 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
   }
 
   void _onManualContainerAdded(EPCParseResult result) {
-    if (result.type != EPCType.sscc) {
-      context.showError(
-        'The value entered is not a valid SSCC container barcode.',
-      );
+    final validationError = validateParentContainerEpc(result);
+    if (validationError != null) {
+      context.showError(validationError);
       return;
     }
 
-    final ssccToValidate = result.sscc ?? result.raw;
-    final ssccError =
-        AggregationEventFormValidators.validateSsccInput(ssccToValidate);
-    if (ssccError != null) {
-      context.showError(
-        'The value entered is not a valid SSCC. '
-        'An SSCC must be exactly 18 digits. Check the number and try again.',
-      );
-      return;
-    }
-
-    setState(() => _parentContainerId = result.sscc ?? ssccToValidate);
+    setState(
+      () => _parentContainerId = parentContainerIdFromParsed(result),
+    );
     _loadContainerContents();
   }
 

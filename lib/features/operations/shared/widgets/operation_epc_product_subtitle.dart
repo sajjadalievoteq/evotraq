@@ -6,11 +6,27 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 
 class OperationEpcProductSubtitle extends StatelessWidget {
-  const OperationEpcProductSubtitle({super.key, required this.epc});
+  const OperationEpcProductSubtitle({
+    super.key,
+    required this.epc,
+    this.productName,
+  });
 
   final String epc;
+  final String? productName;
 
-  static Future<String?> resolveProductName(String epc) async {
+  /// Session-scoped memoization keyed by EPC. Caching the *Future* both
+  /// deduplicates concurrent lookups (in-flight guard) and prevents re-fetching
+  /// on every rebuild — the FutureBuilder below gets the same completed future
+  /// for a given EPC instead of issuing fresh /sgtins/serial + /gtins/code calls
+  /// each time the (always-mounted, on desktop) items panel rebuilds.
+  static final Map<String, Future<String?>> _resolveCache = {};
+
+  static Future<String?> resolveProductName(String epc) {
+    return _resolveCache.putIfAbsent(epc, () => _resolveProductNameUncached(epc));
+  }
+
+  static Future<String?> _resolveProductNameUncached(String epc) async {
     final type = OperationEpcScanValidator.resolveEpcType(epc);
     final gtinService = getIt<GTINService>();
 
@@ -109,21 +125,28 @@ class OperationEpcProductSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (productName != null) {
+      return _productNameText(productName);
+    }
+
     return FutureBuilder<String?>(
       future: resolveProductName(epc),
       builder: (context, snapshot) {
-        final name = snapshot.data;
-        if (name == null || name.trim().isEmpty) return const SizedBox.shrink();
-        return Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            name,
-            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
+        return _productNameText(snapshot.data);
       },
+    );
+  }
+
+  Widget _productNameText(String? name) {
+    if (name == null || name.trim().isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        name,
+        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

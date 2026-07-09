@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_batch.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
-import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/pharma_service.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_batch_lookup_status.dart';
@@ -17,17 +15,14 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
   CommissioningOperationCubit({
     required CommissioningOperationService commissioningService,
     required PharmaService pharmaService,
-    required GTINService gtinService,
     required PharmaceuticalService pharmaceuticalService,
   })  : _service = commissioningService,
         _pharmaService = pharmaService,
-        _gtinService = gtinService,
         _pharmaceuticalService = pharmaceuticalService,
         super(const CommissioningOperationState());
 
   final CommissioningOperationService _service;
   final PharmaService _pharmaService;
-  final GTINService _gtinService;
   final PharmaceuticalService _pharmaceuticalService;
 
   Timer? _batchLookupDebounce;
@@ -60,7 +55,9 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
     emit(state.copyWith(clearBatchState: true));
   }
 
-  Future<void> onPharmaGtinSelected(GTIN? gtin) async {
+  /// Resolves pharma batch context from GTIN code (no master-data GTIN fetch).
+  /// Returns true when a pharmaceutical extension exists for batch lookup.
+  Future<bool> onPharmaGtinIdentified(String gtinCode) async {
     _cancelBatchLookupDebounce();
     _lookupGeneration++;
     emit(
@@ -69,28 +66,21 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
         batchLookupStatus: CommissioningBatchLookupStatus.idle,
       ),
     );
-    if (gtin == null || !gtin.isPharmaceuticalProduct) return;
 
-    final dbId = await _resolveGtinDbId(gtin);
-    if (isClosed) return;
-    if (dbId == null) {
-      emit(
-        state.copyWith(
-          batchLookupStatus: CommissioningBatchLookupStatus.error,
-          batchLookupError:
-              'Could not resolve GTIN database id for batch lookup.',
-        ),
-      );
-      return;
-    }
+    final dbId = await _resolveGtinDbId(gtinCode);
+    if (isClosed) return false;
+    if (dbId == null) return false;
+
     emit(state.copyWith(gtinDbId: dbId));
+    return true;
   }
 
   void onBatchLotInputChanged({
-    required GTIN? gtin,
+    required String? gtinCode,
+    required bool isPharmaGtin,
     required String batchLot,
   }) {
-    if (gtin == null || !gtin.isPharmaceuticalProduct) return;
+    if (!isPharmaGtin || gtinCode == null) return;
     final trimmed = batchLot.trim();
     if (trimmed.isEmpty) {
       _cancelBatchLookupDebounce();
@@ -112,11 +102,11 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
 
     _cancelBatchLookupDebounce();
     _batchLookupDebounce = Timer(_batchLookupDebounceDuration, () {
-      if (!_needsBatchLookup(gtin.gtinCode, trimmed)) return;
+      if (!_needsBatchLookup(gtinCode, trimmed)) return;
       unawaited(
         lookupBatch(
           gtinDbId: dbId,
-          gtinCode: gtin.gtinCode,
+          gtinCode: gtinCode,
           batchLot: trimmed,
         ),
       );
@@ -124,20 +114,21 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
   }
 
   void triggerBatchLookupNow({
-    required GTIN? gtin,
+    required String? gtinCode,
+    required bool isPharmaGtin,
     required String batchLot,
   }) {
     _cancelBatchLookupDebounce();
-    if (gtin == null || !gtin.isPharmaceuticalProduct) return;
+    if (!isPharmaGtin || gtinCode == null) return;
     final trimmed = batchLot.trim();
     if (trimmed.isEmpty) return;
     final dbId = state.gtinDbId;
     if (dbId == null) return;
-    if (!_needsBatchLookup(gtin.gtinCode, trimmed)) return;
+    if (!_needsBatchLookup(gtinCode, trimmed)) return;
     unawaited(
       lookupBatch(
         gtinDbId: dbId,
-        gtinCode: gtin.gtinCode,
+        gtinCode: gtinCode,
         batchLot: trimmed,
       ),
     );
@@ -340,6 +331,26 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
       final response = await _service.createCommissioningOperation(request);
       emit(state.copyWith(lastResult: response, loading: false, clearError: true));
       return response;
+    } on ApiException {
+      emit(state.copyWith(loading: false));
+      rethrow;
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+      return null;
+    }
+  }
+
+  Future<CommissioningResponse?> commissionSscc(
+    SsccCommissioningRequest request,
+  ) async {
+    emit(state.copyWith(loading: true, clearError: true));
+    try {
+      final response = await _service.createSsccCommissioningOperation(request);
+      emit(state.copyWith(lastResult: response, loading: false, clearError: true));
+      return response;
+    } on ApiException {
+      emit(state.copyWith(loading: false));
+      rethrow;
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
       return null;
@@ -371,29 +382,12 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
     };
   }
 
-  Future<int?> _resolveGtinDbId(GTIN gtin) async {
-    final direct = _gtinDbIdFromModel(gtin);
-    if (direct != null) return direct;
-
-    try {
-      final full = await _gtinService.getGTIN(gtin.gtinCode);
-      final fromFull = _gtinDbIdFromModel(full);
-      if (fromFull != null) return fromFull;
-    } catch (_) {}
-
+  Future<int?> _resolveGtinDbId(String gtinCode) async {
     try {
       final ext =
-          await _pharmaceuticalService.getExtensionByGtinCode(gtin.gtinCode);
+          await _pharmaceuticalService.getExtensionByGtinCode(gtinCode);
       if (ext != null && ext.gtinId > 0) return ext.gtinId;
     } catch (_) {}
-
-    return null;
-  }
-
-  int? _gtinDbIdFromModel(GTIN gtin) {
-    if (gtin.id != null && gtin.id! > 0) return gtin.id;
-    final extId = gtin.pharmaceuticalExtension?.gtinId;
-    if (extId != null && extId > 0) return extId;
     return null;
   }
 

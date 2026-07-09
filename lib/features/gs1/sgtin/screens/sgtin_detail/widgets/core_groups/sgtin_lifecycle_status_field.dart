@@ -74,10 +74,10 @@ class SgtinLifecycleStatusField extends StatelessWidget {
       'Status',
       selectedStatus != null
           ? status_rules.friendlyLabel(selectedStatus!)
-          : 'COMMISSIONED',
+          : status_rules.friendlyLabel(ItemStatus.ALLOCATED),
       valueColor: selectedStatus != null
           ? status_rules.statusColor(selectedStatus!)
-          : Colors.blue,
+          : status_rules.statusColor(ItemStatus.ALLOCATED),
     );
   }
 }

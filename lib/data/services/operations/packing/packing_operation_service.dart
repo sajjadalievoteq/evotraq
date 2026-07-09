@@ -46,7 +46,8 @@ class PackingOperationService {
 
       throw _apiExceptionFromResponse(
         response,
-        fallbackMessage: 'Failed to create packing operation',
+        fallbackMessage:
+            'Packing could not be submitted. Check the parent container, items, and location.',
       );
     } on ApiException {
       rethrow;
@@ -54,12 +55,13 @@ class PackingOperationService {
       throw _apiExceptionFromDio(
         e,
         stackTrace: stackTrace,
-        fallbackMessage: 'Network error while creating packing operation',
+        fallbackMessage: 'Network error — could not submit packing. Check your connection.',
       );
     } catch (e, stackTrace) {
       debugPrint('[PackingOperationService.create] unexpected: $e\n$stackTrace');
       throw ApiException(
-        message: 'Unexpected error creating packing operation',
+        message:
+            'An unexpected error occurred while submitting packing. Please try again.',
         originalException: e,
       );
     }

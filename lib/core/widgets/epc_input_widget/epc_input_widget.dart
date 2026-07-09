@@ -17,6 +17,7 @@ class EPCInputWidget extends StatefulWidget {
     this.placeholder,
     this.label,
     this.scannerAvailable,
+    this.onParseFallback,
     super.key,
   });
 
@@ -24,8 +25,10 @@ class EPCInputWidget extends StatefulWidget {
   final List<EPCType>? allowedTypes;
   final String? placeholder;
   final String? label;
-
   final bool? scannerAvailable;
+
+  /// When [parseToEPC] fails, optionally resolve bare serials or other formats.
+  final Future<EPCParseResult?> Function(String input)? onParseFallback;
 
   @override
   State<EPCInputWidget> createState() => _EPCInputWidgetState();
@@ -68,7 +71,7 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
     return allowed.contains(type);
   }
 
-  void _tryParse(String value) {
+  Future<void> _tryParse(String value) async {
     final trimmed = value.trim();
     if (trimmed.isEmpty) {
       setState(() {
@@ -93,6 +96,17 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
         _errorMessage = null;
       });
     } on EPCParseException catch (e) {
+      if (widget.onParseFallback != null) {
+        final fallback = await widget.onParseFallback!(trimmed);
+        if (!mounted) return;
+        if (fallback != null && _isTypeAllowed(fallback.type)) {
+          setState(() {
+            _lastParsed = fallback;
+            _errorMessage = null;
+          });
+          return;
+        }
+      }
       setState(() {
         _lastParsed = null;
         _errorMessage = e.message;
@@ -167,6 +181,17 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
         _errorMessage = null;
       });
     } on EPCParseException catch (e) {
+      if (widget.onParseFallback != null) {
+        final fallback = await widget.onParseFallback!(raw);
+        if (!mounted) return;
+        if (fallback != null && _isTypeAllowed(fallback.type)) {
+          setState(() {
+            _lastParsed = fallback;
+            _errorMessage = null;
+          });
+          return;
+        }
+      }
       setState(() {
         _lastParsed = null;
         _errorMessage = e.message;
@@ -229,17 +254,6 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
               onEditingComplete: () => _handleAdd(),
             ),
             if (_lastParsed != null) _typeBadge(_lastParsed!),
-            if (_errorMessage != null && _controller.text.trim().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  _errorMessage!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _lastParsed != null ? () => _handleAdd() : null,

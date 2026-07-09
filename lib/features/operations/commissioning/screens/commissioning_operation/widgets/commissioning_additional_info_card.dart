@@ -13,6 +13,7 @@ class CommissioningAdditionalInfoCard extends StatelessWidget {
     required this.regulatoryStatusController,
     required this.operatorIdController,
     required this.notesController,
+    required this.readPointGlnController,
   });
 
   final TextEditingController countryOfOriginController;
@@ -22,6 +23,7 @@ class CommissioningAdditionalInfoCard extends StatelessWidget {
   final TextEditingController regulatoryStatusController;
   final TextEditingController operatorIdController;
   final TextEditingController notesController;
+  final TextEditingController readPointGlnController;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,18 @@ class CommissioningAdditionalInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Gs1ValidatedField(
+            controller: readPointGlnController,
+            fieldName: 'readPointGLN',
+            label: 'Read Point GLN (optional)',
+            hintText: '13-digit GLN of the physical scan point',
+            helperText:
+                'Leave blank to use the commissioning location as read point',
+            validator:
+                CommissioningFieldValidators.validateReadPointGlnOptional,
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
           Gs1ValidatedField(
             controller: countryOfOriginController,
             fieldName: 'countryOfOrigin',

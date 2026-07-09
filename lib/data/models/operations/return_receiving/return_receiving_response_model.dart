@@ -106,7 +106,7 @@ class ReturnReceivingResponse {
   String? get navigableOperationId {
     final id = _str(returnReceivingOperationId);
     if (id != null) return id;
-    return eventIds?.isNotEmpty == true ? _str(eventIds!.first) : null;
+    return null;
   }
 
   bool get isSuccess => status == OperationStatus.success;

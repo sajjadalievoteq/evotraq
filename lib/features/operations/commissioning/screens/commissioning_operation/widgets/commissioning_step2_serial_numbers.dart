@@ -1,119 +1,136 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
-import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_scanning_mode.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_empty_serial_hint.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_product_summary_banner.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_scan_input_card.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_serial_list.dart';
-import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_serial_list_header.dart';
-import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
+import 'package:traqtrace_app/data/models/gs1/gtin/gtin_batch.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_batch_lookup_status.dart';
+import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_batch_dates_card.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
 
-import '../../../../../../core/utils/responsive_utils.dart';
-
+/// Plain item scan step — matches Update Status operation layout.
 class CommissioningStep2SerialNumbers extends StatelessWidget {
   const CommissioningStep2SerialNumbers({
     super.key,
-    required this.selectedGTIN,
-    required this.gtinController,
-    required this.batchLotController,
-    required this.serialNumbers,
-    required this.scanningMode,
-    required this.wiredScannerController,
-    required this.wiredScannerFocusNode,
-    required this.manualSerialController,
-    required this.isWiredScannerActive,
-    required this.onScanningModeChanged,
-    required this.onAddSerial,
-    required this.onRemoveSerial,
+    required this.scannedEpcs,
+    required this.onItemAdded,
+    required this.onRemoveItem,
     required this.onClearAll,
-    required this.onScanResult,
-    this.fillHeight = true,
+    required this.batchLotController,
+    required this.expiryDate,
+    required this.productionDate,
+    required this.bestBeforeDate,
+    required this.onSelectDate,
+    required this.onClearDate,
+    required this.onBatchLotEditingComplete,
+    required this.onBatchLotFocusLost,
+    required this.registrationQuantityController,
+    required this.onSelectRegistrationDate,
+    required this.onClearRegistrationDate,
+    required this.onRegisterBatch,
+    required this.onToggleRegistrationPanel,
+    this.identifiedType,
+    this.onParseFallback,
+    this.embeddedInPanel = false,
+    this.fillHeight = false,
+    this.showPharmaBatchLookup = false,
+    this.batchLookupStatus = CommissioningBatchLookupStatus.idle,
+    this.resolvedBatch,
+    this.batchLookupError,
+    this.registrationPanelExpanded = false,
+    this.registrationExpiryDate,
+    this.registrationManufactureDate,
+    this.isBatchRegistering = false,
+    this.stepFormKey,
+    this.itemProductNames = const {},
   });
 
-  final GTIN? selectedGTIN;
-  final TextEditingController gtinController;
-  final TextEditingController batchLotController;
-
-  final List<String> serialNumbers;
-  final CommissioningScanningMode scanningMode;
-
-  final TextEditingController wiredScannerController;
-  final FocusNode wiredScannerFocusNode;
-  final TextEditingController manualSerialController;
-  final bool isWiredScannerActive;
-
-  final ValueChanged<CommissioningScanningMode> onScanningModeChanged;
-  final ValueChanged<String> onAddSerial;
-  final ValueChanged<int> onRemoveSerial;
+  final List<String> scannedEpcs;
+  final void Function(EPCParseResult result) onItemAdded;
+  final ValueChanged<int> onRemoveItem;
   final VoidCallback onClearAll;
-  final ValueChanged<ScanResult> onScanResult;
+  final Future<EPCParseResult?> Function(String input)? onParseFallback;
+  final bool embeddedInPanel;
   final bool fillHeight;
 
-  Widget _serialListArea() {
-    if (serialNumbers.isEmpty) {
-      return const CommissioningEmptySerialHint();
-    }
-    return CommissioningSerialList(
-      serialNumbers: serialNumbers,
-      onRemove: onRemoveSerial,
-    );
-  }
+  final EPCType? identifiedType;
+  final TextEditingController batchLotController;
+  final DateTime? expiryDate;
+  final DateTime? productionDate;
+  final DateTime? bestBeforeDate;
+  final ValueChanged<String> onSelectDate;
+  final ValueChanged<String> onClearDate;
+  final VoidCallback onBatchLotEditingComplete;
+  final VoidCallback onBatchLotFocusLost;
+  final TextEditingController registrationQuantityController;
+  final ValueChanged<String> onSelectRegistrationDate;
+  final ValueChanged<String> onClearRegistrationDate;
+  final VoidCallback onRegisterBatch;
+  final ValueChanged<bool> onToggleRegistrationPanel;
+  final bool showPharmaBatchLookup;
+  final CommissioningBatchLookupStatus batchLookupStatus;
+  final GtinBatch? resolvedBatch;
+  final String? batchLookupError;
+  final bool registrationPanelExpanded;
+  final DateTime? registrationExpiryDate;
+  final DateTime? registrationManufactureDate;
+  final bool isBatchRegistering;
+  final GlobalKey<FormState>? stepFormKey;
+  final Map<String, String> itemProductNames;
+
+  bool get _showBatchDates => identifiedType == EPCType.sgtin;
 
   @override
   Widget build(BuildContext context) {
-    final header = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CommissioningProductSummaryBanner(
-          selectedGTIN: selectedGTIN,
-          gtinController: gtinController,
-          batchLotController: batchLotController,
-        ),
-        const SizedBox(height: 16),
-        CommissioningScanInputCard(
-          scanningMode: scanningMode,
-          wiredScannerController: wiredScannerController,
-          wiredScannerFocusNode: wiredScannerFocusNode,
-          manualSerialController: manualSerialController,
-          isWiredScannerActive: isWiredScannerActive,
-          onScanningModeChanged: onScanningModeChanged,
-          onAddSerial: onAddSerial,
-          onScanResult: onScanResult,
-        ),
-        const SizedBox(height: 16),
-        CommissioningSerialListHeader(
-          count: serialNumbers.length,
-          onClearAll: serialNumbers.isNotEmpty ? onClearAll : null,
-        ),
-        const SizedBox(height: 8),
-      ],
+    final batchDatesCard = _showBatchDates
+        ? CommissioningBatchDatesCard(
+            batchLotController: batchLotController,
+            expiryDate: expiryDate,
+            productionDate: productionDate,
+            bestBeforeDate: bestBeforeDate,
+            onSelectDate: onSelectDate,
+            onClearDate: onClearDate,
+            onBatchLotEditingComplete: onBatchLotEditingComplete,
+            onBatchLotFocusLost: onBatchLotFocusLost,
+            registrationQuantityController: registrationQuantityController,
+            onSelectRegistrationDate: onSelectRegistrationDate,
+            onClearRegistrationDate: onClearRegistrationDate,
+            onRegisterBatch: onRegisterBatch,
+            onToggleRegistrationPanel: onToggleRegistrationPanel,
+            showPharmaBatchLookup: showPharmaBatchLookup,
+            batchLookupStatus: batchLookupStatus,
+            resolvedBatch: resolvedBatch,
+            batchLookupError: batchLookupError,
+            registrationPanelExpanded: registrationPanelExpanded,
+            registrationExpiryDate: registrationExpiryDate,
+            registrationManufactureDate: registrationManufactureDate,
+            isBatchRegistering: isBatchRegistering,
+          )
+        : null;
+
+    final scanStep = OperationItemScanStep(
+      scannedEpcs: scannedEpcs,
+      onItemAdded: onItemAdded,
+      onRemoveItem: onRemoveItem,
+      onClearAll: onClearAll,
+      groupCardTitle: 'Add EPCs to Commission',
+      pageHeaderTitle: 'Scan Items to Commission',
+      pageHeaderSubtitle: 'Scan SGTIN or SSCC labels to commission.',
+      scannedListTitle: 'Items to Commission',
+      scannedQueuedLabel: 'queued for commissioning',
+      hierarchyScreenTitle: 'Commissioning Hierarchy',
+      allowedTypes: const [EPCType.sgtin, EPCType.sscc],
+      onParseFallback: onParseFallback,
+      fillHeight: fillHeight,
+      showPageHeader: !embeddedInPanel,
+      betweenScanAndList: batchDatesCard,
+      itemProductNames: itemProductNames,
     );
 
-    if (fillHeight) {
-      return Padding(
-        padding: ResponsiveUtils.paddingAll(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            header,
-            Expanded(child: _serialListArea()),
-          ],
-        ),
-      );
+    if (stepFormKey == null || batchDatesCard == null) {
+      return scanStep;
     }
 
-    return SingleChildScrollView(
-      padding: ResponsiveUtils.paddingAll(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          header,
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
-            child: _serialListArea(),
-          ),
-        ],
-      ),
+    return Form(
+      key: stepFormKey,
+      child: scanStep,
     );
   }
 }

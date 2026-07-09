@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/product_journey/cubit/journey_cubit.dart'
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_empty_state.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_canvas_skeleton.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_event_filter_chips.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_pin_canvas.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_timeline_header.dart';
 
@@ -24,7 +25,7 @@ class JourneyCanvasPane extends StatelessWidget {
   Widget build(BuildContext context) {
     if (state.isLoaded && state.journey != null) {
       return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
+        duration: JourneyAnimationConstants.canvasPaneSwitch,
         switchInCurve: Curves.easeOut,
         transitionBuilder: (child, animation) => FadeTransition(
           opacity: animation,

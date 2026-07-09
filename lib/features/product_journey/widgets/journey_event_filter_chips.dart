@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 
 class JourneyEventFilterChips extends StatelessWidget {
@@ -77,7 +78,7 @@ class _AnimatedFilterChipState extends State<_AnimatedFilterChip>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 280),
+      duration: JourneyAnimationConstants.filterChipBounce,
       // Start at 1.0 so chips aren't invisible on first build.
       value: 1.0,
     );

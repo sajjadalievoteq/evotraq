@@ -192,10 +192,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (widget.isCreating && _selectedLocation == null) {
-      context.showWarning('Commissioning Location is required for new SGTINs');
-      return;
-    }
     if (widget.isCreating && _selectedGtin == null) {
       context.showWarning('A GTIN must be selected for new SGTINs');
       return;
@@ -213,8 +209,9 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       expiryDate: _expiryDate,
       productionDate: _productionDate,
       bestBeforeDate: _bestBeforeDate,
-      status: _selectedStatus ?? ItemStatus.COMMISSIONED,
-      currentLocation: _selectedLocation,
+      status: _selectedStatus ??
+          (widget.isCreating ? ItemStatus.ALLOCATED : ItemStatus.COMMISSIONED),
+      currentLocation: widget.isCreating ? null : _selectedLocation,
       regulatoryMarket: _regulatoryMarketController.text.isNotEmpty
           ? _regulatoryMarketController.text
           : null,
@@ -358,7 +355,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
       regulatoryMarketController: _regulatoryMarketController,
       regulatoryStatusController: _regulatoryStatusController,
       selectedGtin: _selectedGtin,
-      selectedLocation: _selectedLocation,
       selectedStatus: _selectedStatus,
       expiryDate: _expiryDate,
       productionDate: _productionDate,
@@ -369,7 +365,6 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
           _gtinController.text = gtin?.gtinCode ?? '';
         });
       },
-      onLocationChanged: (gln) => setState(() => _selectedLocation = gln),
       onStatusChanged: (s) => setState(() => _selectedStatus = s),
       onTransitionError: (msg) => context.showError(msg),
       onPickExpiry: () => _pickDate((d) => setState(() => _expiryDate = d)),

@@ -39,6 +39,17 @@ void main() {
       expect(result.type, EPCType.sgtin);
       expect(result.epc, urn);
       expect(result.serial, 'SN123');
+      expect(result.gtin, '00629200080027');
+    });
+
+    test('extracts GTIN from SGTIN URN without AI notation', () {
+      const urn =
+          'urn:epc:id:sgtin:0629200.001000.TQNBH47U88OC10RIRSH8';
+      final result = parseToEPC(urn);
+
+      expect(result.type, EPCType.sgtin);
+      expect(result.gtin, '00629200010000');
+      expect(result.serial, 'TQNBH47U88OC10RIRSH8');
     });
 
     test('passes through SSCC URN unchanged', () {
@@ -66,6 +77,15 @@ void main() {
       expect(result.type, EPCType.gtin);
       expect(result.gtin, '00629200080027');
       expect(result.epc, startsWith('urn:epc:idpat:sgtin:'));
+    });
+
+    test('parses human-readable GTIN-14 plus serial', () {
+      final result = parseToEPC('00629200080027 SN123');
+
+      expect(result.type, EPCType.sgtin);
+      expect(result.gtin, '00629200080027');
+      expect(result.serial, 'SN123');
+      expect(result.epc, startsWith('urn:epc:id:sgtin:'));
     });
 
     test('throws EPCParseException for invalid input', () {

@@ -21,6 +21,7 @@ class OperationItemManualEntryCard extends StatelessWidget {
           label: 'Item Barcode',
           placeholder: 'Enter SGTIN or SSCC barcode',
           allowedTypes: allowedTypes ?? const [EPCType.sgtin, EPCType.sscc],
+          scannerAvailable: false,
           onItemAdded: onItemAdded,
         ),
       ),

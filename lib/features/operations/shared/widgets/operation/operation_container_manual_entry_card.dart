@@ -12,16 +12,12 @@ class OperationContainerManualEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: EPCInputWidget(
-          label: 'Container SSCC / Barcode',
-          placeholder: 'Enter the SSCC or container barcode',
-          allowedTypes: const [EPCType.sscc],
-          onItemAdded: onContainerAdded,
-        ),
-      ),
+    return EPCInputWidget(
+      label: 'Container SSCC / SGTIN',
+      placeholder: 'SSCC (carton/pallet) or SGTIN product serial',
+      allowedTypes: const [EPCType.sscc, EPCType.sgtin],
+      scannerAvailable: false,
+      onItemAdded: onContainerAdded,
     );
   }
 }

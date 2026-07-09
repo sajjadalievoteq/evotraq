@@ -26,6 +26,12 @@ class CommissioningRequest {
 
   String? readPointGLN;
 
+  /// UI/review only — not sent to POST /commissioning/bulk.
+  String? identifierType;
+
+  /// UI/review only — not sent to POST /commissioning/bulk (use serialNumbers).
+  List<String>? epcUris;
+
   CommissioningRequest({
     this.commissioningReference,
     required this.gtinCode,
@@ -43,6 +49,8 @@ class CommissioningRequest {
     this.regulatoryStatus,
     this.countryOfOrigin,
     this.readPointGLN,
+    this.identifierType,
+    this.epcUris,
   });
 
   Map<String, dynamic> toJson() {
@@ -52,9 +60,12 @@ class CommissioningRequest {
       'serialNumbers': serialNumbers,
       'batchLotNumber': batchLotNumber,
       'commissioningLocationGLN': commissioningLocationGLN,
-      'productionDate': productionDate?.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(),
-      'bestBeforeDate': bestBeforeDate?.toIso8601String(),
+      // Backend fields are LocalDate (yyyy-MM-dd). Send date-only — a full ISO
+      // datetime fails LocalDate deserialization (the cause of the commissioning
+      // 500). Matches gtin_model.dart / gtin_pharmaceutical_extension_model.dart.
+      'productionDate': productionDate?.toIso8601String().split('T').first,
+      'expiryDate': expiryDate?.toIso8601String().split('T').first,
+      'bestBeforeDate': bestBeforeDate?.toIso8601String().split('T').first,
       'productionOrder': productionOrder,
       'productionLine': productionLine,
       'operatorId': operatorId,
@@ -90,8 +101,52 @@ class CommissioningRequest {
       regulatoryStatus: json['regulatoryStatus'],
       countryOfOrigin: json['countryOfOrigin'],
       readPointGLN: json['readPointGLN'],
+      identifierType: json['identifierType'] as String?,
+      epcUris: json['epcUris'] != null
+          ? List<String>.from(json['epcUris'])
+          : null,
     );
   }
+}
+
+/// Request body for POST /commissioning/sscc.
+class SsccCommissioningRequest {
+  String? commissioningReference;
+  List<String> epcUris;
+  String commissioningLocationGLN;
+  String? readPointGLN;
+  String? operatorId;
+  String? notes;
+  String? countryOfOrigin;
+
+  /// Child SGTIN EPC URIs aggregated into the parent SSCC after commissioning.
+  List<String>? childEpcUris;
+
+  SsccCommissioningRequest({
+    this.commissioningReference,
+    required this.epcUris,
+    required this.commissioningLocationGLN,
+    this.readPointGLN,
+    this.operatorId,
+    this.notes,
+    this.countryOfOrigin,
+    this.childEpcUris,
+  });
+
+  Map<String, dynamic> toJson() => {
+        if (commissioningReference != null)
+          'commissioningReference': commissioningReference,
+        'epcUris': epcUris,
+        'commissioningLocationGLN': commissioningLocationGLN,
+        if (readPointGLN != null && readPointGLN!.isNotEmpty)
+          'readPointGLN': readPointGLN,
+        if (operatorId != null && operatorId!.isNotEmpty) 'operatorId': operatorId,
+        if (notes != null && notes!.isNotEmpty) 'notes': notes,
+        if (countryOfOrigin != null && countryOfOrigin!.isNotEmpty)
+          'countryOfOrigin': countryOfOrigin,
+        if (childEpcUris != null && childEpcUris!.isNotEmpty)
+          'childEpcUris': childEpcUris,
+      };
 }
 
 enum CommissioningStatus {
@@ -301,6 +356,7 @@ class CommissioningItemResult {
   String? eventId;
   bool success;
   String? errorMessage;
+  String? outcome;
 
   CommissioningItemResult({
     required this.serialNumber,
@@ -309,16 +365,18 @@ class CommissioningItemResult {
     this.eventId,
     required this.success,
     this.errorMessage,
+    this.outcome,
   });
 
   factory CommissioningItemResult.fromJson(Map<String, dynamic> json) {
     return CommissioningItemResult(
-      serialNumber: json['serialNumber'],
-      sgtinId: json['sgtinId'],
-      epcUri: json['epcUri'],
-      eventId: json['eventId'],
-      success: json['success'] ?? false,
-      errorMessage: json['errorMessage'],
+      serialNumber: json['serialNumber'] as String? ?? '',
+      sgtinId: json['sgtinId']?.toString(),
+      epcUri: json['epcUri'] as String?,
+      eventId: json['eventId'] as String?,
+      success: json['success'] as bool? ?? false,
+      errorMessage: json['errorMessage'] as String?,
+      outcome: json['outcome'] as String?,
     );
   }
 

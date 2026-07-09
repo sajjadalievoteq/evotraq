@@ -60,6 +60,11 @@ EPCParseResult parseToEPC(String input) {
     }
   }
 
+  final humanReadable = _parseHumanReadableGtinSerial(raw);
+  if (humanReadable != null) {
+    return humanReadable;
+  }
+
   final digitsOnly = GtinFormat.stripGtinInput(raw);
   if (RegExp(r'^\d+$').hasMatch(digitsOnly) &&
       const {8, 12, 13, 14}.contains(digitsOnly.length)) {
@@ -93,6 +98,29 @@ EPCParseResult parseToEPC(String input) {
   }
 
   throw EPCParseException('Unrecognized barcode format: $raw');
+}
+
+EPCParseResult? _parseHumanReadableGtinSerial(String raw) {
+  final match = RegExp(r'^(\d{14})\s+(\S.+)$').firstMatch(raw.trim());
+  if (match == null) return null;
+
+  final gtin14 = match.group(1)!;
+  final serial = match.group(2)!.trim();
+  if (serial.isEmpty || !GtinFormat.isValidGtin(gtin14)) return null;
+
+  final epc = Gs1Converter.gtinSerialToEpc(gtin14, serial);
+  if (epc == null) {
+    throw EPCParseException('Could not convert GTIN+serial to EPC URI');
+  }
+
+  return EPCParseResult(
+    type: EPCType.sgtin,
+    epc: epc,
+    gtin: gtin14,
+    serial: serial,
+    raw: raw,
+    detectedFormat: 'Human-readable GTIN-14 + serial',
+  );
 }
 
 String? _tagUriToPureIdentity(String tagUri) {
@@ -203,6 +231,16 @@ EPCParseResult _fromEpcUri(
   }
   if (sscc == null && raw.contains('(00)')) {
     sscc = _ssccFromParsedOrAi(raw, parsed);
+  }
+
+  if ((gtin == null || gtin.isEmpty) &&
+      (epc.startsWith('urn:epc:id:sgtin:') ||
+          epc.startsWith('urn:epc:id:lgtin:') ||
+          epc.startsWith('urn:epc:idpat:sgtin:'))) {
+    gtin = Gs1Converter.epcToGTIN(epc);
+  }
+  if (gtin != null && gtin.isNotEmpty && GtinFormat.isValidGtin(gtin)) {
+    gtin = GtinFormat.normalizeGtinTo14(gtin);
   }
 
   final type = _resolveType(epc, gtin: gtin, serial: serial, sscc: sscc);

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_audit_card.dart';
@@ -42,13 +41,11 @@ class SgtinDetailFormBody extends StatelessWidget {
     required this.regulatoryMarketController,
     required this.regulatoryStatusController,
     required this.selectedGtin,
-    required this.selectedLocation,
     required this.selectedStatus,
     required this.expiryDate,
     required this.productionDate,
     required this.bestBeforeDate,
     required this.onGtinChanged,
-    required this.onLocationChanged,
     required this.onStatusChanged,
     required this.onTransitionError,
     required this.onPickExpiry,
@@ -75,14 +72,12 @@ class SgtinDetailFormBody extends StatelessWidget {
   final TextEditingController regulatoryStatusController;
 
   final gtin_model.GTIN? selectedGtin;
-  final GLN? selectedLocation;
   final ItemStatus? selectedStatus;
   final DateTime? expiryDate;
   final DateTime? productionDate;
   final DateTime? bestBeforeDate;
 
   final ValueChanged<gtin_model.GTIN?> onGtinChanged;
-  final ValueChanged<GLN?> onLocationChanged;
   final ValueChanged<ItemStatus> onStatusChanged;
   final ValueChanged<String> onTransitionError;
   final VoidCallback onPickExpiry;
@@ -155,14 +150,11 @@ class SgtinDetailFormBody extends StatelessWidget {
                   onStatusChanged: onStatusChanged,
                   onTransitionError: onTransitionError,
                 ),
-                SgtinCommissioningCard(
-                  borderColor: borderColor,
-                  isEditing: isEditing,
-                  isCreating: isCreating,
-                  sgtin: loadedSgtin,
-                  selectedLocation: selectedLocation,
-                  onLocationChanged: onLocationChanged,
-                ),
+                if (!isCreating)
+                  SgtinCommissioningCard(
+                    borderColor: borderColor,
+                    sgtin: loadedSgtin,
+                  ),
                 if (loadedSgtin != null && !isCreating)
                   SgtinLocationCustodyCard(
                     sgtin: loadedSgtin!,

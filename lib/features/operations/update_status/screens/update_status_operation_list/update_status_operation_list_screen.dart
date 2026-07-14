@@ -97,7 +97,6 @@ class _UpdateStatusOperationListBodyState
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
-  bool _initialLoadDone = false;
   bool _bindRefreshDone = false;
 
   @override
@@ -114,13 +113,6 @@ class _UpdateStatusOperationListBodyState
       widget.onBindRefresh?.call(
         () => context.read<OperationsCubit<Operation>>().refresh(),
       );
-    }
-    if (!_initialLoadDone) {
-      _initialLoadDone = true;
-      return;
-    }
-    if (!widget.embedded) {
-      context.read<OperationsCubit<Operation>>().refresh();
     }
   }
 
@@ -234,6 +226,13 @@ class _UpdateStatusOperationListBodyState
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      buildWhen: (previous, current) =>
+          previous.items != current.items ||
+          previous.isLoading != current.isLoading ||
+          previous.isLoadingMore != current.isLoadingMore ||
+          previous.hasMore != current.hasMore ||
+          previous.errorMessage != current.errorMessage ||
+          previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
 

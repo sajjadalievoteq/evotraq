@@ -61,8 +61,8 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   void _initializeDefaults() {
     _eventParams['businessStep'] = 'urn:epcglobal:cbv:bizstep:commissioning';
     _eventParams['disposition'] = 'urn:epcglobal:cbv:disp:active';
-    _eventParams['readPoint'] = 'urn:epc:id:sgln:0614141.00001.0';
-    _eventParams['bizLocation'] = 'urn:epc:id:sgln:0614141.00001.0';
+    _eventParams['readPoint'] = '0614141000012';
+    _eventParams['bizLocation'] = '0614141000012';
 
     _simulationParams['duration'] = 300;
     _simulationParams['eventInterval'] = 1000;

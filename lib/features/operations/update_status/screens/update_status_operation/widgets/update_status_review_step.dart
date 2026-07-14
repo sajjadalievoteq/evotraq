@@ -3,11 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation/utils/update_status_disposition.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_type_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_rows.dart';
 
 class UpdateStatusReviewStep extends StatelessWidget {
   const UpdateStatusReviewStep({
@@ -41,24 +41,19 @@ class UpdateStatusReviewStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionLabel('Review Update Status Operation'),
-          if (showPageHeader) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'Please review all details before submitting.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-          const SizedBox(height: 16),
+          OperationReviewStepHeader(
+            title: 'Review Update Status Operation',
+            showPageHeader: showPageHeader,
+          ),
           Gs1GroupCard(
             title: 'Operation Details',
             outlineColor: outline,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _row('Reference', 'Auto-generated on submit'),
+                OperationReviewInfoRow('Reference', 'Auto-generated on submit'),
                 const SizedBox(height: 12),
-                _row('Location GLN', locationGln?.glnCode ?? '-'),
+                OperationReviewInfoRow('Location GLN', locationGln?.glnCode ?? '-'),
                 if (locationGln?.locationName.isNotEmpty == true)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -68,15 +63,14 @@ class UpdateStatusReviewStep extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 12),
-                _row('Status', disposition?.label ?? '-'),
+                OperationReviewInfoRow('Status', disposition?.label ?? '-'),
                 const SizedBox(height: 12),
-                _row('Reason', reason.isNotEmpty ? reason : '-'),
-                if (comments.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Comments', comments),
-                ],
+                OperationReviewInfoRow('Reason', reason.isNotEmpty ? reason : '-'),
+                OperationReviewOptionalFields([
+                  OperationReviewField('Comments', comments),
+                ]),
                 const SizedBox(height: 12),
-                _row(
+                OperationReviewInfoRow(
                   'Event Time',
                   eventTime != null
                       ? _eventTimeFormat.format(eventTime!.toLocal())
@@ -112,22 +106,6 @@ class UpdateStatusReviewStep extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _row(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-        Expanded(child: Text(value)),
-      ],
     );
   }
 }

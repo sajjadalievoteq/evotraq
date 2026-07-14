@@ -139,7 +139,7 @@ class ObjectEventHelpWidget extends StatelessWidget {
           children: [
             _buildHelpItem(
               'EPCs (Instance-Level)',
-              'Electronic Product Codes that uniquely identify individual items. Use this for serialized items like SGTINs (Serialized GTINs). Format example: urn:epc:id:sgtin:0614141.107346.2017',
+              'Electronic Product Codes that uniquely identify individual items. Use this for serialized items like SGTINs (Serialized GTINs). Format example: https://id.gs1.org/01/10614141073464/21/2017',
             ),
             _buildHelpItem(
               'EPC Classes (Class-Level)',

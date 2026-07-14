@@ -3,8 +3,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 class SSCC {
   final String? id;
   final String ssccCode;
-  final String? ssccUri;
-  final String? gs1DigitalLinkUri;
+  final String? canonicalIdentifier;
 
   final UnitType unitType;
   final LogisticUnitStatus status;
@@ -71,8 +70,7 @@ class SSCC {
   const SSCC({
     this.id,
     required this.ssccCode,
-    this.ssccUri,
-    this.gs1DigitalLinkUri,
+    this.canonicalIdentifier,
     required this.unitType,
     required this.status,
     this.contentHomogeneity = ContentHomogeneity.UNKNOWN,
@@ -129,8 +127,7 @@ class SSCC {
   SSCC copyWith({
     String? id,
     String? ssccCode,
-    String? ssccUri,
-    String? gs1DigitalLinkUri,
+    String? canonicalIdentifier,
     UnitType? unitType,
     LogisticUnitStatus? status,
     ContentHomogeneity? contentHomogeneity,
@@ -186,8 +183,8 @@ class SSCC {
     return SSCC(
       id: id ?? this.id,
       ssccCode: ssccCode ?? this.ssccCode,
-      ssccUri: ssccUri ?? this.ssccUri,
-      gs1DigitalLinkUri: gs1DigitalLinkUri ?? this.gs1DigitalLinkUri,
+      canonicalIdentifier:
+          canonicalIdentifier ?? this.canonicalIdentifier,
       unitType: unitType ?? this.unitType,
       status: status ?? this.status,
       contentHomogeneity: contentHomogeneity ?? this.contentHomogeneity,
@@ -262,8 +259,7 @@ class SSCC {
     return SSCC(
       id: json['id']?.toString(),
       ssccCode: ssccCode,
-      ssccUri: json['ssccUri'] as String?,
-      gs1DigitalLinkUri: json['gs1DigitalLinkUri'] as String?,
+      canonicalIdentifier: _parseCanonicalIdentifier(json),
       unitType: parseUnitType(
         json['unitType'] as String? ?? json['containerType'] as String?,
       ),
@@ -335,8 +331,8 @@ class SSCC {
     return {
       if (id != null) 'id': id,
       'sscc': ssccCode,
-      if (ssccUri != null) 'ssccUri': ssccUri,
-      if (gs1DigitalLinkUri != null) 'gs1DigitalLinkUri': gs1DigitalLinkUri,
+      if (canonicalIdentifier != null)
+        'canonicalIdentifier': canonicalIdentifier,
       'status': status.name,
       'containerStatus': legacyContainerStatusName(status),
       'unitType': unitType.name,
@@ -383,6 +379,20 @@ class SSCC {
       if (serialReference != null) 'serialReference': serialReference,
       if (checkDigit != null) 'checkDigit': checkDigit,
     };
+  }
+
+  static String? _parseCanonicalIdentifier(Map<String, dynamic> json) {
+    final canonical = json['canonicalIdentifier'];
+    if (canonical is String && canonical.trim().isNotEmpty) {
+      return canonical.trim();
+    }
+    for (final key in ['ssccUri', 'gs1DigitalLinkUri', 'epcUri']) {
+      final value = json[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return null;
   }
 
   static List<String>? _parseStringList(dynamic value) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
-import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/utils/cancel_receiving_ui_constants.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_advanced_filters_panel.dart';
 
 class CancelReceivingAdvancedFiltersPanel extends StatelessWidget {
   const CancelReceivingAdvancedFiltersPanel({
@@ -21,60 +20,22 @@ class CancelReceivingAdvancedFiltersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: gincController,
-          decoration: const InputDecoration(
-            labelText: 'Original GINC',
-            hintText: 'Filter by original receiving reference (optional)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
+    return OperationAdvancedFiltersPanel(
+      sortBy: sortBy,
+      sortFieldLabels: CancelReceivingUiConstants.sortFieldLabels,
+      onSortByChanged: onSortByChanged,
+      onApply: onApply,
+      onClearAll: onClearAll,
+      footerHint:
           'Filters apply to loaded results. Sort order updates when applied.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+      filterField: TextField(
+        controller: gincController,
+        decoration: const InputDecoration(
+          labelText: 'Original GINC',
+          hintText: 'Filter by original receiving reference (optional)',
+          border: OutlineInputBorder(),
         ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          key: ValueKey(sortBy),
-          initialValue: sortBy,
-          decoration: const InputDecoration(
-            labelText: CancelReceivingUiConstants.labelSortResultsBy,
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          items: CancelReceivingUiConstants.sortFieldLabels.entries
-              .map(
-                (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
-              )
-              .toList(),
-          onChanged: onSortByChanged,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: CustomOutlinedButtonWidget(
-                title: CancelReceivingUiConstants.buttonClearFilters,
-                onTap: onClearAll,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: CustomButtonWidget(
-                title: CancelReceivingUiConstants.buttonApply,
-                onTap: onApply,
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }

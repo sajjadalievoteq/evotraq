@@ -12,21 +12,46 @@ abstract final class UnpackingContainerContentsLoader {
       Gs1Converter.barcodeToEpc(parentContainerId) ?? parentContainerId,
     );
 
-    final nodes = <HierarchyNode>[];
-    var page = 0;
-    const pageSize = 100;
+    const pageSize = 200;
+    final first = await hierarchyService.getHierarchyChildren(
+      parentEpc,
+      page: 0,
+      size: pageSize,
+    );
 
-    while (true) {
-      final result = await hierarchyService.getHierarchyChildren(
-        parentEpc,
-        page: page,
-        size: pageSize,
-      );
-      nodes.addAll(result.children);
-      if (!result.hasMore) break;
-      page++;
+    final nodes = <HierarchyNode>[...first.children];
+    if (!first.hasMore) return nodes;
+
+    final remainingPages = first.totalPages > 1
+        ? first.totalPages - 1
+        : 0;
+    if (remainingPages <= 0) {
+      // hasMore without reliable totalPages — fall back to sequential fetch.
+      var page = 1;
+      while (true) {
+        final result = await hierarchyService.getHierarchyChildren(
+          parentEpc,
+          page: page,
+          size: pageSize,
+        );
+        nodes.addAll(result.children);
+        if (!result.hasMore) break;
+        page++;
+      }
+      return nodes;
     }
 
+    final rest = await Future.wait([
+      for (var page = 1; page <= remainingPages; page++)
+        hierarchyService.getHierarchyChildren(
+          parentEpc,
+          page: page,
+          size: pageSize,
+        ),
+    ]);
+    for (final page in rest) {
+      nodes.addAll(page.children);
+    }
     return nodes;
   }
 }

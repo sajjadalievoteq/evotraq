@@ -8,7 +8,7 @@ enum JourneyEventFilter {
   receiving,
   aggregation,
   commissioning,
-  // objectEvents,
+  decommissioning,
 }
 
 extension JourneyEventFilterX on JourneyEventFilter {
@@ -19,7 +19,7 @@ extension JourneyEventFilterX on JourneyEventFilter {
         JourneyEventFilter.receiving => 'Receiving',
         JourneyEventFilter.aggregation => 'Aggregation',
         JourneyEventFilter.commissioning => 'Commissioning',
-        // JourneyEventFilter.objectEvents => 'Object Events',
+        JourneyEventFilter.decommissioning => 'Decommissioning',
       };
 
   bool matches(JourneyStep step) {
@@ -32,14 +32,14 @@ extension JourneyEventFilterX on JourneyEventFilter {
     return switch (this) {
       JourneyEventFilter.packing =>
         bizToken == 'packing' ||
-        (biz.contains('packing') && !biz.contains('unpacking')),
+            (biz.contains('packing') && !biz.contains('unpacking')),
       JourneyEventFilter.shipping =>
         bizToken == 'shipping' || biz.contains('shipping'),
       JourneyEventFilter.receiving =>
         bizToken == 'receiving' || biz.contains('receiving'),
       JourneyEventFilter.aggregation => type.contains('aggregation'),
       JourneyEventFilter.commissioning => bizToken == 'commissioning',
-      // JourneyEventFilter.objectEvents => type.contains('object'),
+      JourneyEventFilter.decommissioning => bizToken == 'decommissioning',
       JourneyEventFilter.all => true,
     };
   }

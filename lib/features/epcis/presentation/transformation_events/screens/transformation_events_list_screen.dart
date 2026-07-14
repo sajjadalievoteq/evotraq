@@ -207,7 +207,7 @@ class _TransformationEventsListScreenState
                       controller: epcController,
                       decoration: const InputDecoration(
                         labelText: 'Enter EPC to track',
-                        hintText: 'e.g., urn:epc:id:sgtin:...',
+                        hintText: 'e.g., https://id.gs1.org/01/…/21/…',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -315,7 +315,7 @@ class _TransformationEventsListScreenState
                       controller: inputEpcController,
                       decoration: const InputDecoration(
                         labelText: 'Input EPC',
-                        hintText: 'e.g., urn:epc:id:sgtin:...',
+                        hintText: 'e.g., https://id.gs1.org/01/…/21/…',
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -323,7 +323,7 @@ class _TransformationEventsListScreenState
                       controller: outputEpcController,
                       decoration: const InputDecoration(
                         labelText: 'Output EPC',
-                        hintText: 'e.g., urn:epc:id:sgtin:...',
+                        hintText: 'e.g., https://id.gs1.org/01/…/21/…',
                       ),
                     ),
                     const SizedBox(height: 16),

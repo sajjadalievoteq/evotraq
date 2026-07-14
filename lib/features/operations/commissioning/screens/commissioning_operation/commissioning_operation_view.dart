@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
@@ -139,12 +140,12 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
   @override
   void initState() {
     super.initState();
+    _poolChecker = getIt<CommissioningSerialPoolChecker>();
     _epcResolver = CommissioningEpcResolver(
       sgtinService: getIt<SGTINService>(),
       ssccService: getIt<SSCCService>(),
-    );
-    _poolChecker = getIt<CommissioningSerialPoolChecker>();
-    _gtinService = getIt<GTINService>();
+      poolChecker: _poolChecker,
+    );    _gtinService = getIt<GTINService>();
     _batchLotController.addListener(_onBatchLotTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadLocations());
   }
@@ -224,7 +225,10 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
           _commissionItems.length,
           _commissionItems.map((item) {
             final match = results.where((r) {
-              if (r.epcUri != null && r.epcUri == item.epc) return true;
+              if (r.canonicalIdentifier != null &&
+                  r.canonicalIdentifier == item.epc) {
+                return true;
+              }
               final serial = item.parsed.serial;
               return serial != null && r.serialNumber == serial;
             }).firstOrNull;
@@ -446,13 +450,23 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
     final outcome = await _epcResolver.resolve(input);
     if (!mounted) return null;
     return switch (outcome) {
-      CommissioningEpcResolved(:final parsed) => parsed,
+      CommissioningEpcResolved(:final parsed, :final poolCheck) => () {
+          if (poolCheck != null) {
+            _poolCheckCache[parsed.epc] = poolCheck;
+          }
+          return parsed;
+        }(),
       CommissioningEpcResolveAmbiguous(:final matches) =>
         await CommissioningEpcDisambiguationDialog.show(
           context,
           serial: input,
           matches: matches,
-        ).then((m) => m?.parsed),
+        ).then((m) {
+          if (m?.poolCheck != null) {
+            _poolCheckCache[m!.parsed.epc] = m.poolCheck!;
+          }
+          return m?.parsed;
+        }),
       CommissioningEpcResolveError(:final message) => () {
           context.showError(message);
           return null;
@@ -785,7 +799,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       countryOfOrigin: _countryOfOriginController.text.trim().isNotEmpty
           ? _countryOfOriginController.text.trim().toUpperCase()
           : null,
-      // TODO: SSCC child linking UI deferred — aggregation children not collected here.
+      // SSCC child aggregation is not collected on this screen.
       childEpcUris: null,
     );
   }
@@ -832,7 +846,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
           : null,
       readPointGLN: readPoint.isNotEmpty ? readPoint : null,
       identifierType: _identifiedType?.name,
-      epcUris: _commissionItems.map((i) => i.epc).toList(),
+      canonicalIdentifiers: _commissionItems.map((i) => i.epc).toList(),
     );
   }
 
@@ -878,7 +892,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
         context.showSuccess(
           'Partial success: $commissioned commissioned, $failed failed',
         );
-        if (mounted) context.go('/operations/commissioning');
+        if (mounted) popOrGo(context, Constants.opCommissioningRoute);
       case CommissioningPartialSuccessChoice.continueWithoutRemoving:
         context.showInfo(
           '${_commissionItems.length} failed EPC(s) remain — review and submit again.',
@@ -924,7 +938,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
         context.showSuccess(
           'Successfully commissioned ${response.commissionedCount} items',
         );
-        if (mounted) context.go('/operations/commissioning');
+        if (mounted) popOrGo(context, Constants.opCommissioningRoute);
       } else if (response.status == CommissioningStatus.partialSuccess) {
         await _handlePartialSuccess(response);
       } else {

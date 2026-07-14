@@ -12,6 +12,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_generator.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
@@ -638,7 +639,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
                     
                     final epcList = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
                     for (final epc in epcList) {
-                      if (!epc.startsWith('urn:epc:id:') && !RegExp(r'\(\d+\)').hasMatch(epc)) {
+                      final ok = Gs1CanonicalIdentifier.isValid(epc) ||
+                          RegExp(r'\(\d+\)').hasMatch(epc);
+                      if (!ok) {
                         return 'Invalid EPC format: $epc';
                       }
                     }
@@ -680,7 +683,9 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
                     
                     final epcList = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
                     for (final epc in epcList) {
-                      if (!epc.startsWith('urn:epc:id:') && !RegExp(r'\(\d+\)').hasMatch(epc)) {
+                      final ok = Gs1CanonicalIdentifier.isValid(epc) ||
+                          RegExp(r'\(\d+\)').hasMatch(epc);
+                      if (!ok) {
                         return 'Invalid EPC format: $epc';
                       }
                     }
@@ -998,7 +1003,8 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         ),
         const SizedBox(height: 4),
         const Text('Formats accepted:\n'
-          '• URI: urn:epc:id:sgtin:CompanyPrefix.ItemReference.SerialNumber\n'
+          '• Digital Link: https://id.gs1.org/01/<GTIN-14>/21/<SerialNumber>\n'
+          '• URI (accepted): urn:epc:id:sgtin:CompanyPrefix.ItemReference.SerialNumber\n'
           '• GS1: (01)05415062325810(21)70005188444899',
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),

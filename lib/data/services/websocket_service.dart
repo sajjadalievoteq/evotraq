@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/notifications/domain/models/realtime_noti
 
 class WebSocketService {
   WebSocketChannel? _channel;
+  StreamSubscription? _channelSubscription;
   final StreamController<RealtimeNotification> _notificationController =
       StreamController<RealtimeNotification>.broadcast();
   final StreamController<bool> _connectionController =
@@ -14,6 +15,7 @@ class WebSocketService {
   String? _baseUrl;
   String? _accessToken;
   bool _isConnected = false;
+  bool _intentionalDisconnect = false;
   Timer? _heartbeatTimer;
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
@@ -36,17 +38,18 @@ class WebSocketService {
       throw Exception('WebSocket service not properly initialized');
     }
 
-    _reconnectAttempts = 0;
+    _intentionalDisconnect = false;
+    _teardownChannel(sendDisconnect: false);
 
     try {
       final wsUrl = '${_baseUrl!.replaceFirst('http', 'ws')}/ws';
-      
+
       _channel = WebSocketChannel.connect(
         Uri.parse(wsUrl),
         protocols: ['v10.stomp', 'v11.stomp', 'v12.stomp'],
       );
 
-      _channel!.stream.listen(
+      _channelSubscription = _channel!.stream.listen(
         _onMessage,
         onError: _onError,
         onDone: _onDisconnect,
@@ -62,31 +65,49 @@ class WebSocketService {
       _connectionController.add(true);
       _reconnectAttempts = 0;
       _startHeartbeat();
-
     } catch (e) {
       print('Error connecting to WebSocket: $e');
+      _isConnected = false;
       _connectionController.add(false);
       _scheduleReconnect();
     }
   }
 
   void disconnect() {
-    _heartbeatTimer?.cancel();
+    _intentionalDisconnect = true;
     _reconnectTimer?.cancel();
-    
-    if (_channel != null) {
-      _sendStompFrame('DISCONNECT', {});
-      _channel!.sink.close(status.normalClosure);
-    }
-    
+    _teardownChannel(sendDisconnect: true);
     _isConnected = false;
-    _connectionController.add(false);
+    if (!_connectionController.isClosed) {
+      _connectionController.add(false);
+    }
+  }
+
+  /// Cancels heartbeat/subscription and closes the channel to avoid leaks on reconnect.
+  void _teardownChannel({required bool sendDisconnect}) {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    _channelSubscription?.cancel();
+    _channelSubscription = null;
+
+    final channel = _channel;
+    _channel = null;
+    if (channel == null) return;
+
+    if (sendDisconnect) {
+      try {
+        _sendStompFrameOn(channel, 'DISCONNECT', {});
+      } catch (_) {}
+    }
+    try {
+      channel.sink.close(status.normalClosure);
+    } catch (_) {}
   }
 
   void _onMessage(dynamic message) {
     try {
       final String messageStr = message.toString();
-      
+
       if (messageStr.startsWith('CONNECTED')) {
         print('WebSocket connected successfully');
         _subscribeToNotifications();
@@ -103,34 +124,50 @@ class WebSocketService {
   void _onError(dynamic error) {
     print('WebSocket Error: $error');
     _isConnected = false;
-    _connectionController.add(false);
-    _scheduleReconnect();
+    if (!_connectionController.isClosed) {
+      _connectionController.add(false);
+    }
+    if (!_intentionalDisconnect) {
+      _scheduleReconnect();
+    }
   }
 
   void _onDisconnect() {
     print('WebSocket disconnected');
     _isConnected = false;
-    _connectionController.add(false);
-    _scheduleReconnect();
+    if (!_connectionController.isClosed) {
+      _connectionController.add(false);
+    }
+    if (!_intentionalDisconnect) {
+      _scheduleReconnect();
+    }
   }
 
   void _sendStompFrame(String command, Map<String, String> headers, [String? body]) {
     if (_channel == null) return;
+    _sendStompFrameOn(_channel!, command, headers, body);
+  }
 
+  void _sendStompFrameOn(
+    WebSocketChannel channel,
+    String command,
+    Map<String, String> headers, [
+    String? body,
+  ]) {
     final StringBuffer frame = StringBuffer();
     frame.writeln(command);
-    
+
     headers.forEach((key, value) {
       frame.writeln('$key:$value');
     });
-    
+
     frame.writeln();
     if (body != null) {
       frame.write(body);
     }
     frame.write('\x00');
 
-    _channel!.sink.add(frame.toString());
+    channel.sink.add(frame.toString());
   }
 
   void _subscribeToNotifications() {
@@ -149,7 +186,7 @@ class WebSocketService {
     try {
       final lines = message.split('\n');
       String? body;
-      
+
       bool foundEmptyLine = false;
       for (int i = 0; i < lines.length; i++) {
         if (lines[i].isEmpty) {
@@ -165,7 +202,9 @@ class WebSocketService {
       if (body != null && body.isNotEmpty) {
         final Map<String, dynamic> data = json.decode(body);
         final notification = RealtimeNotification.fromJson(data);
-        _notificationController.add(notification);
+        if (!_notificationController.isClosed) {
+          _notificationController.add(notification);
+        }
       }
     } catch (e) {
       print('Error parsing notification: $e');
@@ -173,7 +212,8 @@ class WebSocketService {
   }
 
   void _startHeartbeat() {
-    _heartbeatTimer = Timer.periodic(Duration(seconds: 30), (timer) {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_isConnected && _channel != null) {
         _channel!.sink.add('\n');
       }
@@ -182,16 +222,18 @@ class WebSocketService {
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-    
+
     if (_reconnectAttempts >= _maxReconnectAttempts) {
       print('Max reconnection attempts reached. Stopping reconnection.');
       return;
     }
-    
+
     _reconnectAttempts++;
-    _reconnectTimer = Timer(Duration(seconds: 5), () {
-      if (!_isConnected) {
-        print('Attempting to reconnect... (attempt $_reconnectAttempts/$_maxReconnectAttempts)');
+    _reconnectTimer = Timer(const Duration(seconds: 5), () {
+      if (!_isConnected && !_intentionalDisconnect) {
+        print(
+          'Attempting to reconnect... (attempt $_reconnectAttempts/$_maxReconnectAttempts)',
+        );
         connect();
       }
     });

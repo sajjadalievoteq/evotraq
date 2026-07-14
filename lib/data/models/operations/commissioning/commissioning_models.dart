@@ -30,7 +30,7 @@ class CommissioningRequest {
   String? identifierType;
 
   /// UI/review only — not sent to POST /commissioning/bulk (use serialNumbers).
-  List<String>? epcUris;
+  List<String>? canonicalIdentifiers;
 
   CommissioningRequest({
     this.commissioningReference,
@@ -50,7 +50,7 @@ class CommissioningRequest {
     this.countryOfOrigin,
     this.readPointGLN,
     this.identifierType,
-    this.epcUris,
+    this.canonicalIdentifiers,
   });
 
   Map<String, dynamic> toJson() {
@@ -102,9 +102,11 @@ class CommissioningRequest {
       countryOfOrigin: json['countryOfOrigin'],
       readPointGLN: json['readPointGLN'],
       identifierType: json['identifierType'] as String?,
-      epcUris: json['epcUris'] != null
-          ? List<String>.from(json['epcUris'])
-          : null,
+      canonicalIdentifiers: json['canonicalIdentifiers'] != null
+          ? List<String>.from(json['canonicalIdentifiers'])
+          : json['epcUris'] != null
+              ? List<String>.from(json['epcUris'])
+              : null,
     );
   }
 }
@@ -352,7 +354,7 @@ class CommissioningResponse {
 class CommissioningItemResult {
   String serialNumber;
   String? sgtinId;
-  String? epcUri;
+  String? canonicalIdentifier;
   String? eventId;
   bool success;
   String? errorMessage;
@@ -361,7 +363,7 @@ class CommissioningItemResult {
   CommissioningItemResult({
     required this.serialNumber,
     this.sgtinId,
-    this.epcUri,
+    this.canonicalIdentifier,
     this.eventId,
     required this.success,
     this.errorMessage,
@@ -372,7 +374,7 @@ class CommissioningItemResult {
     return CommissioningItemResult(
       serialNumber: json['serialNumber'] as String? ?? '',
       sgtinId: json['sgtinId']?.toString(),
-      epcUri: json['epcUri'] as String?,
+      canonicalIdentifier: _parseCanonicalIdentifier(json),
       eventId: json['eventId'] as String?,
       success: json['success'] as bool? ?? false,
       errorMessage: json['errorMessage'] as String?,
@@ -384,7 +386,8 @@ class CommissioningItemResult {
     return {
       'serialNumber': serialNumber,
       'sgtinId': sgtinId,
-      'epcUri': epcUri,
+      if (canonicalIdentifier != null)
+        'canonicalIdentifier': canonicalIdentifier,
       'eventId': eventId,
       'success': success,
       'errorMessage': errorMessage,
@@ -486,14 +489,14 @@ class CommissioningBatch {
 
 class CommissioningBatchItem {
   final String serialNumber;
-  final String? epcUri;
+  final String? canonicalIdentifier;
   final int? sgtinId;
   final bool success;
   final String? errorMessage;
 
   const CommissioningBatchItem({
     required this.serialNumber,
-    this.epcUri,
+    this.canonicalIdentifier,
     this.sgtinId,
     required this.success,
     this.errorMessage,
@@ -502,10 +505,24 @@ class CommissioningBatchItem {
   factory CommissioningBatchItem.fromJson(Map<String, dynamic> json) {
     return CommissioningBatchItem(
       serialNumber: json['serialNumber'] as String? ?? '',
-      epcUri: json['epcUri'] as String?,
+      canonicalIdentifier: _parseCanonicalIdentifier(json),
       sgtinId: (json['sgtinId'] as num?)?.toInt(),
       success: json['success'] as bool? ?? false,
       errorMessage: json['errorMessage'] as String?,
     );
   }
+}
+
+String? _parseCanonicalIdentifier(Map<String, dynamic> json) {
+  final canonical = json['canonicalIdentifier'];
+  if (canonical is String && canonical.trim().isNotEmpty) {
+    return canonical.trim();
+  }
+  for (final key in ['epcUri', 'gs1DigitalLinkUri', 'ssccUri']) {
+    final value = json[key];
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+  }
+  return null;
 }

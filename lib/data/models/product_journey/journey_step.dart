@@ -129,6 +129,11 @@ class JourneyStep extends Equatable {
       locationGLN: json['locationGLN']?.toString(),
       locationName: json['locationName']?.toString(),
       locationAddress: json['locationAddress']?.toString(),
+      coordinates: json['coordinates'] is Map
+          ? GeospatialCoordinates.fromJson(
+              Map<String, dynamic>.from(json['coordinates'] as Map),
+            )
+          : null,
       action: json['action']?.toString(),
       parentId: json['parentEpc']?.toString(),
       childEpcs: json['epcs'] != null

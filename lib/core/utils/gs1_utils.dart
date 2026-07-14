@@ -1,5 +1,9 @@
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 
+/// Legacy GS1 helpers for SSCC check-digit utilities.
+///
+/// For EPC URI generation use [Gs1Converter] / [EPCURIConverter] instead.
 class GS1Utils {
   static const Map<String, int> _aiLengths = {
     '00': 18,
@@ -20,48 +24,23 @@ class GS1Utils {
   };
 
   static String convertToSGTIN(String gtin, String serialNumber) {
-    if (gtin.length < 14) {
-      gtin = gtin.padLeft(14, '0');
-    }
-
-    final String companyPrefix = gtin.substring(1, 8);
-    final String itemRef = gtin.substring(8, 13);
-    
-    return 'urn:epc:id:sgtin:$companyPrefix.$itemRef.$serialNumber';
+    return Gs1Converter.gtinSerialToEpc(gtin, serialNumber) ??
+        'https://id.gs1.org/01/${gtin.padLeft(14, '0')}/21/$serialNumber';
   }
 
   static String convertToGTINClassEPC(String gtin) {
-    if (gtin.length < 14) {
-      gtin = gtin.padLeft(14, '0');
-    }
-
-    final String companyPrefix = gtin.substring(1, 8);
-    final String itemRef = gtin.substring(8, 13);
-    
-    return 'urn:epc:idpat:sgtin:$companyPrefix.$itemRef.*';
+    return Gs1Converter.gtinToClassEpc(gtin) ??
+        'https://id.gs1.org/01/${gtin.padLeft(14, '0')}';
   }
 
   static String convertToSSCCEPC(String sscc) {
-    if (sscc.length < 18) {
-      sscc = sscc.padLeft(18, '0');
-    }
-
-    final String extensionDigit = sscc[0];
-    final String companyPrefix = sscc.substring(1, 8);
-    final String serialRef = sscc.substring(8, 17);
-    
-    return 'urn:epc:id:sscc:$companyPrefix.$extensionDigit$serialRef';
+    final padded = sscc.padLeft(18, '0');
+    return Gs1Converter.ssccToEpc(padded) ?? 'https://id.gs1.org/00/$padded';
   }
 
   static String convertToGLNEPC(String gln, [String? extension]) {
-    if (gln.length < 13) {
-      gln = gln.padLeft(13, '0');
-    }
-
-    final String companyPrefix = gln.substring(0, 7);
-    final String locationRef = gln.substring(7, 12);
-    
-    return 'urn:epc:id:sgln:$companyPrefix.$locationRef.${extension ?? ""}';
+    return Gs1Converter.glnToEpc(gln, extension: extension ?? '0') ??
+        'https://id.gs1.org/414/${gln.padLeft(13, '0')}';
   }
 
   static Map<String, String> parseGS1Data(String barcodeData) {

@@ -106,6 +106,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/images/logo/
+    - ../backend/src/main/resources/gs1/gcpprefixformatlist.json
 
   fonts:
     - family: Nekst

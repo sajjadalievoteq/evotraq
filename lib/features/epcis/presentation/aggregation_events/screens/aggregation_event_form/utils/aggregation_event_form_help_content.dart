@@ -30,8 +30,9 @@ abstract final class AggregationEventFormHelpContent {
           '(Serial Shipping Container Code). In pharmaceutical supply chains, this usually identifies a case, '
           'pallet, tote, or shipping container that contains multiple product items.\n\n'
           'Format examples:\n'
-          '• URN format: urn:epc:id:sscc:0614141.1234567890\n'
-          '• GS1 barcode format: (00)00614141123456789',
+          '• Digital Link (preferred): https://id.gs1.org/00/106141412345678908\n'
+          '• GS1 barcode format: (00)006141411234567890\n'
+          '• URN (accepted): urn:epc:id:sscc:0614141.1234567890',
     },
     'childEPCs': {
       'title': 'Child EPCs',
@@ -40,8 +41,9 @@ abstract final class AggregationEventFormHelpContent {
           'In pharmaceutical track and trace, these are typically SGTINs (Serialized Global Trade Item Numbers) '
           'representing individual product packages.\n\n'
           'Format examples:\n'
-          '• URN format: urn:epc:id:sgtin:0614141.112345.1234567\n'
-          '• GS1 barcode format: (01)00614141123451(21)1234567\n\n'
+          '• Digital Link (preferred): https://id.gs1.org/01/10614141123459/21/1234567\n'
+          '• GS1 barcode format: (01)00614141123451(21)1234567\n'
+          '• URN (accepted): urn:epc:id:sgtin:0614141.112345.1234567\n\n'
           'Multiple child EPCs should be separated by commas.',
     },
     'businessStep': {

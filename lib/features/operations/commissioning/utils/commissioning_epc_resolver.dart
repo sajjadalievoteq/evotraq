@@ -7,13 +7,15 @@ import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_pool_match.dart';
+import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_checker.dart';
 
 sealed class CommissioningEpcResolveOutcome {}
 
 class CommissioningEpcResolved extends CommissioningEpcResolveOutcome {
-  CommissioningEpcResolved(this.parsed);
+  CommissioningEpcResolved(this.parsed, {this.poolCheck});
 
   final EPCParseResult parsed;
+  final CommissioningPoolCheckResult? poolCheck;
 }
 
 class CommissioningEpcResolveError extends CommissioningEpcResolveOutcome {
@@ -33,11 +35,14 @@ class CommissioningEpcResolver {
   const CommissioningEpcResolver({
     required SGTINService sgtinService,
     required SSCCService ssccService,
+    required CommissioningSerialPoolChecker poolChecker,
   })  : _sgtinService = sgtinService,
-        _ssccService = ssccService;
+        _ssccService = ssccService,
+        _poolChecker = poolChecker;
 
   final SGTINService _sgtinService;
   final SSCCService _ssccService;
+  final CommissioningSerialPoolChecker _poolChecker;
 
   Future<CommissioningEpcResolveOutcome> resolve(String rawInput) async {
     final trimmed = rawInput.trim();
@@ -68,8 +73,12 @@ class CommissioningEpcResolver {
   Future<CommissioningEpcResolveOutcome> _resolveBareSerial(
     String serial,
   ) async {
-    final sgtinMatches = await _searchSgtinBySerial(serial);
-    final ssccMatch = await _searchSsccByCode(serial);
+    final results = await Future.wait([
+      _searchSgtinBySerial(serial),
+      _searchSsccByCode(serial),
+    ]);
+    final sgtinMatches = results[0] as List<CommissioningPoolMatch>;
+    final ssccMatch = results[1] as CommissioningPoolMatch?;
 
     final matches = <CommissioningPoolMatch>[
       ...sgtinMatches,
@@ -80,7 +89,11 @@ class CommissioningEpcResolver {
       return CommissioningEpcResolveError('Serial not pre-allocated');
     }
     if (matches.length == 1) {
-      return CommissioningEpcResolved(matches.first.parsed);
+      final match = matches.first;
+      return CommissioningEpcResolved(
+        match.parsed,
+        poolCheck: match.poolCheck,
+      );
     }
     return CommissioningEpcResolveAmbiguous(matches);
   }
@@ -98,9 +111,9 @@ class CommissioningEpcResolver {
             const <SGTIN>[];
 
     return content.map((sgtin) {
-      final epc = sgtin.epcUri ??
+      final epc = sgtin.canonicalIdentifier ??
           Gs1Converter.gtinSerialToEpc(sgtin.gtinCode, sgtin.serialNumber) ??
-          'urn:epc:id:sgtin:.${sgtin.serialNumber}';
+          'https://id.gs1.org/01/${sgtin.gtinCode.padLeft(14, '0')}/21/${sgtin.serialNumber}';
       final parsed = EPCParseResult(
         type: EPCType.sgtin,
         epc: epc,
@@ -109,10 +122,13 @@ class CommissioningEpcResolver {
         raw: serial,
         detectedFormat: 'Pool lookup (bare serial)',
       );
+      final poolCheck = _poolChecker.resultFromSgtin(sgtin);
       return CommissioningPoolMatch(
         parsed: parsed,
-        label: 'SGTIN ${sgtin.gtinCode} / ${sgtin.serialNumber} (${sgtin.status.name})',
+        label:
+            'SGTIN ${sgtin.gtinCode} / ${sgtin.serialNumber} (${sgtin.status.name})',
         sourceStatus: sgtin.status.name,
+        poolCheck: poolCheck,
       );
     }).toList();
   }
@@ -124,20 +140,22 @@ class CommissioningEpcResolver {
     }
     try {
       final sscc = await _ssccService.getSSCCByCode(stripped);
-      final epc = sscc.ssccUri ??
+      final epc = sscc.canonicalIdentifier ??
           Gs1Converter.ssccToEpc(stripped) ??
-          'urn:epc:id:sscc:$stripped';
+          'https://id.gs1.org/00/$stripped';
+      final parsed = EPCParseResult(
+        type: EPCType.sscc,
+        epc: epc,
+        sscc: stripped,
+        raw: input,
+        detectedFormat: 'Pool lookup (bare SSCC)',
+        companyPrefix: sscc.gs1CompanyPrefix,
+      );
       return CommissioningPoolMatch(
-        parsed: EPCParseResult(
-          type: EPCType.sscc,
-          epc: epc,
-          sscc: stripped,
-          raw: input,
-          detectedFormat: 'Pool lookup (bare SSCC)',
-          companyPrefix: sscc.gs1CompanyPrefix,
-        ),
+        parsed: parsed,
         label: 'SSCC $stripped (${sscc.status.name})',
         sourceStatus: sscc.status.name,
+        poolCheck: _poolChecker.resultFromSscc(sscc),
       );
     } catch (_) {
       return null;
@@ -154,6 +172,6 @@ class CommissioningEpcResolver {
     if (value.startsWith('00') && value.length >= 18) return true;
     final digits = GtinFormat.stripGtinInput(value);
     if (RegExp(r'^\d{8,14}$').hasMatch(digits)) return true;
-  return RegExp(r'^\d{14}\s+\S').hasMatch(value);
+    return RegExp(r'^\d{14}\s+\S').hasMatch(value);
   }
 }

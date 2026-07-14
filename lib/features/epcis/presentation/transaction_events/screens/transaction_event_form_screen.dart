@@ -440,7 +440,7 @@ class _TransactionEventFormScreenState extends State<TransactionEventFormScreen>
                             const SizedBox(height: 4),
                             const Text(
                               'Formats accepted:\n'
-                              '• URI: urn:epc:id:sgtin:CompanyPrefix.ItemReference.SerialNumber\n'
+                              '• Digital Link: https://id.gs1.org/01/<GTIN-14>/21/<SerialNumber>\n'
                               '• GS1: (01)05415062325810(21)70005188444899',
                               style: TextStyle(
                                 fontSize: 12,

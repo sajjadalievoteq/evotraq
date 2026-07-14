@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
@@ -188,13 +189,13 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                 hintText: 'Enter EPC or serial number',
                 border: OutlineInputBorder(),
               ),
-              helpText: 'Example: urn:epc:id:sgtin:0614141.107346.2017',
+              helpText: 'Example: https://id.gs1.org/01/10614141073464/21/2017',
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'EPC is required';
                 }
-                if (!value.startsWith('urn:epc:')) {
-                  return 'EPC must be in proper format (urn:epc:...)';
+                if (!Gs1CanonicalIdentifier.isValid(value)) {
+                  return 'EPC must be a valid GS1 identity (Digital Link, URN, or barcode)';
                 }
                 return null;
               },
@@ -280,10 +281,14 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                       hintText: 'Enter read point',
                       border: OutlineInputBorder(),
                     ),
-                    helpText: 'Example: urn:epc:id:sgln:0614141.00777.0',
+                    helpText: 'Example: https://id.gs1.org/414/0614141007776',
                     validator: (value) {
-                      if (value != null && value.isNotEmpty && !value.startsWith('urn:epc:id:sgln:')) {
-                        return 'Read point should be a valid SGLN';
+                      if (value == null || value.isEmpty) return null;
+                      final ok = RegExp(r'^\d{13}$').hasMatch(value) ||
+                          Gs1CanonicalIdentifier.classify(value) ==
+                              Gs1CanonicalKind.sgln;
+                      if (!ok) {
+                        return 'Read point should be a GLN or Digital Link (414)';
                       }
                       return null;
                     },
@@ -300,10 +305,14 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                       hintText: 'Enter business location',
                       border: OutlineInputBorder(),
                     ),
-                    helpText: 'Example: urn:epc:id:sgln:0614141.00888.0',
+                    helpText: 'Example: https://id.gs1.org/414/0614141008889',
                     validator: (value) {
-                      if (value != null && value.isNotEmpty && !value.startsWith('urn:epc:id:sgln:')) {
-                        return 'Business location should be a valid SGLN';
+                      if (value == null || value.isEmpty) return null;
+                      final ok = RegExp(r'^\d{13}$').hasMatch(value) ||
+                          Gs1CanonicalIdentifier.classify(value) ==
+                              Gs1CanonicalKind.sgln;
+                      if (!ok) {
+                        return 'Business location should be a GLN or Digital Link (414)';
                       }
                       return null;
                     },

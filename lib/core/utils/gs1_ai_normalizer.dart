@@ -1,5 +1,7 @@
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-
+import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
 final _aiElement = RegExp(r'\((\d{2,4})\)([^(]*)');
 
@@ -19,19 +21,37 @@ String? gs1AiToEpcUri(String input) {
   final ais = _parseAis(trimmed);
   if (ais.isEmpty) return null;
 
-  final sscc = ais['00'];
+  final ai00 = ais['00'];
   final gtin = ais['01'];
   final lot = ais['10'];
   final serial = ais['21'];
 
-  if (sscc != null && sscc.isNotEmpty) {
-    final s18 = sscc.padLeft(18, '0');
-    if (!RegExp(r'^\d{18}$').hasMatch(s18)) return null;
-    return Gs1Converter.ssccToEpc(s18);
+  final ai00Digits = ai00?.replaceAll(RegExp(r'\D'), '') ?? '';
+
+  // True SSCC only when AI(00) carries a real 18-digit SSCC.
+  // Do not left-pad shorter values (e.g. a 14-digit GTIN mistyped as AI 00).
+  if (ai00Digits.length == 18 && SsccFormat.isValidSscc(ai00Digits)) {
+    return Gs1Converter.ssccToEpc(ai00Digits);
   }
 
-  if (gtin != null && gtin.isNotEmpty) {
-    final gtin14 = gtin.padLeft(14, '0');
+  // SGTIN: AI(01)+AI(21), or AI(00)+AI(21) when AI(00) is GTIN-shaped (common scan typo).
+  var gtinCandidate = gtin?.replaceAll(RegExp(r'\D'), '') ?? '';
+  if (gtinCandidate.isEmpty &&
+      ai00Digits.isNotEmpty &&
+      serial != null &&
+      serial.isNotEmpty &&
+      const {8, 12, 13, 14}.contains(ai00Digits.length)) {
+    gtinCandidate = ai00Digits;
+  }
+
+  if (gtinCandidate.isNotEmpty) {
+    if (!GtinFormat.isValidGtin(gtinCandidate) &&
+        !RegExp(r'^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$').hasMatch(gtinCandidate)) {
+      return null;
+    }
+    final gtin14 = gtinCandidate.length == 14
+        ? gtinCandidate
+        : gtinCandidate.padLeft(14, '0');
     if (!RegExp(r'^\d{14}$').hasMatch(gtin14)) return null;
 
     if (serial != null && serial.isNotEmpty) {
@@ -48,17 +68,27 @@ String? gs1AiToEpcUri(String input) {
   return null;
 }
 
+/// Normalizes scan/API input to canonical GS1 Digital Link for storage.
 String normalizeEpcInput(String input) {
   final trimmed = input.trim();
+  if (trimmed.isEmpty) return trimmed;
+
   if (isGS1AiNotation(trimmed)) {
-    return gs1AiToEpcUri(trimmed) ?? trimmed;
+    final fromAi = gs1AiToEpcUri(trimmed);
+    if (fromAi != null) return EPCURIConverter.normalizeForStorage(fromAi);
+    return trimmed;
   }
-  if (trimmed.startsWith('https://id.gs1.org/')) {
-    return Gs1Converter.barcodeToEpc(trimmed) ?? trimmed;
+
+  if (trimmed.startsWith('https://id.gs1.org/') ||
+      trimmed.startsWith('urn:epc:')) {
+    return EPCURIConverter.normalizeForStorage(trimmed);
   }
+
+  final converted = Gs1Converter.barcodeToEpc(trimmed);
+  if (converted != null) return converted;
+
   return trimmed;
 }
-
 
 String _stripFnc1Prefix(String s) {
   for (final prefix in _fnc1Prefixes) {

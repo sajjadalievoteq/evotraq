@@ -118,7 +118,7 @@ class _GS1ValidationDemoScreenState extends State<GS1ValidationDemoScreen>
               
               _buildSection(
                 'SGTIN Validation',
-                'Enter a SGTIN to validate (e.g., urn:epc:id:sgtin:...)',
+                'Enter a SGTIN to validate (e.g., https://id.gs1.org/01/…/21/…)',
                 _sgtinController,
                 'sgtin',
               ),

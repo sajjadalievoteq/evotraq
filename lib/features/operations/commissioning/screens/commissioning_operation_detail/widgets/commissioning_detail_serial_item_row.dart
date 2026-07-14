@@ -42,9 +42,9 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (item.epcUri != null)
+                if (item.canonicalIdentifier != null)
                   Text(
-                    item.epcUri!,
+                    item.canonicalIdentifier!,
                     style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -56,14 +56,14 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
               ],
             ),
           ),
-          if (item.epcUri != null)
+          if (item.canonicalIdentifier != null)
             IconButton(
               icon: TraqIcon(AppAssets.iconAggregate, size: 16),
               tooltip: 'View hierarchy',
               visualDensity: VisualDensity.compact,
               onPressed: () => openHierarchyScreen(
                 context,
-                epc: item.epcUri!,
+                epc: item.canonicalIdentifier!,
                 title: 'Commissioning Hierarchy',
               ),
             ),

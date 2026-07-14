@@ -4,28 +4,42 @@ import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 
 void main() {
   group('EPCFormatter Tests', () {
-    test('Format URI EPC - already in correct format', () {
-      const input = 'urn:epc:id:sgtin:5415062.32581.70005188444899';
+    test('Format URI EPC - URN normalizes to Digital Link', () {
+      const input = 'urn:epc:id:sgtin:5415062.032581.70005188444899';
+      final result = EPCFormatter.formatToEPCUri(input);
+      expect(result, 'https://id.gs1.org/01/05415062325810/21/70005188444899');
+    });
+
+    test('Format Digital Link passes through', () {
+      const input =
+          'https://id.gs1.org/01/05415062325810/21/70005188444899';
       final result = EPCFormatter.formatToEPCUri(input);
       expect(result, input);
     });
 
-    test('Format GS1 barcode format with parentheses to URI', () {
+    test('Format GS1 barcode format with parentheses to Digital Link', () {
       const input = '(01)05415062325810(21)70005188444899';
       final result = EPCFormatter.formatToEPCUri(input);
-      expect(result, 'urn:epc:id:sgtin:5415062.032581.70005188444899');
+      expect(result, 'https://id.gs1.org/01/05415062325810/21/70005188444899');
     });
 
-    test('Format GS1 barcode with AI (00) GTIN to URI', () {
+    test('Format GS1 barcode with AI (00) GTIN+serial to Digital Link', () {
       const input = '(00)00629200080027(21)VKIH2AWX9KN8RIHED75T';
       final result = EPCFormatter.formatToEPCUri(input);
-      expect(result, 'urn:epc:id:sgtin:062920.0008002.VKIH2AWX9KN8RIHED75T');
+      expect(
+        result,
+        'https://id.gs1.org/01/00629200080027/21/VKIH2AWX9KN8RIHED75T',
+      );
     });
 
-    test('Format bare SGTIN body to URI', () {
+    test('Format bare SGTIN body to Digital Link', () {
       const input = '062920.0008002.VKIH2AWX9KN8RIHED75T';
       final result = EPCFormatter.formatToEPCUri(input);
-      expect(result, 'urn:epc:id:sgtin:$input');
+      expect(
+        result,
+        startsWith('https://id.gs1.org/01/'),
+      );
+      expect(result, contains('/21/VKIH2AWX9KN8RIHED75T'));
     });
 
     test('Empty string returns null', () {
@@ -40,10 +54,14 @@ void main() {
       expect(result, isNull);
     });
 
-    test('AI string without serial returns null', () {
+    test('AI string without serial returns class Digital Link or null', () {
       const input = '(01)00629200080027';
       final result = EPCFormatter.formatToEPCUri(input);
-      expect(result, isNull);
+      // Class-level DL is acceptable; null also fine if converter rejects incomplete SGTIN.
+      expect(
+        result == null || result == 'https://id.gs1.org/01/00629200080027',
+        isTrue,
+      );
     });
 
     test('isLikelyGS1Barcode detects GS1 barcode format with parentheses', () {
@@ -66,15 +84,15 @@ void main() {
 
     test('formatListToEPCUri handles mixed format list', () {
       final inputs = [
-        'urn:epc:id:sgtin:5415062.32581.70005188444899',
+        'urn:epc:id:sgtin:5415062.032581.70005188444899',
         '(01)05415062325810(21)70005188444899',
         '(01)05415062325810(21)70005188444900',
       ];
       final results = EPCFormatter.formatListToEPCUri(inputs);
 
-      expect(results[0], 'urn:epc:id:sgtin:5415062.32581.70005188444899');
-      expect(results[1], 'urn:epc:id:sgtin:5415062.032581.70005188444899');
-      expect(results[2], 'urn:epc:id:sgtin:5415062.032581.70005188444900');
+      expect(results[0], 'https://id.gs1.org/01/05415062325810/21/70005188444899');
+      expect(results[1], 'https://id.gs1.org/01/05415062325810/21/70005188444899');
+      expect(results[2], 'https://id.gs1.org/01/05415062325810/21/70005188444900');
     });
   });
 

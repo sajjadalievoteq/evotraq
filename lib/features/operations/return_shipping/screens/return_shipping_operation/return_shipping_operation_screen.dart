@@ -1,12 +1,11 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
@@ -93,8 +92,12 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     if (ctx == null || !ctx.isValid) return;
 
     final builder = PharmaReturnContextBuilder();
-    final source = await builder.loadGln(ctx.returnShippingSourceGln);
-    final destination = await builder.loadGln(ctx.returnShippingDestinationGln);
+    final results = await Future.wait([
+      builder.loadGln(ctx.returnShippingSourceGln),
+      builder.loadGln(ctx.returnShippingDestinationGln),
+    ]);
+    final source = results[0];
+    final destination = results[1];
 
     if (!mounted) return;
     setState(() {
@@ -380,12 +383,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
           }
           widget.onEmbeddedActionSuccess!();
         } else {
-          if (!context.isDesktop && response.navigableOperationId != null) {
-            context.go(
-                '${Constants.opReturnShippingRoute}/${response.navigableOperationId}');
-          } else {
-            context.go(Constants.opReturnShippingRoute);
-          }
+          popOrGo(context, Constants.opReturnShippingRoute);
         }
       } else {
         context.showError(OperationErrorTranslator.translateMessages(
@@ -425,7 +423,8 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    await _checkEpcStatus(barcode);
+    // Soft warning is advisory â€” don't block toast / next scan on status round-trip.
+    _checkEpcStatus(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
     }

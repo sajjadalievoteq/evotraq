@@ -143,15 +143,34 @@ class DioService {
     debugPrint(buffer.toString());
   }
 
+  /// Public auth/verification routes that must not carry a stale Bearer token.
+  static const Set<String> _publicAuthPathSuffixes = {
+    '/auth/login',
+    '/auth/register',
+    '/auth/check-username',
+    '/auth/resend-verification-email',
+    '/auth/password-reset-request',
+    '/auth/validate-reset-token',
+    '/auth/reset-password',
+    '/verification/verify-email',
+  };
+
+  bool _isPublicAuthRequest(RequestOptions options) {
+    final path = options.uri.path;
+    return _publicAuthPathSuffixes.any(path.endsWith);
+  }
+
   void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (!options.headers.containsKey('Authorization')) {
+          if (_isPublicAuthRequest(options)) {
+            options.headers.remove('Authorization');
+          } else if (!options.headers.containsKey('Authorization')) {
             final token = await _secureStorage.read(
               key: AppConfig.authTokenKey,
             );
-            if (token != null) {
+            if (token != null && token.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $token';
             }
           }
@@ -160,13 +179,21 @@ class DioService {
 
           return handler.next(options);
         },
-        onResponse: (response, handler) {
+        onResponse: (response, handler) async {
           _logResponse(response);
+          if (response.statusCode == 401 &&
+              !_isPublicAuthRequest(response.requestOptions)) {
+            await removeAuthToken();
+          }
 
           return handler.next(response);
         },
-        onError: (DioException e, handler) {
+        onError: (DioException e, handler) async {
           _logError(e);
+          if (e.response?.statusCode == 401 &&
+              !_isPublicAuthRequest(e.requestOptions)) {
+            await removeAuthToken();
+          }
 
           return handler.next(e);
         },

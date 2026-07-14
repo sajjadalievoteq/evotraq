@@ -54,6 +54,44 @@ class DashboardService {
     );
   }
 
+  /// Loads master-data counts, recent events, and event totals from the same
+  /// event list responses (avoids a second round of size=1 event count calls).
+  Future<({DashboardStats stats, List<RecentEvent> recentEvents})>
+      getStatsAndRecentEvents({int recentLimit = 10}) async {
+    final token = await _dioService.getAuthToken();
+    final headers = _buildHeaders(token);
+
+    final results = await Future.wait([
+      _fetchCount('${_dioService.baseUrl}/master-data/gtins', headers),
+      _fetchCount('${_dioService.baseUrl}/master-data/glns', headers),
+      _fetchCount('${_dioService.baseUrl}/identifiers/sgtins', headers),
+      _fetchCount(
+        '${_dioService.baseUrl}${SsccServiceConstants.pathBase}',
+        headers,
+      ),
+      _fetchRecentEventsPage(headers, recentLimit),
+      _fetchCommissioningThroughput(headers, 24),
+    ]);
+
+    final eventPage = results[4] as _RecentEventsPage;
+    final throughput = results[5] as _ThroughputResult;
+    final totalEvents =
+        eventPage.counts.values.fold(0, (sum, count) => sum + count);
+
+    final stats = DashboardStats(
+      gtinCount: results[0] as int,
+      glnCount: results[1] as int,
+      sgtinCount: results[2] as int,
+      ssccCount: results[3] as int,
+      totalEvents: totalEvents,
+      eventsByType: eventPage.counts,
+      throughputBuckets: throughput.buckets,
+      throughputTotal: throughput.total,
+    );
+
+    return (stats: stats, recentEvents: eventPage.events);
+  }
+
   Future<int> _fetchCount(String url, Map<String, String> headers) async {
     try {
       final response = await _dioService.get(
@@ -135,17 +173,41 @@ class DashboardService {
   Future<List<RecentEvent>> getRecentEvents({int limit = 5}) async {
     final token = await _dioService.getAuthToken();
     final headers = _buildHeaders(token);
+    final page = await _fetchRecentEventsPage(headers, limit);
+    return page.events;
+  }
 
+  Future<_RecentEventsPage> _fetchRecentEventsPage(
+    Map<String, String> headers,
+    int limit,
+  ) async {
     try {
       final eventEndpoints = [
-        '${_dioService.baseUrl}/events/object?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_dioService.baseUrl}/events/aggregation?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_dioService.baseUrl}/events/transaction?page=0&size=$limit&sortBy=eventTime&direction=DESC',
-        '${_dioService.baseUrl}/transformation-events?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        (
+          'Object',
+          'ObjectEvent',
+          '${_dioService.baseUrl}/events/object?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        ),
+        (
+          'Aggregation',
+          'AggregationEvent',
+          '${_dioService.baseUrl}/events/aggregation?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        ),
+        (
+          'Transaction',
+          'TransactionEvent',
+          '${_dioService.baseUrl}/events/transaction?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        ),
+        (
+          'Transformation',
+          'TransformationEvent',
+          '${_dioService.baseUrl}/transformation-events?page=0&size=$limit&sortBy=eventTime&direction=DESC',
+        ),
       ];
 
       final responses = await Future.wait(
-        eventEndpoints.map((url) async {
+        eventEndpoints.map((endpoint) async {
+          final url = endpoint.$3;
           try {
             return await _dioService.get(
               url,
@@ -158,47 +220,50 @@ class DashboardService {
             return Response(
               requestOptions: RequestOptions(path: url),
               statusCode: 200,
-              data: '{"content":[]}',
+              data: '{"content":[],"totalElements":0}',
             );
           }
         }),
       );
 
-      List<RecentEvent> allEvents = [];
+      final allEvents = <RecentEvent>[];
+      final counts = <String, int>{};
 
-      final eventTypes = [
-        'ObjectEvent',
-        'AggregationEvent',
-        'TransactionEvent',
-        'TransformationEvent',
-      ];
+      for (var i = 0; i < responses.length; i++) {
+        final typeLabel = eventEndpoints[i].$1;
+        final eventType = eventEndpoints[i].$2;
+        counts[typeLabel] = 0;
 
-      for (int i = 0; i < responses.length; i++) {
-        if (responses[i].statusCode == 200) {
-          final data = json.decode(responses[i].data);
-          List<dynamic> events;
+        if (responses[i].statusCode != 200) continue;
 
-          if (data is Map && data.containsKey('content')) {
-            events = data['content'] as List<dynamic>;
-          } else if (data is List) {
-            events = data;
-          } else {
-            events = [];
-          }
+        final data = json.decode(responses[i].data);
+        List<dynamic> events;
+        if (data is Map && data.containsKey('content')) {
+          events = data['content'] as List<dynamic>;
+          counts[typeLabel] =
+              data['totalElements'] ?? data['total'] ?? events.length;
+        } else if (data is List) {
+          events = data;
+          counts[typeLabel] = data.length;
+        } else {
+          events = [];
+        }
 
-          for (var e in events) {
-            final map = e as Map<String, dynamic>;
-            map['eventType'] = eventTypes[i];
-            allEvents.add(RecentEvent.fromJson(map));
-          }
+        for (final e in events) {
+          final map = e as Map<String, dynamic>;
+          map['eventType'] = eventType;
+          allEvents.add(RecentEvent.fromJson(map));
         }
       }
 
       allEvents.sort((a, b) => b.eventTime.compareTo(a.eventTime));
-      return allEvents.take(limit).toList();
+      return _RecentEventsPage(
+        events: allEvents.take(limit).toList(),
+        counts: counts,
+      );
     } catch (e) {
       print('Error fetching recent events: $e');
-      return [];
+      return const _RecentEventsPage(events: [], counts: {});
     }
   }
 
@@ -282,4 +347,11 @@ class _ThroughputResult {
   final int total;
 
   const _ThroughputResult({required this.buckets, required this.total});
+}
+
+class _RecentEventsPage {
+  final List<RecentEvent> events;
+  final Map<String, int> counts;
+
+  const _RecentEventsPage({required this.events, required this.counts});
 }

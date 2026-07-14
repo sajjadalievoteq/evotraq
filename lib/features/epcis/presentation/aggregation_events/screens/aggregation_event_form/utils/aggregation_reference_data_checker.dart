@@ -4,12 +4,11 @@ import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_missing_reference.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 
 class AggregationReferenceDataChecker {
   AggregationReferenceDataChecker({
@@ -169,7 +168,11 @@ class AggregationReferenceDataChecker {
   String? _resolveEpcUri(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return null;
-    if (trimmed.startsWith('urn:epc:id:')) return trimmed;
+    if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
+        Gs1CanonicalIdentifier.isLotOrClassLevel(trimmed) ||
+        Gs1CanonicalIdentifier.isValid(trimmed)) {
+      return Gs1CanonicalIdentifier.forStorage(trimmed);
+    }
 
     final fromConverter = Gs1Converter.barcodeToEpc(trimmed);
     if (fromConverter != null) return fromConverter;
@@ -216,7 +219,7 @@ class AggregationReferenceDataChecker {
 
     try {
       final record = await _sgtinService.getSGTINBySerialNumber(serial);
-      final storedUri = record.epcUri?.trim();
+      final storedUri = record.canonicalIdentifier?.trim();
       if (storedUri != null &&
           storedUri.toLowerCase() == normalizedUri.toLowerCase()) {
         return true;
@@ -237,13 +240,6 @@ class AggregationReferenceDataChecker {
   }
 
   String? _ssccCodeFromEpc(String epc) {
-    final lower = epc.toLowerCase();
-    if (lower.startsWith('urn:epc:id:sscc:')) {
-      return SsccInputParser.parseToSsccCode(epc);
-    }
-
-    final digits = SsccFormat.stripSsccInput(epc);
-    if (digits.length == 18) return digits;
-    return null;
+    return Gs1CanonicalIdentifier.extractSscc18(epc);
   }
 }

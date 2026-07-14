@@ -11,22 +11,60 @@ import 'package:traqtrace_app/features/operations/shared/screens/generic_operati
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
 Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses(
+  CommissioningBatch? batch,
   List<CommissioningBatchItem> items,
 ) async {
+  final successItems = items
+      .where((i) => i.success && i.serialNumber.isNotEmpty)
+      .toList();
+  if (successItems.isEmpty) return {};
+
   final sgtinService = getIt<SGTINService>();
-  final successItems =
-      items.where((i) => i.success && i.serialNumber.isNotEmpty);
-  final futures = successItems.map((item) async {
+  final result = <String, ItemStatus>{};
+  final lot = batch?.batchLotNumber?.trim();
+  final gtinCode = batch?.gtinCode?.trim();
+
+  if (lot != null && lot.isNotEmpty) {
     try {
-      final sgtin =
-          await sgtinService.getSGTINBySerialNumber(item.serialNumber);
-      return MapEntry(item.serialNumber, sgtin.status);
+      final sgtins = await sgtinService.findSGTINsByBatchLotNumber(lot);
+      for (final sgtin in sgtins) {
+        if (gtinCode != null &&
+            gtinCode.isNotEmpty &&
+            sgtin.gtinCode != gtinCode) {
+          continue;
+        }
+        result[sgtin.serialNumber] = sgtin.status;
+      }
     } catch (_) {
-      return null;
+      // Fall through to per-serial lookups for any missing items.
     }
-  });
-  final entries = await Future.wait(futures);
-  return Map.fromEntries(entries.whereType<MapEntry<String, ItemStatus>>());
+  }
+
+  final missing = successItems
+      .where((item) => !result.containsKey(item.serialNumber))
+      .toList();
+  if (missing.isEmpty) return result;
+
+  const chunkSize = 8;
+  for (var i = 0; i < missing.length; i += chunkSize) {
+    final chunk = missing.skip(i).take(chunkSize);
+    final entries = await Future.wait(
+      chunk.map((item) async {
+        try {
+          final sgtin =
+              await sgtinService.getSGTINBySerialNumber(item.serialNumber);
+          return MapEntry(item.serialNumber, sgtin.status);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+    for (final entry in entries.whereType<MapEntry<String, ItemStatus>>()) {
+      result[entry.key] = entry.value;
+    }
+  }
+
+  return result;
 }
 
 Future<CommissioningDetailData> _loadCommissioningDetail(String id) async {
@@ -37,7 +75,7 @@ Future<CommissioningDetailData> _loadCommissioningDetail(String id) async {
   ]);
   final batch = results[0] as CommissioningBatch?;
   final items = (results[1] as List<CommissioningBatchItem>?) ?? [];
-  final itemStatuses = await _fetchCommissioningItemStatuses(items);
+  final itemStatuses = await _fetchCommissioningItemStatuses(batch, items);
   return CommissioningDetailData(
     batch: batch,
     items: items,

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
@@ -11,10 +12,15 @@ abstract final class EpcisEpcValidators {
       return required ? 'EPC is required' : null;
     }
     final trimmed = value.trim();
-    if (trimmed.startsWith('urn:epc:id:') ||
-        RegExp(r'\(\d+\)').hasMatch(trimmed) ||
-        trimmed.startsWith('https://id.gs1.org/')) {
-      return AggregationEventFormValidators.validateResolvedParentEpc(trimmed);
+    // Phase 2: normalize once at the validator boundary so URN / DL / AI
+    // are treated equivalently before form validation.
+    final canonical = Gs1CanonicalIdentifier.forStorage(trimmed);
+    if (Gs1CanonicalIdentifier.isValid(canonical) ||
+        Gs1CanonicalIdentifier.isValid(trimmed) ||
+        RegExp(r'\(\d+\)').hasMatch(trimmed)) {
+      return AggregationEventFormValidators.validateResolvedParentEpc(
+        Gs1CanonicalIdentifier.isValid(canonical) ? canonical : trimmed,
+      );
     }
     return 'Invalid EPC format: $trimmed';
   }

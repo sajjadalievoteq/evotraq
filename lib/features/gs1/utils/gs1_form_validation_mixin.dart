@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 
@@ -88,22 +89,22 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
     if (value == null || value.isEmpty) {
       return 'SGTIN is required';
     }
-    if (!value.startsWith('urn:epc:id:sgtin:') &&
-        !RegExp(r'\(01\)\d{14}\(21\)\w+').hasMatch(value)) {
-      return 'Invalid SGTIN format';
+    if (Gs1CanonicalIdentifier.isSgtin(value) ||
+        RegExp(r'\(01\)\d{14}\(21\)\w+').hasMatch(value)) {
+      return null;
     }
-    return null;
+    return 'Invalid SGTIN format. Expected https://id.gs1.org/01/…/21/…';
   }
 
   String? validateSSCC(String? value) {
     if (value == null || value.isEmpty) {
       return 'SSCC is required';
     }
-    if (!value.startsWith('urn:epc:id:sscc:') &&
-        !RegExp(r'\(00\)\d{18}').hasMatch(value)) {
-      return 'Invalid SSCC format';
+    if (Gs1CanonicalIdentifier.isSscc(value) ||
+        RegExp(r'\(00\)\d{18}').hasMatch(value)) {
+      return null;
     }
-    return null;
+    return 'Invalid SSCC format. Expected https://id.gs1.org/00/…';
   }
 
   String? validateCompanyPrefix(String? value) {
@@ -217,11 +218,16 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
       return 'EPC URI is required';
     }
 
+    if (Gs1CanonicalIdentifier.isValid(value) ||
+        Gs1CanonicalIdentifier.classify(value) != Gs1CanonicalKind.unknown) {
+      return null;
+    }
+
     final epcUriPattern = RegExp(
       r'^urn:epc:(id|class|idpat):(sgtin|sscc|sgln|grai|giai|gsrn|gdti|cpi):.+$',
     );
     if (!epcUriPattern.hasMatch(value)) {
-      return 'Invalid EPC URI format';
+      return 'Invalid EPC URI format. Prefer https://id.gs1.org/…';
     }
 
     return null;

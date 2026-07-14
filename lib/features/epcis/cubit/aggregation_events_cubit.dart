@@ -6,6 +6,7 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_list_utils.dart';
+import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 
 
@@ -173,6 +174,8 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }
 
     codesToFetch.removeWhere(_glnCache.containsKey);
+    _seedGlnCacheFromCatalog(codesToFetch);
+    codesToFetch.removeWhere(_glnCache.containsKey);
 
     if (codesToFetch.isNotEmpty) {
       final results = await Future.wait(
@@ -210,6 +213,17 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
         readPoint: resolvedReadPt,
       );
     }).toList();
+  }
+
+  void _seedGlnCacheFromCatalog(Iterable<String> codes) {
+    if (!getIt.isRegistered<GlnPickerCatalog>()) return;
+    final catalog = getIt<GlnPickerCatalog>();
+    if (!catalog.isLoaded) return;
+    for (final code in codes) {
+      if (_glnCache.containsKey(code)) continue;
+      final hit = resolveGlnInCatalog(code, catalog.items);
+      if (hit != null) _glnCache[code] = hit;
+    }
   }
 
   Future<AggregationEvent> _enrichOne(AggregationEvent event) async {

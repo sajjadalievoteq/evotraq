@@ -85,6 +85,14 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<JourneyCubit, JourneyState>(
+      buildWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.journey != current.journey ||
+          previous.searchResults != current.searchResults ||
+          previous.isSearching != current.isSearching ||
+          previous.selectedStep != current.selectedStep ||
+          previous.errorMessage != current.errorMessage ||
+          previous.eventFilter != current.eventFilter,
       builder: (context, state) => SplitOrListIndexedStack(
         split: MasterDetailSplitLayout(
           narrowListFlex: 22,

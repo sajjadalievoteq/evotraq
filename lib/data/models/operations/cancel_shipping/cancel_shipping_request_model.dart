@@ -9,6 +9,7 @@ class CancelShippingRequest {
     this.sourceLocation,
     this.destinationLocation,
     required this.cancelReason,
+    required this.actingGln,
     this.originalShippingReference,
     this.comments,
     this.eventTime,
@@ -21,6 +22,8 @@ class CancelShippingRequest {
   final OperationGlnDisplay? sourceLocation;
   final OperationGlnDisplay? destinationLocation;
   final String cancelReason;
+  /// Shipper / source GLN authorizing the cancel (CX-7).
+  final String actingGln;
   final String? originalShippingReference;
   final String? comments;
   final DateTime? eventTime;
@@ -36,6 +39,7 @@ class CancelShippingRequest {
       if (destinationLocation != null)
         'destinationLocation': destinationLocation!.toJson(),
       'cancelReason': cancelReason,
+      'actingGln': actingGln,
       if (originalShippingReference != null &&
           originalShippingReference!.isNotEmpty)
         'originalShippingReference': originalShippingReference,

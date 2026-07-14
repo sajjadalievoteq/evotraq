@@ -1,7 +1,9 @@
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
+import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
@@ -44,10 +46,14 @@ class PharmaReturnContextBuilder {
       if (!accepted) return null;
     }
 
-    final alreadyReturnShipped = await _hasReturnShippingInTransit(epcs);
+    final checks = await Future.wait([
+      _hasReturnShippingInTransit(epcs),
+      _resolveProduct(epcs),
+    ]);
+    final alreadyReturnShipped = checks[0] as bool;
     if (alreadyReturnShipped) return null;
 
-    final product = await _resolveProduct(epcs);
+    final product = checks[1] as _ProductSnapshot;
     final senderGln =
         PharmaReturnEligibility.normalizeGln(operation.sourceGLN) ?? '';
     final receiverGln =
@@ -79,23 +85,22 @@ class PharmaReturnContextBuilder {
     PharmaReturnReason? resolvedReason = returnReason;
     String? resolvedReturnShippingEventId = returnShippingEventId;
 
+    final epcEvents = await _findEventsForEpcs(epcs);
+    final alreadyReceived = epcEvents.any(
+      (e) => PharmaReturnEligibility.isReturnAlreadyReceived(
+        businessStep: e.businessStep,
+        disposition: e.disposition,
+      ),
+    );
+    if (alreadyReceived) return null;
+
     if (resolvedReason == null) {
-      ObjectEvent? inTransitEvent;
-      for (final epc in epcs) {
-        try {
-          final epcEvents =
-              await _objectEventService.findObjectEventsByEPC(epc);
-          inTransitEvent = epcEvents.where((event) {
-            return PharmaReturnEligibility.isReturnShippingInTransit(
-              businessStep: event.businessStep,
-              disposition: event.disposition,
-            );
-          }).firstOrNull;
-          if (inTransitEvent != null) break;
-        } catch (_) {
-          continue;
-        }
-      }
+      final inTransitEvent = epcEvents.where((event) {
+        return PharmaReturnEligibility.isReturnShippingInTransit(
+          businessStep: event.businessStep,
+          disposition: event.disposition,
+        );
+      }).firstOrNull;
       if (inTransitEvent == null) return null;
       resolvedReturnShippingEventId = inTransitEvent.eventId;
       final ilmd = inTransitEvent.ilmd ?? const {};
@@ -104,9 +109,6 @@ class PharmaReturnContextBuilder {
       );
       if (resolvedReason == null) return null;
     }
-
-    final alreadyReceived = await _hasReturnAlreadyReceived(epcs);
-    if (alreadyReceived) return null;
 
     final product = await _resolveProduct(epcs);
     return PharmaReturnContext(
@@ -151,40 +153,35 @@ class PharmaReturnContextBuilder {
     }
   }
 
-  Future<bool> _hasReturnShippingInTransit(List<String> epcs) async {
-    for (final epc in epcs) {
+  static const _epcBatchSize = 50;
+
+  Future<List<ObjectEvent>> _findEventsForEpcs(List<String> epcs) async {
+    if (epcs.isEmpty) return const [];
+    final all = <ObjectEvent>[];
+    for (var i = 0; i < epcs.length; i += _epcBatchSize) {
+      final end = i + _epcBatchSize;
+      final chunk = epcs.sublist(i, end > epcs.length ? epcs.length : end);
       try {
-        final events = await _objectEventService.findObjectEventsByEPC(epc);
-        final found = events.any(
-          (e) => PharmaReturnEligibility.isReturnShippingInTransit(
-            businessStep: e.businessStep,
-            disposition: e.disposition,
-          ),
-        );
-        if (found) return true;
+        all.addAll(await _objectEventService.findObjectEventsByEPCs(chunk));
       } catch (_) {
-        continue;
+        for (final epc in chunk) {
+          try {
+            all.addAll(await _objectEventService.findObjectEventsByEPC(epc));
+          } catch (_) {}
+        }
       }
     }
-    return false;
+    return all;
   }
 
-  Future<bool> _hasReturnAlreadyReceived(List<String> epcs) async {
-    for (final epc in epcs) {
-      try {
-        final events = await _objectEventService.findObjectEventsByEPC(epc);
-        final found = events.any(
-          (e) => PharmaReturnEligibility.isReturnAlreadyReceived(
-            businessStep: e.businessStep,
-            disposition: e.disposition,
-          ),
-        );
-        if (found) return true;
-      } catch (_) {
-        continue;
-      }
-    }
-    return false;
+  Future<bool> _hasReturnShippingInTransit(List<String> epcs) async {
+    final events = await _findEventsForEpcs(epcs);
+    return events.any(
+      (e) => PharmaReturnEligibility.isReturnShippingInTransit(
+        businessStep: e.businessStep,
+        disposition: e.disposition,
+      ),
+    );
   }
 
   Future<bool> hasAcceptingEventForReceiving(ReceivingResponse operation) async {
@@ -202,18 +199,45 @@ class PharmaReturnContextBuilder {
         continue;
       }
       final serial = _serialFromEpc(epc);
-      if (serial == null) continue;
-      try {
-        final sgtin = await _sgtinService.getSGTINBySerialNumber(serial);
-        final description = await _productDescriptionForGtin(sgtin.gtinCode);
+      final gtinFromUri = _gtinFromEpc(epc);
+
+      if (serial != null) {
+        try {
+          final sgtinFuture = _sgtinService.getSGTINBySerialNumber(serial);
+          final descriptionFuture = gtinFromUri != null
+              ? _productDescriptionForGtin(gtinFromUri)
+              : Future<String?>.value(null);
+          final results = await Future.wait<Object?>([
+            sgtinFuture,
+            descriptionFuture,
+          ]);
+          final sgtin = results[0] as SGTIN;
+          var description = results[1] as String?;
+          description ??= await _productDescriptionForGtin(sgtin.gtinCode);
+          return _ProductSnapshot(
+            gtin: sgtin.gtinCode,
+            lotNumber: sgtin.batchLotNumber,
+            expiryDate: sgtin.expiryDate ?? sgtin.expiryDateTime,
+            productDescription: description,
+          );
+        } catch (_) {
+          if (gtinFromUri != null) {
+            final description = await _productDescriptionForGtin(gtinFromUri);
+            return _ProductSnapshot(
+              gtin: gtinFromUri,
+              productDescription: description,
+            );
+          }
+          continue;
+        }
+      }
+
+      if (gtinFromUri != null) {
+        final description = await _productDescriptionForGtin(gtinFromUri);
         return _ProductSnapshot(
-          gtin: sgtin.gtinCode,
-          lotNumber: sgtin.batchLotNumber,
-          expiryDate: sgtin.expiryDate ?? sgtin.expiryDateTime,
+          gtin: gtinFromUri,
           productDescription: description,
         );
-      } catch (_) {
-        continue;
       }
     }
     return const _ProductSnapshot();
@@ -231,11 +255,11 @@ class PharmaReturnContextBuilder {
   }
 
   String? _serialFromEpc(String epc) {
-    if (epc.startsWith('urn:epc:id:sgtin:')) {
-      final parts = epc.substring('urn:epc:id:sgtin:'.length).split('.');
-      if (parts.length == 3) return parts[2];
-    }
-    return null;
+    return Gs1CanonicalIdentifier.extractSerial(epc);
+  }
+
+  String? _gtinFromEpc(String epc) {
+    return Gs1CanonicalIdentifier.extractGtin(epc);
   }
 }
 

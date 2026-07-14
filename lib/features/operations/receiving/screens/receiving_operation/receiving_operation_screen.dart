@@ -1,12 +1,11 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
@@ -328,7 +327,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               );
             }
           } catch (_) {
-            // Auto-accept failed — still navigate, user can accept manually.
+            // Auto-accept failed â€” still navigate, user can accept manually.
             if (mounted) {
               context.showSuccess(
                 'Receiving operation created. Tap "Accept Goods" on the record to complete acceptance.',
@@ -355,12 +354,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           }
           widget.onEmbeddedActionSuccess!();
         } else {
-          if (!context.isDesktop && response.navigableOperationId != null) {
-            context.go(
-                '${Constants.opReceivingRoute}/${response.navigableOperationId}');
-          } else {
-            context.go(Constants.opReceivingRoute);
-          }
+          popOrGo(context, Constants.opReceivingRoute);
         }
       } else {
         context.showError(OperationErrorTranslator.translateMessages(
@@ -400,7 +394,8 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    await _loadSoftWarning(barcode);
+    // Soft warning is advisory â€” don't block toast / next scan on status round-trip.
+    _loadSoftWarning(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');
     }

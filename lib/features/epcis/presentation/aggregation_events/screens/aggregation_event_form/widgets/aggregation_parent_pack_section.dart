@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_pharma_rules_text.dart';
@@ -46,11 +47,15 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
 
   void _hydrateFromInitial(String? epc) {
     if (epc == null || epc.isEmpty) return;
-    if (epc.toLowerCase().contains(':sgtin:')) {
+    if (Gs1CanonicalIdentifier.isSgtin(epc)) {
       _mode = AggregationParentPackMode.sgtin;
-      final parts = epc.split(':sgtin:').last.split('.');
-      if (parts.length >= 3) {
-        _serialController.text = parts.last;
+      final gtin = Gs1CanonicalIdentifier.extractGtin(epc);
+      final serial = Gs1CanonicalIdentifier.extractSerial(epc);
+      if (gtin != null) {
+        _gtinController.text = gtin;
+      }
+      if (serial != null) {
+        _serialController.text = serial;
       }
     } else {
       _mode = AggregationParentPackMode.sscc;
@@ -72,7 +77,7 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
       case AggregationParentPackMode.sscc:
         final raw = _ssccController.text.trim();
         if (raw.isEmpty) return null;
-        if (raw.startsWith('urn:epc:')) return raw;
+        if (Gs1CanonicalIdentifier.isValid(raw)) return raw;
         final fromBarcode = Gs1Converter.barcodeToEpc(raw);
         if (fromBarcode != null) return fromBarcode;
         final digits = raw.replaceAll(RegExp(r'\D'), '');
@@ -185,7 +190,7 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
               SsccEntryField(
                 controller: _ssccController,
                 label: 'SSCC',
-                hintText: '18-digit code, (00)… barcode, or urn:epc:id:sscc:…',
+                hintText: '18-digit code, (00)… barcode, or https://id.gs1.org/00/…',
                 helperText: 'GS1 SSCC with valid check digit',
                 optional: !_parentRequired,
                 validator: (value) =>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
@@ -177,7 +178,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     if (!CbvVocabularyFormatter.isBizStepCommissioning(_businessStep)) {
       return false;
     }
-    return _epcList.any((epc) => epc.toLowerCase().contains('sgtin'));
+    return _epcList.any(Gs1CanonicalIdentifier.isSgtin);
   }
 
   void _syncIlmdState() {
@@ -400,7 +401,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
         eventTimeZone: '+00:00',
         epcisVersion: EPCISVersion.v2_0,
         action: 'OBSERVE',
-        epcList: ['urn:epc:id:sgtin:0614141.107346.1000'],
+        epcList: ['https://id.gs1.org/01/10614141073464/21/1000'],
         readPoint: GLN.fromCode('1234567890128'),
         certificationInfo: [
           CertificationInfo(

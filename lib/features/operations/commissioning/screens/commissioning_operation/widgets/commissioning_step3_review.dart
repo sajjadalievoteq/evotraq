@@ -153,22 +153,20 @@ class CommissioningStep3Review extends StatelessWidget {
             outlineColor: outline,
             child: items.isEmpty
                 ? const SgtinInfoRow('EPCs', 'None added yet')
-                : ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 240),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        return SgtinInfoRow(
-                          '${index + 1}',
-                          '${item.epc}\n'
-                          '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'COMMISSIONED'}',
-                          monospace: true,
-                        );
-                      },
-                    ),
+                : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return SgtinInfoRow(
+                        '${index + 1}',
+                        '${item.epc}\n'
+                        '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'COMMISSIONED'}',
+                        monospace: true,
+                      );
+                    },
                   ),
           ),
           if (poolCount > 0) ...[

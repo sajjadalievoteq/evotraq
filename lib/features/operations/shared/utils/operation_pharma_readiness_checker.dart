@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/gln_check_digit_validator.dart';
 
@@ -62,16 +63,16 @@ abstract final class OperationPharmaReadinessChecker {
     final issues = <String>[];
 
     for (final epc in epcs) {
-      if (epc.startsWith('urn:epc:class:lgtin:')) {
+      if (Gs1CanonicalIdentifier.isLgtin(epc)) {
         issues.add(
           '"$epc" is a lot-based GTIN (lgtin). '
           'DSCSA requires serialized SGTINs. lgtin is not valid for pharma events.',
         );
-      } else if (!epc.startsWith('urn:epc:id:sgtin:') &&
-          !epc.startsWith('urn:epc:id:sscc:')) {
+      } else if (!Gs1CanonicalIdentifier.isSerializedInstance(epc)) {
         issues.add(
           '"$epc" is not a valid GS1 EPC URI for a pharma event. '
-          'Expected urn:epc:id:sgtin:… or urn:epc:id:sscc:…',
+          'Expected https://id.gs1.org/01/…/21/… or https://id.gs1.org/00/… '
+          '(URN forms are also accepted).',
         );
       }
     }

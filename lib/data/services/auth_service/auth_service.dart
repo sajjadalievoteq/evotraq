@@ -165,6 +165,9 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
+      // Drop any stale session token before authenticating.
+      await _dioService.removeAuthToken();
+
       final response = await _dioService.post(
         '${_dioService.baseUrl}${Constants.authLoginEndpoint}',
         data: jsonEncode(request.toJson()),
@@ -207,6 +210,8 @@ class AuthService {
 
   Future<void> register(RegisterRequest request) async {
     try {
+      await _dioService.removeAuthToken();
+
       final response = await _dioService.post(
         '${_dioService.baseUrl}${Constants.authRegisterEndpoint}',
         data: jsonEncode(request.toJson()),
@@ -340,6 +345,10 @@ class AuthService {
         return User.fromJson(data as Map<String, dynamic>);
       }
 
+      if (response.statusCode == 401) {
+        await _dioService.removeAuthToken();
+      }
+
       throw ApiException(
         statusCode: response.statusCode,
         message:
@@ -347,6 +356,9 @@ class AuthService {
         responseBody: _stringifyResponseData(response.data),
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await _dioService.removeAuthToken();
+      }
       throw ApiException(
         statusCode: e.response?.statusCode,
         message:

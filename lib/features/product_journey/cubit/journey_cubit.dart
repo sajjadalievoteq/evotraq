@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
@@ -33,6 +34,7 @@ class JourneyCubit extends Cubit<JourneyState> {
     ));
     try {
       final journey = await _service.getJourneyByIdentifier(identifier.trim());
+      if (isClosed) return;
       if (journey == null || journey.steps.isEmpty) {
         emit(state.copyWith(
           status: JourneyStatus.error,
@@ -47,7 +49,9 @@ class JourneyCubit extends Cubit<JourneyState> {
           errorMessage: null,
         ));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('[JourneyCubit] search failed: $e\n$stackTrace');
+      if (isClosed) return;
       emit(state.copyWith(
         status: JourneyStatus.error,
         journey: null,
@@ -64,8 +68,11 @@ class JourneyCubit extends Cubit<JourneyState> {
     emit(state.copyWith(isSearching: true));
     try {
       final results = await _service.searchProducts(query);
+      if (isClosed) return;
       emit(state.copyWith(isSearching: false, searchResults: results));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('[JourneyCubit] searchSuggestions failed: $e\n$stackTrace');
+      if (isClosed) return;
       emit(state.copyWith(isSearching: false, searchResults: const []));
     }
   }

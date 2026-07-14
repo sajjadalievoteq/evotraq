@@ -84,7 +84,7 @@ class AggregationEventFormDestinationListSection extends StatelessWidget {
                       controller: controllers.value,
                       decoration: const InputDecoration(
                         labelText: 'Destination Value *',
-                        hintText: 'urn:epc:id:sgln:… or GLN',
+                        hintText: 'https://id.gs1.org/414/… or GLN',
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),

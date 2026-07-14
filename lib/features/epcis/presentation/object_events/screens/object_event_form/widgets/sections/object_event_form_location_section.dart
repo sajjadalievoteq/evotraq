@@ -78,7 +78,7 @@ class ObjectEventFormLocationSection extends StatelessWidget {
             GLNSelector(
               label: 'Business Location GLN',
               hintText:
-                  'e.g., 0614141.00001.0 or urn:epc:id:sgln:0614141.00001.0',
+                  'e.g., 0614141000012 or https://id.gs1.org/414/0614141000012',
               initialValue: businessLocation,
               isRequired: isBusinessLocationMandatory,
               errorText: validation.getFieldError('businessLocationGLN'),
@@ -101,7 +101,7 @@ class ObjectEventFormLocationSection extends StatelessWidget {
             GLNSelector(
               label: 'Read Point GLN',
               hintText:
-                  'e.g., 0614141.00777.0 or urn:epc:id:sgln:0614141.00777.0',
+                  'e.g., 0614141007776 or https://id.gs1.org/414/0614141007776',
               initialValue: readPoint,
               isRequired: isReadPointMandatory,
               errorText: validation.getFieldError('readPointGLN'),

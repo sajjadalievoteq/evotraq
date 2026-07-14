@@ -376,7 +376,7 @@ class ValidationRuleCubit extends Cubit<ValidationRuleState> {
         priority: 50,
         field: 'epcList[*]',
         ruleExpression:
-            'epcList.every(epc => epc.startsWith("urn:epc:id:sgtin:") ? isValidSGTINSerial(epc) : true)',
+            'epcList.every(epc => isSgtin(epc) ? isValidSGTINSerial(epc) : true)',
         errorMessage: 'SGTIN serial numbers must follow GS1 format guidelines',
         enabled: true,
         isCustom: false,

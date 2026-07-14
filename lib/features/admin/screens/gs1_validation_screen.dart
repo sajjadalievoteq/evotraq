@@ -161,17 +161,17 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
       );
       
       results['EPC URI Valid SGTIN'] = ValidationResult(
-        isValid: GS1Validator.isValidEPCURI('urn:epc:id:sgtin:0614141.112345.ABC123'),
+        isValid: GS1Validator.isValidEPCURI('https://id.gs1.org/01/10614141123459/21/ABC123'),
         testType: 'EPC URI',
-        value: 'urn:epc:id:sgtin:0614141.112345.ABC123',
-        message: 'Valid SGTIN EPC URI',
+        value: 'https://id.gs1.org/01/10614141123459/21/ABC123',
+        message: 'Valid SGTIN Digital Link',
       );
       
       results['EPC URI Valid SSCC'] = ValidationResult(
-        isValid: GS1Validator.isValidEPCURI('urn:epc:id:sscc:0614141.1234567890'),
+        isValid: GS1Validator.isValidEPCURI('https://id.gs1.org/00/106141412345678908'),
         testType: 'EPC URI',
-        value: 'urn:epc:id:sscc:0614141.1234567890',
-        message: 'Valid SSCC EPC URI',
+        value: 'https://id.gs1.org/00/106141412345678908',
+        message: 'Valid SSCC Digital Link',
       );
       
       results['EPC URI Valid Pattern'] = ValidationResult(
@@ -499,7 +499,7 @@ class _GS1ValidationScreenState extends State<GS1ValidationScreen> {
                                 controller: _epcUriController,
                                 decoration: const InputDecoration(
                                   labelText: 'EPC URI',
-                                  helperText: 'Example: urn:epc:id:sgtin:0614141.112345.ABC123',
+                                  helperText: 'Example: https://id.gs1.org/01/10614141123459/21/ABC123',
                                   border: OutlineInputBorder(),
                                 ),
                               ),

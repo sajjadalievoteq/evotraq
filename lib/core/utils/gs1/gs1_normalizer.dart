@@ -7,6 +7,10 @@ abstract final class Gs1Normalizer {
     return ai_normalizer.normalizeEpcInput(input);
   }
 
+  static String normalizeForStorage(String input) {
+    return ai_normalizer.normalizeEpcInput(input);
+  }
+
   static String normalizeEpc(String input) {
     return ai_normalizer.normalizeEpcInput(input);
   }

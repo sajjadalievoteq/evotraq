@@ -82,8 +82,8 @@ Transaction Events are one of the four core EPCIS event types:
 ### Product Identifiers
 
 * **EPCs (Electronic Product Codes)** - List of unique product identifiers involved in the transaction.
-  * Format: urn:epc:id:sgtin:CompanyPrefix.ItemReference.SerialNumber
-  * Example: urn:epc:id:sgtin:0614141.112345.400
+  * Format: https://id.gs1.org/01/<GTIN-14>/21/<SerialNumber>
+  * Example: https://id.gs1.org/01/10614141123459/21/400
 
 ### Location Information
 

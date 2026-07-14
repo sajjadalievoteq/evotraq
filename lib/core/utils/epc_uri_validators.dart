@@ -7,6 +7,9 @@ final _sgtinUrn = RegExp(
 final _sgtinDl = RegExp(
   r'''^https://id\.gs1\.org/01/\d{14}/21/[!%-?A-Z_a-z"]{1,20}$''');
 
+final _sgtinClassDl = RegExp(
+  r'''^https://id\.gs1\.org/01/\d{14}$''');
+
 final _ssccUrn = RegExp(
   r'''^urn:epc:id:sscc:\d{1,12}\.\d{1,17}$''');
 
@@ -54,17 +57,20 @@ String? validateEpcUriField(String? value, {bool required = false}) {
     return 'Invalid GS1 Digital Link URI format';
   }
   return 'Not a valid EPC URI. Accepted formats:\n'
+      '• https://id.gs1.org/01/<14digits>/21/<serial>  — GS1 Digital Link (preferred)\n'
+      '• https://id.gs1.org/00/<18digits>  — SSCC Digital Link\n'
       '• (01)<GTIN>(21)<serial>  — GS1 barcode\n'
-      '• urn:epc:id:sgtin:<prefix>.<ref>.<serial>\n'
-      '• https://id.gs1.org/01/<14digits>/21/<serial>\n'
-      '• urn:epc:id:sscc:<prefix>.<serialRef>  (SSCC)';
+      '• urn:epc:id:sgtin:<prefix>.<ref>.<serial>  (accepted)\n'
+      '• urn:epc:id:sscc:<prefix>.<serialRef>  (accepted)';
 }
 
 String normalizeEpc(String input) => normalizeEpcInput(input.trim());
 
 String? epcUriType(String input) {
   final n = normalizeEpcInput(input.trim());
-  if (_sgtinUrn.hasMatch(n) || _sgtinDl.hasMatch(n)) return 'SGTIN';
+  if (_sgtinUrn.hasMatch(n) || _sgtinDl.hasMatch(n) || _sgtinClassDl.hasMatch(n)) {
+    return 'SGTIN';
+  }
   if (_ssccUrn.hasMatch(n) || _ssccDl.hasMatch(n)) return 'SSCC';
   if (_lgtinUrn.hasMatch(n) || _lgtinDl.hasMatch(n)) return 'LGTIN';
   if (_graiUrn.hasMatch(n)) return 'GRAI';
@@ -79,6 +85,7 @@ bool _isValidNormalized(String n) {
   if (n.isEmpty) return false;
   if (_sgtinUrn.hasMatch(n)) return true;
   if (_sgtinDl.hasMatch(n)) return _validateSgtinDlCheckDigit(n);
+  if (_sgtinClassDl.hasMatch(n)) return _validateSgtinDlCheckDigit(n);
   return _ssccUrn.hasMatch(n) ||
       _ssccDl.hasMatch(n) ||
       _lgtinUrn.hasMatch(n) ||

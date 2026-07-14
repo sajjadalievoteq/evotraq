@@ -16,7 +16,7 @@ class ObjectEventHelpObjectIdentificationSection extends StatelessWidget {
             ObjectEventHelpItem(
               title: 'EPCs (Instance-Level)',
               description:
-                  'Electronic Product Codes that uniquely identify individual items. Use this for serialized items like SGTINs (Serialized GTINs). Format example: urn:epc:id:sgtin:0614141.107346.2017',
+                  'Electronic Product Codes that uniquely identify individual items. Use this for serialized items like SGTINs (Serialized GTINs). Format example: https://id.gs1.org/01/10614141073464/21/2017',
             ),
             ObjectEventHelpItem(
               title: 'EPC Classes (Class-Level)',

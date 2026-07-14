@@ -78,7 +78,7 @@ class OperationItemScanStep extends StatelessWidget {
 
     if (!fillHeight) {
       return SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
+        padding: EdgeInsets.fromLTRB(context.padding.top, 0, context.padding.top, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

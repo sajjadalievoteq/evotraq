@@ -10,7 +10,8 @@ void main() {
       );
 
       expect(result.type, EPCType.sgtin);
-      expect(result.epc, startsWith('urn:epc:id:sgtin:'));
+      expect(result.epc, startsWith('https://id.gs1.org/01/'));
+      expect(result.epc, contains('/21/Q3W8K5M9X2R7N4P6L1TZ'));
       expect(result.serial, 'Q3W8K5M9X2R7N4P6L1TZ');
       expect(result.gtin, '00629200080027');
     });
@@ -19,7 +20,7 @@ void main() {
       final result = parseToEPC('(00)003664798000000011');
 
       expect(result.type, EPCType.sscc);
-      expect(result.epc, startsWith('urn:epc:id:sscc:'));
+      expect(result.epc, 'https://id.gs1.org/00/003664798000000011');
       expect(result.sscc, '003664798000000011');
     });
 
@@ -27,17 +28,17 @@ void main() {
       final result = parseToEPC('(01)00629200080027');
 
       expect(result.type, EPCType.gtin);
-      expect(result.epc, startsWith('urn:epc:idpat:sgtin:'));
+      expect(result.epc, 'https://id.gs1.org/01/00629200080027');
       expect(result.serial, isNull);
       expect(result.gtin, '00629200080027');
     });
 
-    test('passes through SGTIN URN unchanged', () {
+    test('normalizes SGTIN URN to Digital Link', () {
       const urn = 'urn:epc:id:sgtin:0629200.008002.SN123';
       final result = parseToEPC(urn);
 
       expect(result.type, EPCType.sgtin);
-      expect(result.epc, urn);
+      expect(result.epc, 'https://id.gs1.org/01/00629200080027/21/SN123');
       expect(result.serial, 'SN123');
       expect(result.gtin, '00629200080027');
     });
@@ -50,14 +51,17 @@ void main() {
       expect(result.type, EPCType.sgtin);
       expect(result.gtin, '00629200010000');
       expect(result.serial, 'TQNBH47U88OC10RIRSH8');
+      expect(result.epc, contains('/21/TQNBH47U88OC10RIRSH8'));
     });
 
-    test('passes through SSCC URN unchanged', () {
-      const urn = 'urn:epc:id:sscc:0629200.108002700000001';
+    test('normalizes SSCC URN to Digital Link', () {
+      const urn = 'urn:epc:id:sscc:0614141.1234567890';
       final result = parseToEPC(urn);
 
       expect(result.type, EPCType.sscc);
-      expect(result.epc, urn);
+      expect(result.epc, startsWith('https://id.gs1.org/00/'));
+      expect(result.epc, hasLength(40));
+      expect(result.sscc, isNotNull);
     });
 
     test('parses GS1 Digital Link SGTIN', () {
@@ -66,17 +70,17 @@ void main() {
       );
 
       expect(result.type, EPCType.sgtin);
-      expect(result.epc, startsWith('urn:epc:id:sgtin:'));
+      expect(result.epc, 'https://id.gs1.org/01/00629200080027/21/SN123');
       expect(result.serial, 'SN123');
       expect(result.gtin, '00629200080027');
     });
 
-    test('normalizes plain GTIN-13 to GTIN class EPC', () {
+    test('normalizes plain GTIN-13 to GTIN class Digital Link', () {
       final result = parseToEPC('0629200080027');
 
       expect(result.type, EPCType.gtin);
       expect(result.gtin, '00629200080027');
-      expect(result.epc, startsWith('urn:epc:idpat:sgtin:'));
+      expect(result.epc, 'https://id.gs1.org/01/00629200080027');
     });
 
     test('parses human-readable GTIN-14 plus serial', () {
@@ -85,7 +89,7 @@ void main() {
       expect(result.type, EPCType.sgtin);
       expect(result.gtin, '00629200080027');
       expect(result.serial, 'SN123');
-      expect(result.epc, startsWith('urn:epc:id:sgtin:'));
+      expect(result.epc, 'https://id.gs1.org/01/00629200080027/21/SN123');
     });
 
     test('throws EPCParseException for invalid input', () {

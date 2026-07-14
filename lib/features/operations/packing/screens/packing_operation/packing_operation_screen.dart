@@ -1,12 +1,11 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
@@ -300,11 +299,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
           );
         }
         if (mounted) {
-          if (!context.isDesktop && response.operationId != null) {
-            context.go('${Constants.opPackingRoute}/${response.operationId}');
-          } else {
-            context.go(Constants.opPackingRoute);
-          }
+          popOrGo(context, Constants.opPackingRoute);
         }
       } else {
         context.showError(PackingSubmitErrorMessage.fromResponse(response));
@@ -343,12 +338,13 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   }
 
   Future<bool> _addEpc(String barcode, {bool showSuccessToast = false}) async {
-    final outcome = await _epcScanValidator.validateAndAdd(
+    final result = await _epcScanValidator.validateAndAddWithStatus(
       barcode,
       alreadyScanned: _scannedEPCs,
       operationLabel: 'packing',
-      allowGtin: false,
+      loadStatus: (epc) => getIt<OperationEpcStatusService>().getEpcStatus(epc),
     );
+    final outcome = result.outcome;
     if (!outcome.success) {
       context.showError(
         outcome.errorMessage ??
@@ -365,26 +361,19 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     }
 
     if (!mounted) return false;
-    setState(() => _scannedEPCs.add(outcome.rawBarcode));
-    await _checkEpcStatus(outcome.rawBarcode);
+    setState(() {
+      _scannedEPCs.add(outcome.rawBarcode);
+      final status = result.status;
+      if (status != null && !status.compatibleWithShipping) {
+        _itemWarnings[outcome.rawBarcode] = status.status;
+      } else {
+        _itemWarnings.remove(outcome.rawBarcode);
+      }
+    });
     if (showSuccessToast) {
       context.showSuccess('Item added');
     }
     return true;
-  }
-
-  Future<void> _checkEpcStatus(String epc) async {
-    try {
-      final statusService = getIt<OperationEpcStatusService>();
-      final status = await statusService.getEpcStatus(epc);
-      if (!mounted || status == null) return;
-      if (!status.compatibleWithShipping) {
-        setState(() => _itemWarnings[epc] = status.status);
-      } else {
-        setState(() => _itemWarnings.remove(epc));
-      }
-    } catch (_) {
-    }
   }
 
   void _onManualContainerAdded(EPCParseResult result) {

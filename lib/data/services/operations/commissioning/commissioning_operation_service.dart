@@ -162,7 +162,9 @@ class CommissioningOperationService {
       return CommissioningItemResult(
         serialNumber: m['serialNumber'] as String? ?? '',
         sgtinId: m['sgtinId']?.toString(),
-        epcUri: m['epcUri'] as String?,
+        canonicalIdentifier: m['canonicalIdentifier'] as String? ??
+            m['epcUri'] as String? ??
+            m['gs1DigitalLinkUri'] as String?,
         success: m['success'] as bool? ?? false,
         errorMessage: m['errorMessage'] as String?,
         outcome: m['outcome'] as String?,
@@ -346,7 +348,7 @@ class CommissioningOperationService {
       }
       return CommissioningItemResult(
         serialNumber: serialNumber,
-        epcUri: epcUri,
+        canonicalIdentifier: epcUri,
         success: true,
       );
     }).toList();

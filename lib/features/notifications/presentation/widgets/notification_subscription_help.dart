@@ -94,7 +94,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
                   ),
                   _buildHelpItem(
                     'EPC Pattern',
-                    'Filter by specific EPC patterns using wildcards (e.g., urn:epc:id:sgtin:*)',
+                    'Filter by specific EPC patterns using wildcards (e.g., https://id.gs1.org/01/*)',
                   ),
                 ],
               ),

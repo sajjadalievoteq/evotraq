@@ -1,10 +1,10 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
@@ -311,12 +311,8 @@ class _UnpackingOperationScreenState extends State<UnpackingOperationScreen> {
             'Unpacking operation completed successfully.',
           );
         }
-        if (mounted && response.operationId != null) {
-          context.go(
-            '${Constants.opUnpackingRoute}?selected=${response.operationId}',
-          );
-        } else if (mounted) {
-          context.go(Constants.opUnpackingRoute);
+        if (mounted) {
+          popOrGo(context, Constants.opUnpackingRoute);
         }
       } else {
         context.showError(OperationErrorTranslator.translateMessages(

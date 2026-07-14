@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_gln_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
@@ -47,16 +48,12 @@ class AggregationEventFormValidators {
   }
 
   static String? _validateSsccContent(String trimmed) {
-    final lower = trimmed.toLowerCase();
-    if (lower.startsWith('urn:epc:id:sscc:')) {
-      return _validateSsccEpcUri(trimmed);
-    }
-
-    if (_digitalLink.hasMatch(trimmed) && trimmed.contains('/00/')) {
-      final digits = trimmed.replaceAll(RegExp(r'\D'), '');
-      if (digits.length >= 18) {
-        final sscc = digits.substring(digits.length - 18);
-        if (SsccFormat.isValidSscc(sscc)) return null;
+    if (Gs1CanonicalIdentifier.isSscc(trimmed)) {
+      final extracted = Gs1CanonicalIdentifier.extractSscc18(trimmed);
+      if (extracted != null && SsccFormat.isValidSscc(extracted)) return null;
+      // URN shape accepted by classify but may lack a reconstructable check digit.
+      if (_ssccUrn.hasMatch(trimmed)) {
+        return _validateSsccEpcUri(trimmed);
       }
       return 'Invalid SSCC Digital Link — could not verify 18-digit SSCC';
     }
@@ -89,7 +86,7 @@ class AggregationEventFormValidators {
     }
 
     return 'Enter a valid 18-digit SSCC (with check digit), (00)… barcode, '
-        'or urn:epc:id:sscc:… EPC URI';
+        'https://id.gs1.org/00/…, or urn:epc:id:sscc:…';
   }
 
   static String? _validateSsccEpcUri(String uri) {
@@ -119,6 +116,9 @@ class AggregationEventFormValidators {
     if (uri == null || uri.isEmpty) {
       return 'Could not build a valid SSCC EPC URI';
     }
+    if (Gs1CanonicalIdentifier.isSscc(uri)) {
+      return _validateSsccContent(uri);
+    }
     return _validateSsccEpcUri(uri);
   }
 
@@ -126,26 +126,32 @@ class AggregationEventFormValidators {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return 'Empty EPC value';
 
-    if (trimmed.toLowerCase().startsWith('urn:epc:class:lgtin:')) {
+    if (Gs1CanonicalIdentifier.isLgtin(trimmed)) {
       return _validateLgtinUri(trimmed);
     }
 
-    if (trimmed.toLowerCase().startsWith('urn:epc:idpat:sgtin:')) {
-      return _validateLgtinUri(trimmed.replaceFirst('idpat:sgtin:', 'class:lgtin:'));
+    if (Gs1CanonicalIdentifier.isClassGtin(trimmed)) {
+      final gtin = Gs1CanonicalIdentifier.extractGtin(trimmed);
+      if (gtin != null) {
+        return GtinFieldValidators.validateGtinCode(gtin);
+      }
+      return _validateLgtinUri(
+        trimmed.replaceFirst('idpat:sgtin:', 'class:lgtin:'),
+      );
     }
 
-    if (trimmed.toLowerCase().startsWith('urn:epc:id:sgtin:')) {
+    if (Gs1CanonicalIdentifier.isSgtin(trimmed)) {
       return sgtin_validators.validateEpcUri(trimmed);
     }
 
-    if (trimmed.toLowerCase().startsWith('urn:epc:id:sscc:')) {
+    if (Gs1CanonicalIdentifier.isSscc(trimmed)) {
       return _validateSsccEpcUri(trimmed);
     }
 
     if (_digitalLink.hasMatch(trimmed)) {
       final dlError = sgtin_validators.validateGs1DigitalLinkUri(trimmed);
       if (dlError == null) return null;
-      if (trimmed.contains('/00/')) {
+      if (Gs1CanonicalIdentifier.isSscc(trimmed) || trimmed.contains('/00/')) {
         return _validateSsccContent(trimmed);
       }
       return dlError;
@@ -164,18 +170,16 @@ class AggregationEventFormValidators {
   }
 
   static String? _validateLgtinUri(String uri) {
-    final lower = uri.toLowerCase();
-    if (!lower.startsWith('urn:epc:class:lgtin:')) {
+    if (!Gs1CanonicalIdentifier.isLgtin(uri) &&
+        !Gs1CanonicalIdentifier.isLotOrClassLevel(uri)) {
       return 'Invalid LGTIN URI';
     }
-    final parts = uri.substring('urn:epc:class:lgtin:'.length).split('.');
-    if (parts.length < 3) {
+    final gtin = Gs1CanonicalIdentifier.extractGtin(uri);
+    if (gtin == null) {
       return 'LGTIN URI must include company prefix, item reference, and lot';
     }
-    final gtin = '${parts[0]}${parts[1]}';
     final gtinError = GtinFieldValidators.validateGtinCode(gtin);
     if (gtinError != null) return gtinError;
-    if (parts[2].trim().isEmpty) return 'LGTIN URI must include a lot number';
     return null;
   }
 
@@ -218,11 +222,10 @@ class AggregationEventFormValidators {
   }
 
   static String? validateResolvedParentEpc(String uri) {
-    final lower = uri.toLowerCase();
-    if (lower.contains(':sgtin:')) {
+    if (Gs1CanonicalIdentifier.isSgtin(uri)) {
       return validateSgtinEpcUri(uri);
     }
-    if (lower.contains(':sscc:')) {
+    if (Gs1CanonicalIdentifier.isSscc(uri)) {
       return validateSsccEpcUri(uri);
     }
     if (isLikelyEpc(uri)) {
@@ -232,7 +235,7 @@ class AggregationEventFormValidators {
       }
       return null;
     }
-    return 'Parent EPC must be a valid GS1 EPC URI or barcode';
+    return 'Parent EPC must be a valid GS1 Digital Link, EPC URI, or barcode';
   }
 
   static String? validateChildEpcList(String? value, String action) {
@@ -264,10 +267,12 @@ class AggregationEventFormValidators {
       return 'EPC class is required';
     }
     final trimmed = value.trim();
-    if (!trimmed.startsWith('urn:epc:idpat:') && !isLikelyEpc(trimmed)) {
-      return 'EPC class must be urn:epc:idpat:… or a valid GS1 URI';
+    if (Gs1CanonicalIdentifier.isClassGtin(trimmed) ||
+        Gs1CanonicalIdentifier.isLotOrClassLevel(trimmed) ||
+        isLikelyEpc(trimmed)) {
+      return null;
     }
-    return null;
+    return 'EPC class must be urn:epc:idpat:… or a valid GS1 URI';
   }
 
   static String? validateQuantity(String? value) {

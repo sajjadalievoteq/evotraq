@@ -210,20 +210,15 @@ class _TransactionEventsListScreenState
 
   void _navigateToEventDetails(TransactionEvent event) {
 
-    print('DEBUG: Event database id: ${event.id}');
-    print('DEBUG: Event unique identifier (eventId): ${event.eventId}');
 
     String idToUse;
 
     if (event.id != null && event.id!.isNotEmpty) {
       idToUse = event.id!;
-      print('DEBUG: Using database ID: $idToUse');
     } else if (event.eventId.contains(':')) {
       idToUse = event.eventId.split(':').last;
-      print('DEBUG: Extracted UUID from eventId: $idToUse');
     } else {
       idToUse = event.eventId;
-      print('DEBUG: Using eventId as is: $idToUse');
     }
 
     context.push('/epcis/transaction-events/$idToUse', extra: event).then((

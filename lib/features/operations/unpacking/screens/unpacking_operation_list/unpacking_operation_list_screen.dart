@@ -88,25 +88,12 @@ class _UnpackingOperationListBodyState
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
-  bool _initialLoadDone = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onFiltersChanged);
     _containerFilterController.addListener(_onFiltersChanged);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialLoadDone) {
-      _initialLoadDone = true;
-      return;
-    }
-    if (!widget.embedded) {
-      context.read<OperationsCubit<Operation>>().refresh();
-    }
   }
 
   @override
@@ -213,6 +200,13 @@ class _UnpackingOperationListBodyState
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      buildWhen: (previous, current) =>
+          previous.items != current.items ||
+          previous.isLoading != current.isLoading ||
+          previous.isLoadingMore != current.isLoadingMore ||
+          previous.hasMore != current.hasMore ||
+          previous.errorMessage != current.errorMessage ||
+          previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
 

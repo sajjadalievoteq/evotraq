@@ -1,12 +1,11 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
@@ -325,12 +324,7 @@ _showOperationError(
           }
           widget.onEmbeddedActionSuccess!();
         } else {
-          if (!context.isDesktop && response.navigableOperationId != null) {
-            context.go(
-                '${Constants.opShippingRoute}/${response.navigableOperationId}');
-          } else {
-            context.go(Constants.opShippingRoute);
-          }
+          popOrGo(context, Constants.opShippingRoute);
         }
       } else {
 _showOperationError(
@@ -359,12 +353,13 @@ _showOperationError(
 
     setState(() => _isAddingEpc = true);
     try {
-      final outcome = await _epcScanValidator.validateAndAdd(
+      final result = await _epcScanValidator.validateAndAddWithStatus(
         barcode,
         alreadyScanned: _scannedEpcs,
         operationLabel: 'shipping',
-        allowGtin: false,
+        loadStatus: (epc) => getIt<OperationEpcStatusService>().getEpcStatus(epc),
       );
+      final outcome = result.outcome;
       if (!outcome.success) {
         _showOperationError(
           outcome.errorMessage ??
@@ -374,28 +369,21 @@ _showOperationError(
       }
 
       if (!mounted) return false;
-      setState(() => _scannedEpcs.add(outcome.rawBarcode));
-      await _loadSoftWarning(outcome.rawBarcode);
+      setState(() {
+        _scannedEpcs.add(outcome.rawBarcode);
+        final status = result.status;
+        if (status != null && !status.compatibleWithShipping) {
+          _itemWarnings[outcome.rawBarcode] = status.status;
+        } else {
+          _itemWarnings.remove(outcome.rawBarcode);
+        }
+      });
       if (showSuccessToast) {
         context.showSuccess('Item added');
       }
       return true;
     } finally {
       if (mounted) setState(() => _isAddingEpc = false);
-    }
-  }
-
-  Future<void> _loadSoftWarning(String epc) async {
-    try {
-      final statusService = getIt<OperationEpcStatusService>();
-      final status = await statusService.getEpcStatus(epc);
-      if (!mounted || status == null) return;
-      if (!status.compatibleWithShipping) {
-        setState(() => _itemWarnings[epc] = status.status);
-      } else {
-        setState(() => _itemWarnings.remove(epc));
-      }
-    } catch (_) {
     }
   }
 

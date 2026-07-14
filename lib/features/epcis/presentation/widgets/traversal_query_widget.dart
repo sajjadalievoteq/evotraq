@@ -101,7 +101,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               name: 'epc',
               decoration: const InputDecoration(
                 labelText: 'Target EPC',
-                hintText: 'urn:epc:id:sgtin:0614141.112345.400',
+                hintText: 'https://id.gs1.org/01/10614141123459/21/400',
                 prefixIcon: TraqIcon(AppAssets.iconQr),
                 border: OutlineInputBorder(),
               ),
@@ -190,7 +190,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               name: 'epc',
               decoration: const InputDecoration(
                 labelText: 'Item EPC',
-                hintText: 'urn:epc:id:sgtin:0614141.112345.400',
+                hintText: 'https://id.gs1.org/01/10614141123459/21/400',
                 prefixIcon: TraqIcon(AppAssets.iconSscc),
                 border: OutlineInputBorder(),
               ),
@@ -261,7 +261,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               name: 'parentEpc',
               decoration: const InputDecoration(
                 labelText: 'Parent EPC',
-                hintText: 'urn:epc:id:sscc:0614141.1234567890',
+                hintText: 'https://id.gs1.org/00/106141412345678908',
                 prefixIcon: TraqIcon(AppAssets.iconPackage),
                 border: OutlineInputBorder(),
               ),

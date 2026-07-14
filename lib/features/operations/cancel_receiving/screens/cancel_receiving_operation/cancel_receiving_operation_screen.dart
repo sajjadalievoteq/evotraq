@@ -1,13 +1,14 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
@@ -17,6 +18,7 @@ import 'package:traqtrace_app/data/models/operations/cancel_receiving/cancel_rec
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_receiving/cancel_receiving_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation/utils/cancel_receiving_operation_step_validator.dart';
@@ -262,6 +264,28 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         setState(() => _isLoading = true);
       }
 
+      final user = context.read<AuthCubit>().state.user;
+      final actingGln = user != null
+          ? await OperationalGlnStore.getGln(user.id)
+          : null;
+      if (actingGln == null || actingGln.isEmpty) {
+        if (mounted) {
+          context.showError(
+            'Set your operational GLN in Profile before cancelling a receipt.',
+          );
+        }
+        return;
+      }
+      if (actingGln != _receivingGln!.glnCode) {
+        if (mounted) {
+          context.showError(
+            'Your operational GLN ($actingGln) must match the receiving GLN '
+            '(${_receivingGln!.glnCode}) to cancel this receipt.',
+          );
+        }
+        return;
+      }
+
       final request = CancelReceivingRequest(
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
@@ -269,6 +293,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
         sourceLocation: OperationGlnDisplay.fromGln(_sourceGln),
         receivingLocation: OperationGlnDisplay.fromGln(_receivingGln),
         cancelReason: _cancelReasonController.text.trim(),
+        actingGln: actingGln,
         originalReceivingReference:
             _originalReferenceController.text.trim().isNotEmpty
                 ? _originalReferenceController.text.trim()
@@ -300,13 +325,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
           }
           widget.onEmbeddedActionSuccess!();
         } else {
-          if (!context.isDesktop && response.navigableOperationId != null) {
-            context.go(
-              '${Constants.opCancelReceivingRoute}/${response.navigableOperationId}',
-            );
-          } else {
-            context.go(Constants.opCancelReceivingRoute);
-          }
+          popOrGo(context, Constants.opCancelReceivingRoute);
         }
       } else {
         context.showError(OperationErrorTranslator.translateMessages(
@@ -328,7 +347,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
 
   Future<void> _onItemAdded(EPCParseResult result) async {
     final epc = result.epc;
-    if (epc.startsWith('urn:epc:class:lgtin:')) {
+    if (Gs1CanonicalIdentifier.isLotOrClassLevel(epc)) {
       context.showError(
         'Lot-based GTINs are not valid for a pharma cancel receiving event. '
         'Scan a serialized SGTIN (GTIN + serial number) or SSCC instead.',
@@ -341,7 +360,8 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       return;
     }
     setState(() => _scannedEpcs.add(epc));
-    await _checkEpcStatus(epc);
+    // Soft warning is advisory â€” don't block the next scan on status round-trip.
+    _checkEpcStatus(epc);
   }
 
   Future<void> _checkEpcStatus(String epc) async {

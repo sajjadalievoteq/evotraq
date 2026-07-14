@@ -454,7 +454,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
           EpcEntryField(
             controller: _epcUriController,
             label: 'EPC URI',
-            hintText: 'Enter the EPC URI (e.g., urn:epc:id:sgtin:...)',
+            hintText: 'Enter the EPC URI (e.g., https://id.gs1.org/01/…/21/…)',
             required: true,
             validator: (value) =>
                 EpcisEpcValidators.validateEpcOrBarcode(value),

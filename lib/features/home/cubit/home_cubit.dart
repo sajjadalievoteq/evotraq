@@ -42,19 +42,18 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       final results = await Future.wait([
-        _dashboardService.getDashboardStats(),
-        _dashboardService.getRecentEvents(limit: 10),
+        _dashboardService.getStatsAndRecentEvents(recentLimit: 10),
         _dashboardService.getSystemHealth(),
       ]);
 
-      final stats = results[0] as DashboardStats;
-      final recentEvents = results[1] as List<RecentEvent>;
-      final healthStatus = results[2] as SystemHealthStatus;
+      final overview =
+          results[0] as ({DashboardStats stats, List<RecentEvent> recentEvents});
+      final healthStatus = results[1] as SystemHealthStatus;
       final refreshedAt = DateTime.now();
       _sessionStore.save(
         HomeOverviewBundle(
-          stats: stats,
-          recentEvents: recentEvents,
+          stats: overview.stats,
+          recentEvents: overview.recentEvents,
           healthStatus: healthStatus,
           lastDataRefreshAt: refreshedAt,
           accountEmail: accountEmail,
@@ -64,8 +63,8 @@ class HomeCubit extends Cubit<HomeState> {
       emit(
         HomeState(
           status: HomeLoadStatus.success,
-          stats: stats,
-          recentEvents: recentEvents,
+          stats: overview.stats,
+          recentEvents: overview.recentEvents,
           healthStatus: healthStatus,
           lastDataRefreshAt: refreshedAt,
         ),

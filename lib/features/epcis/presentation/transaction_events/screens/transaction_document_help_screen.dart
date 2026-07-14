@@ -101,7 +101,7 @@ class TransactionDocumentHelpScreen extends StatelessWidget {
               content: 'This function finds the original document where a specific item (identified by its EPC) '
                   'first appeared in the system.\n\n'
                   'Example inputs:\n'
-                  '• EPC: urn:epc:id:sgtin:0614141.107346.2017\n'
+                  '• EPC: https://id.gs1.org/01/10614141073464/21/2017\n'
                   '• Document Type (optional): po\n\n'
                   'This is useful for tracing the provenance of an item back to its original '
                   'documentation, which can be important for authenticity verification or recall situations.'

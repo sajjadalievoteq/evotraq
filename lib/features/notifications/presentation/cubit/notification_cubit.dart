@@ -282,7 +282,8 @@ class NotificationCubit extends Cubit<NotificationState> {
   @override
   Future<void> close() {
     _realtimeSubscription?.cancel();
-    _webSocketService.dispose();
+    _realtimeSubscription = null;
+    // WebSocketService is an app-wide singleton — do not dispose it here.
     return super.close();
   }
 }

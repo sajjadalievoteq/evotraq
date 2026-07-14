@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
@@ -282,9 +283,7 @@ void _handleManualSsccCodeChange({
 }
 
 bool _looksLikeStructuredSsccInput(String trimmed) {
-  final lower = trimmed.toLowerCase();
-  return lower.startsWith('urn:epc:') ||
-      lower.contains('id.gs1.org') ||
-      trimmed.contains('(00)') ||
-      RegExp(r'^00\d').hasMatch(trimmed.replaceAll(RegExp(r'[\s\u00A0]'), ''));
+  if (Gs1CanonicalIdentifier.isSscc(trimmed)) return true;
+  if (trimmed.contains('(00)')) return true;
+  return RegExp(r'^00\d').hasMatch(trimmed.replaceAll(RegExp(r'[\s\u00A0]'), ''));
 }

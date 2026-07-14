@@ -146,7 +146,7 @@ class ObjectEventBatchImportManualTab extends StatelessWidget {
                             decoration: const InputDecoration(
                               labelText: 'EPC',
                               hintText:
-                                  'URI: urn:epc:id:sgtin:5415062.32581.70007488444899\nGS1: (01)05415062325810(21)70007488444899',
+                                  'Digital Link: https://id.gs1.org/01/05415062325810/21/70007488444899\nGS1: (01)05415062325810(21)70007488444899',
                               border: OutlineInputBorder(),
                             ),
                             onFieldSubmitted: (_) => onAddEpc(),

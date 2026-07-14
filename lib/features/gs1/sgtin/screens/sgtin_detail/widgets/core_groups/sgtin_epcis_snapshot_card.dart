@@ -23,7 +23,7 @@ class SgtinEpcisSnapshotCard extends StatelessWidget {
         sgtin.latestDisposition!.trim().isNotEmpty) {
       params['currentItemDisposition'] = sgtin.latestDisposition!.trim();
     }
-    final epc = sgtin.epcUri?.trim();
+    final epc = sgtin.canonicalIdentifier?.trim();
     if (epc != null && epc.isNotEmpty) {
       params['epcs'] = epc;
     }
@@ -41,7 +41,8 @@ class SgtinEpcisSnapshotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canRecordEvent = sgtin.epcUri != null || sgtin.latestDisposition != null;
+    final canRecordEvent =
+        sgtin.canonicalIdentifier != null || sgtin.latestDisposition != null;
 
     return Gs1GroupCard(
       title: 'EPCIS Event Snapshot',

@@ -280,6 +280,13 @@ class _CommissioningOperationListBodyState
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      buildWhen: (previous, current) =>
+          previous.items != current.items ||
+          previous.isLoading != current.isLoading ||
+          previous.isLoadingMore != current.isLoadingMore ||
+          previous.hasMore != current.hasMore ||
+          previous.errorMessage != current.errorMessage ||
+          previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
 

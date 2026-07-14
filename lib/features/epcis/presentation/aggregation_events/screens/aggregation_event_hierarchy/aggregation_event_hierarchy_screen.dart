@@ -51,26 +51,43 @@ class _AggregationEventHierarchyScreenState
     });
 
     try {
-      if (widget.isParent) {
-        _hierarchyContents = await cubit.loadContainerContents(widget.epc);
-      } else {
-        try {
-          final parentEvent = await cubit.findCurrentParentOfChild(widget.epc);
-          if (parentEvent != null) {
-            _hierarchyContents = [parentEvent.parentID];
-          }
-        } catch (e) {
-          _hierarchyContents = [];
-        }
-      }
+      late List<String> contents;
+      late List<AggregationEvent> history;
 
       if (widget.isParent) {
-        await cubit.trackParentHistory(widget.epc);
-        _historyEvents = cubit.state.aggregationEvents;
+        await Future.wait([
+          () async {
+            contents = await cubit.loadContainerContents(widget.epc);
+          }(),
+          () async {
+            await cubit.trackParentHistory(widget.epc);
+            history =
+                List<AggregationEvent>.from(cubit.state.aggregationEvents);
+          }(),
+        ]);
       } else {
-        await cubit.trackChildHistory(widget.epc);
-        _historyEvents = cubit.state.aggregationEvents;
+        await Future.wait([
+          () async {
+            try {
+              final parentEvent =
+                  await cubit.findCurrentParentOfChild(widget.epc);
+              contents = parentEvent != null
+                  ? [parentEvent.parentID]
+                  : <String>[];
+            } catch (_) {
+              contents = <String>[];
+            }
+          }(),
+          () async {
+            await cubit.trackChildHistory(widget.epc);
+            history =
+                List<AggregationEvent>.from(cubit.state.aggregationEvents);
+          }(),
+        ]);
       }
+
+      _hierarchyContents = contents;
+      _historyEvents = history;
     } catch (e) {
       setState(() {
         _error = e.toString();

@@ -56,7 +56,15 @@ abstract final class Gs1Converter {
     return EPCURIConverter.extractSerialFromEPCUri(epcUri);
   }
 
+  static String? epcToSscc(String epcUri) {
+    return EPCURIConverter.extractSSCCFromEPCUri(epcUri);
+  }
+
   static String? epcType(String epcUri) {
     return EPCURIConverter.getEPCType(epcUri);
+  }
+
+  static String normalizeForStorage(String input) {
+    return EPCURIConverter.normalizeForStorage(input);
   }
 }

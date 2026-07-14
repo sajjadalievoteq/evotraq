@@ -147,7 +147,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           controller: parentEpcController,
           decoration: const InputDecoration(
             labelText: 'Parent EPC / SSCC',
-            hintText: 'urn:epc:id:sscc:…',
+            hintText: 'https://id.gs1.org/00/…',
             border: OutlineInputBorder(),
             isDense: true,
           ),
@@ -158,7 +158,7 @@ class AggregationEventAdvancedFiltersPanel extends StatelessWidget {
           controller: childEpcController,
           decoration: const InputDecoration(
             labelText: 'Child EPC / SGTIN',
-            hintText: 'urn:epc:id:sgtin:…',
+            hintText: 'https://id.gs1.org/01/…/21/…',
             border: OutlineInputBorder(),
             isDense: true,
           ),

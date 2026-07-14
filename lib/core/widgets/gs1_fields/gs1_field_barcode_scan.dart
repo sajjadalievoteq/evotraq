@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/barcode_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
@@ -104,12 +105,12 @@ abstract final class Gs1FieldBarcodeScan {
         return null;
 
       case Gs1FieldScanKind.sgtin:
-        if (result.data.startsWith('urn:epc:id:sgtin:')) {
-          return result.data;
+        if (Gs1CanonicalIdentifier.isSgtin(result.data)) {
+          return Gs1CanonicalIdentifier.forStorage(result.data);
         }
         final epc = EPCFormatter.formatToEPCUri(result.data);
-        if (epc != null && epc.startsWith('urn:epc:id:sgtin:')) {
-          return epc;
+        if (epc != null && Gs1CanonicalIdentifier.isSgtin(epc)) {
+          return Gs1CanonicalIdentifier.forStorage(epc);
         }
         if (details.gtin != null && details.serial != null) {
           return Gs1Converter.gtinSerialToEpc(
@@ -128,25 +129,13 @@ abstract final class Gs1FieldBarcodeScan {
             return stripped.padLeft(18, '0');
           }
         }
-        if (result.data.startsWith('urn:epc:id:sscc:')) {
-          return _ssccDigitsFromEpcUri(result.data);
+        if (Gs1CanonicalIdentifier.isSscc(result.data)) {
+          return Gs1CanonicalIdentifier.extractSscc18(result.data);
         }
         final digits = SsccFormat.stripSsccInput(result.data);
         if (digits.length == 18) return digits;
         return null;
     }
-  }
-
-  static String? _ssccDigitsFromEpcUri(String epcUri) {
-    if (!epcUri.startsWith('urn:epc:id:sscc:')) return null;
-    final body = epcUri.substring('urn:epc:id:sscc:'.length);
-    final dot = body.indexOf('.');
-    if (dot < 0) return null;
-    final companyPrefix = body.substring(0, dot);
-    final serialRef = body.substring(dot + 1);
-    final combined = companyPrefix + serialRef;
-    if (!RegExp(r'^\d+$').hasMatch(combined)) return null;
-    return combined.padLeft(18, '0');
   }
 
   static void _showError(BuildContext context, String message) {

@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/core/utils/epc_uri_validators.dart';
@@ -32,7 +33,8 @@ EPCParseResult parseToEPC(String input) {
     if (!isValidEpcUri(raw)) {
       throw EPCParseException('Invalid EPC URI format');
     }
-    return _fromEpcUri(raw, raw: raw, detectedFormat: 'EPC URN');
+    final canonical = normalizeEpcInput(raw);
+    return _fromEpcUri(canonical, raw: raw, detectedFormat: 'EPC URN');
   }
 
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
@@ -44,20 +46,13 @@ EPCParseResult parseToEPC(String input) {
   }
 
   if (raw.contains('(') && raw.contains(')')) {
-    final epc = normalizeGS1AiToEpcUrn(raw);
-    if (epc == null || !isValidEpcUri(epc)) {
+    final epc = normalizeEpcInput(raw);
+    if (!isValidEpcUri(epc)) {
       throw EPCParseException(
         'GS1 barcode could not be converted to a valid EPC URI',
       );
     }
     return _fromEpcUri(epc, raw: raw, detectedFormat: 'GS1 AI notation');
-  }
-
-  if (raw.startsWith('00')) {
-    final stripped = SsccFormat.stripSsccInput(raw);
-    if (stripped.length == 18 && SsccFormat.isValidSscc(stripped)) {
-      return _fromSsccDigits(stripped, raw: raw, detectedFormat: 'SSCC');
-    }
   }
 
   final humanReadable = _parseHumanReadableGtinSerial(raw);
@@ -97,7 +92,51 @@ EPCParseResult parseToEPC(String input) {
     }
   }
 
+  // Bare numeric SSCC / GTIN+serial — only after structured SGTIN/GTIN attempts.
+  // Many GTIN-14 values start with "00"; do not treat those as SSCC.
+  final ssccCandidate = _tryParseBareSsccOrGtinSerial(raw);
+  if (ssccCandidate != null) {
+    return ssccCandidate;
+  }
+
   throw EPCParseException('Unrecognized barcode format: $raw');
+}
+
+/// Disambiguates pure numeric input that could be SSCC-18 or GTIN-14 + serial.
+EPCParseResult? _tryParseBareSsccOrGtinSerial(String raw) {
+  final stripped = SsccFormat.stripSsccInput(raw);
+  if (!RegExp(r'^\d+$').hasMatch(stripped)) return null;
+
+  // AI(00) + 18-digit SSCC element string (20 digits).
+  if (stripped.length == 20 && stripped.startsWith('00')) {
+    final sscc18 = stripped.substring(2);
+    if (SsccFormat.isValidSscc(sscc18)) {
+      return _fromSsccDigits(sscc18, raw: raw, detectedFormat: 'SSCC');
+    }
+  }
+
+  if (stripped.length == 18) {
+    final gtin14 = stripped.substring(0, 14);
+    final serial = stripped.substring(14);
+    if (GtinFormat.isValidGtin(gtin14) && serial.isNotEmpty) {
+      final epc = Gs1Converter.gtinSerialToEpc(gtin14, serial);
+      if (epc != null) {
+        return EPCParseResult(
+          type: EPCType.sgtin,
+          epc: epc,
+          gtin: GtinFormat.normalizeGtinTo14(gtin14),
+          serial: serial,
+          raw: raw,
+          detectedFormat: 'GTIN-14 + numeric serial',
+        );
+      }
+    }
+    if (SsccFormat.isValidSscc(stripped)) {
+      return _fromSsccDigits(stripped, raw: raw, detectedFormat: 'SSCC');
+    }
+  }
+
+  return null;
 }
 
 EPCParseResult? _parseHumanReadableGtinSerial(String raw) {
@@ -134,7 +173,9 @@ String? _tagUriToPureIdentity(String tagUri) {
     final gcp = parts[1];
     final itemRef = parts[2];
     final serial = parts.sublist(3).join('.');
-    return 'urn:epc:id:sgtin:$gcp.$itemRef.$serial';
+    return Gs1Converter.normalizeForStorage(
+      'urn:epc:id:sgtin:$gcp.$itemRef.$serial',
+    );
   }
   if (tagUri.startsWith('urn:epc:tag:sscc-')) {
     final schemeEnd = 'urn:epc:tag:sscc-'.length;
@@ -145,7 +186,9 @@ String? _tagUriToPureIdentity(String tagUri) {
     if (parts.length < 3) return null;
     final gcp = parts[1];
     final serialRef = parts[2];
-    return 'urn:epc:id:sscc:$gcp.$serialRef';
+    return Gs1Converter.normalizeForStorage(
+      'urn:epc:id:sscc:$gcp.$serialRef',
+    );
   }
   return null;
 }
@@ -180,7 +223,19 @@ EPCParseResult _fromEpcUri(
   String? companyPrefix;
   int? gcpLength;
 
-  if (epc.startsWith('urn:epc:id:sgtin:')) {
+  if (epc.startsWith('https://id.gs1.org/01/') && epc.contains('/21/')) {
+    gtin = Gs1Converter.epcToGTIN(epc);
+    serial = Gs1Converter.epcToSerial(epc);
+  } else if (epc.startsWith('https://id.gs1.org/01/')) {
+    gtin = Gs1Converter.epcToGTIN(epc);
+  } else if (epc.startsWith('https://id.gs1.org/00/')) {
+    final digits = epc.substring('https://id.gs1.org/00/'.length);
+    if (RegExp(r'^\d{18}$').hasMatch(digits)) {
+      sscc = digits;
+    } else {
+      sscc = _ssccFromParsedOrAi(raw, parsed);
+    }
+  } else if (epc.startsWith('urn:epc:id:sgtin:')) {
     final tail = epc.substring('urn:epc:id:sgtin:'.length);
     final parts = tail.split('.');
     if (parts.isNotEmpty) {
@@ -243,11 +298,16 @@ EPCParseResult _fromEpcUri(
     gtin = GtinFormat.normalizeGtinTo14(gtin);
   }
 
-  final type = _resolveType(epc, gtin: gtin, serial: serial, sscc: sscc);
+  final storageEpc = Gs1CanonicalIdentifier.forStorage(epc);
+  gtin ??= Gs1CanonicalIdentifier.extractGtin(storageEpc);
+  serial ??= Gs1CanonicalIdentifier.extractSerial(storageEpc);
+  sscc ??= Gs1CanonicalIdentifier.extractSscc18(storageEpc);
+
+  final type = _resolveType(storageEpc, gtin: gtin, serial: serial, sscc: sscc);
 
   return EPCParseResult(
     type: type,
-    epc: epc,
+    epc: storageEpc,
     gtin: gtin,
     serial: serial,
     sscc: sscc,
@@ -304,6 +364,11 @@ EPCType _resolveType(
   String? serial,
   String? sscc,
 }) {
+  if (epc.startsWith('https://id.gs1.org/01/') && epc.contains('/21/')) {
+    return EPCType.sgtin;
+  }
+  if (epc.startsWith('https://id.gs1.org/00/')) return EPCType.sscc;
+  if (epc.startsWith('https://id.gs1.org/01/')) return EPCType.gtin;
   if (epc.startsWith('urn:epc:id:sgtin:')) return EPCType.sgtin;
   if (epc.startsWith('urn:epc:id:sscc:')) return EPCType.sscc;
   if (epc.startsWith('urn:epc:id:lgtin:') ||

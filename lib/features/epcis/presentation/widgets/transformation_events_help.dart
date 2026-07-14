@@ -59,7 +59,7 @@ class TransformationEventsHelp extends StatelessWidget {
             _buildHelpSection(
               context,
               'Example',
-              'A batch of bulk medicine (input EPC: urn:epc:id:sgtin:0614141.107346.2018) '
+              'A batch of bulk medicine (input EPC: https://id.gs1.org/01/10614141073464/21/2018) '
               'is repackaged into 100 individual packages with new serial numbers. '
               'Each new package receives its own output EPC.',
               [],

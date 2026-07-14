@@ -3,6 +3,7 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
     as sgtin_rules;
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_status.dart';
@@ -32,6 +33,12 @@ class CommissioningSerialPoolChecker {
   final SGTINService _sgtinService;
   final SSCCService _ssccService;
 
+  CommissioningPoolCheckResult resultFromSgtin(SGTIN sgtin) =>
+      _sgtinStatusResult(sgtin);
+
+  CommissioningPoolCheckResult resultFromSscc(SSCC sscc) =>
+      _ssccStatusResult(sscc);
+
   Future<CommissioningPoolCheckResult> check(EPCParseResult parsed) async {
     try {
       return switch (parsed.type) {
@@ -60,11 +67,18 @@ class CommissioningSerialPoolChecker {
       );
     }
 
+    // Prefer exact lookups so Digital Link / URN input resolves reliably.
+    final byEpc = await _tryGetByEpc(parsed.epc);
+    if (byEpc != null) return _sgtinStatusResult(byEpc);
+
+    final bySerial = await _tryGetBySerial(serial, expectedGtin: gtin);
+    if (bySerial != null) return _sgtinStatusResult(bySerial);
+
     final result = await _sgtinService.searchSGTINsAdvanced(
       gtinCode: gtin,
       serialNumber: serial,
       page: 0,
-      size: 1,
+      size: 5,
     );
     final content = (result['content'] as List?)?.whereType<SGTIN>().toList() ??
         const <SGTIN>[];
@@ -76,8 +90,53 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    final sgtin = content.first;
+    final exact = content.where((s) {
+      if (s.serialNumber != serial) return false;
+      if (gtin == null || gtin.isEmpty) return true;
+      final code = s.gtinCode;
+      if (code == null || code.isEmpty) return true;
+      try {
+        return GtinFormat.normalizeGtinTo14(code) ==
+            GtinFormat.normalizeGtinTo14(gtin);
+      } catch (_) {
+        return code == gtin;
+      }
+    }).toList();
+
+    final sgtin = exact.isNotEmpty ? exact.first : content.first;
     return _sgtinStatusResult(sgtin);
+  }
+
+  Future<SGTIN?> _tryGetByEpc(String epc) async {
+    if (epc.isEmpty) return null;
+    try {
+      return await _sgtinService.getSGTINByEPC(epc);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<SGTIN?> _tryGetBySerial(
+    String serial, {
+    String? expectedGtin,
+  }) async {
+    try {
+      final sgtin = await _sgtinService.getSGTINBySerialNumber(serial);
+      if (expectedGtin == null || expectedGtin.isEmpty) return sgtin;
+      final code = sgtin.gtinCode;
+      if (code == null || code.isEmpty) return sgtin;
+      try {
+        if (GtinFormat.normalizeGtinTo14(code) !=
+            GtinFormat.normalizeGtinTo14(expectedGtin)) {
+          return null;
+        }
+      } catch (_) {
+        if (code != expectedGtin) return null;
+      }
+      return sgtin;
+    } catch (_) {
+      return null;
+    }
   }
 
   CommissioningPoolCheckResult _sgtinStatusResult(SGTIN sgtin) {
@@ -187,28 +246,5 @@ class CommissioningSerialPoolChecker {
       sourceStatus: status.name,
       blockReason: 'SSCC cannot be commissioned from ${status.name}',
     );
-  }
-
-  /// Returns a warning when a child SGTIN is not commissioned/active; null when OK.
-  Future<String?> checkChildForAggregation(EPCParseResult parsed) async {
-    if (parsed.type != EPCType.sgtin) {
-      return 'Child EPC must be a SGTIN';
-    }
-    final check = await _checkSgtin(parsed);
-    if (check.status == CommissioningSerialPoolStatus.notPreAllocated) {
-      return 'Child SGTIN not found in serial pool';
-    }
-    if (check.status == CommissioningSerialPoolStatus.alreadyCommissioned) {
-      return null;
-    }
-    final src = check.sourceStatus;
-    if (src == 'COMMISSIONED' || src == 'ACTIVE' || src == 'RECEIVED') {
-      return null;
-    }
-    if (check.status == CommissioningSerialPoolStatus.preReserved &&
-        (src == 'RESERVED' || src == 'ALLOCATED')) {
-      return 'Child SGTIN is not yet commissioned';
-    }
-    return check.blockReason ?? 'Child SGTIN is not eligible for aggregation';
   }
 }

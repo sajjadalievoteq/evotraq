@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
@@ -132,7 +133,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                     controller: _epcListController,
                     decoration: const InputDecoration(
                       labelText: 'EPCs (comma separated)',
-                      hintText: 'urn:epc:id:sgtin:0614141.107346.1, ...',
+                      hintText: 'https://id.gs1.org/01/10614141073464/21/1, ...',
                       border: OutlineInputBorder(),
                       prefixIcon: TraqIcon(AppAssets.iconList),
                     ),
@@ -365,8 +366,8 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
     }
     
     for (final epc in epcs) {
-      if (!epc.startsWith('urn:epc:')) {
-        return 'EPCs must start with urn:epc:';
+      if (!Gs1CanonicalIdentifier.isValid(epc)) {
+        return 'EPC must be a valid GS1 identity (Digital Link, URN, or barcode)';
       }
     }
     

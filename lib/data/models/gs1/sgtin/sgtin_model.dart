@@ -22,8 +22,7 @@ class SGTIN extends Equatable {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  final String? epcUri;
-  final String? gs1DigitalLinkUri;
+  final String? canonicalIdentifier;
   final DateTime? commissionedAt;
   final String? commissioningReadpointGln;
   final String? commissioningEventId;
@@ -68,8 +67,7 @@ class SGTIN extends Equatable {
     this.decommissionedDate,
     required this.createdAt,
     this.updatedAt,
-    this.epcUri,
-    this.gs1DigitalLinkUri,
+    this.canonicalIdentifier,
     this.commissionedAt,
     this.commissioningReadpointGln,
     this.commissioningEventId,
@@ -120,8 +118,7 @@ class SGTIN extends Equatable {
       decommissionedDate: _parseDateTime(json['decommissionedDate']),
       createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _parseDateTime(json['updatedAt']),
-      epcUri: json['epcUri'],
-      gs1DigitalLinkUri: json['gs1DigitalLinkUri'],
+      canonicalIdentifier: _parseCanonicalIdentifier(json),
       commissionedAt: _parseDateTime(json['commissionedAt']),
       commissioningReadpointGln: json['commissioningReadpointGln'],
       commissioningEventId: json['commissioningEventId'],
@@ -173,8 +170,8 @@ class SGTIN extends Equatable {
       if (decommissionedDate != null) 'decommissionedDate': _formatDateWithTimezone(decommissionedDate!),
       'createdAt': _formatDateWithTimezone(createdAt),
       if (updatedAt != null) 'updatedAt': _formatDateWithTimezone(updatedAt!),
-      if (epcUri != null) 'epcUri': epcUri,
-      if (gs1DigitalLinkUri != null) 'gs1DigitalLinkUri': gs1DigitalLinkUri,
+      if (canonicalIdentifier != null)
+        'canonicalIdentifier': canonicalIdentifier,
       if (commissionedAt != null) 'commissionedAt': _formatDateWithTimezone(commissionedAt!),
       if (commissioningReadpointGln != null) 'commissioningReadpointGln': commissioningReadpointGln,
       if (commissioningEventId != null) 'commissioningEventId': commissioningEventId,
@@ -218,8 +215,7 @@ class SGTIN extends Equatable {
     DateTime? decommissionedDate,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? epcUri,
-    String? gs1DigitalLinkUri,
+    String? canonicalIdentifier,
     DateTime? commissionedAt,
     String? commissioningReadpointGln,
     String? commissioningEventId,
@@ -260,8 +256,8 @@ class SGTIN extends Equatable {
       decommissionedDate: decommissionedDate ?? this.decommissionedDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      epcUri: epcUri ?? this.epcUri,
-      gs1DigitalLinkUri: gs1DigitalLinkUri ?? this.gs1DigitalLinkUri,
+      canonicalIdentifier:
+          canonicalIdentifier ?? this.canonicalIdentifier,
       commissionedAt: commissionedAt ?? this.commissionedAt,
       commissioningReadpointGln: commissioningReadpointGln ?? this.commissioningReadpointGln,
       commissioningEventId: commissioningEventId ?? this.commissioningEventId,
@@ -287,11 +283,9 @@ class SGTIN extends Equatable {
   }
 
   String get computedEpcUri {
-    if (epcUri != null) return epcUri!;
+    if (canonicalIdentifier != null) return canonicalIdentifier!;
     final String padded = gtinCode.padLeft(14, '0');
-    final String companyPrefix = padded.substring(1, 8);
-    final String itemRef = padded.substring(8, 13);
-    return 'urn:epc:id:sgtin:$companyPrefix.$itemRef.$serialNumber';
+    return 'https://id.gs1.org/01/$padded/21/$serialNumber';
   }
 
   String get sgtinString => '$gtinCode$serialNumber';
@@ -302,7 +296,7 @@ class SGTIN extends Equatable {
         bestBeforeDate, status, currentLocation, currentSSCC, currentSsccCode,
         regulatoryMarket,
         regulatoryStatus, decommissionedReason, decommissionedDate, createdAt,
-        updatedAt, epcUri, gs1DigitalLinkUri, commissionedAt,
+        updatedAt, canonicalIdentifier, commissionedAt,
         commissioningReadpointGln, commissioningEventId, expiryDateTime,
         serialGenerationStrategy, serialOrigin, serialRangeId, parentEpc,
         aggregatedAt, currentCustodianGln, latestEventId, latestBizStep,
@@ -311,6 +305,20 @@ class SGTIN extends Equatable {
         pharmaExtension,
         childEpcs,
       ];
+
+  static String? _parseCanonicalIdentifier(Map<String, dynamic> json) {
+    final canonical = json['canonicalIdentifier'];
+    if (canonical is String && canonical.trim().isNotEmpty) {
+      return canonical.trim();
+    }
+    for (final key in ['epcUri', 'gs1DigitalLinkUri']) {
+      final value = json[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return null;
+  }
 
   static String _parseGtinCode(Map<String, dynamic> json) {
     final gtin = json['gtin'];

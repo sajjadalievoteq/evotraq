@@ -1,14 +1,13 @@
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/operation_wizard/operation_step_config.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/update_status/update_status_request_model.dart';
@@ -256,13 +255,7 @@ class _UpdateStatusOperationScreenState
           }
           widget.onEmbeddedActionSuccess!();
         } else {
-          if (!context.isDesktop && response.navigableOperationId != null) {
-            context.go(
-              '${Constants.opUpdateStatusRoute}/${response.navigableOperationId}',
-            );
-          } else {
-            context.go(Constants.opUpdateStatusRoute);
-          }
+          popOrGo(context, Constants.opUpdateStatusRoute);
         }
       } else {
         _showOperationError(

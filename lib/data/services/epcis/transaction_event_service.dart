@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
@@ -29,14 +28,11 @@ class TransactionEventService {
     String cleanId;
     if (id.contains(':')) {
       cleanId = id.split(':').last;
-      print('DEBUG: Extracted UUID from eventId: $cleanId');
     } else {
       cleanId = id;
-      print('DEBUG: Using ID as is: $cleanId');
     }
 
     try {
-      print('DEBUG: Sending request to: $_baseUrl/$cleanId');
       final response = await _dioService.get(
         '$_baseUrl/$cleanId',
         headers: headers,
@@ -44,24 +40,14 @@ class TransactionEventService {
         acceptAllStatusCodes: true,
       );
       if (response.statusCode == 200) {
-        print('DEBUG: Successfully retrieved transaction event');
         final responseBody = json.decode(response.data);
-        print(
-          'DEBUG: Transaction event data: ${responseBody.toString().substring(0, min(500, responseBody.toString().length))}',
-        );
-        print(
-          'DEBUG: businessStep: ${responseBody['businessStep']}, bizStep: ${responseBody['bizStep']}',
-        );
         return TransactionEvent.fromJson(responseBody);
       } else {
-        print('DEBUG: Failed to get transaction event: ${response.statusCode}');
-        print('DEBUG: Response body: ${response.data}');
         throw Exception(
           'Failed to get transaction event: ${response.statusCode}',
         );
       }
     } catch (e) {
-      print('DEBUG: Error retrieving transaction event: ${e.toString()}');
       throw Exception('Error retrieving transaction event: ${e.toString()}');
     }
   }
@@ -407,7 +393,7 @@ class TransactionEventService {
       'bizData': bizData,
       'action': 'ADD',
       'parentID':
-          'urn:epc:id:sscc:${DateTime.now().millisecondsSinceEpoch % 1000000000000}.0000000000',
+          'https://id.gs1.org/00/${(DateTime.now().millisecondsSinceEpoch % 100000000000000000).toString().padLeft(18, '0')}',
       'quantityList': <Map<String, dynamic>>[],
     };
 
@@ -480,7 +466,7 @@ class TransactionEventService {
       'bizData': bizData,
       'action': 'DELETE',
       'parentID':
-          'urn:epc:id:sscc:${DateTime.now().millisecondsSinceEpoch % 1000000000000}.0000000000',
+          'https://id.gs1.org/00/${(DateTime.now().millisecondsSinceEpoch % 100000000000000000).toString().padLeft(18, '0')}',
       'quantityList': <Map<String, dynamic>>[],
     };
 
@@ -554,7 +540,7 @@ class TransactionEventService {
       'bizData': bizData,
       'action': 'OBSERVE',
       'parentID':
-          'urn:epc:id:sscc:${DateTime.now().millisecondsSinceEpoch % 1000000000000}.0000000000',
+          'https://id.gs1.org/00/${(DateTime.now().millisecondsSinceEpoch % 100000000000000000).toString().padLeft(18, '0')}',
       'quantityList': <Map<String, dynamic>>[],
     };
 

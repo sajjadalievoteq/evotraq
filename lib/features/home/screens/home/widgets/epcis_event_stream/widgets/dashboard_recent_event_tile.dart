@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
@@ -121,13 +122,15 @@ class DashboardRecentEventTile extends StatelessWidget {
 
   String _shortId(String? epc) {
     if (epc == null || epc.isEmpty) return '–';
-    if (epc.startsWith('urn:epc:id:')) {
-      final afterType = epc.substring('urn:epc:id:'.length);
-      final colonIdx = afterType.indexOf(':');
-      if (colonIdx != -1) {
-        final parts = afterType.substring(colonIdx + 1).split('.');
-        if (parts.length >= 2) return '${parts[0]}.${parts[1]}';
+    if (Gs1CanonicalIdentifier.isSgtin(epc)) {
+      final gtin = Gs1CanonicalIdentifier.extractGtin(epc);
+      if (gtin != null && gtin.length == 14) {
+        return '${gtin.substring(1, 8)}.${gtin.substring(8)}';
       }
+    }
+    if (Gs1CanonicalIdentifier.isSscc(epc)) {
+      final sscc = Gs1CanonicalIdentifier.extractSscc18(epc);
+      if (sscc != null) return sscc;
     }
     return epc.length > 20 ? '…${epc.substring(epc.length - 16)}' : epc;
   }

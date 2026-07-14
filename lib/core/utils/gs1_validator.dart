@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
@@ -30,10 +31,8 @@ class GS1Validator {
 
   static bool isValidEPCURI(String? epcUri) {
     if (epcUri == null || epcUri.isEmpty) return false;
-    final pattern = RegExp(
-      r'^urn:epc:(id|class|idpat):(sgtin|sscc|sgln|grai|giai|gsrn|gdti|cpi):.+$',
-    );
-    return pattern.hasMatch(epcUri);
+    // Deprecated wrapper — prefer Gs1CanonicalIdentifier.isValid.
+    return Gs1CanonicalIdentifier.isValid(epcUri);
   }
 
   static String? validateBarcodeData(String? barcodeData) {

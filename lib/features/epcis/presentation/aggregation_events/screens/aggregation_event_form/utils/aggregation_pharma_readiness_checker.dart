@@ -3,11 +3,10 @@ import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 
 class AggregationPharmaReadinessChecker {
   AggregationPharmaReadinessChecker({
@@ -297,18 +296,16 @@ class AggregationPharmaReadinessChecker {
   String? _resolveEpcUri(String? raw) {
     if (raw == null || raw.trim().isEmpty) return null;
     final trimmed = raw.trim();
-    if (trimmed.startsWith('urn:epc:id:')) return trimmed;
+    if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
+        Gs1CanonicalIdentifier.isLotOrClassLevel(trimmed) ||
+        Gs1CanonicalIdentifier.isValid(trimmed)) {
+      return Gs1CanonicalIdentifier.forStorage(trimmed);
+    }
     return Gs1Converter.barcodeToEpc(trimmed) ??
         EPCFormatter.formatToEPCUri(trimmed);
   }
 
   String? _ssccCodeFromEpc(String epc) {
-    final lower = epc.toLowerCase();
-    if (lower.startsWith('urn:epc:id:sscc:')) {
-      return SsccInputParser.parseToSsccCode(epc);
-    }
-    final digits = SsccFormat.stripSsccInput(epc);
-    if (digits.length == 18) return digits;
-    return null;
+    return Gs1CanonicalIdentifier.extractSscc18(epc);
   }
 }

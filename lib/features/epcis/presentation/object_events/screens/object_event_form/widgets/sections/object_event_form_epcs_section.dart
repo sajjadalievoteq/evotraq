@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_add_to_list_section.dart';
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
@@ -65,7 +66,7 @@ class _ObjectEventFormEpcsSectionState extends State<ObjectEventFormEpcsSection>
 
     final converted = EPCFormatter.formatToEPCUri(value);
 
-    if (converted != null && converted.startsWith('urn:epc:idpat:')) {
+    if (converted != null && Gs1CanonicalIdentifier.isClassGtin(converted)) {
       setState(() {
         _inputError =
             'This is a product class identifier, not a serialised item. '
@@ -74,12 +75,16 @@ class _ObjectEventFormEpcsSectionState extends State<ObjectEventFormEpcsSection>
       return;
     }
 
-    if (converted == null || !converted.startsWith('urn:epc:id:')) {
+    final isIdentity = converted != null &&
+        Gs1CanonicalIdentifier.isValid(converted) &&
+        !Gs1CanonicalIdentifier.isClassGtin(converted);
+    if (!isIdentity) {
       setState(() {
         _inputError =
             'Unrecognised format. Accepted inputs:\n'
+            '• GS1 Digital Link: https://id.gs1.org/01/…/21/…\n'
             '• GS1 barcode: (01)GTIN(21)SERIAL\n'
-            '• EPC URI: urn:epc:id:sgtin:...\n'
+            '• EPC URI: urn:epc:id:sgtin:… (accepted)\n'
             '• Or use the scan button to scan a barcode.';
       });
       return;
@@ -145,8 +150,8 @@ class _ObjectEventFormEpcsSectionState extends State<ObjectEventFormEpcsSection>
         controller: _controller,
         decoration: InputDecoration(
           labelText: 'EPC',
-          hintText: 'urn:epc:id:sgtin:... or (01)GTIN(21)serial',
-          helperText: 'Enter a serialised item EPC or scan a GS1 FMD 2D barcode',
+          hintText: 'https://id.gs1.org/01/…/21/… or (01)GTIN(21)serial',
+          helperText: 'Enter a GS1 Digital Link, serialised EPC, or scan a GS1 FMD 2D barcode',
           errorText: _inputError,
           errorMaxLines: 4,
           border: const OutlineInputBorder(),

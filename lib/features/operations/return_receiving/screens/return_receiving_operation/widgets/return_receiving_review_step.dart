@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_rows.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
 class ReturnReceivingReviewStep extends StatelessWidget {
@@ -49,82 +47,46 @@ class ReturnReceivingReviewStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionLabel('Review Return Receiving'),
-          if (showPageHeader) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'Please review all details before submitting.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-          const SizedBox(height: 16),
+          OperationReviewStepHeader(
+            title: 'Review Return Receiving',
+            showPageHeader: showPageHeader,
+          ),
           Gs1GroupCard(
             title: 'Operation Details',
             outlineColor: outline,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _row('Return Receiving Reference', 'Auto-generated on submit'),
+                OperationReviewInfoRow(
+                  'Return Receiving Reference',
+                  'Auto-generated on submit',
+                ),
                 const SizedBox(height: 12),
-                _row('Returned From', sourceGln?.glnCode ?? '-'),
-                if (sourceGln?.locationName.isNotEmpty == true)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      sourceGln!.locationName,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                    ),
+                OperationReviewGlnTransfer(
+                  sourceLabel: 'Returned From',
+                  sourceGln: sourceGln,
+                  destinationLabel: 'Received At',
+                  destinationGln: receivingGln,
+                ),
+                OperationReviewOptionalFields([
+                  OperationReviewField(
+                    'Return Authorization',
+                    returnAuthorizationNumber,
                   ),
-                const SizedBox(height: 12),
-                const Center(child: TraqIcon(AppAssets.iconArrowD, size: 20)),
-                const SizedBox(height: 12),
-                _row('Received At', receivingGln?.glnCode ?? '-'),
-                if (receivingGln?.locationName.isNotEmpty == true)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      receivingGln!.locationName,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                    ),
+                  OperationReviewField('Purchase Order', purchaseOrder),
+                  OperationReviewField('Despatch Advice', despatchAdvice),
+                  OperationReviewField(
+                    'Return Receiving Advice (RECADV)',
+                    receivingAdvice,
                   ),
-                if (returnAuthorizationNumber.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Return Authorization', returnAuthorizationNumber),
-                ],
-                if (purchaseOrder.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Purchase Order', purchaseOrder),
-                ],
-                if (despatchAdvice.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Despatch Advice', despatchAdvice),
-                ],
-                if (receivingAdvice.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Return Receiving Advice (RECADV)', receivingAdvice),
-                ],
-                if (invoiceNumber.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Invoice Number', invoiceNumber),
-                ],
-                if (billOfLading.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Bill of Lading', billOfLading),
-                ],
-                if (carrier.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Carrier', carrier),
-                ],
-                if (trackingNumber.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Tracking Number', trackingNumber),
-                ],
-                if (notes.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _row('Notes', notes),
-                ],
+                  OperationReviewField('Invoice Number', invoiceNumber),
+                  OperationReviewField('Bill of Lading', billOfLading),
+                  OperationReviewField('Carrier', carrier),
+                  OperationReviewField('Tracking Number', trackingNumber),
+                  OperationReviewField('Notes', notes),
+                ]),
                 const SizedBox(height: 12),
-                _row(
+                OperationReviewInfoRow(
                   'Event Time',
                   eventTime != null
                       ? '${eventTime!.toLocal()}'.substring(0, 16)
@@ -141,19 +103,6 @@ class ReturnReceivingReviewStep extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _row(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ),
-        Expanded(child: Text(value)),
-      ],
     );
   }
 }

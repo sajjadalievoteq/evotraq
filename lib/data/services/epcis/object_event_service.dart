@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_formatter.dart';
@@ -882,43 +883,30 @@ class ObjectEventService {
   }
 
   Future<bool> validateEPC(String epc) async {
-    final RegExp sgtin = RegExp(
-      r'^urn:epc:id:sgtin:(\d+)\.(\d+)\.(\w+)$',
-      caseSensitive: false,
-    );
-
-    final RegExp sscc = RegExp(
-      r'^urn:epc:id:sscc:(\d+)\.(\d+)$',
-      caseSensitive: false,
-    );
-
-    final RegExp sgln = RegExp(
-      r'^urn:epc:id:sgln:(\d+)\.(\d+)\.(\w*)$',
-      caseSensitive: false,
-    );
-
-    return sgtin.hasMatch(epc) || sscc.hasMatch(epc) || sgln.hasMatch(epc);
+    final normalized = Gs1Converter.normalizeForStorage(epc);
+    return normalized.startsWith('https://id.gs1.org/01/') ||
+        normalized.startsWith('https://id.gs1.org/00/') ||
+        normalized.startsWith('https://id.gs1.org/414/') ||
+        RegExp(r'^urn:epc:id:(sgtin|sscc|sgln):', caseSensitive: false)
+            .hasMatch(epc);
   }
 
   Future<String> convertGS1ElementStringToEPC(String gs1ElementString) async {
+    final converted = Gs1Converter.barcodeToEpc(gs1ElementString);
+    if (converted != null) return converted;
+
     if (gs1ElementString.startsWith('01') && gs1ElementString.contains('21')) {
       final gtin = gs1ElementString.substring(2, 16);
       final serial = gs1ElementString.substring(
         gs1ElementString.indexOf('21') + 2,
       );
-
-      final companyPrefix = gtin.substring(1, 7);
-      final itemReference = gtin.substring(7, 13);
-
-      return 'urn:epc:id:sgtin:$companyPrefix.$itemReference.$serial';
+      return Gs1Converter.gtinSerialToEpc(gtin, serial) ??
+          'https://id.gs1.org/01/${gtin.padLeft(14, '0')}/21/$serial';
     }
 
     if (gs1ElementString.startsWith('00')) {
       final sscc = gs1ElementString.substring(2, 20);
-      final companyPrefix = sscc.substring(1, 8);
-      final serialReference = sscc.substring(8, 18);
-
-      return 'urn:epc:id:sscc:$companyPrefix.$serialReference';
+      return Gs1Converter.ssccToEpc(sscc) ?? 'https://id.gs1.org/00/$sscc';
     }
 
     throw Exception('Unsupported GS1 element string format');

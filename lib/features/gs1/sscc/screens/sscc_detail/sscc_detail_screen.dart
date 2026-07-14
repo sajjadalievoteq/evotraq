@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_route_constants.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
@@ -220,6 +221,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   bool _serverRefreshInFlight = false;
 
   String? _lastListSyncKey;
+  String? _aggregationLinksRequestedCode;
+  Future<void>? _aggregationLinksFuture;
 
   void _reloadFromServer() {
     if (_serverRefreshInFlight) return;
@@ -227,12 +230,16 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     if (code == null || code.isEmpty) return;
 
     _serverRefreshInFlight = true;
+    _aggregationLinksRequestedCode = null;
+    _aggregationLinksFuture = null;
     setState(() {
       _loadedSsccKey = null;
       _formFieldsHydrated = false;
     });
     if (RegExp(r'^\d{18}$').hasMatch(code)) {
       _cubit.fetchSSCCByCode(code);
+      // Aggregation links only need the SSCC code — overlap with primary fetch.
+      _loadAggregationLinks(code);
     } else {
       _cubit.fetchSSCCById(code);
     }
@@ -464,12 +471,19 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     });
   }
 
-  Future<void> _loadAggregationLinks(String ssccCode) async {
-    final links =
-        await _cubit.fetchAggregationLinks(ssccCode);
-    if (mounted) {
-      setState(() => _aggregationLinks = links);
+  Future<void> _loadAggregationLinks(String ssccCode) {
+    if (_aggregationLinksRequestedCode == ssccCode &&
+        _aggregationLinksFuture != null) {
+      return _aggregationLinksFuture!;
     }
+    _aggregationLinksRequestedCode = ssccCode;
+    final future = () async {
+      final links = await _cubit.fetchAggregationLinks(ssccCode);
+      if (!mounted || _aggregationLinksRequestedCode != ssccCode) return;
+      setState(() => _aggregationLinks = links);
+    }();
+    _aggregationLinksFuture = future;
+    return future;
   }
 
   Future<bool> _addAggregationChild({
@@ -832,13 +846,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
               if (widget.embedded && widget.onEmbeddedActionSuccess != null) {
                 widget.onEmbeddedActionSuccess!();
               } else if (context.mounted) {
-                final code =
-                    state.selectedSSCC?.ssccCode ?? widget.routeSsccCode;
-                if (code != null && code.isNotEmpty) {
-                  context.go(SsccRouteConstants.pathForSsccCode(code));
-                } else {
-                  context.go(Constants.gs1SsccsRoute);
-                }
+                popOrGo(context, Constants.gs1SsccsRoute);
               }
             }
             return;

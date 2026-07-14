@@ -157,7 +157,7 @@ class _QueryParameterWidgetState extends State<QueryParameterWidget> {
           decoration: const InputDecoration(
             labelText: 'EPCs (comma-separated)',
             border: OutlineInputBorder(),
-            helperText: 'Example: urn:epc:id:sgtin:0614141.812345.400,urn:epc:id:sgtin:0614141.812345.401',
+            helperText: 'Example: https://id.gs1.org/01/10614148123456/21/400,https://id.gs1.org/01/10614148123456/21/401',
           ),
           initialValue: _parameters.epcs?.join(', '),
           maxLines: 3,
@@ -208,7 +208,7 @@ class _QueryParameterWidgetState extends State<QueryParameterWidget> {
           decoration: const InputDecoration(
             labelText: 'Read Points (comma-separated)',
             border: OutlineInputBorder(),
-            helperText: 'Example: urn:epc:id:sgln:0614141.00777.0',
+            helperText: 'Example: https://id.gs1.org/414/0614141007776',
           ),
           initialValue: _parameters.readPoints?.join(', '),
           maxLines: 2,
@@ -219,7 +219,7 @@ class _QueryParameterWidgetState extends State<QueryParameterWidget> {
           decoration: const InputDecoration(
             labelText: 'Business Locations (comma-separated)',
             border: OutlineInputBorder(),
-            helperText: 'Example: urn:epc:id:sgln:0614141.00888.0',
+            helperText: 'Example: https://id.gs1.org/414/0614141008889',
           ),
           initialValue: _parameters.businessLocations?.join(', '),
           maxLines: 2,

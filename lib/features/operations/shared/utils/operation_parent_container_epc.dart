@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 
@@ -36,8 +37,6 @@ String? validateParentContainerEpc(EPCParseResult parsed) {
 
 bool isValidParentContainerId(String? id) {
   if (id == null || id.isEmpty) return false;
-  final lower = id.toLowerCase();
-  return lower.startsWith('urn:epc:id:sscc:') ||
-      lower.startsWith('urn:epc:id:sgtin:') ||
-      RegExp(r'^\d{18}$').hasMatch(id);
+  if (Gs1CanonicalIdentifier.isSerializedInstance(id)) return true;
+  return RegExp(r'^\d{18}$').hasMatch(id);
 }

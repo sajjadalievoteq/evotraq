@@ -277,7 +277,7 @@ class _EPCISEventsListScreenState extends State<EPCISEventsListScreen> {
               TextField(
                 decoration: const InputDecoration(
                   labelText: 'EPC',
-                  hintText: 'e.g., urn:epc:id:sgtin:...',
+                  hintText: 'e.g., https://id.gs1.org/01/…/21/…',
                 ),
                 onChanged: (value) => selectedEPC = value.isEmpty ? null : value,
               ),

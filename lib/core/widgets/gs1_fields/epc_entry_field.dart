@@ -113,7 +113,7 @@ class _EpcEntryFieldState extends State<EpcEntryField> {
       fieldName: widget.fieldName,
       label: widget.label,
       hintText: widget.hintText ??
-          '(01)…(21)…  •  urn:epc:id:sgtin:…  •  https://id.gs1.org/…',
+          'https://id.gs1.org/…  •  (01)…(21)…  •  urn:epc:id:sgtin:…',
       helperText: effectiveHelper,
       readOnly: !widget.enabled,
       setFieldError: widget.setFieldError,

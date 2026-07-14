@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 
@@ -41,7 +42,7 @@ class SgtinSearchInputResolver {
       return SgtinSearchInputResolver(
         raw: trimmed,
         gtinCode: parsed.gtin,
-        serialNumber: parsed.serial ?? _serialFromSgtinEpc(parsed.epc),
+        serialNumber: parsed.serial ?? Gs1CanonicalIdentifier.extractSerial(parsed.epc),
         epcUri: parsed.type == EPCType.sgtin ? parsed.epc : null,
       );
     } on EPCParseException catch (e) {
@@ -53,20 +54,18 @@ class SgtinSearchInputResolver {
     }
   }
 
-  static String? _serialFromSgtinEpc(String epc) {
-    if (!epc.startsWith('urn:epc:id:sgtin:')) return null;
-    final parts = epc.substring('urn:epc:id:sgtin:'.length).split('.');
-    if (parts.length >= 3) return parts[2];
-    return null;
-  }
-
   static bool _looksLikeStructuredIdentifier(String value) {
+    if (Gs1CanonicalIdentifier.isValid(value) ||
+        Gs1CanonicalIdentifier.classify(value) != Gs1CanonicalKind.unknown) {
+      return true;
+    }
     if (value.startsWith('urn:') ||
         value.startsWith('http://') ||
         value.startsWith('https://')) {
       return true;
     }
     if (value.contains('(') && value.contains(')')) return true;
+    if (Gs1CanonicalIdentifier.isSscc(value)) return true;
     if (value.startsWith('00') && value.length >= 18) return true;
     return RegExp(r'^\d{8,14}$').hasMatch(value);
   }

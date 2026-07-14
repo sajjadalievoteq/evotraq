@@ -175,6 +175,7 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
   bool _loading = false;
   bool _eligible = false;
   String? _disabledReason;
+  PharmaReturnContext? _context;
 
   @override
   void initState() {
@@ -202,6 +203,7 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
       _loading = true;
       _eligible = false;
       _disabledReason = null;
+      _context = null;
     });
 
     if (!widget.operation.isAccepted && !widget.operation.isAwaitingAcceptance) {
@@ -239,6 +241,7 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
     setState(() {
       _loading = false;
       _eligible = contextData != null && contextData.isValid;
+      _context = contextData;
       if (!_eligible) {
         _disabledReason = 'Return context could not be resolved for this operation';
       }
@@ -246,16 +249,10 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
   }
 
   Future<void> _onPressed() async {
-    setState(() => _loading = true);
-    final contextData =
-        await PharmaReturnContextBuilder().fromReceiving(widget.operation);
-    if (!mounted || contextData == null || !contextData.isValid) {
-      setState(() => _loading = false);
-      return;
-    }
+    if (_context == null || !_context!.isValid) return;
     context.go(
       Constants.opReturnShippingCreateRoute,
-      extra: contextData.toExtra(),
+      extra: _context!.toExtra(),
     );
   }
 

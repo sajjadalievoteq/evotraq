@@ -1,9 +1,10 @@
-//import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart' show BarcodeFormat;
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_event.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:uuid/uuid.dart';
 
 class BarcodeToEPCISMapper {  final Uuid _uuid = Uuid();
@@ -31,9 +32,10 @@ class BarcodeToEPCISMapper {  final Uuid _uuid = Uuid();
         readPoint,
         bizLocation,
       );
-    } else if (value.startsWith('urn:epc:')) {
+    } else if (Gs1CanonicalIdentifier.isValid(value)) {
+      final canonical = Gs1CanonicalIdentifier.forStorage(value);
       return _createEPCISEventFromEPC(
-        value,
+        canonical,
         bizStep,
         disposition,
         readPoint,
@@ -251,62 +253,38 @@ class BarcodeToEPCISMapper {  final Uuid _uuid = Uuid();
   }
   
   String _getEPCType(String epc) {
-    if (epc.contains(':sgtin:')) return 'SGTIN';
-    if (epc.contains(':sscc:')) return 'SSCC';
-    if (epc.contains(':sgln:')) return 'SGLN';
-    if (epc.contains(':grai:')) return 'GRAI';
-    if (epc.contains(':giai:')) return 'GIAI';
-    if (epc.contains(':gsrn:')) return 'GSRN';
-    return 'UNKNOWN';
+    final type = Gs1CanonicalIdentifier.typeOf(epc);
+    if (type != null) return type;
+
+    return switch (Gs1CanonicalIdentifier.classify(epc)) {
+      Gs1CanonicalKind.sgtin => 'SGTIN',
+      Gs1CanonicalKind.sscc => 'SSCC',
+      Gs1CanonicalKind.sgln => 'SGLN',
+      Gs1CanonicalKind.pgln => 'PGLN',
+      Gs1CanonicalKind.lgtin => 'LGTIN',
+      Gs1CanonicalKind.classGtin => 'SGTIN-CLASS',
+      Gs1CanonicalKind.unknown => 'UNKNOWN',
+    };
   }
   
   String _convertSGTINToEPC(String gtin, String serialNumber) {
-    if (gtin.length < 14) {
-      gtin = gtin.padLeft(14, '0');
-    }
-    
-    final companyPrefix = gtin.substring(1, 8);
-    
-    final itemReference = gtin.substring(8, 13);
-    
-    return 'urn:epc:id:sgtin:$companyPrefix.$itemReference.$serialNumber';
+    return Gs1Converter.gtinSerialToEpc(gtin, serialNumber) ??
+        'https://id.gs1.org/01/${gtin.padLeft(14, '0')}/21/$serialNumber';
   }
   
   String _convertSSCCToEPC(String sscc) {
-    if (sscc.length < 18) {
-      sscc = sscc.padLeft(18, '0');
-    }
-    
-    final extensionDigit = sscc.substring(0, 1);
-    final companyPrefix = sscc.substring(1, 8);
-    
-    final serialReference = sscc.substring(8, 17);
-    
-    return 'urn:epc:id:sscc:$companyPrefix.$extensionDigit$serialReference';
+    final padded = sscc.padLeft(18, '0');
+    return Gs1Converter.ssccToEpc(padded) ?? 'https://id.gs1.org/00/$padded';
   }
   
   String _convertGLNToEPC(String gln, String extension) {
-    if (gln.length < 13) {
-      gln = gln.padLeft(13, '0');
-    }
-    
-    final companyPrefix = gln.substring(0, 7);
-    
-    final locationReference = gln.substring(7, 12);
-    
-    return 'urn:epc:id:sgln:$companyPrefix.$locationReference.$extension';
+    return Gs1Converter.glnToEpc(gln, extension: extension) ??
+        'https://id.gs1.org/414/${gln.padLeft(13, '0')}';
   }
   
   String _convertGTINToClassEPC(String gtin) {
-    if (gtin.length < 14) {
-      gtin = gtin.padLeft(14, '0');
-    }
-    
-    final companyPrefix = gtin.substring(1, 8);
-    
-    final itemReference = gtin.substring(8, 13);
-    
-    return 'urn:epc:idpat:sgtin:$companyPrefix.$itemReference.*';
+    return Gs1Converter.gtinToClassEpc(gtin) ??
+        'https://id.gs1.org/01/${gtin.padLeft(14, '0')}';
   }
 
   GLN _createGLN(String glnStr) {

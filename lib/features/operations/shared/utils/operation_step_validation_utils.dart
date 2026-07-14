@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/gln_check_digit_validator.dart';
 
@@ -7,18 +8,20 @@ abstract final class OperationStepValidationUtils {
       return 'Scan at least one serialized SGTIN or SSCC before continuing.';
     }
     for (final epc in scannedEpcs) {
-      if (epc.startsWith('urn:epc:class:lgtin:')) {
+      if (Gs1CanonicalIdentifier.isLgtin(epc)) {
         return '"$epc" is a lot-based GTIN (lgtin). '
-            'DSCSA requires serialized SGTINs (urn:epc:id:sgtin:…). '
+            'DSCSA requires serialized SGTINs '
+            '(https://id.gs1.org/01/…/21/…). '
             'Lot-level EPCs are not permitted.';
       }
-      if (epc.startsWith('urn:epc:idpat:')) {
+      if (Gs1CanonicalIdentifier.isClassGtin(epc)) {
         return '"$epc" is an EPC pattern type used for queries — not valid in an event. '
             'Scan a serialized SGTIN or SSCC instead.';
       }
-      if (!_isValidSerializedEpc(epc)) {
+      if (!Gs1CanonicalIdentifier.isSerializedInstance(epc)) {
         return '"$epc" is not a valid GS1 EPC URI. '
-            'Expected: urn:epc:id:sgtin:… or urn:epc:id:sscc:…';
+            'Expected: https://id.gs1.org/01/…/21/… or https://id.gs1.org/00/… '
+            '(URN forms are also accepted).';
       }
     }
     if (scannedEpcs.toSet().length != scannedEpcs.length) {
@@ -33,7 +36,7 @@ abstract final class OperationStepValidationUtils {
   }) {
     if (scannedEpcs.isEmpty) return emptyMessage;
     for (final epc in scannedEpcs) {
-      if (epc.startsWith('urn:epc:class:lgtin:')) {
+      if (Gs1CanonicalIdentifier.isLgtin(epc)) {
         return '"$epc" is a lot-based GTIN. '
             'Only serialized SGTINs and SSCCs are valid for cancel operations under DSCSA/FMD.';
       }
@@ -66,10 +69,5 @@ abstract final class OperationStepValidationUtils {
       return '$destinationInvalidMessagePrefix"${destinationGln.glnCode}"$destinationInvalidMessageSuffix';
     }
     return null;
-  }
-
-  static bool _isValidSerializedEpc(String epc) {
-    return epc.startsWith('urn:epc:id:sgtin:') ||
-        epc.startsWith('urn:epc:id:sscc:');
   }
 }

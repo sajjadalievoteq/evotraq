@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/utils/gs1_ai_normalizer.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
@@ -80,7 +81,7 @@ class ProductJourneyService {
           final candidate = Map<String, dynamic>.from(item as Map);
           final candidateSerial = candidate['serialNumber']?.toString();
           final candidateGtin =
-              candidate['gtin']?.toString()?.padLeft(14, '0');
+              candidate['gtin']?.toString().padLeft(14, '0');
           if (candidateSerial == serialNumber &&
               (candidateGtin == null || candidateGtin == gtin14)) {
             final identifier = candidate['identifier']?.toString();
@@ -105,8 +106,10 @@ class ProductJourneyService {
   }
 
   Future<ProductJourney?> getJourneyBySscc(String sscc) async {
-    final ssccUri = sscc.startsWith('urn:') ? sscc : 'urn:epc:id:sscc:$sscc';
-    return getJourneyByEpc(ssccUri);
+    final trimmed = sscc.trim();
+    if (trimmed.isEmpty) return null;
+    final canonical = Gs1CanonicalIdentifier.forStorage(trimmed);
+    return getJourneyByEpc(canonical);
   }
 
   /// Resolves SGTIN, SSCC, GS1 barcodes, EPC URNs, or plain serial via [parseToEPC].
@@ -142,7 +145,8 @@ class ProductJourneyService {
   }
 
   Future<ProductJourney?> _journeyForUnparsed(String trimmed) async {
-    if (trimmed.toLowerCase().startsWith('urn:epc:id:')) {
+    if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
+        Gs1CanonicalIdentifier.isValid(trimmed)) {
       return getJourneyByEpc(trimmed);
     }
 
@@ -174,9 +178,9 @@ class ProductJourneyService {
   Future<List<ProductSearchResult>> searchProducts(String query) async {
     final trimmed = query.trim();
 
-    // Pure EPC URI — show as a direct trace suggestion without hitting the API.
-    if (trimmed.toLowerCase().startsWith('urn:epc:id:') ||
-        trimmed.toLowerCase().startsWith('urn:epc:tag:')) {
+    // Pure EPC identity — show as a direct trace suggestion without hitting the API.
+    if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
+        Gs1CanonicalIdentifier.isValid(trimmed)) {
       try {
         final parsed = parseToEPC(trimmed);
         final displayId =
@@ -264,14 +268,20 @@ class ProductJourneyService {
     String epcUri,
     Map<String, String> headers,
   ) async {
-    if (!epcUri.toLowerCase().contains('sgtin')) return epcUri;
+    final normalized = Gs1CanonicalIdentifier.forStorage(epcUri);
+    if (!Gs1CanonicalIdentifier.isSgtin(normalized) &&
+        !Gs1CanonicalIdentifier.isSscc(normalized)) {
+      return normalized;
+    }
     try {
-      final serial = epcUri.split('.').lastOrNull ?? '';
-      if (serial.isEmpty) return epcUri;
+      final serialOrSscc = Gs1CanonicalIdentifier.extractSerial(normalized) ??
+          Gs1CanonicalIdentifier.extractSscc18(normalized) ??
+          '';
+      if (serialOrSscc.isEmpty) return normalized;
 
       final response = await _dioService.get(
         '$_baseUrl/product-journey/search',
-        queryParameters: {'q': serial, 'size': '1'},
+        queryParameters: {'q': serialOrSscc, 'size': '5'},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -280,31 +290,41 @@ class ProductJourneyService {
       if (response.statusCode == 200) {
         final data = decodeApiResponseBody(response.data);
         final List<dynamic> items = data is List ? data : const [];
-        if (items.isNotEmpty) {
-          final candidate = Map<String, dynamic>.from(items.first as Map);
-          if (candidate['serialNumber']?.toString() == serial) {
-            final canonical = candidate['identifier']?.toString();
-            if (canonical != null && canonical.isNotEmpty) {
-              debugPrint(
-                'ProductJourneyService: Resolved canonical EPC '
-                '$epcUri → $canonical',
-              );
-              return canonical;
-            }
+        for (final item in items) {
+          final candidate = Map<String, dynamic>.from(item as Map);
+          final identifier = candidate['identifier']?.toString();
+          if (identifier == null || identifier.isEmpty) continue;
+          final candidateSerial = candidate['serialNumber']?.toString();
+          final displayName = candidate['displayName']?.toString();
+          final type = candidate['type']?.toString();
+          final matchesSgtin = (type == 'SGTIN') &&
+              (candidateSerial == serialOrSscc || displayName == serialOrSscc);
+          final matchesSscc = (type == 'SSCC') &&
+              (displayName == serialOrSscc ||
+                  identifier.endsWith(serialOrSscc) ||
+                  identifier.contains(serialOrSscc));
+          if (matchesSgtin || matchesSscc) {
+            debugPrint(
+              'ProductJourneyService: Resolved canonical EPC '
+              '$epcUri → $identifier',
+            );
+            return identifier;
           }
         }
       }
     } catch (e) {
       debugPrint('ProductJourneyService: EPC normalization failed: $e');
     }
-    return epcUri;
+    return normalized;
   }
 
   String _inferIdentifierType(String identifier) {
-    if (identifier.contains('sgtin')) return 'SGTIN';
-    if (identifier.contains('sscc')) return 'SSCC';
-    if (identifier.contains('gtin')) return 'GTIN';
-    return 'EPC';
+    return switch (Gs1CanonicalIdentifier.classify(identifier)) {
+      Gs1CanonicalKind.sgtin => 'SGTIN',
+      Gs1CanonicalKind.sscc => 'SSCC',
+      Gs1CanonicalKind.lgtin || Gs1CanonicalKind.classGtin => 'GTIN',
+      _ => 'EPC',
+    };
   }
 
 }

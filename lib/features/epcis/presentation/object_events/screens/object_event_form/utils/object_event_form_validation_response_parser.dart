@@ -43,7 +43,7 @@ class ObjectEventFormValidationResponseParser {
     if (epcListMatch != null) {
       final n = int.parse(epcListMatch.group(1)!) + 1;
       return 'EPC #$n is not a valid GS1 instance-level identifier.\n'
-          'Copy the EPC URI from the SGTIN list (e.g. urn:epc:id:sgtin:062920.0001000.ABC123), '
+          'Copy the EPC URI from the SGTIN list (e.g. https://id.gs1.org/01/00629200001000/21/ABC123), '
           'or enter a GS1 barcode like (01)00629200010003(21)ABC123.';
     }
 
@@ -118,7 +118,7 @@ class ObjectEventFormValidationResponseParser {
     if (raw.contains('Invalid EPC URI format')) {
       final epc = _extractEpc(raw);
       return 'The EPC "${epc ?? 'entered'}" is not a valid GS1 EPC URI. '
-          'Expected format: urn:epc:id:sgtin:<prefix>.<itemRef>.<serial>.';
+          'Expected format: https://id.gs1.org/01/<14digits>/21/<serial>.';
     }
 
     if (raw.contains('Duplicate EPC')) {

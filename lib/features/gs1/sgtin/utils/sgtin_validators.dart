@@ -35,10 +35,10 @@ String? validateBatchLotNumber(String? value) {
 
 String? validateEpcUri(String? value) {
   if (value == null || value.isEmpty) return null;
-  if (!_epcUrnRegex.hasMatch(value)) {
-    return 'Invalid SGTIN EPC URI — expected urn:epc:id:sgtin:<prefix>.<ref>.<serial>';
-  }
-  return null;
+  if (_epcUrnRegex.hasMatch(value)) return null;
+  if (_gs1DlRegex.hasMatch(value)) return null;
+  return 'Invalid SGTIN EPC URI — expected https://id.gs1.org/01/<14digits>/21/<serial> '
+      '(or urn:epc:id:sgtin:<prefix>.<ref>.<serial>)';
 }
 
 String? validateGs1DigitalLinkUri(String? value) {

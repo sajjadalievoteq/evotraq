@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
@@ -20,9 +21,20 @@ class OperationEpcProductSubtitle extends StatelessWidget {
   /// on every rebuild — the FutureBuilder below gets the same completed future
   /// for a given EPC instead of issuing fresh /sgtins/serial + /gtins/code calls
   /// each time the (always-mounted, on desktop) items panel rebuilds.
+  static const int _maxCacheEntries = 256;
   static final Map<String, Future<String?>> _resolveCache = {};
+  static final Map<String, Future<String?>> _gtinNameCache = {};
 
   static Future<String?> resolveProductName(String epc) {
+    final cached = _resolveCache.remove(epc);
+    if (cached != null) {
+      // Re-insert so this key becomes most-recently used.
+      _resolveCache[epc] = cached;
+      return cached;
+    }
+    while (_resolveCache.length >= _maxCacheEntries) {
+      _resolveCache.remove(_resolveCache.keys.first);
+    }
     return _resolveCache.putIfAbsent(epc, () => _resolveProductNameUncached(epc));
   }
 
@@ -31,7 +43,12 @@ class OperationEpcProductSubtitle extends StatelessWidget {
     final gtinService = getIt<GTINService>();
 
     if (type == OperationScanItemType.sgtin) {
-      final serial = _serialFromSgtinEpc(epc);
+      // Prefer GTIN from EPC URI — avoids an extra SGTIN-by-serial round trip.
+      final gtinFromUri = Gs1CanonicalIdentifier.extractGtin(epc);
+      if (gtinFromUri != null) {
+        return _productNameForGtin(gtinService, gtinFromUri);
+      }
+      final serial = Gs1CanonicalIdentifier.extractSerial(epc);
       if (serial == null) return null;
       try {
         final sgtin = await getIt<SGTINService>().getSGTINBySerialNumber(serial);
@@ -42,14 +59,22 @@ class OperationEpcProductSubtitle extends StatelessWidget {
     }
 
     if (type == OperationScanItemType.sscc) {
-      final ssccCode = _ssccCodeFromEpc(epc);
+      final ssccCode = Gs1CanonicalIdentifier.extractSscc18(epc);
       if (ssccCode == null) return null;
       try {
         final sscc = await getIt<SSCCService>().getSSCCByCode(ssccCode);
+        final contained = sscc.containedGtin?.trim();
+        if (contained != null && contained.isNotEmpty) {
+          return _productNameForGtin(gtinService, contained);
+        }
         final children = sscc.childSgtins;
         if (children == null || children.isEmpty) return null;
         final firstChild = children.first;
-        final childSerial = _serialFromSgtinEpc(firstChild);
+        final gtinFromUri = Gs1CanonicalIdentifier.extractGtin(firstChild);
+        if (gtinFromUri != null) {
+          return _productNameForGtin(gtinService, gtinFromUri);
+        }
+        final childSerial = Gs1CanonicalIdentifier.extractSerial(firstChild);
         if (childSerial != null) {
           try {
             final sgtin =
@@ -57,17 +82,14 @@ class OperationEpcProductSubtitle extends StatelessWidget {
             return _productNameForGtin(gtinService, sgtin.gtinCode);
           } catch (_) {}
         }
-        final gtinFromUri = _gtinFromSgtinEpc(firstChild);
-        if (gtinFromUri != null) {
-          return _productNameForGtin(gtinService, gtinFromUri);
-        }
       } catch (_) {
         return null;
       }
     }
 
-    if (type == OperationScanItemType.gtin) {
-      final gtinCode = _gtinFromLgtinOrBarcode(epc);
+    if (type == OperationScanItemType.gtin ||
+        Gs1CanonicalIdentifier.isLotOrClassLevel(epc)) {
+      final gtinCode = Gs1CanonicalIdentifier.extractGtin(epc);
       if (gtinCode != null) {
         return _productNameForGtin(gtinService, gtinCode);
       }
@@ -79,48 +101,25 @@ class OperationEpcProductSubtitle extends StatelessWidget {
   static Future<String?> _productNameForGtin(
     GTINService gtinService,
     String gtinCode,
-  ) async {
-    try {
-      final gtin = await gtinService.getGTIN(gtinCode);
-      if (gtin.tradeItemDescription?.trim().isNotEmpty == true) {
-        return gtin.tradeItemDescription;
-      }
-      if (gtin.productName.trim().isNotEmpty) return gtin.productName;
-    } catch (_) {}
-    return null;
-  }
-
-  static String? _serialFromSgtinEpc(String epc) {
-    if (epc.startsWith('urn:epc:id:sgtin:')) {
-      final parts = epc.substring('urn:epc:id:sgtin:'.length).split('.');
-      if (parts.length == 3) return parts[2];
+  ) {
+    final cached = _gtinNameCache.remove(gtinCode);
+    if (cached != null) {
+      _gtinNameCache[gtinCode] = cached;
+      return cached;
     }
-    return null;
-  }
-
-  static String? _gtinFromSgtinEpc(String epc) {
-    if (epc.startsWith('urn:epc:id:sgtin:')) {
-      final parts = epc.substring('urn:epc:id:sgtin:'.length).split('.');
-      if (parts.length == 3) {
-        return '${parts[0]}${parts[1]}';
-      }
+    while (_gtinNameCache.length >= _maxCacheEntries) {
+      _gtinNameCache.remove(_gtinNameCache.keys.first);
     }
-    return null;
-  }
-
-  static String? _ssccCodeFromEpc(String epc) {
-    if (epc.startsWith('urn:epc:id:sscc:')) {
-      return epc.substring('urn:epc:id:sscc:'.length);
-    }
-    return null;
-  }
-
-  static String? _gtinFromLgtinOrBarcode(String epc) {
-    if (epc.startsWith('urn:epc:class:lgtin:')) {
-      final parts = epc.substring('urn:epc:class:lgtin:'.length).split('.');
-      if (parts.length >= 2) return '${parts[0]}${parts[1]}';
-    }
-    return null;
+    return _gtinNameCache.putIfAbsent(gtinCode, () async {
+      try {
+        final gtin = await gtinService.getGTIN(gtinCode);
+        if (gtin.tradeItemDescription?.trim().isNotEmpty == true) {
+          return gtin.tradeItemDescription;
+        }
+        if (gtin.productName.trim().isNotEmpty) return gtin.productName;
+      } catch (_) {}
+      return null;
+    });
   }
 
   @override

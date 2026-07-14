@@ -26,11 +26,9 @@ class SsccEpcisAuditCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SgtinInfoRow('SSCC URI', sscc!.ssccUri, monospace: true),
-          const SizedBox(height: 12),
           SgtinInfoRow(
             'GS1 Digital Link',
-            sscc!.gs1DigitalLinkUri,
+            sscc!.canonicalIdentifier,
             monospace: true,
           ),
           const SizedBox(height: 12),

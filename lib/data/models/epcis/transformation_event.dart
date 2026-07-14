@@ -108,7 +108,7 @@ class TransformationEvent extends EPCISEvent {
     } else if (inputQuantityList.isNotEmpty) {
       json['inputQuantityList'] = inputQuantityList;
     } else {
-      json['inputEPCList'] = ['urn:epc:id:sgtin:0000000.000000.000000000000'];
+      json['inputEPCList'] = ['https://id.gs1.org/01/00000000000000/21/000000000000'];
     }
     
     if (outputEPCList.isNotEmpty) {
@@ -116,7 +116,7 @@ class TransformationEvent extends EPCISEvent {
     } else if (outputQuantityList.isNotEmpty) {
       json['outputQuantityList'] = outputQuantityList;
     } else {
-      json['outputEPCList'] = ['urn:epc:id:sgtin:0000000.000000.000000000000'];
+      json['outputEPCList'] = ['https://id.gs1.org/01/00000000000000/21/000000000000'];
     }
     
     if (ilmd.isNotEmpty) {

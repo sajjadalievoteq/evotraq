@@ -49,7 +49,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   @override
   void initState() {
     super.initState();
-    print('DEBUG: initState called');
     _tabController = TabController(length: 5, vsync: this);
     _persistenceService = DataConsistencyPersistenceService();
     _initializeServices();
@@ -58,7 +57,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     
     _integrityJobs = _persistenceService.integrityJobs;
     _correctionWorkflows = _persistenceService.correctionWorkflows;
-    print('DEBUG: initState - Loaded persisted workflows: ${_correctionWorkflows.length}');
     
     _loadDashboardData();
     _startAutoRefresh();
@@ -117,44 +115,30 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   Future<void> _loadWorkflowData() async {
-    print('DEBUG: _loadWorkflowData called');
     try {
       final workflows = await _correctionService.getAllCorrectionWorkflows();
-      print('DEBUG: Raw API response: $workflows');
-      print('DEBUG: API response length: ${workflows.length}');
-      
-      if (workflows.isNotEmpty) {
-        print('DEBUG: First workflow: ${workflows[0]}');
-      }
-      
+
       setState(() {
         _correctionWorkflows.clear();
-        print('DEBUG: Cleared _correctionWorkflows, length now: ${_correctionWorkflows.length}');
-        
+
         for (int i = 0; i < workflows.length; i++) {
           final w = workflows[i];
-          print('DEBUG: Processing workflow $i: ${w['workflow_id']}');
-          
+
           final mappedWorkflow = {
             'workflow_id': w['workflow_id'] ?? 'UNKNOWN',
-            'status': w['workflow_status'] ?? 'UNKNOWN', 
+            'status': w['workflow_status'] ?? 'UNKNOWN',
             'source_job_id': w['error_id'] ?? 'UNKNOWN',
             'violation_count': w['current_step'] ?? 0,
             'created_time': DateTime.now(),
             'requires_approval': false,
             'workflow_type': w['workflow_type'] ?? 'UNKNOWN',
           };
-          
+
           _correctionWorkflows.add(mappedWorkflow);
-          print('DEBUG: Added workflow, new length: ${_correctionWorkflows.length}');
         }
       });
-      
-      print('DEBUG: Final setState completed, _correctionWorkflows.length: ${_correctionWorkflows.length}');
-      
-    } catch (e, stackTrace) {
-      print('DEBUG: ERROR in _loadWorkflowData: $e');
-      print('DEBUG: Stack trace: $stackTrace');
+    } catch (_) {
+      // Keep existing workflows on load failure.
     }
   }
 
@@ -435,7 +419,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 ...((anomaly['suggested_actions'] as List?)?.cast<String>() ?? []).map(
                   (action) => Padding(
                     padding: const EdgeInsets.only(left: 16, top: 4),
-                    child: Text('• $action'),
+                    child: Text('â€¢ $action'),
                   ),
                 ).toList(),
               ],
@@ -1755,7 +1739,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   Widget _buildWorkflowsTab() {
-    print('DEBUG: Building WorkflowsTab - _correctionWorkflows.length: ${_correctionWorkflows.length}');
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1786,7 +1769,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Active Workflows: ${_correctionWorkflows.length} (DEBUG: Length = ${_correctionWorkflows.length})',
+                    'Active Workflows: ${_correctionWorkflows.length}',
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
@@ -1826,7 +1809,6 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             )
           else
             ..._correctionWorkflows.map((workflow) {
-              print('DEBUG: Mapping workflow ${workflow['workflow_id']} for display');
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _buildCorrectionWorkflowCard(workflow),
@@ -1838,19 +1820,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _refreshWorkflowData() async {
-    print('DEBUG: _refreshWorkflowData called');
     try {
       final workflows = await _correctionService.getAllCorrectionWorkflows();
-      print('DEBUG: Refresh - Raw API response: $workflows');
-      print('DEBUG: Refresh - API response length: ${workflows.length}');
       
       setState(() {
         _correctionWorkflows.clear();
-        print('DEBUG: Refresh - Cleared, length: ${_correctionWorkflows.length}');
         
         for (int i = 0; i < workflows.length; i++) {
           final w = workflows[i];
-          print('DEBUG: Refresh - Processing workflow $i: ${w['workflow_id']}');
           
           final mappedWorkflow = {
             'workflow_id': w['workflow_id'] ?? 'UNKNOWN',
@@ -1863,16 +1840,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           };
           
           _correctionWorkflows.add(mappedWorkflow);
-          print('DEBUG: Refresh - Added workflow, new length: ${_correctionWorkflows.length}');
         }
       });
       
-      print('DEBUG: Refresh - Final length: ${_correctionWorkflows.length}');
       
       context.showSuccess('Loaded ${_correctionWorkflows.length} workflows');
-    } catch (e, stackTrace) {
-      print('DEBUG: ERROR in _refreshWorkflowData: $e');
-      print('DEBUG: Stack trace: $stackTrace');
+    } catch (e) {
       context.showError('Error: $e');
     }
   }
@@ -1977,7 +1950,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     ...((executionResults['corrected_violations'] as List).map((violation) => 
                       Padding(
                         padding: const EdgeInsets.only(left: 16, bottom: 4),
-                        child: Text('• $violation', style: const TextStyle(color: Colors.green)),
+                        child: Text('â€¢ $violation', style: const TextStyle(color: Colors.green)),
                       )
                     )).toList(),
                     const SizedBox(height: 8),

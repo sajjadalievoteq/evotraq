@@ -450,7 +450,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                     TextField(
                       decoration: const InputDecoration(
                         labelText: 'EPCs (Optional)',
-                        hintText: 'Enter EPCs separated by commas (e.g., urn:epc:id:sgtin:0614141.812345.400)',
+                        hintText: 'Enter EPCs separated by commas (e.g., https://id.gs1.org/01/10614148123456/21/400)',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) {
@@ -971,29 +971,29 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       {
         "type": "ObjectEvent",
         "eventTime": "2025-07-19T10:30:00Z",
-        "epcList": ["urn:epc:id:sgtin:0614141.107346.2025"],
+        "epcList": ["https://id.gs1.org/01/10614141073464/21/2025"],
         "action": "OBSERVE",
         "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
         "disposition": "urn:epcglobal:cbv:disp:in_progress",
         "readPoint": {
-          "id": "urn:epc:id:sgln:0614141.07346.1234"
+          "id": "https://id.gs1.org/414/0614141073467"
         },
         "bizLocation": {
-          "id": "urn:epc:id:sgln:0614141.07346.0"
+          "id": "https://id.gs1.org/414/0614141073467"
         }
       },
       {
         "type": "ObjectEvent",
         "eventTime": "2025-07-19T11:15:00Z",
-        "epcList": ["urn:epc:id:sgtin:0614141.107346.2026"],
+        "epcList": ["https://id.gs1.org/01/10614141073464/21/2026"],
         "action": "OBSERVE",
         "bizStep": "urn:epcglobal:cbv:bizstep:shipping",
         "disposition": "urn:epcglobal:cbv:disp:in_transit",
         "readPoint": {
-          "id": "urn:epc:id:sgln:0614141.07346.5678"
+          "id": "https://id.gs1.org/414/0614141073467"
         },
         "bizLocation": {
-          "id": "urn:epc:id:sgln:0614141.07346.0"
+          "id": "https://id.gs1.org/414/0614141073467"
         }
       }
     ]
@@ -1010,13 +1010,13 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       <ObjectEvent>
         <eventTime>2023-01-01T12:00:00Z</eventTime>
         <epcList>
-          <epc>urn:epc:id:sgtin:0614141.107346.2017</epc>
+          <epc>https://id.gs1.org/01/10614141073464/21/2017</epc>
         </epcList>
         <action>OBSERVE</action>
         <bizStep>urn:epcglobal:cbv:bizstep:receiving</bizStep>
         <disposition>urn:epcglobal:cbv:disp:in_progress</disposition>
         <readPoint>
-          <id>urn:epc:id:sgln:0614141.07346.1234</id>
+          <id>https://id.gs1.org/414/0614141073467</id>
         </readPoint>
       </ObjectEvent>
     </EventList>
@@ -1033,12 +1033,12 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
       {
         "type": "ObjectEvent",
         "eventTime": "2023-01-01T12:00:00Z",
-        "epcList": ["urn:epc:id:sgtin:0614141.107346.2017"],
+        "epcList": ["https://id.gs1.org/01/10614141073464/21/2017"],
         "action": "OBSERVE",
         "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
         "disposition": "urn:epcglobal:cbv:disp:in_progress",
         "readPoint": {
-          "id": "urn:epc:id:sgln:0614141.07346.1234"
+          "id": "https://id.gs1.org/414/0614141073467"
         }
       }
     ]

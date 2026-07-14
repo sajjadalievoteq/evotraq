@@ -88,9 +88,7 @@ class GtinSupplyChainCard extends StatelessWidget {
   static String? _detailRouteForEpc(String epc) {
     final type = OperationEpcScanValidator.resolveEpcType(epc);
     if (type == OperationScanItemType.sscc) {
-      final code = epc.toLowerCase().startsWith('urn:epc:id:sscc:')
-          ? SsccInputParser.parseToSsccCode(epc)
-          : null;
+      final code = SsccInputParser.parseToSsccCode(epc);
       if (code != null && code.isNotEmpty) {
         return '${Constants.gs1SsccsRoute}/$code';
       }

@@ -183,34 +183,18 @@ class PackingReviewStep extends StatelessWidget {
 
                 ? const SgtinInfoRow('Items', 'None added yet')
 
-                : ConstrainedBox(
-
-                    constraints: const BoxConstraints(maxHeight: 200),
-
-                    child: ListView.separated(
-
-                      shrinkWrap: true,
-
-                      itemCount: scannedEpcs.length,
-
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-
-                      itemBuilder: (context, index) => SgtinInfoRow(
-
-                        '${index + 1}',
-
-                        scannedEpcs[index],
-
-                        monospace: true,
-
-                      ),
-
+                : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: scannedEpcs.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) => SgtinInfoRow(
+                      '${index + 1}',
+                      scannedEpcs[index],
+                      monospace: true,
                     ),
-
                   ),
-
           ),
-
           const SizedBox(height: 16),
 
           Gs1GroupCard(

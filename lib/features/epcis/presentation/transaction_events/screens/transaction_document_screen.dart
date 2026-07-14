@@ -273,7 +273,7 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
                 _buildSection(
                   title: 'Find Original Document for EPC',
                   children: [
-                    _buildTextField(_epcController, 'EPC (e.g., urn:epc:id:sgtin:...)'),
+                    _buildTextField(_epcController, 'EPC (e.g., https://id.gs1.org/01/…/21/…)'),
                     _buildOptionalDocumentTypeDropdown(_documentTypeController),
                     ElevatedButton(
                       onPressed: () async {

@@ -1,389 +1,78 @@
 import 'package:flutter/material.dart';
-
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
-
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-
-import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
-
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-
-import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-
-import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_container_manual_entry_card.dart';
-
-import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_container_selected_card.dart';
-
-import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_scanning_mode_selector.dart';
-
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
-
+import 'package:traqtrace_app/features/operations/shared/widgets/operation/container_operation_reference_details_step.dart';
 
 class PackingReferenceDetailsStep extends StatelessWidget {
-
   const PackingReferenceDetailsStep({
-
     super.key,
-
     required this.workOrderController,
-
     required this.batchNumberController,
-
     required this.productionOrderController,
-
     required this.packingLocationGln,
-
     required this.packingLocationGlnError,
-
     required this.onPackingLocationChanged,
-
     required this.parentContainerId,
-
     required this.scanningMode,
-
     required this.onScanningModeChanged,
-
     required this.onContainerScanResult,
-
     required this.onContainerAdded,
-
     required this.onClearContainer,
-
     required this.eventTime,
-
     required this.onEventTimeChanged,
-
     this.showPageHeader = true,
-
     this.showReferenceSection = true,
-
     this.showLocationSection = true,
-
     this.showContainerSection = true,
-
     this.showProductionSection = true,
-
   });
 
-
   final TextEditingController workOrderController;
-
   final TextEditingController batchNumberController;
-
   final TextEditingController productionOrderController;
-
   final GLN? packingLocationGln;
-
   final String? packingLocationGlnError;
-
   final ValueChanged<GLN?> onPackingLocationChanged;
-
   final String? parentContainerId;
-
   final OperationScanningMode scanningMode;
-
   final ValueChanged<OperationScanningMode> onScanningModeChanged;
-
   final void Function(ScanResult result) onContainerScanResult;
-
   final void Function(EPCParseResult result) onContainerAdded;
-
   final VoidCallback onClearContainer;
-
   final DateTime? eventTime;
-
   final ValueChanged<DateTime?> onEventTimeChanged;
-
   final bool showPageHeader;
-
   final bool showReferenceSection;
-
   final bool showLocationSection;
-
   final bool showContainerSection;
-
   final bool showProductionSection;
 
-
   @override
-
   Widget build(BuildContext context) {
-
-    final outline = Theme.of(context).colorScheme.outlineVariant;
-
-
-    return SingleChildScrollView(
-
-      physics: const ClampingScrollPhysics(),
-
-      padding: EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
-
-      child: Column(
-
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-
-          if (showPageHeader) ...[
-
-            const Text(
-
-              'Packing Reference Details',
-
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-
-            ),
-
-            const SizedBox(height: 8),
-
-            const Text(
-
-              'Enter the reference information for this packing operation.',
-
-              style: TextStyle(color: Colors.grey),
-
-            ),
-
-            const SizedBox(height: 24),
-
-          ],
-
-          if (showReferenceSection)
-
-            Gs1GroupCard(
-
-              title: 'Packing Reference',
-
-              outlineColor: outline,
-
-              child: Column(
-
-                children: [
-
-                  const OperationAutoReferenceNotice(
-
-                    operationLabel: 'Packing',
-
-                  ),
-
-
-                  OperationEventTimeTile(
-
-                    eventTime: eventTime,
-
-                    onEventTimeChanged: onEventTimeChanged,
-
-                    lastDate: DateTime.now(),
-
-                  ),
-
-                ],
-
-              ),
-
-            ),
-
-          if (showLocationSection)
-
-            Gs1GroupCard(
-
-              title: 'Packing Location',
-              showRequiredStar: true,
-
-              outlineColor: outline,
-
-              child: OperationGlnSelector(
-
-                label: 'Packing Location GLN',
-
-                hintText: 'Search and select packing location',
-
-                gln: packingLocationGln,
-
-                errorText: packingLocationGlnError,
-
-                onChanged: onPackingLocationChanged,
-
-              ),
-
-            ),
-
-          if (showContainerSection)
-
-            Gs1GroupCard(
-
-              title: 'Parent Container',
-
-              outlineColor: outline,
-
-              child: Column(
-
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-
-                children: [
-
-                  Text(
-                    'Identify the parent logistic unit — SSCC (carton/pallet) '
-                    'or SGTIN (serialized product acting as container).',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  if (parentContainerId != null) ...[
-
-                    OperationContainerSelectedCard(
-
-                      containerId: parentContainerId!,
-
-                      onClear: onClearContainer,
-
-                    ),
-
-                    const SizedBox(height: 16),
-
-                  ],
-
-                  OperationScanningModeSelector(
-
-                    selectedMode: scanningMode,
-
-                    onModeChanged: onScanningModeChanged,
-
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  if (scanningMode == OperationScanningMode.scanner)
-
-                    BarcodeScanner(
-
-                      title: 'Scan Container',
-
-                      allowedFormats: const ['SSCC', 'SGTIN'],
-
-                      onScanResult: onContainerScanResult,
-
-                    )
-
-                  else
-
-                    OperationContainerManualEntryCard(
-                      onContainerAdded: onContainerAdded,
-                    ),
-
-                ],
-
-              ),
-
-            ),
-
-          if (showProductionSection)
-
-            Gs1GroupCard(
-
-              title: 'GS1 Business Transactions (Optional)',
-
-              outlineColor: outline,
-
-              child: Column(
-
-                children: [
-
-                  TextField(
-
-                    controller: workOrderController,
-
-                    decoration: const InputDecoration(
-
-                      labelText: 'Work Order Number',
-
-                      hintText: 'e.g., WO-12345',
-
-                      helperText: 'GS1 bizTransactionList: Work Order (btt:wo)',
-
-                      border: OutlineInputBorder(),
-
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.only(left: 5),
-                        child: TraqIcon(AppAssets.iconList),
-                      ),
-
-                    ),
-
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TextField(
-
-                    controller: batchNumberController,
-
-                    decoration: const InputDecoration(
-
-                      labelText: 'Batch / Lot Number',
-
-                      hintText: 'e.g., BATCH-2024-001',
-
-                      helperText: 'GS1 ILMD: cbvmda:lotNumber — required for FMD / DSCSA',
-
-                      border: OutlineInputBorder(),
-
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.only(left: 5),
-                        child: TraqIcon(AppAssets.iconPin),
-                      ),
-
-                    ),
-
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TextField(
-
-                    controller: productionOrderController,
-
-                    decoration: const InputDecoration(
-
-                      labelText: 'Production Order',
-
-                      hintText: 'e.g., PO-2024-001',
-
-                      helperText:
-
-                          'GS1 bizTransactionList: Production Order (btt:prodorder)',
-
-                      border: OutlineInputBorder(),
-
-                      prefixIcon: TraqIcon(AppAssets.iconPrecisionManufacturing),
-
-                    ),
-
-                  ),
-
-                ],
-
-              ),
-
-            ),
-
-        ],
-
-      ),
-
+    return ContainerOperationReferenceDetailsStep(
+      isUnpacking: false,
+      padWorkOrderBatchIcons: true,
+      workOrderController: workOrderController,
+      batchNumberController: batchNumberController,
+      productionOrderController: productionOrderController,
+      locationGln: packingLocationGln,
+      locationGlnError: packingLocationGlnError,
+      onLocationChanged: onPackingLocationChanged,
+      parentContainerId: parentContainerId,
+      scanningMode: scanningMode,
+      onScanningModeChanged: onScanningModeChanged,
+      onContainerScanResult: onContainerScanResult,
+      onContainerAdded: onContainerAdded,
+      onClearContainer: onClearContainer,
+      eventTime: eventTime,
+      onEventTimeChanged: onEventTimeChanged,
+      showPageHeader: showPageHeader,
+      showReferenceSection: showReferenceSection,
+      showLocationSection: showLocationSection,
+      showContainerSection: showContainerSection,
+      showProductionSection: showProductionSection,
     );
-
   }
-
 }
-
-

@@ -44,7 +44,7 @@ class ObjectEventBatchImportCsvTab extends StatelessWidget {
                     decoration: const InputDecoration(
                       labelText: 'Paste CSV data here',
                       hintText:
-                          'EPC,Action,BusinessStep,Disposition,BusinessLocation,ReadPoint,Lot\nurn:epc:id:sgtin:5415062.32581.70007488444899,ADD,urn:epcglobal:cbv:bizstep:commissioning,urn:epcglobal:cbv:disp:active,6290360400006,,LOT123\n(01)05415062325810(21)70007488444899,ADD,urn:epcglobal:cbv:bizstep:commissioning,urn:epcglobal:cbv:disp:active,6290360400006,,LOT123',
+                          'EPC,Action,BusinessStep,Disposition,BusinessLocation,ReadPoint,Lot\nhttps://id.gs1.org/01/05415062325810/21/70007488444899,ADD,urn:epcglobal:cbv:bizstep:commissioning,urn:epcglobal:cbv:disp:active,6290360400006,,LOT123\n(01)05415062325810(21)70007488444899,ADD,urn:epcglobal:cbv:bizstep:commissioning,urn:epcglobal:cbv:disp:active,6290360400006,,LOT123',
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 10,

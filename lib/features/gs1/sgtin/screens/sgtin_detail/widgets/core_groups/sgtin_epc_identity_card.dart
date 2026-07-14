@@ -22,18 +22,10 @@ class SgtinEpcIdentityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SgtinInfoRow(
-            'EPC URI (urn:epc:id:sgtin)',
-            sgtin.epcUri ?? sgtin.computedEpcUri,
+            'GS1 Digital Link',
+            sgtin.canonicalIdentifier ?? sgtin.computedEpcUri,
             monospace: true,
           ),
-          if (sgtin.gs1DigitalLinkUri != null) ...[
-            const SizedBox(height: 12),
-            SgtinInfoRow(
-              'GS1 Digital Link URI',
-              sgtin.gs1DigitalLinkUri,
-              monospace: true,
-            ),
-          ],
         ],
       ),
     );

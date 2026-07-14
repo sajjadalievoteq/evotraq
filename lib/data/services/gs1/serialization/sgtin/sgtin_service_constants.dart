@@ -11,18 +11,22 @@ abstract final class SgtinServiceConstants {
   static const String pathCommission     = '$pathBase/commission-multiple';
 
   static String pathById(String id)                 => '$pathBase/$id';
-  static String pathBySerial(String sn)             => '$pathBase/serial/$sn';
-  static String pathByEpc(String epcUri)            => '$pathBase/epc/${Uri.encodeComponent(epcUri)}';
-  static String pathByGtin(String gtin)             => '$pathBase/gtin/$gtin';
+  static const String pathBySerial                  = '$pathBase/serial';
+  static const String pathByEpc                     = '$pathBase/epc';
+  static const String pathByGtin                    = '$pathBase/gtin';
   static String pathByLocation(String gln)          => '$pathBase/location/$gln';
   static String pathBySscc(String sscc)             => '$pathBase/sscc/$sscc';
   static String pathCount(String gtin)              => '$pathBase/count/$gtin';
   static String pathGenerateSerial(String gtin)     => '$pathBase/generate-serial/$gtin';
-  static String pathItemStatus(String sn)           => '$pathBase/serial/$sn/status';
+  static const String pathItemStatus                = '$pathBase/serial/status';
   static String pathItemLocation(String sn)         => '$pathBase/$sn/location';
   static String pathItemPack(String sn)             => '$pathBase/$sn/pack';
-  static String pathItemDecommission(String sn)     => '$pathBase/serial/$sn/decommission';
+  static const String pathItemDecommission          = '$pathBase/serial/decommission';
   static String pathItemTransitions(String id)       => '$pathBase/$id/transitions';
+
+  static const String qEpcUri         = 'epcUri';
+  static const String qGtin           = 'gtin';
+  static const String qBatchLot       = 'batchLot';
 
   static const String headerContentType    = 'Content-Type';
   static const String headerAuthorization  = 'Authorization';

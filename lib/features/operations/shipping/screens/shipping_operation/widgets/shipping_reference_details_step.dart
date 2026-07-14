@@ -53,7 +53,10 @@ class ShippingReferenceDetailsStep extends StatelessWidget {
         referenceSectionTitle: 'Shipping Reference',
         eventTimeLabel: 'Event Date & Time',
         eventTimeEmptyLabel: 'Now',
-        documentSectionTitle: 'Shipping Details (Optional)',
+        documentSectionTitle: 'Business Transactions',
+        documentsRequired: true,
+        documentsHelperText:
+            'DSCSA T3 requires at least one of Purchase Order or Despatch Advice.',
         sourceGln: sourceGln,
         sourceGlnLabel: 'Ship From Location',
         sourceGlnHint: 'Search and select source GLN',

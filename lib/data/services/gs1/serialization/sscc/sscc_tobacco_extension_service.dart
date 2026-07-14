@@ -19,7 +19,8 @@ class SSCCTobaccoExtensionService {
     SSCCTobaccoExtension extension,
   ) async {
     final response = await _dioService.post(
-      '$_baseUrl/code/$ssccCode',
+      '$_baseUrl/code',
+      queryParameters: {'ssccCode': ssccCode},
       headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
@@ -77,7 +78,8 @@ class SSCCTobaccoExtensionService {
 
   Future<SSCCTobaccoExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
-      '$_baseUrl/code/$ssccCode',
+      '$_baseUrl/code',
+      queryParameters: {'ssccCode': ssccCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

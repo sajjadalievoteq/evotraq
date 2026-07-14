@@ -31,10 +31,12 @@ class ProductJourneyService {
     try {
       final headers = await _getHeaders();
       final canonicalEpc = await _resolveCanonicalEpc(epcUri, headers);
-      final encoded = Uri.encodeComponent(canonicalEpc);
 
+      // Query param (not path): Digital Links like https://id.gs1.org/00/... contain
+      // '/' which breaks Flutter web XMLHttpRequest when placed in the URL path.
       final response = await _dioService.get(
-        '$_baseUrl/product-journey/epc/$encoded',
+        '$_baseUrl/product-journey/epc',
+        queryParameters: {'epc': canonicalEpc},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,

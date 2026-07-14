@@ -135,7 +135,8 @@ class EPCISEventService {
   Future<List<EPCISEvent>> getEventsByEPC(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/epc/$epc',
+      '$_baseUrl/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -204,7 +205,8 @@ class EPCISEventService {
   Future<List<EPCISEvent>> getEventsByLocation(String locationGLN) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/location/$locationGLN',
+      '$_baseUrl/location',
+      queryParameters: {'locationGLN': locationGLN},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -221,7 +223,8 @@ class EPCISEventService {
   Future<List<EPCISEvent>> getItemHistory(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/track/$epc',
+      '$_baseUrl/track',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -238,7 +241,8 @@ class EPCISEventService {
   Future<Map<String, dynamic>> getItemStatus(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/status/$epc',
+      '$_baseUrl/status',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

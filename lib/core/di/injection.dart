@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -14,6 +16,7 @@ import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart'
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
@@ -114,6 +117,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<CbvMasterDataService>(
     () => CbvMasterDataService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<CbvVocabularyService>(
+    () => CbvVocabularyService(masterDataService: getIt<CbvMasterDataService>()),
   );
 
   getIt.registerLazySingleton<UserManagementService>(
@@ -339,8 +346,12 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerSingleton<AuthCubit>(
     AuthCubit(authService: getIt<AuthService>()),
   );
+  // Avoid constructor cycle: wire after both DioService and AuthCubit exist.
+  getIt<DioService>().onUnauthorized = () {
+    unawaited(getIt<AuthCubit>().sessionExpired());
+  };
   getIt.registerSingleton<CbvVocabularyCubit>(
-    CbvVocabularyCubit(service: getIt<CbvMasterDataService>()),
+    CbvVocabularyCubit(service: getIt<CbvVocabularyService>()),
   );
   getIt.registerFactory<AdminCbvVocabularyCubit>(
     () => AdminCbvVocabularyCubit(

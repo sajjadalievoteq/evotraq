@@ -17,6 +17,8 @@ import '../widgets/storage_utilization_chart.dart';
 import '../widgets/monitoring_overview_card.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 
 class MonitoringDashboardScreen extends StatefulWidget {
   const MonitoringDashboardScreen({super.key});
@@ -34,16 +36,17 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   StreamSubscription<StorageStatistics>? _storageSubscription;
   StreamSubscription<IntegrityStatistics>? _integritySubscription;
   StreamSubscription<List<PerformanceAlert>>? _alertsSubscription;
-  
-  PerformanceMetrics? _currentPerformance;
-  StorageStatistics? _currentStorage;
-  IntegrityStatistics? _currentIntegrity;
-  List<PerformanceAlert> _currentAlerts = [];
+
+  // Each metric group tracks its own load lifecycle independently, so a
+  // failure in one (e.g. storage) never blanks the cards/tabs backed by
+  // the others (e.g. performance, integrity).
+  LoadState<PerformanceMetrics> _performanceState = const LoadState.loading();
+  LoadState<StorageStatistics> _storageState = const LoadState.loading();
+  LoadState<IntegrityStatistics> _integrityState = const LoadState.loading();
+  LoadState<List<PerformanceAlert>> _alertsState = const LoadState.loading();
+
   List<BulkJobStatus> _currentBulkJobs = [];
-  
-  bool _isLoading = true;
-  String? _errorMessage;
-  
+
   List<PerformanceMetrics> _performanceHistory = [];
   static const int maxHistoryLength = 50;
 
@@ -63,7 +66,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         (performance) {
           if (mounted) {
             setState(() {
-              _currentPerformance = performance;
+              _performanceState = LoadState.success(performance);
               _performanceHistory.add(performance);
               if (_performanceHistory.length > maxHistoryLength) {
                 _performanceHistory.removeAt(0);
@@ -74,90 +77,143 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         onError: (error) {
           if (mounted) {
             setState(() {
-              _errorMessage = error.toString();
-              _isLoading = false;
+              _performanceState = LoadState.error(error.toString());
             });
           }
         },
       );
-      
+
       _storageSubscription = _monitoringService.storageStream.listen(
         (storage) {
           if (mounted) {
             setState(() {
-              _currentStorage = storage;
+              _storageState = LoadState.success(storage);
             });
           }
         },
         onError: (error) {
-          print('Storage stream error: $error');
+          if (mounted) {
+            setState(() {
+              _storageState = LoadState.error(error.toString());
+            });
+          }
         },
       );
-      
+
       _integritySubscription = _monitoringService.integrityStream.listen(
         (integrity) {
           if (mounted) {
             setState(() {
-              _currentIntegrity = integrity;
+              _integrityState = LoadState.success(integrity);
             });
           }
         },
         onError: (error) {
-          print('Integrity stream error: $error');
+          if (mounted) {
+            setState(() {
+              _integrityState = LoadState.error(error.toString());
+            });
+          }
         },
       );
-      
+
       _alertsSubscription = _monitoringService.alertsStream.listen(
         (alerts) {
           if (mounted) {
             setState(() {
-              _currentAlerts = alerts;
+              _alertsState = LoadState.success(alerts);
             });
           }
         },
         onError: (error) {
-          print('Alerts stream error: $error');
+          if (mounted) {
+            setState(() {
+              _alertsState = LoadState.error(error.toString());
+            });
+          }
         },
       );
-      
+
       await _loadInitialData();
-      
+
       _monitoringService.startRealTimeMonitoring(interval: const Duration(seconds: 10));
-      
+
     } catch (e) {
+      // Initialization itself failed (e.g. service lookup) before any
+      // subscription could be set up; surface the failure per metric group
+      // so the tabs can each show their own error/retry instead of a single
+      // screen-wide blank/error state.
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to initialize monitoring: $e';
-          _isLoading = false;
+          final message = 'Failed to initialize monitoring: $e';
+          _performanceState = LoadState.error(message);
+          _storageState = LoadState.error(message);
+          _integrityState = LoadState.error(message);
+          _alertsState = LoadState.error(message);
         });
       }
     }
   }
 
   Future<void> _loadInitialData() async {
-    try {
-      final futures = await Future.wait([
-        _monitoringService.getPerformanceMetrics(),
-        _monitoringService.getStorageStatistics(),
-        _monitoringService.getIntegrityStatistics(),
-      ]);
+    await Future.wait([
+      _loadPerformanceMetrics(),
+      _loadStorageStatistics(),
+      _loadIntegrityStatistics(),
+    ]);
+  }
 
+  Future<void> _loadPerformanceMetrics() async {
+    try {
+      final performance = await _monitoringService.getPerformanceMetrics();
       if (mounted) {
         setState(() {
-          _currentPerformance = futures[0] as PerformanceMetrics;
-          _currentStorage = futures[1] as StorageStatistics;
-          _currentIntegrity = futures[2] as IntegrityStatistics;
-          _currentAlerts = (futures[0] as PerformanceMetrics).activeAlerts;
-          _performanceHistory.add(futures[0] as PerformanceMetrics);
-          _isLoading = false;
-          _errorMessage = null;
+          _performanceState = LoadState.success(performance);
+          _alertsState = LoadState.success(performance.activeAlerts);
+          _performanceHistory.add(performance);
+          if (_performanceHistory.length > maxHistoryLength) {
+            _performanceHistory.removeAt(0);
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load initial data: $e';
-          _isLoading = false;
+          _performanceState = LoadState.error('Failed to load performance metrics: $e');
+        });
+      }
+    }
+  }
+
+  Future<void> _loadStorageStatistics() async {
+    try {
+      final storage = await _monitoringService.getStorageStatistics();
+      if (mounted) {
+        setState(() {
+          _storageState = LoadState.success(storage);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _storageState = LoadState.error('Failed to load storage statistics: $e');
+        });
+      }
+    }
+  }
+
+  Future<void> _loadIntegrityStatistics() async {
+    try {
+      final integrity = await _monitoringService.getIntegrityStatistics();
+      if (mounted) {
+        setState(() {
+          _integrityState = LoadState.success(integrity);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _integrityState = LoadState.error('Failed to load integrity statistics: $e');
         });
       }
     }
@@ -221,50 +277,9 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading monitoring data...'),
-          ],
-        ),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TraqIcon(AppAssets.iconAlert,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: Text(
-                  'Error: $_errorMessage',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _refreshData,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
+    // Each tab renders independently and each metric group manages its own
+    // loading/empty/error state via LoadStateView, so a failure in one
+    // metric (e.g. storage) never blanks the tabs backed by the others.
     return TabBarView(
       controller: _tabController,
       children: [
@@ -282,70 +297,97 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
       child: Column(
         children: [
           MonitoringOverviewCard(
-            performance: _currentPerformance,
-            storage: _currentStorage,
-            integrity: _currentIntegrity,
-            alerts: _currentAlerts,
+            performance: _performanceState.data,
+            storage: _storageState.data,
+            integrity: _integrityState.data,
+            alerts: _alertsState.data ?? [],
           ),
-          
+
           const SizedBox(height: 16),
-          
-          if (_currentAlerts.isNotEmpty) ...[
-            AlertsPanel(
-              alerts: _currentAlerts,
-              onAlertAcknowledge: _acknowledgeAlert,
-            ),
-            const SizedBox(height: 16),
-          ],
-          
-          if (_performanceHistory.isNotEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Real-time Performance',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 300,
-                      child: PerformanceChart(
-                        metrics: _performanceHistory,
-                        chartType: 'response_time',
+
+          // Alerts depend only on the alerts metric group, so a failure
+          // fetching alerts doesn't affect the overview card above or the
+          // performance charts below.
+          LoadStateView<List<PerformanceAlert>>(
+            state: _alertsState,
+            loadingWidget: const SizedBox.shrink(),
+            emptyWidget: const SizedBox.shrink(),
+            onRetry: _refreshData,
+            builder: (context, alerts) {
+              if (alerts.isEmpty) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  AlertsPanel(
+                    alerts: alerts,
+                    onAlertAcknowledge: _acknowledgeAlert,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              );
+            },
+          ),
+
+          // Real-time performance / event type charts depend only on the
+          // performance metric group.
+          LoadStateView<PerformanceMetrics>(
+            state: _performanceState,
+            loadingWidget: const SizedBox.shrink(),
+            onRetry: _refreshData,
+            builder: (context, performance) {
+              return Column(
+                children: [
+                  if (_performanceHistory.isNotEmpty)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Real-time Performance',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 300,
+                              child: PerformanceChart(
+                                metrics: _performanceHistory,
+                                chartType: 'response_time',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          
-          const SizedBox(height: 16),
-          
-          if (_currentPerformance?.eventTypeMetrics.isNotEmpty ?? false)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Event Type Metrics',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 300,
-                      child: EventTypeMetricsChart(
-                        eventTypeMetrics: _currentPerformance!.eventTypeMetrics,
+
+                  const SizedBox(height: 16),
+
+                  if (performance.eventTypeMetrics.isNotEmpty)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Event Type Metrics',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 300,
+                              child: EventTypeMetricsChart(
+                                eventTypeMetrics: performance.eventTypeMetrics,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -356,15 +398,18 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          if (_currentPerformance != null)
-            PerformanceMetricsCard(
-              performance: _currentPerformance!,
+          LoadStateView<PerformanceMetrics>(
+            state: _performanceState,
+            onRetry: _refreshData,
+            builder: (context, performance) => PerformanceMetricsCard(
+              performance: performance,
               onConfigureIsolation: _configureTransactionIsolation,
               onResolveDeadlocks: _resolveDeadlocks,
             ),
-          
+          ),
+
           const SizedBox(height: 16),
-          
+
           BulkJobsPanel(
             jobs: _currentBulkJobs,
             onJobCancel: _cancelBulkJob,
@@ -379,20 +424,22 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   Widget _buildStorageTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          if (_currentStorage != null) ...[
+      child: LoadStateView<StorageStatistics>(
+        state: _storageState,
+        onRetry: _refreshData,
+        builder: (context, storage) => Column(
+          children: [
             StorageStatisticsCard(
-              storage: _currentStorage!,
+              storage: storage,
               onArchiveEvents: _archiveEvents,
               onCompressEvents: _compressEvents,
             ),
             const SizedBox(height: 16),
             StorageUtilizationChart(
-              storageStats: _currentStorage!,
+              storageStats: storage,
             ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -400,39 +447,30 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   Widget _buildIntegrityTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          if (_currentIntegrity != null)
+      child: LoadStateView<IntegrityStatistics>(
+        state: _integrityState,
+        onRetry: _refreshData,
+        builder: (context, integrity) => Column(
+          children: [
             IntegrityStatisticsCard(
-              integrity: _currentIntegrity!,
+              integrity: integrity,
               onVerifyIntegrity: _verifyEventIntegrity,
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   void _refreshData() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _performanceState = const LoadState.loading();
+      _storageState = const LoadState.loading();
+      _integrityState = const LoadState.loading();
+      _alertsState = const LoadState.loading();
     });
-    
-    try {
-      await Future.wait([
-        _monitoringService.getPerformanceMetrics(),
-        _monitoringService.getStorageStatistics(),
-        _monitoringService.getIntegrityStatistics(),
-      ]);
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Refresh failed: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+
+    await _loadInitialData();
   }
 
   void _handleMenuAction(String action) async {

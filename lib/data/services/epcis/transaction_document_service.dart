@@ -195,9 +195,13 @@ class TransactionDocumentService {
     }
 
     final headers = await _getHeaders();
+    final queryParams = <String, String>{'epc': epc};
+    if (type != null) {
+      queryParams['type'] = type;
+    }
     final response = await _dioService.get(
-      '$_baseUrl/original-for-epc/$epc',
-      queryParameters: type != null ? {'type': type} : null,
+      '$_baseUrl/original-for-epc',
+      queryParameters: queryParams,
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

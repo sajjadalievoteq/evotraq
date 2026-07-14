@@ -136,6 +136,7 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
           if (showContainerSection)
             Gs1GroupCard(
               title: 'Parent Container',
+              showRequiredStar: true,
               outlineColor: outline,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

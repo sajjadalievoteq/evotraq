@@ -56,6 +56,7 @@ class DashboardService {
 
   /// Loads master-data counts, recent events, and event totals from the same
   /// event list responses (avoids a second round of size=1 event count calls).
+  /// Kept for backward compatibility; Home screen uses [getSummary].
   Future<({DashboardStats stats, List<RecentEvent> recentEvents})>
       getStatsAndRecentEvents({int recentLimit = 10}) async {
     final token = await _dioService.getAuthToken();
@@ -90,6 +91,38 @@ class DashboardService {
     );
 
     return (stats: stats, recentEvents: eventPage.events);
+  }
+
+  /// Single-request dashboard payload (counts, event totals, recent events, throughput).
+  Future<({DashboardStats stats, List<RecentEvent> recentEvents})> getSummary({
+    int recentLimit = 10,
+    int throughputHours = 24,
+  }) async {
+    final token = await _dioService.getAuthToken();
+    final headers = _buildHeaders(token);
+    final url =
+        '${_dioService.baseUrl}/dashboard/summary?recentLimit=$recentLimit&throughputHours=$throughputHours';
+
+    final response = await _dioService.get(
+      url,
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load dashboard summary (${response.statusCode})');
+    }
+
+    final data = json.decode(response.data) as Map<String, dynamic>;
+    final stats = DashboardStats.fromSummaryJson(data);
+    final rawEvents = data['recentEvents'] as List<dynamic>? ?? const [];
+    final recentEvents = rawEvents
+        .whereType<Map>()
+        .map((e) => RecentEvent.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+
+    return (stats: stats, recentEvents: recentEvents);
   }
 
   Future<int> _fetchCount(String url, Map<String, String> headers) async {
@@ -277,53 +310,32 @@ class DashboardService {
     bool cacheHealthy = false;
     String? backendVersion;
 
-    try {
-      final healthResponse = await _dioService
-          .get(
-            '$actuatorBaseUrl/health',
-            headers: headers,
-            responseType: ResponseType.plain,
-            acceptAllStatusCodes: true,
-          )
-          .timeout(const Duration(seconds: 5));
+    final results = await Future.wait([
+      _getActuatorPayload('$actuatorBaseUrl/health', headers),
+      _getActuatorPayload('$actuatorBaseUrl/info', headers),
+    ]);
 
-      if (healthResponse.statusCode == 200) {
-        backendHealthy = true;
-        final healthData = json.decode(healthResponse.data);
+    final healthData = results[0];
+    final infoData = results[1];
 
-        if (healthData is Map && healthData['components'] != null) {
-          final components = healthData['components'] as Map<String, dynamic>;
-          databaseHealthy = components['db']?['status'] == 'UP';
-          final redisStatus = components['redis']?['status'] as String?;
-          final cacheComponentStatus =
-              components['cache']?['status'] as String?;
-          cacheHealthy =
-              redisStatus == 'UP' || cacheComponentStatus == 'UP';
-        } else {
-          databaseHealthy = healthData['status'] == 'UP';
-          cacheHealthy = true;
-        }
+    if (healthData != null) {
+      backendHealthy = true;
+      if (healthData['components'] != null) {
+        final components = healthData['components'] as Map<String, dynamic>;
+        databaseHealthy = components['db']?['status'] == 'UP';
+        final redisStatus = components['redis']?['status'] as String?;
+        final cacheComponentStatus =
+            components['cache']?['status'] as String?;
+        cacheHealthy =
+            redisStatus == 'UP' || cacheComponentStatus == 'UP';
+      } else {
+        databaseHealthy = healthData['status'] == 'UP';
+        cacheHealthy = true;
       }
-    } catch (e) {
-      print('Error checking backend health: $e');
     }
 
-    try {
-      final infoResponse = await _dioService
-          .get(
-            '$actuatorBaseUrl/info',
-            headers: headers,
-            responseType: ResponseType.plain,
-            acceptAllStatusCodes: true,
-          )
-          .timeout(const Duration(seconds: 5));
-
-      if (infoResponse.statusCode == 200) {
-        final infoData = json.decode(infoResponse.data);
-        backendVersion = infoData['build']?['version']?.toString();
-      }
-    } catch (e) {
-      print('Error fetching version info: $e');
+    if (infoData != null) {
+      backendVersion = infoData['build']?['version']?.toString();
     }
 
     return SystemHealthStatus(
@@ -332,6 +344,30 @@ class DashboardService {
       cacheHealthy: cacheHealthy,
       backendVersion: backendVersion,
     );
+  }
+
+  Future<Map<String, dynamic>?> _getActuatorPayload(
+    String url,
+    Map<String, String> headers,
+  ) async {
+    try {
+      final response = await _dioService
+          .get(
+            url,
+            headers: headers,
+            responseType: ResponseType.plain,
+            acceptAllStatusCodes: true,
+          )
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode != 200) return null;
+      final decoded = json.decode(response.data);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      return null;
+    } catch (e) {
+      print('Error fetching actuator $url: $e');
+      return null;
+    }
   }
   Future<({Map<int, int> buckets, int total})> fetchThroughput(
     int hours,

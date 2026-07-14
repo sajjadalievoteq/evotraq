@@ -91,7 +91,8 @@ class SSCCService {
 
   Future<SSCC> getSSCCByCode(String ssccCode) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathBase}/code/$ssccCode',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathByCode}',
+      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -377,7 +378,8 @@ class SSCCService {
 
   Future<List<SSCC>> findChildSSCCs(String parentSsccCode) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathHierarchy(parentSsccCode)}',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathHierarchy}',
+      queryParameters: {SsccServiceConstants.qSsccCode: parentSsccCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -607,7 +609,8 @@ class SSCCService {
 
   Future<List<SsccAggregationLink>> getAggregationLinksByCode(String ssccCode) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode(ssccCode)}',
+      '${_dioService.baseUrl}${SsccServiceConstants.pathAggregationByCode}',
+      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

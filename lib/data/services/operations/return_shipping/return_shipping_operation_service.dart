@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
@@ -47,14 +48,14 @@ class ReturnShippingOperationService {
         return ReturnShippingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to create shipping operation',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while creating shipping operation',
@@ -83,14 +84,14 @@ class ReturnShippingOperationService {
         return ReturnShippingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operation',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading shipping operation',
@@ -124,14 +125,14 @@ class ReturnShippingOperationService {
         return operations.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading shipping operations',
@@ -163,14 +164,14 @@ class ReturnShippingOperationService {
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operations by reference',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching shipping operations',
@@ -202,14 +203,14 @@ class ReturnShippingOperationService {
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operations by container',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching shipping operations',
@@ -241,14 +242,14 @@ class ReturnShippingOperationService {
         return responseData.map((op) => ReturnShippingResponse.fromJson(op as Map<String, dynamic>)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operations by location',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching shipping operations',
@@ -280,14 +281,14 @@ class ReturnShippingOperationService {
         return ReturnShippingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'ReturnShipping validation failed',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while validating shipping request',
@@ -320,14 +321,14 @@ class ReturnShippingOperationService {
         return OperationPage.fromJson(responseData, ReturnShippingResponse.fromJson);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get shipping operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading shipping operations',
@@ -338,54 +339,6 @@ class ReturnShippingOperationService {
         message: 'Unexpected error loading shipping operations',
         originalException: e,
       );
-    }
-  }
-
-  ApiException _apiExceptionFromResponse(
-    Response<dynamic> response, {
-    required String fallbackMessage,
-  }) {
-    final body = response.data?.toString();
-    final apiException = ApiException(
-      statusCode: response.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-    );
-    _logApiException(apiException);
-    return apiException;
-  }
-
-  ApiException _apiExceptionFromDio(
-    DioException exception, {
-    required String fallbackMessage,
-    StackTrace? stackTrace,
-  }) {
-    final body = exception.response?.data?.toString();
-    final apiException = ApiException(
-      statusCode: exception.response?.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-      originalException: exception,
-    );
-    _logApiException(apiException, stackTrace: stackTrace);
-    return apiException;
-  }
-
-  void _logApiException(
-    ApiException exception, {
-    StackTrace? stackTrace,
-  }) {
-    debugPrint(
-      '[ReturnShippingOperationService] ApiException '
-      'status=${exception.statusCode} message=${exception.message}',
-    );
-    if (exception.responseBody != null && exception.responseBody!.isNotEmpty) {
-      debugPrint(
-        '[ReturnShippingOperationService] responseBody: ${exception.responseBody}',
-      );
-    }
-    if (stackTrace != null) {
-      debugPrint('[ReturnShippingOperationService] $stackTrace');
     }
   }
 }

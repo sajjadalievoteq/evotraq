@@ -31,7 +31,7 @@ class OperationGlnSelector extends StatelessWidget {
     if (readOnly) {
       return InputDecorator(
         decoration: InputDecoration(
-          labelText: label,
+          labelText: isRequired ? '$label *' : label,
           border: const OutlineInputBorder(),
           prefixIcon: TraqIcon(AppAssets.iconGln),
         ),

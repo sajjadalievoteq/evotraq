@@ -40,18 +40,24 @@ class MonitoringService {
 
   Future<void> _fetchAllMetrics() async {
     try {
-      final futures = await Future.wait([
-        getPerformanceMetrics(),
-        getStorageStatistics(),
-        getIntegrityStatistics(),
-      ]);
+      final summary = await getMonitoringSummary();
 
-      _performanceController.add(futures[0] as PerformanceMetrics);
-      _storageController.add(futures[1] as StorageStatistics);
-      _integrityController.add(futures[2] as IntegrityStatistics);
-      
-      final performance = futures[0] as PerformanceMetrics;
-      _alertsController.add(performance.activeAlerts);
+      final performance = summary['performance'] != null
+          ? PerformanceMetrics.fromJson(summary['performance'])
+          : null;
+      final storage = summary['storage'] != null
+          ? StorageStatistics.fromJson(summary['storage'])
+          : null;
+      final integrity = summary['integrity'] != null
+          ? IntegrityStatistics.fromJson(summary['integrity'])
+          : null;
+
+      if (performance != null) {
+        _performanceController.add(performance);
+        _alertsController.add(performance.activeAlerts);
+      }
+      if (storage != null) _storageController.add(storage);
+      if (integrity != null) _integrityController.add(integrity);
     } catch (e) {
       print('Error fetching metrics: $e');
     }
@@ -122,6 +128,27 @@ class MonitoringService {
       }
     } catch (e) {
       throw Exception('Error fetching integrity statistics: $e');
+    }
+  }
+
+  /// Merged performance + storage + integrity summary in a single call,
+  /// used by [_fetchAllMetrics] to replace 3 separate requests with 1.
+  Future<Map<String, dynamic>> getMonitoringSummary() async {
+    try {
+      final response = await _dioService.get(
+        '$_baseUrl/monitoring/summary',
+        headers: await _headers,
+        responseType: ResponseType.plain,
+        acceptAllStatusCodes: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.data);
+      } else {
+        throw Exception('Failed to load monitoring summary: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching monitoring summary: $e');
     }
   }
 

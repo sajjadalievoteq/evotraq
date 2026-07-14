@@ -5,6 +5,9 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../data/services/performance_optimization_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
+import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
 
 class PerformanceOptimizationDashboard extends StatefulWidget {
@@ -20,18 +23,19 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
       getIt<PerformanceOptimizationService>();
   
   late TabController _tabController;
-  Map<String, dynamic>? _performanceReport;
-  Map<String, dynamic>? _resourceUsage;
-  Map<String, dynamic>? _connectionPoolStatus;
-  Map<String, dynamic>? _threadPoolStatus;
-  bool _isLoading = true;
-  String? _errorMessage;
+  LoadState<Map<String, dynamic>> _reportState = const LoadState.loading();
+  bool _reportLoaded = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _loadPerformanceData();
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _ensureTabLoaded(_tabController.index);
+      }
+    });
+    _ensureTabLoaded(_tabController.index);
   }
 
   @override
@@ -40,33 +44,38 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
     super.dispose();
   }
 
+  /// All five tabs render fields derived from the single merged
+  /// `getPerformanceReport()` response, so one fetch satisfies every tab.
+  /// Triggers that fetch the first time any tab is viewed.
+  void _ensureTabLoaded(int index) {
+    if (_reportLoaded) return;
+    _reportLoaded = true;
+    _loadPerformanceData();
+  }
+
   Future<void> _loadPerformanceData() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _reportState = const LoadState.loading();
     });
 
     try {
-      final futures = await Future.wait([
-        _performanceService.getPerformanceReport(),
-        _performanceService.monitorResourceUsage(),
-        _performanceService.monitorConnectionPool(),
-        _performanceService.monitorThreadPools(),
-      ]);
+      final report = await _performanceService.getPerformanceReport();
 
+      if (!mounted) return;
       setState(() {
-        _performanceReport = futures[0];
-        _resourceUsage = futures[1];
-        _connectionPoolStatus = futures[2];
-        _threadPoolStatus = futures[3];
-        _isLoading = false;
+        _reportState = report.isEmpty ? const LoadState.empty() : LoadState.success(report);
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load performance data: $e';
-        _isLoading = false;
+        _reportState = LoadState.error('Failed to load performance data: $e');
       });
     }
+  }
+
+  void _refreshPerformanceData() {
+    _reportLoaded = true;
+    _loadPerformanceData();
   }
 
   @override
@@ -77,7 +86,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadPerformanceData,
+            onPressed: _refreshPerformanceData,
             tooltip: 'Refresh Data',
           ),
         ],
@@ -93,55 +102,46 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
         ),
       ),
       drawer: const AppDrawer(),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
-                      const SizedBox(height: 16),
-                      Text(_errorMessage!, textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadPerformanceData,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildOverviewTab(),
-                    _buildQueryOptimizationTab(),
-                    _buildConnectionPoolTab(),
-                    _buildThreadManagementTab(),
-                    _buildResourceManagementTab(),
-                  ],
-                ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          KeepAliveTabView(child: _buildOverviewTab()),
+          KeepAliveTabView(child: _buildQueryOptimizationTab()),
+          KeepAliveTabView(child: _buildConnectionPoolTab()),
+          KeepAliveTabView(child: _buildThreadManagementTab()),
+          KeepAliveTabView(child: _buildResourceManagementTab()),
+        ],
+      ),
     );
   }
 
   Widget _buildOverviewTab() {
-    final overallScore = _performanceReport?['overallPerformanceScore'] ?? 0.0;
-    final recommendations = _performanceReport?['topRecommendations'] as List? ?? [];
+    return LoadStateView<Map<String, dynamic>>(
+      state: _reportState,
+      onRetry: _refreshPerformanceData,
+      builder: (context, report) {
+        final overallScore = report['overallPerformanceScore'] ?? 0.0;
+        final recommendations = report['topRecommendations'] as List? ?? [];
+        final resourceUsage = report['resourceUsage'] as Map<String, dynamic>?;
+        final connectionPoolStatus = report['connectionPoolPerformance'] as Map<String, dynamic>?;
+        final threadPoolStatus = report['threadPoolPerformance'] as Map<String, dynamic>?;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildPerformanceScoreCard(overallScore),
-          const SizedBox(height: 16),
-          _buildSystemHealthCards(),
-          const SizedBox(height: 16),
-          _buildTopRecommendationsCard(recommendations),
-          const SizedBox(height: 16),
-          _buildQuickActionsCard(),
-        ],
-      ),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPerformanceScoreCard(overallScore),
+              const SizedBox(height: 16),
+              _buildSystemHealthCards(resourceUsage, connectionPoolStatus, threadPoolStatus),
+              const SizedBox(height: 16),
+              _buildTopRecommendationsCard(recommendations),
+              const SizedBox(height: 16),
+              _buildQuickActionsCard(),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -190,16 +190,20 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
     );
   }
 
-  Widget _buildSystemHealthCards() {
+  Widget _buildSystemHealthCards(
+    Map<String, dynamic>? resourceUsage,
+    Map<String, dynamic>? connectionPoolStatus,
+    Map<String, dynamic>? threadPoolStatus,
+  ) {
     return Row(
       children: [
-        Expanded(child: _buildHealthCard('Memory Usage', _resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', AppAssets.iconChip)),
+        Expanded(child: _buildHealthCard('Memory Usage', resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', AppAssets.iconChip)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('CPU Usage', '${((_resourceUsage?['cpu']?['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%', AppAssets.iconComputer)),
+        Expanded(child: _buildHealthCard('CPU Usage', '${((resourceUsage?['cpu']?['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%', AppAssets.iconComputer)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('Connections', '${_connectionPoolStatus?['activeConnections'] ?? 0}/${_connectionPoolStatus?['totalConnections'] ?? 0}', AppAssets.iconHub)),
+        Expanded(child: _buildHealthCard('Connections', '${connectionPoolStatus?['activeConnections'] ?? 0}/${connectionPoolStatus?['totalConnections'] ?? 0}', AppAssets.iconHub)),
         const SizedBox(width: 8),
-        Expanded(child: _buildHealthCard('Threads', '${_threadPoolStatus?['systemMetrics']?['activeThreadCount'] ?? 0}', AppAssets.iconSettings)),
+        Expanded(child: _buildHealthCard('Threads', '${threadPoolStatus?['systemMetrics']?['activeThreadCount'] ?? 0}', AppAssets.iconSettings)),
       ],
     );
   }
@@ -297,202 +301,224 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
   }
 
   Widget _buildQueryOptimizationTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Query Analysis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'SQL Query',
-                      hintText: 'Enter SQL query to analyze...',
-                      border: OutlineInputBorder(),
+    return LoadStateView<Map<String, dynamic>>(
+      state: _reportState,
+      onRetry: _refreshPerformanceData,
+      builder: (context, report) => SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Query Analysis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'SQL Query',
+                        hintText: 'Enter SQL query to analyze...',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 4,
+                      onSubmitted: _analyzeQuery,
                     ),
-                    maxLines: 4,
-                    onSubmitted: _analyzeQuery,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _analyzeQuery(''),
-                        child: const Text('Analyze Query'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _detectSlowQueries(),
-                        child: const Text('Detect Slow Queries'),
-                      ),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => _analyzeQuery(''),
+                          child: const Text('Analyze Query'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () => _detectSlowQueries(),
+                          child: const Text('Detect Slow Queries'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Index Optimization', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  const Text('Select table for index analysis:'),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
-                    items: ['object_events', 'aggregation_events', 'transaction_events', 'transformation_events']
-                        .map((table) => DropdownMenuItem(value: table, child: Text(table)))
-                        .toList(),
-                    onChanged: (table) {
-                      if (table != null) {
-                        _analyzeTableIndexes(table);
-                      }
-                    },
-                    hint: const Text('Select table'),
-                  ),
-                ],
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Index Optimization', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    const Text('Select table for index analysis:'),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                      items: ['object_events', 'aggregation_events', 'transaction_events', 'transformation_events']
+                          .map((table) => DropdownMenuItem(value: table, child: Text(table)))
+                          .toList(),
+                      onChanged: (table) {
+                        if (table != null) {
+                          _analyzeTableIndexes(table);
+                        }
+                      },
+                      hint: const Text('Select table'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildConnectionPoolTab() {
-    final currentStats = _connectionPoolStatus?['currentStatistics'];
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Connection Pool Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  if (currentStats != null) ...[
-                    _buildStatRow('Active Connections', '${currentStats['activeConnections'] ?? 0}'),
-                    _buildStatRow('Idle Connections', '${currentStats['idleConnections'] ?? 0}'),
-                    _buildStatRow('Total Connections', '${currentStats['totalConnections'] ?? 0}'),
-                    _buildStatRow('Max Pool Size', '${currentStats['maxPoolSize'] ?? 0}'),
-                    _buildStatRow('Connection Timeout', '${currentStats['connectionTimeout'] ?? 0}ms'),
-                    _buildStatRow('Avg Connection Time', '${currentStats['avgConnectionTime'] ?? 0}ms'),
-                  ],
-                  const SizedBox(height: 16),
-                  Row(
+    return LoadStateView<Map<String, dynamic>>(
+      state: _reportState,
+      onRetry: _refreshPerformanceData,
+      builder: (context, report) {
+        final connectionPoolStatus = report['connectionPoolPerformance'] as Map<String, dynamic>?;
+        final currentStats = connectionPoolStatus?['currentStatistics'];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        onPressed: () => _showConnectionPoolOptimization(),
-                        child: const Text('Optimize Pool'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _detectConnectionLeaks(),
-                        child: const Text('Detect Leaks'),
+                      const Text('Connection Pool Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      if (currentStats != null) ...[
+                        _buildStatRow('Active Connections', '${currentStats['activeConnections'] ?? 0}'),
+                        _buildStatRow('Idle Connections', '${currentStats['idleConnections'] ?? 0}'),
+                        _buildStatRow('Total Connections', '${currentStats['totalConnections'] ?? 0}'),
+                        _buildStatRow('Max Pool Size', '${currentStats['maxPoolSize'] ?? 0}'),
+                        _buildStatRow('Connection Timeout', '${currentStats['connectionTimeout'] ?? 0}ms'),
+                        _buildStatRow('Avg Connection Time', '${currentStats['avgConnectionTime'] ?? 0}ms'),
+                      ],
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _showConnectionPoolOptimization(),
+                            child: const Text('Optimize Pool'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => _detectConnectionLeaks(),
+                            child: const Text('Detect Leaks'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildThreadManagementTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Thread Pool Management', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  const Text('Configure optimal thread pool settings:'),
-                  const SizedBox(height: 16),
-                  _buildThreadPoolConfigForm(),
-                ],
+    return LoadStateView<Map<String, dynamic>>(
+      state: _reportState,
+      onRetry: _refreshPerformanceData,
+      builder: (context, report) => SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Thread Pool Management', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    const Text('Configure optimal thread pool settings:'),
+                    const SizedBox(height: 16),
+                    _buildThreadPoolConfigForm(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildResourceManagementTab() {
-    final memoryUsage = _resourceUsage?['memory'];
-    final cpuUsage = _resourceUsage?['cpu'];
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('System Resources', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  if (memoryUsage != null) ...[
-                    const Text('Memory Usage:', style: TextStyle(fontWeight: FontWeight.w500)),
-                    _buildStatRow('Used Memory', '${(memoryUsage['usedMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
-                    _buildStatRow('Free Memory', '${(memoryUsage['freeMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
-                    _buildStatRow('Max Memory', '${(memoryUsage['maxMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
-                    const SizedBox(height: 16),
-                  ],
-                  if (cpuUsage != null) ...[
-                    const Text('CPU Information:', style: TextStyle(fontWeight: FontWeight.w500)),
-                    _buildStatRow('Available Processors', '${cpuUsage['availableProcessors'] ?? 0}'),
-                    _buildStatRow('System CPU Load', '${((cpuUsage['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%'),
-                    const SizedBox(height: 16),
-                  ],
-                  Row(
+    return LoadStateView<Map<String, dynamic>>(
+      state: _reportState,
+      onRetry: _refreshPerformanceData,
+      builder: (context, report) {
+        final resourceUsage = report['resourceUsage'] as Map<String, dynamic>?;
+        final memoryUsage = resourceUsage?['memory'];
+        final cpuUsage = resourceUsage?['cpu'];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        onPressed: () => _optimizeMemory(),
-                        child: const Text('Optimize Memory'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _optimizeCpu(),
-                        child: const Text('Balance CPU'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _optimizeIo(),
-                        child: const Text('Optimize I/O'),
+                      const Text('System Resources', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      if (memoryUsage != null) ...[
+                        const Text('Memory Usage:', style: TextStyle(fontWeight: FontWeight.w500)),
+                        _buildStatRow('Used Memory', '${(memoryUsage['usedMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
+                        _buildStatRow('Free Memory', '${(memoryUsage['freeMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
+                        _buildStatRow('Max Memory', '${(memoryUsage['maxMemory'] ?? 0) ~/ 1024 ~/ 1024} MB'),
+                        const SizedBox(height: 16),
+                      ],
+                      if (cpuUsage != null) ...[
+                        const Text('CPU Information:', style: TextStyle(fontWeight: FontWeight.w500)),
+                        _buildStatRow('Available Processors', '${cpuUsage['availableProcessors'] ?? 0}'),
+                        _buildStatRow('System CPU Load', '${((cpuUsage['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%'),
+                        const SizedBox(height: 16),
+                      ],
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _optimizeMemory(),
+                            child: const Text('Optimize Memory'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => _optimizeCpu(),
+                            child: const Text('Balance CPU'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => _optimizeIo(),
+                            child: const Text('Optimize I/O'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

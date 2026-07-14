@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
@@ -44,7 +45,7 @@ class PackingOperationService {
         return PackingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage:
             'Packing could not be submitted. Check the parent container, items, and location.',
@@ -52,7 +53,7 @@ class PackingOperationService {
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error — could not submit packing. Check your connection.',
@@ -82,14 +83,14 @@ class PackingOperationService {
         return PackingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operation',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading packing operation',
@@ -123,14 +124,14 @@ class PackingOperationService {
         return operations.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading packing operations',
@@ -162,14 +163,14 @@ class PackingOperationService {
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operations by reference',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching packing operations',
@@ -201,14 +202,14 @@ class PackingOperationService {
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operations by container',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching packing operations',
@@ -240,14 +241,14 @@ class PackingOperationService {
         return responseData.map((op) => PackingResponse.fromJson(op)).toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operations by location',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while searching packing operations',
@@ -279,14 +280,14 @@ class PackingOperationService {
         return PackingResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Packing validation failed',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while validating packing request',
@@ -319,14 +320,14 @@ class PackingOperationService {
         return OperationPage.fromJson(responseData, PackingResponse.fromJson);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get packing operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading packing operations',
@@ -337,54 +338,6 @@ class PackingOperationService {
         message: 'Unexpected error loading packing operations',
         originalException: e,
       );
-    }
-  }
-
-  ApiException _apiExceptionFromResponse(
-    Response<dynamic> response, {
-    required String fallbackMessage,
-  }) {
-    final body = response.data?.toString();
-    final apiException = ApiException(
-      statusCode: response.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-    );
-    _logApiException(apiException);
-    return apiException;
-  }
-
-  ApiException _apiExceptionFromDio(
-    DioException exception, {
-    required String fallbackMessage,
-    StackTrace? stackTrace,
-  }) {
-    final body = exception.response?.data?.toString();
-    final apiException = ApiException(
-      statusCode: exception.response?.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-      originalException: exception,
-    );
-    _logApiException(apiException, stackTrace: stackTrace);
-    return apiException;
-  }
-
-  void _logApiException(
-    ApiException exception, {
-    StackTrace? stackTrace,
-  }) {
-    debugPrint(
-      '[PackingOperationService] ApiException '
-      'status=${exception.statusCode} message=${exception.message}',
-    );
-    if (exception.responseBody != null && exception.responseBody!.isNotEmpty) {
-      debugPrint(
-        '[PackingOperationService] responseBody: ${exception.responseBody}',
-      );
-    }
-    if (stackTrace != null) {
-      debugPrint('[PackingOperationService] $stackTrace');
     }
   }
 }

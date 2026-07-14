@@ -56,6 +56,7 @@ class UnpackingItemScanStep extends StatelessWidget {
 
     final scopeCard = Gs1GroupCard(
       title: 'Unpack scope',
+      showRequiredStar: true,
       outlineColor: outline,
       margin: EdgeInsets.zero,
       child: Column(
@@ -90,6 +91,7 @@ class UnpackingItemScanStep extends StatelessWidget {
     final addItemsCard = isPartial
         ? Gs1GroupCard(
             title: 'Add item by scan or manual entry',
+            showRequiredStar: true,
             outlineColor: outline,
             margin: EdgeInsets.zero,
             child: Column(

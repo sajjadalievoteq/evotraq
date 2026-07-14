@@ -36,7 +36,8 @@ class SGTINService {
 
   Future<SGTIN> getSGTINByEPC(String epcUri) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathByEpc(epcUri)}',
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathByEpc}',
+      queryParameters: {SgtinServiceConstants.qEpcUri: epcUri},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -54,7 +55,8 @@ class SGTINService {
 
   Future<SGTIN> getSGTINBySerialNumber(String serialNumber) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathBySerial(serialNumber)}',
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathBySerial}',
+      queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -180,7 +182,8 @@ class SGTINService {
 
   Future<List<SGTIN>> findSGTINsByGTIN(String gtinCode) async {
     final response = await _dioService.get(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathByGtin(gtinCode)}',
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathByGtin}',
+      queryParameters: {SgtinServiceConstants.qGtin: gtinCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -201,7 +204,7 @@ class SGTINService {
   Future<List<SGTIN>> findSGTINsByBatchLotNumber(String batchLotNumber) async {
     final response = await _dioService.get(
       '${_dioService.baseUrl}${SgtinServiceConstants.pathBatch}',
-      queryParameters: {SgtinServiceConstants.qBatchLotNumber: batchLotNumber},
+      queryParameters: {SgtinServiceConstants.qBatchLot: batchLotNumber},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -435,7 +438,8 @@ class SGTINService {
     ItemStatus newStatus,
   ) async {
     final response = await _dioService.put(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemStatus(serialNumber)}',
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemStatus}',
+      queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
       headers: _headers,
       data: json.encode({SgtinServiceConstants.bStatus: newStatus.name}),
       responseType: ResponseType.plain,
@@ -599,7 +603,8 @@ class SGTINService {
 
   Future<SGTIN> decommissionSGTIN(String serialNumber, String reason) async {
     final response = await _dioService.post(
-      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission(serialNumber)}',
+      '${_dioService.baseUrl}${SgtinServiceConstants.pathItemDecommission}',
+      queryParameters: {SgtinServiceConstants.qSerialNumber: serialNumber},
       headers: _headers,
       data: json.encode({SgtinServiceConstants.bReason: reason}),
       responseType: ResponseType.plain,

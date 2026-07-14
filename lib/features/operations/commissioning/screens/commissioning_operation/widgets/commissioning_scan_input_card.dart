@@ -43,6 +43,7 @@ class CommissioningScanInputCard extends StatelessWidget {
       width: double.infinity,
       child: Gs1GroupCard(
         title: 'Add Serial Numbers',
+        showRequiredStar: true,
         outlineColor: colorScheme.outlineVariant,
         margin: EdgeInsets.zero,
         child: Column(

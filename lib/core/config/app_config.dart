@@ -28,9 +28,10 @@ class AppConfig {
   
   static const String authTokenKey = 'auth_token';
   
-  static const int connectTimeout = 60000;
-  
-  static const int receiveTimeout = 60000;
+  /// Fail-fast network timeouts so hung calls surface as errors (login/splash/401).
+  static const int connectTimeout = 15000;
+  static const int sendTimeout = 15000;
+  static const int receiveTimeout = 15000;
   
   AppConfig({
     required this.apiBaseUrl,

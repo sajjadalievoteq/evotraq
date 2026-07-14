@@ -7,7 +7,20 @@ import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
+import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
+/// Combined overview data backing the Overview tab's stat cards and the
+/// Partitions tab's summary card, fetched via a single
+/// `getDashboardOverview()` call instead of two separate monitoring/health
+/// calls.
+class _OverviewData {
+  final PartitionStatistics statistics;
+  final Map<String, dynamic> health;
+
+  const _OverviewData(this.statistics, this.health);
+}
 
 class DatabasePartitioningDashboard extends StatefulWidget {
   const DatabasePartitioningDashboard({Key? key}) : super(key: key);
@@ -23,11 +36,18 @@ class _DatabasePartitioningDashboardState
   late final DatabasePartitioningService _partitioningService;
   late TabController _tabController;
 
-  PartitionStatistics? _statistics;
-  Map<String, dynamic>? _healthStatus;
-  List<PartitionMetadata>? _metadata;
-  bool _isLoading = true;
-  String? _error;
+  /// Tabs whose data has already been fetched at least once, so switching
+  /// back to a tab doesn't re-trigger its fetch and the refresh button
+  /// knows which tabs' data to reload.
+  final Set<int> _loadedTabs = {};
+
+  /// Overview tab (index 0) + Partitions tab's summary card (index 1) both
+  /// derive from this single merged `getDashboardOverview()` response.
+  LoadState<_OverviewData> _overviewState = const LoadState.loading();
+
+  /// Partitions tab's full partition list (index 1). `getDashboardOverview()`
+  /// only returns a count, not the full list, so this stays a separate call.
+  LoadState<List<PartitionMetadata>> _metadataState = const LoadState.loading();
 
   final List<String> _validTables = [
     'epcis_events',
@@ -41,12 +61,17 @@ class _DatabasePartitioningDashboardState
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _ensureTabLoaded(_tabController.index);
+      }
+    });
 
     _partitioningService = DatabasePartitioningService(
       dioService: getIt<DioService>(),
     );
 
-    _loadDashboardData();
+    _ensureTabLoaded(_tabController.index);
   }
 
   @override
@@ -55,31 +80,105 @@ class _DatabasePartitioningDashboardState
     super.dispose();
   }
 
-  Future<void> _loadDashboardData() async {
+  /// Triggers only the data fetch(es) a given tab needs, the first time that
+  /// tab is viewed:
+  /// - Overview (0): merged overview call (statistics + health).
+  /// - Partitions (1): the same merged overview call (for its summary card)
+  ///   plus the separate partition metadata list call.
+  /// - Archive (2) / Maintenance (3): static content, nothing to fetch.
+  void _ensureTabLoaded(int index) {
+    if (_loadedTabs.contains(index)) return;
+    _loadedTabs.add(index);
+
+    switch (index) {
+      case 0:
+        _loadOverview();
+        break;
+      case 1:
+        _loadOverview();
+        _loadMetadata();
+        break;
+      default:
+        break;
+    }
+  }
+
+  Future<void> _loadOverview({bool force = false}) async {
+    if (!force && _overviewState.isSuccess) return;
+
     setState(() {
-      _isLoading = true;
-      _error = null;
+      _overviewState = const LoadState.loading();
     });
 
     try {
-      final results = await Future.wait([
-        _partitioningService.getPartitionMonitoringReport(),
-        _partitioningService.getPartitionHealthStatus(),
-        _partitioningService.getPartitionMetadata(),
-      ]);
+      final overview = await _partitioningService.getDashboardOverview();
+      final statsJson = overview['statistics'];
+      final healthJson = overview['health'];
+
+      if (!mounted) return;
+
+      if (statsJson == null) {
+        setState(() {
+          _overviewState = const LoadState.empty();
+        });
+        return;
+      }
+
+      final statistics = PartitionStatistics.fromJson(
+        (statsJson as Map).cast<String, dynamic>(),
+      );
+      final health = healthJson != null
+          ? (healthJson as Map).cast<String, dynamic>()
+          : <String, dynamic>{};
 
       setState(() {
-        _statistics = results[0] as PartitionStatistics;
-        _healthStatus = results[1] as Map<String, dynamic>;
-        _metadata = results[2] as List<PartitionMetadata>;
-        _isLoading = false;
+        _overviewState = LoadState.success(_OverviewData(statistics, health));
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _error = e.toString();
-        _isLoading = false;
+        _overviewState = LoadState.error(e.toString());
       });
     }
+  }
+
+  Future<void> _loadMetadata({bool force = false}) async {
+    if (!force && _metadataState.isSuccess) return;
+
+    setState(() {
+      _metadataState = const LoadState.loading();
+    });
+
+    try {
+      final metadata = await _partitioningService.getPartitionMetadata();
+
+      if (!mounted) return;
+      setState(() {
+        _metadataState =
+            metadata.isEmpty ? const LoadState.empty() : LoadState.success(metadata);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _metadataState = LoadState.error(e.toString());
+      });
+    }
+  }
+
+  /// Refresh button semantics: reload every tab's data that has already been
+  /// loaded at least once, without triggering fetches for tabs never
+  /// visited (those will fetch fresh on first visit via [_ensureTabLoaded]).
+  Future<void> _refreshLoadedTabs() async {
+    final futures = <Future<void>>[];
+
+    if (_loadedTabs.contains(0) || _loadedTabs.contains(1)) {
+      futures.add(_loadOverview(force: true));
+    }
+    if (_loadedTabs.contains(1)) {
+      futures.add(_loadMetadata(force: true));
+    }
+
+    await Future.wait(futures);
   }
 
   @override
@@ -106,43 +205,36 @@ class _DatabasePartitioningDashboardState
           ),
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadDashboardData,
+            onPressed: _refreshLoadedTabs,
             tooltip: 'Refresh Data',
           ),
         ],
       ),
       drawer: const AppDrawer(),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[400]),
-                  const SizedBox(height: 16),
-                  Text('Error: $_error'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadDashboardData,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(),
-                _buildPartitionsTab(),
-                _buildArchiveTab(),
-                _buildMaintenanceTab(),
-              ],
-            ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          KeepAliveTabView(child: _buildOverviewTab()),
+          KeepAliveTabView(child: _buildPartitionsTab()),
+          KeepAliveTabView(child: _buildArchiveTab()),
+          KeepAliveTabView(child: _buildMaintenanceTab()),
+        ],
+      ),
     );
   }
 
   Widget _buildOverviewTab() {
+    return LoadStateView<_OverviewData>(
+      state: _overviewState,
+      onRetry: () => _loadOverview(force: true),
+      builder: (context, data) => _buildOverviewContent(data.statistics, data.health),
+    );
+  }
+
+  Widget _buildOverviewContent(
+    PartitionStatistics statistics,
+    Map<String, dynamic> health,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -154,54 +246,52 @@ class _DatabasePartitioningDashboardState
           ),
           const SizedBox(height: 20),
 
-          if (_statistics != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Total Partitions',
-                    _statistics!.totalPartitions.toString(),
-                    AppAssets.iconTable,
-                    Colors.blue,
-                  ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Total Partitions',
+                  statistics.totalPartitions.toString(),
+                  AppAssets.iconTable,
+                  Colors.blue,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    'Active Partitions',
-                    _statistics!.activePartitions.toString(),
-                    AppAssets.iconCheckCircle,
-                    Colors.green,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  'Active Partitions',
+                  statistics.activePartitions.toString(),
+                  AppAssets.iconCheckCircle,
+                  Colors.green,
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Archived Partitions',
-                    _statistics!.archivedPartitions.toString(),
-                    AppAssets.iconArchive,
-                    Colors.orange,
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Archived Partitions',
+                  statistics.archivedPartitions.toString(),
+                  AppAssets.iconArchive,
+                  Colors.orange,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    'Total Size',
-                    '${(_statistics!.totalSizeGb != null && _statistics!.totalSizeGb! > 0) ? _statistics!.totalSizeGb!.toStringAsFixed(6) : (_statistics!.totalSizeMb != null ? (_statistics!.totalSizeMb! / 1024).toStringAsFixed(6) : '0.000000')} GB',
-                    AppAssets.iconDatabase,
-                    Colors.purple,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  'Total Size',
+                  '${(statistics.totalSizeGb != null && statistics.totalSizeGb! > 0) ? statistics.totalSizeGb!.toStringAsFixed(6) : (statistics.totalSizeMb != null ? (statistics.totalSizeMb! / 1024).toStringAsFixed(6) : '0.000000')} GB',
+                  AppAssets.iconDatabase,
+                  Colors.purple,
                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
 
-            if (_healthStatus != null) _buildHealthStatusCard(),
-          ],
+          _buildHealthStatusCard(health),
         ],
       ),
     );
@@ -219,53 +309,60 @@ class _DatabasePartitioningDashboardState
           ),
           const SizedBox(height: 20),
 
-          if (_statistics != null) ...[
-            Card(
-              color: Colors.blue.withOpacity(0.1),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Partition Data Summary:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Total Records (in partitions): ${_statistics!.totalRecords}',
-                    ),
-                    Text('Total Size Bytes: ${_statistics!.totalSizeBytes}'),
-                    Text(
-                      'Total Size MB: ${_statistics!.totalSizeMb?.toStringAsFixed(2) ?? 'null'}',
-                    ),
-                    Text(
-                      'Total Size GB: ${_statistics!.totalSizeGb?.toStringAsFixed(6) ?? 'null'}',
-                    ),
-                    Text(
-                      'Average Partition Size: ${_statistics!.averagePartitionSizeMb?.toStringAsFixed(2) ?? 'N/A'} MB',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+          LoadStateView<_OverviewData>(
+            state: _overviewState,
+            onRetry: () => _loadOverview(force: true),
+            builder: (context, data) => _buildPartitionSummaryCard(data.statistics),
+          ),
+          const SizedBox(height: 20),
 
-          if (_metadata != null && _metadata!.isNotEmpty) ...[
-            ListView.builder(
+          LoadStateView<List<PartitionMetadata>>(
+            state: _metadataState,
+            onRetry: () => _loadMetadata(force: true),
+            emptyWidget: const Center(child: Text('No partition data available')),
+            builder: (context, metadata) => ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _metadata!.length,
+              itemCount: metadata.length,
               itemBuilder: (context, index) {
-                final partition = _metadata![index];
+                final partition = metadata[index];
                 return _buildPartitionCard(partition);
               },
             ),
-          ] else ...[
-            const Center(child: Text('No partition data available')),
-          ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPartitionSummaryCard(PartitionStatistics statistics) {
+    return Card(
+      color: Colors.blue.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Partition Data Summary:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Total Records (in partitions): ${statistics.totalRecords}',
+            ),
+            Text('Total Size Bytes: ${statistics.totalSizeBytes}'),
+            Text(
+              'Total Size MB: ${statistics.totalSizeMb?.toStringAsFixed(2) ?? 'null'}',
+            ),
+            Text(
+              'Total Size GB: ${statistics.totalSizeGb?.toStringAsFixed(6) ?? 'null'}',
+            ),
+            Text(
+              'Average Partition Size: ${statistics.averagePartitionSizeMb?.toStringAsFixed(2) ?? 'N/A'} MB',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -339,8 +436,8 @@ class _DatabasePartitioningDashboardState
     );
   }
 
-  Widget _buildHealthStatusCard() {
-    final status = _healthStatus!['overall_status'] ?? 'UNKNOWN';
+  Widget _buildHealthStatusCard(Map<String, dynamic> healthStatus) {
+    final status = healthStatus['overall_status'] ?? 'UNKNOWN';
     Color statusColor;
     String statusIconAsset;
 
@@ -383,11 +480,11 @@ class _DatabasePartitioningDashboardState
                 ),
               ],
             ),
-            if (_healthStatus!['issues'] != null &&
-                (_healthStatus!['issues'] as List).isNotEmpty) ...[
+            if (healthStatus['issues'] != null &&
+                (healthStatus['issues'] as List).isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                '${(_healthStatus!['issues'] as List).length} issue(s) found',
+                '${(healthStatus['issues'] as List).length} issue(s) found',
               ),
             ],
           ],
@@ -528,7 +625,7 @@ class _DatabasePartitioningDashboardState
 
       context.showSuccess('Maintenance operation completed successfully');
 
-      _loadDashboardData();
+      _refreshLoadedTabs();
     } catch (e) {
       Navigator.of(context).pop();
 
@@ -765,7 +862,7 @@ class _DatabasePartitioningDashboardState
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _loadDashboardData();
+              _refreshLoadedTabs();
             },
             child: const Text('Refresh Dashboard'),
           ),

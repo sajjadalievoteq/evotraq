@@ -9,6 +9,9 @@ import '../../../data/services/error_correction_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
+import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
 
 class DataConsistencyIntegrityDashboard extends StatefulWidget {
@@ -26,39 +29,60 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   late ErrorCorrectionService _correctionService;
   late DataConsistencyPersistenceService _persistenceService;
   
-  Map<String, dynamic>? _consistencyReport;
-  List<dynamic> _detectableAnomalies = [];
   List<dynamic> _correctableErrors = [];
-  Map<String, dynamic>? _correctionStatistics;
   List<dynamic> _integrityJobs = [];
   List<Map<String, dynamic>> _correctionWorkflows = [];
-  
-  bool _isLoading = false;
+
+  // Per-tab independent load state, replacing the old shared
+  // _isLoading/_errorMessage pair so one tab's failure/empty result
+  // doesn't blank the others.
+  LoadState<Map<String, dynamic>> _consistencyReportState = const LoadState.empty();
+  LoadState<List<dynamic>> _anomaliesState = const LoadState.empty();
+  LoadState<Map<String, dynamic>> _correctionStatisticsState = const LoadState.loading();
+  LoadState<List<dynamic>> _jobsState = const LoadState.loading();
+  LoadState<List<Map<String, dynamic>>> _workflowDataState = const LoadState.loading();
+
+  // Tracks which of the 5 tabs have had their data loaded at least once, so
+  // switching tabs the first time triggers a load, and manual/periodic
+  // refreshes only touch tabs the user has actually viewed.
+  final Set<int> _loadedTabs = {};
+
   bool _isGeneratingReport = false;
   bool _isDetectingAnomalies = false;
   bool _isIdentifyingErrors = false;
-  String? _errorMessage;
-  
+  bool _isRefreshingAll = false;
+
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _endDate = DateTime.now();
   List<String> _selectedEventTypes = ['ObjectEvent', 'AggregationEvent', 'TransactionEvent', 'TransformationEvent'];
   List<String> _selectedErrorTypes = ['MISSING_FIELD', 'INVALID_FORMAT', 'DUPLICATE_EVENT', 'TIMING_INCONSISTENCY'];
 
   Timer? _refreshTimer;
+  final Map<String, Timer> _jobPollTimers = {};
+  final Map<String, Timer> _workflowPollTimers = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _ensureTabLoaded(_tabController.index);
+      }
+    });
     _persistenceService = DataConsistencyPersistenceService();
     _initializeServices();
-    
+
     _persistenceService.addListener(_onPersistenceUpdate);
-    
+
     _integrityJobs = _persistenceService.integrityJobs;
     _correctionWorkflows = _persistenceService.correctionWorkflows;
-    
-    _loadDashboardData();
+    _jobsState = _integrityJobs.isEmpty ? const LoadState.empty() : LoadState.success(_integrityJobs);
+    _workflowDataState = _correctionWorkflows.isEmpty ? const LoadState.empty() : LoadState.success(_correctionWorkflows);
+
+    // Only load the tab that's actually visible on first build; the other
+    // 4 tabs load lazily the first time the user switches to them.
+    _ensureTabLoaded(_tabController.index);
     _startAutoRefresh();
   }
 
@@ -67,6 +91,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     _persistenceService.removeListener(_onPersistenceUpdate);
     _tabController.dispose();
     _refreshTimer?.cancel();
+    for (final timer in _jobPollTimers.values) {
+      timer.cancel();
+    }
+    for (final timer in _workflowPollTimers.values) {
+      timer.cancel();
+    }
     super.dispose();
   }
 
@@ -75,6 +105,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       setState(() {
         _integrityJobs = _persistenceService.integrityJobs;
         _correctionWorkflows = _persistenceService.correctionWorkflows;
+        if (_loadedTabs.contains(3)) {
+          _jobsState = _integrityJobs.isEmpty ? const LoadState.empty() : LoadState.success(_integrityJobs);
+        }
+        if (_loadedTabs.contains(4)) {
+          _workflowDataState = _correctionWorkflows.isEmpty ? const LoadState.empty() : LoadState.success(_correctionWorkflows);
+        }
       });
     }
   }
@@ -87,36 +123,74 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   void _startAutoRefresh() {
     _refreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       if (mounted) {
-        _loadDashboardData();
+        // Only refresh tabs the user has already viewed - don't force-load
+        // tabs that were never opened.
+        _refreshLoadedTabs();
       }
     });
   }
 
-  Future<void> _loadDashboardData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await Future.wait([
-        _loadCorrectionStatistics(),
-        _loadWorkflowData(),
-      ]);
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load dashboard data: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+  /// Loads the data a given tab index needs, if it has any auto-loaded data
+  /// group (tabs 0/1 are purely user-action-driven via their own buttons and
+  /// have nothing to auto-load here).
+  Future<void> _triggerTabLoad(int index) {
+    switch (index) {
+      case 2:
+        return _loadCorrectionStatistics();
+      case 3:
+        _refreshJobsState();
+        return Future.value();
+      case 4:
+        return _loadWorkflowData();
+      default:
+        return Future.value();
     }
   }
 
+  void _ensureTabLoaded(int index) {
+    if (_loadedTabs.contains(index)) return;
+    _loadedTabs.add(index);
+    _triggerTabLoad(index);
+  }
+
+  /// Manual refresh (app bar action / filter changes): reload every tab
+  /// that has already been loaded at least once, matching the "refresh
+  /// reloads everything already loaded" semantic used elsewhere.
+  Future<void> _refreshLoadedTabs() async {
+    if (!mounted) return;
+    setState(() {
+      _isRefreshingAll = true;
+    });
+    try {
+      await Future.wait(_loadedTabs.map(_triggerTabLoad));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshingAll = false;
+        });
+      }
+    }
+  }
+
+  void _refreshJobsState() {
+    if (!mounted) return;
+    setState(() {
+      _jobsState = _integrityJobs.isEmpty ? const LoadState.empty() : LoadState.success(_integrityJobs);
+    });
+  }
+
   Future<void> _loadWorkflowData() async {
+    if (mounted) {
+      setState(() {
+        if (_workflowDataState.data == null) {
+          _workflowDataState = const LoadState.loading();
+        }
+      });
+    }
+
     try {
       final workflows = await _correctionService.getAllCorrectionWorkflows();
+      if (!mounted) return;
 
       setState(() {
         _correctionWorkflows.clear();
@@ -136,15 +210,31 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
 
           _correctionWorkflows.add(mappedWorkflow);
         }
+
+        _workflowDataState = _correctionWorkflows.isEmpty
+            ? const LoadState.empty()
+            : LoadState.success(_correctionWorkflows);
       });
-    } catch (_) {
-      // Keep existing workflows on load failure.
+    } catch (e) {
+      // Keep existing workflows on load failure; only surface an error
+      // state if we have nothing to show at all.
+      if (mounted) {
+        setState(() {
+          _workflowDataState = _correctionWorkflows.isNotEmpty
+              ? LoadState.success(_correctionWorkflows)
+              : LoadState.error('Failed to load workflows: $e');
+        });
+      }
     }
   }
 
   Future<void> _generateConsistencyReport() async {
+    if (!mounted) return;
     setState(() {
       _isGeneratingReport = true;
+      if (_consistencyReportState.data == null) {
+        _consistencyReportState = const LoadState.loading();
+      }
     });
 
     try {
@@ -153,22 +243,38 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         _endDate,
         _selectedEventTypes,
       );
-      
-      setState(() {
-        _consistencyReport = report;
-      });
+
+      if (mounted) {
+        setState(() {
+          _consistencyReportState = LoadState.success(report);
+        });
+      }
     } catch (e) {
+      if (mounted) {
+        setState(() {
+          final previous = _consistencyReportState.data;
+          _consistencyReportState = previous != null
+              ? LoadState.success(previous)
+              : LoadState.error('Failed to generate consistency report: $e');
+        });
+      }
       _showErrorSnackBar('Failed to generate consistency report: $e');
     } finally {
-      setState(() {
-        _isGeneratingReport = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isGeneratingReport = false;
+        });
+      }
     }
   }
 
   Future<void> _detectAnomalies() async {
+    if (!mounted) return;
     setState(() {
       _isDetectingAnomalies = true;
+      if (_anomaliesState.data == null) {
+        _anomaliesState = const LoadState.loading();
+      }
     });
 
     try {
@@ -176,16 +282,28 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         {'start': _startDate, 'end': _endDate},
         _selectedEventTypes,
       );
-      
-      setState(() {
-        _detectableAnomalies = anomalies;
-      });
+
+      if (mounted) {
+        setState(() {
+          _anomaliesState = anomalies.isEmpty ? const LoadState.empty() : LoadState.success(anomalies);
+        });
+      }
     } catch (e) {
+      if (mounted) {
+        setState(() {
+          final previous = _anomaliesState.data;
+          _anomaliesState = (previous != null && previous.isNotEmpty)
+              ? LoadState.success(previous)
+              : LoadState.error('Failed to detect anomalies: $e');
+        });
+      }
       _showErrorSnackBar('Failed to detect anomalies: $e');
     } finally {
-      setState(() {
-        _isDetectingAnomalies = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isDetectingAnomalies = false;
+        });
+      }
     }
   }
 
@@ -214,17 +332,34 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   Future<void> _loadCorrectionStatistics() async {
+    if (mounted) {
+      setState(() {
+        if (_correctionStatisticsState.data == null) {
+          _correctionStatisticsState = const LoadState.loading();
+        }
+      });
+    }
+
     try {
       final statistics = await _correctionService.getErrorCorrectionStatistics(
         _startDate,
         _endDate,
       );
-      
-      setState(() {
-        _correctionStatistics = statistics;
-      });
+
+      if (mounted) {
+        setState(() {
+          _correctionStatisticsState = LoadState.success(statistics);
+        });
+      }
     } catch (e) {
-      print('Failed to load correction statistics: $e');
+      if (mounted) {
+        setState(() {
+          final previous = _correctionStatisticsState.data;
+          _correctionStatisticsState = previous != null
+              ? LoadState.success(previous)
+              : LoadState.error('Failed to load correction statistics: $e');
+        });
+      }
     }
   }
 
@@ -475,7 +610,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _isLoading ? null : _loadDashboardData,
+            onPressed: _isRefreshingAll ? null : _refreshLoadedTabs,
             tooltip: 'Refresh Data',
           ),
           IconButton(
@@ -486,41 +621,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         ],
       ),
       drawer: const AppDrawer(),
-      body: _isLoading ? const Center(child: CircularProgressIndicator()) : _buildTabContent(),
+      body: _buildTabContent(),
     );
   }
 
   Widget _buildTabContent() {
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadDashboardData,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
     return TabBarView(
       controller: _tabController,
       children: [
-        _buildConsistencyTab(),
-        _buildAnomalyDetectionTab(),
-        _buildErrorCorrectionTab(),
-        _buildIntegrityMonitoringTab(),
-        _buildWorkflowsTab(),
+        KeepAliveTabView(child: _buildConsistencyTab()),
+        KeepAliveTabView(child: _buildAnomalyDetectionTab()),
+        KeepAliveTabView(child: _buildErrorCorrectionTab()),
+        KeepAliveTabView(child: _buildIntegrityMonitoringTab()),
+        KeepAliveTabView(child: _buildWorkflowsTab()),
       ],
     );
   }
@@ -560,12 +673,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (_consistencyReport != null) ...[
-                    _buildConsistencyMetrics(_consistencyReport!),
-                    const SizedBox(height: 16),
-                    _buildConsistencyViolations(_consistencyReport!),
-                  ] else
-                    const Text('No consistency report generated yet. Click "Generate Report" to start.'),
+                  LoadStateView<Map<String, dynamic>>(
+                    state: _consistencyReportState,
+                    onRetry: _generateConsistencyReport,
+                    emptyWidget: const Text('No consistency report generated yet. Click "Generate Report" to start.'),
+                    builder: (context, report) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildConsistencyMetrics(report),
+                        const SizedBox(height: 16),
+                        _buildConsistencyViolations(report),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -770,12 +890,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (_detectableAnomalies.isNotEmpty) ...[
-                    Text('${_detectableAnomalies.length} anomalies detected'),
-                    const SizedBox(height: 16),
-                    ..._detectableAnomalies.map((anomaly) => _buildAnomalyCard(anomaly)).toList(),
-                  ] else
-                    const Text('No anomalies detected yet. Click "Detect Anomalies" to start scanning.'),
+                  LoadStateView<List<dynamic>>(
+                    state: _anomaliesState,
+                    onRetry: _detectAnomalies,
+                    emptyWidget: const Text('No anomalies detected yet. Click "Detect Anomalies" to start scanning.'),
+                    builder: (context, anomalies) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${anomalies.length} anomalies detected'),
+                        const SizedBox(height: 16),
+                        ...anomalies.map((anomaly) => _buildAnomalyCard(anomaly)).toList(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -900,9 +1027,14 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (_correctionStatistics != null) _buildCorrectionStatisticsCard(),
+          LoadStateView<Map<String, dynamic>>(
+            state: _correctionStatisticsState,
+            onRetry: _loadCorrectionStatistics,
+            emptyWidget: const SizedBox.shrink(),
+            builder: (context, stats) => _buildCorrectionStatisticsCard(stats),
+          ),
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -947,8 +1079,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     );
   }
 
-  Widget _buildCorrectionStatisticsCard() {
-    final stats = _correctionStatistics!;
+  Widget _buildCorrectionStatisticsCard(Map<String, dynamic> stats) {
     final totalErrors = stats['total_errors_identified'] ?? 0;
     final totalWorkflows = stats['total_workflows_created'] ?? 0;
     final approvalRate = (stats['approval_rate_percentage'] ?? 0.0).toDouble();
@@ -1090,15 +1221,22 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (_integrityJobs.isNotEmpty) ...[
-                    const Text(
-                      'Recent Integrity Jobs',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  LoadStateView<List<dynamic>>(
+                    state: _jobsState,
+                    onRetry: _refreshJobsState,
+                    emptyWidget: const Text('No integrity monitoring jobs have been run yet.'),
+                    builder: (context, jobs) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Recent Integrity Jobs',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        ...jobs.map((job) => _buildIntegrityJobCard(job)).toList(),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    ..._integrityJobs.map((job) => _buildIntegrityJobCard(job)).toList(),
-                  ] else
-                    const Text('No integrity monitoring jobs have been run yet.'),
+                  ),
                 ],
               ),
             ),
@@ -1620,7 +1758,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _loadDashboardData();
+              _refreshLoadedTabs();
             },
             child: const Text('Apply'),
           ),
@@ -1716,24 +1854,29 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _pollJobStatus(String jobId) {
-    Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _jobPollTimers[jobId]?.cancel();
+    _jobPollTimers[jobId] = Timer.periodic(const Duration(seconds: 5), (timer) async {
       try {
         final status = await _consistencyService.getIntegrityJobStatus(jobId);
-        
-        setState(() {
-          final jobIndex = _integrityJobs.indexWhere((job) => job['job_id'] == jobId);
-          if (jobIndex >= 0) {
-            _integrityJobs[jobIndex] = status;
-          }
-        });
-        
+
+        if (mounted) {
+          setState(() {
+            final jobIndex = _integrityJobs.indexWhere((job) => job['job_id'] == jobId);
+            if (jobIndex >= 0) {
+              _integrityJobs[jobIndex] = status;
+            }
+          });
+        }
+
         _persistenceService.updateIntegrityJob(jobId, status);
-        
+
         if (status['status'] == 'COMPLETED' || status['status'] == 'FAILED') {
           timer.cancel();
+          _jobPollTimers.remove(jobId);
         }
       } catch (e) {
         timer.cancel();
+        _jobPollTimers.remove(jobId);
       }
     });
   }
@@ -1777,9 +1920,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             ),
           ),
           const SizedBox(height: 16),
-          
-          if (_correctionWorkflows.isEmpty)
-            Card(
+
+          LoadStateView<List<Map<String, dynamic>>>(
+            state: _workflowDataState,
+            onRetry: _loadWorkflowData,
+            emptyWidget: Card(
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
@@ -1806,14 +1951,16 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   ),
                 ),
               ),
-            )
-          else
-            ..._correctionWorkflows.map((workflow) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _buildCorrectionWorkflowCard(workflow),
-              );
-            }).toList(),
+            ),
+            builder: (context, workflows) => Column(
+              children: workflows.map((workflow) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildCorrectionWorkflowCard(workflow),
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
     );
@@ -1841,9 +1988,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           
           _correctionWorkflows.add(mappedWorkflow);
         }
+
+        _workflowDataState = _correctionWorkflows.isEmpty
+            ? const LoadState.empty()
+            : LoadState.success(_correctionWorkflows);
       });
-      
-      
+
       context.showSuccess('Loaded ${_correctionWorkflows.length} workflows');
     } catch (e) {
       context.showError('Error: $e');
@@ -1982,37 +2132,42 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   }
 
   void _pollWorkflowStatus(String workflowId) {
-    Timer.periodic(const Duration(seconds: 3), (timer) async {
+    _workflowPollTimers[workflowId]?.cancel();
+    _workflowPollTimers[workflowId] = Timer.periodic(const Duration(seconds: 3), (timer) async {
       try {
         final status = await _correctionService.getCorrectionWorkflowStatus(workflowId);
-        
-        setState(() {
-          final workflowIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
-          if (workflowIndex >= 0) {
-            _correctionWorkflows[workflowIndex] = {
-              ..._correctionWorkflows[workflowIndex],
-              'status': status['workflow_status'],
-              'current_step': status['current_step'],
-              'total_steps': status['total_steps'],
-              'last_updated': status['last_updated'],
-            };
-          }
-        });
-        
+
+        if (mounted) {
+          setState(() {
+            final workflowIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
+            if (workflowIndex >= 0) {
+              _correctionWorkflows[workflowIndex] = {
+                ..._correctionWorkflows[workflowIndex],
+                'status': status['workflow_status'],
+                'current_step': status['current_step'],
+                'total_steps': status['total_steps'],
+                'last_updated': status['last_updated'],
+              };
+            }
+          });
+        }
+
         final workflowIndex = _correctionWorkflows.indexWhere((w) => w['workflow_id'] == workflowId);
         if (workflowIndex >= 0) {
           _persistenceService.updateCorrectionWorkflow(workflowId, _correctionWorkflows[workflowIndex]);
         }
-        
+
         if (status['workflow_status'] == 'COMPLETED' || status['workflow_status'] == 'FAILED') {
           timer.cancel();
-          
+          _workflowPollTimers.remove(workflowId);
+
           if (status['workflow_status'] == 'COMPLETED') {
             _identifyCorrectableErrors();
           }
         }
       } catch (e) {
         timer.cancel();
+        _workflowPollTimers.remove(workflowId);
       }
     });
   }

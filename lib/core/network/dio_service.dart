@@ -9,6 +9,13 @@ class DioService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final AppConfig _appConfig;
 
+  /// Invoked (debounced) when a non-public request returns 401.
+  /// Wired from DI to [AuthCubit.sessionExpired] without a constructor cycle.
+  void Function()? onUnauthorized;
+
+  DateTime? _lastUnauthorizedNotifyAt;
+  static const Duration _unauthorizedDebounce = Duration(seconds: 2);
+
   static final DioService _instance = DioService._internal();
   factory DioService() => _instance;
 
@@ -160,6 +167,33 @@ class DioService {
     return _publicAuthPathSuffixes.any(path.endsWith);
   }
 
+  /// Clears the token and notifies [onUnauthorized] (debounced) for non-public 401s.
+  Future<void> handleUnauthorized(RequestOptions options) async {
+    if (_isPublicAuthRequest(options)) return;
+    try {
+      await removeAuthToken();
+    } catch (_) {
+      // Still notify so the UI can leave a stranded authenticated state.
+    }
+    notifyUnauthorizedDebounced();
+  }
+
+  /// Debounced fire of [onUnauthorized]. Safe to call repeatedly for parallel 401s.
+  void notifyUnauthorizedDebounced() {
+    final now = DateTime.now();
+    if (_lastUnauthorizedNotifyAt != null &&
+        now.difference(_lastUnauthorizedNotifyAt!) < _unauthorizedDebounce) {
+      return;
+    }
+    _lastUnauthorizedNotifyAt = now;
+    onUnauthorized?.call();
+  }
+
+  @visibleForTesting
+  void resetUnauthorizedDebounceForTest() {
+    _lastUnauthorizedNotifyAt = null;
+  }
+
   void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -181,23 +215,42 @@ class DioService {
         },
         onResponse: (response, handler) async {
           _logResponse(response);
-          if (response.statusCode == 401 &&
-              !_isPublicAuthRequest(response.requestOptions)) {
-            await removeAuthToken();
+          if (response.statusCode == 401) {
+            await handleUnauthorized(response.requestOptions);
           }
 
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
           _logError(e);
-          if (e.response?.statusCode == 401 &&
-              !_isPublicAuthRequest(e.requestOptions)) {
-            await removeAuthToken();
+          if (e.response?.statusCode == 401) {
+            await handleUnauthorized(e.requestOptions);
           }
 
           return handler.next(e);
         },
       ),
+    );
+  }
+
+  /// Dio web rejects [sendTimeout] on requests without a body (e.g. GET).
+  /// Only apply it for methods that send a body.
+  Duration? _sendTimeoutForBody(dynamic data) {
+    if (data == null) return null;
+    return Duration(milliseconds: AppConfig.sendTimeout);
+  }
+
+  Options _requestOptions({
+    Map<String, dynamic>? headers,
+    ResponseType? responseType,
+    bool acceptAllStatusCodes = false,
+    dynamic data,
+  }) {
+    return Options(
+      headers: headers,
+      responseType: responseType,
+      validateStatus: acceptAllStatusCodes ? (_) => true : null,
+      sendTimeout: _sendTimeoutForBody(data),
     );
   }
 
@@ -212,10 +265,10 @@ class DioService {
       final response = await _dio.get(
         path,
         queryParameters: queryParameters,
-        options: Options(
+        options: _requestOptions(
           headers: headers,
           responseType: responseType,
-          validateStatus: acceptAllStatusCodes ? (_) => true : null,
+          acceptAllStatusCodes: acceptAllStatusCodes,
         ),
       );
       return response;
@@ -237,10 +290,11 @@ class DioService {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(
+        options: _requestOptions(
           headers: headers,
           responseType: responseType,
-          validateStatus: acceptAllStatusCodes ? (_) => true : null,
+          acceptAllStatusCodes: acceptAllStatusCodes,
+          data: data,
         ),
       );
       return response;
@@ -262,10 +316,11 @@ class DioService {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(
+        options: _requestOptions(
           headers: headers,
           responseType: responseType,
-          validateStatus: acceptAllStatusCodes ? (_) => true : null,
+          acceptAllStatusCodes: acceptAllStatusCodes,
+          data: data,
         ),
       );
       return response;
@@ -287,10 +342,11 @@ class DioService {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(
+        options: _requestOptions(
           headers: headers,
           responseType: responseType,
-          validateStatus: acceptAllStatusCodes ? (_) => true : null,
+          acceptAllStatusCodes: acceptAllStatusCodes,
+          data: data,
         ),
       );
       return response;
@@ -312,10 +368,11 @@ class DioService {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(
+        options: _requestOptions(
           headers: headers,
           responseType: responseType,
-          validateStatus: acceptAllStatusCodes ? (_) => true : null,
+          acceptAllStatusCodes: acceptAllStatusCodes,
+          data: data,
         ),
       );
       return response;

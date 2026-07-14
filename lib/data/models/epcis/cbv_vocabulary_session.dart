@@ -110,6 +110,13 @@ class CbvVocabularySession {
 
   }
 
+  Map<String, dynamic> toJson() => {
+        'bizSteps': bizSteps.map((e) => e.toJson()).toList(),
+        'dispositions': dispositions.map((e) => e.toJson()).toList(),
+        'bizStepValidDispositions': bizStepValidDispositions,
+        'actionBizStepCodes': actionBizStepCodes,
+      };
+
 }
 
 

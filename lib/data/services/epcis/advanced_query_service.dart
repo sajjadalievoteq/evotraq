@@ -331,6 +331,7 @@ class AdvancedQueryService {
   }) async {
     try {
       final queryParams = <String, String>{
+        'epc': epc,
         'direction': direction,
         'maxDepth': maxDepth.toString(),
       };
@@ -343,7 +344,7 @@ class AdvancedQueryService {
       }
 
       final response = await _dioService.get(
-        '/events/query/traversal/supply-chain/$epc',
+        '/events/query/traversal/supply-chain',
         queryParameters: queryParams,
       );
 
@@ -366,6 +367,7 @@ class AdvancedQueryService {
   }) async {
     try {
       final queryParams = <String, String>{
+        'epc': epc,
         'includeTransformations': includeTransformations.toString(),
         'includeAggregations': includeAggregations.toString(),
       };
@@ -378,7 +380,7 @@ class AdvancedQueryService {
       }
 
       final response = await _dioService.get(
-        '/events/query/traversal/history/$epc',
+        '/events/query/traversal/history',
         queryParameters: queryParams,
       );
 
@@ -399,6 +401,7 @@ class AdvancedQueryService {
   }) async {
     try {
       final queryParams = <String, String>{
+        'parentEpc': parentEpc,
         'includeHistory': includeHistory.toString(),
       };
       
@@ -407,7 +410,7 @@ class AdvancedQueryService {
       }
 
       final response = await _dioService.get(
-        '/events/query/traversal/hierarchy/$parentEpc',
+        '/events/query/traversal/hierarchy',
         queryParameters: queryParams,
       );
 

@@ -144,7 +144,8 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/product/$inputEPC',
+      '$_baseUrl/track',
+      queryParameters: {'epc': inputEPC},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -167,7 +168,8 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/product/$outputEPC',
+      '$_baseUrl/track',
+      queryParameters: {'epc': outputEPC},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -190,7 +192,8 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/batch/$inputEPCClass',
+      '$_baseUrl/batch',
+      queryParameters: {'batchLot': inputEPCClass},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -213,7 +216,8 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/batch/$outputEPCClass',
+      '$_baseUrl/batch',
+      queryParameters: {'batchLot': outputEPCClass},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -288,7 +292,8 @@ class TransformationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/product/$outputEPC',
+      '$_baseUrl/track',
+      queryParameters: {'epc': outputEPC},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -402,7 +407,8 @@ class TransformationEventService {
   Future<List<TransformationEvent>> findTransformationsByEPC(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/track/$epc',
+      '$_baseUrl/track',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

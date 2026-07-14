@@ -11,13 +11,12 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart' as _i6;
 import 'package:traqtrace_app/core/models/system_settings_model.dart' as _i7;
 import 'package:traqtrace_app/core/theme/theme_cubit.dart' as _i5;
+import 'package:traqtrace_app/data/models/auth/auth_models.dart' as _i12;
+import 'package:traqtrace_app/data/models/epcis/validation_rule.dart' as _i8;
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart'
     as _i3;
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart' as _i11;
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart' as _i4;
-import 'package:traqtrace_app/data/models/auth/auth_models.dart' as _i12;
-import 'package:traqtrace_app/data/models/epcis/validation_rule.dart'
-    as _i8;
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart'
     as _i2;
 
@@ -467,6 +466,15 @@ class MockAuthCubit extends _i1.Mock implements _i11.AuthCubit {
   _i9.Future<void> verifyEmail(String? token) =>
       (super.noSuchMethod(
             Invocation.method(#verifyEmail, [token]),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> resendVerificationEmail(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resendVerificationEmail, [email]),
             returnValue: _i9.Future<void>.value(),
             returnValueForMissingStub: _i9.Future<void>.value(),
           )

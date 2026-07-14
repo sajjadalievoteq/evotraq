@@ -229,41 +229,52 @@ class CancelOperationExtras extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: originalReferenceController,
-          decoration: InputDecoration(
-            labelText: isReceiving
-                ? 'Original Receiving Reference (GINC)'
-                : 'Original Shipping Reference (GINC)',
-            hintText: isReceiving
-                ? 'e.g. GINC-2026-0001 or urn:epc:id:ginc:…'
-                : 'e.g. GINC-2026-0001 or urn:epc:id:ginc:0614141.xyz…',
-            helperText: isReceiving
-                ? 'Required for DSCSA — enter the GINC from the original receiving event.'
-                : 'Required for DSCSA — enter the GINC from the original shipment.',
-            helperMaxLines: 2,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: outline),
-            ),
-            prefixIcon: const TraqIcon(AppAssets.iconShipment),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: cancelReasonController,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: 'Cancellation Reason *',
-            hintText: isReceiving
-                ? 'e.g. Duplicate scan — receiving event recorded in error'
-                : 'e.g. Shipment staged but never dispatched — cancelled before pickup',
-            helperText: 'Required — stored in EPCIS ILMD for DSCSA/FMD audit.',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: outline),
-            ),
-            prefixIcon: const TraqIcon(AppAssets.iconDocument),
+        Gs1GroupCard(
+          title: 'Cancellation Details',
+          showRequiredStar: true,
+          outlineColor: outline,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: originalReferenceController,
+                decoration: InputDecoration(
+                  labelText: isReceiving
+                      ? 'Original Receiving Reference (GINC) *'
+                      : 'Original Shipping Reference (GINC) *',
+                  hintText: isReceiving
+                      ? 'e.g. GINC-2026-0001 or urn:epc:id:ginc:…'
+                      : 'e.g. GINC-2026-0001 or urn:epc:id:ginc:0614141.xyz…',
+                  helperText: isReceiving
+                      ? 'Required for DSCSA — enter the GINC from the original receiving event.'
+                      : 'Required for DSCSA — enter the GINC from the original shipment.',
+                  helperMaxLines: 2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: outline),
+                  ),
+                  prefixIcon: const TraqIcon(AppAssets.iconShipment),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: cancelReasonController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Cancellation Reason *',
+                  hintText: isReceiving
+                      ? 'e.g. Duplicate scan — receiving event recorded in error'
+                      : 'e.g. Shipment staged but never dispatched — cancelled before pickup',
+                  helperText:
+                      'Required — stored in EPCIS ILMD for DSCSA/FMD audit.',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: outline),
+                  ),
+                  prefixIcon: const TraqIcon(AppAssets.iconDocument),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 32),

@@ -53,10 +53,11 @@ class OperationItemScanStep extends StatelessWidget {
 
     final scanInput = Gs1GroupCard(
       title: groupCardTitle,
+      showRequiredStar: true,
       outlineColor: outline,
       margin: EdgeInsets.zero,
       child: EPCInputWidget(
-        label: 'Item Barcode',
+        label: 'Item Barcode *',
         placeholder: 'Enter SGTIN or SSCC barcode',
         allowedTypes: allowedTypes ??
             const [EPCType.sgtin, EPCType.sscc],

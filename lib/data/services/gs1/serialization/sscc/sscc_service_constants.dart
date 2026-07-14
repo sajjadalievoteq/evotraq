@@ -18,9 +18,9 @@ abstract final class SsccServiceConstants {
 
   static String pathById(String id) => '$pathBase/$id';
 
-  static String pathByCode(String code) => '$pathBase/code/$code';
+  static const String pathByCode = '$pathBase/code';
 
-  static String pathHierarchy(String code) => '$pathBase/$code/hierarchy';
+  static const String pathHierarchy = '$pathBase/hierarchy';
 
   static String pathStatus(String id) => '$pathBase/$id/status';
 
@@ -31,8 +31,10 @@ abstract final class SsccServiceConstants {
   static String pathDisaggregate(int linkId) =>
       '$pathBase/aggregation/$linkId/disaggregate';
 
-  static String pathAggregationByCode(String code) =>
-      '$pathBase/code/$code/aggregation';
+  static const String pathAggregationByCode = '$pathBase/code/aggregation';
+
+  static const String pathPharmaExtByCode =
+      '$pathBase/code/pharmaceutical-extension';
 
   static String pathContainerType(String type) => '$pathBase/container-type/$type';
 

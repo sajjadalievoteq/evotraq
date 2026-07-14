@@ -69,9 +69,9 @@ class ReferenceDataValidationService {
 
   Future<EPCValidationResult> validateSSCC(String ssccCode) async {
     try {
-      final encoded = Uri.encodeComponent(ssccCode);
       final response = await _dioService.get(
-        '$_baseUrl/sscc/$encoded',
+        '$_baseUrl/sscc',
+        queryParameters: {'ssccCode': ssccCode},
         headers: await _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -96,11 +96,9 @@ class ReferenceDataValidationService {
 
   Future<EPCValidationResult> validateSGTIN(String sgtinCode) async {
     try {
-      // Path-segment encode so Digital Links / serials with reserved chars
-      // never break the URL (e.g. https://… → /sgtin/https%3A%2F%2F…).
-      final encoded = Uri.encodeComponent(sgtinCode);
       final response = await _dioService.get(
-        '$_baseUrl/sgtin/$encoded',
+        '$_baseUrl/sgtin',
+        queryParameters: {'sgtinCode': sgtinCode},
         headers: await _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -126,7 +124,8 @@ class ReferenceDataValidationService {
   Future<EPCValidationResult> validateGTIN(String gtinCode) async {
     try {
       final response = await _dioService.get(
-        '$_baseUrl/gtin/$gtinCode',
+        '$_baseUrl/gtin',
+        queryParameters: {'gtinCode': gtinCode},
         headers: await _headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,

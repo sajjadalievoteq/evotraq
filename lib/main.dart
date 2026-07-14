@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,6 +15,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
@@ -74,6 +77,11 @@ void main() async {
       AppRouter(authCubit: getIt<AuthCubit>()),
     );
     debugPrint('Dependencies initialized.');
+
+    // Non-blocking: hydrates the CBV vocabulary cache and kicks off a
+    // background fetch/retry loop for the app's lifetime. Never awaited so
+    // it can't delay first paint or the splash-to-home navigation.
+    unawaited(getIt<CbvVocabularyService>().start());
 
     debugPrint('Starting TraqTraceApp...');
     runApp(const TraqTraceApp());

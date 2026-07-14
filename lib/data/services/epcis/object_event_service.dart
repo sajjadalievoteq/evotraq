@@ -429,7 +429,8 @@ class ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsByEPC(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/$epc',
+      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
+      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -469,7 +470,8 @@ class ObjectEventService {
   Future<List<ObjectEvent>> findObjectEventsByEPCClass(String epcClass) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpcClass}/$epcClass',
+      '$_baseUrl/${ObjectEventApiConstants.segmentEpcClass}',
+      queryParameters: {ObjectEventApiConstants.queryEpcClass: epcClass},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -586,7 +588,10 @@ class ObjectEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/$locationGLN',
+      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}',
+      queryParameters: {
+        ObjectEventApiConstants.queryLocationGln: locationGLN,
+      },
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -639,8 +644,9 @@ class ObjectEventService {
     final startTimeStr = startTime.toUtc().toIso8601String();
     final endTimeStr = endTime.toUtc().toIso8601String();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/$locationGLN/${ObjectEventApiConstants.segmentTimeRange}',
+      '$_baseUrl/${ObjectEventApiConstants.segmentLocation}/${ObjectEventApiConstants.segmentTimeRange}',
       queryParameters: {
+        ObjectEventApiConstants.queryLocationGln: locationGLN,
         ObjectEventApiConstants.queryStartTime: startTimeStr,
         ObjectEventApiConstants.queryEndTime: endTimeStr,
       },
@@ -716,7 +722,8 @@ class ObjectEventService {
   Future<List<ObjectEvent>> findEPCHistory(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/$epc',
+      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}',
+      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -918,7 +925,8 @@ class ObjectEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}/$epc',
+      '$_baseUrl/${ObjectEventApiConstants.segmentBusinessStep}/$businessStep/${ObjectEventApiConstants.segmentEpc}',
+      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -1004,7 +1012,8 @@ class ObjectEventService {
   Future<List<ObjectEvent>> getEpcHistory(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/$epc/${ObjectEventApiConstants.segmentHistory}',
+      '$_baseUrl/${ObjectEventApiConstants.segmentEpc}/${ObjectEventApiConstants.segmentHistory}',
+      queryParameters: {ObjectEventApiConstants.queryEpc: epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

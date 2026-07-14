@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
+import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
@@ -50,16 +52,14 @@ class CommissioningOperationService {
         String errorMsg;
         try {
           final errorData = decodeApiResponseMap(response.data);
-          errorMsg = errorData['message'] as String? ??
-              errorData['error'] as String? ??
+          errorMsg = BackendErrorParser.parseMap(errorData).displayMessage ??
               'Commissioning failed (HTTP ${response.statusCode})';
         } catch (_) {
           errorMsg = 'Commissioning failed (HTTP ${response.statusCode})';
         }
-        throw ApiException(
-          message: errorMsg,
-          statusCode: response.statusCode,
-          responseBody: response.data is String ? response.data as String : null,
+        throw ApiExceptionMapper.fromHttpResponse(
+          response,
+          fallbackMessage: errorMsg,
         );
       }
     } on ApiException {
@@ -115,17 +115,15 @@ class CommissioningOperationService {
         String errorMsg;
         try {
           final errorData = decodeApiResponseMap(response.data);
-          errorMsg = errorData['message'] as String? ??
-              errorData['error'] as String? ??
+          errorMsg = BackendErrorParser.parseMap(errorData).displayMessage ??
               'SSCC commissioning failed (HTTP ${response.statusCode})';
         } catch (_) {
           errorMsg =
               'SSCC commissioning failed (HTTP ${response.statusCode})';
         }
-        throw ApiException(
-          message: errorMsg,
-          statusCode: response.statusCode,
-          responseBody: response.data is String ? response.data as String : null,
+        throw ApiExceptionMapper.fromHttpResponse(
+          response,
+          fallbackMessage: errorMsg,
         );
       }
     } on ApiException {

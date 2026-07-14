@@ -15,6 +15,8 @@ class HomeState extends Equatable {
     this.errorMessage,
     this.throughputHours = 24,
     this.throughputLoading = false,
+    this.healthLoading = false,
+    this.refreshFailed = false,
   });
 
   final HomeLoadStatus status;
@@ -25,11 +27,16 @@ class HomeState extends Equatable {
   final String? errorMessage;
   final int throughputHours;
   final bool throughputLoading;
+  final bool healthLoading;
+
+  /// True when a background revalidation failed and the data currently shown is
+  /// a retained (possibly stale) cached snapshot. Lets the UI surface a
+  /// "couldn't refresh" hint instead of presenting stale numbers as live.
+  final bool refreshFailed;
 
   bool get isLoading => status == HomeLoadStatus.loading;
   bool get hasError => status == HomeLoadStatus.failure;
-  bool get hasPayload =>
-      stats != null && recentEvents != null && healthStatus != null;
+  bool get hasPayload => stats != null && recentEvents != null;
 
   HomeState copyWith({
     HomeLoadStatus? status,
@@ -41,6 +48,8 @@ class HomeState extends Equatable {
     bool clearError = false,
     int? throughputHours,
     bool? throughputLoading,
+    bool? healthLoading,
+    bool? refreshFailed,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -51,6 +60,8 @@ class HomeState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       throughputHours: throughputHours ?? this.throughputHours,
       throughputLoading: throughputLoading ?? this.throughputLoading,
+      healthLoading: healthLoading ?? this.healthLoading,
+      refreshFailed: refreshFailed ?? this.refreshFailed,
     );
   }
 
@@ -64,5 +75,7 @@ class HomeState extends Equatable {
         errorMessage,
         throughputHours,
         throughputLoading,
+        healthLoading,
+        refreshFailed,
       ];
 }

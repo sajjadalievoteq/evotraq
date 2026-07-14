@@ -56,7 +56,10 @@ class ReceivingReferenceDetailsStep extends StatelessWidget {
         operationLabel: 'Receiving',
         referenceSectionTitle: 'Receiving Reference',
         eventTimeLabel: 'Received On',
-        documentSectionTitle: 'Shipment Details (Optional)',
+        documentSectionTitle: 'Business Transactions',
+        documentsRequired: true,
+        documentsHelperText:
+            'DSCSA T3 requires at least one of RECADV, Invoice, or Despatch Advice.',
         sourceGln: sourceGln,
         sourceGlnLabel: 'Ship From Location',
         sourceGlnHint: 'Search and select source GLN',

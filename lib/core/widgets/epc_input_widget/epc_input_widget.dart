@@ -225,12 +225,8 @@ class _EPCInputWidgetState extends State<EPCInputWidget> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Chip(
-          avatar: TraqIcon(AppAssets.iconCheck,
-            size: 18,
-            color: colorScheme.primary,
-          ),
-          label: Text('${result.typeLabel} detected'),
-          backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.35),
+          label: Text('${result.typeLabel} detected',style: TextStyle(color: Colors.white),),
+          backgroundColor: colorScheme.primaryContainer,
           side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
         ),
       ),

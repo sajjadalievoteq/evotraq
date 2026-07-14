@@ -46,6 +46,23 @@ class RecentEvent {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'eventType': eventType,
+      'action': action,
+      'bizStep': bizStep,
+      'eventTime': eventTime.toIso8601String(),
+      'epcList': epcList,
+      'inputEPCList': List.filled(inputEpcCount, ''),
+      'parentID': parentId,
+      'ilmd': {
+        if (gtinCode != null) 'traqtrace:gtin': gtinCode,
+        if (batchLotNumber != null) 'cbvmda:lotNumber': batchLotNumber,
+      },
+    };
+  }
+
   static List<String> _parseEpcList(Map<String, dynamic> json) {
     for (final key in const ['epcList', 'childEPCs', 'outputEPCList']) {
       if (json[key] is List && (json[key] as List).isNotEmpty) {

@@ -98,6 +98,7 @@ class UpdateStatusReferenceDetailsStep extends StatelessWidget {
           const SizedBox(height: 16),
           Gs1GroupCard(
             title: 'Status & Reason',
+            showRequiredStar: true,
             outlineColor: outline,
             child: Column(
               children: [

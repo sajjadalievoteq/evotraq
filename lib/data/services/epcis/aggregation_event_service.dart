@@ -187,7 +187,8 @@ class AggregationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/parent/$parentEPC',
+      '$_baseUrl/parent',
+      queryParameters: {'parentEPC': parentEPC},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -208,7 +209,8 @@ class AggregationEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/child/$childEPC',
+      '$_baseUrl/child',
+      queryParameters: {'childEPC': childEPC},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -287,7 +289,8 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/child/$childEPC/container',
+        '$_baseUrl/container',
+        queryParameters: {'childEPC': childEPC},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -323,7 +326,8 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/parent/$parentEPC',
+        '$_baseUrl/parent',
+        queryParameters: {'parentEPC': parentEPC},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -590,7 +594,8 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/parent/$parentEPC/contents',
+        '$_baseUrl/contents',
+        queryParameters: {'parentEPC': parentEPC},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -612,7 +617,8 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/parent/$epc/contents',
+        '$_baseUrl/contents',
+        queryParameters: {'parentEPC': epc},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -623,7 +629,8 @@ class AggregationEventService {
       } else if (response.statusCode == 404) {
         try {
           final containerResponse = await _dioService.get(
-            '$_baseUrl/child/$epc/container',
+            '$_baseUrl/container',
+            queryParameters: {'childEPC': epc},
             headers: headers,
             responseType: ResponseType.plain,
             acceptAllStatusCodes: true,

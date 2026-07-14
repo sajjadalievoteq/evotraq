@@ -26,7 +26,8 @@ class SSCCPharmaceuticalExtensionService {
     SSCCPharmaceuticalExtension extension,
   ) async {
     final response = await _dioService.post(
-      '$_specCrudBase/code/$ssccCode/pharmaceutical-extension',
+      '$_specCrudBase/code/pharmaceutical-extension',
+      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
       headers: _headers,
       data: jsonEncode(extension.toJson()),
       responseType: ResponseType.plain,
@@ -84,7 +85,8 @@ class SSCCPharmaceuticalExtensionService {
 
   Future<SSCCPharmaceuticalExtension?> getBySsccCode(String ssccCode) async {
     final response = await _dioService.get(
-      '$_specCrudBase/code/$ssccCode/pharmaceutical-extension',
+      '$_specCrudBase/code/pharmaceutical-extension',
+      queryParameters: {SsccServiceConstants.qSsccCode: ssccCode},
       headers: _headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

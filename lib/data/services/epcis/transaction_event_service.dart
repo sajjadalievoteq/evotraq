@@ -154,7 +154,8 @@ class TransactionEventService {
   Future<List<TransactionEvent>> findTransactionEventsByEPC(String epc) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/epc/$epc',
+      '$_baseUrl/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -175,7 +176,8 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/epcclass/$epcClass',
+      '$_baseUrl/epcclass',
+      queryParameters: {'epcClass': epcClass},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -241,7 +243,8 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/business-step/$businessStep/epc/$epc',
+      '$_baseUrl/business-step/$businessStep/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -263,7 +266,8 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/disposition/$disposition/epc/$epc',
+      '$_baseUrl/disposition/$disposition/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -285,11 +289,9 @@ class TransactionEventService {
     DateTime endTime,
   ) async {
     final headers = await _getHeaders();
-    final startTimeStr = startTime.toIso8601String();
-    final endTimeStr = endTime.toIso8601String();
     final response = await _dioService.get(
-      '$_baseUrl/time-range',
-      queryParameters: {'startTime': startTimeStr, 'endTime': endTimeStr},
+      '$_baseUrl/location',
+      queryParameters: {'locationGLN': locationGLN},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -304,8 +306,8 @@ class TransactionEventService {
       return allEvents
           .where(
             (event) =>
-                event.businessLocation != null &&
-                event.businessLocation!.glnCode == locationGLN,
+                !event.eventTime.isBefore(startTime) &&
+                !event.eventTime.isAfter(endTime),
           )
           .toList();
     } else {
@@ -320,7 +322,8 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/active/$epc',
+      '$_baseUrl/active/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
@@ -341,7 +344,8 @@ class TransactionEventService {
   ) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(
-      '$_baseUrl/history/$epc',
+      '$_baseUrl/history/epc',
+      queryParameters: {'epc': epc},
       headers: headers,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,

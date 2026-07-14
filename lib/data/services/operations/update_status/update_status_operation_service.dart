@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
@@ -49,31 +50,29 @@ class UpdateStatusOperationService {
           statusCode == 422 ||
           statusCode == 400) {
         if (body == null || body.trim().isEmpty) {
-          throw _apiExceptionFromResponse(
+          throw ApiExceptionMapper.fromHttpResponse(
             response,
             fallbackMessage: 'Failed to create decommissioning operation',
           );
         }
         final responseData = jsonDecode(body) as Map<String, dynamic>;
         if (OperationApiErrorMessage.isStructuredErrorBody(responseData)) {
-          throw ApiException(
-            statusCode: statusCode,
-            message: OperationApiErrorMessage.fromJsonMap(responseData) ??
-                'Failed to create decommissioning operation',
-            responseBody: body,
+          throw ApiExceptionMapper.fromHttpResponse(
+            response,
+            fallbackMessage: 'Failed to create decommissioning operation',
           );
         }
         return UpdateStatusResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to create decommissioning operation',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while creating decommissioning operation',
@@ -106,14 +105,14 @@ class UpdateStatusOperationService {
         return UpdateStatusResponse.fromJson(responseData);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get decommissioning operation',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading decommissioning operation',
@@ -149,14 +148,14 @@ class UpdateStatusOperationService {
             .toList();
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get decommissioning operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading decommissioning operations',
@@ -189,14 +188,14 @@ class UpdateStatusOperationService {
         return OperationPage.fromJson(responseData, UpdateStatusResponse.fromJson);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to get decommissioning operations',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, stackTrace) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: stackTrace,
         fallbackMessage: 'Network error while loading decommissioning operations',
@@ -207,54 +206,6 @@ class UpdateStatusOperationService {
         message: 'Unexpected error loading decommissioning operations',
         originalException: e,
       );
-    }
-  }
-
-  ApiException _apiExceptionFromResponse(
-    Response<dynamic> response, {
-    required String fallbackMessage,
-  }) {
-    final body = response.data?.toString();
-    final apiException = ApiException(
-      statusCode: response.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-    );
-    _logApiException(apiException);
-    return apiException;
-  }
-
-  ApiException _apiExceptionFromDio(
-    DioException exception, {
-    required String fallbackMessage,
-    StackTrace? stackTrace,
-  }) {
-    final body = exception.response?.data?.toString();
-    final apiException = ApiException(
-      statusCode: exception.response?.statusCode,
-      message: fallbackMessage,
-      responseBody: body,
-      originalException: exception,
-    );
-    _logApiException(apiException, stackTrace: stackTrace);
-    return apiException;
-  }
-
-  void _logApiException(
-    ApiException exception, {
-    StackTrace? stackTrace,
-  }) {
-    debugPrint(
-      '[UpdateStatusOperationService] ApiException '
-      'status=${exception.statusCode} message=${exception.message}',
-    );
-    if (exception.responseBody != null && exception.responseBody!.isNotEmpty) {
-      debugPrint(
-        '[UpdateStatusOperationService] responseBody: ${exception.responseBody}',
-      );
-    }
-    if (stackTrace != null) {
-      debugPrint('[UpdateStatusOperationService] $stackTrace');
     }
   }
 }

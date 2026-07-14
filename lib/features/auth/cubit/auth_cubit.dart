@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
@@ -9,10 +11,24 @@ import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart'
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
+  final Duration _authCheckTimeout;
+  final Duration _loginTimeout;
   AuthService get authService => _authService;
-  AuthCubit({required AuthService authService})
-    : _authService = authService,
-      super(const AuthState(status: AuthStatus.initial));
+
+  /// Startup profile check must finish within this window or become unauthenticated.
+  static const Duration authCheckTimeout = Duration(seconds: 10);
+
+  /// Login must fail fast so the button never spins forever.
+  static const Duration loginTimeout = Duration(seconds: 15);
+
+  AuthCubit({
+    required AuthService authService,
+    Duration? authCheckTimeout,
+    Duration? loginTimeout,
+  })  : _authService = authService,
+        _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
+        _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
+        super(const AuthState(status: AuthStatus.initial));
 
   bool _requiresEmailVerification(String? message) {
     final normalized = message?.trim().toLowerCase();
@@ -57,7 +73,9 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final user = await _authService.getCurrentUser();
+      final user = await _authService
+          .getCurrentUser()
+          .timeout(_authCheckTimeout);
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -68,15 +86,10 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       _preloadGlnPickerCatalog();
+    } on TimeoutException {
+      await _forceUnauthenticated();
     } catch (e) {
-      _clearSessionCaches();
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          error: null,
-          message: null,
-        ),
-      );
+      await _forceUnauthenticated();
     }
   }
 
@@ -85,8 +98,10 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final response = await _authService.login(request);
-      final user = await _authService.getCurrentUser();
+      final response =
+          await _authService.login(request).timeout(_loginTimeout);
+      final user =
+          await _authService.getCurrentUser().timeout(_loginTimeout);
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -98,6 +113,14 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       _preloadGlnPickerCatalog();
+    } on TimeoutException {
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Login timed out. Please check your connection and try again.',
+          message: null,
+        ),
+      );
     } catch (e) {
       final errorMessage = _resolveErrorMessage(e, 'Authentication failed');
       final fallbackEmail = request.username.contains('@')
@@ -143,18 +166,26 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    await _authService.logout();
+    try {
+      await _authService.logout();
+    } catch (_) {
+      // Local session clear must proceed even if token delete fails.
+    }
+    await _forceUnauthenticated();
+  }
+
+  /// Clears the session after 401 / expiry. Idempotent if already unauthenticated.
+  Future<void> sessionExpired() async {
+    if (state.status == AuthStatus.unauthenticated) return;
+    try {
+      await _authService.logout();
+    } catch (_) {}
+    await _forceUnauthenticated();
+  }
+
+  Future<void> _forceUnauthenticated() async {
     _clearSessionCaches();
-    emit(
-      state.copyWith(
-        status: AuthStatus.unauthenticated,
-        user: null,
-        token: null,
-        error: null,
-        message: null,
-        registeredEmail: null,
-      ),
-    );
+    emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 
   Future<void> getCurrentUser() async {
@@ -170,14 +201,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       _preloadGlnPickerCatalog();
     } catch (e) {
-      _clearSessionCaches();
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          error: null,
-          message: null,
-        ),
-      );
+      await _forceUnauthenticated();
     }
   }
 

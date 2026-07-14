@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +10,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
-import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import '../../../core/config/constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -48,22 +51,26 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    final authCheck = context.read<AuthCubit>().checkAuth();
+    final authCubit = context.read<AuthCubit>();
+    final authCheck = authCubit.checkAuth();
     final minDelay = Future.delayed(const Duration(seconds: 2));
 
     try {
-      await Future.wait([
-        authCheck,
-        context.read<CbvVocabularyCubit>().loadVocabulary(),
-        minDelay,
-      ]).timeout(const Duration(seconds: 10));
+      await Future.wait([authCheck, minDelay])
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
-      debugPrint('Auth check or vocabulary load took too long or failed: $e');
+      debugPrint('Auth check took too long or failed: $e');
     } finally {
+      // Guarantee a terminal auth state so the router never stays on splash.
+      final status = authCubit.state.status;
+      if (status == AuthStatus.initial || status == AuthStatus.loading) {
+        await authCubit.sessionExpired();
+      }
       if (mounted) {
         setState(() => _canNavigate = true);
-        final authState = context.read<AuthCubit>().state;
-        _checkAndNavigate(authState);
+        // CBV is off the critical path — never block routing/auth on vocabulary.
+        unawaited(getIt<CbvVocabularyService>().ensureLoaded());
+        _checkAndNavigate(authCubit.state);
       }
     }
   }

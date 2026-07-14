@@ -194,7 +194,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/admin/performance/connection-pool/recommendations',
+      '${_appConfig.apiBaseUrl}/api/performance/connection-pool/recommendations',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -208,6 +208,34 @@ class AdvancedPerformanceService {
     } else {
       throw Exception(
         'Failed to get connection pool recommendations: ${response.statusCode}',
+      );
+    }
+  }
+
+  /// Merged connection pool dashboard (status + leaks + health + recommendations)
+  /// in a single call, to replace the 4 separate calls the connection pool
+  /// monitoring dashboard used to make on open.
+  Future<Map<String, dynamic>> getConnectionPoolDashboard() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found');
+    }
+
+    final response = await _dioService.get(
+      '${_appConfig.apiBaseUrl}/api/performance/connection-pool/dashboard',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.data);
+    } else {
+      throw Exception(
+        'Failed to get connection pool dashboard: ${response.statusCode}',
       );
     }
   }
@@ -257,6 +285,34 @@ class AdvancedPerformanceService {
       return json.decode(response.data);
     } else {
       throw Exception('Failed to analyze contention: ${response.statusCode}');
+    }
+  }
+
+  /// Merged thread pool dashboard (metrics + contention analysis) in a single
+  /// call, to replace the 2 separate calls the thread pool management
+  /// dashboard used to make on open.
+  Future<Map<String, dynamic>> getThreadPoolDashboard() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found');
+    }
+
+    final response = await _dioService.get(
+      '${_appConfig.apiBaseUrl}/api/performance/thread-pool/dashboard',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.data);
+    } else {
+      throw Exception(
+        'Failed to get thread pool dashboard: ${response.statusCode}',
+      );
     }
   }
 
@@ -447,7 +503,7 @@ class AdvancedPerformanceService {
     }
 
     final response = await _dioService.get(
-      '${_appConfig.apiBaseUrl}/admin/performance/comprehensive/analysis',
+      '${_appConfig.apiBaseUrl}/api/performance/analysis/comprehensive',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

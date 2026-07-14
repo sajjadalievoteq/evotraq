@@ -8,6 +8,9 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
+import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
 class ConnectionPoolMonitoringDashboard extends StatefulWidget {
   const ConnectionPoolMonitoringDashboard({Key? key}) : super(key: key);
@@ -18,27 +21,43 @@ class ConnectionPoolMonitoringDashboard extends StatefulWidget {
 }
 
 class _ConnectionPoolMonitoringDashboardState
-    extends State<ConnectionPoolMonitoringDashboard> {
+    extends State<ConnectionPoolMonitoringDashboard>
+    with SingleTickerProviderStateMixin {
   late AdvancedPerformanceService _performanceService;
-  Map<String, dynamic>? _poolStatus;
-  Map<String, dynamic>? _leakDetection;
-  Map<String, dynamic>? _healthCheck;
-  List<dynamic>? _recommendations;
-  bool _isLoading = false;
-  String? _errorMessage;
+  late final TabController _tabController;
+
+  LoadState<Map<String, dynamic>> _poolStatusState = const LoadState.loading();
+  LoadState<Map<String, dynamic>> _leakDetectionState =
+      const LoadState.loading();
+  LoadState<Map<String, dynamic>> _healthCheckState =
+      const LoadState.loading();
+  LoadState<String> _recommendationsState = const LoadState.loading();
+
+  /// All four tabs render fields derived from the single merged
+  /// `getConnectionPoolDashboard()` response, so one fetch satisfies every
+  /// tab. Guards against re-fetching every time the user switches tabs.
+  bool _dataLoaded = false;
+
   Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _initializeService();
-    _loadAllData();
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _ensureTabLoaded(_tabController.index);
+      }
+    });
+    _ensureTabLoaded(_tabController.index);
     _startAutoRefresh();
   }
 
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -53,102 +72,70 @@ class _ConnectionPoolMonitoringDashboardState
 
   void _startAutoRefresh() {
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      if (mounted) {
-        _loadPoolStatus();
+      if (mounted && _dataLoaded) {
+        _loadAllData();
       }
     });
+  }
+
+  void _ensureTabLoaded(int index) {
+    if (_dataLoaded) return;
+    _dataLoaded = true;
+    _loadAllData();
+  }
+
+  /// Reloads all previously-loaded data by re-triggering the one merged
+  /// fetch. Used by both the refresh button and per-tab retry actions.
+  void _refreshData() {
+    _dataLoaded = true;
+    _loadAllData();
   }
 
   Future<void> _loadAllData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await Future.wait([
-        _loadPoolStatus(),
-        _loadLeakDetection(),
-        _loadHealthCheck(),
-        _loadRecommendations(),
-      ]);
-    } catch (e) {
+    if (mounted) {
       setState(() {
-        _errorMessage = 'Failed to load connection pool data: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
+        _poolStatusState = const LoadState.loading();
+        _leakDetectionState = const LoadState.loading();
+        _healthCheckState = const LoadState.loading();
+        _recommendationsState = const LoadState.loading();
       });
     }
-  }
 
-  Future<void> _loadPoolStatus() async {
     try {
-      final status = await _performanceService.getConnectionPoolStatus();
-      if (mounted) {
-        setState(() {
-          _poolStatus = status;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to load pool status: $e';
-        });
-      }
-    }
-  }
+      final result = await _performanceService.getConnectionPoolDashboard();
 
-  Future<void> _loadLeakDetection() async {
-    try {
-      final leaks = await _performanceService.detectConnectionLeaks();
-      if (mounted) {
-        setState(() {
-          _leakDetection = leaks;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to detect connection leaks: $e';
-        });
-      }
-    }
-  }
+      if (!mounted) return;
 
-  Future<void> _loadHealthCheck() async {
-    try {
-      final health = await _performanceService.checkConnectionPoolHealth();
-      if (mounted) {
-        setState(() {
-          _healthCheck = health;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to perform health check: $e';
-        });
-      }
-    }
-  }
+      final status = result['status'] as Map<String, dynamic>?;
+      final leaks = result['leaks'] as Map<String, dynamic>?;
+      final health = result['health'] as Map<String, dynamic>?;
+      final recommendations = result['recommendations'];
+      final recommendationsText = recommendations?.toString();
 
-  Future<void> _loadRecommendations() async {
-    try {
-      final recommendations = await _performanceService
-          .getConnectionPoolRecommendations();
-      if (mounted) {
-        setState(() {
-          _recommendations = recommendations;
-        });
-      }
+      setState(() {
+        _poolStatusState = (status == null || status.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(status);
+        _leakDetectionState = (leaks == null || leaks.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(leaks);
+        _healthCheckState = (health == null || health.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(health);
+        _recommendationsState =
+            (recommendationsText == null || recommendationsText.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(recommendationsText);
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to load recommendations: $e';
-        });
-      }
+      if (!mounted) return;
+      final message = 'Failed to load connection pool data: $e';
+      setState(() {
+        _poolStatusState = LoadState.error(message);
+        _leakDetectionState = LoadState.error(message);
+        _healthCheckState = LoadState.error(message);
+        _recommendationsState = LoadState.error(message);
+      });
     }
   }
 
@@ -162,104 +149,40 @@ class _ConnectionPoolMonitoringDashboardState
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadAllData,
+            onPressed: _refreshData,
             tooltip: 'Refresh Data',
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-              length: 4,
-              child: Column(
-                children: [
-                  const TabBar(
-                    tabs: [
-                      Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Pool Status'),
-                      Tab(icon: TraqIcon(AppAssets.iconSignal), text: 'Leak Detection'),
-                      Tab(
-                        icon: TraqIcon(AppAssets.iconSecurity),
-                        text: 'Health Check',
-                      ),
-                      Tab(icon: TraqIcon(AppAssets.iconLightbulb), text: 'Recommendations'),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        _buildPoolStatusTab(),
-                        _buildLeakDetectionTab(),
-                        _buildHealthCheckTab(),
-                        _buildRecommendationsTab(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildPoolStatusTab() {
-    if (_errorMessage != null) {
-      return _buildErrorWidget(_errorMessage!);
-    }
-
-    if (_poolStatus == null) {
-      return const Center(child: Text('No pool status data available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'HikariCP Connection Pool Status',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPoolMetrics(),
-                ],
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Pool Status'),
+              Tab(
+                icon: TraqIcon(AppAssets.iconSignal),
+                text: 'Leak Detection',
               ),
-            ),
+              Tab(
+                icon: TraqIcon(AppAssets.iconSecurity),
+                text: 'Health Check',
+              ),
+              Tab(
+                icon: TraqIcon(AppAssets.iconLightbulb),
+                text: 'Recommendations',
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Detailed Status',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _poolStatus.toString(),
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
-              ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                KeepAliveTabView(child: _buildPoolStatusTab()),
+                KeepAliveTabView(child: _buildLeakDetectionTab()),
+                KeepAliveTabView(child: _buildHealthCheckTab()),
+                KeepAliveTabView(child: _buildRecommendationsTab()),
+              ],
             ),
           ),
         ],
@@ -267,11 +190,75 @@ class _ConnectionPoolMonitoringDashboardState
     );
   }
 
-  Widget _buildPoolMetrics() {
-    final activeConnections = _poolStatus?['activeConnections'] ?? 0;
-    final idleConnections = _poolStatus?['idleConnections'] ?? 0;
-    final totalConnections = _poolStatus?['totalConnections'] ?? 0;
-    final awaitingConnections = _poolStatus?['awaitingConnections'] ?? 0;
+  Widget _buildPoolStatusTab() {
+    return LoadStateView<Map<String, dynamic>>(
+      state: _poolStatusState,
+      onRetry: _refreshData,
+      emptyWidget: const Center(child: Text('No pool status data available')),
+      builder: (context, poolStatus) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HikariCP Connection Pool Status',
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildPoolMetrics(poolStatus),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Detailed Status',
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          poolStatus.toString(),
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPoolMetrics(Map<String, dynamic> poolStatus) {
+    final activeConnections = poolStatus['activeConnections'] ?? 0;
+    final idleConnections = poolStatus['idleConnections'] ?? 0;
+    final totalConnections = poolStatus['totalConnections'] ?? 0;
+    final awaitingConnections = poolStatus['awaitingConnections'] ?? 0;
 
     return Column(
       children: [
@@ -323,94 +310,102 @@ class _ConnectionPoolMonitoringDashboardState
   }
 
   Widget _buildLeakDetectionTab() {
-    if (_leakDetection == null) {
-      return const Center(child: Text('No leak detection data available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Connection Leak Detection Results',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _leakDetection.toString(),
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+    return LoadStateView<Map<String, dynamic>>(
+      state: _leakDetectionState,
+      onRetry: _refreshData,
+      emptyWidget: const Center(
+        child: Text('No leak detection data available'),
       ),
+      builder: (context, leakDetection) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Connection Leak Detection Results',
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          leakDetection.toString(),
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHealthCheckTab() {
-    if (_healthCheck == null) {
-      return const Center(child: Text('No health check data available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Connection Pool Health Check',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+    return LoadStateView<Map<String, dynamic>>(
+      state: _healthCheckState,
+      onRetry: _refreshData,
+      emptyWidget: const Center(child: Text('No health check data available')),
+      builder: (context, healthCheck) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Connection Pool Health Check',
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          healthCheck.toString(),
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _healthCheck.toString(),
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildRecommendationsTab() {
-    if (_recommendations == null || _recommendations!.isEmpty) {
-      return const Center(
+    return LoadStateView<String>(
+      state: _recommendationsState,
+      onRetry: _refreshData,
+      emptyWidget: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -422,23 +417,33 @@ class _ConnectionPoolMonitoringDashboardState
             ),
           ],
         ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: _recommendations!.length,
-      itemBuilder: (context, index) {
-        final recommendation = _recommendations![index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.orange.shade100,
-              child: TraqIcon(AppAssets.iconLightbulb, color: Colors.orange),
+      ),
+      builder: (context, recommendations) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: TraqIcon(
+                      AppAssets.iconLightbulb,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      recommendations,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            title: Text('Recommendation #${index + 1}'),
-            subtitle: Text(recommendation.toString()),
           ),
         );
       },
@@ -476,40 +481,6 @@ class _ConnectionPoolMonitoringDashboardState
             value,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            'Error',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _loadAllData,
-            icon: const TraqIcon(AppAssets.iconRefresh),
-            label: const Text('Retry'),
           ),
         ],
       ),

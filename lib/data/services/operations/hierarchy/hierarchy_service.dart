@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_page.dart';
 import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_summary.dart';
@@ -29,10 +30,13 @@ class HierarchyService {
     final normalizedParent = normalizeHierarchyEpc(parentEpc);
     try {
       final headers = await _headers;
-      final encodedEpc = Uri.encodeComponent(normalizedParent);
       final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/aggregation/parent/$encodedEpc/children',
-        queryParameters: {'page': page.toString(), 'size': size.toString()},
+        '${_dioService.baseUrl}/events/aggregation/children',
+        queryParameters: {
+          'parentEPC': normalizedParent,
+          'page': page.toString(),
+          'size': size.toString(),
+        },
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -43,14 +47,14 @@ class HierarchyService {
         return HierarchyPage.fromJson(data);
       }
 
-      throw _apiExceptionFromResponse(
+      throw ApiExceptionMapper.fromHttpResponse(
         response,
         fallbackMessage: 'Failed to load hierarchy children',
       );
     } on ApiException {
       rethrow;
     } on DioException catch (e, st) {
-      throw _apiExceptionFromDio(
+      throw ApiExceptionMapper.fromDio(
         e,
         stackTrace: st,
         fallbackMessage: 'Network error loading hierarchy',
@@ -68,9 +72,9 @@ class HierarchyService {
     final normalized = normalizeHierarchyEpc(childEpc);
     try {
       final headers = await _headers;
-      final encodedEpc = Uri.encodeComponent(normalized);
       final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/aggregation/child/$encodedEpc/container',
+        '${_dioService.baseUrl}/events/aggregation/container',
+        queryParameters: {'childEPC': normalized},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -93,9 +97,9 @@ class HierarchyService {
     final normalized = normalizeHierarchyEpc(epc);
     try {
       final headers = await _headers;
-      final encodedEpc = Uri.encodeComponent(normalized);
       final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/aggregation/child/$encodedEpc/root-container',
+        '${_dioService.baseUrl}/events/aggregation/root-container',
+        queryParameters: {'childEPC': normalized},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -117,9 +121,9 @@ class HierarchyService {
     final normalized = normalizeHierarchyEpc(rootEpc);
     try {
       final headers = await _headers;
-      final encodedEpc = Uri.encodeComponent(normalized);
       final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/query/traversal/hierarchy/$encodedEpc',
+        '${_dioService.baseUrl}/events/query/traversal/hierarchy',
+        queryParameters: {'parentEpc': normalized},
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -140,29 +144,5 @@ class HierarchyService {
       debugPrint('[HierarchyService] getHierarchySummary error: $e\n$st');
       return null;
     }
-  }
-
-  ApiException _apiExceptionFromResponse(
-    Response<dynamic> response, {
-    required String fallbackMessage,
-  }) {
-    return ApiException(
-      statusCode: response.statusCode,
-      message: fallbackMessage,
-      responseBody: response.data?.toString(),
-    );
-  }
-
-  ApiException _apiExceptionFromDio(
-    DioException exception, {
-    required String fallbackMessage,
-    StackTrace? stackTrace,
-  }) {
-    return ApiException(
-      statusCode: exception.response?.statusCode,
-      message: fallbackMessage,
-      responseBody: exception.response?.data?.toString(),
-      originalException: exception,
-    );
   }
 }

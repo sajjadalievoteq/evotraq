@@ -82,6 +82,11 @@ abstract final class PackingSubmitErrorMessage {
       }
       return 'One or more items have not been commissioned. Commission the product serials before packing.';
     }
+    if (lower.contains('read-point gln is required for commissioning') ||
+        lower.contains('xsc-008')) {
+      return 'Packing into a newly allocated SSCC requires a packing location with an active GLN '
+          '(used as the commissioning read point). Select a packing location, then try again.';
+    }
     if (lower.contains('custody') || lower.contains('held by')) {
       return text;
     }

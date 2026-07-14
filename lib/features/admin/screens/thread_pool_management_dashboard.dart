@@ -7,6 +7,9 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
+import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
+import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
 class ThreadPoolManagementDashboard extends StatefulWidget {
   const ThreadPoolManagementDashboard({Key? key}) : super(key: key);
@@ -17,13 +20,20 @@ class ThreadPoolManagementDashboard extends StatefulWidget {
 }
 
 class _ThreadPoolManagementDashboardState
-    extends State<ThreadPoolManagementDashboard> {
+    extends State<ThreadPoolManagementDashboard>
+    with SingleTickerProviderStateMixin {
   late AdvancedPerformanceService _performanceService;
-  Map<String, dynamic>? _threadPoolMetrics;
-  Map<String, dynamic>? _contentionAnalysis;
+  late final TabController _tabController;
+
+  /// Both the metrics and contention groups come from the single merged
+  /// `getThreadPoolDashboard()` call, so one fetch satisfies both tabs.
+  bool _dashboardLoaded = false;
+  LoadState<Map<String, dynamic>> _metricsState = const LoadState.loading();
+  LoadState<Map<String, dynamic>> _contentionState =
+      const LoadState.loading();
+
   String _selectedBackpressureStrategy = 'CALLER_RUNS';
   bool _isLoading = false;
-  String? _errorMessage;
   Timer? _refreshTimer;
 
   final List<String> _backpressureStrategies = [
@@ -37,13 +47,20 @@ class _ThreadPoolManagementDashboardState
   void initState() {
     super.initState();
     _initializeService();
-    _loadAllData();
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _ensureTabLoaded(_tabController.index);
+      }
+    });
+    _ensureTabLoaded(_tabController.index);
     _startAutoRefresh();
   }
 
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -59,62 +76,56 @@ class _ThreadPoolManagementDashboardState
   void _startAutoRefresh() {
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       if (mounted) {
-        _loadMetrics();
+        _loadThreadPoolDashboard();
       }
     });
   }
 
-  Future<void> _loadAllData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  /// Every tab's content is derived from the single merged
+  /// `getThreadPoolDashboard()` response, so one fetch satisfies every tab.
+  /// Triggers that fetch the first time any tab is viewed.
+  void _ensureTabLoaded(int index) {
+    if (_dashboardLoaded) return;
+    _dashboardLoaded = true;
+    _loadThreadPoolDashboard();
+  }
+
+  Future<void> _loadThreadPoolDashboard() async {
+    if (mounted) {
+      setState(() {
+        _metricsState = const LoadState.loading();
+        _contentionState = const LoadState.loading();
+      });
+    }
 
     try {
-      await Future.wait([_loadMetrics(), _loadContentionAnalysis()]);
-    } catch (e) {
+      final result = await _performanceService.getThreadPoolDashboard();
+      final metrics = result['metrics'] as Map<String, dynamic>?;
+      final contention = result['contention'] as Map<String, dynamic>?;
+
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load thread pool data: $e';
+        _metricsState = (metrics == null || metrics.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(metrics);
+        _contentionState = (contention == null || contention.isEmpty)
+            ? const LoadState.empty()
+            : LoadState.success(contention);
       });
-    } finally {
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _isLoading = false;
+        _metricsState = LoadState.error('Failed to load thread pool metrics: $e');
+        _contentionState = LoadState.error('Failed to analyze contention: $e');
       });
     }
   }
 
-  Future<void> _loadMetrics() async {
-    try {
-      final metrics = await _performanceService.getThreadPoolMetrics();
-      if (mounted) {
-        setState(() {
-          _threadPoolMetrics = metrics;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to load thread pool metrics: $e';
-        });
-      }
-    }
-  }
-
-  Future<void> _loadContentionAnalysis() async {
-    try {
-      final contention = await _performanceService.analyzeContention();
-      if (mounted) {
-        setState(() {
-          _contentionAnalysis = contention;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to analyze contention: $e';
-        });
-      }
-    }
+  /// Refresh button semantics: re-trigger the one merged fetch that backs
+  /// every tab, regardless of which tab is currently active.
+  void _refreshDashboardData() {
+    _dashboardLoaded = true;
+    _loadThreadPoolDashboard();
   }
 
   Future<void> _configureBackpressure() async {
@@ -132,7 +143,7 @@ class _ThreadPoolManagementDashboardState
       );
 
       _showSuccessDialog('Backpressure strategy configured successfully');
-      await _loadMetrics();
+      await _loadThreadPoolDashboard();
     } catch (e) {
       _showErrorDialog('Failed to configure backpressure: $e');
     } finally {
@@ -153,7 +164,7 @@ class _ThreadPoolManagementDashboardState
       await _performanceService.optimizeThreadPools(settings);
 
       _showSuccessDialog('Thread pools optimized successfully');
-      await _loadAllData();
+      await _loadThreadPoolDashboard();
     } catch (e) {
       _showErrorDialog('Failed to optimize thread pools: $e');
     } finally {
@@ -209,113 +220,105 @@ class _ThreadPoolManagementDashboardState
         actions: [
           IconButton(
             icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _loadAllData,
+            onPressed: _refreshDashboardData,
             tooltip: 'Refresh Data',
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Metrics'),
+            Tab(icon: TraqIcon(AppAssets.iconAlert), text: 'Contention'),
+            Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Backpressure'),
+            Tab(icon: TraqIcon(AppAssets.iconFilter), text: 'Optimization'),
+          ],
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-              length: 4,
-              child: Column(
-                children: [
-                  const TabBar(
-                    tabs: [
-                      Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Metrics'),
-                      Tab(icon: TraqIcon(AppAssets.iconAlert), text: 'Contention'),
-                      Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Backpressure'),
-                      Tab(icon: TraqIcon(AppAssets.iconFilter), text: 'Optimization'),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        _buildMetricsTab(),
-                        _buildContentionTab(),
-                        _buildBackpressureTab(),
-                        _buildOptimizationTab(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          KeepAliveTabView(child: _buildMetricsTab()),
+          KeepAliveTabView(child: _buildContentionTab()),
+          KeepAliveTabView(child: _buildBackpressureTab()),
+          KeepAliveTabView(child: _buildOptimizationTab()),
+        ],
+      ),
     );
   }
 
   Widget _buildMetricsTab() {
-    if (_errorMessage != null) {
-      return _buildErrorWidget(_errorMessage!);
-    }
-
-    if (_threadPoolMetrics == null) {
-      return const Center(child: Text('No thread pool metrics available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Thread Pool Metrics',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildThreadPoolMetrics(),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Detailed Metrics',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _threadPoolMetrics.toString(),
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+    return LoadStateView<Map<String, dynamic>>(
+      state: _metricsState,
+      onRetry: _loadThreadPoolDashboard,
+      emptyWidget: const Center(
+        child: Text('No thread pool metrics available'),
       ),
+      builder: (context, metrics) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Thread Pool Metrics',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildThreadPoolMetrics(metrics),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Detailed Metrics',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          metrics.toString(),
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildThreadPoolMetrics() {
-    final activeThreads = _threadPoolMetrics?['activeThreads'] ?? 0;
-    final corePoolSize = _threadPoolMetrics?['corePoolSize'] ?? 0;
-    final maximumPoolSize = _threadPoolMetrics?['maximumPoolSize'] ?? 0;
-    final queueSize = _threadPoolMetrics?['queueSize'] ?? 0;
+  Widget _buildThreadPoolMetrics(Map<String, dynamic> metrics) {
+    final activeThreads = metrics['activeThreads'] ?? 0;
+    final corePoolSize = metrics['corePoolSize'] ?? 0;
+    final maximumPoolSize = metrics['maximumPoolSize'] ?? 0;
+    final queueSize = metrics['queueSize'] ?? 0;
 
     return Column(
       children: [
@@ -367,45 +370,50 @@ class _ThreadPoolManagementDashboardState
   }
 
   Widget _buildContentionTab() {
-    if (_contentionAnalysis == null) {
-      return const Center(child: Text('No contention analysis data available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Thread Contention Analysis',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _contentionAnalysis.toString(),
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+    return LoadStateView<Map<String, dynamic>>(
+      state: _contentionState,
+      onRetry: _loadThreadPoolDashboard,
+      emptyWidget: const Center(
+        child: Text('No contention analysis data available'),
       ),
+      builder: (context, contentionAnalysis) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Thread Contention Analysis',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          contentionAnalysis.toString(),
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -629,36 +637,6 @@ class _ThreadPoolManagementDashboardState
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            'Error',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadAllData, child: const Text('Retry')),
         ],
       ),
     );

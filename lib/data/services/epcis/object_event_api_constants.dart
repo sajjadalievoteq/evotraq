@@ -15,9 +15,11 @@ class ObjectEventApiConstants {
   static const String queryStartTime = 'startTime';
   static const String queryEndTime = 'endTime';
   static const String queryEpcs = 'epcs';
+  static const String queryEpc = 'epc';
   static const String queryProperty = 'property';
   static const String queryValue = 'value';
   static const String queryEpcClass = 'epcClass';
+  static const String queryGtin = 'gtin';
   static const String queryMin = 'min';
   static const String queryMax = 'max';
 
@@ -40,6 +42,7 @@ class ObjectEventApiConstants {
   static const String segmentDelete = 'delete';
   static const String segmentSearch = 'search';
   static const String segmentHistory = 'history';
+  static const String segmentGtin = 'gtin';
 
   static const String jsonKeyContent = 'content';
   static const String jsonKeyEvents = 'events';

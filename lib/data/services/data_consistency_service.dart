@@ -36,8 +36,9 @@ class DataConsistencyService {
   ) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/api/data/consistency/validate/supply-chain/$epc',
+      '${_dioService.baseUrl}/api/data/consistency/validate/supply-chain',
       queryParameters: {
+        'epc': epc,
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
       },
@@ -184,8 +185,9 @@ class DataConsistencyService {
   ) async {
     final token = await _dioService.getAuthToken();
     final response = await _dioService.get(
-      '${_dioService.baseUrl}/api/data/consistency/validate/missing-events/$epc',
+      '${_dioService.baseUrl}/api/data/consistency/validate/missing-events',
       queryParameters: {
+        'epc': epc,
         'expectedSequence': expectedSequence,
       },
       headers: {

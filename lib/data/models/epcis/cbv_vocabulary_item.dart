@@ -41,6 +41,18 @@ class CbvVocabularyItem {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'code': code,
+        'urn': urn,
+        'label': label,
+        'group': group,
+        'enabled': enabled,
+        'isCustom': isCustom,
+        'createdAt': createdAt?.toIso8601String(),
+        'createdBy': createdBy,
+        'updatedAt': updatedAt?.toIso8601String(),
+      };
+
   CbvVocabularyItem copyWith({
     String? code,
     String? urn,

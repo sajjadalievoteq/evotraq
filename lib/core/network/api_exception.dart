@@ -1,19 +1,25 @@
 import 'dart:convert';
 
-import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
+import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 
 class ApiException implements Exception {
   final int? statusCode;
-  
+
+  final String? code;
+
   final String message;
-  
+
+  final List<String> validationMessages;
+
   final dynamic originalException;
-  
+
   final String? responseBody;
 
   ApiException({
     this.statusCode,
+    this.code,
     required this.message,
+    this.validationMessages = const [],
     this.originalException,
     this.responseBody,
   });
@@ -26,45 +32,53 @@ class ApiException implements Exception {
     return 'ApiException: $message';
   }
 
+  /// User-facing text for snackbars — prefers backend validation details.
   String getUserFriendlyMessage() {
-    if (statusCode == null) {
+    if (statusCode == null &&
+        (responseBody == null || responseBody!.trim().isEmpty) &&
+        validationMessages.isEmpty) {
       return 'Network error. Please check your connection and try again.';
     }
 
-    final parsed = _parseResponseBody();
-    if (parsed != null) {
-      if (OperationApiErrorMessage.isStructuredErrorBody(parsed)) {
-        final fromStructured = OperationApiErrorMessage.fromJsonMap(parsed);
-        if (fromStructured != null && fromStructured.isNotEmpty) {
-          return fromStructured;
-        }
-      }
-      final fromStructured = _messageFromStructuredBody(parsed);
-      if (fromStructured != null && fromStructured.isNotEmpty) {
-        return fromStructured;
-      }
+    final details = BackendErrorParser.parse(responseBody);
+    if (details.displayMessage != null && details.displayMessage!.isNotEmpty) {
+      return details.displayMessage!;
+    }
+
+    if (validationMessages.isNotEmpty) {
+      return validationMessages.join('\n');
     }
 
     if (message.isNotEmpty &&
+        !BackendErrorParser.isGenericFallbackMessage(message) &&
         !message.startsWith('ApiException:') &&
-        message != 'Failed to create object event' &&
         statusCode != 500) {
       return message;
     }
 
     switch (statusCode) {
       case 400:
-        return 'The request was invalid. Please check your input and try again.';
+        return message.isNotEmpty &&
+                !BackendErrorParser.isGenericFallbackMessage(message)
+            ? message
+            : 'The request was invalid. Please check your input and try again.';
       case 401:
         return 'Authentication required. Please log in and try again.';
       case 403:
         return 'You do not have permission to perform this action.';
       case 404:
-        return 'The requested resource was not found.';
+        return message.isNotEmpty &&
+                !BackendErrorParser.isGenericFallbackMessage(message)
+            ? message
+            : 'The requested resource was not found.';
       case 409:
-        return 'There was a conflict with the current state of the resource. The GTIN code may already exist.';
+        return message.isNotEmpty &&
+                !BackendErrorParser.isGenericFallbackMessage(message)
+            ? message
+            : 'There was a conflict with the current state of the resource.';
       case 422:
-        return message.isNotEmpty
+        return message.isNotEmpty &&
+                !BackendErrorParser.isGenericFallbackMessage(message)
             ? message
             : 'The request could not be processed. Check your inputs and try again.';
       case 500:
@@ -79,7 +93,9 @@ class ApiException implements Exception {
         }
         return 'A server error occurred. Please try again later.';
       default:
-        return message;
+        return message.isNotEmpty
+            ? message
+            : 'Something went wrong. Please try again.';
     }
   }
 
@@ -98,36 +114,6 @@ class ApiException implements Exception {
     } catch (_) {
       return null;
     }
-    return null;
-  }
-
-  String? _messageFromStructuredBody(Map<String, dynamic> jsonBody) {
-    final message = jsonBody['message'];
-    if (message != null && message.toString().isNotEmpty) {
-      return message.toString();
-    }
-
-    final fieldErrors = jsonBody['fieldErrors'];
-    if (fieldErrors is Map && fieldErrors.isNotEmpty) {
-      return fieldErrors.entries
-          .map((e) => '${e.key}: ${e.value}')
-          .join('\n');
-    }
-
-    final errors = jsonBody['errors'];
-    if (errors is List && errors.isNotEmpty) {
-      return errors.map((e) => e.toString()).join('\n');
-    }
-
-    if (errors is Map && errors.isNotEmpty) {
-      return errors.values.map((e) => e.toString()).join('\n');
-    }
-
-    final error = jsonBody['error'];
-    if (error != null && error.toString().isNotEmpty) {
-      return error.toString();
-    }
-
     return null;
   }
 }

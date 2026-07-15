@@ -53,6 +53,14 @@ class ObjectEventsState extends Equatable {
     this.sortOrder = 'DESC',
   });
 
+  bool get hasActiveFilters =>
+      filterAction != null ||
+      filterBizStep != null ||
+      filterDisposition != null ||
+      filterLocationGLN != null ||
+      filterEPC != null ||
+      (filterSearchText != null && filterSearchText!.isNotEmpty);
+
   ObjectEventsState copyWith({
     ObjectEventsStatus? status,
     List<ObjectEvent>? objectEvents,

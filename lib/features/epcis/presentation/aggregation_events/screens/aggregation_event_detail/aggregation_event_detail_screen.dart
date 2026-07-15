@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/widgets/aggregation_event_detail_awaiting_pane.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/widgets/aggregation_event_detail_content.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/widgets/aggregation_event_detail_skeleton.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_ui_constants.dart';
@@ -64,11 +65,21 @@ class _AggregationEventDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    Widget body;
-
     if (widget.awaitingListSelection) {
-      body = const AggregationEventDetailAwaitingPane();
-    } else if (_loading) {
+      final empty = AppEmptyDetail(
+        title: AggregationEventUiConstants.awaitingSelectionTitle,
+        subtitle: AggregationEventUiConstants.awaitingSelectionSubtitle,
+        iconAsset: AppAssets.iconLayers,
+      );
+      return Gs1MasterDataDetailScaffold(
+        embedded: widget.embedded,
+        title: AggregationEventUiConstants.appBarManagement,
+        body: empty,
+      );
+    }
+
+    Widget body;
+    if (_loading) {
       body = const AggregationEventDetailSkeleton();
     } else if (_event == null) {
       body = const Center(child: Text('Event not found'));

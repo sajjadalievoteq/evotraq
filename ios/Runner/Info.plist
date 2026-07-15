@@ -49,6 +49,8 @@
 		<string>This app needs access to location when open to show location on maps.</string>
 		<key>NSLocationAlwaysUsageDescription</key>
 		<string>This app needs access to location when in the background.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>This app needs camera access to scan GS1 barcodes on pharmaceutical products.</string>
 		<key>io.flutter.embedded_views_preview</key>
 		<true/>
 		<key>LSApplicationQueriesSchemes</key>
@@ -57,8 +59,6 @@
 			<string>https</string>
 			<string>maps</string>
 			<string>google</string>
-			<string>googlemaps</string>
-			<string>comgooglemaps</string>
 		</array>
 		<key>UIStatusBarHidden</key>
 		<true/>

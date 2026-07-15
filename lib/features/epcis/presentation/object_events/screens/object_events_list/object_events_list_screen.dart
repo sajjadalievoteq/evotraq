@@ -277,6 +277,8 @@ class _ObjectEventsListScreenState extends State<ObjectEventsListScreen> {
         if (_showAdvancedFilters) _showAdvancedFiltersDialog();
       },
       onClearFilters: _clearFilters,
+      onCreate: widget.onEmbeddedCreate ??
+          () => context.push(Constants.epcisObjectEventNewRoute),
       onQuickFilters: _showQuickFilterDialog,
       pageSize: _pageSize,
       onPageSizeChanged: (size) {

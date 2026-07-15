@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
@@ -20,6 +21,7 @@ void main() {
 
   late MockDashboardService mockService;
   late HomeOverviewSessionStore sessionStore;
+  late Directory hiveDir;
 
   DashboardStats stats({required int gtin}) => DashboardStats(
         gtinCount: gtin,
@@ -48,11 +50,17 @@ void main() {
       );
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    hiveDir = await Directory.systemTemp.createTemp('home_cubit_hive_');
+    await HiveStorage.initForTests(hiveDir.path);
     mockService = MockDashboardService();
-    sessionStore = HomeOverviewSessionStore(
-      prefs: await SharedPreferences.getInstance(),
-    );
+    sessionStore = HomeOverviewSessionStore();
+  });
+
+  tearDown(() async {
+    await HiveStorage.resetForTests();
+    if (await hiveDir.exists()) {
+      await hiveDir.delete(recursive: true);
+    }
   });
 
   test('dashboard emits without waiting for health', () async {
@@ -156,5 +164,208 @@ void main() {
     expect(cubit.state.healthLoading, isFalse);
 
     await cubit.close();
+  });
+
+  group('polling', () {
+    Future<HomeCubit> seedReadyCubit({
+      required Duration pollInterval,
+      int gtin = 1,
+    }) async {
+      await sessionStore.save(
+        HomeOverviewBundle(
+          stats: stats(gtin: gtin),
+          recentEvents: events('seed'),
+          healthStatus: health(up: true),
+          lastDataRefreshAt: DateTime(2026, 1, 1),
+          accountEmail: 'user@example.com',
+        ),
+      );
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: gtin), recentEvents: events('seed')),
+      );
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: true));
+
+      final cubit = HomeCubit(
+        mockService,
+        sessionStore,
+        pollInterval: pollInterval,
+      );
+      await cubit.load(accountEmail: 'user@example.com');
+      // Allow background SWR from load() to finish so _isRevalidating clears.
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(cubit.state.status, HomeLoadStatus.success);
+      return cubit;
+    }
+
+    test('tick triggers background revalidate without loading flash', () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 40),
+      );
+      clearInteractions(mockService);
+
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: 11), recentEvents: events('poll')),
+      );
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: true));
+
+      cubit.startPolling(accountEmail: 'user@example.com');
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+
+      expect(cubit.state.status, isNot(HomeLoadStatus.loading));
+      expect(cubit.state.stats?.gtinCount, 11);
+      expect(cubit.state.refreshFailed, isFalse);
+      verify(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).called(greaterThanOrEqualTo(1));
+
+      cubit.stopPolling();
+      clearInteractions(mockService);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      verifyNever(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      ));
+
+      await cubit.close();
+    });
+
+    test('overlapping ticks are skipped while revalidation is in flight', () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 40),
+      );
+
+      var summaryCalls = 0;
+      final gate = Completer<void>();
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer((_) async {
+        summaryCalls++;
+        await gate.future;
+        return (stats: stats(gtin: summaryCalls), recentEvents: events('x'));
+      });
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: true));
+
+      cubit.startPolling(accountEmail: 'user@example.com');
+      await Future<void>.delayed(const Duration(milliseconds: 55));
+      expect(summaryCalls, 1);
+
+      // Several intervals while the first request is still gated.
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(summaryCalls, 1);
+
+      gate.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(cubit.state.stats?.gtinCount, 1);
+
+      await cubit.close();
+    });
+
+    test('failed poll keeps payload and sets refreshFailed', () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 40),
+        gtin: 42,
+      );
+
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer((_) async => throw TimeoutException('down'));
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: false));
+
+      cubit.startPolling(accountEmail: 'user@example.com');
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+
+      expect(cubit.state.status, HomeLoadStatus.success);
+      expect(cubit.state.stats?.gtinCount, 42);
+      expect(cubit.state.refreshFailed, isTrue);
+
+      await cubit.close();
+    });
+
+    test('startPolling is idempotent (single cadence)', () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 50),
+      );
+
+      var summaryCalls = 0;
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer((_) async {
+        summaryCalls++;
+        return (stats: stats(gtin: summaryCalls), recentEvents: events('p'));
+      });
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: true));
+
+      cubit.startPolling(accountEmail: 'user@example.com');
+      cubit.startPolling(accountEmail: 'user@example.com');
+      cubit.startPolling(accountEmail: 'user@example.com');
+
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect(summaryCalls, 1);
+
+      await cubit.close();
+    });
+
+    test('onAppResumed refreshes immediately; close cancels further polls',
+        () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 40),
+      );
+
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer(
+        (_) async => (stats: stats(gtin: 9), recentEvents: events('resume')),
+      );
+      when(mockService.getSystemHealth())
+          .thenAnswer((_) async => health(up: true));
+
+      await cubit.onAppResumed(accountEmail: 'user@example.com');
+      expect(cubit.state.stats?.gtinCount, 9);
+
+      clearInteractions(mockService);
+      await cubit.close();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(cubit.isClosed, isTrue);
+      verifyNever(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      ));
+    });
+
+    test('close cancels polling timer', () async {
+      final cubit = await seedReadyCubit(
+        pollInterval: const Duration(milliseconds: 30),
+      );
+
+      var summaryCalls = 0;
+      when(mockService.getSummary(
+        recentLimit: anyNamed('recentLimit'),
+        throughputHours: anyNamed('throughputHours'),
+      )).thenAnswer((_) async {
+        summaryCalls++;
+        return (stats: stats(gtin: 1), recentEvents: events('x'));
+      });
+
+      cubit.startPolling(accountEmail: 'user@example.com');
+      await cubit.close();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(summaryCalls, 0);
+    });
   });
 }

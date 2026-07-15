@@ -26,6 +26,8 @@ class GlnListBody extends StatelessWidget {
     required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapGln,
     required this.onRowMenuAction,
     required this.onLoadMore,
@@ -47,6 +49,8 @@ class GlnListBody extends StatelessWidget {
   final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapGln;
   final void Function(GLN gln, String action) onRowMenuAction;
   final VoidCallback onLoadMore;
@@ -105,6 +109,8 @@ class GlnListBody extends StatelessWidget {
         selectedGlnCode: selectedGlnCode,
         onRefresh: onRefresh,
         onClearFilters: onClearFilters,
+        hasActiveFilters: hasActiveFilters,
+        onCreate: onCreate,
         onTapGln: onTapGln,
         onRowMenuAction: onRowMenuAction,
         onLoadMore: onLoadMore,

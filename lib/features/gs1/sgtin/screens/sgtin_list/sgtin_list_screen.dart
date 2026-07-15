@@ -25,11 +25,13 @@ class SGTINListScreen extends StatefulWidget {
     this.embedded = false,
     this.selectedSgtinId,
     this.onSelectSgtin,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final String? selectedSgtinId;
   final ValueChanged<String>? onSelectSgtin;
+  final VoidCallback? onEmbeddedCreate;
 
   @override
   State<SGTINListScreen> createState() => _SGTINListScreenState();
@@ -249,7 +251,20 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
   }
 
   void _navigateToCreate() {
+    if (widget.onEmbeddedCreate != null) {
+      widget.onEmbeddedCreate!();
+      return;
+    }
     context.go(Constants.gs1SgtinNewRoute);
+  }
+
+  bool get _hasActiveFilters {
+    return _searchController.text.trim().isNotEmpty ||
+        _gtinCodeController.text.trim().isNotEmpty ||
+        _serialNumberController.text.trim().isNotEmpty ||
+        _batchLotController.text.trim().isNotEmpty ||
+        (_selectedStatus != null &&
+            _selectedStatus != SgtinUiConstants.filterAll);
   }
 
   void _clearAllFilters() {
@@ -298,6 +313,8 @@ class _SGTINListScreenState extends State<SGTINListScreen> {
             _searchController.clear();
             _clearAllFilters();
           },
+          hasActiveFilters: _hasActiveFilters,
+          onCreate: _navigateToCreate,
           onTapSgtin: _navigateToDetails,
           onLoadMore: _loadMore,
         );

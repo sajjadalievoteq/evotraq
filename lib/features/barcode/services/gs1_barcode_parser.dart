@@ -155,10 +155,16 @@ class GS1BarcodeParser {
     if (barcode.contains(RegExp(r'\(\d{2,4}\)'))) {
       return barcode;
     }
-    
-    String normalized = barcode.replaceAll(String.fromCharCode(29), '<GS>');
-    
-    
+
+    // ASCII GS (29). Some web/HID scanners also emit '|' for FNC1.
+    String normalized = barcode
+        .replaceAll(String.fromCharCode(29), '<GS>')
+        .replaceAll('|', '<GS>');
+
+    while (normalized.startsWith('<GS>')) {
+      normalized = normalized.substring(4);
+    }
+
     if (normalized.length >= 16 && normalized.startsWith("01") && RegExp(r'^\d{16}').hasMatch(normalized.substring(0, 16))) {
       int position = 16;
       String result = '(01)${normalized.substring(2, 16)}';
@@ -261,24 +267,23 @@ class GS1BarcodeParser {
       } else {
         int nextAI = gs1ElementString.indexOf('(', currentPosition);
         int nextGS = gs1ElementString.indexOf('<GS>', currentPosition);
-        
-        int endOfValue;
-        if (nextAI != -1 && nextGS != -1) {
-          endOfValue = nextAI < nextGS ? nextAI : nextGS;
-        } else if (nextAI != -1) {
-          endOfValue = nextAI;
-        } else if (nextGS != -1) {
-          endOfValue = nextGS;
-        } else {
-          endOfValue = gs1ElementString.length;
+        // Pipe may still appear if parentheses form was already present.
+        int nextPipe = gs1ElementString.indexOf('|', currentPosition);
+
+        int endOfValue = gs1ElementString.length;
+        for (final idx in [nextAI, nextGS, nextPipe]) {
+          if (idx != -1 && idx < endOfValue) endOfValue = idx;
         }
 
         result[ai] = gs1ElementString.substring(currentPosition, endOfValue);
         currentPosition = endOfValue;
-        
-        if (currentPosition < gs1ElementString.length && 
+
+        if (currentPosition < gs1ElementString.length &&
             gs1ElementString.substring(currentPosition).startsWith('<GS>')) {
           currentPosition += 4;
+        } else if (currentPosition < gs1ElementString.length &&
+            gs1ElementString[currentPosition] == '|') {
+          currentPosition += 1;
         }
       }
     }

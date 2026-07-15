@@ -1,26 +1,20 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
 
-/// In-memory + SharedPreferences cache for home dashboard SWR.
+/// In-memory + Hive cache for home dashboard SWR.
 class HomeOverviewSessionStore {
   HomeOverviewSessionStore({
     this.maxReuseAge = const Duration(days: 7),
-    SharedPreferences? prefs,
-  }) : _prefs = prefs;
+  });
 
   static const _prefsKeyPrefix = 'home_overview_v1_';
 
   final Duration maxReuseAge;
-  SharedPreferences? _prefs;
   HomeOverviewBundle? _bundle;
-
-  Future<SharedPreferences> _ensurePrefs() async {
-    return _prefs ??= await SharedPreferences.getInstance();
-  }
 
   /// Returns cached overview for [accountEmail] if present (may be stale).
   /// Used for stale-while-revalidate paints; age only discards very old disk entries.
@@ -33,14 +27,13 @@ class HomeOverviewSessionStore {
     }
 
     try {
-      final prefs = await _ensurePrefs();
-      final raw = prefs.getString(_prefsKey(accountEmail));
+      final raw = await HiveStorage.getString(_prefsKey(accountEmail));
       if (raw == null || raw.isEmpty) return null;
       final decoded = json.decode(raw) as Map<String, dynamic>;
       final bundle = HomeOverviewBundle.fromJson(decoded);
       if (bundle.accountEmail != accountEmail) return null;
       if (DateTime.now().difference(bundle.lastDataRefreshAt) > maxReuseAge) {
-        await prefs.remove(_prefsKey(accountEmail));
+        await HiveStorage.remove(_prefsKey(accountEmail));
         return null;
       }
       _bundle = bundle;
@@ -59,8 +52,7 @@ class HomeOverviewSessionStore {
     final email = bundle.accountEmail;
     if (email == null || email.isEmpty) return;
     try {
-      final prefs = await _ensurePrefs();
-      await prefs.setString(_prefsKey(email), json.encode(bundle.toJson()));
+      await HiveStorage.putString(_prefsKey(email), json.encode(bundle.toJson()));
     } catch (_) {
       // Memory cache still holds the bundle.
     }
@@ -77,8 +69,7 @@ class HomeOverviewSessionStore {
 
   Future<void> _clearPersisted(String email) async {
     try {
-      final prefs = await _ensurePrefs();
-      await prefs.remove(_prefsKey(email));
+      await HiveStorage.remove(_prefsKey(email));
     } catch (_) {}
   }
 

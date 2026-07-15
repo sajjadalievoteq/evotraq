@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 
 const String _recentLoginUsernamesKey = 'recent_login_usernames';
 const int _maxRecentLoginUsernames = 8;
@@ -10,8 +10,7 @@ class RecentLoginUsernamesStore {
 
   Future<List<String>> getUsernames() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_recentLoginUsernamesKey);
+      final raw = await HiveStorage.getString(_recentLoginUsernamesKey);
       if (raw == null || raw.isEmpty) return [];
 
       final decoded = jsonDecode(raw);
@@ -40,8 +39,7 @@ class RecentLoginUsernamesStore {
         ),
       ].take(_maxRecentLoginUsernames).toList();
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_recentLoginUsernamesKey, jsonEncode(updated));
+      await HiveStorage.putString(_recentLoginUsernamesKey, jsonEncode(updated));
     } catch (_) {}
   }
 }

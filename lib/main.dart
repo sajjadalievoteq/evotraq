@@ -46,6 +46,7 @@ import 'package:traqtrace_app/features/api_management/providers/partner_access_p
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 
 import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
@@ -59,6 +60,8 @@ import 'core/network/dio_service.dart';
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+
+    await HiveStorage.init();
 
     configureUrlStrategy();
 

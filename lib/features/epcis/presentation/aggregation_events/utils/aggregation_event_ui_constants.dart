@@ -13,9 +13,15 @@ class AggregationEventUiConstants {
   static const String searchHint = 'Search by parent EPC, event ID…';
   static const String dialogQuickFiltersTitle = 'Quick Filters';
   static const String dialogAdvancedFiltersTitle = 'Advanced Filters';
-  static const String emptyListTitle = 'No aggregation events found';
+  static const String emptyListTitle = 'No aggregation events yet';
+  static const String emptyListSubtitle =
+      'Record an aggregation event to get started.';
+  static const String emptyAddAction = 'Record Aggregation Event';
   static const String emptyNoMatchSearch =
       'No events match the current search or filters';
+  static const String awaitingSelectionTitle = 'Select an aggregation event';
+  static const String awaitingSelectionSubtitle =
+      'Choose one from the list to view its details.';
   static const String tooltipRefresh = 'Refresh';
   static const String tooltipQuickFilters = 'Quick filters';
   static const String tooltipAdvancedFilters = 'Advanced filters';

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/utils/object_event_detail_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/widgets/object_event_detail_content.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/widgets/object_event_detail_not_found_pane.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/widgets/skeleton/object_event_detail_skeleton.dart';
+import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_events_list/utils/object_event_list_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_shared_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
-import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class ObjectEventDetailScreen extends StatefulWidget {
   const ObjectEventDetailScreen({
@@ -71,11 +74,23 @@ class _ObjectEventDetailScreenState extends State<ObjectEventDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body;
+    if (widget.awaitingListSelection) {
+      final empty = AppEmptyDetail(
+        title: ObjectEventListUiConstants.awaitingSelectionTitle,
+        subtitle: ObjectEventDetailUiConstants.detailAwaitingHint,
+        iconAsset: AppAssets.iconCalendar,
+      );
+      return Gs1MasterDataDetailScaffold(
+        embedded: widget.embedded,
+        title: ObjectEventSharedUiConstants.appBarManagement,
+        body: empty,
+      );
+    }
 
-    if (widget.awaitingListSelection || _loading) {
+    Widget body;
+    if (_loading) {
       body = const ObjectEventDetailSkeleton();
-    }  else if (_event == null) {
+    } else if (_event == null) {
       body = ObjectEventDetailNotFoundPane(onRetry: _load);
     } else {
       body = ObjectEventDetailContent(event: _event!);

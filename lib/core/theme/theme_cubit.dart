@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
 import 'package:traqtrace_app/features/user/cubit/profile_state.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -56,8 +56,7 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   Future<bool> _getLocalThemePreference() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(DARK_MODE_KEY) ?? false;
+      return await HiveStorage.getBool(DARK_MODE_KEY) ?? false;
     } catch (e) {
       print('Error reading theme preference from local storage: $e');
       return false;
@@ -66,8 +65,7 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   Future<void> _saveLocalThemePreference(bool isDark) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(DARK_MODE_KEY, isDark);
+      await HiveStorage.putBool(DARK_MODE_KEY, isDark);
     } catch (e) {
       print('Error saving theme preference to local storage: $e');
     }
@@ -109,9 +107,7 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   Future<bool> _isApiEndpointAvailable() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setBool(API_ENDPOINT_STATUS_KEY, true);
+      await HiveStorage.putBool(API_ENDPOINT_STATUS_KEY, true);
 
       return true;
     } catch (e) {
@@ -180,13 +176,11 @@ class ThemeCubit extends Cubit<ThemeState> {
   }
 
   static Future<bool> loadThemePreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(DARK_MODE_KEY) ?? false;
+    return await HiveStorage.getBool(DARK_MODE_KEY) ?? false;
   }
 
   static Future<void> saveThemePreference(bool isDarkMode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(DARK_MODE_KEY, isDarkMode);
+    await HiveStorage.putBool(DARK_MODE_KEY, isDarkMode);
   }
 
   static Future<bool> checkApiAvailability() async {

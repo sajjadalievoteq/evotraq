@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
@@ -520,6 +522,23 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.awaitingListSelection) {
+      final cubit = widget.embedded
+          ? context.read<GLNCubit>()
+          : _glnCubit;
+      final state = cubit?.state;
+      final loading = state == null ||
+          state.isGlnListLoading ||
+          state.status == GLNStatus.initial;
+      final empty = AppEmptyDetail(
+        title: GlnUiConstants.awaitingSelectionTitle,
+        subtitle: GlnUiConstants.awaitingSelectionSubtitle,
+        iconAsset: AppAssets.iconMapPin,
+        loading: loading,
+      );
+      return widget.embedded ? empty : Scaffold(body: empty);
+    }
+
     final role = context.watch<AuthCubit>().state.user?.role;
     final canEditMasterData = role == 'ADMIN' || role == 'MANUFACTURER';
     final allowMasterDataActions =

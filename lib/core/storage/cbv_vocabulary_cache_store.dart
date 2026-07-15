@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:traqtrace_app/core/storage/hive_storage.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_session.dart';
 
 /// A cached CBV vocabulary session paired with the time it was fetched.
@@ -12,7 +12,7 @@ class CbvVocabularyCacheEntry {
 }
 
 /// Persists the last-known-good CBV vocabulary to disk (mirrors the
-/// static-method [SharedPreferences] wrapper pattern already used by
+/// static-method Hive wrapper pattern already used by
 /// OperationalGlnStore) so it's available immediately on the next app
 /// launch, before any network request completes.
 class CbvVocabularyCacheStore {
@@ -25,9 +25,8 @@ class CbvVocabularyCacheStore {
   /// cached or the cached data is corrupt/unreadable.
   static Future<CbvVocabularyCacheEntry?> read() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final rawJson = prefs.getString(_jsonKey);
-      final rawTimestamp = prefs.getInt(_timestampKey);
+      final rawJson = await HiveStorage.getString(_jsonKey);
+      final rawTimestamp = await HiveStorage.getInt(_timestampKey);
       if (rawJson == null || rawTimestamp == null) return null;
 
       final decoded = jsonDecode(rawJson);
@@ -45,9 +44,8 @@ class CbvVocabularyCacheStore {
   /// source of truth.
   static Future<void> write(CbvVocabularySession session) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_jsonKey, jsonEncode(session.toJson()));
-      await prefs.setInt(_timestampKey, DateTime.now().millisecondsSinceEpoch);
+      await HiveStorage.putString(_jsonKey, jsonEncode(session.toJson()));
+      await HiveStorage.putInt(_timestampKey, DateTime.now().millisecondsSinceEpoch);
     } catch (_) {
       // Ignore cache write failures — the in-memory session still works.
     }
@@ -55,9 +53,8 @@ class CbvVocabularyCacheStore {
 
   static Future<void> clear() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_jsonKey);
-      await prefs.remove(_timestampKey);
+      await HiveStorage.remove(_jsonKey);
+      await HiveStorage.remove(_timestampKey);
     } catch (_) {
       // Ignore.
     }

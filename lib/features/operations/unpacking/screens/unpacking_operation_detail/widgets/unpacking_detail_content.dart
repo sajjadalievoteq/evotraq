@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_body.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_error_view.dart';
@@ -24,8 +26,23 @@ class UnpackingDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (awaitingSelection || isLoading) {
-      if (isLoading) return const OperationDetailsLoadingWidget();
+    if (listLoading) {
+      return const AppEmptyDetail(
+        title: 'Select an unpacking operation',
+        subtitle: 'Choose one from the list to view its details.',
+        iconAsset: AppAssets.iconPackage,
+        loading: true,
+      );
+    }
+    if (awaitingSelection) {
+      return const AppEmptyDetail(
+        title: 'Select an unpacking operation',
+        subtitle: 'Choose one from the list to view its details.',
+        iconAsset: AppAssets.iconPackage,
+      );
+    }
+    if (isLoading) {
+      return const OperationDetailsLoadingWidget();
     }
 
     if (errorMessage != null) {
@@ -34,7 +51,13 @@ class UnpackingDetailContent extends StatelessWidget {
         onRetry: onRetry,
       );
     }
-    if (operation == null) return const OperationDetailsLoadingWidget();
+    if (operation == null) {
+      return const AppEmptyDetail(
+        title: 'Select an unpacking operation',
+        subtitle: 'Choose one from the list to view its details.',
+        iconAsset: AppAssets.iconPackage,
+      );
+    }
 
     return UnpackingDetailBody(operation: operation!);
   }

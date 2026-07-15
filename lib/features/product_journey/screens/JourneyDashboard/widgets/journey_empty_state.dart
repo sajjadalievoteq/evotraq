@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class JourneyEmptyState extends StatelessWidget {
@@ -11,7 +11,7 @@ class JourneyEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
 
-    return EmptyListView(
+    return AppEmptyState(
       iconAsset: AppAssets.iconGlobe,
       title: 'Track Product Journey',
       subtitle:

@@ -92,6 +92,17 @@ void main() {
       expect(result.epc, 'https://id.gs1.org/01/00629200080027/21/SN123');
     });
 
+    test('parses pipe-delimited GS1 element string from web camera', () {
+      const barcode = '|01062911091203601726113010UX9B|2171585936751779';
+      final result = parseToEPC(barcode);
+
+      expect(result.type, EPCType.sgtin);
+      expect(result.gtin, '06291109120360');
+      expect(result.serial, '71585936751779');
+      expect(result.epc, contains('/01/06291109120360/'));
+      expect(result.epc, contains('/21/71585936751779'));
+    });
+
     test('throws EPCParseException for invalid input', () {
       expect(
         () => parseToEPC('NOTABARCODE'),

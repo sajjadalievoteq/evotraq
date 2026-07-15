@@ -71,7 +71,12 @@ abstract final class GlnUiConstants {
   static const fabAddNew = 'Add New GLN';
   static const fabCloseCreate = 'Close create form';
   static const emptyNoMatchSearch = 'No GLNs match your search.';
-  static const emptyListTitle = 'No GLNs found';
+  static const emptyListTitle = 'No GLNs yet';
+  static const emptyListSubtitle = 'Create a GLN to get started.';
+  static const emptyAddAction = 'Add GLN';
+  static const awaitingSelectionTitle = 'Select a GLN';
+  static const awaitingSelectionSubtitle =
+      'Choose one from the list to view its details.';
   static const entityPluralGlns = 'GLNs';
   static const listCardGlnPrefix = 'GLN: ';
   static const menuTooltipActions = 'Actions';

@@ -6,7 +6,7 @@ import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/features/epcis/cubit/aggregation_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_ui_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_events_list/widgets/aggregation_event_list_item_card.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -18,6 +18,7 @@ class AggregationEventsResultsList extends StatelessWidget {
     this.selectedEventId,
     required this.onRefresh,
     required this.onClearFilters,
+    this.onCreate,
     required this.onTapEvent,
     required this.onLoadMore,
   });
@@ -26,6 +27,7 @@ class AggregationEventsResultsList extends StatelessWidget {
   final String? selectedEventId;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<AggregationEvent> onTapEvent;
   final VoidCallback onLoadMore;
 
@@ -60,16 +62,21 @@ class AggregationEventsResultsList extends StatelessWidget {
         }
 
         if (state.aggregationEvents.isEmpty) {
+          final filtered = state.hasActiveFilters;
           return _constrainedCenter(
-            EmptyListView(
+            AppEmptyState(
               iconAsset: AppAssets.iconLayers,
               title: AggregationEventUiConstants.emptyListTitle,
-              subtitle: 'Try adjusting your search criteria or filters',
-              filteredTitle: AggregationEventUiConstants.emptyListTitle,
-              filteredSubtitle: 'Try adjusting your search criteria or filters',
-              hasItems: true,
-              hasActiveFilters: true,
+              subtitle: AggregationEventUiConstants.emptyListSubtitle,
+              filteredTitle: 'No results found',
+              filteredSubtitle: AggregationEventUiConstants.emptyNoMatchSearch,
+              hasItems: filtered,
+              hasActiveFilters: filtered,
               onClearFilters: onClearFilters,
+              primaryActionLabel:
+                  filtered ? null : AggregationEventUiConstants.emptyAddAction,
+              primaryActionIconAsset: filtered ? null : AppAssets.iconPlus,
+              onPrimaryAction: filtered ? null : onCreate,
             ),
           );
         }

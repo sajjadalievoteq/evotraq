@@ -7,7 +7,8 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
-import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_awaiting_selection.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/sgtin_detail_scaffold.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
@@ -275,7 +276,16 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.awaitingListSelection) {
-      return SgtinDetailAwaitingSelection(embedded: widget.embedded);
+      final status = context.read<SGTINCubit>().state.status;
+      final loading =
+          status == SGTINStatus.loading || status == SGTINStatus.initial;
+      final empty = AppEmptyDetail(
+        title: SgtinUiConstants.awaitingSelectionTitle,
+        subtitle: SgtinUiConstants.awaitingSelectionSubtitle,
+        iconAsset: AppAssets.iconTarget,
+        loading: loading,
+      );
+      return widget.embedded ? empty : Scaffold(body: empty);
     }
 
     return BlocListener<SGTINCubit, SGTINState>(

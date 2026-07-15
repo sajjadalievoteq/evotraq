@@ -25,7 +25,8 @@ dependencies:
   web_socket_channel: ^3.0.0
   
   # Storage
-  shared_preferences: ^2.5.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
   flutter_secure_storage: ^10.0.0
   
   # UI components
@@ -38,7 +39,7 @@ dependencies:
   
   # Utils
   intl: ^0.20.2
-  logger: ^2.6.1
+  crypto: ^3.0.7
   url_launcher: ^6.3.0
   uuid: ^4.5.1
   flutter_markdown: ^0.7.5
@@ -48,35 +49,11 @@ dependencies:
   
   # Charts and Data Visualization
   fl_chart: ^1.1.1
-  syncfusion_flutter_charts: ^33.2.4
-  timeline_tile: ^2.0.0
   
-  # Date and Time
-  timezone: ^0.11.0
+  # Camera / barcode scanning (Web + Android + iOS)
+  mobile_scanner: ^7.2.1
   
-  # QR Code and Barcode
-  qr_code_scanner: ^1.0.1
-  
-  # PDF Generation
-  pdf: ^3.11.3
-  printing: ^5.14.2
-  
-  # Export functionality
-  csv: ^8.0.0
-  
-  # Platform Integration
-  device_info_plus: ^12.1.0
-  package_info_plus: ^9.0.1
-  
-  # Camera and ML Vision
-  camera: ^0.12.0+1
-  google_mlkit_barcode_scanning: ^0.14.1
-  image: ^4.3.0
-  permission_handler: ^12.0.1
-  
-  # Maps and Location
-  google_maps_flutter: ^2.13.1
-  geolocator: ^14.0.2
+  # Maps
   flutter_map: ^8.0.0
   latlong2: ^0.9.1
   get_it: ^9.2.1
@@ -106,8 +83,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/images/logo/
-    - ../backend/src/main/resources/gs1/gcpprefixformatlist.json
-
   fonts:
     - family: Nekst
       fonts:

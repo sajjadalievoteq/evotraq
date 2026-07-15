@@ -27,6 +27,8 @@ class SsccListBody extends StatelessWidget {
     required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapSscc,
     required this.onRowMenuAction,
     required this.onLoadMore,
@@ -49,6 +51,8 @@ class SsccListBody extends StatelessWidget {
   final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapSscc;
   final void Function(SSCC sscc, String action) onRowMenuAction;
   final VoidCallback onLoadMore;
@@ -102,6 +106,8 @@ class SsccListBody extends StatelessWidget {
         selectedSsccCode: selectedSsccCode,
         onRefresh: onRefresh,
         onClearFilters: onClearFilters,
+        hasActiveFilters: hasActiveFilters,
+        onCreate: onCreate,
         onTapSscc: onTapSscc,
         onRowMenuAction: onRowMenuAction,
         onLoadMore: onLoadMore,

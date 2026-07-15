@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_error_view.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
@@ -23,6 +23,7 @@ class OperationListResults<T> extends StatelessWidget {
     required this.itemBuilder,
     required this.emptyTitle,
     required this.emptySubtitle,
+    this.emptyIconAsset,
     this.hasMore = false,
     this.isLoadingMore = false,
     required this.onLoadMore,
@@ -40,6 +41,7 @@ class OperationListResults<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T operation) itemBuilder;
   final String emptyTitle;
   final String emptySubtitle;
+  final String? emptyIconAsset;
   final bool hasMore;
   final bool isLoadingMore;
   final VoidCallback onLoadMore;
@@ -64,8 +66,8 @@ class OperationListResults<T> extends StatelessWidget {
     }
 
     if (filteredOperations.isEmpty) {
-      return EmptyListView(
-        iconAsset: AppAssets.iconPackage,
+      return AppEmptyState(
+        iconAsset: emptyIconAsset ?? AppAssets.iconPackage,
         title: emptyTitle,
         subtitle: emptySubtitle,
         filteredTitle: 'No operations match your search or filters.',

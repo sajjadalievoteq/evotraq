@@ -25,6 +25,8 @@ class GtinListBody extends StatelessWidget {
     required this.onPageSizeChanged,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapGtin,
     required this.onLoadMore,
   });
@@ -42,6 +44,8 @@ class GtinListBody extends StatelessWidget {
   final ValueChanged<int> onPageSizeChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapGtin;
   final VoidCallback onLoadMore;
 
@@ -112,6 +116,8 @@ class GtinListBody extends StatelessWidget {
         selectedGtinCode: selectedGtinCode,
         onRefresh: onRefresh,
         onClearFilters: onClearFilters,
+        hasActiveFilters: hasActiveFilters,
+        onCreate: onCreate,
         onTapGtin: onTapGtin,
         onLoadMore: onLoadMore,
       ),

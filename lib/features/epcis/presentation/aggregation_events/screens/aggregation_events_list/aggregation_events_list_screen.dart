@@ -287,6 +287,8 @@ class _AggregationEventsListScreenState
         if (_showAdvancedFilters) _showAdvancedFiltersDialog();
       },
       onClearFilters: _clearFilters,
+      onCreate: widget.onEmbeddedCreate ??
+          () => context.push(Constants.epcisAggregationEventNewRoute),
       onQuickFilters: _showQuickFilterDialog,
       pageSize: _pageSize,
       onPageSizeChanged: (size) {

@@ -17,6 +17,7 @@ class AggregationEventsListBody extends StatelessWidget {
     required this.onSearchTextChanged,
     required this.onToggleAdvancedFilters,
     required this.onClearFilters,
+    this.onCreate,
     required this.onQuickFilters,
     required this.pageSize,
     required this.onPageSizeChanged,
@@ -33,6 +34,7 @@ class AggregationEventsListBody extends StatelessWidget {
   final ValueChanged<String> onSearchTextChanged;
   final VoidCallback onToggleAdvancedFilters;
   final VoidCallback onClearFilters;
+  final VoidCallback? onCreate;
   final VoidCallback onQuickFilters;
   final int pageSize;
   final ValueChanged<int> onPageSizeChanged;
@@ -92,6 +94,7 @@ class AggregationEventsListBody extends StatelessWidget {
         selectedEventId: selectedEventId,
         onRefresh: onRefresh,
         onClearFilters: onClearFilters,
+        onCreate: onCreate,
         onTapEvent: onTapEvent,
         onLoadMore: onLoadMore,
       ),

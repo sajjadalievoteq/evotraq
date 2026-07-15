@@ -1,15 +1,32 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit(this._dashboardService, this._sessionStore)
-      : super(const HomeState(status: HomeLoadStatus.loading));
+  HomeCubit(
+    this._dashboardService,
+    this._sessionStore, {
+    this.pollInterval = const Duration(seconds: 60),
+  })  : _currentPollInterval = pollInterval,
+        super(const HomeState(status: HomeLoadStatus.loading));
 
   final DashboardService _dashboardService;
   final HomeOverviewSessionStore _sessionStore;
+
+  /// Production default polling interval while the dashboard is visible.
+  final Duration pollInterval;
+
+  static const Duration _maxPollBackoff = Duration(minutes: 5);
+
   int _healthLoadGeneration = 0;
+  Timer? _pollTimer;
+  Duration _currentPollInterval;
+  String? _pollAccountEmail;
+  bool _isRevalidating = false;
+  bool _isPolling = false;
 
   Future<void> load({
     String? accountEmail,
@@ -29,9 +46,11 @@ class HomeCubit extends Cubit<HomeState> {
           ),
         );
         // Revalidate in background — do not block the return of load().
-        _revalidate(
-          accountEmail: accountEmail,
-          keepExistingOnError: true,
+        unawaited(
+          _revalidate(
+            accountEmail: accountEmail,
+            keepExistingOnError: true,
+          ),
         );
         return;
       }
@@ -77,13 +96,64 @@ class HomeCubit extends Cubit<HomeState> {
     await load(accountEmail: accountEmail, forceRefresh: true);
   }
 
+  /// Starts (or restarts) periodic background SWR while the dashboard is open.
+  void startPolling({String? accountEmail}) {
+    if (isClosed) return;
+    _pollAccountEmail = accountEmail ?? _pollAccountEmail;
+    _pollTimer?.cancel();
+    _isPolling = true;
+    _pollTimer = Timer.periodic(_currentPollInterval, (_) => _onPollTick());
+  }
+
+  /// Cancels the poll timer without resetting backoff (pause may resume later).
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    _isPolling = false;
+  }
+
+  /// Immediate background refresh on app/tab foreground, then restart polling.
+  Future<void> onAppResumed({String? accountEmail}) async {
+    if (isClosed) return;
+    final email = accountEmail ?? _pollAccountEmail;
+    _currentPollInterval = pollInterval;
+    await _revalidate(
+      accountEmail: email,
+      keepExistingOnError: true,
+    );
+    if (!isClosed) {
+      startPolling(accountEmail: email);
+    }
+  }
+
+  void _onPollTick() {
+    if (isClosed || !_isPolling || _isRevalidating) return;
+    // Claim the lock synchronously so a later tick cannot also enter before
+    // `_revalidate` runs to its first await.
+    _isRevalidating = true;
+    unawaited(
+      _revalidate(
+        accountEmail: _pollAccountEmail,
+        keepExistingOnError: true,
+        adjustPollBackoff: true,
+        lockAlreadyHeld: true,
+      ),
+    );
+  }
+
   Future<void> _revalidate({
     required String? accountEmail,
     required bool keepExistingOnError,
+    bool adjustPollBackoff = false,
+    bool lockAlreadyHeld = false,
   }) async {
+    if (!lockAlreadyHeld) {
+      if (_isRevalidating) return;
+      _isRevalidating = true;
+    }
     try {
       final overview = await _dashboardService.getSummary(
-        recentLimit: 10,
+        recentLimit: 5,
         throughputHours: state.throughputHours,
       );
       final refreshedAt = DateTime.now();
@@ -113,8 +183,15 @@ class HomeCubit extends Cubit<HomeState> {
       );
 
       _startHealthLoad(accountEmail: accountEmail);
+
+      if (adjustPollBackoff) {
+        _restorePollInterval();
+      }
     } catch (e) {
       if (isClosed) return;
+      if (adjustPollBackoff) {
+        _increasePollBackoff();
+      }
       if (keepExistingOnError && state.hasPayload) {
         // Revalidation failed but we have a cached snapshot to keep showing.
         // Flag it so the UI can indicate the numbers may be stale instead of
@@ -129,6 +206,25 @@ class HomeCubit extends Cubit<HomeState> {
           errorMessage: e.toString(),
         ),
       );
+    } finally {
+      _isRevalidating = false;
+    }
+  }
+
+  void _restorePollInterval() {
+    if (_currentPollInterval == pollInterval) return;
+    _currentPollInterval = pollInterval;
+    if (_isPolling && !isClosed) {
+      startPolling(accountEmail: _pollAccountEmail);
+    }
+  }
+
+  void _increasePollBackoff() {
+    final doubled = _currentPollInterval * 2;
+    _currentPollInterval =
+        doubled > _maxPollBackoff ? _maxPollBackoff : doubled;
+    if (_isPolling && !isClosed) {
+      startPolling(accountEmail: _pollAccountEmail);
     }
   }
 
@@ -192,5 +288,11 @@ class HomeCubit extends Cubit<HomeState> {
     } catch (_) {
       emit(state.copyWith(throughputLoading: false));
     }
+  }
+
+  @override
+  Future<void> close() {
+    stopPolling();
+    return super.close();
   }
 }

@@ -26,6 +26,8 @@ class SgtinListBody extends StatelessWidget {
     required this.onSortOrderChanged,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapSgtin,
     required this.onLoadMore,
   });
@@ -47,6 +49,8 @@ class SgtinListBody extends StatelessWidget {
   final ValueChanged<String> onSortOrderChanged;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapSgtin;
   final VoidCallback onLoadMore;
 
@@ -99,6 +103,8 @@ class SgtinListBody extends StatelessWidget {
         selectedSgtinId: selectedSgtinId,
         onRefresh: onRefresh,
         onClearFilters: onClearFilters,
+        hasActiveFilters: hasActiveFilters,
+        onCreate: onCreate,
         onTapSgtin: onTapSgtin,
         onLoadMore: onLoadMore,
       ),

@@ -361,6 +361,23 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
     _searchImmediate();
   }
 
+  bool get _hasActiveFilters {
+    return _searchController.text.trim().isNotEmpty ||
+        _sourceLocationController.text.trim().isNotEmpty ||
+        _destinationLocationController.text.trim().isNotEmpty ||
+        _companyPrefixController.text.trim().isNotEmpty ||
+        (_selectedStatus != null &&
+            _selectedStatus != SsccUiConstants.filterAll) ||
+        (_selectedContainerType != null &&
+            _selectedContainerType != SsccUiConstants.filterAll) ||
+        _packingDateFrom != null ||
+        _packingDateTo != null ||
+        _shippingDateFrom != null ||
+        _shippingDateTo != null ||
+        _receivingDateFrom != null ||
+        _receivingDateTo != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final content = AppLayoutBuilder(
@@ -386,6 +403,8 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
           onSortOrderChanged: _onSortOrderChanged,
           onRefresh: _refresh,
           onClearFilters: _clearAllFilters,
+          hasActiveFilters: _hasActiveFilters,
+          onCreate: _navigateToCreate,
           onTapSscc: _navigateToDetails,
           onRowMenuAction: _handleSsccRowMenu,
           onLoadMore: _loadMore,

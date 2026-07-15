@@ -1,14 +1,31 @@
-import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
+import 'package:traqtrace_app/features/barcode/widgets/camera_media_stream_stub.dart'
+    if (dart.library.html)
+        'package:traqtrace_app/features/barcode/widgets/camera_media_stream_web.dart';
 import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_stub.dart'
+    if (dart.library.html)
+        'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_web.dart';
 
+/// Camera acquisition for GS1 barcode scanning (Web + Android + iOS + macOS).
+///
+/// Public API (constructor, callbacks, overlay) is preserved. Downstream GS1
+/// parsing is unchanged — this widget only delivers raw barcode strings.
+///
+/// Mounted only after an explicit "Scan with Camera" tap so browser permission
+/// is never requested on page load.
+///
+/// **mobile_scanner 7.2.1 web lifecycle:** MediaStream tracks are released by
+/// [MobileScannerController.stop] (ZXing `reset`). [dispose] also calls
+/// platform `stop`. We disable [MobileScanner.useAppLifecycleState] and own
+/// stop/start ourselves to avoid racing dispose vs the widget's observer.
 class GS1BarcodeScannerWidget extends StatefulWidget {
   const GS1BarcodeScannerWidget({
     super.key,
@@ -18,6 +35,8 @@ class GS1BarcodeScannerWidget extends StatefulWidget {
     this.overlayColor = Colors.green,
     this.loadingWidget,
     this.errorWidget,
+    this.onCameraBecameAvailable,
+    this.onCameraUnavailable,
   });
 
   final Function(String gs1ElementString) onGS1BarcodeDetected;
@@ -27,6 +46,12 @@ class GS1BarcodeScannerWidget extends StatefulWidget {
   final Widget? loadingWidget;
   final Widget? errorWidget;
 
+  /// Optional: host can mark camera capability as available after start.
+  final VoidCallback? onCameraBecameAvailable;
+
+  /// Optional: host can mark camera capability as unavailable after failure.
+  final VoidCallback? onCameraUnavailable;
+
   @override
   State<GS1BarcodeScannerWidget> createState() =>
       _GS1BarcodeScannerWidgetState();
@@ -34,158 +59,197 @@ class GS1BarcodeScannerWidget extends StatefulWidget {
 
 class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     with WidgetsBindingObserver {
-  CameraController? _cameraController;
-  final BarcodeScanner _barcodeScanner = BarcodeScanner(
-    formats: [BarcodeFormat.dataMatrix, BarcodeFormat.code128],
-  );
-  bool _isInitialized = false;
-  bool _isProcessing = false;
+  MobileScannerController? _controller;
   String? _errorMessage;
-  List<Rect> _barcodeLocations = [];
   bool _flashEnabled = false;
-  List<CameraDescription>? _cameras;
-  CameraLensDirection _currentLensDirection = CameraLensDirection.back;
-  bool _isPlatformSupported = false;
+  bool _usingFrontCamera = false;
+  bool _reportedAvailable = false;
+  bool _controllerUpdateScheduled = false;
+  String? _lastDetectedValue;
+  DateTime? _lastDetectedAt;
+
+  /// True while a live controller exists (not fully released).
+  bool _cameraHeld = false;
+
+  /// In-flight full release; prevents overlapping dispose / recreate.
+  Future<void>? _releaseFuture;
+
+  VoidCallback? _unsubscribeVisibility;
+
+  static const _duplicateWindow = Duration(seconds: 1);
+
+  static const _formats = [
+    BarcodeFormat.dataMatrix,
+    BarcodeFormat.code128,
+    BarcodeFormat.qrCode,
+    BarcodeFormat.ean13,
+    BarcodeFormat.ean8,
+  ];
+
+  MobileScannerController get _requireController {
+    final c = _controller;
+    if (c == null) {
+      throw StateError('MobileScannerController is not available');
+    }
+    return c;
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPlatformAndInitialize();
+    _unsubscribeVisibility = subscribePageVisibility(
+      onHidden: _pauseCameraForLifecycle,
+      onVisible: _resumeCameraAfterLifecycle,
+    );
+    _attachNewController();
   }
 
-  void _checkPlatformAndInitialize() {
-    if (kIsWeb) {
-      setState(() {
-        _errorMessage = 'Camera scanning is not supported on web platform';
-        _isPlatformSupported = false;
-      });
-    } else if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      _isPlatformSupported = true;
-      _initializeCamera();
-    } else {
-      setState(() {
-        _errorMessage =
-            'Camera scanning is not supported on ${defaultTargetPlatform.toString()}';
-        _isPlatformSupported = false;
-      });
-    }
+  void _attachNewController() {
+    final controller = MobileScannerController(
+      facing: CameraFacing.back,
+      formats: _formats,
+      detectionSpeed: DetectionSpeed.normal,
+      detectionTimeoutMs: 500,
+    );
+    controller.addListener(_onControllerChanged);
+    _controller = controller;
+    _cameraHeld = true;
+    _releaseFuture = null;
   }
 
-  Future<void> _initializeCamera() async {
-    try {
-      _cameras = await availableCameras();
-      if (_cameras == null || _cameras!.isEmpty) {
-        setState(() {
-          _errorMessage = 'No cameras available';
-        });
-        return;
-      }
-
-      final camera = _cameras!.firstWhere(
-        (camera) => camera.lensDirection == _currentLensDirection,
-        orElse: () => _cameras!.first,
-      );
-
-      _cameraController = CameraController(
-        camera,
-        ResolutionPreset.medium,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.yuv420,
-      );
-
-      await _cameraController!.initialize();
-
-      try {
-        await _cameraController!.setFocusMode(FocusMode.auto);
-      } catch (e) {
-        debugPrint('Focus mode not supported on this device: $e');
-      }
-
-      try {
-        await _cameraController!.setExposureOffset(1.5);
-      } catch (e) {
-        debugPrint('Setting exposure not supported on this device: $e');
-      }
-
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-        _startBarcodeScanning();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to initialize camera: $e';
-      });
-    }
+  /// Full release: stop (releases web MediaStream) then dispose. Idempotent.
+  Future<void> _releaseFully() {
+    return _releaseFuture ??= _doReleaseFully();
   }
 
-  void _startBarcodeScanning() {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+  Future<void> _doReleaseFully() async {
+    final controller = _controller;
+    if (controller == null) {
+      _cameraHeld = false;
       return;
     }
 
-    _cameraController!.startImageStream((CameraImage image) {
-      if (_isProcessing) return;
-      _isProcessing = true;
-      _processImage(image);
+    _cameraHeld = false;
+    try {
+      controller.removeListener(_onControllerChanged);
+    } catch (_) {}
+
+    // mobile_scanner 7.2.1 web: stop() → ZXing reset() stops MediaStreamTracks.
+    try {
+      await controller.stop();
+    } catch (e) {
+      debugPrint('GS1BarcodeScanner: stop failed: $e');
+    }
+    try {
+      await controller.dispose();
+    } catch (e) {
+      debugPrint('GS1BarcodeScanner: dispose failed: $e');
+    }
+
+    // Clear any leftover browser tracks after plugin teardown.
+    forceStopActiveCameraTracks();
+
+    _controller = null;
+  }
+
+  /// Pause only (keep controller) — matches mobile_scanner README lifecycle.
+  Future<void> _pauseCameraForLifecycle() async {
+    if (!_cameraHeld || _controller == null) return;
+    // Permission dialogs also fire inactive; only stop if already running.
+    if (!_controller!.value.isRunning) return;
+    try {
+      await _controller!.stop();
+    } catch (_) {}
+    forceStopActiveCameraTracks();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _resumeCameraAfterLifecycle() async {
+    if (!_cameraHeld || _controller == null || !mounted) return;
+    if (_controller!.value.isRunning) return;
+    try {
+      await _controller!.start();
+    } catch (e) {
+      debugPrint('GS1BarcodeScanner: resume start failed: $e');
+    }
+    if (mounted) setState(() {});
+  }
+
+  /// MobileScanner can notify during mount/layout. Never setState or notify the
+  /// parent synchronously from that path — it triggers `!_dirty` on ancestors.
+  void _onControllerChanged() {
+    if (!mounted || !_cameraHeld || _controllerUpdateScheduled) return;
+    _controllerUpdateScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controllerUpdateScheduled = false;
+      if (!mounted || !_cameraHeld || _controller == null) return;
+      _applyControllerState();
     });
   }
 
-  Future<void> _processImage(CameraImage image) async {
-    try {
-      final inputImage = _inputImageFromCameraImage(image);
-      final barcodes = await _barcodeScanner.processImage(inputImage);
-      if (barcodes.isNotEmpty) {
-        _handleDetectedBarcodes(barcodes);
+  void _applyControllerState() {
+    final state = _requireController.value;
+    final error = state.error;
+
+    if (error != null) {
+      final message = _friendlyError(error);
+      if (_errorMessage != message || _flashEnabled) {
+        setState(() {
+          _errorMessage = message;
+          _flashEnabled = false;
+        });
       }
-    } catch (e) {
-      debugPrint('Error processing image: $e');
-    } finally {
-      _isProcessing = false;
+      widget.onCameraUnavailable?.call();
+      return;
     }
-  }
 
-  InputImage _inputImageFromCameraImage(CameraImage image) {
-    final writeBuffer = WriteBuffer();
-    for (final plane in image.planes) {
-      writeBuffer.putUint8List(plane.bytes);
+    if (state.isInitialized && !_reportedAvailable) {
+      _reportedAvailable = true;
+      widget.onCameraBecameAvailable?.call();
     }
-    final bytes = writeBuffer.done().buffer.asUint8List();
 
-    final rotation = InputImageRotationValue.fromRawValue(
-          _cameraController!.description.sensorOrientation,
-        ) ??
-        InputImageRotation.rotation0deg;
-
-    return InputImage.fromBytes(
-      bytes: bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation,
-        format: InputImageFormat.nv21,
-        bytesPerRow: image.planes[0].bytesPerRow,
-      ),
-    );
-  }
-
-  void _handleDetectedBarcodes(List<Barcode> barcodes) {
-    if (widget.showOverlay && mounted) {
+    final flash = state.torchState == TorchState.on;
+    final front = state.cameraDirection == CameraFacing.front;
+    if (_flashEnabled != flash || _usingFrontCamera != front) {
       setState(() {
-        _barcodeLocations =
-            barcodes.map((barcode) => barcode.boundingBox).toList();
+        _flashEnabled = flash;
+        _usingFrontCamera = front;
       });
     }
+  }
 
-    for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
-        final gs1ElementString = _processRawBarcode(barcode.rawValue!);
-        if (gs1ElementString != null) {
-          _handleValidGS1Barcode(gs1ElementString);
-          break;
-        }
+  String _friendlyError(MobileScannerException e) {
+    switch (e.errorCode) {
+      case MobileScannerErrorCode.permissionDenied:
+        return 'Camera access is unavailable. Enable camera permission in your browser settings or continue using a wired scanner or manual entry.';
+      case MobileScannerErrorCode.unsupported:
+        return 'Camera scanning is not supported in this browser. Use a wired scanner or manual entry.';
+      default:
+        return 'Camera access is unavailable. Enable camera permission in your browser settings or continue using a wired scanner or manual entry.';
+    }
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    if (!_cameraHeld || _controller == null) return;
+    for (final barcode in capture.barcodes) {
+      final raw = barcode.rawValue;
+      if (raw == null || raw.isEmpty) continue;
+
+      final now = DateTime.now();
+      if (_lastDetectedValue == raw &&
+          _lastDetectedAt != null &&
+          now.difference(_lastDetectedAt!) < _duplicateWindow) {
+        return;
+      }
+
+      _lastDetectedValue = raw;
+      _lastDetectedAt = now;
+
+      final gs1ElementString = _processRawBarcode(raw);
+      if (gs1ElementString != null) {
+        unawaited(_handleValidGS1Barcode(gs1ElementString));
+        break;
       }
     }
   }
@@ -194,74 +258,91 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     return rawValue.isNotEmpty ? rawValue : null;
   }
 
-  void _handleValidGS1Barcode(String gs1ElementString) {
+  /// Single-mode: fully release the MediaStream before notifying the parent
+  /// (parent still switches to details / unmounts). Continuous mode keeps scanning.
+  Future<void> _handleValidGS1Barcode(String gs1ElementString) async {
     if (widget.scanMode == ScanMode.single) {
-      _cameraController?.stopImageStream();
-      if (mounted) {
-        setState(() {
-          _barcodeLocations = [];
-        });
-      }
+      await _releaseFully();
+      if (mounted) setState(() {});
     }
     widget.onGS1BarcodeDetected(gs1ElementString);
   }
 
   Future<void> toggleFlash() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
-    }
+    if (!_cameraHeld || _controller == null) return;
     try {
-      final newMode = _flashEnabled ? FlashMode.off : FlashMode.torch;
-      await _cameraController!.setFlashMode(newMode);
+      await _controller!.toggleTorch();
+      if (!mounted || !_cameraHeld || _controller == null) return;
       setState(() {
-        _flashEnabled = !_flashEnabled;
+        _flashEnabled = _controller!.value.torchState == TorchState.on;
       });
     } catch (e) {
       debugPrint('Flash control not supported: $e');
       if (mounted) {
         context.showInfo(
           'Flash mode not supported on this device',
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         );
       }
     }
   }
 
   Future<void> toggleCamera() async {
-    _currentLensDirection = _currentLensDirection == CameraLensDirection.back
-        ? CameraLensDirection.front
-        : CameraLensDirection.back;
+    if (!_cameraHeld || _controller == null) return;
+    try {
+      await _controller!.switchCamera();
+      if (!mounted || !_cameraHeld || _controller == null) return;
+      setState(() {
+        _usingFrontCamera =
+            _controller!.value.cameraDirection == CameraFacing.front;
+        _flashEnabled = _controller!.value.torchState == TorchState.on;
+      });
+    } catch (e) {
+      debugPrint('Camera switch not supported: $e');
+      if (mounted) {
+        context.showInfo(
+          'Switching camera is not supported on this device',
+          duration: const Duration(seconds: 2),
+        );
+      }
+    }
+  }
 
-    await _cameraController?.stopImageStream();
-    await _cameraController?.dispose();
-
+  Future<void> _retry() async {
+    await _releaseFully();
+    _lastDetectedValue = null;
+    _lastDetectedAt = null;
+    _reportedAvailable = false;
+    if (!mounted) return;
     setState(() {
-      _isInitialized = false;
-      _flashEnabled = false;
+      _errorMessage = null;
+      _attachNewController();
     });
-
-    await _initializeCamera();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
-    }
-
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      _cameraController?.stopImageStream();
-    } else if (state == AppLifecycleState.resumed) {
-      _startBarcodeScanning();
+    // Own lifecycle only — MobileScanner.useAppLifecycleState is false.
+    // Do not dispose on inactive (permission popups); stop releases the stream.
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        unawaited(_pauseCameraForLifecycle());
+      case AppLifecycleState.resumed:
+        unawaited(_resumeCameraAfterLifecycle());
+      case AppLifecycleState.detached:
+        unawaited(_releaseFully());
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _barcodeScanner.close();
-    _cameraController?.dispose();
+    _unsubscribeVisibility?.call();
+    _unsubscribeVisibility = null;
+    // Kick off stop+dispose immediately; cannot await in State.dispose.
+    unawaited(_releaseFully());
     super.dispose();
   }
 
@@ -286,42 +367,63 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
                     _errorMessage!,
                     textAlign: TextAlign.center,
                   ),
-                  if (!_isPlatformSupported) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Use manual barcode entry instead.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Use a wired scanner or manual barcode entry instead.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: _retry,
+                    icon: TraqIcon(AppAssets.iconCamera, size: 18),
+                    label: const Text('Retry'),
+                  ),
                 ],
               ),
             ),
           );
     }
 
-    if (!_isInitialized) {
+    final controller = _controller;
+    if (!_cameraHeld || controller == null) {
       return widget.loadingWidget ??
           const Center(child: CircularProgressIndicator());
     }
 
     return Stack(
       children: [
-        SizedBox.expand(child: CameraPreview(_cameraController!)),
+        MobileScanner(
+          controller: controller,
+          // Avoid racing our WidgetsBindingObserver (dispose vs stop/start).
+          useAppLifecycleState: false,
+          onDetect: _onDetect,
+          placeholderBuilder: (_) =>
+              widget.loadingWidget ??
+              const Center(child: CircularProgressIndicator()),
+          errorBuilder: (context, error) {
+            // errorBuilder runs during build — only schedule side effects.
+            final message = _friendlyError(error);
+            if (_errorMessage != message && !_controllerUpdateScheduled) {
+              _controllerUpdateScheduled = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _controllerUpdateScheduled = false;
+                if (!mounted) return;
+                setState(() => _errorMessage = message);
+                widget.onCameraUnavailable?.call();
+              });
+            }
+            return widget.loadingWidget ??
+                const Center(child: CircularProgressIndicator());
+          },
+        ),
         if (widget.showOverlay)
-          CustomPaint(
-            size: Size.infinite,
-            painter: BarcodePainter(
-              barcodeLocations: _barcodeLocations,
-              color: widget.overlayColor,
+          Positioned.fill(
+            child: ScannerOverlay(
+              borderColor: widget.overlayColor,
+              cutOutWidth: 260,
+              cutOutHeight: 200,
             ),
           ),
-        Positioned.fill(
-          child: ScannerOverlay(
-            borderColor: widget.overlayColor,
-            cutOutWidth: 260,
-            cutOutHeight: 200,
-          ),
-        ),
         Positioned(
           top: 20,
           right: 20,
@@ -342,7 +444,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
             onPressed: toggleCamera,
           ),
         ),
-        if (_currentLensDirection == CameraLensDirection.front)
+        if (_usingFrontCamera)
           Positioned(
             top: 70,
             left: 0,
@@ -382,35 +484,5 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
         ),
       ],
     );
-  }
-}
-
-class BarcodePainter extends CustomPainter {
-  const BarcodePainter({
-    required this.barcodeLocations,
-    required this.color,
-  });
-
-  final List<Rect> barcodeLocations;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-
-    for (final rect in barcodeLocations) {
-      if (rect != Rect.zero) {
-        canvas.drawRect(rect, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant BarcodePainter oldDelegate) {
-    return !listEquals(oldDelegate.barcodeLocations, barcodeLocations) ||
-        oldDelegate.color != color;
   }
 }

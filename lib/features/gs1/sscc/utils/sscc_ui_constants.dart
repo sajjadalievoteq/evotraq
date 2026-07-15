@@ -55,7 +55,12 @@ abstract final class SsccUiConstants {
   static const fabAddNew = 'Add New SSCC';
   static const fabCloseCreate = 'Close create form';
   static const emptyNoMatchSearch = 'No SSCCs match your search.';
-  static const emptyListTitle = 'No SSCCs found';
+  static const emptyListTitle = 'No SSCCs yet';
+  static const emptyListSubtitle = 'Create an SSCC to get started.';
+  static const emptyAddAction = 'Add SSCC';
+  static const awaitingSelectionTitle = 'Select an SSCC';
+  static const awaitingSelectionSubtitle =
+      'Choose one from the list to view its details.';
   static const entityPluralSsccs = 'SSCCs';
 
   static const listCardTypePrefix = 'Type: ';
@@ -103,7 +108,6 @@ abstract final class SsccUiConstants {
   static const detailCreateTitle = 'Create New SSCC';
   static const detailEditTitle = 'Edit SSCC';
   static const detailViewTitle = 'SSCC Details';
-  static const detailAwaitSelection = 'Select an SSCC from the list';
   static const detailSaveButton = 'Save SSCC';
   static const successSsccSaved = 'SSCC saved successfully';
   static const errorGeneric = 'Something went wrong';

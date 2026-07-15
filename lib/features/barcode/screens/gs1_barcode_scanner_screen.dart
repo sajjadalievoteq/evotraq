@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -68,11 +66,6 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   final FocusNode _manualFocusNode = FocusNode();
   final FocusNode _wiredFocusNode = FocusNode();
 
-  bool get _cameraSupported =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
-
   @override
   void initState() {
     super.initState();
@@ -83,6 +76,8 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
     } catch (_) {
     }
 
+    // Wired is default when HID is possible; camera starts only after
+    // explicit "Scan with Camera" tap (browser permission safety).
     if (_scannerDetection.supportsWired) {
       _isWiredActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -136,6 +131,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
           _details = details;
           _verificationResult = verResult;
           _isProcessing = false;
+          _isCameraActive = false;
           _manualController.clear();
         });
 
@@ -239,11 +235,9 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
   Widget _buildScannerView() {
     final colorScheme = Theme.of(context).colorScheme;
     final isScannable = _scannerDetection.isScannable;
-    final showCameraButton =
-        _scannerDetection.hasCamera && _cameraSupported;
-    final showWiredToggle = _scannerDetection.supportsWired &&
-        _scannerDetection.hasCamera &&
-        _cameraSupported;
+    final showCameraButton = _scannerDetection.canOfferCamera;
+    final showWiredToggle =
+        _scannerDetection.supportsWired && _scannerDetection.canOfferCamera;
 
     return KeyboardListener(
       focusNode: _wiredFocusNode,
@@ -279,13 +273,16 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
                               _isWiredActive = false;
                               _wiredBuffer = '';
                               _scannerKey = UniqueKey();
+                            } else if (_scannerDetection.supportsWired) {
+                              _isWiredActive = true;
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _wiredFocusNode.requestFocus(),
+                              );
                             }
                           });
                         },
                         icon: TraqIcon(
-                          _isCameraActive
-                              ? AppAssets.iconCamera
-                              : AppAssets.iconCamera,
+                          AppAssets.iconCamera,
                           size: 16,
                         ),
                         label: Text(
@@ -334,7 +331,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
               ),
             ),
 
-          if (_isCameraActive && _cameraSupported)
+          if (_isCameraActive && showCameraButton)
             Expanded(
               flex: 3,
               child: Padding(
@@ -345,6 +342,10 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
                     key: _scannerKey,
                     onGS1BarcodeDetected: _handleDetection,
                     scanMode: widget.scanMode,
+                    onCameraBecameAvailable:
+                        _scannerDetection.reportCameraAvailable,
+                    onCameraUnavailable:
+                        _scannerDetection.reportCameraUnavailable,
                   ),
                 ),
               ),

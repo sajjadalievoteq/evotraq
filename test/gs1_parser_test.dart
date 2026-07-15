@@ -39,6 +39,18 @@ void main() {
       expect(result['SERIAL'], '0SIATXTA39607034P');
     });
 
+    test('Parse barcode with pipe as FNC1 (web/HID scanners)', () {
+      const barcode = '|01062911091203601726113010UX9B|2171585936751779';
+
+      final result = GS1BarcodeParser.parseGS1Barcode(barcode);
+
+      expect(result['valid'], isTrue);
+      expect(result['GTIN'], '06291109120360');
+      expect(result['EXPIRY'], '261130');
+      expect(result['BATCH'], 'UX9B');
+      expect(result['SERIAL'], '71585936751779');
+    });
+
     test('Parse invalid barcode', () {
       final result = GS1BarcodeParser.parseGS1Barcode('INVALID_CODE');
       

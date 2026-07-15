@@ -65,6 +65,7 @@ class _GTINScreenState extends State<GTINScreen> {
                     embedded: true,
                     selectedGtinCode: selectedId,
                     onSelectGtin: onSelect,
+                    onEmbeddedCreate: onRequestCreate,
                   ),
           detailViewBuilder: (context, code) => GTINDetailScreen(
             key: ValueKey(code),

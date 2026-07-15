@@ -43,7 +43,9 @@ abstract final class SgtinUiConstants {
   static const fabAddNew = 'Add New SGTIN';
   static const fabCloseCreate = 'Close create form';
   static const emptyNoMatchSearch = 'No SGTINs match your search.';
-  static const emptyListTitle = 'No SGTINs found';
+  static const emptyListTitle = 'No SGTINs yet';
+  static const emptyListSubtitle = 'Create an SGTIN to get started.';
+  static const emptyAddAction = 'Add SGTIN';
   static const entityPluralSgtins = 'SGTINs';
 
   static const listCardSerialPrefix = 'Serial: ';
@@ -87,7 +89,7 @@ abstract final class SgtinUiConstants {
 
   static const awaitingSelectionTitle = 'Select an SGTIN';
   static const awaitingSelectionSubtitle =
-      'Select an SGTIN from the list to view its details.';
+      'Choose one from the list to view its details.';
 
   static String successSgtinUpdated(String serial) =>
       'SGTIN $serial updated successfully';

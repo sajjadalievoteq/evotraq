@@ -327,9 +327,9 @@ class _ReturnShippingOperationListBodyState
             onRetry: cubit.refresh,
             onRefresh: cubit.refresh,
             onClearFilters: _clearAllFilters,
-            emptyTitle: 'No shipping operations yet',
+            emptyTitle: 'No return shipping operations yet',
             emptySubtitle:
-                'Tap the + button to create your first shipping operation.',
+                'Tap the + button to create your first return shipping operation.',
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,

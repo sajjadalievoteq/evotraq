@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_list_item_card.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -19,6 +19,8 @@ class GtinResultsList extends StatelessWidget {
     this.selectedGtinCode,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapGtin,
     required this.onLoadMore,
   });
@@ -27,6 +29,8 @@ class GtinResultsList extends StatelessWidget {
   final String? selectedGtinCode;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapGtin;
   final VoidCallback onLoadMore;
 
@@ -73,15 +77,20 @@ class GtinResultsList extends StatelessWidget {
         final gtins = state.gtins;
         if (gtins == null || gtins.isEmpty) {
           return _constrainedCenter(
-            EmptyListView(
+            AppEmptyState(
               iconAsset: AppAssets.iconQr,
               title: GtinUiConstants.emptyListTitle,
-              subtitle: 'Try adjusting your search criteria or filters',
-              filteredTitle: GtinUiConstants.emptyListTitle,
-              filteredSubtitle: 'Try adjusting your search criteria or filters',
-              hasItems: true,
-              hasActiveFilters: true,
+              subtitle: GtinUiConstants.emptyListSubtitle,
+              filteredTitle: 'No results found',
+              filteredSubtitle: GtinUiConstants.emptyNoMatchSearch,
+              hasItems: hasActiveFilters,
+              hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
+              primaryActionLabel:
+                  hasActiveFilters ? null : GtinUiConstants.emptyAddAction,
+              primaryActionIconAsset:
+                  hasActiveFilters ? null : AppAssets.iconPlus,
+              onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
         }

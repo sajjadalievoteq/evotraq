@@ -55,7 +55,12 @@ abstract final class GtinUiConstants {
   static const fabAddNew = 'Add New GTIN';
   static const fabCloseCreate = 'Close create form';
   static const emptyNoMatchSearch = 'No GTINs match your search.';
-  static const emptyListTitle = 'No GTINs found';
+  static const emptyListTitle = 'No GTINs yet';
+  static const emptyListSubtitle = 'Create a GTIN to get started.';
+  static const emptyAddAction = 'Add GTIN';
+  static const awaitingSelectionTitle = 'Select a GTIN';
+  static const awaitingSelectionSubtitle =
+      'Choose one from the list to view its details.';
   static const entityPluralGtins = 'GTINs';
   static const listCardGtinPrefix = 'GTIN: ';
   static const listCardManufacturerPrefix = 'Manufacturer: ';

@@ -2,7 +2,8 @@ class ObjectEventDetailUiConstants {
   ObjectEventDetailUiConstants._();
 
   static const String detailTitle = 'Object Event';
-  static const String detailAwaitingHint = 'Details will appear here';
+  static const String detailAwaitingHint =
+      'Choose one from the list to view its details.';
   static const String detailNotFound = 'Event not found';
   static const String detailRetry = 'Retry';
   static const String detailCopied = 'Copied to clipboard';

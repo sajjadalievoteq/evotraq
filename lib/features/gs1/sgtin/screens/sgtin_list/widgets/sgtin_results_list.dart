@@ -4,7 +4,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/bloc/sgtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_list/widgets/sgtin_list_item_card.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -17,6 +17,8 @@ class SgtinResultsList extends StatelessWidget {
     this.selectedSgtinId,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapSgtin,
     required this.onLoadMore,
   });
@@ -25,6 +27,8 @@ class SgtinResultsList extends StatelessWidget {
   final String? selectedSgtinId;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapSgtin;
   final VoidCallback onLoadMore;
 
@@ -59,15 +63,20 @@ class SgtinResultsList extends StatelessWidget {
         final sgtins = state.sgtins;
         if (sgtins == null || sgtins.isEmpty) {
           return _constrainedCenter(
-            EmptyListView(
-              iconAsset: AppAssets.iconQr,
+            AppEmptyState(
+              iconAsset: AppAssets.iconTarget,
               title: SgtinUiConstants.emptyListTitle,
-              subtitle: 'Try adjusting your search criteria or filters',
-              filteredTitle: SgtinUiConstants.emptyListTitle,
-              filteredSubtitle: 'Try adjusting your search criteria or filters',
-              hasItems: true,
-              hasActiveFilters: true,
+              subtitle: SgtinUiConstants.emptyListSubtitle,
+              filteredTitle: 'No results found',
+              filteredSubtitle: SgtinUiConstants.emptyNoMatchSearch,
+              hasItems: hasActiveFilters,
+              hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
+              primaryActionLabel:
+                  hasActiveFilters ? null : SgtinUiConstants.emptyAddAction,
+              primaryActionIconAsset:
+                  hasActiveFilters ? null : AppAssets.iconPlus,
+              onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
         }

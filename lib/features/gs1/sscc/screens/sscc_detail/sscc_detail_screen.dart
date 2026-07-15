@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/navigation/pop_or_go.dart';
@@ -18,7 +20,6 @@ import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregatio
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_input_mode.dart';
-import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_awaiting_selection.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_error_pane.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
@@ -882,10 +883,13 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
         });
       },
       builder: (context, state) {
-        if (widget.awaitingListSelection &&
-            !state.isListLoading &&
-            state.status != SSCCStatus.initial) {
-          return const SsccDetailAwaitingSelection();
+        if (widget.awaitingListSelection) {
+          return AppEmptyDetail(
+            title: SsccUiConstants.awaitingSelectionTitle,
+            subtitle: SsccUiConstants.awaitingSelectionSubtitle,
+            iconAsset: AppAssets.iconBox,
+            loading: state.isListLoading || state.status == SSCCStatus.initial,
+          );
         }
 
         if (state.status == SSCCStatus.codeGenerated &&

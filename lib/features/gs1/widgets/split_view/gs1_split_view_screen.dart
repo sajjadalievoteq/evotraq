@@ -178,7 +178,9 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
     final viewPane = BlocBuilder<TCubit, TState>(
       builder: (context, state) {
         if (widget.isEmptyNoMatch(state)) {
-          return Center();
+          // Empty / filtered-out list: keep the detail pane on the await
+          // placeholder (Select a …), never a blank Center().
+          return widget.detailAwaitBuilder(context);
         }
 
         final ids = widget.idsFromState(state)?.toList(growable: false);

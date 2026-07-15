@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gln/cubit/gln_state.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_list/widgets/gln_list_item_card.dart';
-import 'package:traqtrace_app/core/widgets/empty_list_view.dart';
+import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -19,6 +19,8 @@ class GlnResultsList extends StatelessWidget {
     this.selectedGlnCode,
     required this.onRefresh,
     required this.onClearFilters,
+    required this.hasActiveFilters,
+    this.onCreate,
     required this.onTapGln,
     required this.onRowMenuAction,
     required this.onLoadMore,
@@ -28,6 +30,8 @@ class GlnResultsList extends StatelessWidget {
   final String? selectedGlnCode;
   final Future<void> Function() onRefresh;
   final VoidCallback onClearFilters;
+  final bool hasActiveFilters;
+  final VoidCallback? onCreate;
   final ValueChanged<String> onTapGln;
   final void Function(GLN gln, String action) onRowMenuAction;
   final VoidCallback onLoadMore;
@@ -77,15 +81,20 @@ class GlnResultsList extends StatelessWidget {
 
         if (state.glns.isEmpty) {
           return _constrainedCenter(
-            EmptyListView(
+            AppEmptyState(
               iconAsset: AppAssets.iconMapPin,
               title: GlnUiConstants.emptyListTitle,
-              subtitle: 'Try adjusting your search criteria or filters',
-              filteredTitle: GlnUiConstants.emptyListTitle,
-              filteredSubtitle: 'Try adjusting your search criteria or filters',
-              hasItems: true,
-              hasActiveFilters: true,
+              subtitle: GlnUiConstants.emptyListSubtitle,
+              filteredTitle: 'No results found',
+              filteredSubtitle: GlnUiConstants.emptyNoMatchSearch,
+              hasItems: hasActiveFilters,
+              hasActiveFilters: hasActiveFilters,
               onClearFilters: onClearFilters,
+              primaryActionLabel:
+                  hasActiveFilters ? null : GlnUiConstants.emptyAddAction,
+              primaryActionIconAsset:
+                  hasActiveFilters ? null : AppAssets.iconPlus,
+              onPrimaryAction: hasActiveFilters ? null : onCreate,
             ),
           );
         }

@@ -328,9 +328,10 @@ class _ReturnReceivingOperationListBodyState
             onRetry: cubit.refresh,
             onRefresh: cubit.refresh,
             onClearFilters: _clearAllFilters,
-            emptyTitle: 'No ReturnReceiving operations yet',
+            emptyTitle: 'No Return Receiving operations yet',
             emptySubtitle:
-                'Tap the + button to create your first ReturnReceiving operation.',
+                'Tap the + button to create your first return receiving operation.',
+            emptyIconAsset: AppAssets.iconReceive,
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,

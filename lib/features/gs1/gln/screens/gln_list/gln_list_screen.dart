@@ -356,6 +356,24 @@ class _GLNListScreenState extends State<GLNListScreen> {
         GlnUiConstants.sortFieldFallback;
   }
 
+  bool get _hasActiveFilters {
+    final statusActive = _selectedStatus != null &&
+        _selectedStatus != GlnUiConstants.filterAll &&
+        _selectedStatus != 'All';
+    final typeActive = _selectedLocationType != null &&
+        _selectedLocationType != GlnUiConstants.filterAll &&
+        _selectedLocationType != 'All';
+    return _searchController.text.trim().isNotEmpty ||
+        _glnCodeController.text.trim().isNotEmpty ||
+        _locationNameController.text.trim().isNotEmpty ||
+        _addressController.text.trim().isNotEmpty ||
+        _licenseNumberController.text.trim().isNotEmpty ||
+        _contactEmailController.text.trim().isNotEmpty ||
+        _contactNameController.text.trim().isNotEmpty ||
+        statusActive ||
+        typeActive;
+  }
+
   @override
   Widget build(BuildContext context) {
     final content = AppLayoutBuilder(
@@ -382,6 +400,8 @@ class _GLNListScreenState extends State<GLNListScreen> {
           onSortOrderChanged: _onSortOrderChanged,
           onRefresh: _refresh,
           onClearFilters: _clearAllFilters,
+          hasActiveFilters: _hasActiveFilters,
+          onCreate: _navigateToCreateGLN,
           onTapGln: _openGlnDetail,
           onRowMenuAction: _handleGlnRowMenu,
           onLoadMore: _loadMore,

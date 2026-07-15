@@ -7,9 +7,15 @@ class ObjectEventListUiConstants {
   static const String searchHint = 'Search by EPC, event ID…';
   static const String dialogQuickFiltersTitle = 'Quick Filters';
   static const String dialogAdvancedFiltersTitle = 'Advanced Filters';
-  static const String emptyListTitle = 'No object events found';
+  static const String emptyListTitle = 'No object events yet';
+  static const String emptyListSubtitle =
+      'Record an object event to get started.';
+  static const String emptyAddAction = 'Record Object Event';
   static const String emptyNoMatchSearch =
       'No events match the current search or filters';
+  static const String awaitingSelectionTitle = 'Select an object event';
+  static const String awaitingSelectionSubtitle =
+      'Choose one from the list to view its details.';
   static const String tooltipRefresh = 'Refresh';
   static const String tooltipQuickFilters = 'Quick filters';
   static const String tooltipAdvancedFilters = 'Advanced filters';

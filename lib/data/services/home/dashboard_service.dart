@@ -95,7 +95,7 @@ class DashboardService {
 
   /// Single-request dashboard payload (counts, event totals, recent events, throughput).
   Future<({DashboardStats stats, List<RecentEvent> recentEvents})> getSummary({
-    int recentLimit = 10,
+    int recentLimit = 5,
     int throughputHours = 24,
   }) async {
     final token = await _dioService.getAuthToken();

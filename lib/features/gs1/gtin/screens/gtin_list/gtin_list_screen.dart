@@ -23,11 +23,13 @@ class GTINListScreen extends StatefulWidget {
     this.embedded = false,
     this.selectedGtinCode,
     this.onSelectGtin,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final String? selectedGtinCode;
   final ValueChanged<String>? onSelectGtin;
+  final VoidCallback? onEmbeddedCreate;
 
   @override
   State<GTINListScreen> createState() => _GTINListScreenState();
@@ -236,8 +238,27 @@ class _GTINListScreenState extends State<GTINListScreen> {
   }
 
   void _navigateToCreateGTIN() {
+    if (widget.onEmbeddedCreate != null) {
+      widget.onEmbeddedCreate!();
+      return;
+    }
     context.go(Constants.gs1GtinNewRoute);
     _searchImmediate();
+  }
+
+  bool get _hasActiveFilters {
+    final statusActive = _selectedStatus != null &&
+        _selectedStatus != GtinUiConstants.filterAll;
+    final packagingActive = _selectedPackagingLevel != null &&
+        _selectedPackagingLevel != GtinUiConstants.filterAll;
+    return _searchController.text.trim().isNotEmpty ||
+        _productNameController.text.trim().isNotEmpty ||
+        _gtinCodeController.text.trim().isNotEmpty ||
+        _manufacturerController.text.trim().isNotEmpty ||
+        statusActive ||
+        packagingActive ||
+        _registrationDateFrom != null ||
+        _registrationDateTo != null;
   }
 
   @override
@@ -266,6 +287,8 @@ class _GTINListScreenState extends State<GTINListScreen> {
             _searchController.clear();
             _clearAllFilters();
           },
+          hasActiveFilters: _hasActiveFilters,
+          onCreate: _navigateToCreateGTIN,
           onTapGtin: _navigateToGTINDetails,
           onLoadMore: _loadMore,
         );

@@ -16,7 +16,12 @@ class AggregationEventDetailSkeleton extends StatelessWidget {
     return AppShimmer(
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.all(context.gutter),
+        padding: EdgeInsets.fromLTRB(
+          context.padding.top,
+          context.padding.top,
+          context.padding.top,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

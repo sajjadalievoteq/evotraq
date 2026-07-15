@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/api_management/providers/service_account_
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class ServiceAccountManagementScreen extends StatefulWidget {
   const ServiceAccountManagementScreen({super.key});
@@ -313,7 +314,7 @@ class _ServiceAccountManagementScreenState
               children: [
                 _buildInfoChip(
                   'Rate: ${account.rateLimitPerMinute}/min',
-                  AppAssets.iconGauge,
+                  NavIcons.performanceOptimization,
                 ),
                 if (account.allowedIps.isNotEmpty)
                   _buildInfoChip(
@@ -328,7 +329,7 @@ class _ServiceAccountManagementScreenState
                 if (account.expiresAt != null)
                   _buildInfoChip(
                     'Expires: ${ApiUiUtils.formatDate(account.expiresAt!)}',
-                    AppAssets.iconEvent,
+                    NavIcons.epcisEvents,
                     color: account.isExpired ? Colors.red : null,
                   ),
               ],
@@ -629,14 +630,14 @@ class _CreateServiceAccountDialogState
                   decoration: const InputDecoration(
                     labelText: 'Allowed Endpoints (comma-separated)',
                     hintText: 'e.g., /api/events/*, /api/gs1/*',
-                    prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                    prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                     helperText: 'Leave empty to allow all endpoints',
                   ),
                 ),
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: TraqIcon(AppAssets.iconEvent),
+                  leading: TraqIcon(NavIcons.epcisEvents),
                   title: Text(
                     _expiresAt != null
                         ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'

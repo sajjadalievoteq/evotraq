@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class ETLManagementPanel extends StatefulWidget {
@@ -298,7 +299,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 children: [
                   _buildSummaryItem('Active', activePipelines, AppAssets.iconPlay, color: Colors.green),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Total', totalPipelines, AppAssets.iconDatabase),
+                  _buildSummaryItem('Total', totalPipelines, NavIcons.databasePartitioning),
                   const SizedBox(width: 24),
                   _buildSummaryItem('Failed', failedPipelines, AppAssets.iconXCircle, color: Colors.red),
                 ],
@@ -806,14 +807,14 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
           Row(
             children: [
               Expanded(
-                child: _buildPerformanceCard('Throughput', '$throughput records/sec', AppAssets.iconGauge),
+                child: _buildPerformanceCard('Throughput', '$throughput records/sec', NavIcons.performanceOptimization),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildPerformanceCard(
                   'Avg Processing Time', 
                   '${avgProcessingTime.toStringAsFixed(2)}s', 
-                  AppAssets.iconTimer
+                  NavIcons.performanceTests
                 ),
               ),
             ],
@@ -833,7 +834,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 child: _buildPerformanceCard(
                   'Resource Usage', 
                   '${(resourceUtilization * 100).toStringAsFixed(1)}%', 
-                  AppAssets.iconChip
+                  NavIcons.eventSerialization
                 ),
               ),
             ],

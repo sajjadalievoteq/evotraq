@@ -33,9 +33,24 @@ class SsccPharmaComplianceCard extends StatefulWidget {
 
 class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
   final _service = getIt<SsccPharmaComplianceService>();
-  final _witnessNameController = TextEditingController();
-  final _witnessGlnController = TextEditingController();
-  final _notesController = TextEditingController();
+
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, String> _seedTexts = {};
+
+  TextEditingController _c(String key) => _controllers.putIfAbsent(
+        key,
+        () => TextEditingController(text: _seedTexts[key] ?? ''),
+      );
+
+  void _setSeedOrController(String key, String value) {
+    _seedTexts[key] = value;
+    _controllers[key]?.text = value;
+  }
+
+  TextEditingController get _witnessNameController => _c('witnessName');
+  TextEditingController get _witnessGlnController => _c('witnessGln');
+  TextEditingController get _notesController => _c('notes');
+
   bool _loading = true;
   List<SsccReportingRegime> _regimes = const [];
   List<SsccTatmeenSubmission> _tatmeen = const [];
@@ -51,9 +66,11 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
 
   @override
   void dispose() {
-    _witnessNameController.dispose();
-    _witnessGlnController.dispose();
-    _notesController.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    _controllers.clear();
+    _seedTexts.clear();
     super.dispose();
   }
 
@@ -96,9 +113,9 @@ class _SsccPharmaComplianceCardState extends State<SsccPharmaComplianceCard> {
         notes: _notesController.text.trim(),
       ),
     );
-    _witnessNameController.clear();
-    _witnessGlnController.clear();
-    _notesController.clear();
+    _setSeedOrController('witnessName', '');
+    _setSeedOrController('witnessGln', '');
+    _setSeedOrController('notes', '');
     await _load();
   }
 

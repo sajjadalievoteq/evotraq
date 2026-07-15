@@ -8,6 +8,7 @@ import '../cubit/api_management_cubit.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class PartnerAccessManagementScreen extends StatefulWidget {
   final String? initialPartnerId;
@@ -240,7 +241,7 @@ class _PartnerAccessManagementScreenState
                   _buildSummaryCard(
                     'Individual APIs',
                     summary.individualApiAccessCount.toString(),
-                    AppAssets.iconApi,
+                    NavIcons.apiManagement,
                     Colors.green,
                   ),
                   const SizedBox(width: 16),

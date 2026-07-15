@@ -5,6 +5,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../data/services/performance_optimization_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
@@ -93,7 +94,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Overview'),
+            Tab(icon: TraqIcon(NavIcons.dashboard), text: 'Overview'),
             Tab(icon: TraqIcon(AppAssets.iconBarChart), text: 'Query Optimization'),
             Tab(icon: TraqIcon(AppAssets.iconHub), text: 'Connection Pool'),
             Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Thread Management'),
@@ -197,7 +198,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
   ) {
     return Row(
       children: [
-        Expanded(child: _buildHealthCard('Memory Usage', resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', AppAssets.iconChip)),
+        Expanded(child: _buildHealthCard('Memory Usage', resourceUsage?['memory']?['usagePercentage'] ?? 'N/A', NavIcons.eventSerialization)),
         const SizedBox(width: 8),
         Expanded(child: _buildHealthCard('CPU Usage', '${((resourceUsage?['cpu']?['systemCpuLoad'] ?? 0.0) * 100).toStringAsFixed(1)}%', AppAssets.iconComputer)),
         const SizedBox(width: 8),
@@ -274,7 +275,7 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
               children: [
                 ElevatedButton.icon(
                   onPressed: () => _runBenchmark('comprehensive'),
-                  icon: const TraqIcon(AppAssets.iconGauge, size: 16),
+                  icon: const TraqIcon(NavIcons.performanceOptimization, size: 16),
                   label: const Text('Run Benchmark'),
                 ),
                 ElevatedButton.icon(

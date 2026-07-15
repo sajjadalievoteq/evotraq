@@ -6,6 +6,7 @@ import '../../../core/network/dio_service.dart';
 import '../../../data/services/industry_test_data_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class IndustryTestDataScreen extends StatefulWidget {
   const IndustryTestDataScreen({Key? key}) : super(key: key);
@@ -550,7 +551,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
+          _buildSectionHeader('Master Data Generation', NavIcons.masterData),
           const SizedBox(height: 12),
           
           Row(
@@ -616,7 +617,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          _buildSectionHeader('EPCIS Events - Full Supply Chain', AppAssets.iconEvent),
+          _buildSectionHeader('EPCIS Events - Full Supply Chain', NavIcons.epcisEvents),
           const SizedBox(height: 12),
           
           _buildActionCard(
@@ -640,7 +641,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
             children: [
               _buildEventTypeChip('Object Events', AppAssets.iconBox, Colors.blue),
               _buildEventTypeChip('Aggregation Events', AppAssets.iconCategory, Colors.green),
-              _buildEventTypeChip('Shipping Events', AppAssets.iconTruck, Colors.orange),
+              _buildEventTypeChip('Shipping Events', NavIcons.logistics, Colors.orange),
               _buildEventTypeChip('Receiving Events', AppAssets.iconInbox, Colors.purple),
             ],
           ),
@@ -702,7 +703,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          _buildSectionHeader('Master Data Generation', AppAssets.iconDataset),
+          _buildSectionHeader('Master Data Generation', NavIcons.masterData),
           const SizedBox(height: 12),
           
           Row(
@@ -768,7 +769,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           
           const SizedBox(height: 24),
           
-          _buildSectionHeader('EPCIS Events', AppAssets.iconEvent),
+          _buildSectionHeader('EPCIS Events', NavIcons.epcisEvents),
           const SizedBox(height: 12),
           
           Card(
@@ -786,7 +787,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                           color: const Color(0xFF2D4A3E).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: TraqIcon(AppAssets.iconEvent, color: Color(0xFF2D4A3E), size: 24),
+                        child: TraqIcon(NavIcons.epcisEvents, color: Color(0xFF2D4A3E), size: 24),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(

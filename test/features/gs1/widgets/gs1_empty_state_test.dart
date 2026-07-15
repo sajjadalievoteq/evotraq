@@ -85,7 +85,7 @@ void main() {
   });
 
   group('GS1 AppEmptyDetail awaiting selection', () {
-    testWidgets('renders per-type titles and loading', (tester) async {
+    testWidgets('renders per-type titles', (tester) async {
       await tester.pumpWidget(
         wrap(
           const AppEmptyDetail(
@@ -102,11 +102,13 @@ void main() {
         wrap(
           const AppEmptyDetail(
             title: SsccUiConstants.awaitingSelectionTitle,
-            loading: true,
+            subtitle: SsccUiConstants.awaitingSelectionSubtitle,
           ),
         ),
       );
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pump();
+      expect(find.text(SsccUiConstants.awaitingSelectionTitle), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
 }

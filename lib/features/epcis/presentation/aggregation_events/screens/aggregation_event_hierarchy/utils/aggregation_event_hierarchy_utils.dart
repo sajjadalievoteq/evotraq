@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 abstract final class AggregationEventHierarchyUtils {
   static Widget actionIcon(String action) {
@@ -12,7 +13,7 @@ abstract final class AggregationEventHierarchyUtils {
       case 'OBSERVE':
         return TraqIcon(AppAssets.iconEye, color: Colors.blue);
       default:
-        return TraqIcon(AppAssets.iconEvent);
+        return TraqIcon(NavIcons.epcisEvents);
     }
   }
 }

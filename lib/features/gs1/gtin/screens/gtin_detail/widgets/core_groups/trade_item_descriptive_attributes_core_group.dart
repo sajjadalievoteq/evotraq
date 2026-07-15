@@ -1,79 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-class TradeItemDescriptiveAttributesCoreGroup extends StatefulWidget {
+/// Presenter — controllers owned by [GTINDetailScreen].
+class TradeItemDescriptiveAttributesCoreGroup extends StatelessWidget {
   const TradeItemDescriptiveAttributesCoreGroup({
     super.key,
     required this.isReadOnly,
+    required this.functionalNameController,
+    required this.tradeItemDescriptionController,
+    required this.gpcBrickCodeController,
+    required this.targetMarketCountryController,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final TextEditingController functionalNameController;
+  final TextEditingController tradeItemDescriptionController;
+  final TextEditingController gpcBrickCodeController;
+  final TextEditingController targetMarketCountryController;
   final bool showFieldSkeleton;
-
-  @override
-  State<TradeItemDescriptiveAttributesCoreGroup> createState() =>
-      TradeItemDescriptiveAttributesCoreGroupState();
-}
-
-class TradeItemDescriptiveAttributesCoreGroupState
-    extends State<TradeItemDescriptiveAttributesCoreGroup> {
-  late final TextEditingController _functionalName;
-  late final TextEditingController _tradeItemDescription;
-  late final TextEditingController _gpcCategoryCode;
-  late final TextEditingController _targetMarketCountryCode;
-
-  @override
-  void initState() {
-    super.initState();
-    _functionalName = TextEditingController();
-    _tradeItemDescription = TextEditingController();
-    _gpcCategoryCode = TextEditingController();
-    _targetMarketCountryCode = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _functionalName.dispose();
-    _tradeItemDescription.dispose();
-    _gpcCategoryCode.dispose();
-    _targetMarketCountryCode.dispose();
-    super.dispose();
-  }
-
-  String? get functionalName =>
-      _functionalName.text.trim().isEmpty ? null : _functionalName.text.trim();
-  String? get tradeItemDescription => _tradeItemDescription.text.trim().isEmpty
-      ? null
-      : _tradeItemDescription.text.trim();
-  String? get gpcBrickCode => _gpcCategoryCode.text.trim().isEmpty
-      ? null
-      : _gpcCategoryCode.text.trim();
-  String? get targetMarketCountry =>
-      _targetMarketCountryCode.text.trim().isEmpty
-      ? null
-      : _targetMarketCountryCode.text.trim();
-
-  TextEditingController get targetMarketCountryController =>
-      _targetMarketCountryCode;
-
-  void setFromGtin({
-    required String? functionalName,
-    required String? tradeItemDescription,
-    required String? gpcBrickCode,
-    required String? targetMarketCountry,
-  }) {
-    _functionalName.text = (functionalName ?? '').trim();
-    _tradeItemDescription.text = (tradeItemDescription ?? '').trim();
-    _gpcCategoryCode.text = (gpcBrickCode ?? '').trim();
-    _targetMarketCountryCode.text = (targetMarketCountry ?? '').trim();
-    if (mounted) setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,42 +31,42 @@ class TradeItemDescriptiveAttributesCoreGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Gs1ValidatedField(
-          controller: _functionalName,
+          controller: functionalNameController,
           fieldName: 'functional_name',
           label: GtinUiConstants.labelFunctionalName,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 35,
           validator: (v) => GtinFieldValidators.validateFunctionalName(
             v,
-            hasGpcBrickCode: _gpcCategoryCode.text.trim().isNotEmpty,
+            hasGpcBrickCode: gpcBrickCodeController.text.trim().isNotEmpty,
           ),
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _tradeItemDescription,
+          controller: tradeItemDescriptionController,
           fieldName: 'trade_item_description',
           label: GtinUiConstants.labelTradeItemDescription,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 200,
           validator: GtinFieldValidators.validateTradeItemDescription,
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _gpcCategoryCode,
+          controller: gpcBrickCodeController,
           fieldName: 'gpc_brick_code',
           label: GtinUiConstants.labelGpcBrickCode,
           helperText: GtinUiConstants.helperGpcBrickCode,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: TextInputType.number,
           maxLength: 8,
           validator: GtinFieldValidators.validateGpcBrickCode,
         ),
         const SizedBox(height: 12),
         GtinCountryCodePickerField(
-          controller: _targetMarketCountryCode,
+          controller: targetMarketCountryController,
           labelText: GtinUiConstants.labelTargetMarketCountryCode,
           helperText: GtinUiConstants.helperIso3166Numeric3,
-          enabled: !widget.isReadOnly,
+          enabled: !isReadOnly,
           validator: GtinFieldValidators.validateTargetMarketCountry,
         ),
       ],
@@ -126,7 +76,7 @@ class TradeItemDescriptiveAttributesCoreGroupState
       title: GtinUiConstants.sectionTradeItemDescriptiveAttributes,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

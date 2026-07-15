@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../data/services/event_generation_test_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class EventGenerationTestScreen extends StatefulWidget {
   const EventGenerationTestScreen({Key? key}) : super(key: key);
@@ -1350,7 +1351,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanObjectEvents,
-                        icon: TraqIcon(AppAssets.iconPackage),
+                        icon: TraqIcon(NavIcons.packaging),
                         label: const Text('Clean Object Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1358,7 +1359,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanGLNTestData,
-                        icon: TraqIcon(AppAssets.iconGln),
+                        icon: TraqIcon(NavIcons.gln),
                         label: const Text('Clean GLN Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1382,7 +1383,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanSSCCTestData,
-                        icon: TraqIcon(AppAssets.iconSscc),
+                        icon: TraqIcon(NavIcons.sscc),
                         label: const Text('Clean SSCC Test Data'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,
@@ -1398,7 +1399,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                       ),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanAggregationEvents,
-                        icon: TraqIcon(AppAssets.iconAggregate),
+                        icon: TraqIcon(NavIcons.aggregationEvents),
                         label: const Text('Clean Aggregation Events'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.warning,

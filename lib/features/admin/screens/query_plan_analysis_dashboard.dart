@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class QueryPlanAnalysisDashboard extends StatefulWidget {
   const QueryPlanAnalysisDashboard({Key? key}) : super(key: key);
@@ -374,7 +375,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Execution Time',
             executionTime.toString(),
-            AppAssets.iconTimer,
+            NavIcons.performanceTests,
             Colors.blue,
           ),
         ),
@@ -392,7 +393,7 @@ class _QueryPlanAnalysisDashboardState
           child: _buildMetricCard(
             'Node Count',
             nodeCount.toString(),
-            AppAssets.iconHierarchy,
+            NavIcons.aggregationHierarchy,
             Colors.green,
           ),
         ),

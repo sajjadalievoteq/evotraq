@@ -11,6 +11,7 @@ import '../widgets/notification_quick_guide.dart';
 import '../../domain/models/realtime_notification.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
@@ -176,7 +177,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
           const NotificationQuickGuide(),
           const SizedBox(height: 24),
           TraqIcon(
-            AppAssets.iconNotification,
+            NavIcons.notifications,
             size: 64,
             color: Colors.grey[400],
           ),

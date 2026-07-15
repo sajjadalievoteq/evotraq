@@ -1,82 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-class AuditCoreGroup extends StatefulWidget {
+/// Presenter — controllers owned by [GTINDetailScreen].
+class AuditCoreGroup extends StatelessWidget {
   const AuditCoreGroup({
     super.key,
     required this.isReadOnly,
+    required this.createdByController,
+    required this.updatedByController,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final TextEditingController createdByController;
+  final TextEditingController updatedByController;
   final bool showFieldSkeleton;
 
   @override
-  State<AuditCoreGroup> createState() => AuditCoreGroupState();
-}
-
-class AuditCoreGroupState extends State<AuditCoreGroup> {
-  late final TextEditingController _createdBy;
-  late final TextEditingController _updatedBy;
-
-  @override
-  void initState() {
-    super.initState();
-    _createdBy = TextEditingController();
-    _updatedBy = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _createdBy.dispose();
-    _updatedBy.dispose();
-    super.dispose();
-  }
-
-  String? get createdBy =>
-      _createdBy.text.trim().isEmpty ? null : _createdBy.text.trim();
-  String? get updatedBy =>
-      _updatedBy.text.trim().isEmpty ? null : _updatedBy.text.trim();
-
-  void setFromGtin({required String? createdBy, required String? updatedBy}) {
-    _createdBy.text = (createdBy ?? '').trim();
-    _updatedBy.text = (updatedBy ?? '').trim();
-    if (mounted) setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final body = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Gs1ValidatedField(
-          controller: _createdBy,
-          fieldName: 'created_by',
-          label: GtinUiConstants.labelCreatedBy,
-          readOnly: widget.isReadOnly,
-          maxLength: 64,
-          validator: GtinFieldValidators.validateCreatedBy,
-        ),
-        const SizedBox(height: 12),
-        Gs1ValidatedField(
-          controller: _updatedBy,
-          fieldName: 'updated_by',
-          label: GtinUiConstants.labelUpdatedBy,
-          readOnly: widget.isReadOnly,
-          maxLength: 64,
-          validator: GtinFieldValidators.validateUpdatedBy,
-        ),
-      ],
-    );
-
     return Gs1GroupCard(
       title: GtinUiConstants.sectionAudit,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -86,7 +35,28 @@ class AuditCoreGroupState extends State<AuditCoreGroup> {
           GtinSkeletonOutlineField(color: c, height: 56),
         ],
       ),
-      child: body,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Gs1ValidatedField(
+            controller: createdByController,
+            fieldName: 'created_by',
+            label: GtinUiConstants.labelCreatedBy,
+            readOnly: isReadOnly,
+            maxLength: 64,
+            validator: GtinFieldValidators.validateCreatedBy,
+          ),
+          const SizedBox(height: 12),
+          Gs1ValidatedField(
+            controller: updatedByController,
+            fieldName: 'updated_by',
+            label: GtinUiConstants.labelUpdatedBy,
+            readOnly: isReadOnly,
+            maxLength: 64,
+            validator: GtinFieldValidators.validateUpdatedBy,
+          ),
+        ],
+      ),
     );
   }
 }

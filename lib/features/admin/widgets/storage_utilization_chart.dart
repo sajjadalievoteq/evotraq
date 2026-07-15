@@ -3,6 +3,7 @@ import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualiza
 import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class StorageUtilizationChart extends StatelessWidget {
   final StorageStatistics storageStats;
@@ -128,7 +129,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Total Storage',
                 '${storageStats.totalStorageCapacityGB.toStringAsFixed(0)} GB',
-                AppAssets.iconDatabase,
+                NavIcons.databasePartitioning,
                 Colors.blue,
               ),
             ),
@@ -146,7 +147,7 @@ class StorageUtilizationChart extends StatelessWidget {
               child: _buildMetricCard(
                 'Partitions',
                 storageStats.partitionDistribution.length.toString(),
-                AppAssets.iconDataset,
+                NavIcons.masterData,
                 Colors.orange,
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:traqtrace_app/data/models/operations/commissioning/commissioning
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigation.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class CommissioningDetailSerialItemRow extends StatelessWidget {
   const CommissioningDetailSerialItemRow({
@@ -58,7 +59,7 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
           ),
           if (item.canonicalIdentifier != null)
             IconButton(
-              icon: TraqIcon(AppAssets.iconAggregate, size: 16),
+              icon: TraqIcon(NavIcons.aggregationEvents, size: 16),
               tooltip: 'View hierarchy',
               visualDensity: VisualDensity.compact,
               onPressed: () => openHierarchyScreen(

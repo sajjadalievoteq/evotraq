@@ -33,9 +33,10 @@ class CancelReceivingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => CancelReceivingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => CancelReceivingOperationDetailScreen(
           key: const ValueKey('__cancel_receiving_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const CancelReceivingOperationListScreen(),

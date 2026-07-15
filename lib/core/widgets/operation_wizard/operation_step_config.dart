@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class OperationStepConfig {
   const OperationStepConfig({
@@ -23,10 +24,10 @@ class OperationStepConfig {
   );
   static const product = OperationStepConfig(
     label: 'Product',
-    iconAsset: AppAssets.iconPackage,
+    iconAsset: NavIcons.packaging,
   );
   static const serials = OperationStepConfig(
     label: 'Serials',
-    iconAsset: AppAssets.iconSgtin,
+    iconAsset: NavIcons.sgtin,
   );
 }

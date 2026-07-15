@@ -81,18 +81,6 @@ void main() {
   });
 
   group('AppEmptyDetail', () {
-    testWidgets('renders loading indicator', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const AppEmptyDetail(
-            title: 'Select a shipping operation',
-            loading: true,
-          ),
-        ),
-      );
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
     testWidgets('renders empty and fires action', (tester) async {
       var acted = false;
       await tester.pumpWidget(

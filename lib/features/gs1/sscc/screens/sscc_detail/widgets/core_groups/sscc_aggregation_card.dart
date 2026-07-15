@@ -9,6 +9,7 @@ import 'package:traqtrace_app/core/widgets/gs1_fields/epc_entry_field.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SsccAggregationCard extends StatefulWidget {
   const SsccAggregationCard({
@@ -40,15 +41,31 @@ class SsccAggregationCard extends StatefulWidget {
 }
 
 class _SsccAggregationCardState extends State<SsccAggregationCard> {
-  final _childEpcController = TextEditingController();
-  final _eventIdController = TextEditingController();
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, String> _seedTexts = {};
+
+  TextEditingController _c(String key) => _controllers.putIfAbsent(
+        key,
+        () => TextEditingController(text: _seedTexts[key] ?? ''),
+      );
+
+  void _setSeedOrController(String key, String value) {
+    _seedTexts[key] = value;
+    _controllers[key]?.text = value;
+  }
+
+  TextEditingController get _childEpcController => _c('childEpc');
+  TextEditingController get _eventIdController => _c('eventId');
   String _childKind = 'SGTIN';
   bool _isSubmitting = false;
 
   @override
   void dispose() {
-    _childEpcController.dispose();
-    _eventIdController.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    _controllers.clear();
+    _seedTexts.clear();
     super.dispose();
   }
 
@@ -71,8 +88,8 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
     if (mounted) {
       setState(() => _isSubmitting = false);
       if (ok) {
-        _childEpcController.clear();
-        _eventIdController.clear();
+        _setSeedOrController('childEpc', '');
+        _setSeedOrController('eventId', '');
       }
     }
   }
@@ -265,7 +282,7 @@ class _SsccAggregationCardState extends State<SsccAggregationCard> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : TraqIcon(AppAssets.iconAggregate),
+                    : TraqIcon(NavIcons.aggregationEvents),
                 label: const Text('Add child'),
               ),
             ),

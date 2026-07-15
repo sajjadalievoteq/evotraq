@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_analytics.dart';
@@ -32,17 +33,17 @@ class JourneyMetricsSection extends StatelessWidget {
               value: JourneyFormatters.duration(longest),
             ),
             JourneyMetricRow(
-              icon: AppAssets.iconTimer,
+              icon: NavIcons.performanceTests,
               label: 'Average Transit',
               value: JourneyFormatters.duration(average),
             ),
             JourneyMetricRow(
-              icon: AppAssets.iconShipment,
+              icon: NavIcons.shipping,
               label: 'Number of Shipments',
               value: '${JourneyAnalytics.shipmentCount(journey)}',
             ),
             JourneyMetricRow(
-              icon: AppAssets.iconAggregate,
+              icon: NavIcons.aggregationEvents,
               label: 'Number of Aggregations',
               value: '${JourneyAnalytics.aggregationCount(journey)}',
             ),

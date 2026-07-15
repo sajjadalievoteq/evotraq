@@ -9,6 +9,7 @@ import '../widgets/create_subscription_dialog.dart';
 import '../widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key});
@@ -210,7 +211,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TraqIcon(
-            AppAssets.iconNotification,
+            NavIcons.notifications,
             size: 64,
             color: Colors.grey[400],
           ),

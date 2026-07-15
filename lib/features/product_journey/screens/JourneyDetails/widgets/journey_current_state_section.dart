@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
@@ -45,7 +46,7 @@ class JourneyCurrentStateSection extends StatelessWidget {
               value: location,
             ),
             JourneyStateRow(
-              icon: AppAssets.iconBusiness,
+              icon: NavIcons.partnerManagement,
               label: 'Current Owner',
               value: owner,
             ),
@@ -55,12 +56,12 @@ class JourneyCurrentStateSection extends StatelessWidget {
               value: disposition,
             ),
             JourneyStateRow(
-              icon: AppAssets.iconRoute,
+              icon: NavIcons.supplyChainTraversal,
               label: 'Current Business Step',
               value: businessStep,
             ),
             JourneyStateRow(
-              icon: AppAssets.iconEvent,
+              icon: NavIcons.epcisEvents,
               label: 'Current Event',
               value: currentEvent,
               isLast: true,

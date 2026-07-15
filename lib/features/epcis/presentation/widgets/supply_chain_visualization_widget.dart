@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class SupplyChainVisualizationWidget extends StatefulWidget {
@@ -90,7 +91,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAggregate,
+            TraqIcon(NavIcons.aggregationEvents,
               size: 64,
               color: Colors.grey[400],
             ),
@@ -131,7 +132,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
               text: 'Timeline',
             ),
             Tab(
-              icon: TraqIcon(AppAssets.iconAggregate),
+              icon: TraqIcon(NavIcons.aggregationEvents),
               text: 'Hierarchy',
             ),
           ],
@@ -154,7 +155,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   Widget _buildSupplyChainView() {
     if (widget.traversalResult == null) {
       return _buildEmptyState(
-        iconAsset: AppAssets.iconRoute,
+        iconAsset: NavIcons.supplyChainTraversal,
         title: 'No Supply Chain Data',
         subtitle: 'Execute a Supply Chain Path query to see the visualization.',
       );
@@ -252,7 +253,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
   Widget _buildHierarchyView() {
     if (widget.aggregationHierarchy == null) {
       return _buildEmptyState(
-        iconAsset: AppAssets.iconHierarchy,
+        iconAsset: NavIcons.aggregationHierarchy,
         title: 'No Hierarchy Data',
         subtitle: 'Execute an Aggregation Hierarchy query to see the structure.',
       );
@@ -491,7 +492,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
           margin: const EdgeInsets.symmetric(vertical: 2.0),
           child: ListTile(
             dense: true,
-            leading: TraqIcon(AppAssets.iconPackage,
+            leading: TraqIcon(NavIcons.packaging,
               color: Theme.of(context).colorScheme.primary,
             ),
             title: Text(parentEpc),
@@ -553,7 +554,7 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
       case 'GIAI':
         return AppAssets.iconBadge;
       default:
-        return AppAssets.iconHelpCircle;
+        return NavIcons.helpSupport;
     }
   }
 

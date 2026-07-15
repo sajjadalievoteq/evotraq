@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/field_validation_indicator.dart';
@@ -90,7 +91,7 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
                       labelText: 'Action',
                       hintText: 'ADD, OBSERVE, or DELETE',
                       border: OutlineInputBorder(),
-                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                      prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                     ),
                     validator: _validateAction,
                     helpText: 'The action type for this event',

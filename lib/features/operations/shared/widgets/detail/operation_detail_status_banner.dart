@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
@@ -67,7 +68,7 @@ class OperationDetailStatusBanner extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TraqIcon(
-                          AppAssets.iconPackage,
+                          NavIcons.packaging,
                           size: 14,
                           color: Colors.white70,
                         ),

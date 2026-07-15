@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
@@ -82,7 +82,7 @@ class _GTINScreenState extends State<GTINScreen> {
               context.read<GTINCubit>().fetchGTINList();
             },
           ),
-          detailAwaitBuilder: (context) => const GTINDetailScreen(
+          detailAwaitBuilder: (context, {required listLoading}) => const GTINDetailScreen(
             key: ValueKey('__gtin_split_await_list__'),
             isEditing: false,
             embedded: true,

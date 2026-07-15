@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -20,7 +21,7 @@ import 'package:traqtrace_app/features/operations/return_shipping/screens/return
 import 'package:traqtrace_app/features/operations/return_shipping/utils/return_shipping_ui_constants.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 class ReturnShippingOperationListScreen extends StatelessWidget {
@@ -243,9 +244,16 @@ class _ReturnShippingOperationListBodyState
           previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
-
         final filtered = _filteredOperations(state.items);
-        _syncEmbeddedOperationIds(filtered);
+        if (widget.embedded) {
+          final split = context.read<OperationSplitCubit>();
+          if (state.isLoading) {
+            split.setListLoading(true);
+          } else {
+            _syncEmbeddedOperationIds(filtered);
+            split.setListLoading(false);
+          }
+        }
 
         if (widget.embedded &&
             widget.selectedOperationId == null &&
@@ -330,11 +338,12 @@ class _ReturnShippingOperationListBodyState
             emptyTitle: 'No return shipping operations yet',
             emptySubtitle:
                 'Tap the + button to create your first return shipping operation.',
+            emptyIconAsset: NavIcons.returnShipping,
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,
             itemBuilder: (context, operation) =>
-                OperationListCardBuilders.forOperation(
+                OperationListCard(
               operation: operation,
               isSelected: widget.embedded &&
                   operation.navigableOperationId != null &&

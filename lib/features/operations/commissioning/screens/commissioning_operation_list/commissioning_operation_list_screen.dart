@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -19,8 +20,9 @@ import 'package:traqtrace_app/features/operations/commissioning/screens/commissi
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_quick_filter_dialog.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_ui_constants.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 
 class CommissioningOperationListScreen extends StatefulWidget {
@@ -30,12 +32,16 @@ class CommissioningOperationListScreen extends StatefulWidget {
     this.onSelectOperation,
     this.selectedBatchId,
     this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final ValueChanged<String>? onSelectOperation;
   final String? selectedBatchId;
   final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
 
   @override
   State<CommissioningOperationListScreen> createState() =>
@@ -125,6 +131,8 @@ class _CommissioningOperationListScreenState
         onSelectOperation: widget.onSelectOperation,
         selectedBatchId: widget.selectedBatchId,
         onLoadingChanged: widget.onLoadingChanged,
+        onBindRefresh: widget.onBindRefresh,
+        onEmbeddedCreate: widget.onEmbeddedCreate,
         gtinFilterController: _gtinFilterController,
         sortBy: _sortBy,
         sortDir: _sortDir,
@@ -150,12 +158,16 @@ class _CommissioningOperationListBody extends StatefulWidget {
     this.onSelectOperation,
     this.selectedBatchId,
     this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final ValueChanged<String>? onSelectOperation;
   final String? selectedBatchId;
   final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
   final TextEditingController gtinFilterController;
   final String sortBy;
   final String sortDir;
@@ -175,11 +187,21 @@ class _CommissioningOperationListBodyState
   final _scrollController = ScrollController();
 
   String? _selectedStatus;
+  bool _bindRefreshDone = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onFiltersChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_bindRefreshDone) {
+      _bindRefreshDone = true;
+      widget.onBindRefresh?.call(widget.onServerReload);
+    }
   }
 
   @override
@@ -199,6 +221,17 @@ class _CommissioningOperationListBodyState
       query: _searchController.text,
       statusFilter: _selectedStatus,
     );
+  }
+
+  void _syncEmbeddedOperationIds(List<Operation> filtered) {
+    if (!widget.embedded) return;
+    final ids = filtered
+        .map((op) => op.navigableOperationId)
+        .whereType<String>()
+        .toList();
+    context
+        .read<OperationSplitCubit>()
+        .updateOperationIds(ids, isEmpty: ids.isEmpty);
   }
 
   void _showFilterDialog() {
@@ -289,19 +322,14 @@ class _CommissioningOperationListBodyState
           previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
-
-        if (widget.embedded &&
-            widget.selectedBatchId == null &&
-            !state.isLoading &&
-            state.errorMessage == null) {
-          final filtered = _filteredOperations(state.items);
-          if (filtered.isNotEmpty) {
-            final firstId = filtered.first.navigableOperationId;
-            if (firstId != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                widget.onSelectOperation?.call(firstId);
-              });
-            }
+        final filtered = _filteredOperations(state.items);
+        if (widget.embedded) {
+          final split = context.read<OperationSplitCubit>();
+          if (state.isLoading) {
+            split.setListLoading(true);
+          } else {
+            _syncEmbeddedOperationIds(filtered);
+            split.setListLoading(false);
           }
         }
       },
@@ -379,11 +407,12 @@ class _CommissioningOperationListBodyState
             onClearFilters: _clearAllFilters,
             emptyTitle: 'No commissioning operations found',
             emptySubtitle: 'Create your first commissioning operation',
+            emptyIconAsset: NavIcons.commissioning,
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,
             itemBuilder: (context, operation) =>
-                OperationListCardBuilders.forOperation(
+                OperationListCard(
               operation: operation,
               isSelected: widget.embedded &&
                   operation.navigableOperationId != null &&

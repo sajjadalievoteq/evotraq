@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class OperationContainerSummaryBanner extends StatelessWidget {
@@ -18,7 +18,7 @@ class OperationContainerSummaryBanner extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            TraqIcon(AppAssets.iconPackage, color: Colors.white),
+            TraqIcon(NavIcons.packaging, color: Colors.white),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_util
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/widgets/hierarchy_node_tile.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 sealed class _HierarchyItem {
   const _HierarchyItem();
@@ -197,7 +197,7 @@ class _HierarchySummaryBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
           children: [
-            TraqIcon(AppAssets.iconAggregate,
+            TraqIcon(NavIcons.aggregationEvents,
               size: 18,
               color: theme.colorScheme.primary,
             ),

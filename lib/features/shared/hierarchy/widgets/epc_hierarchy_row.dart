@@ -4,6 +4,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigation.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class EpcHierarchyRow extends StatelessWidget {
   const EpcHierarchyRow({
@@ -53,7 +54,7 @@ class EpcHierarchyRow extends StatelessWidget {
               ),
             ),
           IconButton(
-            icon: TraqIcon(AppAssets.iconAggregate, size: 18),
+            icon: TraqIcon(NavIcons.aggregationEvents, size: 18),
             tooltip: 'View hierarchy',
             visualDensity: VisualDensity.compact,
             onPressed: () => openHierarchyScreen(

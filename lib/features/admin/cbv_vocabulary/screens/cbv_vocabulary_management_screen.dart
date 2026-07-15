@@ -15,6 +15,7 @@ import 'package:traqtrace_app/features/admin/cbv_vocabulary/widgets/cbv_vocabula
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 
 class CbvVocabularyManagementScreen extends StatelessWidget {
@@ -79,7 +80,7 @@ class _CbvVocabularyManagementViewState
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: TraqIcon(AppAssets.iconAggregate),
+              leading: TraqIcon(NavIcons.aggregationEvents),
               title: const Text('Add Biz Step'),
               onTap: () {
                 Navigator.of(dialogCtx).pop();

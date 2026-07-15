@@ -15,14 +15,16 @@ class TraqIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolved = color ?? IconTheme.of(context).color ?? Colors.grey;
+    final resolved = color ??
+        IconTheme.of(context).color ??
+        DefaultTextStyle.of(context).style.color ??
+        Theme.of(context).colorScheme.onSurface;
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: SvgPicture.asset(
         asset,
         width: size,
         height: size,
-
         colorFilter: ColorFilter.mode(resolved, BlendMode.srcIn),
       ),
     );

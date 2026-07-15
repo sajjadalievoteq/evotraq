@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/widgets/create_partner_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class PartnerManagementScreen extends StatefulWidget {
   const PartnerManagementScreen({super.key});
@@ -110,7 +111,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatCard('Total Partners', state.totalPartners.toString(), AppAssets.iconBusiness),
+          _buildStatCard('Total Partners', state.totalPartners.toString(), NavIcons.partnerManagement),
           _buildStatCard('Active', state.activePartnersCount.toString(), AppAssets.iconCheckCircle, color: Colors.green),
           _buildStatCard('Inactive', state.inactivePartners.length.toString(), AppAssets.iconXCircle, color: Colors.grey),
         ],
@@ -180,7 +181,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconFactory, color: Colors.grey.shade400, size: 64),
+            TraqIcon(NavIcons.partnerManagement, color: Colors.grey.shade400, size: 64),
             const SizedBox(height: 16),
             const Text('No partners found'),
             const SizedBox(height: 8),

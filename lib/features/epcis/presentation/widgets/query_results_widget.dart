@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
@@ -188,7 +189,7 @@ class QueryResultsWidget extends StatelessWidget {
             context,
             'Total Events',
             result!.totalCount.toString(),
-            AppAssets.iconEvent,
+            NavIcons.epcisEvents,
           ),
           _buildSummaryItem(
             context,
@@ -200,7 +201,7 @@ class QueryResultsWidget extends StatelessWidget {
             context,
             'Execution Time',
             '${result!.executionTimeMs}ms',
-            AppAssets.iconTimer,
+            NavIcons.performanceTests,
           ),
         ],
       ),

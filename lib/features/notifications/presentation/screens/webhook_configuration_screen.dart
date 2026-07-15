@@ -9,6 +9,7 @@ import '../cubit/notification_state.dart';
 import '../widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class WebhookConfigurationScreen extends StatefulWidget {
   const WebhookConfigurationScreen({super.key});
@@ -150,7 +151,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
                 hintText: 'https://your-api.com/webhooks/traqtrace',
                 labelText: 'Webhook URL',
                 border: OutlineInputBorder(),
-                prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                prefixIcon: TraqIcon(NavIcons.aggregationEvents),
               ),
             ),
             const SizedBox(height: 12),

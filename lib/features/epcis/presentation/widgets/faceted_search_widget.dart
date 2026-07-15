@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class FacetedSearchWidget extends StatefulWidget {
   final Map<String, List<String>>? availableFacets;
@@ -309,7 +310,7 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
         return AppAssets.iconCategory;
       case 'businessStep':
       case 'bizStep':
-        return AppAssets.iconBusiness;
+        return NavIcons.partnerManagement;
       case 'disposition':
         return AppAssets.iconTag;
       case 'readPoint':
@@ -324,7 +325,7 @@ class _FacetedSearchWidgetState extends State<FacetedSearchWidget> {
       case 'transformationId':
         return AppAssets.iconTransform;
       case 'parentId':
-        return AppAssets.iconHierarchy;
+        return NavIcons.aggregationHierarchy;
       case 'childEpcs':
         return AppAssets.iconList;
       default:

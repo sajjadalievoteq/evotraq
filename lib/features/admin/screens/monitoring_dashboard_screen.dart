@@ -17,6 +17,7 @@ import '../widgets/storage_utilization_chart.dart';
 import '../widgets/monitoring_overview_card.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 
@@ -264,7 +265,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Overview'),
+            Tab(icon: TraqIcon(NavIcons.dashboard), text: 'Overview'),
             Tab(icon: TraqIcon(AppAssets.iconEye), text: 'Performance'),
             Tab(icon: TraqIcon(AppAssets.iconList), text: 'Storage'),
             Tab(icon: TraqIcon(AppAssets.iconLock), text: 'Integrity'),

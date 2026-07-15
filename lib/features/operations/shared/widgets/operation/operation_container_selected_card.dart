@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class OperationContainerSelectedCard extends StatelessWidget {
@@ -17,7 +18,7 @@ class OperationContainerSelectedCard extends StatelessWidget {
     return Card(
       color: Colors.green[50],
       child: ListTile(
-        leading: TraqIcon(AppAssets.iconPackage, color: Colors.green),
+        leading: TraqIcon(NavIcons.packaging, color: Colors.green),
         title: const Text('Container Selected'),
         subtitle: Text(
           containerId,

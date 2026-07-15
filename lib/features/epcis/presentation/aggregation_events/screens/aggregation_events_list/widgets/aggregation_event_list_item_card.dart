@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_select
 
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class AggregationEventListItemCard extends StatelessWidget {
   const AggregationEventListItemCard({
@@ -106,7 +107,7 @@ class AggregationEventListItemCard extends StatelessWidget {
                           ),
                         if (event.businessStep != null)
                           infoRow(
-                            AppAssets.iconRoute,
+                            NavIcons.supplyChainTraversal,
                             '${AggregationEventUiConstants.listCardBizStepPrefix}$bizStep',
                           ),
                         infoRow(

@@ -13,7 +13,7 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/toba
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sections/sscc_tobacco_tax_stamp_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sections/sscc_tobacco_transport_security_section.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SSCCTobaccoExtensionWidget extends StatefulWidget {
   final int? ssccId;
@@ -39,42 +39,70 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
   bool _isLoading = true;
   bool _hasExtension = false;
 
-  final _euTransportUnitIdController = TextEditingController();
-  final _euRouteAuthorizationNumberController = TextEditingController();
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, String> _seedTexts = {};
+
+  TextEditingController _c(String key) => _controllers.putIfAbsent(
+        key,
+        () => TextEditingController(text: _seedTexts[key] ?? ''),
+      );
+
+  String _text(String key) =>
+      _controllers[key]?.text ?? _seedTexts[key] ?? '';
+
+  void _setSeedOrController(String key, String value) {
+    _seedTexts[key] = value;
+    _controllers[key]?.text = value;
+  }
+
+  TextEditingController get _euTransportUnitIdController =>
+      _c('euTransportUnitId');
+  TextEditingController get _euRouteAuthorizationNumberController =>
+      _c('euRouteAuthorizationNumber');
   DateTime? _euRouteAuthorizationDate;
   DateTime? _euRouteAuthorizationExpiry;
   bool _euFirstRetailOutlet = false;
 
-  final _taxStampAggregationLevelController = TextEditingController();
-  final _aggregatedStampCountController = TextEditingController();
-  final _taxStampAuthorityIdController = TextEditingController();
+  TextEditingController get _aggregatedStampCountController =>
+      _c('aggregatedStampCount');
+  TextEditingController get _taxStampAuthorityIdController =>
+      _c('taxStampAuthorityId');
 
-  final _customsDeclarationNumberController = TextEditingController();
+  TextEditingController get _customsDeclarationNumberController =>
+      _c('customsDeclarationNumber');
   DateTime? _customsDeclarationDate;
-  final _exportLicenseNumberController = TextEditingController();
+  TextEditingController get _exportLicenseNumberController =>
+      _c('exportLicenseNumber');
   DateTime? _exportLicenseDate;
   DateTime? _exportLicenseExpiry;
-  final _importPermitNumberController = TextEditingController();
+  TextEditingController get _importPermitNumberController =>
+      _c('importPermitNumber');
   DateTime? _importPermitDate;
   String? _countryOfOrigin;
   String? _countryOfDestination;
 
-  final _sealNumberController = TextEditingController();
+  TextEditingController get _sealNumberController => _c('sealNumber');
   String? _sealType;
-  final _sealedByController = TextEditingController();
+  TextEditingController get _sealedByController => _c('sealedBy');
   DateTime? _sealedDate;
 
-  final _carrierLicenseNumberController = TextEditingController();
-  final _carrierTobaccoPermitNumberController = TextEditingController();
-  final _driverIdController = TextEditingController();
-  final _vehicleRegistrationController = TextEditingController();
+  TextEditingController get _carrierLicenseNumberController =>
+      _c('carrierLicenseNumber');
+  TextEditingController get _carrierTobaccoPermitNumberController =>
+      _c('carrierTobaccoPermitNumber');
+  TextEditingController get _driverIdController => _c('driverId');
+  TextEditingController get _vehicleRegistrationController =>
+      _c('vehicleRegistration');
 
-  final _pactActManifestNumberController = TextEditingController();
-  final _stateTransitPermitNumberController = TextEditingController();
+  TextEditingController get _pactActManifestNumberController =>
+      _c('pactActManifestNumber');
+  TextEditingController get _stateTransitPermitNumberController =>
+      _c('stateTransitPermitNumber');
   String? _stateTransitPermitState;
 
   bool _containsMultipleBatches = false;
-  final _primaryBatchNumberController = TextEditingController();
+  TextEditingController get _primaryBatchNumberController =>
+      _c('primaryBatchNumber');
 
   @override
   void initState() {
@@ -84,23 +112,11 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
 
   @override
   void dispose() {
-    _euTransportUnitIdController.dispose();
-    _euRouteAuthorizationNumberController.dispose();
-    _taxStampAggregationLevelController.dispose();
-    _aggregatedStampCountController.dispose();
-    _taxStampAuthorityIdController.dispose();
-    _customsDeclarationNumberController.dispose();
-    _exportLicenseNumberController.dispose();
-    _importPermitNumberController.dispose();
-    _sealNumberController.dispose();
-    _sealedByController.dispose();
-    _carrierLicenseNumberController.dispose();
-    _carrierTobaccoPermitNumberController.dispose();
-    _driverIdController.dispose();
-    _vehicleRegistrationController.dispose();
-    _pactActManifestNumberController.dispose();
-    _stateTransitPermitNumberController.dispose();
-    _primaryBatchNumberController.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    _controllers.clear();
+    _seedTexts.clear();
     super.dispose();
   }
 
@@ -149,56 +165,83 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
   }
 
   void _populateFields(SSCCTobaccoExtension ext) {
-    _euTransportUnitIdController.text = ext.euTransportUnitId ?? '';
-    _euRouteAuthorizationNumberController.text = ext.euRouteAuthorizationNumber ?? '';
+    _setSeedOrController('euTransportUnitId', ext.euTransportUnitId ?? '');
+    _setSeedOrController(
+      'euRouteAuthorizationNumber',
+      ext.euRouteAuthorizationNumber ?? '',
+    );
     _euRouteAuthorizationDate = ext.euRouteAuthorizationDate;
     _euRouteAuthorizationExpiry = ext.euRouteAuthorizationExpiry;
     _euFirstRetailOutlet = ext.euFirstRetailOutlet;
 
-    _taxStampAggregationLevelController.text = ext.taxStampAggregationLevel ?? '';
-    _aggregatedStampCountController.text = ext.aggregatedStampCount?.toString() ?? '';
-    _taxStampAuthorityIdController.text = ext.taxStampAuthorityId ?? '';
+    _setSeedOrController(
+      'taxStampAggregationLevel',
+      ext.taxStampAggregationLevel ?? '',
+    );
+    _setSeedOrController(
+      'aggregatedStampCount',
+      ext.aggregatedStampCount?.toString() ?? '',
+    );
+    _setSeedOrController('taxStampAuthorityId', ext.taxStampAuthorityId ?? '');
 
-    _customsDeclarationNumberController.text = ext.customsDeclarationNumber ?? '';
+    _setSeedOrController(
+      'customsDeclarationNumber',
+      ext.customsDeclarationNumber ?? '',
+    );
     _customsDeclarationDate = ext.customsDeclarationDate;
-    _exportLicenseNumberController.text = ext.exportLicenseNumber ?? '';
+    _setSeedOrController('exportLicenseNumber', ext.exportLicenseNumber ?? '');
     _exportLicenseDate = ext.exportLicenseDate;
     _exportLicenseExpiry = ext.exportLicenseExpiry;
-    _importPermitNumberController.text = ext.importPermitNumber ?? '';
+    _setSeedOrController('importPermitNumber', ext.importPermitNumber ?? '');
     _importPermitDate = ext.importPermitDate;
     _countryOfOrigin = ext.countryOfOrigin;
     _countryOfDestination = ext.countryOfDestination;
 
-    _sealNumberController.text = ext.sealNumber ?? '';
+    _setSeedOrController('sealNumber', ext.sealNumber ?? '');
     _sealType = ext.sealType;
-    _sealedByController.text = ext.sealedBy ?? '';
+    _setSeedOrController('sealedBy', ext.sealedBy ?? '');
     _sealedDate = ext.sealedDate;
 
-    _carrierLicenseNumberController.text = ext.carrierLicenseNumber ?? '';
-    _carrierTobaccoPermitNumberController.text = ext.carrierTobaccoPermitNumber ?? '';
-    _driverIdController.text = ext.driverId ?? '';
-    _vehicleRegistrationController.text = ext.vehicleRegistration ?? '';
+    _setSeedOrController(
+      'carrierLicenseNumber',
+      ext.carrierLicenseNumber ?? '',
+    );
+    _setSeedOrController(
+      'carrierTobaccoPermitNumber',
+      ext.carrierTobaccoPermitNumber ?? '',
+    );
+    _setSeedOrController('driverId', ext.driverId ?? '');
+    _setSeedOrController(
+      'vehicleRegistration',
+      ext.vehicleRegistration ?? '',
+    );
 
-    _pactActManifestNumberController.text = ext.pactActManifestNumber ?? '';
-    _stateTransitPermitNumberController.text = ext.stateTransitPermitNumber ?? '';
+    _setSeedOrController(
+      'pactActManifestNumber',
+      ext.pactActManifestNumber ?? '',
+    );
+    _setSeedOrController(
+      'stateTransitPermitNumber',
+      ext.stateTransitPermitNumber ?? '',
+    );
     _stateTransitPermitState = ext.stateTransitPermitState;
 
     _containsMultipleBatches = ext.containsMultipleBatches;
-    _primaryBatchNumberController.text = ext.primaryBatchNumber ?? '';
+    _setSeedOrController('primaryBatchNumber', ext.primaryBatchNumber ?? '');
   }
 
   bool get hasData =>
-      _euTransportUnitIdController.text.isNotEmpty ||
-      _euRouteAuthorizationNumberController.text.isNotEmpty ||
+      _text('euTransportUnitId').isNotEmpty ||
+      _text('euRouteAuthorizationNumber').isNotEmpty ||
       _euFirstRetailOutlet ||
-      _taxStampAggregationLevelController.text.isNotEmpty ||
-      _aggregatedStampCountController.text.isNotEmpty ||
-      _taxStampAuthorityIdController.text.isNotEmpty ||
-      _customsDeclarationNumberController.text.isNotEmpty ||
-      _exportLicenseNumberController.text.isNotEmpty ||
-      _sealNumberController.text.isNotEmpty ||
-      _carrierLicenseNumberController.text.isNotEmpty ||
-      _pactActManifestNumberController.text.isNotEmpty ||
+      _text('taxStampAggregationLevel').isNotEmpty ||
+      _text('aggregatedStampCount').isNotEmpty ||
+      _text('taxStampAuthorityId').isNotEmpty ||
+      _text('customsDeclarationNumber').isNotEmpty ||
+      _text('exportLicenseNumber').isNotEmpty ||
+      _text('sealNumber').isNotEmpty ||
+      _text('carrierLicenseNumber').isNotEmpty ||
+      _text('pactActManifestNumber').isNotEmpty ||
       _containsMultipleBatches ||
       _countryOfOrigin != null ||
       _countryOfDestination != null ||
@@ -219,70 +262,64 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
       id: _extension?.id,
       ssccId: widget.ssccId,
       ssccCode: widget.ssccCode,
-      euTransportUnitId: _euTransportUnitIdController.text.isEmpty
+      euTransportUnitId: _text('euTransportUnitId').isEmpty
           ? null
-          : _euTransportUnitIdController.text,
-      euRouteAuthorizationNumber: _euRouteAuthorizationNumberController.text.isEmpty
+          : _text('euTransportUnitId'),
+      euRouteAuthorizationNumber: _text('euRouteAuthorizationNumber').isEmpty
           ? null
-          : _euRouteAuthorizationNumberController.text,
+          : _text('euRouteAuthorizationNumber'),
       euRouteAuthorizationDate: _euRouteAuthorizationDate,
       euRouteAuthorizationExpiry: _euRouteAuthorizationExpiry,
       euFirstRetailOutlet: _euFirstRetailOutlet,
-      taxStampAggregationLevel: _taxStampAggregationLevelController.text.isEmpty
+      taxStampAggregationLevel: _text('taxStampAggregationLevel').isEmpty
           ? null
-          : _taxStampAggregationLevelController.text,
-      aggregatedStampCount: _aggregatedStampCountController.text.isEmpty
+          : _text('taxStampAggregationLevel'),
+      aggregatedStampCount: _text('aggregatedStampCount').isEmpty
           ? null
-          : int.tryParse(_aggregatedStampCountController.text),
-      taxStampAuthorityId: _taxStampAuthorityIdController.text.isEmpty
+          : int.tryParse(_text('aggregatedStampCount')),
+      taxStampAuthorityId: _text('taxStampAuthorityId').isEmpty
           ? null
-          : _taxStampAuthorityIdController.text,
-      customsDeclarationNumber: _customsDeclarationNumberController.text.isEmpty
+          : _text('taxStampAuthorityId'),
+      customsDeclarationNumber: _text('customsDeclarationNumber').isEmpty
           ? null
-          : _customsDeclarationNumberController.text,
+          : _text('customsDeclarationNumber'),
       customsDeclarationDate: _customsDeclarationDate,
-      exportLicenseNumber: _exportLicenseNumberController.text.isEmpty
+      exportLicenseNumber: _text('exportLicenseNumber').isEmpty
           ? null
-          : _exportLicenseNumberController.text,
+          : _text('exportLicenseNumber'),
       exportLicenseDate: _exportLicenseDate,
       exportLicenseExpiry: _exportLicenseExpiry,
-      importPermitNumber: _importPermitNumberController.text.isEmpty
+      importPermitNumber: _text('importPermitNumber').isEmpty
           ? null
-          : _importPermitNumberController.text,
+          : _text('importPermitNumber'),
       importPermitDate: _importPermitDate,
       countryOfOrigin: _countryOfOrigin,
       countryOfDestination: _countryOfDestination,
-      sealNumber: _sealNumberController.text.isEmpty
-          ? null
-          : _sealNumberController.text,
+      sealNumber: _text('sealNumber').isEmpty ? null : _text('sealNumber'),
       sealType: _sealType,
-      sealedBy: _sealedByController.text.isEmpty
-          ? null
-          : _sealedByController.text,
+      sealedBy: _text('sealedBy').isEmpty ? null : _text('sealedBy'),
       sealedDate: _sealedDate,
-      carrierLicenseNumber: _carrierLicenseNumberController.text.isEmpty
+      carrierLicenseNumber: _text('carrierLicenseNumber').isEmpty
           ? null
-          : _carrierLicenseNumberController.text,
-      carrierTobaccoPermitNumber: _carrierTobaccoPermitNumberController.text.isEmpty
+          : _text('carrierLicenseNumber'),
+      carrierTobaccoPermitNumber: _text('carrierTobaccoPermitNumber').isEmpty
           ? null
-          : _carrierTobaccoPermitNumberController.text,
-      driverId: _driverIdController.text.isEmpty
+          : _text('carrierTobaccoPermitNumber'),
+      driverId: _text('driverId').isEmpty ? null : _text('driverId'),
+      vehicleRegistration: _text('vehicleRegistration').isEmpty
           ? null
-          : _driverIdController.text,
-      vehicleRegistration: _vehicleRegistrationController.text.isEmpty
+          : _text('vehicleRegistration'),
+      pactActManifestNumber: _text('pactActManifestNumber').isEmpty
           ? null
-          : _vehicleRegistrationController.text,
-      pactActManifestNumber: _pactActManifestNumberController.text.isEmpty
+          : _text('pactActManifestNumber'),
+      stateTransitPermitNumber: _text('stateTransitPermitNumber').isEmpty
           ? null
-          : _pactActManifestNumberController.text,
-      stateTransitPermitNumber: _stateTransitPermitNumberController.text.isEmpty
-          ? null
-          : _stateTransitPermitNumberController.text,
+          : _text('stateTransitPermitNumber'),
       stateTransitPermitState: _stateTransitPermitState,
       containsMultipleBatches: _containsMultipleBatches,
-      primaryBatchNumber: _primaryBatchNumberController.text.isEmpty
+      primaryBatchNumber: _text('primaryBatchNumber').isEmpty
           ? null
-          : _primaryBatchNumberController.text,
+          : _text('primaryBatchNumber'),
     );
   }
 
@@ -349,7 +386,7 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
         collapsedIconColor: Colors.white,
         title: const Text('Tobacco Extension'),
         subtitle: Text(_hasExtension ? 'Extension data loaded' : 'No extension data'),
-        leading: TraqIcon(AppAssets.iconShipment),
+        leading: TraqIcon(NavIcons.shipping),
         initiallyExpanded: false,
         children: [
           Padding(
@@ -388,12 +425,14 @@ class SSCCTobaccoExtensionWidgetState extends State<SSCCTobaccoExtensionWidget> 
                 SsccTobaccoTaxStampSection(
                   isEditing: widget.isEditing,
                   taxStampAggregationLevel:
-                      _taxStampAggregationLevelController.text.isEmpty
+                      _text('taxStampAggregationLevel').isEmpty
                           ? null
-                          : _taxStampAggregationLevelController.text,
+                          : _text('taxStampAggregationLevel'),
                   onTaxStampAggregationLevelChanged: (value) => setState(
-                    () => _taxStampAggregationLevelController.text =
-                        value ?? '',
+                    () => _setSeedOrController(
+                      'taxStampAggregationLevel',
+                      value ?? '',
+                    ),
                   ),
                   aggregatedStampCountController:
                       _aggregatedStampCountController,

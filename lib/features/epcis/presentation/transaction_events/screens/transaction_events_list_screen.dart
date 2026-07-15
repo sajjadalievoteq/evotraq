@@ -9,6 +9,7 @@ import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class TransactionEventsListScreen extends StatefulWidget {
   const TransactionEventsListScreen({Key? key}) : super(key: key);
@@ -307,7 +308,7 @@ class _TransactionEventsListScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TraqIcon(AppAssets.iconEvent, size: 48.0, color: Colors.grey[400]),
+                  TraqIcon(NavIcons.epcisEvents, size: 48.0, color: Colors.grey[400]),
                   const SizedBox(height: 16.0),
                   Text(
                     'No Transaction Events Found',

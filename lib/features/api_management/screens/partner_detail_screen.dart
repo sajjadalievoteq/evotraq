@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class PartnerDetailScreen extends StatefulWidget {
   final String partnerId;
@@ -362,7 +363,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     value: _selectedPartnerType,
                     decoration: const InputDecoration(
                       labelText: 'Partner Type',
-                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                      prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                     ),
                     items: PartnerType.values.map((type) {
                       return DropdownMenuItem(value: type, child: Text(type.displayName));
@@ -538,7 +539,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               controller: _outboundApiUrlController,
               decoration: const InputDecoration(
                 labelText: 'Partner API Base URL',
-                prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                 hintText: 'https://partner-api.example.com',
               ),
               enabled: _isEditing,
@@ -551,7 +552,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundEventsEndpointController,
                     decoration: const InputDecoration(
                       labelText: 'Events Endpoint',
-                      prefixIcon: TraqIcon(AppAssets.iconEvent),
+                      prefixIcon: TraqIcon(NavIcons.epcisEvents),
                       hintText: '/api/v1/events',
                     ),
                     enabled: _isEditing,
@@ -563,7 +564,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundMasterdataEndpointController,
                     decoration: const InputDecoration(
                       labelText: 'Master Data Endpoint',
-                      prefixIcon: TraqIcon(AppAssets.iconSscc),
+                      prefixIcon: TraqIcon(NavIcons.sscc),
                       hintText: '/api/v1/masterdata',
                     ),
                     enabled: _isEditing,
@@ -679,7 +680,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                     controller: _outboundTokenUrlController,
                     decoration: const InputDecoration(
                       labelText: 'Token URL',
-                      prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                      prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                       hintText: 'https://auth.example.com/oauth/token',
                     ),
                     enabled: _isEditing,

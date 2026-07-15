@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -14,8 +15,9 @@ import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.d
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/utils/unpacking_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_list/widgets/unpacking_advanced_filters_panel.dart';
@@ -29,12 +31,16 @@ class UnpackingOperationListScreen extends StatelessWidget {
     this.onSelectOperation,
     this.selectedOperationId,
     this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final ValueChanged<String>? onSelectOperation;
   final String? selectedOperationId;
   final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +61,8 @@ class UnpackingOperationListScreen extends StatelessWidget {
         onSelectOperation: onSelectOperation,
         selectedOperationId: selectedOperationId,
         onLoadingChanged: onLoadingChanged,
+        onBindRefresh: onBindRefresh,
+        onEmbeddedCreate: onEmbeddedCreate,
       ),
     );
   }
@@ -66,12 +74,16 @@ class _UnpackingOperationListBody extends StatefulWidget {
     this.onSelectOperation,
     this.selectedOperationId,
     this.onLoadingChanged,
+    this.onBindRefresh,
+    this.onEmbeddedCreate,
   });
 
   final bool embedded;
   final ValueChanged<String>? onSelectOperation;
   final String? selectedOperationId;
   final ValueChanged<bool>? onLoadingChanged;
+  final void Function(VoidCallback refreshFn)? onBindRefresh;
+  final VoidCallback? onEmbeddedCreate;
 
   @override
   State<_UnpackingOperationListBody> createState() =>
@@ -88,12 +100,24 @@ class _UnpackingOperationListBodyState
   String? _selectedStatus;
   String _sortBy = 'processedAt';
   String _sortDir = 'desc';
+  bool _bindRefreshDone = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onFiltersChanged);
     _containerFilterController.addListener(_onFiltersChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_bindRefreshDone) {
+      _bindRefreshDone = true;
+      widget.onBindRefresh?.call(
+        () => context.read<OperationsCubit<Operation>>().refresh(),
+      );
+    }
   }
 
   @override
@@ -117,6 +141,17 @@ class _UnpackingOperationListBodyState
       sortBy: _sortBy,
       sortDir: _sortDir,
     );
+  }
+
+  void _syncEmbeddedOperationIds(List<Operation> filtered) {
+    if (!widget.embedded) return;
+    final ids = filtered
+        .map((op) => op.navigableOperationId)
+        .whereType<String>()
+        .toList();
+    context
+        .read<OperationSplitCubit>()
+        .updateOperationIds(ids, isEmpty: ids.isEmpty);
   }
 
   void _showFilterDialog() {
@@ -209,19 +244,14 @@ class _UnpackingOperationListBodyState
           previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
-
-        if (widget.embedded &&
-            widget.selectedOperationId == null &&
-            !state.isLoading &&
-            state.errorMessage == null) {
-          final filtered = _filteredOperations(state.items);
-          if (filtered.isNotEmpty) {
-            final firstId = filtered.first.navigableOperationId;
-            if (firstId != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                widget.onSelectOperation?.call(firstId);
-              });
-            }
+        final filtered = _filteredOperations(state.items);
+        if (widget.embedded) {
+          final split = context.read<OperationSplitCubit>();
+          if (state.isLoading) {
+            split.setListLoading(true);
+          } else {
+            _syncEmbeddedOperationIds(filtered);
+            split.setListLoading(false);
           }
         }
       },
@@ -295,11 +325,12 @@ class _UnpackingOperationListBodyState
             emptyTitle: 'No unpacking operations yet',
             emptySubtitle:
                 'Tap the + button to create your first unpacking operation.',
+            emptyIconAsset: NavIcons.unpacking,
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,
             itemBuilder: (context, operation) =>
-                OperationListCardBuilders.forOperation(
+                OperationListCard(
               operation: operation,
               isSelected: widget.embedded &&
                   operation.navigableOperationId != null &&

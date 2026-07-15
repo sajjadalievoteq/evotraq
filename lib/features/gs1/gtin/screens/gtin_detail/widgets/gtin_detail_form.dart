@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_skeleton.dart';
@@ -31,6 +31,25 @@ class GtinDetailForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (fullFormShimmer) {
+      return SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: EdgeInsets.only(
+          top: context.padding.left,
+          right: context.padding.left,
+          left: context.padding.left,
+        ),
+        child: Form(
+          key: formKey,
+          child: Gs1FormShimmerLayer(
+            show: true,
+            formColumn: const SizedBox.shrink(),
+            skeleton: const GtinDetailFormSkeleton(),
+          ),
+        ),
+      );
+    }
+
     final formColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -56,13 +75,7 @@ class GtinDetailForm extends StatelessWidget {
       ),
       child: Form(
         key: formKey,
-        child: fullFormShimmer
-            ? Gs1FormShimmerLayer(
-                show: true,
-                formColumn: formColumn,
-                skeleton: const GtinDetailFormSkeleton(),
-              )
-            : formColumn,
+        child: formColumn,
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class TraversalQueryWidget extends StatefulWidget {
   final Function(String queryType, Map<String, dynamic> parameters)? onQueryExecuted;
@@ -56,7 +57,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               text: 'Item History',
             ),
             Tab(
-              icon: TraqIcon(AppAssets.iconAggregate),
+              icon: TraqIcon(NavIcons.aggregationEvents),
               text: 'Aggregation',
             ),
           ],
@@ -191,7 +192,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Item EPC',
                 hintText: 'https://id.gs1.org/01/10614141123459/21/400',
-                prefixIcon: TraqIcon(AppAssets.iconSscc),
+                prefixIcon: TraqIcon(NavIcons.sscc),
                 border: OutlineInputBorder(),
               ),
               validator: FormBuilderValidators.compose([
@@ -262,7 +263,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
               decoration: const InputDecoration(
                 labelText: 'Parent EPC',
                 hintText: 'https://id.gs1.org/00/106141412345678908',
-                prefixIcon: TraqIcon(AppAssets.iconPackage),
+                prefixIcon: TraqIcon(NavIcons.packaging),
                 border: OutlineInputBorder(),
               ),
               validator: FormBuilderValidators.compose([
@@ -298,7 +299,7 @@ class _TraversalQueryWidgetState extends State<TraversalQueryWidget>
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : TraqIcon(AppAssets.iconAggregate),
+                    : TraqIcon(NavIcons.aggregationEvents),
                 label: Text(widget.isLoading ? 'Loading...' : 'Get Aggregation Hierarchy'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),

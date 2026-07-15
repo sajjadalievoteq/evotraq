@@ -34,7 +34,12 @@ class ObjectEventDetailSkeleton extends StatelessWidget {
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(context.gutter),
+        padding: EdgeInsets.fromLTRB(
+          context.padding.top,
+          context.padding.top,
+          context.padding.top,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

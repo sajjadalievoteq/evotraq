@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class NotificationQuickGuide extends StatelessWidget {
   const NotificationQuickGuide({super.key});
@@ -39,7 +40,7 @@ class NotificationQuickGuide extends StatelessWidget {
               '2.',
               'Configure Webhook',
               'Set up your webhook URL where notifications will be sent',
-              AppAssets.iconWebhook,
+              NavIcons.webhookConfiguration,
             ),
             _buildGuideStep(
               '3.',

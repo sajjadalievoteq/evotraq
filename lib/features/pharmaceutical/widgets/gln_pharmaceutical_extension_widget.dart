@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_extension_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class GLNPharmaceuticalExtensionWidget extends StatefulWidget {
   final int? glnId;
@@ -1045,7 +1046,7 @@ class GLNPharmaceuticalExtensionWidgetState
   Widget _buildWholesaleSection() {
     return _buildSection(
       GlnPharmaceuticalExtensionUiConstants.cardWholesaleDistribution,
-      AppAssets.iconTruck,
+      NavIcons.logistics,
       [
         _buildTextField(
           controller: _wholesaleLicenseNumberController,

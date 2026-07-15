@@ -10,6 +10,7 @@ import '../../domain/models/notification_subscription.dart';
 import '../widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
   final String subscriptionId;
@@ -325,7 +326,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
         break;
       default:
         chipColor = Colors.grey;
-        chipIconAsset = AppAssets.iconHelpCircle;
+        chipIconAsset = NavIcons.helpSupport;
     }
 
     return Chip(

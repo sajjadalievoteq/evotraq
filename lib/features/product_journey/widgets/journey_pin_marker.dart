@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
@@ -147,7 +148,7 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
                   Row(
                     children: [
                       TraqIcon(
-                        AppAssets.iconGln,
+                        NavIcons.gln,
                         size: 9,
                         color: Colors.white.withValues(alpha: 0.7),
                       ),

@@ -9,7 +9,12 @@ class OperationDetailsLoadingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShimmer(
       child: SingleChildScrollView(
-        padding: context.padding,
+        padding: EdgeInsets.fromLTRB(
+          context.padding.top,
+          context.padding.top,
+          context.padding.top,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

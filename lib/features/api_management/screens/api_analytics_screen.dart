@@ -8,6 +8,7 @@ import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class ApiAnalyticsScreen extends StatefulWidget {
   final String partnerId;
@@ -190,13 +191,13 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
   Widget _buildSummaryCards(ApiUsageStats stats) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), AppAssets.iconApi, Colors.blue)),
+        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), NavIcons.apiManagement, Colors.blue)),
         const SizedBox(width: 12),
         Expanded(child: _buildStatCard('Successful', '${stats.successRate.toStringAsFixed(1)}%', AppAssets.iconCheckCircle, Colors.green)),
         const SizedBox(width: 12),
         Expanded(child: _buildStatCard('Failed', stats.failedRequests.toString(), AppAssets.iconXCircle, Colors.red)),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', AppAssets.iconTimer, Colors.orange)),
+        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', NavIcons.performanceTests, Colors.orange)),
       ],
     );
   }

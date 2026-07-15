@@ -35,7 +35,8 @@ class OperationEntryScreen extends StatefulWidget {
   }) listBuilder;
 
   final Widget Function(BuildContext context, String id) detailViewBuilder;
-  final Widget Function(BuildContext context) detailAwaitBuilder;
+  final Widget Function(BuildContext context, {required bool listLoading})
+      detailAwaitBuilder;
   final Widget? fallbackList;
 
   @override
@@ -72,10 +73,12 @@ class _OperationEntryScreenState extends State<OperationEntryScreen> {
           emptyNoMatchText: widget.emptyNoMatchText,
           fabNavigateRoute: widget.fabNavigateRoute,
           listenWhenListChanged: (prev, curr) =>
-              prev.operationIds != curr.operationIds,
+              prev.operationIds != curr.operationIds ||
+              prev.isListLoading != curr.isListLoading,
           idsFromState: (s) => s.operationIds,
           createdIdFromState: (s) => s.createdOperationId,
           isEmptyNoMatch: (s) => s.isEmpty,
+          isListLoading: (s) => s.isListLoading,
           listBuilder: widget.listBuilder,
           detailViewBuilder: widget.detailViewBuilder,
           detailAwaitBuilder: widget.detailAwaitBuilder,

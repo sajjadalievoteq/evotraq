@@ -10,6 +10,7 @@ import 'package:traqtrace_app/core/widgets/error_message.dart';
 import '../../../core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class CacheManagementScreen extends StatefulWidget {
   const CacheManagementScreen({super.key});
@@ -102,7 +103,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Overview', icon: TraqIcon(AppAssets.iconDashboard)),
+            Tab(text: 'Overview', icon: TraqIcon(NavIcons.dashboard)),
             Tab(text: 'Statistics', icon: TraqIcon(AppAssets.iconBarChart)),
             Tab(text: 'Management', icon: TraqIcon(AppAssets.iconSettings)),
             Tab(text: 'Health', icon: TraqIcon(AppAssets.iconSecurity)),
@@ -222,7 +223,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                         _buildStatCard(
                           'Cache Entries',
                           _statistics!.totalCacheEntries.toString(),
-                          AppAssets.iconDatabase,
+                          NavIcons.databasePartitioning,
                           Colors.purple,
                         ),
                         _buildStatCard(
@@ -653,7 +654,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
   Widget _buildEventDataAction(String eventType) {
     return ListTile(
-      leading: TraqIcon(AppAssets.iconEvent),
+      leading: TraqIcon(NavIcons.epcisEvents),
       title: Text('${eventType.replaceAll('-', ' ').toUpperCase()} Cache'),
       subtitle: Text('Manage $eventType hot data cache'),
       trailing: ElevatedButton(
@@ -941,7 +942,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
 
           _buildHelpSection(
             'Performance Benefits',
-            AppAssets.iconGauge,
+            NavIcons.performanceOptimization,
             Colors.red,
             [
               '🚀 Response Time Reduction: Up to 90% faster for cached queries',

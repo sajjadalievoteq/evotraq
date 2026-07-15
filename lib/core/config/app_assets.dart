@@ -179,4 +179,10 @@ class AppAssets {
   static const String iconDecommissioning = '$_traqIcons/decommissioning.svg';
   static const String iconHolding = '$_traqIcons/holding.svg';
   static const String iconDispatching = '$_traqIcons/dispatching.svg';
+
+  static const String iconReturnShipping = '$_traqIcons/return-shipping.svg';
+  static const String iconReturnReceiving = '$_traqIcons/return-receiving.svg';
+  static const String iconUpdateStatus = '$_traqIcons/update-status.svg';
+  static const String iconObjectEvent = '$_traqIcons/object-event.svg';
+  static const String iconProductJourney = '$_traqIcons/product-journey.svg';
 }

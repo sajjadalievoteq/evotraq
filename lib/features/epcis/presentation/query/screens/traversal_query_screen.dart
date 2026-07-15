@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/traversal_quer
 import 'package:traqtrace_app/features/epcis/presentation/widgets/supply_chain_visualization_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class TraversalQueryScreen extends StatelessWidget {
   const TraversalQueryScreen({super.key});
@@ -92,7 +93,7 @@ class _HeaderSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconAggregate,
+                TraqIcon(NavIcons.aggregationEvents,
                   color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
@@ -191,7 +192,7 @@ class _MainContent extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          TraqIcon(AppAssets.iconAggregate,
+                          TraqIcon(NavIcons.aggregationEvents,
                             color: Theme.of(context).colorScheme.onSecondary,
                           ),
                           const SizedBox(width: 8),

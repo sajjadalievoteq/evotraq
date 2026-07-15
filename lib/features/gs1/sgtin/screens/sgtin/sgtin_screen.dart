@@ -61,7 +61,7 @@ class SGTINScreen extends StatelessWidget {
                 ctx.read<SGTINCubit>().fetchSGTINList();
               },
             ),
-            detailAwaitBuilder: (context) => const SGTINDetailScreen(
+            detailAwaitBuilder: (context, {required listLoading}) => const SGTINDetailScreen(
               key: ValueKey('__sgtin_split_await_list__'),
               isEditing: false,
               embedded: true,

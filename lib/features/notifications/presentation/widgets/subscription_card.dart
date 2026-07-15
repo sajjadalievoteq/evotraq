@@ -3,6 +3,7 @@ import '../../domain/models/notification_subscription.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SubscriptionCard extends StatelessWidget {
   final NotificationSubscription subscription;
@@ -104,7 +105,7 @@ class SubscriptionCard extends StatelessWidget {
         break;
       default:
         color = Colors.grey;
-        iconAsset = AppAssets.iconHelpCircle;
+        iconAsset = NavIcons.helpSupport;
     }
 
     return Chip(
@@ -215,7 +216,7 @@ class SubscriptionCard extends StatelessWidget {
             context,
             'Total',
             stats.totalNotifications.toString(),
-            AppAssets.iconNotification,
+            NavIcons.notifications,
             Colors.blue,
           ),
         ),

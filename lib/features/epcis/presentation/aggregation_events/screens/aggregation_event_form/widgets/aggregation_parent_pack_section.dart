@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/utils/epc_formatter.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class AggregationParentPackSection extends StatefulWidget {
   const AggregationParentPackSection({
@@ -168,7 +169,7 @@ class AggregationParentPackSectionState extends State<AggregationParentPackSecti
                 ButtonSegment(
                   value: AggregationParentPackMode.sscc,
                   label: Text('SSCC'),
-                  icon: TraqIcon(AppAssets.iconPackage, size: 18),
+                  icon: TraqIcon(NavIcons.packaging, size: 18),
                 ),
                 ButtonSegment(
                   value: AggregationParentPackMode.sgtin,

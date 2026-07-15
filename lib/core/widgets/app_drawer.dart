@@ -8,6 +8,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
 import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
@@ -101,7 +102,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
   Widget _svgLeading(String asset) => TraqIcon(asset);
 
-  Widget _svgTrailingChevron() => TraqIcon(AppAssets.iconChevronR, size: 14);
+  Widget _svgTrailingChevron() => TraqIcon(NavIcons.chevronRight, size: 14);
 
   @override
   Widget build(BuildContext context) {
@@ -180,8 +181,8 @@ class _AppDrawerState extends State<AppDrawer> {
                           IconButton(
                             icon: TraqIcon(
                               isDarkMode
-                                  ? AppAssets.iconSun
-                                  : AppAssets.iconMoon,
+                                  ? NavIcons.themeSun
+                                  : NavIcons.themeMoon,
                               color: context.colors.background,
                             ),
                             onPressed: () async {
@@ -200,7 +201,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   padding: EdgeInsets.zero,
                   children: [
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconDashboard),
+                      leading: _svgLeading(NavIcons.dashboard),
                       title: const Text('Dashboard'),
                       onTap: () => _navigate(
                         Constants.homeRoute,
@@ -208,7 +209,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconUser),
+                      leading: _svgLeading(NavIcons.profile),
                       title: const Text('My Profile'),
                       onTap: () => _navigate(Constants.profileRoute),
                     ),
@@ -227,7 +228,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconGlobe),
+                      leading: _svgLeading(NavIcons.productJourney),
                       title: const Text('Product Journey'),
                       subtitle: const Text('Track supply chain flow'),
                       onTap: () =>
@@ -249,18 +250,18 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconList),
+                      leading: _svgLeading(NavIcons.masterData),
                       title: const Text('Master Data'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconGtin),
+                          leading: _svgLeading(NavIcons.gtin),
                           title: const Text('GTIN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
                           onTap: () => _navigate(Constants.gs1GtinsRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconGln),
+                          leading: _svgLeading(NavIcons.gln),
                           title: const Text('GLN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -270,11 +271,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconQr),
+                      leading: _svgLeading(NavIcons.serialization),
                       title: const Text('Serialization'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconSscc),
+                          leading: _svgLeading(NavIcons.sscc),
                           title: const Text('SSCC Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -282,7 +283,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.gs1SsccsRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconSgtin),
+                          leading: _svgLeading(NavIcons.sgtin),
                           title: const Text('SGTIN Management'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -293,11 +294,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconEvent),
+                      leading: _svgLeading(NavIcons.epcisEvents),
                       title: const Text('EPCIS Events'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconSgtin),
+                          leading: _svgLeading(NavIcons.objectEvents),
                           title: const Text('Object Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -305,7 +306,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Constants.epcisObjectEventsRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconAggregate),
+                          leading: _svgLeading(NavIcons.aggregationEvents),
                           title: const Text('Aggregation Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -316,11 +317,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconSearch),
+                      leading: _svgLeading(NavIcons.eventQueries),
                       title: const Text('Event Queries'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconEvent),
+                          leading: _svgLeading(NavIcons.allEvents),
                           title: const Text('All Events'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -328,7 +329,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisEventsRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconAggregate),
+                          leading: _svgLeading(NavIcons.aggregationHierarchy),
                           title: const Text('Aggregation Hierarchy'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -382,7 +383,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           },
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconFilter),
+                          leading: _svgLeading(NavIcons.advancedQuery),
                           title: const Text('Advanced Query'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -390,7 +391,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisAdvancedQueryRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconPin),
+                          leading: _svgLeading(NavIcons.supplyChainTraversal),
                           title: const Text('Supply Chain Traversal'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -398,7 +399,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.epcisTraversalQueryRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconRefresh),
+                          leading: _svgLeading(NavIcons.eventSerialization),
                           title: const Text('Event Serialization'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -422,7 +423,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconRefresh),
+                      leading: _svgLeading(NavIcons.lifecycle),
                       title: const Text('Lifecycle'),
 
                       children: [
@@ -430,7 +431,7 @@ class _AppDrawerState extends State<AppDrawer> {
                        contentPadding:
                        const EdgeInsets.only(left: 32.0),
                     
-                     leading: _svgLeading(AppAssets.iconSparkle),
+                     leading: _svgLeading(NavIcons.commissioning),
                      title: const Text('Commissioning'),
                      onTap: () =>
                          _navigate(Constants.opCommissioningRoute),
@@ -440,7 +441,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           contentPadding:
                           const EdgeInsets.only(left: 32.0),
 
-                          leading: _svgLeading(AppAssets.iconTrash),
+                          leading: _svgLeading(NavIcons.updateStatus),
                           title: const Text('Update Status'),
                           onTap: () =>
                               _navigate(Constants.opUpdateStatusRoute),
@@ -448,14 +449,14 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconPackage),
+                      leading: _svgLeading(NavIcons.packaging),
                       title: const Text('Packaging'),
                       children: [
                         ListTile(
                           contentPadding:
                           const EdgeInsets.only(left: 32.0),
 
-                          leading: _svgLeading(AppAssets.iconAggregate),
+                          leading: _svgLeading(NavIcons.packing),
                           title: const Text('Packing'),
                           onTap: () => _navigate(Constants.opPackingRoute),
                         ),
@@ -464,7 +465,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           contentPadding:
                           const EdgeInsets.only(left: 32.0),
 
-                          leading: _svgLeading(AppAssets.iconTransform),
+                          leading: _svgLeading(NavIcons.unpacking),
                           title: const Text('Unpacking'),
                           onTap: () => _navigate(Constants.opUnpackingRoute),
                         ),
@@ -473,19 +474,19 @@ class _AppDrawerState extends State<AppDrawer> {
 
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconTruck),
+                      leading: _svgLeading(NavIcons.logistics),
                       title: const Text('Logistics'),
                       childrenPadding: EdgeInsets.only(left: 22),
                       children: [
                         ExpansionTile(
                           backgroundColor: context.colors.surface,
-                          leading: _svgLeading(AppAssets.iconArrowUpR),
+                          leading: _svgLeading(NavIcons.shippings),
                           title: const Text('Shippings'),
                           children: [
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(AppAssets.iconShipment),
+                              leading: _svgLeading(NavIcons.shipping),
                               title: const Text('Shipping'),
                               onTap: () =>
                                   _navigate(Constants.opShippingRoute),
@@ -493,7 +494,7 @@ class _AppDrawerState extends State<AppDrawer> {
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(AppAssets.iconShipment),
+                              leading: _svgLeading(NavIcons.returnShipping),
                               title: const Text('Return Shipping'),
                               onTap: () => _navigate(Constants.opReturnShippingRoute),
                             ),
@@ -501,7 +502,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
 
-                              leading: _svgLeading(AppAssets.iconXCircle),
+                              leading: _svgLeading(NavIcons.cancelShipping),
                               title: const Text('Cancel Shipping'),
                               onTap: () => _navigate(Constants.opCancelShippingRoute),
                             ),
@@ -510,13 +511,13 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                         ExpansionTile(
 
-                          leading: _svgLeading(AppAssets.iconReceive),
+                          leading: _svgLeading(NavIcons.receivings),
                           title: const Text('Receivings'),
                           children: [
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(AppAssets.iconReceive),
+                              leading: _svgLeading(NavIcons.receiving),
                               title: const Text('Receiving'),
                               onTap: () =>
                                   _navigate(Constants.opReceivingRoute),
@@ -524,14 +525,14 @@ class _AppDrawerState extends State<AppDrawer> {
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(AppAssets.iconReceive),
+                              leading: _svgLeading(NavIcons.returnReceiving),
                               title: const Text('Return Receiving'),
                               onTap: () => _navigate(Constants.opReturnReceivingRoute),
                             ),
                             ListTile(
                               contentPadding:
                               const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(AppAssets.iconXCircle),
+                              leading: _svgLeading(NavIcons.cancelReceiving),
                               title: const Text('Cancel Receiving'),
                               onTap: () => _navigate(Constants.opCancelReceivingRoute),
                             ),
@@ -558,18 +559,18 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconQr),
+                      leading: _svgLeading(NavIcons.generateVerifyBarcode),
                       title: const Text('Generate / Verify Barcode'),
                       onTap: () =>
                           _navigate(Constants.barcodeGenerateRoute),
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconCheck),
+                      leading: _svgLeading(NavIcons.validation),
                       title: const Text('Validation'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconFlask),
+                          leading: _svgLeading(NavIcons.gs1ValidationDemo),
                           title: const Text('GS1 Validation Demo'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -577,7 +578,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.gs1ValidationDemoRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconCheck),
+                          leading: _svgLeading(NavIcons.gs1ValidationTests),
                           title: const Text('GS1 Validation Tests'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -585,7 +586,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               _navigate(Constants.adminGs1ValidationRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconGlobe),
+                          leading: _svgLeading(NavIcons.integrationValidation),
                           title: const Text('Integration Validation'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -593,7 +594,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Constants.adminIntegrationValidationRoute),
                         ),
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconList),
+                          leading: _svgLeading(NavIcons.validationRules),
                           title: const Text('Validation Rules'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -604,11 +605,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
 
                     ExpansionTile(
-                      leading: _svgLeading(AppAssets.iconTransform),
+                      leading: _svgLeading(NavIcons.conversion),
                       title: const Text('Conversion'),
                       children: [
                         ListTile(
-                          leading: _svgLeading(AppAssets.iconTransform),
+                          leading: _svgLeading(NavIcons.epcConversion),
                           title: const Text('EPC Conversion'),
                           contentPadding:
                               const EdgeInsets.only(left: 32.0),
@@ -634,11 +635,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconUsers),
+                        leading: _svgLeading(NavIcons.userManagement),
                         title: const Text('User Management'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconUsers),
+                            leading: _svgLeading(NavIcons.userManagement),
                             title: const Text('User Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -646,7 +647,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminUsersRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconApproval),
+                            leading: _svgLeading(NavIcons.pendingApprovals),
                             title: const Text('Pending Approvals'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -657,11 +658,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconNotification),
+                        leading: _svgLeading(NavIcons.notifications),
                         title: const Text('Notifications'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconNotification),
+                            leading: _svgLeading(NavIcons.notificationCenter),
                             title: const Text('Notification Center'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -669,7 +670,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.notificationsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconMail),
+                            leading: _svgLeading(NavIcons.manageSubscriptions),
                             title: const Text('Manage Subscriptions'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -677,7 +678,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.notificationSubscriptionsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconSettings),
+                            leading: _svgLeading(NavIcons.webhookConfiguration),
                             title: const Text('Webhook Configuration'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -688,11 +689,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconSpinner),
+                        leading: _svgLeading(NavIcons.batchProcessing),
                         title: const Text('Batch Processing'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconList),
+                            leading: _svgLeading(NavIcons.jobQueueManagement),
                             title: const Text('Job Queue Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -700,7 +701,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminJobQueueRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconTransform),
+                            leading: _svgLeading(NavIcons.etlManagement),
                             title: const Text('ETL Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -708,7 +709,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminEtlManagementRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconDownload),
+                            leading: _svgLeading(NavIcons.bulkExport),
                             title: const Text('Bulk Export'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -719,11 +720,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconGlobe),
+                        leading: _svgLeading(NavIcons.apiManagement),
                         title: const Text('API Management'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconList),
+                            leading: _svgLeading(NavIcons.apiCollections),
                             title: const Text('API Collections'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -731,7 +732,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminApiCollectionsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconUsers),
+                            leading: _svgLeading(NavIcons.partnerManagement),
                             title: const Text('Partner Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -739,7 +740,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminApiPartnersRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconLock),
+                            leading: _svgLeading(NavIcons.serviceAccounts),
                             title: const Text('Service Accounts'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -750,11 +751,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconSettings),
+                        leading: _svgLeading(NavIcons.systemTools),
                         title: const Text('System Tools'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconSettings),
+                            leading: _svgLeading(NavIcons.systemSettings),
                             title: const Text('System Settings'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -762,7 +763,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminSettingsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconRefresh),
+                            leading: _svgLeading(NavIcons.cacheManagement),
                             title: const Text('Cache Management'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -770,7 +771,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminCacheRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconClock),
+                            leading: _svgLeading(NavIcons.performanceTests),
                             title: const Text('Performance Tests'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -778,7 +779,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminPerformanceTestsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconFilter),
+                            leading: _svgLeading(NavIcons.performanceOptimization),
                             title: const Text('Performance Optimization'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -786,7 +787,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminPerformanceOptimizationRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconEye),
+                            leading: _svgLeading(NavIcons.systemMonitoring),
                             title: const Text('System Monitoring'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -794,7 +795,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 _navigate(Constants.adminMonitoringRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconList),
+                            leading: _svgLeading(NavIcons.databasePartitioning),
                             title: const Text('Database Partitioning'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -802,7 +803,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminDatabasePartitioningRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconLock),
+                            leading: _svgLeading(NavIcons.dataConsistencyIntegrity),
                             title:
                                 const Text('Data Consistency & Integrity'),
                             contentPadding:
@@ -814,11 +815,11 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       ExpansionTile(
-                        leading: _svgLeading(AppAssets.iconFlask),
+                        leading: _svgLeading(NavIcons.testDataGeneration),
                         title: const Text('Test Data Generation'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconEvent),
+                            leading: _svgLeading(NavIcons.eventGenerationTests),
                             title: const Text('Event Generation Tests'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -826,7 +827,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Constants.adminEventGenerationTestRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(AppAssets.iconFactory),
+                            leading: _svgLeading(NavIcons.industryTestData),
                             title: const Text('Industry Test Data'),
                             contentPadding:
                                 const EdgeInsets.only(left: 32.0),
@@ -837,7 +838,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                       ListTile(
                         trailing: _svgTrailingChevron(),
-                        leading: _svgLeading(AppAssets.iconGlobe),
+                        leading: _svgLeading(NavIcons.cbvVocabulary),
                         title: const Text('CBV Vocabulary'),
 
                         onTap: () =>
@@ -848,7 +849,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
                     const Divider(),
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconDownload),
+                      leading: _svgLeading(NavIcons.postmanCollection),
                       title: const Text('Postman Collection'),
                       subtitle: Text(
                         isAdmin ? 'Download or update the API collection' : 'Download the API collection',
@@ -858,7 +859,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           ? Tooltip(
                               message: 'Admin: download or upload',
                               child: TraqIcon(
-                                AppAssets.iconSecurity,
+                                NavIcons.security,
                                 size: 16,
                                 color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
                               ),
@@ -871,7 +872,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     const Divider(),
                     ListTile(
-                      leading: _svgLeading(AppAssets.iconInfo),
+                      leading: _svgLeading(NavIcons.helpSupport),
                       title: const Text('Help & Support'),
                       onTap: () {
                         Navigator.pop(context);
@@ -887,7 +888,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           showLogoutConfirmDialog(host ?? context);
                         },
                         title: 'Log Out',
-                        iconAsset: AppAssets.iconLogout,
+                        iconAsset: NavIcons.logout,
                       ),
                     ),
                   ],

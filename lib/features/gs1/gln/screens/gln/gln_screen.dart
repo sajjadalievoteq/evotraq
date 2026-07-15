@@ -78,7 +78,7 @@ class _GLNScreenState extends State<GLNScreen> {
             embedded: true,
             onEmbeddedActionSuccess: onSuccess,
           ),
-          detailAwaitBuilder: (context) => const GLNDetailScreen(
+          detailAwaitBuilder: (context, {required listLoading}) => const GLNDetailScreen(
             key: ValueKey('__gln_split_await_list__'),
             glnId: null,
             isEditing: false,

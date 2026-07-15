@@ -11,6 +11,7 @@ import 'package:traqtrace_app/core/web/web_download_stub.dart'
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class JobQueuePanel extends StatefulWidget {
@@ -304,7 +305,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                     unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
                     tabs: [
                       Tab(
-                        icon: TraqIcon(AppAssets.iconDashboard),
+                        icon: TraqIcon(NavIcons.dashboard),
                         text: 'Dashboard',
                       ),
                       Tab(
@@ -391,7 +392,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Queued', queuedJobs, AppAssets.iconQueue),
+                  _buildSummaryItem('Queued', queuedJobs, NavIcons.jobQueueManagement),
                   const SizedBox(width: 24),
                   _buildSummaryItem('Active', activeJobs, AppAssets.iconPlay),
                   const SizedBox(width: 24),
@@ -561,7 +562,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
                 child: _buildEnhancedStatusCard(
                   'Queued Jobs',
                   '${_queuedJobs.length}',
-                  AppAssets.iconQueue,
+                  NavIcons.jobQueueManagement,
                   Colors.orange.shade600,
                   Colors.orange.shade50,
                 ),
@@ -2133,7 +2134,7 @@ class JobQueuePanelState extends State<JobQueuePanel> with TickerProviderStateMi
             decoration: InputDecoration(
               labelText: 'Source Path/URL',
               border: OutlineInputBorder(),
-              prefixIcon: TraqIcon(AppAssets.iconAggregate),
+              prefixIcon: TraqIcon(NavIcons.aggregationEvents),
               hintText: 'File path or API endpoint URL',
             ),
           ),

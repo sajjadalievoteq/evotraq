@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -12,7 +13,7 @@ class JourneyEmptyState extends StatelessWidget {
     final c = context.colors;
 
     return AppEmptyState(
-      iconAsset: AppAssets.iconGlobe,
+      iconAsset: NavIcons.productJourney,
       title: 'Track Product Journey',
       subtitle:
           'Enter a serial number, SGTIN, or SSCC to view\nthe complete supply chain journey',
@@ -21,9 +22,9 @@ class JourneyEmptyState extends StatelessWidget {
         runSpacing: 8,
         alignment: WrapAlignment.center,
         children: [
-          _hintChip(c, 'Serial Number', AppAssets.iconQr),
+          _hintChip(c, 'Serial Number', NavIcons.serialization),
           _hintChip(c, 'SGTIN URI', AppAssets.iconLink),
-          _hintChip(c, 'SSCC', AppAssets.iconBox),
+          _hintChip(c, 'SSCC', NavIcons.sscc),
         ],
       ),
     );

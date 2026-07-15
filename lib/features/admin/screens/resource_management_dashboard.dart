@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
@@ -430,7 +431,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Memory Usage',
                 '${memoryUsage.toStringAsFixed(1)}%',
-                AppAssets.iconChip,
+                NavIcons.eventSerialization,
                 AdminHelperMappers.usageColor(memoryUsage.toDouble()),
               ),
             ),
@@ -439,7 +440,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'CPU Usage',
                 '${cpuUsage.toStringAsFixed(1)}%',
-                AppAssets.iconGauge,
+                NavIcons.performanceOptimization,
                 AdminHelperMappers.usageColor(cpuUsage.toDouble()),
               ),
             ),
@@ -452,7 +453,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Disk Usage',
                 '${diskUsage.toStringAsFixed(1)}%',
-                AppAssets.iconDatabase,
+                NavIcons.databasePartitioning,
                 AdminHelperMappers.usageColor(diskUsage.toDouble()),
               ),
             ),
@@ -461,7 +462,7 @@ class _ResourceManagementDashboardState
               child: _buildMetricCard(
                 'Network Load',
                 '${networkLoad.toStringAsFixed(1)}%',
-                AppAssets.iconNetworkCheck,
+                NavIcons.integrationValidation,
                 AdminHelperMappers.usageColor(networkLoad.toDouble()),
               ),
             ),

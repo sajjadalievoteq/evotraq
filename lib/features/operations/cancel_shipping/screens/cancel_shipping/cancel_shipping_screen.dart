@@ -33,9 +33,10 @@ class CancelShippingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => CancelShippingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => CancelShippingOperationDetailScreen(
           key: const ValueKey('__cancel_shipping_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const CancelShippingOperationListScreen(),

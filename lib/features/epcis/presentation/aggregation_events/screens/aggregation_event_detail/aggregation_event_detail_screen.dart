@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
@@ -66,15 +66,27 @@ class _AggregationEventDetailScreenState
   @override
   Widget build(BuildContext context) {
     if (widget.awaitingListSelection) {
-      final empty = AppEmptyDetail(
-        title: AggregationEventUiConstants.awaitingSelectionTitle,
-        subtitle: AggregationEventUiConstants.awaitingSelectionSubtitle,
-        iconAsset: AppAssets.iconLayers,
-      );
-      return Gs1MasterDataDetailScaffold(
-        embedded: widget.embedded,
-        title: AggregationEventUiConstants.appBarManagement,
-        body: empty,
+      return BlocBuilder<AggregationEventsCubit, AggregationEventsState>(
+        buildWhen: (prev, curr) =>
+            prev.isListLoading != curr.isListLoading ||
+            prev.status != curr.status,
+        builder: (context, state) {
+          final listLoading = state.isListLoading ||
+              state.status == AggregationEventsStatus.initial;
+          final body = listLoading
+              ? const AggregationEventDetailSkeleton()
+              : AppEmptyDetail(
+                  title: AggregationEventUiConstants.awaitingSelectionTitle,
+                  subtitle:
+                      AggregationEventUiConstants.awaitingSelectionSubtitle,
+                  iconAsset: NavIcons.aggregationEvents,
+                );
+          return Gs1MasterDataDetailScaffold(
+            embedded: widget.embedded,
+            title: AggregationEventUiConstants.appBarManagement,
+            body: body,
+          );
+        },
       );
     }
 

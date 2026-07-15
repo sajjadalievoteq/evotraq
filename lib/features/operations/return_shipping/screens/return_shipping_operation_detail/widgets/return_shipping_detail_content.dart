@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/operations/return_shipping/return_shipping_response_model.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/widgets/return_shipping_detail_body.dart';
@@ -26,23 +26,15 @@ class ReturnShippingDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (listLoading) {
-      return const AppEmptyDetail(
-        title: 'Select a return shipping operation',
-        subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
-        loading: true,
-      );
+    if (listLoading || isLoading) {
+      return const OperationDetailsLoadingWidget();
     }
     if (awaitingSelection) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a return shipping operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.returnShipping,
       );
-    }
-    if (isLoading) {
-      return const OperationDetailsLoadingWidget();
     }
     if (errorMessage != null) {
       return OperationDetailErrorView(
@@ -51,10 +43,10 @@ class ReturnShippingDetailContent extends StatelessWidget {
       );
     }
     if (operation == null) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a return shipping operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.returnShipping,
       );
     }
 

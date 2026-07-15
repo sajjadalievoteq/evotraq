@@ -4,6 +4,7 @@ import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class StorageStatisticsCard extends StatelessWidget {
   final StorageStatistics storage;
@@ -37,7 +38,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Total Events',
                     _formatNumber(storage.totalEvents),
-                    AppAssets.iconEvent,
+                    NavIcons.epcisEvents,
                     Colors.blue,
                   ),
                 ),
@@ -46,7 +47,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   child: _buildStorageMetric(
                     'Storage Used',
                     '${storage.storageUsedGB.toStringAsFixed(2)} GB',
-                    AppAssets.iconDatabase,
+                    NavIcons.databasePartitioning,
                     Colors.orange,
                   ),
                 ),

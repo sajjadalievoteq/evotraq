@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
@@ -191,7 +192,7 @@ class _DatabasePartitioningDashboardState
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Overview', icon: TraqIcon(AppAssets.iconDashboard)),
+            Tab(text: 'Overview', icon: TraqIcon(NavIcons.dashboard)),
             Tab(text: 'Partitions', icon: TraqIcon(AppAssets.iconTable)),
             Tab(text: 'Archive', icon: TraqIcon(AppAssets.iconDownload)),
             Tab(text: 'Maintenance', icon: TraqIcon(AppAssets.iconSettings)),
@@ -283,7 +284,7 @@ class _DatabasePartitioningDashboardState
                 child: _buildStatCard(
                   'Total Size',
                   '${(statistics.totalSizeGb != null && statistics.totalSizeGb! > 0) ? statistics.totalSizeGb!.toStringAsFixed(6) : (statistics.totalSizeMb != null ? (statistics.totalSizeMb! / 1024).toStringAsFixed(6) : '0.000000')} GB',
-                  AppAssets.iconDatabase,
+                  NavIcons.databasePartitioning,
                   Colors.purple,
                 ),
               ),
@@ -456,7 +457,7 @@ class _DatabasePartitioningDashboardState
         break;
       default:
         statusColor = Colors.grey;
-        statusIconAsset = AppAssets.iconHelpCircle;
+        statusIconAsset = NavIcons.helpSupport;
     }
 
     return Card(
@@ -660,7 +661,7 @@ class _DatabasePartitioningDashboardState
         break;
       default:
         statusColor = Colors.grey;
-        statusIconAsset = AppAssets.iconHelpCircle;
+        statusIconAsset = NavIcons.helpSupport;
     }
 
     showDialog(
@@ -921,7 +922,7 @@ class _DatabasePartitioningDashboardState
                       '• Transaction Events: Data stored in epcis_events partitions, accessed via transaction_events view\n'
                       '• Transformation Events: Data stored in epcis_events partitions, accessed via transformation_events view\n\n'
                       'This inheritance-based approach ensures all event types benefit from partitioning automatically.',
-                  AppAssets.iconDatabase,
+                  NavIcons.databasePartitioning,
                   Colors.purple,
                 ),
                 const SizedBox(height: 16),
@@ -947,7 +948,7 @@ class _DatabasePartitioningDashboardState
                       '• Archive Old Partitions: Moves partitions older than 12 months to archive status\n'
                       '• Health Check: Performs comprehensive analysis of partition health and performance\n\n'
                       'Regular maintenance ensures optimal database performance and prevents partition-related issues.',
-                  AppAssets.iconBuild,
+                  NavIcons.systemTools,
                   Colors.red,
                 ),
                 const SizedBox(height: 16),

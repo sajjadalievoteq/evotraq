@@ -42,35 +42,64 @@ class SSCCPharmaceuticalExtensionWidgetState
   SSCCPharmaceuticalExtension? _extension;
   bool _isLoading = true;
 
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, String> _seedTexts = {};
+
+  TextEditingController _c(String key) => _controllers.putIfAbsent(
+        key,
+        () => TextEditingController(text: _seedTexts[key] ?? ''),
+      );
+
+  String _text(String key) =>
+      _controllers[key]?.text ?? _seedTexts[key] ?? '';
+
+  void _setSeedOrController(String key, String value) {
+    _seedTexts[key] = value;
+    _controllers[key]?.text = value;
+  }
+
   bool _coldChainRequired = false;
-  final _minTemperatureCelsiusController = TextEditingController();
-  final _maxTemperatureCelsiusController = TextEditingController();
+  TextEditingController get _minTemperatureCelsiusController =>
+      _c('minTemperatureCelsius');
+  TextEditingController get _maxTemperatureCelsiusController =>
+      _c('maxTemperatureCelsius');
   bool _temperatureMonitoringRequired = false;
-  final _temperatureMonitoringDeviceIdController = TextEditingController();
-  final _temperatureExcursionLimitMinutesController = TextEditingController();
+  TextEditingController get _temperatureMonitoringDeviceIdController =>
+      _c('temperatureMonitoringDeviceId');
+  TextEditingController get _temperatureExcursionLimitMinutesController =>
+      _c('temperatureExcursionLimitMinutes');
 
   bool _gdpCompliant = true;
-  final _gdpCertificateNumberController = TextEditingController();
+  TextEditingController get _gdpCertificateNumberController =>
+      _c('gdpCertificateNumber');
   DateTime? _gdpCertificateExpiry;
-  final _gdpIssuingAuthorityController = TextEditingController();
+  TextEditingController get _gdpIssuingAuthorityController =>
+      _c('gdpIssuingAuthority');
 
   bool _whoPqsRequired = false;
-  final _whoPqsEquipmentCodeController = TextEditingController();
+  TextEditingController get _whoPqsEquipmentCodeController =>
+      _c('whoPqsEquipmentCode');
 
   bool _containsControlledSubstance = false;
   String? _deaSchedule;
-  final _deaOrderFormNumberController = TextEditingController();
-  final _incbAuthorizationNumberController = TextEditingController();
-  final _narcoticTransitPermitController = TextEditingController();
+  TextEditingController get _deaOrderFormNumberController =>
+      _c('deaOrderFormNumber');
+  TextEditingController get _incbAuthorizationNumberController =>
+      _c('incbAuthorizationNumber');
+  TextEditingController get _narcoticTransitPermitController =>
+      _c('narcoticTransitPermit');
 
   String? _hazmatClass;
-  final _hazmatUnNumberController = TextEditingController();
+  TextEditingController get _hazmatUnNumberController => _c('hazmatUnNumber');
   String? _hazmatPackingGroup;
-  final _hazmatSpecialProvisionsController = TextEditingController();
+  TextEditingController get _hazmatSpecialProvisionsController =>
+      _c('hazmatSpecialProvisions');
 
   bool _humidityControlled = false;
-  final _minHumidityPercentController = TextEditingController();
-  final _maxHumidityPercentController = TextEditingController();
+  TextEditingController get _minHumidityPercentController =>
+      _c('minHumidityPercent');
+  TextEditingController get _maxHumidityPercentController =>
+      _c('maxHumidityPercent');
   bool _lightSensitive = false;
   bool _orientationSensitive = false;
   bool _shockSensitive = false;
@@ -79,16 +108,21 @@ class SSCCPharmaceuticalExtensionWidgetState
   bool _requiresSignatureOnReceipt = false;
   bool _requiresPharmacistVerification = false;
 
-  final _carrierGdpQualificationNumberController = TextEditingController();
+  TextEditingController get _carrierGdpQualificationNumberController =>
+      _c('carrierGdpQualificationNumber');
   DateTime? _carrierGdpQualificationExpiry;
-  final _vehicleQualificationNumberController = TextEditingController();
+  TextEditingController get _vehicleQualificationNumberController =>
+      _c('vehicleQualificationNumber');
   DateTime? _vehicleLastQualificationDate;
 
   bool _clinicalTrialShipment = false;
-  final _clinicalTrialProtocolNumberController = TextEditingController();
-  final _irbApprovalNumberController = TextEditingController();
+  TextEditingController get _clinicalTrialProtocolNumberController =>
+      _c('clinicalTrialProtocolNumber');
+  TextEditingController get _irbApprovalNumberController =>
+      _c('irbApprovalNumber');
 
-  final _specialHandlingInstructionsController = TextEditingController();
+  TextEditingController get _specialHandlingInstructionsController =>
+      _c('specialHandlingInstructions');
   bool _fragile = false;
   bool _doNotStack = false;
   bool _thisSideUp = false;
@@ -110,25 +144,11 @@ class SSCCPharmaceuticalExtensionWidgetState
 
   @override
   void dispose() {
-    _minTemperatureCelsiusController.dispose();
-    _maxTemperatureCelsiusController.dispose();
-    _temperatureMonitoringDeviceIdController.dispose();
-    _temperatureExcursionLimitMinutesController.dispose();
-    _gdpCertificateNumberController.dispose();
-    _gdpIssuingAuthorityController.dispose();
-    _whoPqsEquipmentCodeController.dispose();
-    _deaOrderFormNumberController.dispose();
-    _incbAuthorizationNumberController.dispose();
-    _narcoticTransitPermitController.dispose();
-    _hazmatUnNumberController.dispose();
-    _hazmatSpecialProvisionsController.dispose();
-    _minHumidityPercentController.dispose();
-    _maxHumidityPercentController.dispose();
-    _carrierGdpQualificationNumberController.dispose();
-    _vehicleQualificationNumberController.dispose();
-    _clinicalTrialProtocolNumberController.dispose();
-    _irbApprovalNumberController.dispose();
-    _specialHandlingInstructionsController.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    _controllers.clear();
+    _seedTexts.clear();
     super.dispose();
   }
 
@@ -175,40 +195,61 @@ class SSCCPharmaceuticalExtensionWidgetState
 
   void _populateFields(SSCCPharmaceuticalExtension ext) {
     _coldChainRequired = ext.coldChainRequired;
-    _minTemperatureCelsiusController.text =
-        ext.minTemperatureCelsius?.toString() ?? '';
-    _maxTemperatureCelsiusController.text =
-        ext.maxTemperatureCelsius?.toString() ?? '';
+    _setSeedOrController(
+      'minTemperatureCelsius',
+      ext.minTemperatureCelsius?.toString() ?? '',
+    );
+    _setSeedOrController(
+      'maxTemperatureCelsius',
+      ext.maxTemperatureCelsius?.toString() ?? '',
+    );
     _temperatureMonitoringRequired = ext.temperatureMonitoringRequired;
-    _temperatureMonitoringDeviceIdController.text =
-        ext.temperatureMonitoringDeviceId ?? '';
-    _temperatureExcursionLimitMinutesController.text =
-        ext.temperatureExcursionLimitMinutes?.toString() ?? '';
+    _setSeedOrController(
+      'temperatureMonitoringDeviceId',
+      ext.temperatureMonitoringDeviceId ?? '',
+    );
+    _setSeedOrController(
+      'temperatureExcursionLimitMinutes',
+      ext.temperatureExcursionLimitMinutes?.toString() ?? '',
+    );
 
     _gdpCompliant = ext.gdpCompliant;
-    _gdpCertificateNumberController.text = ext.gdpCertificateNumber ?? '';
+    _setSeedOrController('gdpCertificateNumber', ext.gdpCertificateNumber ?? '');
     _gdpCertificateExpiry = ext.gdpCertificateExpiry;
-    _gdpIssuingAuthorityController.text = ext.gdpIssuingAuthority ?? '';
+    _setSeedOrController('gdpIssuingAuthority', ext.gdpIssuingAuthority ?? '');
 
     _whoPqsRequired = ext.whoPqsRequired;
-    _whoPqsEquipmentCodeController.text = ext.whoPqsEquipmentCode ?? '';
+    _setSeedOrController('whoPqsEquipmentCode', ext.whoPqsEquipmentCode ?? '');
 
     _containsControlledSubstance = ext.containsControlledSubstance;
     _deaSchedule = ext.deaSchedule;
-    _deaOrderFormNumberController.text = ext.deaOrderFormNumber ?? '';
-    _incbAuthorizationNumberController.text = ext.incbAuthorizationNumber ?? '';
-    _narcoticTransitPermitController.text = ext.narcoticTransitPermit ?? '';
+    _setSeedOrController('deaOrderFormNumber', ext.deaOrderFormNumber ?? '');
+    _setSeedOrController(
+      'incbAuthorizationNumber',
+      ext.incbAuthorizationNumber ?? '',
+    );
+    _setSeedOrController(
+      'narcoticTransitPermit',
+      ext.narcoticTransitPermit ?? '',
+    );
 
     _hazmatClass = ext.hazmatClass;
-    _hazmatUnNumberController.text = ext.hazmatUnNumber ?? '';
+    _setSeedOrController('hazmatUnNumber', ext.hazmatUnNumber ?? '');
     _hazmatPackingGroup = ext.hazmatPackingGroup;
-    _hazmatSpecialProvisionsController.text = ext.hazmatSpecialProvisions ?? '';
+    _setSeedOrController(
+      'hazmatSpecialProvisions',
+      ext.hazmatSpecialProvisions ?? '',
+    );
 
     _humidityControlled = ext.humidityControlled;
-    _minHumidityPercentController.text =
-        ext.minHumidityPercent?.toString() ?? '';
-    _maxHumidityPercentController.text =
-        ext.maxHumidityPercent?.toString() ?? '';
+    _setSeedOrController(
+      'minHumidityPercent',
+      ext.minHumidityPercent?.toString() ?? '',
+    );
+    _setSeedOrController(
+      'maxHumidityPercent',
+      ext.maxHumidityPercent?.toString() ?? '',
+    );
     _lightSensitive = ext.lightSensitive;
     _orientationSensitive = ext.orientationSensitive;
     _shockSensitive = ext.shockSensitive;
@@ -217,20 +258,28 @@ class SSCCPharmaceuticalExtensionWidgetState
     _requiresSignatureOnReceipt = ext.requiresSignatureOnReceipt;
     _requiresPharmacistVerification = ext.requiresPharmacistVerification;
 
-    _carrierGdpQualificationNumberController.text =
-        ext.carrierGdpQualificationNumber ?? '';
+    _setSeedOrController(
+      'carrierGdpQualificationNumber',
+      ext.carrierGdpQualificationNumber ?? '',
+    );
     _carrierGdpQualificationExpiry = ext.carrierGdpQualificationExpiry;
-    _vehicleQualificationNumberController.text =
-        ext.vehicleQualificationNumber ?? '';
+    _setSeedOrController(
+      'vehicleQualificationNumber',
+      ext.vehicleQualificationNumber ?? '',
+    );
     _vehicleLastQualificationDate = ext.vehicleLastQualificationDate;
 
     _clinicalTrialShipment = ext.clinicalTrialShipment;
-    _clinicalTrialProtocolNumberController.text =
-        ext.clinicalTrialProtocolNumber ?? '';
-    _irbApprovalNumberController.text = ext.irbApprovalNumber ?? '';
+    _setSeedOrController(
+      'clinicalTrialProtocolNumber',
+      ext.clinicalTrialProtocolNumber ?? '',
+    );
+    _setSeedOrController('irbApprovalNumber', ext.irbApprovalNumber ?? '');
 
-    _specialHandlingInstructionsController.text =
-        ext.specialHandlingInstructions ?? '';
+    _setSeedOrController(
+      'specialHandlingInstructions',
+      ext.specialHandlingInstructions ?? '',
+    );
     _fragile = ext.fragile;
     _doNotStack = ext.doNotStack;
     _thisSideUp = ext.thisSideUp;
@@ -238,11 +287,11 @@ class SSCCPharmaceuticalExtensionWidgetState
 
   bool get hasData =>
       _coldChainRequired ||
-      _minTemperatureCelsiusController.text.isNotEmpty ||
-      _maxTemperatureCelsiusController.text.isNotEmpty ||
+      _text('minTemperatureCelsius').isNotEmpty ||
+      _text('maxTemperatureCelsius').isNotEmpty ||
       _temperatureMonitoringRequired ||
       _gdpCompliant ||
-      _gdpCertificateNumberController.text.isNotEmpty ||
+      _text('gdpCertificateNumber').isNotEmpty ||
       _whoPqsRequired ||
       _containsControlledSubstance ||
       _deaSchedule != null ||
@@ -264,59 +313,59 @@ class SSCCPharmaceuticalExtensionWidgetState
       ssccId: widget.ssccId,
       ssccCode: widget.ssccCode,
       coldChainRequired: _coldChainRequired,
-      minTemperatureCelsius: _minTemperatureCelsiusController.text.isEmpty
+      minTemperatureCelsius: _text('minTemperatureCelsius').isEmpty
           ? null
-          : double.tryParse(_minTemperatureCelsiusController.text),
-      maxTemperatureCelsius: _maxTemperatureCelsiusController.text.isEmpty
+          : double.tryParse(_text('minTemperatureCelsius')),
+      maxTemperatureCelsius: _text('maxTemperatureCelsius').isEmpty
           ? null
-          : double.tryParse(_maxTemperatureCelsiusController.text),
+          : double.tryParse(_text('maxTemperatureCelsius')),
       temperatureMonitoringRequired: _temperatureMonitoringRequired,
       temperatureMonitoringDeviceId:
-          _temperatureMonitoringDeviceIdController.text.isEmpty
+          _text('temperatureMonitoringDeviceId').isEmpty
               ? null
-              : _temperatureMonitoringDeviceIdController.text,
+              : _text('temperatureMonitoringDeviceId'),
       temperatureExcursionLimitMinutes:
-          _temperatureExcursionLimitMinutesController.text.isEmpty
+          _text('temperatureExcursionLimitMinutes').isEmpty
               ? null
-              : int.tryParse(_temperatureExcursionLimitMinutesController.text),
+              : int.tryParse(_text('temperatureExcursionLimitMinutes')),
       gdpCompliant: _gdpCompliant,
-      gdpCertificateNumber: _gdpCertificateNumberController.text.isEmpty
+      gdpCertificateNumber: _text('gdpCertificateNumber').isEmpty
           ? null
-          : _gdpCertificateNumberController.text,
+          : _text('gdpCertificateNumber'),
       gdpCertificateExpiry: _gdpCertificateExpiry,
-      gdpIssuingAuthority: _gdpIssuingAuthorityController.text.isEmpty
+      gdpIssuingAuthority: _text('gdpIssuingAuthority').isEmpty
           ? null
-          : _gdpIssuingAuthorityController.text,
+          : _text('gdpIssuingAuthority'),
       whoPqsRequired: _whoPqsRequired,
-      whoPqsEquipmentCode: _whoPqsEquipmentCodeController.text.isEmpty
+      whoPqsEquipmentCode: _text('whoPqsEquipmentCode').isEmpty
           ? null
-          : _whoPqsEquipmentCodeController.text,
+          : _text('whoPqsEquipmentCode'),
       containsControlledSubstance: _containsControlledSubstance,
       deaSchedule: _deaSchedule,
-      deaOrderFormNumber: _deaOrderFormNumberController.text.isEmpty
+      deaOrderFormNumber: _text('deaOrderFormNumber').isEmpty
           ? null
-          : _deaOrderFormNumberController.text,
-      incbAuthorizationNumber: _incbAuthorizationNumberController.text.isEmpty
+          : _text('deaOrderFormNumber'),
+      incbAuthorizationNumber: _text('incbAuthorizationNumber').isEmpty
           ? null
-          : _incbAuthorizationNumberController.text,
-      narcoticTransitPermit: _narcoticTransitPermitController.text.isEmpty
+          : _text('incbAuthorizationNumber'),
+      narcoticTransitPermit: _text('narcoticTransitPermit').isEmpty
           ? null
-          : _narcoticTransitPermitController.text,
+          : _text('narcoticTransitPermit'),
       hazmatClass: _hazmatClass,
-      hazmatUnNumber: _hazmatUnNumberController.text.isEmpty
+      hazmatUnNumber: _text('hazmatUnNumber').isEmpty
           ? null
-          : _hazmatUnNumberController.text,
+          : _text('hazmatUnNumber'),
       hazmatPackingGroup: _hazmatPackingGroup,
-      hazmatSpecialProvisions: _hazmatSpecialProvisionsController.text.isEmpty
+      hazmatSpecialProvisions: _text('hazmatSpecialProvisions').isEmpty
           ? null
-          : _hazmatSpecialProvisionsController.text,
+          : _text('hazmatSpecialProvisions'),
       humidityControlled: _humidityControlled,
-      minHumidityPercent: _minHumidityPercentController.text.isEmpty
+      minHumidityPercent: _text('minHumidityPercent').isEmpty
           ? null
-          : int.tryParse(_minHumidityPercentController.text),
-      maxHumidityPercent: _maxHumidityPercentController.text.isEmpty
+          : int.tryParse(_text('minHumidityPercent')),
+      maxHumidityPercent: _text('maxHumidityPercent').isEmpty
           ? null
-          : int.tryParse(_maxHumidityPercentController.text),
+          : int.tryParse(_text('maxHumidityPercent')),
       lightSensitive: _lightSensitive,
       orientationSensitive: _orientationSensitive,
       shockSensitive: _shockSensitive,
@@ -324,27 +373,27 @@ class SSCCPharmaceuticalExtensionWidgetState
       requiresSignatureOnReceipt: _requiresSignatureOnReceipt,
       requiresPharmacistVerification: _requiresPharmacistVerification,
       carrierGdpQualificationNumber:
-          _carrierGdpQualificationNumberController.text.isEmpty
+          _text('carrierGdpQualificationNumber').isEmpty
               ? null
-              : _carrierGdpQualificationNumberController.text,
+              : _text('carrierGdpQualificationNumber'),
       carrierGdpQualificationExpiry: _carrierGdpQualificationExpiry,
       vehicleQualificationNumber:
-          _vehicleQualificationNumberController.text.isEmpty
+          _text('vehicleQualificationNumber').isEmpty
               ? null
-              : _vehicleQualificationNumberController.text,
+              : _text('vehicleQualificationNumber'),
       vehicleLastQualificationDate: _vehicleLastQualificationDate,
       clinicalTrialShipment: _clinicalTrialShipment,
       clinicalTrialProtocolNumber:
-          _clinicalTrialProtocolNumberController.text.isEmpty
+          _text('clinicalTrialProtocolNumber').isEmpty
               ? null
-              : _clinicalTrialProtocolNumberController.text,
-      irbApprovalNumber: _irbApprovalNumberController.text.isEmpty
+              : _text('clinicalTrialProtocolNumber'),
+      irbApprovalNumber: _text('irbApprovalNumber').isEmpty
           ? null
-          : _irbApprovalNumberController.text,
+          : _text('irbApprovalNumber'),
       specialHandlingInstructions:
-          _specialHandlingInstructionsController.text.isEmpty
+          _text('specialHandlingInstructions').isEmpty
               ? null
-              : _specialHandlingInstructionsController.text,
+              : _text('specialHandlingInstructions'),
       fragile: _fragile,
       doNotStack: _doNotStack,
       thisSideUp: _thisSideUp,

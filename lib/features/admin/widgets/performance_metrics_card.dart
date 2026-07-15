@@ -4,6 +4,7 @@ import '../models/monitoring_models.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class PerformanceMetricsCard extends StatelessWidget {
   final PerformanceMetrics performance;
@@ -49,7 +50,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Events/Second',
                     performance.eventsPerSecond.toStringAsFixed(2),
-                    AppAssets.iconGauge,
+                    NavIcons.performanceOptimization,
                     AdminHelperMappers.performanceColor(
                       performance.eventsPerSecond,
                       100,
@@ -62,7 +63,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Avg Processing Time',
                     '${performance.averageProcessingTimeMs.toStringAsFixed(1)}ms',
-                    AppAssets.iconTimer,
+                    NavIcons.performanceTests,
                     AdminHelperMappers.performanceColor(
                       performance.averageProcessingTimeMs,
                       100,
@@ -115,7 +116,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Memory Usage',
                     '${performance.memoryUsagePercentage.toStringAsFixed(1)}%',
-                    AppAssets.iconChip,
+                    NavIcons.eventSerialization,
                     AdminHelperMappers.performanceColor(
                       performance.memoryUsagePercentage,
                       70,
@@ -129,7 +130,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'CPU Usage',
                     '${performance.cpuUsagePercentage.toStringAsFixed(1)}%',
-                    AppAssets.iconChip,
+                    NavIcons.eventSerialization,
                     AdminHelperMappers.performanceColor(
                       performance.cpuUsagePercentage,
                       70,
@@ -149,7 +150,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'DB Connections',
                     '${performance.activeConnections}',
-                    AppAssets.iconDatabase,
+                    NavIcons.databasePartitioning,
                     AdminHelperMappers.performanceColor(
                       performance.databaseConnectionUtilization,
                       70,
@@ -163,7 +164,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   child: _buildMetricTile(
                     'Queued Transactions',
                     '${performance.queuedTransactions}',
-                    AppAssets.iconQueue,
+                    NavIcons.jobQueueManagement,
                     AdminHelperMappers.performanceColor(
                       performance.queuedTransactions.toDouble(),
                       5,

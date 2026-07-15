@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
@@ -21,7 +21,7 @@ class OperationDetailEventsCard extends StatelessWidget {
           children: eventIds
               .map(
                 (id) => ActionChip(
-                  avatar: TraqIcon(AppAssets.iconAggregate, size: 14),
+                  avatar: TraqIcon(NavIcons.aggregationEvents, size: 14),
                   label: Text(
                     id.length > 16 ? '…${id.substring(id.length - 16)}' : id,
                     style: const TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/barcode_scanner.dart';
@@ -217,7 +218,7 @@ class ContainerOperationReferenceDetailsStep extends StatelessWidget {
                       helperText:
                           'GS1 bizTransactionList: Production Order (btt:prodorder)',
                       border: OutlineInputBorder(),
-                      prefixIcon: TraqIcon(AppAssets.iconPrecisionManufacturing),
+                      prefixIcon: TraqIcon(NavIcons.commissioning),
                     ),
                   ),
                 ],

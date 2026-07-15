@@ -1,171 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-class LifecycleAvailabilityStatusCoreGroup extends StatefulWidget {
+/// Presenter — status and date values owned by [GTINDetailScreen].
+class LifecycleAvailabilityStatusCoreGroup extends StatelessWidget {
   const LifecycleAvailabilityStatusCoreGroup({
     super.key,
     required this.isReadOnly,
-    required this.isUpdate,
+    required this.tradeItemStatus,
+    required this.effectiveDateDisplayController,
+    required this.startAvailDateDisplayController,
+    required this.endAvailDateDisplayController,
+    required this.publicationDateDisplayController,
+    required this.startAvailDate,
+    required this.endAvailDate,
+    required this.onTradeItemStatusChanged,
+    required this.onPickEffectiveDate,
+    required this.onPickStartAvail,
+    required this.onPickEndAvail,
+    required this.onPickPublication,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
-  final bool isUpdate;
   final bool showFieldSkeleton;
-
-  @override
-  State<LifecycleAvailabilityStatusCoreGroup> createState() =>
-      LifecycleAvailabilityStatusCoreGroupState();
-}
-
-class LifecycleAvailabilityStatusCoreGroupState
-    extends State<LifecycleAvailabilityStatusCoreGroup> {
-  static final _dateFmt = DateFormat('yyyy-MM-dd');
-  static final _dateTimeNoOffsetFmt = DateFormat('yyyy-MM-dd / HH:mm:ss');
-
-  String? _tradeItemStatus;
-  DateTime? _effectiveDate;
-  DateTime? _startAvailDate;
-  DateTime? _endAvailDate;
-  DateTime? _publicationDate;
-
-  late final TextEditingController _effectiveDateDisplay;
-  late final TextEditingController _startAvailDateDisplay;
-  late final TextEditingController _endAvailDateDisplay;
-  late final TextEditingController _publicationDateDisplay;
-
-  @override
-  void initState() {
-    super.initState();
-    _effectiveDateDisplay = TextEditingController();
-    _startAvailDateDisplay = TextEditingController();
-    _endAvailDateDisplay = TextEditingController();
-    _publicationDateDisplay = TextEditingController();
-
-    _tradeItemStatus = widget.isUpdate ? 'CHN' : 'ADD';
-
-    _effectiveDate = DateTime.now();
-    _effectiveDateDisplay.text = _formatDateTimeWithOffset(_effectiveDate!);
-  }
-
-  @override
-  void dispose() {
-    _effectiveDateDisplay.dispose();
-    _startAvailDateDisplay.dispose();
-    _endAvailDateDisplay.dispose();
-    _publicationDateDisplay.dispose();
-    super.dispose();
-  }
-
-  String? get tradeItemStatus => _tradeItemStatus;
-  DateTime? get effectiveDate => _effectiveDate;
-  DateTime? get startAvailDate => _startAvailDate;
-  DateTime? get endAvailDate => _endAvailDate;
-  DateTime? get publicationDate => _publicationDate;
-
-  void setFromGtin({
-    required String? tradeItemStatus,
-    required DateTime? effectiveDate,
-    required DateTime? startAvailDate,
-    required DateTime? endAvailDate,
-    required DateTime? publicationDate,
-  }) {
-    _tradeItemStatus = tradeItemStatus ?? _tradeItemStatus;
-
-    if (effectiveDate != null) {
-      _effectiveDate = effectiveDate;
-      _effectiveDateDisplay.text = _formatDateTimeWithOffset(effectiveDate);
-    }
-
-    _startAvailDate = startAvailDate;
-    _startAvailDateDisplay.text = startAvailDate == null
-        ? ''
-        : _formatDateTimeWithOffset(startAvailDate);
-
-    _endAvailDate = endAvailDate;
-    _endAvailDateDisplay.text = endAvailDate == null
-        ? ''
-        : _formatDateTimeWithOffset(endAvailDate);
-
-    _publicationDate = publicationDate;
-    _publicationDateDisplay.text = publicationDate == null
-        ? ''
-        : _dateFmt.format(publicationDate);
-
-    if (mounted) setState(() {});
-  }
-
-  String _formatDateTimeWithOffset(DateTime dt) {
-    final local = dt.toLocal();
-    final base = _dateTimeNoOffsetFmt.format(local);
-    final off = local.timeZoneOffset;
-    final sign = off.isNegative ? '-' : '+';
-    final abs = off.abs();
-    final hh = abs.inHours.toString().padLeft(2, '0');
-    final mm = (abs.inMinutes % 60).toString().padLeft(2, '0');
-    return '$base$sign$hh:$mm';
-  }
-
-  Future<void> _pickDate({
-    required DateTime? current,
-    required ValueChanged<DateTime?> setValue,
-    required TextEditingController display,
-    DateTime? firstDate,
-    DateTime? lastDate,
-  }) async {
-    if (widget.isReadOnly) return;
-
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? now,
-      firstDate: firstDate ?? DateTime(1900),
-      lastDate: lastDate ?? DateTime(now.year + 50),
-    );
-    if (!mounted) return;
-    if (picked == null) return;
-
-    setValue(picked);
-    display.text = _dateFmt.format(picked);
-    setState(() {});
-  }
-
-  Future<void> _pickDateTime({
-    required DateTime? current,
-    required ValueChanged<DateTime?> setValue,
-    required TextEditingController display,
-  }) async {
-    if (widget.isReadOnly) return;
-
-    final now = DateTime.now();
-    final base = current ?? now;
-
-    final d = await showDatePicker(
-      context: context,
-      initialDate: base,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(now.year + 50),
-    );
-    if (!mounted) return;
-    if (d == null) return;
-
-    final t = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(base),
-    );
-    if (!mounted) return;
-    if (t == null) return;
-
-    final picked = DateTime(d.year, d.month, d.day, t.hour, t.minute);
-    setValue(picked);
-    display.text = _formatDateTimeWithOffset(picked);
-    setState(() {});
-  }
+  final String? tradeItemStatus;
+  final TextEditingController effectiveDateDisplayController;
+  final TextEditingController startAvailDateDisplayController;
+  final TextEditingController endAvailDateDisplayController;
+  final TextEditingController publicationDateDisplayController;
+  final DateTime? startAvailDate;
+  final DateTime? endAvailDate;
+  final ValueChanged<String?> onTradeItemStatusChanged;
+  final Future<void> Function() onPickEffectiveDate;
+  final Future<void> Function() onPickStartAvail;
+  final Future<void> Function() onPickEndAvail;
+  final Future<void> Function() onPickPublication;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +48,8 @@ class LifecycleAvailabilityStatusCoreGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DropdownButtonFormField<String>(
-          initialValue: _tradeItemStatus,
+          key: ValueKey('trade_item_status_$tradeItemStatus'),
+          initialValue: tradeItemStatus,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelTradeItemStatus,
             helperText: GtinUiConstants.helperTradeItemStatusCodes,
@@ -196,54 +70,40 @@ class LifecycleAvailabilityStatusCoreGroupState
             ),
           ],
           validator: (v) => GtinFieldValidators.validateTradeItemStatus(v),
-          onChanged: widget.isReadOnly
-              ? null
-              : (v) => setState(() => _tradeItemStatus = v),
+          onChanged: isReadOnly ? null : onTradeItemStatusChanged,
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
-          controller: _effectiveDateDisplay,
+          controller: effectiveDateDisplayController,
           label: GtinUiConstants.labelEffectiveDateTime,
-          enabled: !widget.isReadOnly,
-          validator: widget.isReadOnly
+          enabled: !isReadOnly,
+          validator: isReadOnly
               ? null
               : (v) => (v == null || v.trim().isEmpty)
                     ? GtinUiConstants.errorEffectiveDateRequired
                     : null,
-          onPick: () => _pickDateTime(
-            current: _effectiveDate,
-            setValue: (v) => _effectiveDate = v,
-            display: _effectiveDateDisplay,
-          ),
+          onPick: onPickEffectiveDate,
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
-          controller: _startAvailDateDisplay,
+          controller: startAvailDateDisplayController,
           label: GtinUiConstants.labelStartAvailabilityDateTime,
-          enabled: !widget.isReadOnly,
-          onPick: () => _pickDateTime(
-            current: _startAvailDate,
-            setValue: (v) => _startAvailDate = v,
-            display: _startAvailDateDisplay,
-          ),
+          enabled: !isReadOnly,
+          onPick: onPickStartAvail,
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
-          controller: _endAvailDateDisplay,
+          controller: endAvailDateDisplayController,
           label: GtinUiConstants.labelEndAvailabilityDateTime,
-          enabled: !widget.isReadOnly,
-          onPick: () => _pickDateTime(
-            current: _endAvailDate,
-            setValue: (v) => _endAvailDate = v,
-            display: _endAvailDateDisplay,
-          ),
+          enabled: !isReadOnly,
+          onPick: onPickEndAvail,
         ),
         const SizedBox(height: 12),
         Gs1DateFormField(
-          controller: _publicationDateDisplay,
+          controller: publicationDateDisplayController,
           label: GtinUiConstants.labelPublicationDate,
-          enabled: !widget.isReadOnly,
-          validator: widget.isReadOnly
+          enabled: !isReadOnly,
+          validator: isReadOnly
               ? null
               : (v) {
                   final s = (v ?? '').trim();
@@ -264,19 +124,14 @@ class LifecycleAvailabilityStatusCoreGroupState
                   }
                   return null;
                 },
-          onPick: () => _pickDate(
-            current: _publicationDate,
-            setValue: (v) => _publicationDate = v,
-            display: _publicationDateDisplay,
-            lastDate: DateTime.now(),
-          ),
+          onPick: onPickPublication,
         ),
         FormField<void>(
           validator: (_) {
-            if (widget.isReadOnly) return null;
-            if (_startAvailDate != null &&
-                _endAvailDate != null &&
-                _endAvailDate!.isBefore(_startAvailDate!)) {
+            if (isReadOnly) return null;
+            if (startAvailDate != null &&
+                endAvailDate != null &&
+                endAvailDate!.isBefore(startAvailDate!)) {
               return 'End Availability Date / Time must be >= Start Availability Date / Time';
             }
             return null;
@@ -301,7 +156,7 @@ class LifecycleAvailabilityStatusCoreGroupState
       title: GtinUiConstants.sectionLifecycleAvailabilityStatus,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

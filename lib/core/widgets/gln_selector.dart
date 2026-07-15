@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -306,7 +307,7 @@ class _GLNSelectorState extends State<GLNSelector> {
                       : Theme.of(context).cardColor,
                   child: ListTile(
                     dense: true,
-                    leading: TraqIcon(AppAssets.iconGln, size: 20),
+                    leading: TraqIcon(NavIcons.gln, size: 20),
                     title: Text(
                       gln.glnCode,
                       style: const TextStyle(

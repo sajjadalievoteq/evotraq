@@ -9,6 +9,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class AggregationEventsResultsList extends StatelessWidget {
@@ -65,7 +66,7 @@ class AggregationEventsResultsList extends StatelessWidget {
           final filtered = state.hasActiveFilters;
           return _constrainedCenter(
             AppEmptyState(
-              iconAsset: AppAssets.iconLayers,
+              iconAsset: NavIcons.aggregationEvents,
               title: AggregationEventUiConstants.emptyListTitle,
               subtitle: AggregationEventUiConstants.emptyListSubtitle,
               filteredTitle: 'No results found',

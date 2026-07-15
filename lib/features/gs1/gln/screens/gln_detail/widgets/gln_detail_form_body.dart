@@ -18,6 +18,7 @@ import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_de
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
 
@@ -27,6 +28,7 @@ class GlnDetailFormBody extends StatelessWidget {
     required this.formKey,
     required this.onRefresh,
     required this.showSkeleton,
+    this.forceMountAllSections = false,
     required this.gln,
     required this.idStructureReadOnly,
     required this.canEditMasterData,
@@ -96,6 +98,7 @@ class GlnDetailFormBody extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final Future<void> Function() onRefresh;
   final bool showSkeleton;
+  final bool forceMountAllSections;
   final GLN? gln;
   final bool idStructureReadOnly;
   final bool canEditMasterData;
@@ -165,10 +168,43 @@ class GlnDetailFormBody extends StatelessWidget {
   final VoidCallback onPickLicenseExpiry;
   final ValueChanged<GeospatialCoordinates?> onCoordinatesChanged;
 
+  Widget _lazy({
+    required double placeholderHeight,
+    required WidgetBuilder builder,
+  }) {
+    return Gs1LazyViewportSection(
+      forceMount: forceMountAllSections,
+      placeholderHeight: placeholderHeight,
+      builder: builder,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final locationLine =
         '${locationNameController.text}, ${cityController.text}';
+
+    if (showSkeleton) {
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: EdgeInsets.only(
+            top: context.horizontalPadding.left,
+            right: context.horizontalPadding.left,
+            left: context.horizontalPadding.left,
+          ),
+          child: Form(
+            key: formKey,
+            child: Gs1FormShimmerLayer(
+              show: true,
+              formColumn: const SizedBox.shrink(),
+              skeleton: const GlnDetailFormSkeleton(),
+            ),
+          ),
+        ),
+      );
+    }
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -181,42 +217,42 @@ class GlnDetailFormBody extends StatelessWidget {
         ),
         child: Form(
           key: formKey,
-          child: Gs1FormShimmerLayer(
-            show: showSkeleton,
-            formColumn: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GlnDetailHeaderCard(
-                  glnCodeText: glnCodeController.text,
-                  registeredLegalName: registeredLegalNameController.text,
-                  locationLine: locationLine,
-                ),
-                GlnIdentificationStructureCoreGroup(
-                  setFieldError: setFieldError,
-                  readOnly: idStructureReadOnly,
-                  glnCodeController: glnCodeController,
-                  gs1CompanyPrefixController: gs1CompanyPrefixController,
-                  locationReferenceDigitsController:
-                      locationReferenceDigitsController,
-                  checkDigitController: checkDigitController,
-                  parentGlnCodeController: parentGlnCodeController,
-                  glnExtensionComponentController:
-                      glnExtensionComponentController,
-                  initialGs1CompanyPrefixLength: gln?.gs1CompanyPrefixLength,
-                  showFieldSkeleton: false,
-                ),
-                GlnLifecycleStatusCoreGroup(
-                  showFieldSkeleton: false,
-                  isEditing: canEditMasterData,
-                  operatingStatus: operatingStatus,
-                  onOperatingStatusChanged: onOperatingStatusChanged,
-                  effectiveFrom: effectiveFrom,
-                  effectiveTo: effectiveTo,
-                  nonReuseUntil: nonReuseUntil,
-                  onPickEffectiveFrom: onPickEffectiveFrom,
-                  onPickEffectiveTo: onPickEffectiveTo,
-                ),
-                GlnTypesClassificationCoreGroup(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GlnDetailHeaderCard(
+                glnCodeText: glnCodeController.text,
+                registeredLegalName: registeredLegalNameController.text,
+                locationLine: locationLine,
+              ),
+              GlnIdentificationStructureCoreGroup(
+                setFieldError: setFieldError,
+                readOnly: idStructureReadOnly,
+                glnCodeController: glnCodeController,
+                gs1CompanyPrefixController: gs1CompanyPrefixController,
+                locationReferenceDigitsController:
+                    locationReferenceDigitsController,
+                checkDigitController: checkDigitController,
+                parentGlnCodeController: parentGlnCodeController,
+                glnExtensionComponentController:
+                    glnExtensionComponentController,
+                initialGs1CompanyPrefixLength: gln?.gs1CompanyPrefixLength,
+                showFieldSkeleton: false,
+              ),
+              GlnLifecycleStatusCoreGroup(
+                showFieldSkeleton: false,
+                isEditing: canEditMasterData,
+                operatingStatus: operatingStatus,
+                onOperatingStatusChanged: onOperatingStatusChanged,
+                effectiveFrom: effectiveFrom,
+                effectiveTo: effectiveTo,
+                nonReuseUntil: nonReuseUntil,
+                onPickEffectiveFrom: onPickEffectiveFrom,
+                onPickEffectiveTo: onPickEffectiveTo,
+              ),
+              _lazy(
+                placeholderHeight: 280,
+                builder: (_) => GlnTypesClassificationCoreGroup(
                   showFieldSkeleton: false,
                   isEditing: canEditMasterData,
                   setFieldError: setFieldError,
@@ -231,19 +267,26 @@ class GlnDetailFormBody extends StatelessWidget {
                   supplyChainRolesController: supplyChainRolesController,
                   locationRolesController: locationRolesController,
                 ),
-                GlnLegalEntityCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 360,
+                builder: (_) => GlnLegalEntityCoreGroup(
                   showFieldSkeleton: false,
                   setFieldError: setFieldError,
                   readOnly: formReadOnly,
                   registeredLegalNameController: registeredLegalNameController,
                   tradingNameController: tradingNameController,
                   leiCodeController: leiCodeController,
-                  taxRegistrationNumberController: taxRegistrationNumberController,
+                  taxRegistrationNumberController:
+                      taxRegistrationNumberController,
                   countryOfIncorporationNumericController:
                       countryOfIncorporationNumericController,
                   websiteController: websiteController,
                 ),
-                GlnLocationAddressCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 420,
+                builder: (_) => GlnLocationAddressCoreGroup(
                   showFieldSkeleton: false,
                   setFieldError: setFieldError,
                   readOnly: formReadOnly,
@@ -259,7 +302,10 @@ class GlnDetailFormBody extends StatelessWidget {
                   postalCodeController: postalCodeController,
                   countryController: countryController,
                 ),
-                GlnDigitalLocationCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 180,
+                builder: (_) => GlnDigitalLocationCoreGroup(
                   showFieldSkeleton: false,
                   setFieldError: setFieldError,
                   readOnly: formReadOnly,
@@ -267,7 +313,10 @@ class GlnDetailFormBody extends StatelessWidget {
                   onDigitalAddressTypeChanged: onDigitalAddressTypeChanged,
                   digitalAddressValueController: digitalAddressValueController,
                 ),
-                GlnContactCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 220,
+                builder: (_) => GlnContactCoreGroup(
                   showFieldSkeleton: false,
                   setFieldError: setFieldError,
                   readOnly: formReadOnly,
@@ -275,13 +324,19 @@ class GlnDetailFormBody extends StatelessWidget {
                   contactEmailController: contactEmailController,
                   contactPhoneController: contactPhoneController,
                 ),
-                GlnOperationalLocationTypeCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 140,
+                builder: (_) => GlnOperationalLocationTypeCoreGroup(
                   showFieldSkeleton: false,
                   isEditing: canEditMasterData,
                   locationTypeLabel: locationTypeLabel,
                   onLocationTypeChanged: onLocationTypeChanged,
                 ),
-                GlnLicenseCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 260,
+                builder: (_) => GlnLicenseCoreGroup(
                   showFieldSkeleton: false,
                   setFieldError: setFieldError,
                   readOnly: formReadOnly,
@@ -293,13 +348,19 @@ class GlnDetailFormBody extends StatelessWidget {
                   licenseNumberController: licenseNumberController,
                   licenseTypeController: licenseTypeController,
                 ),
-                GlnGeospatialCoreGroup(
+              ),
+              _lazy(
+                placeholderHeight: 200,
+                builder: (_) => GlnGeospatialCoreGroup(
                   showFieldSkeleton: false,
                   displayCoordinates: displayCoordinates ?? gln?.coordinates,
                   onCoordinatesChanged: onCoordinatesChanged,
                   isEditing: canEditMasterData,
                 ),
-                GlnIndustryExtensionsSection(
+              ),
+              _lazy(
+                placeholderHeight: 320,
+                builder: (_) => GlnIndustryExtensionsSection(
                   glnCodeController: glnCodeController,
                   gln: gln,
                   isEditing: canEditMasterData,
@@ -307,17 +368,16 @@ class GlnDetailFormBody extends StatelessWidget {
                   pharmaExtensionKey: pharmaExtensionKey,
                   tobaccoExtensionKey: tobaccoExtensionKey,
                 ),
-                const SizedBox(height: 32),
-                if ((MediaQuery.of(context).size.width < 600 || embedded) &&
-                    allowMasterDataActions)
-                  CustomButtonWidget(
-                    onTap: onSubmit,
-                    title: GlnUiConstants.detailSaveButton,
-                  ),
-                const SizedBox(height: 32),
-              ],
-            ),
-            skeleton: const GlnDetailFormSkeleton(),
+              ),
+              const SizedBox(height: 32),
+              if ((MediaQuery.of(context).size.width < 600 || embedded) &&
+                  allowMasterDataActions)
+                CustomButtonWidget(
+                  onTap: onSubmit,
+                  title: GlnUiConstants.detailSaveButton,
+                ),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),

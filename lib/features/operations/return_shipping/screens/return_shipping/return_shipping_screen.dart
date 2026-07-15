@@ -33,9 +33,10 @@ class ReturnShippingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => ReturnShippingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => ReturnShippingOperationDetailScreen(
           key: const ValueKey('__return_shipping_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const ReturnShippingOperationListScreen(),

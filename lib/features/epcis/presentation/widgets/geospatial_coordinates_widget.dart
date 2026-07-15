@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class GeospatialCoordinatesWidget extends StatefulWidget {
   final GeospatialCoordinates? coordinates;
@@ -114,7 +115,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
             
           Row(
             children: [
-              TraqIcon(AppAssets.iconGln, size: 16, color: Colors.red),
+              TraqIcon(NavIcons.gln, size: 16, color: Colors.red),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -246,7 +247,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                                 ),
                               ),
                             TraqIcon(
-                              AppAssets.iconGln,
+                              NavIcons.gln,
                               color: Colors.red,
                               size: 40.0,
                             ),

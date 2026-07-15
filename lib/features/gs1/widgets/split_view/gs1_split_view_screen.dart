@@ -30,6 +30,7 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     this.detailCreateBuilder,
     required this.detailAwaitBuilder,
     this.fabNavigateRoute,
+    this.isListLoading,
   }) : assert(
           fabNavigateRoute != null || detailCreateBuilder != null,
           'detailCreateBuilder is required when fabNavigateRoute is not set',
@@ -65,7 +66,14 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)?
       detailCreateBuilder;
 
-  final WidgetBuilder detailAwaitBuilder;
+  /// Await / empty detail pane. [listLoading] is true while the master list is
+  /// loading (only when [isListLoading] selector is provided).
+  final Widget Function(BuildContext context, {required bool listLoading})
+      detailAwaitBuilder;
+
+  /// Optional: when provided, drives [detailAwaitBuilder]'s `listLoading` and
+  /// shows the await pane (skeleton) while the list is loading.
+  final bool Function(TState state)? isListLoading;
 
   @override
   State<Gs1SplitViewScreen<TCubit, TState>> createState() =>
@@ -177,17 +185,22 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
   Widget _buildRightPane() {
     final viewPane = BlocBuilder<TCubit, TState>(
       builder: (context, state) {
+        final listLoading = widget.isListLoading?.call(state) ?? false;
+        if (listLoading) {
+          return widget.detailAwaitBuilder(context, listLoading: true);
+        }
+
         if (widget.isEmptyNoMatch(state)) {
           // Empty / filtered-out list: keep the detail pane on the await
           // placeholder (Select a …), never a blank Center().
-          return widget.detailAwaitBuilder(context);
+          return widget.detailAwaitBuilder(context, listLoading: false);
         }
 
         final ids = widget.idsFromState(state)?.toList(growable: false);
         final effective =
             _selectedId ?? (ids != null && ids.isNotEmpty ? ids.first : null);
         if (effective == null) {
-          return widget.detailAwaitBuilder(context);
+          return widget.detailAwaitBuilder(context, listLoading: false);
         }
         return widget.detailViewBuilder(context, effective);
       },

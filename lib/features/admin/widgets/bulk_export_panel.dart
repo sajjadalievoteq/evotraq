@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class BulkExportPanel extends StatefulWidget {
@@ -780,7 +781,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('Total Records', _formatNumber(totalRecords), AppAssets.iconDatabase),
+                child: _buildStatCard('Total Records', _formatNumber(totalRecords), NavIcons.databasePartitioning),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -792,7 +793,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('Avg Export Time', '${avgExportTime.toStringAsFixed(1)}s', AppAssets.iconTimer),
+                child: _buildStatCard('Avg Export Time', '${avgExportTime.toStringAsFixed(1)}s', NavIcons.performanceTests),
               ),
               const SizedBox(width: 8),
               Expanded(

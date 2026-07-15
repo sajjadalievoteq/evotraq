@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -165,7 +166,7 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(color: outline),
                         ),
-                        prefixIcon: const TraqIcon(AppAssets.iconShipment),
+                        prefixIcon: const TraqIcon(NavIcons.shipping),
                       ),
                     ),
                   ],
@@ -394,7 +395,7 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                         labelText: 'Carrier',
                         hintText: 'e.g., DHL',
                         border: OutlineInputBorder(),
-                        prefixIcon: TraqIcon(AppAssets.iconShipment),
+                        prefixIcon: TraqIcon(NavIcons.shipping),
                       ),
                     ),
                     const SizedBox(height: 16),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_list/widgets/gtin_s
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class GtinListItemCard extends StatelessWidget {
   const GtinListItemCard({
@@ -81,7 +82,7 @@ class GtinListItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
 
-                        infoRow(AppAssets.iconQr, 'GTIN: ${gtin.gtinCode}'),
+                        infoRow(NavIcons.gtin, 'GTIN: ${gtin.gtinCode}'),
 
                         if (gtin.manufacturer != null)
                           infoRow(

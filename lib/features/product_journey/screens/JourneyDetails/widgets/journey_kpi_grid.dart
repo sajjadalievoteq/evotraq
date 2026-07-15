@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
@@ -30,7 +31,7 @@ class JourneyKpiGrid extends StatelessWidget {
         color: context.colors.identifierGln,
       ),
       JourneyKpiTile(
-        icon: AppAssets.iconTimer,
+        icon: NavIcons.performanceTests,
         value: JourneyFormatters.duration(journey.journeyDuration),
         label: 'Duration',
         color: context.colors.warning,

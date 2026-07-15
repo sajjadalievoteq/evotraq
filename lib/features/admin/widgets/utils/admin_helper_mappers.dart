@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 abstract final class AdminHelperMappers {
@@ -31,7 +32,7 @@ abstract final class AdminHelperMappers {
       case 'PENDING':
         return AppAssets.iconClock;
       default:
-        return AppAssets.iconHelpCircle;
+        return NavIcons.helpSupport;
     }
   }
 
@@ -99,7 +100,7 @@ abstract final class AdminHelperMappers {
       case 'LOW':
         return AppAssets.iconInfo;
       default:
-        return AppAssets.iconHelpCircle;
+        return NavIcons.helpSupport;
     }
   }
 
@@ -139,7 +140,7 @@ abstract final class AdminHelperMappers {
       case 'FAILED':
         return AppAssets.iconXCircle;
       default:
-        return AppAssets.iconHelpCircle;
+        return NavIcons.helpSupport;
     }
   }
 
@@ -263,7 +264,7 @@ abstract final class AdminHelperMappers {
       case 'HEALTHY':
         return AppAssets.iconCheckCircle;
       default:
-        return AppAssets.iconHelpCircle;
+        return NavIcons.helpSupport;
     }
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
@@ -334,4 +334,4 @@ class _EmptyStateHoverActionState extends State<EmptyStateHoverAction> {
 }
 
 /// Default empty-list icon when a call site does not specify one.
-const kDefaultEmptyStateIcon = AppAssets.iconPackage;
+const kDefaultEmptyStateIcon = NavIcons.packaging;

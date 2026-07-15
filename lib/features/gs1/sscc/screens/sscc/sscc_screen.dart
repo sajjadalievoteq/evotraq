@@ -81,7 +81,7 @@ class _SSCCScreenState extends State<SSCCScreen> {
               context.read<SSCCCubit>().loadSSCCList();
             },
           ),
-          detailAwaitBuilder: (context) => const SSCCDetailScreen(
+          detailAwaitBuilder: (context, {required listLoading}) => const SSCCDetailScreen(
             key: ValueKey('__sscc_split_await_list__'),
             isEditing: false,
             embedded: true,

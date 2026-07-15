@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
@@ -31,23 +31,15 @@ class CommissioningDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (listLoading) {
-      return const AppEmptyDetail(
-        title: 'Select a commissioning operation',
-        subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
-        loading: true,
-      );
+    if (listLoading || isLoading) {
+      return const OperationDetailsLoadingWidget();
     }
     if (awaitingSelection) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a commissioning operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.commissioning,
       );
-    }
-    if (isLoading) {
-      return const OperationDetailsLoadingWidget();
     }
 
     if (errorMessage != null) {
@@ -57,10 +49,10 @@ class CommissioningDetailContent extends StatelessWidget {
       );
     }
     if (batch == null) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a commissioning operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.commissioning,
       );
     }
     return CommissioningDetailBody(batch: batch!, items: items, itemStatuses: itemStatuses);

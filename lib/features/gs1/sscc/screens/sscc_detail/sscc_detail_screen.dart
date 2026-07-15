@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
@@ -19,11 +20,14 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_aggregation_link_model.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen_fields.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_input_mode.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_error_pane.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sscc_tobacco_extension_widget.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_form_validation.dart';
@@ -69,12 +73,11 @@ class SSCCDetailScreen extends StatefulWidget {
 
 
 class _SSCCDetailScreenState extends State<SSCCDetailScreen>
-    with GS1FormValidationMixin<SSCCDetailScreen> {
+    with GS1FormValidationMixin<SSCCDetailScreen>, SsccDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<SSCCTobaccoExtensionWidgetState>();
   final _pharmaExtensionKey =
       GlobalKey<SSCCPharmaceuticalExtensionWidgetState>();
-  late TextEditingController _ssccCodeController;
   GLN? _issuingGln;
   String? _issuingGlnError;
   GLN? _shipFromGln;
@@ -82,15 +85,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   GLN? _billToGln;
   GLN? _shipForGln;
   GLN? _custodianGln;
-  late TextEditingController _extensionDigitController;
-  late TextEditingController _containedGtinController;
-  late TextEditingController _containedQuantityController;
-  late TextEditingController _containedBatchController;
   DateTime? _containedExpiry;
-  late TextEditingController _gsinController;
-  late TextEditingController _gincController;
-  late TextEditingController _poController;
-  late TextEditingController _carrierRoutingController;
 
   SsccInputMode _ssccInputMode = SsccInputMode.generate;
 
@@ -111,6 +106,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   SSCC? _sscc;
 
   bool _editRedirectHandled = false;
+  bool _forceMountAllSections = false;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -120,17 +116,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
         widget.isCreating ||
         widget.routeSsccCode == null ||
         widget.routeSsccCode!.isEmpty;
-    _ssccCodeController = TextEditingController();
-    _extensionDigitController = TextEditingController();
-    _containedGtinController = TextEditingController();
-    _containedQuantityController = TextEditingController();
-    _containedBatchController = TextEditingController();
-    _gsinController = TextEditingController();
-    _gincController = TextEditingController();
-    _poController = TextEditingController();
-    _carrierRoutingController = TextEditingController();
-
-    _extensionDigitController.text = '0';
+    initSsccDetailFields();
     _status = LogisticUnitStatus.DRAFT;
 
     if (!widget.embedded) {
@@ -285,15 +271,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   @override
   void dispose() {
-    _ssccCodeController.dispose();
-    _extensionDigitController.dispose();
-    _containedGtinController.dispose();
-    _containedQuantityController.dispose();
-    _containedBatchController.dispose();
-    _gsinController.dispose();
-    _gincController.dispose();
-    _poController.dispose();
-    _carrierRoutingController.dispose();
+    disposeSsccDetailFields();
     _scrollController.dispose();
     super.dispose();
   }
@@ -375,26 +353,17 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   void _populateFormFields(SSCC sscc) {
     _sscc = sscc;
-    _ssccCodeController.text = sscc.ssccCode;
+    hydrateSsccDetailFields(sscc);
 
     _issuingGln = sscc.issuingGLN;
     _issuingGlnError = null;
 
-    _extensionDigitController.text = sscc.extensionDigit ?? '0';
-    _containedGtinController.text = sscc.containedGtin ?? '';
-    _containedQuantityController.text =
-        sscc.containedQuantity?.toString() ?? '';
-    _containedBatchController.text = sscc.containedBatch ?? '';
     _containedExpiry = sscc.containedExpiry;
     _shipFromGln = _glnFromStoredCode(sscc.shipFromGln);
     _shipToGln = _glnFromStoredCode(sscc.shipToGln);
     _billToGln = _glnFromStoredCode(sscc.billToGln);
     _shipForGln = _glnFromStoredCode(sscc.shipForGln);
     _custodianGln = _glnFromStoredCode(sscc.currentCustodianGln);
-    _gsinController.text = sscc.gsin ?? '';
-    _gincController.text = sscc.ginc ?? '';
-    _poController.text = sscc.purchaseOrderNumber ?? '';
-    _carrierRoutingController.text = sscc.carrierRoutingCode ?? '';
 
     setState(() {
       _unitType = sscc.unitType;
@@ -535,6 +504,14 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   Future<void> _saveSSCC() async {
     if (widget.awaitingListSelection) return;
 
+    if (!_forceMountAllSections) {
+      setState(() => _forceMountAllSections = true);
+      await Future<void>.delayed(Duration.zero);
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+
     setState(() {
       _issuingGlnError = validateIssuingGlnRequired(_issuingGln?.glnCode);
     });
@@ -542,14 +519,14 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     final validationErrors = SsccCreateFormValidation.collectErrors(
       isCreating: widget.isCreating,
       issuingGlnCode: _issuingGln?.glnCode,
-      extensionDigit: _extensionDigitController.text,
-      ssccCodeRaw: _ssccCodeController.text,
+      extensionDigit: extensionDigitText(),
+      ssccCodeRaw: ssccCodeText(),
       ssccMissingMessage: _ssccCodeMissingMessage(),
       contentHomogeneity: _contentHomogeneity,
-      containedGtin: _containedGtinController.text,
-      containedQuantity: _containedQuantityController.text,
-      gsin: _gsinController.text,
-      purchaseOrder: _poController.text,
+      containedGtin: containedGtinText(),
+      containedQuantity: containedQuantityText(),
+      gsin: gsinText(),
+      purchaseOrder: poText(),
     );
 
     _formKey.currentState?.validate();
@@ -577,15 +554,15 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     String gs1CompanyPrefix = '';
     String serialReference = '';
     String checkDigit = '';
-    if (_ssccCodeController.text.isNotEmpty) {
-      var ssccCode = SsccInputParser.parseToSsccCode(_ssccCodeController.text)
-          ?? _ssccCodeController.text.trim();
+    if (ssccCodeText().isNotEmpty) {
+      var ssccCode = SsccInputParser.parseToSsccCode(ssccCodeText())
+          ?? ssccCodeText().trim();
 
       if (ssccCode.length != 18) {
         final fixedSSCC = GS1Utils.validateAndFixSSCC(ssccCode);
         if (fixedSSCC != null) {
           ssccCode = fixedSSCC;
-          _ssccCodeController.text = ssccCode;
+          setSsccFieldSeedOrController('ssccCode', ssccCode);
         } else {
           showValidationErrors(
             context,
@@ -612,7 +589,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       return;
     }
 
-    final containedQty = int.tryParse(_containedQuantityController.text.trim());
+    final containedQty = int.tryParse(containedQuantityText().trim());
     final identityLocked = !widget.isCreating &&
         _sscc != null &&
         edit_rules.isSsccIdentityLocked(_sscc!.status);
@@ -626,17 +603,17 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
     final sscc = SSCC(
       id: widget.isCreating ? null : _sscc?.id,
-      ssccCode: identityLocked ? _sscc!.ssccCode : _ssccCodeController.text,
+      ssccCode: identityLocked ? _sscc!.ssccCode : ssccCodeText(),
       unitType: _unitType,
       status: saveStatus,
       contentHomogeneity: _contentHomogeneity,
-      containedGtin: _containedGtinController.text.trim().isEmpty
+      containedGtin: containedGtinText().trim().isEmpty
           ? null
-          : _containedGtinController.text.trim(),
+          : containedGtinText().trim(),
       containedQuantity: containedQty,
-      containedBatch: _containedBatchController.text.trim().isEmpty
+      containedBatch: containedBatchText().trim().isEmpty
           ? null
-          : _containedBatchController.text.trim(),
+          : containedBatchText().trim(),
       containedExpiry: _containedExpiry,
       packingDate: _packingDate,
       shipFromGln: _glnCodeOrNull(_shipFromGln),
@@ -644,16 +621,16 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       billToGln: _glnCodeOrNull(_billToGln),
       shipForGln: _glnCodeOrNull(_shipForGln),
       currentCustodianGln: _glnCodeOrNull(_custodianGln),
-      gsin: _trimOrNull(_gsinController.text),
-      ginc: _trimOrNull(_gincController.text),
-      purchaseOrderNumber: _trimOrNull(_poController.text),
-      carrierRoutingCode: _trimOrNull(_carrierRoutingController.text),
+      gsin: _trimOrNull(gsinText()),
+      ginc: _trimOrNull(gincText()),
+      purchaseOrderNumber: _trimOrNull(poText()),
+      carrierRoutingCode: _trimOrNull(carrierRoutingText()),
       parentSsccCode: _sscc?.parentSsccCode,
       extensionDigit: identityLocked
           ? (_sscc!.extensionDigit ?? '0')
-          : (_extensionDigitController.text.isEmpty
+          : (extensionDigitText().isEmpty
               ? '0'
-              : _extensionDigitController.text),
+              : extensionDigitText()),
       gs1CompanyPrefix: identityLocked
           ? (_sscc!.gs1CompanyPrefix ?? gs1CompanyPrefix)
           : gs1CompanyPrefix,
@@ -695,13 +672,13 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       return;
     }
 
-    if (_extensionDigitController.text.isEmpty) {
+    if (extensionDigitText().isEmpty) {
       context.showError('Extension Digit is required to generate SSCC');
       return;
     }
 
     final extensionError =
-        validateExtensionDigit(_extensionDigitController.text);
+        validateExtensionDigit(extensionDigitText());
     if (extensionError != null) {
       context.showError(extensionError);
       return;
@@ -711,7 +688,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
     _cubit.generateSSCCFromGLN(
       _issuingGln!.glnCode,
-      _extensionDigitController.text,
+      extensionDigitText(),
     );
   }
 
@@ -737,8 +714,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     }
 
     setState(() {
-      _ssccCodeController.text = parsed;
-      _syncExtensionDigitFromSscc(parsed);
+      setSsccFieldSeedOrController('ssccCode', parsed);
+      syncExtensionDigitFromSsccCode(parsed);
     });
     context.showSuccess('SSCC captured: $parsed');
   }
@@ -755,9 +732,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
   }
 
   void _syncExtensionDigitFromSscc(String ssccCode) {
-    final digits = ssccCode.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return;
-    _extensionDigitController.text = digits[0];
+    syncExtensionDigitFromSsccCode(ssccCode);
   }
 
   @override
@@ -835,7 +810,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
             if (_hasSubmittedForm) {
               setState(() => _hasSubmittedForm = false);
-              final ssccCode = _ssccCodeController.text;
+              final ssccCode = ssccCodeText();
               _saveTobaccoExtensionIfNeeded(null, ssccCode);
               _savePharmaExtensionIfNeeded(
                 _parseSsccId(state.selectedSSCC?.id ?? _sscc?.id),
@@ -867,7 +842,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
                   );
                   ssccCode = GS1Utils.generateSSCC(
                     companyPrefix,
-                    _extensionDigitController.text,
+                    extensionDigitText(),
                   );
                 } catch (e) {
                   context.showError('Failed to generate valid SSCC: $e');
@@ -876,7 +851,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
               }
             }
             setState(() {
-              _ssccCodeController.text = ssccCode;
+              setSsccFieldSeedOrController('ssccCode', ssccCode);
               _syncExtensionDigitFromSscc(ssccCode);
             });
           }
@@ -884,18 +859,35 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       },
       builder: (context, state) {
         if (widget.awaitingListSelection) {
+          final listLoading =
+              state.isListLoading || state.status == SSCCStatus.initial;
+          if (listLoading) {
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                context.padding.top,
+                context.padding.top,
+                context.padding.top,
+                0,
+              ),
+              child: Gs1FormShimmerLayer(
+                show: true,
+                formColumn: const SizedBox.shrink(),
+                skeleton: const SsccDetailSkeleton(),
+              ),
+            );
+          }
           return AppEmptyDetail(
             title: SsccUiConstants.awaitingSelectionTitle,
             subtitle: SsccUiConstants.awaitingSelectionSubtitle,
-            iconAsset: AppAssets.iconBox,
-            loading: state.isListLoading || state.status == SSCCStatus.initial,
+            iconAsset: NavIcons.sscc,
           );
         }
 
         if (state.status == SSCCStatus.codeGenerated &&
             state.generatedCode != null) {
-          if (_ssccCodeController.text.isEmpty) {
-            _ssccCodeController.text = state.generatedCode!;
+          if (ssccCodeText().isEmpty) {
+            setSsccFieldSeedOrController('ssccCode', state.generatedCode!);
           }
         }
 
@@ -961,7 +953,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       state: state,
       formKey: _formKey,
       scrollController: _scrollController,
-      ssccCodeController: _ssccCodeController,
+      forceMountAllSections: _forceMountAllSections,
+      ssccCodeController: ssccCodeController,
       sscc: _sscc,
       unitType: _unitType,
       status: _status,
@@ -977,14 +970,14 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       custodianGln: _custodianGln,
       glnPickerCatalog: _glnPickerCatalog,
       ssccInputMode: _ssccInputMode,
-      extensionDigitController: _extensionDigitController,
-      containedGtinController: _containedGtinController,
-      containedQuantityController: _containedQuantityController,
-      containedBatchController: _containedBatchController,
-      gsinController: _gsinController,
-      gincController: _gincController,
-      poController: _poController,
-      carrierRoutingController: _carrierRoutingController,
+      extensionDigitController: extensionDigitController,
+      containedGtinController: containedGtinController,
+      containedQuantityController: containedQuantityController,
+      containedBatchController: containedBatchController,
+      gsinController: gsinController,
+      gincController: gincController,
+      poController: poController,
+      carrierRoutingController: carrierRoutingController,
       issuingGln: _issuingGln,
       issuingGlnError: _issuingGlnError,
       pharmaExtensionKey: _pharmaExtensionKey,
@@ -1027,8 +1020,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       onInputModeChanged: (mode) {
         setState(() {
           _ssccInputMode = mode;
-          _ssccCodeController.clear();
-          _extensionDigitController.text = '0';
+          clearSsccCodeFields();
         });
         if (mode == SsccInputMode.scan) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1038,10 +1030,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       },
       onGenerateSsccCode: _generateSSCCCode,
       onScanSsccCode: _scanSSCCCode,
-      onClearSsccCode: () => setState(() {
-        _ssccCodeController.clear();
-        _extensionDigitController.text = '0';
-      }),
+      onClearSsccCode: () => setState(clearSsccCodeFields),
       setFieldError: setFieldError,
       onSyncExtensionDigitFromSscc: _syncExtensionDigitFromSscc,
       onManualSsccCodeChanged: () => setState(() {}),

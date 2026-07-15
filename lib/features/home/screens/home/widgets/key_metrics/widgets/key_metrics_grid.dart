@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
@@ -34,63 +34,63 @@ class KeyMetricsGrid extends StatelessWidget {
           (
             HomeStrings.metricGtin,
             stats?.gtinCount.toString() ?? '0',
-            AppAssets.iconGtin,
+            NavIcons.gtin,
             context.colors.identifierGtin,
             () => context.go(HomeNavigation.gs1Gtins),
           ),
           (
             HomeStrings.metricGln,
             stats?.glnCount.toString() ?? '0',
-            AppAssets.iconGln,
+            NavIcons.gln,
             context.colors.identifierGln,
             () => context.go(HomeNavigation.gs1Glns),
           ),
           (
             HomeStrings.metricSgtin,
             stats?.sgtinCount.toString() ?? '0',
-            AppAssets.iconSgtin,
+            NavIcons.sgtin,
             context.colors.identifierSgtin,
             () => context.go(HomeNavigation.gs1Sgtins),
           ),
           (
             HomeStrings.metricSscc,
             stats?.ssccCount.toString() ?? '0',
-            AppAssets.iconSscc,
+            NavIcons.sscc,
             context.colors.identifierSscc,
             () => context.go(HomeNavigation.gs1Ssccs),
           ),
           (
             HomeStrings.metricObjectEvents,
             (eventCounts['Object'] ?? 0).toString(),
-            AppAssets.iconEvent,
+            NavIcons.objectEvents,
             context.colors.identifierEvent,
             () => context.go(HomeNavigation.epcisObjectEvents),
           ),
           (
             HomeStrings.metricAggregationEvents,
             (eventCounts['Aggregation'] ?? 0).toString(),
-            AppAssets.iconAggregate,
+            NavIcons.aggregationEvents,
             context.colors.secondary,
             () => context.go(HomeNavigation.epcisAggregationEvents),
           ),
           (
             HomeStrings.metricTransactionEvents,
             (eventCounts['Transaction'] ?? 0).toString(),
-            AppAssets.iconShipment,
+            NavIcons.epcisEvents,
             context.colors.warning,
             () => context.go(HomeNavigation.epcisTransactionEvents),
           ),
           (
             HomeStrings.metricTransformationEvents,
             (eventCounts['Transformation'] ?? 0).toString(),
-            AppAssets.iconTransform,
+            NavIcons.conversion,
             context.colors.primaryMuted,
             () => context.go(HomeNavigation.epcisTransformationEvents),
           ),
           (
             HomeStrings.metricTotalEvents,
             stats?.totalEvents.toString() ?? '0',
-            AppAssets.iconDashboard,
+            NavIcons.allEvents,
             context.colors.textMuted,
             () => context.go(HomeNavigation.epcisEvents),
           ),

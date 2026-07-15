@@ -1,93 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-class MarketingAuthorizationBoundGroup extends StatefulWidget {
+/// Presenter — controllers/values owned by [GTINDetailScreen].
+class MarketingAuthorizationBoundGroup extends StatelessWidget {
   const MarketingAuthorizationBoundGroup({
     super.key,
     required this.isReadOnly,
+    required this.numberController,
+    required this.validFromDisplayController,
+    required this.validToDisplayController,
+    required this.validFrom,
+    required this.validTo,
+    required this.onPickValidFrom,
+    required this.onPickValidTo,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final TextEditingController numberController;
+  final TextEditingController validFromDisplayController;
+  final TextEditingController validToDisplayController;
+  final DateTime? validFrom;
+  final DateTime? validTo;
+  final Future<void> Function() onPickValidFrom;
+  final Future<void> Function() onPickValidTo;
   final bool showFieldSkeleton;
-
-  @override
-  State<MarketingAuthorizationBoundGroup> createState() =>
-      MarketingAuthorizationBoundGroupState();
-}
-
-class MarketingAuthorizationBoundGroupState
-    extends State<MarketingAuthorizationBoundGroup> {
-  static final _dateFmt = DateFormat('yyyy-MM-dd');
-
-  late final TextEditingController _number;
-  late final TextEditingController _validFromDisplay;
-  late final TextEditingController _validToDisplay;
-  DateTime? _validFrom;
-  DateTime? _validTo;
-
-  @override
-  void initState() {
-    super.initState();
-    _number = TextEditingController();
-    _validFromDisplay = TextEditingController();
-    _validToDisplay = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _number.dispose();
-    _validFromDisplay.dispose();
-    _validToDisplay.dispose();
-    super.dispose();
-  }
-
-  String get number => _number.text;
-  DateTime? get validFrom => _validFrom;
-  DateTime? get validTo => _validTo;
-
-  void setFromGtin({
-    required String number,
-    required DateTime? validFrom,
-    required DateTime? validTo,
-  }) {
-    _number.text = number;
-    _validFrom = validFrom;
-    _validTo = validTo;
-    _validFromDisplay.text = validFrom == null
-        ? ''
-        : _dateFmt.format(validFrom.toLocal());
-    _validToDisplay.text = validTo == null
-        ? ''
-        : _dateFmt.format(validTo.toLocal());
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _pickDate({
-    required DateTime? current,
-    required ValueChanged<DateTime?> setValue,
-    required TextEditingController display,
-  }) async {
-    if (widget.isReadOnly) return;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (!mounted) return;
-    if (picked == null) return;
-    setState(() {
-      setValue(picked);
-      display.text = _dateFmt.format(picked);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,44 +37,36 @@ class MarketingAuthorizationBoundGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Gs1ValidatedField(
-          controller: _number,
+          controller: numberController,
           fieldName: 'registrationNumber',
           label: 'Marketing Authorization Number *',
           helperText:
               'Regulator-issued; market-specific format (max 50 characters)',
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 50,
           validator: GtinFieldValidators.validateMarketingAuthorizationNumber,
         ),
         const SizedBox(height: 16),
         Gs1DateFormField(
-          controller: _validFromDisplay,
+          controller: validFromDisplayController,
           label: GtinUiConstants.labelAuthorizationValidityFromDate,
-          enabled: !widget.isReadOnly,
-          onPick: () => _pickDate(
-            current: _validFrom,
-            setValue: (v) => _validFrom = v,
-            display: _validFromDisplay,
-          ),
-          validator: widget.isReadOnly
+          enabled: !isReadOnly,
+          onPick: onPickValidFrom,
+          validator: isReadOnly
               ? null
               : GtinFieldValidators.validateAuthorizationValidityFromDate,
         ),
         const SizedBox(height: 16),
         Gs1DateFormField(
-          controller: _validToDisplay,
+          controller: validToDisplayController,
           label: GtinUiConstants.labelAuthorizationValidityToDate,
-          enabled: !widget.isReadOnly,
-          onPick: () => _pickDate(
-            current: _validTo,
-            setValue: (v) => _validTo = v,
-            display: _validToDisplay,
-          ),
-          validator: widget.isReadOnly
+          enabled: !isReadOnly,
+          onPick: onPickValidTo,
+          validator: isReadOnly
               ? null
               : (v) => GtinFieldValidators.validateAuthorizationValidityToDate(
                   v,
-                  fromValue: _validFromDisplay.text,
+                  fromValue: validFromDisplayController.text,
                 ),
         ),
       ],
@@ -142,7 +76,7 @@ class MarketingAuthorizationBoundGroupState
       title: GtinUiConstants.sectionMarketingAuthorization,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

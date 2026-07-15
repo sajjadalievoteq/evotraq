@@ -33,9 +33,10 @@ class ShippingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => ShippingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => ShippingOperationDetailScreen(
           key: const ValueKey('__shipping_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const ShippingOperationListScreen(),

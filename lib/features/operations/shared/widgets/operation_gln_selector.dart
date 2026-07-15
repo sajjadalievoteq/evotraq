@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
@@ -33,7 +33,7 @@ class OperationGlnSelector extends StatelessWidget {
         decoration: InputDecoration(
           labelText: isRequired ? '$label *' : label,
           border: const OutlineInputBorder(),
-          prefixIcon: TraqIcon(AppAssets.iconGln),
+          prefixIcon: TraqIcon(NavIcons.gln),
         ),
         child: Text(
           gln != null ? '${gln!.glnCode} — ${gln!.locationName}' : '—',

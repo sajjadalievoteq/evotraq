@@ -8,6 +8,7 @@ import '../cubit/api_collection_state.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class ApiCollectionManagementScreen extends StatefulWidget {
   const ApiCollectionManagementScreen({super.key});
@@ -524,11 +525,11 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildInfoChip('Timeout', '${api.timeoutSeconds}s', AppAssets.iconTimer),
+                    _buildInfoChip('Timeout', '${api.timeoutSeconds}s', NavIcons.performanceTests),
                     if (api.cacheTtlSeconds != null)
                       _buildInfoChip('Cache', '${api.cacheTtlSeconds}s', AppAssets.iconRefresh),
                     if (api.rateLimitPerMinute != null)
-                      _buildInfoChip('Rate Limit', '${api.rateLimitPerMinute}/min', AppAssets.iconGauge),
+                      _buildInfoChip('Rate Limit', '${api.rateLimitPerMinute}/min', NavIcons.performanceOptimization),
                     if (api.requestContentType != null)
                       _buildInfoChip('Request', api.requestContentType!, AppAssets.iconUpload),
                     if (api.responseContentType != null)

@@ -8,6 +8,7 @@ import '../../../data/services/data_consistency_service.dart';
 import '../../../data/services/error_correction_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
@@ -728,7 +729,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Events Analyzed',
                     total.toString(),
                     Colors.blue,
-                    AppAssets.iconEvent,
+                    NavIcons.epcisEvents,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -805,7 +806,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: () => _correctConsistencyViolation(violation),
-              icon: TraqIcon(AppAssets.iconFactory, size: 16),
+              icon: TraqIcon(AppAssets.iconBuild, size: 16),
               label: const Text('Correct'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -1005,7 +1006,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: () => _correctAnomaly(anomaly),
-                      icon: TraqIcon(AppAssets.iconFactory),
+                      icon: TraqIcon(AppAssets.iconBuild),
                       label: const Text('Apply Correction'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -1149,7 +1150,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             Row(
               children: [
                 TraqIcon(
-                  isCorrectable ? AppAssets.iconBuild : AppAssets.iconAlert,
+                  isCorrectable ? NavIcons.systemTools : AppAssets.iconAlert,
                   color: isCorrectable ? Colors.green : Colors.orange,
                 ),
                 const SizedBox(width: 8),

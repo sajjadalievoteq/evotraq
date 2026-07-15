@@ -15,6 +15,7 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_status_rules.dart'
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class SsccListItemCard extends StatelessWidget {
   const SsccListItemCard({
@@ -125,7 +126,7 @@ class SsccListItemCard extends StatelessWidget {
 
                         if (sscc.issuingGLN?.glnCode != null)
                           infoRow(
-                            AppAssets.iconFactory,
+                            NavIcons.gln,
                             '${SsccUiConstants.listCardIssuingGlnPrefix}${sscc.issuingGLN!.glnCode}',
                           ),
 
@@ -144,7 +145,7 @@ class SsccListItemCard extends StatelessWidget {
 
                         if (sscc.shippingDate != null)
                           infoRow(
-                            AppAssets.iconTruck,
+                            NavIcons.shipping,
                             '${SsccUiConstants.listCardShippedPrefix}${dateFormat.format(sscc.shippingDate!)}',
                           ),
 

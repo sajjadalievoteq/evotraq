@@ -5,92 +5,32 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-class NetContentMeasurementsCoreGroup extends StatefulWidget {
+/// Presenter — controllers owned by [GTINDetailScreen].
+class NetContentMeasurementsCoreGroup extends StatelessWidget {
   const NetContentMeasurementsCoreGroup({
     super.key,
     required this.isReadOnly,
+    required this.netContentController,
+    required this.netContentUomController,
+    required this.grossWeightController,
+    required this.grossWeightUomController,
+    required this.heightController,
+    required this.widthController,
+    required this.depthController,
+    required this.dimUomController,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
   final bool showFieldSkeleton;
-
-  @override
-  State<NetContentMeasurementsCoreGroup> createState() =>
-      NetContentMeasurementsCoreGroupState();
-}
-
-class NetContentMeasurementsCoreGroupState
-    extends State<NetContentMeasurementsCoreGroup> {
-  late final TextEditingController _netContent;
-  late final TextEditingController _netContentUom;
-  late final TextEditingController _grossWeight;
-  late final TextEditingController _grossWeightUom;
-  late final TextEditingController _height;
-  late final TextEditingController _width;
-  late final TextEditingController _depth;
-  late final TextEditingController _dimensionUom;
-
-  @override
-  void initState() {
-    super.initState();
-    _netContent = TextEditingController();
-    _netContentUom = TextEditingController();
-    _grossWeight = TextEditingController();
-    _grossWeightUom = TextEditingController();
-    _height = TextEditingController();
-    _width = TextEditingController();
-    _depth = TextEditingController();
-    _dimensionUom = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _netContent.dispose();
-    _netContentUom.dispose();
-    _grossWeight.dispose();
-    _grossWeightUom.dispose();
-    _height.dispose();
-    _width.dispose();
-    _depth.dispose();
-    _dimensionUom.dispose();
-    super.dispose();
-  }
-
-  double? _doubleOrNull(TextEditingController c) =>
-      c.text.trim().isEmpty ? null : double.tryParse(c.text.trim());
-  String? _stringOrNull(TextEditingController c) =>
-      c.text.trim().isEmpty ? null : c.text.trim();
-
-  double? get netContentValue => _doubleOrNull(_netContent);
-  String? get netContentUom => _stringOrNull(_netContentUom);
-  double? get grossWeightValue => _doubleOrNull(_grossWeight);
-  String? get grossWeightUom => _stringOrNull(_grossWeightUom);
-  double? get heightValue => _doubleOrNull(_height);
-  double? get widthValue => _doubleOrNull(_width);
-  double? get depthValue => _doubleOrNull(_depth);
-  String? get dimUom => _stringOrNull(_dimensionUom);
-
-  void setFromGtin({
-    required double? netContentValue,
-    required String? netContentUom,
-    required double? grossWeightValue,
-    required String? grossWeightUom,
-    required double? heightValue,
-    required double? widthValue,
-    required double? depthValue,
-    required String? dimUom,
-  }) {
-    _netContent.text = netContentValue?.toString() ?? '';
-    _netContentUom.text = (netContentUom ?? '').trim();
-    _grossWeight.text = grossWeightValue?.toString() ?? '';
-    _grossWeightUom.text = (grossWeightUom ?? '').trim();
-    _height.text = heightValue?.toString() ?? '';
-    _width.text = widthValue?.toString() ?? '';
-    _depth.text = depthValue?.toString() ?? '';
-    _dimensionUom.text = (dimUom ?? '').trim();
-    if (mounted) setState(() {});
-  }
+  final TextEditingController netContentController;
+  final TextEditingController netContentUomController;
+  final TextEditingController grossWeightController;
+  final TextEditingController grossWeightUomController;
+  final TextEditingController heightController;
+  final TextEditingController widthController;
+  final TextEditingController depthController;
+  final TextEditingController dimUomController;
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +38,10 @@ class NetContentMeasurementsCoreGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Gs1ValidatedField(
-          controller: _netContent,
+          controller: netContentController,
           fieldName: 'net_content_value',
           label: GtinUiConstants.labelNetContentValue,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: false,
@@ -110,20 +50,20 @@ class NetContentMeasurementsCoreGroupState
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _netContentUom,
+          controller: netContentUomController,
           fieldName: 'net_content_uom',
           label: GtinUiConstants.labelNetContentUom,
           helperText: GtinUiConstants.helperUneceRec20,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateNetContentUomRequired,
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _grossWeight,
+          controller: grossWeightController,
           fieldName: 'gross_weight_value',
           label: GtinUiConstants.labelGrossWeightValue,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: false,
@@ -132,20 +72,20 @@ class NetContentMeasurementsCoreGroupState
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _grossWeightUom,
+          controller: grossWeightUomController,
           fieldName: 'gross_weight_uom',
           label: GtinUiConstants.labelGrossWeightUom,
           helperText: GtinUiConstants.helperUneceRec20,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateGrossWeightUom,
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _height,
+          controller: heightController,
           fieldName: 'height_value',
           label: GtinUiConstants.labelHeight,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: false,
@@ -154,10 +94,10 @@ class NetContentMeasurementsCoreGroupState
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _width,
+          controller: widthController,
           fieldName: 'width_value',
           label: GtinUiConstants.labelWidth,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: false,
@@ -166,10 +106,10 @@ class NetContentMeasurementsCoreGroupState
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _depth,
+          controller: depthController,
           fieldName: 'depth_value',
           label: GtinUiConstants.labelDepth,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: false,
@@ -178,11 +118,11 @@ class NetContentMeasurementsCoreGroupState
         ),
         const SizedBox(height: 12),
         Gs1ValidatedField(
-          controller: _dimensionUom,
+          controller: dimUomController,
           fieldName: 'dim_uom',
           label: GtinUiConstants.labelDimensionUom,
           helperText: GtinUiConstants.helperUneceRec20,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 3,
           validator: GtinFieldValidators.validateDimUom,
         ),
@@ -193,7 +133,7 @@ class NetContentMeasurementsCoreGroupState
       title: GtinUiConstants.sectionNetContentMeasurements,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

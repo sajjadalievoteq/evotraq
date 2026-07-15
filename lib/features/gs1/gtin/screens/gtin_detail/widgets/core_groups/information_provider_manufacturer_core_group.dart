@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
@@ -11,98 +8,37 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 
-class InformationProviderManufacturerCoreGroup extends StatefulWidget {
+/// Presenter — GLN values and name controller owned by [GTINDetailScreen].
+class InformationProviderManufacturerCoreGroup extends StatelessWidget {
   const InformationProviderManufacturerCoreGroup({
     super.key,
     required this.isReadOnly,
+    required this.informationProviderNameController,
+    required this.informationProviderGln,
+    required this.manufacturerGln,
+    required this.onInformationProviderGlnChanged,
+    required this.onManufacturerGlnChanged,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
   final bool showFieldSkeleton;
+  final TextEditingController informationProviderNameController;
+  final GLN? informationProviderGln;
+  final GLN? manufacturerGln;
+  final ValueChanged<GLN?> onInformationProviderGlnChanged;
+  final ValueChanged<GLN?> onManufacturerGlnChanged;
 
-  @override
-  State<InformationProviderManufacturerCoreGroup> createState() =>
-      InformationProviderManufacturerCoreGroupState();
-}
-
-class InformationProviderManufacturerCoreGroupState
-    extends State<InformationProviderManufacturerCoreGroup> {
-  GLN? _informationProviderGln;
-  GLN? _manufacturerGln;
-  late final TextEditingController _informationProviderName;
-
-  @override
-  void initState() {
-    super.initState();
-    _informationProviderName = TextEditingController();
+  String? _glnDisplay(GLN? gln) {
+    if (gln == null) return null;
+    final code = gln.glnCode.trim();
+    if (code.isEmpty) return null;
+    return '$code – ${gln.locationName}';
   }
 
-  @override
-  void dispose() {
-    _informationProviderName.dispose();
-    super.dispose();
-  }
-
-  String? get informationProviderGln => _glnCodeOrNull(_informationProviderGln);
-  String? get informationProviderName =>
-      _informationProviderName.text.trim().isEmpty
-      ? null
-      : _informationProviderName.text.trim();
-  String? get manufacturerGln => _glnCodeOrNull(_manufacturerGln);
-
-  String? _glnCodeOrNull(GLN? gln) {
-    final code = gln?.glnCode.trim();
-    if (code == null || code.isEmpty) return null;
-    return code;
-  }
-
-  GLN? _glnFromStoredCode(String? code) {
-    if (code == null || code.trim().isEmpty) return null;
-    return GLN.fromCode(code.trim());
-  }
-
-  void setFromGtin({
-    required String? informationProviderGln,
-    required String? informationProviderName,
-    required String? manufacturerGln,
-  }) {
-    _informationProviderGln = _glnFromStoredCode(informationProviderGln);
-    _manufacturerGln = _glnFromStoredCode(manufacturerGln);
-    _informationProviderName.text = (informationProviderName ?? '').trim();
-    if (mounted) setState(() {});
-    WidgetsBinding.instance.addPostFrameCallback((_) => _resolveGlnsFromCatalog());
-  }
-
-  Future<void> _resolveGlnsFromCatalog() async {
-    if (_informationProviderGln == null && _manufacturerGln == null) return;
-    try {
-      final catalog =
-          await getIt<GlnPickerCatalog>().ensureLoaded();
-      if (!mounted) return;
-      setState(() {
-        _informationProviderGln = resolveGlnForPicker(
-          code: _informationProviderGln?.glnCode,
-          fallback: _informationProviderGln,
-          catalog: catalog,
-        );
-        _manufacturerGln = resolveGlnForPicker(
-          code: _manufacturerGln?.glnCode,
-          fallback: _manufacturerGln,
-          catalog: catalog,
-        );
-      });
-    } catch (_) {
-    }
-  }
-
-  void _onInformationProviderGlnChanged(GLN? gln) {
-    setState(() {
-      _informationProviderGln = gln;
-      if (gln != null && _informationProviderName.text.trim().isEmpty) {
-        _informationProviderName.text = gln.locationName;
-      }
-    });
+  String? get _informationProviderName {
+    final t = informationProviderNameController.text.trim();
+    return t.isEmpty ? null : t;
   }
 
   @override
@@ -110,38 +46,34 @@ class InformationProviderManufacturerCoreGroupState
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.isReadOnly) ...[
+        if (isReadOnly) ...[
           SgtinInfoRow(
             GtinUiConstants.labelInformationProviderGln,
-            _informationProviderGln != null
-                ? '${_informationProviderGln!.glnCode} – ${_informationProviderGln!.locationName}'
-                : informationProviderGln,
+            _glnDisplay(informationProviderGln),
           ),
           const SizedBox(height: 12),
           SgtinInfoRow(
             'Information Provider Name',
-            informationProviderName,
+            _informationProviderName,
           ),
           const SizedBox(height: 12),
           SgtinInfoRow(
             GtinUiConstants.labelManufacturerGlnField,
-            _manufacturerGln != null
-                ? '${_manufacturerGln!.glnCode} – ${_manufacturerGln!.locationName}'
-                : manufacturerGln,
+            _glnDisplay(manufacturerGln),
           ),
         ] else ...[
           GLNSelector(
             label: GtinUiConstants.labelInformationProviderGln,
             hintText: 'Search and select information provider location',
-            initialValue: _informationProviderGln,
-            onChanged: _onInformationProviderGlnChanged,
+            initialValue: informationProviderGln,
+            onChanged: onInformationProviderGlnChanged,
           ),
           const SizedBox(height: 12),
           Gs1ValidatedField(
-            controller: _informationProviderName,
+            controller: informationProviderNameController,
             fieldName: 'information_provider_name',
             label: 'Information Provider Name',
-            readOnly: widget.isReadOnly,
+            readOnly: isReadOnly,
             maxLength: 200,
             validator: GtinFieldValidators.validateInformationProviderName,
           ),
@@ -149,8 +81,8 @@ class InformationProviderManufacturerCoreGroupState
           GLNSelector(
             label: GtinUiConstants.labelManufacturerGlnField,
             hintText: 'Search and select manufacturer location',
-            initialValue: _manufacturerGln,
-            onChanged: (gln) => setState(() => _manufacturerGln = gln),
+            initialValue: manufacturerGln,
+            onChanged: onManufacturerGlnChanged,
           ),
         ],
       ],
@@ -160,7 +92,7 @@ class InformationProviderManufacturerCoreGroupState
       title: GtinUiConstants.sectionInformationProviderManufacturer,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

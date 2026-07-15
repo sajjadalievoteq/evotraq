@@ -1,42 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-class ProductionBatchSerialDateAssociationsCoreGroup extends StatefulWidget {
+/// Presenter — values owned by [GTINDetailScreen].
+class ProductionBatchSerialDateAssociationsCoreGroup extends StatelessWidget {
   const ProductionBatchSerialDateAssociationsCoreGroup({
     super.key,
     required this.isReadOnly,
+    required this.hasBatchNumberIndicator,
+    required this.hasSerialNumberIndicator,
+    required this.onBatchChanged,
+    required this.onSerialChanged,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
+  final String? hasBatchNumberIndicator;
+  final String? hasSerialNumberIndicator;
+  final ValueChanged<String?> onBatchChanged;
+  final ValueChanged<String?> onSerialChanged;
   final bool showFieldSkeleton;
-
-  @override
-  State<ProductionBatchSerialDateAssociationsCoreGroup> createState() =>
-      ProductionBatchSerialDateAssociationsCoreGroupState();
-}
-
-class ProductionBatchSerialDateAssociationsCoreGroupState
-    extends State<ProductionBatchSerialDateAssociationsCoreGroup> {
-  String? _hasBatchNumberIndicator = 'REQUESTED_BY_LAW';
-  String? _hasSerialNumberIndicator = 'REQUESTED_BY_LAW';
-
-  String? get hasBatchNumberIndicator => _hasBatchNumberIndicator;
-  String? get hasSerialNumberIndicator => _hasSerialNumberIndicator;
-
-  void setFromGtin({
-    required String? hasBatchNumberIndicator,
-    required String? hasSerialNumberIndicator,
-  }) {
-    _hasBatchNumberIndicator = (hasBatchNumberIndicator ?? 'REQUESTED_BY_LAW')
-        .trim();
-    _hasSerialNumberIndicator = (hasSerialNumberIndicator ?? 'REQUESTED_BY_LAW')
-        .trim();
-    if (mounted) setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +29,8 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DropdownButtonFormField<String>(
-          initialValue: _hasBatchNumberIndicator,
+          key: ValueKey('batch_$hasBatchNumberIndicator'),
+          initialValue: hasBatchNumberIndicator,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelHasBatchNumberIndicator,
             helperText: GtinUiConstants.helperBatchIndicatorPharma,
@@ -64,16 +50,15 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
               child: Text(GtinUiConstants.batchSerialNotAllocated),
             ),
           ],
-          validator: widget.isReadOnly
+          validator: isReadOnly
               ? null
               : GtinFieldValidators.validateHasBatchNumberIndicator,
-          onChanged: widget.isReadOnly
-              ? null
-              : (v) => setState(() => _hasBatchNumberIndicator = v),
+          onChanged: isReadOnly ? null : onBatchChanged,
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          initialValue: _hasSerialNumberIndicator,
+          key: ValueKey('serial_$hasSerialNumberIndicator'),
+          initialValue: hasSerialNumberIndicator,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelHasSerialNumberIndicator,
             helperText: GtinUiConstants.helperSerialIndicatorPharma,
@@ -93,15 +78,13 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
               child: Text(GtinUiConstants.batchSerialNotAllocated),
             ),
           ],
-          validator: widget.isReadOnly
+          validator: isReadOnly
               ? null
               : (v) => GtinFieldValidators.validateHasSerialNumberIndicator(
                   v,
-                  batchIndicator: _hasBatchNumberIndicator,
+                  batchIndicator: hasBatchNumberIndicator,
                 ),
-          onChanged: widget.isReadOnly
-              ? null
-              : (v) => setState(() => _hasSerialNumberIndicator = v),
+          onChanged: isReadOnly ? null : onSerialChanged,
         ),
       ],
     );
@@ -110,7 +93,7 @@ class ProductionBatchSerialDateAssociationsCoreGroupState
       title: GtinUiConstants.sectionProductionBatchSerialDateAssociations,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

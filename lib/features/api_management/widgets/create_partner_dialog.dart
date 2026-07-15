@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit
 import 'package:traqtrace_app/features/api_management/models/partner.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class CreatePartnerDialog extends StatefulWidget {
   const CreatePartnerDialog({super.key});
@@ -107,7 +108,7 @@ class _CreatePartnerDialogState extends State<CreatePartnerDialog> {
                         value: _selectedPartnerType,
                         decoration: const InputDecoration(
                           labelText: 'Partner Type *',
-                          prefixIcon: TraqIcon(AppAssets.iconAggregate),
+                          prefixIcon: TraqIcon(NavIcons.aggregationEvents),
                         ),
                         items: PartnerType.values.map((type) {
                           return DropdownMenuItem(

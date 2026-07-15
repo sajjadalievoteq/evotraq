@@ -38,4 +38,8 @@ abstract final class HomeNavigation {
   static const String opUpdateStatus = Constants.opUpdateStatusRoute;
   static const String opUpdateStatusCreate =
       Constants.opUpdateStatusCreateRoute;
+  static const String opCancelShippingCreate =
+      Constants.opCancelShippingCreateRoute;
+  static const String opCancelReceivingCreate =
+      Constants.opCancelReceivingCreateRoute;
 }

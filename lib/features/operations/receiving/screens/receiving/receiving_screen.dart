@@ -33,9 +33,10 @@ class ReceivingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => ReceivingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => ReceivingOperationDetailScreen(
           key: const ValueKey('__receiving_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const ReceivingOperationListScreen(),

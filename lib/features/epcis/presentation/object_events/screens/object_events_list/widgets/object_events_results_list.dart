@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -67,7 +68,7 @@ class ObjectEventsResultsList extends StatelessWidget {
         if (state.objectEvents.isEmpty) {
           final filtered = state.hasActiveFilters;
           return AppEmptyState(
-            iconAsset: AppAssets.iconCalendar,
+            iconAsset: NavIcons.objectEvents,
             title: ObjectEventListUiConstants.emptyListTitle,
             subtitle: ObjectEventListUiConstants.emptyListSubtitle,
             filteredTitle: 'No results found',

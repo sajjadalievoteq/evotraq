@@ -73,6 +73,7 @@ class SsccDetailFormBlocBody extends StatelessWidget {
     required this.setFieldError,
     required this.onSyncExtensionDigitFromSscc,
     required this.onManualSsccCodeChanged,
+    required this.forceMountAllSections,
     required this.state,
   });
 
@@ -82,6 +83,7 @@ class SsccDetailFormBlocBody extends StatelessWidget {
   final bool isEditing;
   final bool embedded;
   final bool allowMasterDataActions;
+  final bool forceMountAllSections;
   final SSCCState state;
 
   final GlobalKey<FormState> formKey;
@@ -240,6 +242,7 @@ class SsccDetailFormBlocBody extends StatelessWidget {
       setFieldError: setFieldError,
       onSyncExtensionDigitFromSscc: onSyncExtensionDigitFromSscc,
       onManualSsccCodeChanged: onManualSsccCodeChanged,
+      forceMountAllSections: forceMountAllSections,
     );
   }
 }

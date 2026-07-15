@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/api_management/models/partner_credential.
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class CredentialManagementScreen extends StatefulWidget {
   final String partnerId;
@@ -246,7 +247,7 @@ class _CredentialManagementScreenState
               children: [
                 _buildInfoChip(
                   'Rate: ${credential.rateLimitPerMinute}/min',
-                  AppAssets.iconGauge,
+                  NavIcons.performanceOptimization,
                 ),
                 const SizedBox(width: 8),
                 _buildInfoChip(
@@ -257,7 +258,7 @@ class _CredentialManagementScreenState
                   const SizedBox(width: 8),
                   _buildInfoChip(
                     'Expires: ${ApiUiUtils.formatDate(credential.expiresAt!)}',
-                    AppAssets.iconEvent,
+                    NavIcons.epcisEvents,
                     color: credential.isExpired ? Colors.red : null,
                   ),
                 ],
@@ -483,7 +484,7 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
             const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: TraqIcon(AppAssets.iconEvent),
+              leading: TraqIcon(NavIcons.epcisEvents),
               title: Text(
                 _expiresAt != null
                     ? 'Expires: ${_expiresAt!.toLocal().toString().split(' ')[0]}'

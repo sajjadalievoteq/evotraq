@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/barcode/models/scan_mode.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 typedef GS1BarcodeCallback = void Function(
   String gs1ElementString,
@@ -208,7 +209,7 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
           child: Row(
             children: [
-              TraqIcon(AppAssets.iconQr, color: colorScheme.primary, size: 22),
+              TraqIcon(NavIcons.generateVerifyBarcode, color: colorScheme.primary, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -626,7 +627,7 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: widget.onScanAgain,
-                    icon: TraqIcon(AppAssets.iconQr, size: 18),
+                    icon: TraqIcon(NavIcons.generateVerifyBarcode, size: 18),
                     label: const Text('Scan Again'),
                   ),
                 ),
@@ -866,7 +867,7 @@ class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
                                   : colorScheme.outline)
                               .withValues(alpha: 0.08),
                         ),
-                        child: TraqIcon(AppAssets.iconQr,
+                        child: TraqIcon(NavIcons.generateVerifyBarcode,
                           size: 48,
                           color: connected
                               ? colorScheme.primary

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 
@@ -49,39 +49,8 @@ abstract final class JourneyStepStyle {
     return CbvDisplayUtils.displayBizStep(businessStep);
   }
 
-  static String iconFor(String businessStep) {
-    final token = bizStepToken(businessStep);
-    if (token != null) {
-      return switch (token) {
-        'commissioning' => AppAssets.iconPrecisionManufacturing,
-        'decommissioning' => AppAssets.iconDecommissioning,
-        'unpacking' => AppAssets.iconUnpacking,
-        'packing' => AppAssets.iconPackingSealed,
-        'shipping' => AppAssets.iconShipment,
-        'receiving' => AppAssets.iconReceivingInbound,
-        'accepting' => AppAssets.iconAccepting,
-        'returning' => AppAssets.iconReturning,
-        'loading' => AppAssets.iconLoadingCargo,
-        'unloading' => AppAssets.iconUnloadingCargo,
-        'dispatching' => AppAssets.iconDispatching,
-        'transporting' => AppAssets.iconTruck,
-        'holding' => AppAssets.iconHolding,
-        'encoding' => AppAssets.iconQr,
-        'update_status' => AppAssets.iconRefresh,
-        'destroying' => AppAssets.iconFlame,
-        'inspecting' => AppAssets.iconInspecting,
-        'storing' => AppAssets.iconWarehouse,
-        'picking' => AppAssets.iconCart,
-        'cancel' => AppAssets.iconXCircle,
-        _ => AppAssets.iconEvent,
-      };
-    }
-
-    final s = businessStep.toLowerCase();
-    if (s.contains('unpacking')) return AppAssets.iconUnpacking;
-    if (s.contains('packing')) return AppAssets.iconPackingSealed;
-    return AppAssets.iconEvent;
-  }
+  static String iconFor(String businessStep) =>
+      NavIcons.forBizStep(businessStep);
 
 
   static Color typeColor(BuildContext context, String type) {

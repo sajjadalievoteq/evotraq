@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/quick_actions/widgets/dashboard_quick_action_card.dart';
@@ -11,7 +11,7 @@ class QuickActionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const actions = [
       DashboardQuickAction(
-        iconAsset: AppAssets.iconGtin,
+        iconAsset: NavIcons.gtin,
         title: HomeStrings.quickActionGtinTitle,
         subtitle: HomeStrings.quickActionGtinSubtitle,
         color: Colors.blue,
@@ -19,70 +19,82 @@ class QuickActionsGrid extends StatelessWidget {
         isDisabled: false,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconGln,
+        iconAsset: NavIcons.gln,
         title: HomeStrings.quickActionGlnTitle,
         color: Colors.green,
         route: HomeNavigation.gs1Glns,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconSgtin,
+        iconAsset: NavIcons.sgtin,
         title: HomeStrings.quickActionSgtinTitle,
         color: Colors.orange,
         route: HomeNavigation.gs1Sgtins,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconSscc,
+        iconAsset: NavIcons.sscc,
         title: HomeStrings.quickActionSsccTitle,
         color: Colors.purple,
         route: HomeNavigation.gs1Ssccs,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconShipment,
+        iconAsset: NavIcons.shipping,
         title: HomeStrings.quickActionCreateShipment,
         color: Colors.indigo,
         route: HomeNavigation.opShippingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconReceive,
+        iconAsset: NavIcons.receiving,
         title: HomeStrings.quickActionReceiveShipment,
         color: Colors.teal,
         route: HomeNavigation.opReceivingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconArrowUpR,
+        iconAsset: NavIcons.returnShipping,
         title: HomeStrings.quickActionReturnShipping,
         color: Colors.blueGrey,
         route: HomeNavigation.opReturnShippingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconReceive,
+        iconAsset: NavIcons.returnReceiving,
         title: HomeStrings.quickActionReturnReceiving,
         color: Colors.blueGrey,
         route: HomeNavigation.opReturnReceivingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconAggregate,
+        iconAsset: NavIcons.packing,
         title: HomeStrings.quickActionPacking,
         color: Colors.deepOrange,
         route: HomeNavigation.opPackingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconTransform,
+        iconAsset: NavIcons.unpacking,
         title: HomeStrings.quickActionUnpacking,
         color: Colors.brown,
         route: HomeNavigation.opUnpackingCreate,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconSparkle,
+        iconAsset: NavIcons.commissioning,
         title: HomeStrings.quickActionCommissioning,
         color: Colors.cyan,
         route: HomeNavigation.opCommissioningNew,
       ),
       DashboardQuickAction(
-        iconAsset: AppAssets.iconTrash,
+        iconAsset: NavIcons.updateStatus,
         title: HomeStrings.quickActionUpdateStatus,
         color: Colors.redAccent,
         route: HomeNavigation.opUpdateStatusCreate,
+      ),
+      DashboardQuickAction(
+        iconAsset: NavIcons.cancelShipping,
+        title: HomeStrings.quickActionCancelShipping,
+        color: Colors.red,
+        route: HomeNavigation.opCancelShippingCreate,
+      ),
+      DashboardQuickAction(
+        iconAsset: NavIcons.cancelReceiving,
+        title: HomeStrings.quickActionCancelReceiving,
+        color: Colors.deepOrangeAccent,
+        route: HomeNavigation.opCancelReceivingCreate,
       ),
     ];
 

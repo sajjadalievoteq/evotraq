@@ -8,6 +8,7 @@ import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class NotificationCenterScreen extends StatefulWidget {
   const NotificationCenterScreen({super.key});
@@ -426,11 +427,11 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       case 'EMAIL':
         return AppAssets.iconMail;
       case 'WEBHOOK':
-        return AppAssets.iconWebhook;
+        return NavIcons.webhookConfiguration;
       case 'SMS':
         return AppAssets.iconSms;
       default:
-        return AppAssets.iconNotification;
+        return NavIcons.notifications;
     }
   }
 
@@ -440,7 +441,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TraqIcon(
-            AppAssets.iconNotification,
+            NavIcons.notifications,
             size: 64,
             color: Colors.grey[400],
           ),

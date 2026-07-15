@@ -86,7 +86,7 @@ class _AggregationEventScreenState extends State<AggregationEventScreen> {
                 embedded: true,
                 onEmbeddedActionSuccess: onSuccess,
               ),
-          detailAwaitBuilder: (context) => const AggregationEventDetailScreen(
+          detailAwaitBuilder: (context, {required listLoading}) => const AggregationEventDetailScreen(
             key: ValueKey('__agg_event_split_await__'),
             embedded: true,
             awaitingListSelection: true,

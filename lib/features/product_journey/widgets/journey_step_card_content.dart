@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -111,7 +112,7 @@ class JourneyStepCardContent extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    TraqIcon(AppAssets.iconGln, size: 13, color: mutedColor),
+                    TraqIcon(NavIcons.gln, size: 13, color: mutedColor),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(

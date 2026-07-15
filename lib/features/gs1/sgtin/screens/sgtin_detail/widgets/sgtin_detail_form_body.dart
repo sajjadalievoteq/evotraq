@@ -89,6 +89,28 @@ class SgtinDetailFormBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (showSkeleton) {
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: EdgeInsets.only(
+            top: context.padding.left,
+            right: context.padding.left,
+            left: context.padding.left,
+          ),
+          child: Form(
+            key: formKey,
+            child: Gs1FormShimmerLayer(
+              show: true,
+              skeleton: const SgtinDetailSkeleton(),
+              formColumn: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: SingleChildScrollView(

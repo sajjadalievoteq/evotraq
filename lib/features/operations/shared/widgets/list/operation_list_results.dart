@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_skeleton.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_error_view.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/operation_list_item_skeleton.dart';
 
 class OperationListResults<T> extends StatelessWidget {
   const OperationListResults({
@@ -51,9 +51,9 @@ class OperationListResults<T> extends StatelessWidget {
     if (isLoading) {
       return AppShimmer(
         child: ListView.builder(
-          padding: EdgeInsets.all(context.horizontalPadding.left),
+          padding: EdgeInsets.fromLTRB(context.horizontalPadding.left,0,context.horizontalPadding.left,0),
           itemCount: 6,
-          itemBuilder: (context, _) => const OperationListItemSkeleton(),
+          itemBuilder: (context, _) => const OperationListCardSkeleton(),
         ),
       );
     }
@@ -67,7 +67,7 @@ class OperationListResults<T> extends StatelessWidget {
 
     if (filteredOperations.isEmpty) {
       return AppEmptyState(
-        iconAsset: emptyIconAsset ?? AppAssets.iconPackage,
+        iconAsset: emptyIconAsset ?? NavIcons.packaging,
         title: emptyTitle,
         subtitle: emptySubtitle,
         filteredTitle: 'No operations match your search or filters.',

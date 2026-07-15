@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
@@ -38,7 +39,7 @@ class CbvStatisticsHeader extends StatelessWidget {
                 total: state.totalBizSteps,
                 enabled: state.enabledBizSteps,
                 disabled: state.disabledBizSteps,
-                iconAsset: AppAssets.iconHierarchy,
+                iconAsset: NavIcons.aggregationHierarchy,
                 color: colors.primary,
               ),
             ),

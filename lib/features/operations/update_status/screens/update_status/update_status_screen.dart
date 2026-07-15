@@ -33,9 +33,10 @@ class UpdateStatusScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => UpdateStatusOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => UpdateStatusOperationDetailScreen(
           key: const ValueKey('__update_status_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const UpdateStatusOperationListScreen(),

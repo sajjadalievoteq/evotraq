@@ -1,10 +1,11 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/core/config/feature_flags.dart';
@@ -15,21 +16,14 @@ import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/gtin_detail_screen_fields.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/regulatory_authority/regulatory_authority_extension.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/audit_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/classification_market_origin_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/information_provider_manufacturer_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/lifecycle_availability_status_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/marketing_authorization_bound_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/net_content_measurements_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/packaging_hierarchy_trade_item_roles_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/production_batch_serial_date_associations_core_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/trade_item_masterdata_bound_group.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/core_groups/trade_item_descriptive_attributes_core_group.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_body.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_detail_form_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
 class GTINDetailScreen extends StatefulWidget {
@@ -56,28 +50,13 @@ class GTINDetailScreen extends StatefulWidget {
   State<GTINDetailScreen> createState() => _GTINDetailScreenState();
 }
 
-class _GTINDetailScreenState extends State<GTINDetailScreen> {
+class _GTINDetailScreenState extends State<GTINDetailScreen>
+    with GtinDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
   final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
   final _regulatoryAuthorityKey =
       GlobalKey<RegulatoryAuthorityExtensionState>();
-  final _boundMasterdataKey = GlobalKey<TradeItemMasterdataBoundGroupState>();
-  final _boundMarketingAuthKey =
-      GlobalKey<MarketingAuthorizationBoundGroupState>();
-  final _descriptiveAttrsKey =
-      GlobalKey<TradeItemDescriptiveAttributesCoreGroupState>();
-  final _packagingHierarchyKey =
-      GlobalKey<PackagingHierarchyTradeItemRolesCoreGroupState>();
-  final _netContentKey = GlobalKey<NetContentMeasurementsCoreGroupState>();
-  final _classificationKey =
-      GlobalKey<ClassificationMarketOriginCoreGroupState>();
-  final _infoProviderKey =
-      GlobalKey<InformationProviderManufacturerCoreGroupState>();
-  final _lifecycleKey = GlobalKey<LifecycleAvailabilityStatusCoreGroupState>();
-  final _batchSerialKey =
-      GlobalKey<ProductionBatchSerialDateAssociationsCoreGroupState>();
-  final _auditKey = GlobalKey<AuditCoreGroupState>();
   bool _isSubmitting = false;
 
   GTINCubit? _gtinCubit;
@@ -86,9 +65,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   bool _formFieldsHydrated = true;
 
   bool _detailHydratedForRouteGtin = false;
-
-  final _gtinCodeController = TextEditingController();
-  String? _status = 'ACTIVE';
+  bool _forceMountAllSections = false;
 
   String? _docUnitDescriptorFromBackend({
     required String? unitDescriptor,
@@ -110,6 +87,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   void initState() {
     super.initState();
+    initGtinDetailFields(isUpdate: widget.gtinCode != null);
     if (!widget.embedded) {
       _gtinCubit = getIt<GTINCubit>();
     }
@@ -168,88 +146,18 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _gtinCodeController.text = gtin.gtinCode;
-      _status = gtin.status?.toUpperCase();
-
       try {
         final unitDescriptor = _docUnitDescriptorFromBackend(
           unitDescriptor: gtin.unitDescriptor,
           packagingLevel: gtin.packagingLevel,
         );
-
-        _boundMasterdataKey.currentState?.setFromGtin(
-          brandName: gtin.productName,
-          manufacturer: gtin.manufacturer ?? '',
-          unitDescriptor: unitDescriptor ?? '',
-          status: gtin.status?.toUpperCase(),
-          packSize: gtin.packSize?.toString() ?? '',
-        );
-
-        _boundMarketingAuthKey.currentState?.setFromGtin(
-          number: gtin.registrationNumber ?? '',
-          validFrom: gtin.registrationDate,
-          validTo: gtin.expirationDate,
-        );
-
-        _descriptiveAttrsKey.currentState?.setFromGtin(
-          functionalName: gtin.functionalName,
-          tradeItemDescription: gtin.tradeItemDescription,
-          gpcBrickCode: gtin.gpcBrickCode,
-          targetMarketCountry: gtin.targetMarketCountry,
-        );
-
-        _packagingHierarchyKey.currentState?.setFromGtin(
-          nextLowerLevelGtin: gtin.nextLowerLevelGtin,
-          nextLowerLevelQuantity: gtin.nextLowerLevelQuantity,
-          quantityOfChildren: gtin.quantityOfChildren,
-          totalQtyNextLower: gtin.totalQtyNextLower,
-          launchDate: gtin.launchDate,
-          isBaseUnit: gtin.isBaseUnit,
-          isConsumerUnit: gtin.isConsumerUnit,
-          isOrderableUnit: gtin.isOrderableUnit,
-          isDespatchUnit: gtin.isDespatchUnit,
-          isInvoiceUnit: gtin.isInvoiceUnit,
-          isVariableUnit: gtin.isVariableUnit,
-        );
-
-        _netContentKey.currentState?.setFromGtin(
-          netContentValue: gtin.netContentValue,
-          netContentUom: gtin.netContentUom,
-          grossWeightValue: gtin.grossWeightValue,
-          grossWeightUom: gtin.grossWeightUom,
-          heightValue: gtin.heightValue,
-          widthValue: gtin.widthValue,
-          depthValue: gtin.depthValue,
-          dimUom: gtin.dimUom,
-        );
-
-        _classificationKey.currentState?.setFromGtin(
-          countryOfOrigin: gtin.countryOfOrigin,
-        );
-
-        _infoProviderKey.currentState?.setFromGtin(
-          informationProviderGln: gtin.informationProviderGln,
-          informationProviderName: gtin.informationProviderName,
-          manufacturerGln: gtin.manufacturerGln,
-        );
-
-        _lifecycleKey.currentState?.setFromGtin(
-          tradeItemStatus: gtin.tradeItemStatus,
-          effectiveDate: gtin.effectiveDate,
-          startAvailDate: gtin.startAvailDate,
-          endAvailDate: gtin.endAvailDate,
-          publicationDate: gtin.publicationDate,
-        );
-
-        _batchSerialKey.currentState?.setFromGtin(
-          hasBatchNumberIndicator: gtin.hasBatchNumberIndicator,
-          hasSerialNumberIndicator: gtin.hasSerialNumberIndicator,
-        );
-
-        _auditKey.currentState?.setFromGtin(
-          createdBy: gtin.createdBy,
-          updatedBy: gtin.updatedBy,
-        );
+        hydrateGtinDetailFields(gtin, docUnitDescriptor: unitDescriptor);
+        if (kDebugMode) {
+          debugPrint(
+            '[GTIN perf] allocated controllers after hydrate: '
+            '$allocatedGtinControllerCount',
+          );
+        }
       } finally {
         if (mounted) {
           setState(() => _formFieldsHydrated = true);
@@ -263,7 +171,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     if (!widget.embedded) {
       _gtinCubit?.close();
     }
-    _gtinCodeController.dispose();
+    disposeGtinDetailFields();
     super.dispose();
   }
 
@@ -273,7 +181,55 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _pickDateOnly({
+    required DateTime? current,
+    required void Function(DateTime picked) onPicked,
+  }) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current ?? now,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(now.year + 30),
+    );
+    if (picked == null || !mounted) return;
+    onPicked(DateTime(picked.year, picked.month, picked.day));
+    setState(() {});
+  }
+
+  Future<void> _pickDateTime({
+    required DateTime? current,
+    required void Function(DateTime picked) onPicked,
+  }) async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: current ?? now,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(now.year + 30),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(current ?? now),
+    );
+    if (time == null || !mounted) return;
+    onPicked(
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
+    );
+    setState(() {});
+  }
+
+  Future<void> _submitForm() async {
+    // Ensure every section is mounted so Form validators + extension keys run.
+    if (!_forceMountAllSections) {
+      setState(() => _forceMountAllSections = true);
+      await Future<void>.delayed(Duration.zero);
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+
     final isFormValid = _formKey.currentState?.validate() ?? false;
 
     if (kTobaccoExtensionEnabled) {
@@ -304,120 +260,36 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       );
     }
 
-    if (isFormValid) {
-      setState(() {
-        _isSubmitting = true;
-      });
+    if (!isFormValid) return;
 
-      final gtinCodeForApi = GtinFieldValidators.canonicalGtin14FromInput(
-        _gtinCodeController.text,
-      );
+    final role = context.read<AuthCubit>().state.user?.role;
+    final fieldError = validateGtinFieldsForSave(
+      isReadOnly: !(role == 'ADMIN' || role == 'MANUFACTURER'),
+    );
+    if (fieldError != null) {
+      context.showError(fieldError);
+      return;
+    }
 
-      final boundMasterdata = _boundMasterdataKey.currentState;
-      final boundMarketingAuth = _boundMarketingAuthKey.currentState;
-      final descriptive = _descriptiveAttrsKey.currentState;
-      final packagingHierarchy = _packagingHierarchyKey.currentState;
-      final netContent = _netContentKey.currentState;
-      final classification = _classificationKey.currentState;
-      final infoProvider = _infoProviderKey.currentState;
-      final lifecycle = _lifecycleKey.currentState;
-      final batchSerial = _batchSerialKey.currentState;
-      final audit = _auditKey.currentState;
+    setState(() {
+      _isSubmitting = true;
+    });
 
-      if (boundMasterdata == null ||
-          boundMarketingAuth == null ||
-          descriptive == null ||
-          packagingHierarchy == null ||
-          netContent == null ||
-          classification == null ||
-          infoProvider == null ||
-          lifecycle == null ||
-          batchSerial == null ||
-          audit == null) {
-        setState(() {
-          _isSubmitting = false;
-        });
-        context.showError(
-          'Internal form error: required sections not mounted.',
-        );
-        return;
-      }
+    final gtinCodeForApi = GtinFieldValidators.canonicalGtin14FromInput(
+      gtinCodeController.text,
+    );
 
-      final gtin = GTIN(
-        gtinCode: gtinCodeForApi,
-        productName: boundMasterdata.brandName,
-        manufacturer: boundMasterdata.manufacturer.trim(),
-        unitDescriptor: boundMasterdata.unitDescriptor.isEmpty
-            ? null
-            : boundMasterdata.unitDescriptor.trim(),
-        packagingLevel: boundMasterdata.unitDescriptor.isEmpty
-            ? null
-            : GtinFieldValidators.mapUnitDescriptorToBackendPackagingLevel(
-                boundMasterdata.unitDescriptor,
-              ),
-        packSize: boundMasterdata.packSize,
-        status: boundMasterdata.status,
-        registrationNumber: boundMarketingAuth.number.isEmpty
-            ? null
-            : boundMarketingAuth.number,
-        registrationDate: boundMarketingAuth.validFrom,
-        expirationDate: boundMarketingAuth.validTo,
+    final gtin = buildGtinFromFields(gtinCode: gtinCodeForApi);
 
-        functionalName: descriptive.functionalName,
-        tradeItemDescription: descriptive.tradeItemDescription,
-        gpcBrickCode: descriptive.gpcBrickCode,
-        targetMarketCountry: descriptive.targetMarketCountry,
-
-        nextLowerLevelGtin: packagingHierarchy.nextLowerLevelGtin,
-        nextLowerLevelQuantity: packagingHierarchy.nextLowerLevelQuantity,
-        quantityOfChildren: packagingHierarchy.quantityOfChildren,
-        totalQtyNextLower: packagingHierarchy.totalQtyNextLower,
-        launchDate: packagingHierarchy.launchDate,
-        isBaseUnit: packagingHierarchy.isBaseUnit,
-        isConsumerUnit: packagingHierarchy.isConsumerUnit,
-        isOrderableUnit: packagingHierarchy.isOrderableUnit,
-        isDespatchUnit: packagingHierarchy.isDespatchUnit,
-        isInvoiceUnit: packagingHierarchy.isInvoiceUnit,
-        isVariableUnit: packagingHierarchy.isVariableUnit,
-
-        netContentValue: netContent.netContentValue,
-        netContentUom: netContent.netContentUom,
-        grossWeightValue: netContent.grossWeightValue,
-        grossWeightUom: netContent.grossWeightUom,
-        heightValue: netContent.heightValue,
-        widthValue: netContent.widthValue,
-        depthValue: netContent.depthValue,
-        dimUom: netContent.dimUom,
-
-        countryOfOrigin: classification.countryOfOrigin,
-
-        informationProviderGln: infoProvider.informationProviderGln,
-        informationProviderName: infoProvider.informationProviderName,
-        manufacturerGln: infoProvider.manufacturerGln,
-
-        tradeItemStatus: lifecycle.tradeItemStatus,
-        effectiveDate: lifecycle.effectiveDate,
-        startAvailDate: lifecycle.startAvailDate,
-        endAvailDate: lifecycle.endAvailDate,
-        publicationDate: lifecycle.publicationDate,
-
-        hasBatchNumberIndicator: batchSerial.hasBatchNumberIndicator,
-        hasSerialNumberIndicator: batchSerial.hasSerialNumberIndicator,
-
-        createdBy: audit.createdBy,
-        updatedBy: audit.updatedBy,
-      );
-
-      final cubit = _gtinCubit;
-      if (cubit == null) {
-        setState(() => _isSubmitting = false);
-        return;
-      }
-      if (widget.gtinCode != null) {
-        cubit.updateGTIN(gtin);
-      } else {
-        cubit.createGTIN(gtin);
-      }
+    final cubit = _gtinCubit;
+    if (cubit == null) {
+      setState(() => _isSubmitting = false);
+      return;
+    }
+    if (widget.gtinCode != null) {
+      cubit.updateGTIN(gtin);
+    } else {
+      cubit.createGTIN(gtin);
     }
   }
 
@@ -489,20 +361,47 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.awaitingListSelection) {
-      final cubit = widget.embedded
-          ? context.read<GTINCubit>()
-          : _gtinCubit;
-      final state = cubit?.state;
-      final loading = state == null ||
-          state.isGtinListLoading ||
-          state.status == GTINStatus.initial;
-      final empty = AppEmptyDetail(
-        title: GtinUiConstants.awaitingSelectionTitle,
-        subtitle: GtinUiConstants.awaitingSelectionSubtitle,
-        iconAsset: AppAssets.iconQr,
-        loading: loading,
+      Widget pane(GTINState state) {
+        final listLoading =
+            state.isGtinListLoading || state.status == GTINStatus.initial;
+        if (listLoading) {
+          return SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              context.padding.top,
+              context.padding.top,
+              context.padding.top,
+              0,
+            ),
+            child: Gs1FormShimmerLayer(
+              show: true,
+              formColumn: const SizedBox.shrink(),
+              skeleton: const GtinDetailFormSkeleton(),
+            ),
+          );
+        }
+        return AppEmptyDetail(
+          title: GtinUiConstants.awaitingSelectionTitle,
+          subtitle: GtinUiConstants.awaitingSelectionSubtitle,
+          iconAsset: NavIcons.gtin,
+        );
+      }
+
+      if (widget.embedded) {
+        return BlocBuilder<GTINCubit, GTINState>(
+          builder: (context, state) => pane(state),
+        );
+      }
+      final cubit = _gtinCubit;
+      if (cubit == null) {
+        return Scaffold(body: pane(const GTINState()));
+      }
+      return BlocProvider<GTINCubit>.value(
+        value: cubit,
+        child: BlocBuilder<GTINCubit, GTINState>(
+          builder: (context, state) => Scaffold(body: pane(state)),
+        ),
       );
-      return widget.embedded ? empty : Scaffold(body: empty);
     }
 
     final role = context.watch<AuthCubit>().state.user?.role;
@@ -537,7 +436,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
             });
 
             final createdGtin = state.gtin;
-            final gtinCode = createdGtin?.gtinCode ?? _gtinCodeController.text;
+            final gtinCode = createdGtin?.gtinCode ?? gtinCodeController.text;
 
             _saveTobaccoExtensionIfNeeded(null, gtinCode);
             _savePharmaExtensionIfNeeded(null, gtinCode);
@@ -570,8 +469,8 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
             widget.gtinCode != null || !canEditMasterData || sk;
         return GtinDetailFormBody(
           formKey: _formKey,
-          gtinCodeController: _gtinCodeController,
-          status: _status,
+          fields: this,
+          onFieldsChanged: () => setState(() {}),
           routeGtinCode: widget.gtinCode,
           routeGtin: widget.gtin,
           state: state,
@@ -587,21 +486,66 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
           idStructureReadOnly: idStructureReadOnly,
           gtinFieldLocked: gtinFieldLocked,
           fullFormShimmer: sk,
+          forceMountAllSections: _forceMountAllSections,
           isSubmitting: _isSubmitting,
-          onSubmit: _submitForm,
+          onSubmit: () {
+            _submitForm();
+          },
           tobaccoExtensionKey: _tobaccoExtensionKey,
           pharmaExtensionKey: _pharmaExtensionKey,
           regulatoryAuthorityKey: _regulatoryAuthorityKey,
-          boundMasterdataKey: _boundMasterdataKey,
-          boundMarketingAuthKey: _boundMarketingAuthKey,
-          descriptiveAttrsKey: _descriptiveAttrsKey,
-          packagingHierarchyKey: _packagingHierarchyKey,
-          netContentKey: _netContentKey,
-          classificationKey: _classificationKey,
-          infoProviderKey: _infoProviderKey,
-          lifecycleKey: _lifecycleKey,
-          batchSerialKey: _batchSerialKey,
-          auditKey: _auditKey,
+          onPickRegistrationDate: () => _pickDateOnly(
+            current: registrationDate,
+            onPicked: (d) {
+              registrationDate = d;
+              registrationDateDisplayController.text = formatDate(d);
+            },
+          ),
+          onPickExpirationDate: () => _pickDateOnly(
+            current: expirationDate,
+            onPicked: (d) {
+              expirationDate = d;
+              expirationDateDisplayController.text = formatDate(d);
+            },
+          ),
+          onPickLaunchDate: () => _pickDateOnly(
+            current: launchDate,
+            onPicked: (d) {
+              launchDate = d;
+              launchDateDisplayController.text = formatDate(d);
+            },
+          ),
+          onPickEffectiveDate: () => _pickDateTime(
+            current: effectiveDate,
+            onPicked: (d) {
+              effectiveDate = d;
+              effectiveDateDisplayController.text =
+                  formatDateTimeWithOffset(d);
+            },
+          ),
+          onPickStartAvailDate: () => _pickDateTime(
+            current: startAvailDate,
+            onPicked: (d) {
+              startAvailDate = d;
+              startAvailDateDisplayController.text =
+                  formatDateTimeWithOffset(d);
+            },
+          ),
+          onPickEndAvailDate: () => _pickDateTime(
+            current: endAvailDate,
+            onPicked: (d) {
+              endAvailDate = d;
+              endAvailDateDisplayController.text =
+                  formatDateTimeWithOffset(d);
+            },
+          ),
+          onPickPublicationDate: () => _pickDateOnly(
+            current: publicationDate,
+            onPicked: (d) {
+              publicationDate = d;
+              publicationDateDisplayController.text = formatDate(d);
+            },
+          ),
         );
       },
     );
@@ -612,7 +556,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen> {
       embedded: widget.embedded,
       title: screenTitle,
       showSaveAction: allowMasterDataActions,
-      onSave: _submitForm,
+      onSave: () {
+        _submitForm();
+      },
       saveEnabled: allowMasterDataActions && !_isSubmitting,
       body: bodyWithRefresh,
     );

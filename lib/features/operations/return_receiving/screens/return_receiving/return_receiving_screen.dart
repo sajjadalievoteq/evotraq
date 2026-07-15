@@ -33,9 +33,10 @@ class ReturnReceivingScreen extends StatelessWidget {
           operationId: id,
           embedded: true,
         ),
-        detailAwaitBuilder: (context) => ReturnReceivingOperationDetailScreen(
+        detailAwaitBuilder: (context, {required listLoading}) => ReturnReceivingOperationDetailScreen(
           key: const ValueKey('__return_receiving_split_await__'),
           embedded: true,
+          listLoading: listLoading,
           awaitingSelection: true,
         ),
         fallbackList: const ReturnReceivingOperationListScreen(),

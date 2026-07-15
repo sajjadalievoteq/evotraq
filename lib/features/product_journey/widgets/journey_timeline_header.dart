@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
@@ -66,11 +67,11 @@ class JourneyTimelineHeader extends StatelessWidget {
                       value: dateRange,
                     ),
                   JourneyHeaderStat(
-                    icon: AppAssets.iconEvent,
+                    icon: NavIcons.epcisEvents,
                     value: '${journey.totalSteps} Events',
                   ),
                   JourneyHeaderStat(
-                    icon: AppAssets.iconTimer,
+                    icon: NavIcons.performanceTests,
                     value: JourneyTimelineHeaderUtils.durationLabel(journey),
                   ),
                   JourneyHeaderStat(

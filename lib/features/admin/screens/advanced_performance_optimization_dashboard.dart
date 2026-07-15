@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_performance_data_utils.dart';
 
 class AdvancedPerformanceOptimizationDashboard extends StatefulWidget {
@@ -225,7 +226,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                         children: [
                           Row(
                             children: [
-                              TraqIcon(AppAssets.iconDashboard,
+                              TraqIcon(NavIcons.dashboard,
                                 color: Theme.of(context).primaryColor,
                               ),
                               const SizedBox(width: 8),
@@ -378,7 +379,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'Memory Usage',
                 _getMemoryUsage(systemResources),
-                AppAssets.iconChip,
+                NavIcons.eventSerialization,
                 Colors.blue,
               ),
             ),
@@ -387,7 +388,7 @@ class _AdvancedPerformanceOptimizationDashboardState
               child: _buildOverviewCard(
                 'CPU Usage',
                 _getCpuUsage(systemResources),
-                AppAssets.iconGauge,
+                NavIcons.performanceOptimization,
                 Colors.green,
               ),
             ),

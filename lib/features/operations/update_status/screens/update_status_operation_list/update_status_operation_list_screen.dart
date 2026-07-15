@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -16,7 +17,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operations_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card_builders.dart';
+import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_results.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_list/utils/update_status_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_list/widgets/update_status_advanced_filters_panel.dart';
@@ -235,9 +236,16 @@ class _UpdateStatusOperationListBodyState
           previous.total != current.total,
       listener: (context, state) {
         widget.onLoadingChanged?.call(state.isLoading);
-
         final filtered = _filteredOperations(state.items);
-        _syncEmbeddedOperationIds(filtered);
+        if (widget.embedded) {
+          final split = context.read<OperationSplitCubit>();
+          if (state.isLoading) {
+            split.setListLoading(true);
+          } else {
+            _syncEmbeddedOperationIds(filtered);
+            split.setListLoading(false);
+          }
+        }
 
         if (widget.embedded &&
             widget.selectedOperationId == null &&
@@ -319,11 +327,12 @@ class _UpdateStatusOperationListBodyState
             emptyTitle: 'No Update Status operations yet',
             emptySubtitle:
                 'Tap the + button to create your first Update Status operation.',
+            emptyIconAsset: NavIcons.updateStatus,
             hasMore: state.hasMore,
             isLoadingMore: state.isLoadingMore,
             onLoadMore: cubit.loadMore,
             itemBuilder: (context, operation) =>
-                OperationListCardBuilders.forOperation(
+                OperationListCard(
               operation: operation,
               isSelected: widget.embedded &&
                   operation.navigableOperationId != null &&

@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
@@ -227,7 +228,7 @@ class _ThreadPoolManagementDashboardState
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: TraqIcon(AppAssets.iconDashboard), text: 'Metrics'),
+            Tab(icon: TraqIcon(NavIcons.dashboard), text: 'Metrics'),
             Tab(icon: TraqIcon(AppAssets.iconAlert), text: 'Contention'),
             Tab(icon: TraqIcon(AppAssets.iconSettings), text: 'Backpressure'),
             Tab(icon: TraqIcon(AppAssets.iconFilter), text: 'Optimization'),
@@ -350,7 +351,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Max Pool Size',
                 maximumPoolSize.toString(),
-                AppAssets.iconDatabase,
+                NavIcons.databasePartitioning,
                 Colors.purple,
               ),
             ),
@@ -359,7 +360,7 @@ class _ThreadPoolManagementDashboardState
               child: _buildMetricCard(
                 'Queue Size',
                 queueSize.toString(),
-                AppAssets.iconQueue,
+                NavIcons.jobQueueManagement,
                 Colors.orange,
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_loading_shimmer.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
@@ -64,7 +65,7 @@ class SgtinResultsList extends StatelessWidget {
         if (sgtins == null || sgtins.isEmpty) {
           return _constrainedCenter(
             AppEmptyState(
-              iconAsset: AppAssets.iconTarget,
+              iconAsset: NavIcons.sgtin,
               title: SgtinUiConstants.emptyListTitle,
               subtitle: SgtinUiConstants.emptyListSubtitle,
               filteredTitle: 'No results found',

@@ -35,6 +35,8 @@
   static const quickActionUnpacking = 'Unpacking';
   static const quickActionCommissioning = 'Commissioning';
   static const quickActionUpdateStatus = 'Update Status';
+  static const quickActionCancelShipping = 'Cancel Shipping';
+  static const quickActionCancelReceiving = 'Cancel Receiving';
   static const quickActionUnavailable =
       'This action is not available right now.';
 

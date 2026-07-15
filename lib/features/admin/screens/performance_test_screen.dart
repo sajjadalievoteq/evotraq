@@ -7,6 +7,7 @@ import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/data/services/performance_test_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class PerformanceTestScreen extends StatefulWidget {
   const PerformanceTestScreen({Key? key}) : super(key: key);
@@ -329,12 +330,12 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                   _buildMetricRow(
                     'Operations per second',
                     result.operationsPerSecond.toStringAsFixed(2),
-                    AppAssets.iconGauge,
+                    NavIcons.performanceOptimization,
                   ),
                   _buildMetricRow(
                     'Execution time',
                     '${result.executionTimeMs} ms',
-                    AppAssets.iconTimer,
+                    NavIcons.performanceTests,
                   ),
                   _buildMetricRow(
                     'Threshold',

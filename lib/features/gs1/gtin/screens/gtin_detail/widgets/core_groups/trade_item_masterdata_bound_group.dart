@@ -1,77 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/utils/gtin_detail_constants.dart';
-import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
+import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
-import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
+import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-class TradeItemMasterdataBoundGroup extends StatefulWidget {
+/// Presenter — controllers/values owned by [GTINDetailScreen].
+class TradeItemMasterdataBoundGroup extends StatelessWidget {
   const TradeItemMasterdataBoundGroup({
     super.key,
     required this.isReadOnly,
-    required this.initialStatus,
+    required this.brandNameController,
+    required this.manufacturerController,
+    required this.unitDescriptorController,
+    required this.packSizeController,
+    required this.status,
+    required this.onUnitDescriptorChanged,
+    required this.onStatusChanged,
     this.showFieldSkeleton = false,
   });
 
   final bool isReadOnly;
-  final String? initialStatus;
+  final TextEditingController brandNameController;
+  final TextEditingController manufacturerController;
+  final TextEditingController unitDescriptorController;
+  final TextEditingController packSizeController;
+  final String? status;
+  final ValueChanged<String?> onUnitDescriptorChanged;
+  final ValueChanged<String?> onStatusChanged;
   final bool showFieldSkeleton;
-
-  @override
-  State<TradeItemMasterdataBoundGroup> createState() =>
-      TradeItemMasterdataBoundGroupState();
-}
-
-class TradeItemMasterdataBoundGroupState
-    extends State<TradeItemMasterdataBoundGroup> {
-  late final TextEditingController _brandName;
-  late final TextEditingController _manufacturer;
-  late final TextEditingController _unitDescriptor;
-  late final TextEditingController _packSize;
-  String? _status;
-
-  @override
-  void initState() {
-    super.initState();
-    _brandName = TextEditingController();
-    _manufacturer = TextEditingController();
-    _unitDescriptor = TextEditingController();
-    _packSize = TextEditingController();
-    _status = widget.initialStatus;
-  }
-
-  @override
-  void dispose() {
-    _brandName.dispose();
-    _manufacturer.dispose();
-    _unitDescriptor.dispose();
-    _packSize.dispose();
-    super.dispose();
-  }
-
-  String get brandName => _brandName.text;
-  String get manufacturer => _manufacturer.text;
-  String get unitDescriptor => _unitDescriptor.text;
-  TextEditingController get unitDescriptorController => _unitDescriptor;
-  String get status => _status ?? 'ACTIVE';
-  int? get packSize =>
-      _packSize.text.isEmpty ? null : int.tryParse(_packSize.text);
-
-  void setFromGtin({
-    required String brandName,
-    required String manufacturer,
-    required String unitDescriptor,
-    required String? status,
-    required String packSize,
-  }) {
-    _brandName.text = brandName;
-    _manufacturer.text = manufacturer;
-    _unitDescriptor.text = unitDescriptor;
-    _packSize.text = packSize;
-    _status = status;
-    if (mounted) setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,30 +37,30 @@ class TradeItemMasterdataBoundGroupState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Gs1ValidatedField(
-          controller: _brandName,
+          controller: brandNameController,
           fieldName: 'brand_name',
           label: GtinUiConstants.labelBrandNameRequired,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 70,
           validator: GtinFieldValidators.validateProductName,
         ),
         const SizedBox(height: 16),
         Gs1ValidatedField(
-          controller: _manufacturer,
+          controller: manufacturerController,
           fieldName: 'manufacturer',
           label: GtinUiConstants.labelManufacturerRequired,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           maxLength: 200,
           validator: GtinFieldValidators.validateManufacturer,
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           key: ValueKey(
-            'ud_${_unitDescriptor.text.isEmpty ? '' : _unitDescriptor.text}',
+            'ud_${unitDescriptorController.text.isEmpty ? '' : unitDescriptorController.text}',
           ),
-          initialValue: _unitDescriptor.text.isEmpty
+          initialValue: unitDescriptorController.text.isEmpty
               ? null
-              : _unitDescriptor.text,
+              : unitDescriptorController.text,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelTradeItemUnitDescriptor,
             helperText: GtinUiConstants.helperGdsnUnitDescriptor,
@@ -112,38 +70,33 @@ class TradeItemMasterdataBoundGroupState
                 (level) => DropdownMenuItem(value: level, child: Text(level)),
               )
               .toList(),
-          validator: widget.isReadOnly
+          validator: isReadOnly
               ? null
               : GtinFieldValidators.validateUnitDescriptor,
-          onChanged: widget.isReadOnly
-              ? null
-              : (value) => setState(() => _unitDescriptor.text = value ?? ''),
+          onChanged: isReadOnly ? null : onUnitDescriptorChanged,
         ),
         const SizedBox(height: 16),
         Gs1ValidatedField(
-          controller: _packSize,
+          controller: packSizeController,
           fieldName: 'packSize',
           label: GtinUiConstants.labelPackSize,
           helperText: GtinUiConstants.helperPackSizeExamples,
-          readOnly: widget.isReadOnly,
+          readOnly: isReadOnly,
           validator: GtinFieldValidators.validatePackSizeOptionalInt,
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          key: ValueKey('st_$_status'),
-          initialValue: _status,
+          key: ValueKey('st_$status'),
+          initialValue: status,
           decoration: const InputDecoration(
             labelText: GtinUiConstants.labelProductLifecycleStatus,
           ),
           items: GtinDetailConstants.statusOptions
               .map((s) => DropdownMenuItem(value: s, child: Text(s)))
               .toList(),
-          validator: widget.isReadOnly
-              ? null
-              : GtinFieldValidators.validateProductStatus,
-          onChanged: widget.isReadOnly
-              ? null
-              : (value) => setState(() => _status = value),
+          validator:
+              isReadOnly ? null : GtinFieldValidators.validateProductStatus,
+          onChanged: isReadOnly ? null : onStatusChanged,
         ),
       ],
     );
@@ -152,7 +105,7 @@ class TradeItemMasterdataBoundGroupState
       title: GtinUiConstants.sectionTradeItemData,
       showRequiredStar: true,
       outlineColor: Theme.of(context).colorScheme.outlineVariant,
-      showFieldSkeleton: widget.showFieldSkeleton,
+      showFieldSkeleton: showFieldSkeleton,
       skeletonBuilder: (c) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

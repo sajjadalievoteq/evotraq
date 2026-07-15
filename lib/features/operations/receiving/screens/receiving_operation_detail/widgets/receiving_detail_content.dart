@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_body.dart';
@@ -28,23 +28,15 @@ class ReceivingDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (listLoading) {
-      return const AppEmptyDetail(
-        title: 'Select a receiving operation',
-        subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
-        loading: true,
-      );
+    if (listLoading || isLoading) {
+      return const OperationDetailsLoadingWidget();
     }
     if (awaitingSelection) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a receiving operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.receiving,
       );
-    }
-    if (isLoading) {
-      return const OperationDetailsLoadingWidget();
     }
 
     if (errorMessage != null) {
@@ -54,10 +46,10 @@ class ReceivingDetailContent extends StatelessWidget {
       );
     }
     if (operation == null) {
-      return const AppEmptyDetail(
+      return AppEmptyDetail(
         title: 'Select a receiving operation',
         subtitle: 'Choose one from the list to view its details.',
-        iconAsset: AppAssets.iconPackage,
+        iconAsset: NavIcons.receiving,
       );
     }
 

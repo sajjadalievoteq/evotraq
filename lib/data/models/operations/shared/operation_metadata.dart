@@ -5,7 +5,11 @@ extension OperationMetadata on Operation {
   String? get destinationGLN => metadataString('destinationGLN');
   String? get receivingGLN => metadataString('receivingGLN');
   String? get locationGLN =>
-      metadataString('locationGLN') ?? primaryGln;
+      metadataString('locationGLN') ??
+      metadataString('packingLocationGLN') ??
+      metadataString('unpackingLocationGLN') ??
+      metadataString('commissioningLocationGLN') ??
+      primaryGln;
   String? get packingLine => metadataString('packingLine');
   String? get unpackingLine => metadataString('unpackingLine');
   String? get reason => metadataString('reason');

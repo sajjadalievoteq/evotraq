@@ -82,7 +82,7 @@ class _ObjectEventScreenState extends State<ObjectEventScreen> {
             embedded: true,
             onEmbeddedActionSuccess: onSuccess,
           ),
-          detailAwaitBuilder: (context) => const ObjectEventDetailScreen(
+          detailAwaitBuilder: (context, {required listLoading}) => const ObjectEventDetailScreen(
             key: ValueKey('__obj_event_split_await__'),
             embedded: true,
             awaitingListSelection: true,

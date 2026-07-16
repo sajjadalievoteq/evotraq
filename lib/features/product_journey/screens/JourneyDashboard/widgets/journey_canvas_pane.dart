@@ -31,22 +31,12 @@ class JourneyCanvasPane extends StatelessWidget {
           opacity: animation,
           child: child,
         ),
-        child: Stack(
+        child: Column(
           key: ValueKey(state.journey!.identifier),
-          clipBehavior: Clip.none,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Positioned.fill(
-              child: JourneyPinsCanvas(
-                journey: state.journey!,
-                selectedStep: state.selectedStep,
-                onStepTapped: onStepTapped,
-                eventFilter: state.eventFilter,
-              ),
-            ),
-            Positioned(
-              top: context.padding.top,
-              left: context.padding.top,
-              right: context.padding.top,
+            Padding(
+              padding: journeyCanvasHeaderPadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -61,20 +51,37 @@ class JourneyCanvasPane extends StatelessWidget {
                 ],
               ),
             ),
+            Expanded(
+              child: JourneyPinsCanvas(
+                journey: state.journey!,
+                selectedStep: state.selectedStep,
+                onStepTapped: onStepTapped,
+                eventFilter: state.eventFilter,
+              ),
+            ),
           ],
         ),
       );
     }
 
     if (state.isLoading) {
-      return const JourneyCanvasSkeleton();
+      // Same Column shell as loaded — header takes real space, diagram below.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: journeyCanvasHeaderPadding(context),
+            child: const JourneyCanvasHeaderSkeleton(),
+          ),
+          const Expanded(child: JourneyCanvasDiagramSkeleton()),
+        ],
+      );
     }
 
-    return Stack(
-      children: [
-        if (!state.hasError && state.journey == null)
-          const Center(child: JourneyEmptyState()),
-      ],
-    );
+    if (!state.hasError && state.journey == null) {
+      return const Center(child: JourneyEmptyState());
+    }
+
+    return const SizedBox.shrink();
   }
 }

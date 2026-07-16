@@ -1,3 +1,6 @@
+import 'dart:ui' show PathMetric;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -17,12 +20,16 @@ class JourneyPinsCanvas extends StatefulWidget {
     required this.selectedStep,
     required this.onStepTapped,
     this.eventFilter = JourneyEventFilter.all,
+    this.topInset = 0,
   });
 
   final ProductJourney journey;
   final JourneyStep? selectedStep;
   final ValueChanged<JourneyStep> onStepTapped;
   final JourneyEventFilter eventFilter;
+
+  /// Space reserved above the serpentine band (e.g. floating search/chips).
+  final double topInset;
 
   @override
   State<JourneyPinsCanvas> createState() => _JourneyPinsCanvasState();
@@ -32,13 +39,15 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
 
-  // Shared entrance controller — drives both line draw and pin stagger.
-  // See [JourneyAnimationConstants] for duration and stagger tuning.
   late final AnimationController _entranceCtrl;
   late final Animation<double> _lineProgress;
 
-  // Tracks the journey identity so we restart the animation when a new journey loads.
   String? _lastJourneyId;
+
+  List<Offset>? _cachedCentres;
+  Path? _linePath;
+  List<PathMetric>? _lineMetrics;
+  double _lineTotalLength = 0;
 
   static const double _pinR = JourneyPinLayout.pinRadius;
   static const double _pinW = JourneyPinLayout.pinWidth;
@@ -65,13 +74,10 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
         curve: Curves.easeInOut,
       ),
     );
-    // Record the current journey so didUpdateWidget can detect a real journey change.
     _lastJourneyId = widget.journey.steps.isEmpty
         ? null
         : widget.journey.steps.first.eventId;
 
-    // Defer forward() until after the first frame so every _AnimatedPin child
-    // is fully built and its CurvedAnimation is listening before ticks start.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _entranceCtrl.forward(from: 0.0);
@@ -84,9 +90,9 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     final newId = widget.journey.steps.isEmpty
         ? null
         : widget.journey.steps.first.eventId;
-    // Only restart when the journey itself changed — not on every BlocBuilder rebuild.
     if (newId != _lastJourneyId) {
       _lastJourneyId = newId;
+      _cachedCentres = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _entranceCtrl.forward(from: 0.0);
@@ -99,6 +105,20 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
     _entranceCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _ensureLineGeometry(List<Offset> centres) {
+    if (_cachedCentres != null &&
+        listEquals(_cachedCentres, centres) &&
+        _linePath != null &&
+        _lineMetrics != null) {
+      return;
+    }
+    _cachedCentres = List<Offset>.of(centres);
+    final prepared = JourneyCanvasPainter.prepare(centres);
+    _linePath = prepared.path;
+    _lineMetrics = prepared.metrics;
+    _lineTotalLength = prepared.totalLength;
   }
 
   @override
@@ -118,10 +138,17 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
         viewportW: viewportW,
         viewportH: viewportH,
         axis: axis,
+        topInset: widget.topInset,
       );
       final canvasW = layout.width;
       final canvasH = layout.height;
       final centres = layout.centres;
+
+      _ensureLineGeometry(centres);
+
+      final lineColor = Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white;
 
       final canvas = SizedBox(
         width: canvasW,
@@ -131,16 +158,14 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
           children: [
             Positioned.fill(
               child: RepaintBoundary(
-                child: AnimatedBuilder(
-                  animation: _lineProgress,
-                  builder: (context, _) => CustomPaint(
-                    painter: JourneyCanvasPainter(
-                      positions: centres,
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.black
-                          : Colors.white,
-                      progress: _lineProgress.value,
-                    ),
+                child: CustomPaint(
+                  painter: JourneyCanvasPainter(
+                    positions: centres,
+                    color: lineColor,
+                    progress: _lineProgress,
+                    fullPath: _linePath!,
+                    metrics: _lineMetrics!,
+                    totalLength: _lineTotalLength,
                   ),
                 ),
               ),
@@ -161,7 +186,8 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
                       index: i,
                       totalCount: steps.length,
                       entranceCtrl: _entranceCtrl,
-                      startOffset: JourneyAnimationConstants.durationChipStaggerStartOffset,
+                      startOffset: JourneyAnimationConstants
+                          .durationChipStaggerStartOffset,
                       dimmed: false,
                       child: _DurationChip(
                         label: JourneyFormatters.humanDuration(
@@ -254,9 +280,6 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
   static const double _chipHalfH = 11.0;
 }
 
-/// Wraps any canvas child in a staggered entrance animation driven by a shared controller.
-/// Uses compositor-friendly [FadeTransition] + [ScaleTransition] — zero Dart CPU cost
-/// once the animation completes.
 class _AnimatedPin extends StatefulWidget {
   const _AnimatedPin({
     required this.index,
@@ -282,8 +305,6 @@ class _AnimatedPinState extends State<_AnimatedPin>
     with SingleTickerProviderStateMixin {
   late CurvedAnimation _curve;
 
-  // Drives a spring-pop when this pin transitions from dimmed → visible.
-  // Stays at 1.0 at rest so it never interferes with the steady-state layout.
   late final AnimationController _filterBounceCtrl;
   late final Animation<double> _filterBounceScale;
 
@@ -295,7 +316,7 @@ class _AnimatedPinState extends State<_AnimatedPin>
     _filterBounceCtrl = AnimationController(
       vsync: this,
       duration: JourneyAnimationConstants.pinFilterBounce,
-    )..value = 1.0; // start at rest — no bounce on initial load
+    )..value = 1.0;
 
     _filterBounceScale = CurvedAnimation(
       parent: _filterBounceCtrl,
@@ -313,7 +334,6 @@ class _AnimatedPinState extends State<_AnimatedPin>
       _curve.dispose();
       _curve = _buildCurve();
     }
-    // Pin just became relevant (filter changed to include it): spring pop.
     if (old.dimmed && !widget.dimmed) {
       _filterBounceCtrl.forward(from: 0.0);
     }
@@ -352,8 +372,6 @@ class _AnimatedPinState extends State<_AnimatedPin>
           opacity: widget.dimmed ? 0.22 : 1.0,
           duration: JourneyAnimationConstants.pinFilterDim,
           curve: Curves.easeInOut,
-          // Scale bounce wraps only the content — entrance ScaleTransition above
-          // handles initial layout; this one plays independently on filter change.
           child: ScaleTransition(
             scale: _filterBounceScale,
             alignment: Alignment.bottomCenter,

@@ -8,9 +8,14 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 
 class DashboardRecentEventTile extends StatelessWidget {
-  const DashboardRecentEventTile({super.key, required this.event});
+  const DashboardRecentEventTile({
+    super.key,
+    required this.event,
+    this.onTap,
+  });
 
   final RecentEvent event;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +28,7 @@ class DashboardRecentEventTile extends StatelessWidget {
         final isMobile = constraints.maxWidth < 600;
 
         return ListTile(
+          onTap: onTap,
           dense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

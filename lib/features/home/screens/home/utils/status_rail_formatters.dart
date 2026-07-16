@@ -53,8 +53,10 @@ String formatBackendVersionLine(String raw) {
 String relativeRefreshPhrase(DateTime refreshedAt, DateTime now) {
   var diff = now.difference(refreshedAt);
   if (diff.isNegative) diff = Duration.zero;
-  if (diff.inSeconds < 15) return HomeStrings.relativeJustNow;
-  if (diff.inMinutes < 1) return HomeStrings.relativeUnderOneMin;
+
+  final secs = diff.inSeconds;
+  if (secs < 3) return HomeStrings.relativeJustNow;
+  if (secs < 60) return HomeStrings.relativeSecondsAgo(secs);
   if (diff.inMinutes < 60) {
     return HomeStrings.relativeMinutesAgo(diff.inMinutes);
   }

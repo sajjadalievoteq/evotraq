@@ -85,15 +85,9 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
             child: SizedBox(
               width: r * 2,
               height: r * 2 + tipH,
-              child: AnimatedBuilder(
-                animation: _pulseCtrl,
-                builder: (context, _) => CustomPaint(
-                  painter: _PinBodyPainter(
-                    color: color,
-                    isSelected: widget.isSelected,
-                    tipHeight: tipH,
-                    pulseValue: widget.isSelected ? _pulseCtrl.value : 0.0,
-                  ),
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _pulseCtrl,
                   child: Align(
                     alignment: const Alignment(0, -0.35),
                     child: TraqIcon(
@@ -101,6 +95,15 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
                       size: r * 0.92,
                       color: Colors.white,
                     ),
+                  ),
+                  builder: (context, child) => CustomPaint(
+                    painter: _PinBodyPainter(
+                      color: color,
+                      isSelected: widget.isSelected,
+                      tipHeight: tipH,
+                      pulseValue: widget.isSelected ? _pulseCtrl.value : 0.0,
+                    ),
+                    child: child,
                   ),
                 ),
               ),

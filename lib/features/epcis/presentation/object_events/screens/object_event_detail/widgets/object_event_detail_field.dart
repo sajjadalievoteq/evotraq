@@ -33,7 +33,16 @@ class ObjectEventDetailField extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 4),
-          GestureDetector(
+          InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: display == ObjectEventSharedUiConstants.emDash
+                ? null
+                : () {
+                    Clipboard.setData(ClipboardData(text: display));
+                    context.showSuccess(
+                      ObjectEventDetailUiConstants.detailCopied,
+                    );
+                  },
             onLongPress: display == ObjectEventSharedUiConstants.emDash
                 ? null
                 : () {

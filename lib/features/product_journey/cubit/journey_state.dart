@@ -13,6 +13,8 @@ class JourneyState extends Equatable {
     this.selectedStep,
     this.errorMessage,
     this.eventFilter = JourneyEventFilter.all,
+    this.recentEvents = const [],
+    this.recentEventsLoading = false,
   });
 
   final JourneyStatus status;
@@ -22,6 +24,8 @@ class JourneyState extends Equatable {
   final JourneyStep? selectedStep;
   final String? errorMessage;
   final JourneyEventFilter eventFilter;
+  final List<RecentEvent> recentEvents;
+  final bool recentEventsLoading;
 
   bool get isLoading => status == JourneyStatus.loading;
   bool get isLoaded => status == JourneyStatus.loaded;
@@ -35,6 +39,8 @@ class JourneyState extends Equatable {
     Object? selectedStep = _unset,
     Object? errorMessage = _unset,
     JourneyEventFilter? eventFilter,
+    List<RecentEvent>? recentEvents,
+    bool? recentEventsLoading,
   }) {
     return JourneyState(
       status: status ?? this.status,
@@ -50,6 +56,8 @@ class JourneyState extends Equatable {
           ? this.errorMessage
           : errorMessage as String?,
       eventFilter: eventFilter ?? this.eventFilter,
+      recentEvents: recentEvents ?? this.recentEvents,
+      recentEventsLoading: recentEventsLoading ?? this.recentEventsLoading,
     );
   }
 
@@ -62,5 +70,7 @@ class JourneyState extends Equatable {
         selectedStep,
         errorMessage,
         eventFilter,
+        recentEvents,
+        recentEventsLoading,
       ];
 }

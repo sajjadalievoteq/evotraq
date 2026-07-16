@@ -5,7 +5,6 @@ import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 
 enum SerpentineAxis {
   horizontal,
-
   vertical,
 }
 
@@ -17,6 +16,11 @@ abstract final class JourneyPinLayout {
 
   static const double _laneSpacing = 280.0;
   static const double _edgePad = 80.0;
+  static const double _bandGap = 16.0;
+  static const double _bottomGap = 16.0;
+
+  /// Minimum usable band height so top/bottom lanes don't collapse on short screens.
+  static const double _minBandHeight = 220.0;
 
   static int seedForSteps(List<JourneyStep> steps) {
     var hash = steps.length;
@@ -36,6 +40,7 @@ abstract final class JourneyPinLayout {
     required double viewportW,
     required double viewportH,
     required SerpentineAxis axis,
+    double topInset = 0,
   }) {
     if (count == 0) {
       return (
@@ -46,10 +51,15 @@ abstract final class JourneyPinLayout {
       );
     }
     if (count == 1) {
+      final usableTop = topInset + _bandGap;
+      final cy = math.max(
+        usableTop + pinRadius,
+        (usableTop + viewportH) / 2,
+      );
       return (
         width: viewportW,
-        height: viewportH,
-        centres: [Offset(viewportW / 2, viewportH / 2)],
+        height: math.max(viewportH, usableTop + pinHeight),
+        centres: [Offset(viewportW / 2, cy)],
         axis: axis,
       );
     }
@@ -59,11 +69,13 @@ abstract final class JourneyPinLayout {
           count: count,
           viewportW: viewportW,
           viewportH: viewportH,
+          topInset: topInset,
         ),
       SerpentineAxis.vertical => _verticalSerpentine(
           count: count,
           viewportW: viewportW,
           viewportH: viewportH,
+          topInset: topInset,
         ),
     };
   }
@@ -77,10 +89,16 @@ abstract final class JourneyPinLayout {
     required int count,
     required double viewportW,
     required double viewportH,
+    required double topInset,
   }) {
     const lanes = 2;
-    final topY = viewportH * 0.25;
-    final bottomY = viewportH * 0.75;
+    final usableTop = topInset + _bandGap;
+    final minHeight = usableTop + _minBandHeight + _bottomGap;
+    final height = math.max(viewportH, minHeight);
+    final usableBottom = height - _bottomGap;
+    final band = math.max(_minBandHeight, usableBottom - usableTop);
+    final topY = usableTop + band * 0.05;
+    final bottomY = usableTop + band * 0.75;
     final startX = _edgePad + pinWidth / 2;
 
     final cols = (count / lanes).ceil();
@@ -102,7 +120,7 @@ abstract final class JourneyPinLayout {
 
     return (
       width: width,
-      height: viewportH,
+      height: height,
       centres: centres,
       axis: SerpentineAxis.horizontal,
     );
@@ -117,16 +135,17 @@ abstract final class JourneyPinLayout {
     required int count,
     required double viewportW,
     required double viewportH,
+    required double topInset,
   }) {
     const lanes = 2;
     final leftX = viewportW * 0.25;
     final rightX = viewportW * 0.75;
-    final startY = viewportH * 0.25;
+    final startY = topInset + _bandGap + viewportH * 0.12;
 
     final rows = (count / lanes).ceil();
     final height = math.max(
       viewportH,
-      startY + (rows - 1) * _laneSpacing + startY,
+      startY + (rows - 1) * _laneSpacing + pinHeight,
     );
 
     final centres = <Offset>[];

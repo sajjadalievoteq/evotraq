@@ -7,31 +7,49 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_pin_layout.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_canvas_painter.dart';
 
-/// Skeleton for the product-journey canvas (right / detail pane).
-/// Mirrors [JourneyPinsCanvas] serpentine layout, connector path, pins, and
-/// the timeline header + filter chips overlay so loading matches loaded UI.
+/// Skeleton for the product-journey canvas diagram (and optional header).
+/// Prefer composing header via [JourneyCanvasPane] so padding matches the loaded UI.
 class JourneyCanvasSkeleton extends StatelessWidget {
-  const JourneyCanvasSkeleton({super.key});
+  const JourneyCanvasSkeleton({
+    super.key,
+    this.includeHeader = true,
+  });
+
+  /// When false, only the diagram skeleton is shown.
+  final bool includeHeader;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
+    if (!includeHeader) {
+      return const JourneyCanvasDiagramSkeleton();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Positioned.fill(child: _DiagramSkeleton()),
-        Positioned(
-          top: context.padding.top,
-          left: context.padding.top,
-          right: context.padding.top,
-          child: const _OverlaySkeleton(),
+        Padding(
+          padding: journeyCanvasHeaderPadding(context),
+          child: const JourneyCanvasHeaderSkeleton(),
         ),
+        const Expanded(child: JourneyCanvasDiagramSkeleton()),
       ],
     );
   }
 }
 
-class _OverlaySkeleton extends StatelessWidget {
-  const _OverlaySkeleton();
+/// Shared with [JourneyCanvasPane] so loading and loaded use the same top inset.
+EdgeInsets journeyCanvasHeaderPadding(BuildContext context) {
+  return EdgeInsets.fromLTRB(
+    context.padding.top,
+    context.padding.top,
+    context.padding.top,
+    TraqSpacing.sm,
+  );
+}
+
+/// Timeline header + filter chips placeholder.
+class JourneyCanvasHeaderSkeleton extends StatelessWidget {
+  const JourneyCanvasHeaderSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -94,17 +112,19 @@ class _OverlaySkeleton extends StatelessWidget {
   }
 }
 
-class _DiagramSkeleton extends StatefulWidget {
-  const _DiagramSkeleton();
+class JourneyCanvasDiagramSkeleton extends StatefulWidget {
+  const JourneyCanvasDiagramSkeleton({super.key});
 
   /// Serpentine columns on the horizontal canvas (2 pins per column).
   static const int horizontalLevels = 6;
 
   @override
-  State<_DiagramSkeleton> createState() => _DiagramSkeletonState();
+  State<JourneyCanvasDiagramSkeleton> createState() =>
+      _JourneyCanvasDiagramSkeletonState();
 }
 
-class _DiagramSkeletonState extends State<_DiagramSkeleton> {
+class _JourneyCanvasDiagramSkeletonState
+    extends State<JourneyCanvasDiagramSkeleton> {
   final ScrollController _scrollController = ScrollController();
 
   static const Set<PointerDeviceKind> _dragDevices = {
@@ -123,8 +143,8 @@ class _DiagramSkeletonState extends State<_DiagramSkeleton> {
   int _pinCount(SerpentineAxis axis) {
     return switch (axis) {
       SerpentineAxis.horizontal =>
-        _DiagramSkeleton.horizontalLevels * 2,
-      SerpentineAxis.vertical => _DiagramSkeleton.horizontalLevels,
+        JourneyCanvasDiagramSkeleton.horizontalLevels * 2,
+      SerpentineAxis.vertical => JourneyCanvasDiagramSkeleton.horizontalLevels,
     };
   }
 
@@ -151,6 +171,7 @@ class _DiagramSkeletonState extends State<_DiagramSkeleton> {
           axis: axis,
         );
         final centres = layout.centres;
+        final lineGeom = JourneyCanvasPainter.prepare(centres);
 
         final canvas = AppShimmer(
           child: SizedBox(
@@ -164,6 +185,10 @@ class _DiagramSkeletonState extends State<_DiagramSkeleton> {
                     painter: JourneyCanvasPainter(
                       positions: centres,
                       color: Colors.white,
+                      progress: const AlwaysStoppedAnimation(1.0),
+                      fullPath: lineGeom.path,
+                      metrics: lineGeom.metrics,
+                      totalLength: lineGeom.totalLength,
                     ),
                   ),
                 ),

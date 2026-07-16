@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
+import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
 import 'package:traqtrace_app/features/gs1/widgets/split_view/master_detail_split_layout.dart';
@@ -11,6 +12,7 @@ import 'package:traqtrace_app/features/product_journey/cubit/journey_cubit.dart'
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_canvas_pane.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_left_panel.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_mobile_layout.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_recent_events_section.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDetails/widgets/journey_step_detail_sheet.dart';
 
 class JourneyDashboardBody extends StatefulWidget {
@@ -68,6 +70,15 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
     setState(() {});
   }
 
+  void _onRecentEventTap(RecentEvent event) {
+    final identifier = JourneyRecentEventsSection.identifierFor(event);
+    if (identifier == null) return;
+    _searchController.text = identifier;
+    context.read<JourneyCubit>().clearSuggestions();
+    context.read<JourneyCubit>().search(identifier);
+    setState(() {});
+  }
+
   void _onScanResult(ScanResult result) {
     if (!result.isValid) return;
     final value = result.data;
@@ -92,7 +103,9 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
           previous.isSearching != current.isSearching ||
           previous.selectedStep != current.selectedStep ||
           previous.errorMessage != current.errorMessage ||
-          previous.eventFilter != current.eventFilter,
+          previous.eventFilter != current.eventFilter ||
+          previous.recentEvents != current.recentEvents ||
+          previous.recentEventsLoading != current.recentEventsLoading,
       builder: (context, state) => SplitOrListIndexedStack(
         split: MasterDetailSplitLayout(
           narrowListFlex: 22,
@@ -105,6 +118,7 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
             onClearSearch: _onClearSearch,
             onSuggestionTap: _onSuggestionTap,
             onRetry: () => _onSearchSubmitted(_searchController.text),
+            onRecentEventTap: _onRecentEventTap,
             onScanResult: _onScanResult,
           ),
           detail: JourneyCanvasPane(
@@ -121,6 +135,7 @@ class _JourneyDashboardBodyState extends State<JourneyDashboardBody> {
           onSuggestionTap: _onSuggestionTap,
           onRetry: () => _onSearchSubmitted(_searchController.text),
           onStepTapped: _onStepTapped,
+          onRecentEventTap: _onRecentEventTap,
           onScanResult: _onScanResult,
         ),
       ),

@@ -18,6 +18,7 @@ class JourneySearchBar extends StatelessWidget {
     required this.isSearching,
     required this.onClear,
     this.onScanResult,
+    this.compactMargins = false,
   });
 
   final TextEditingController controller;
@@ -27,19 +28,25 @@ class JourneySearchBar extends StatelessWidget {
   final VoidCallback onClear;
   final ValueChanged<ScanResult>? onScanResult;
 
+  /// When true, uses tight card margins (mobile column layout).
+  final bool compactMargins;
+
   static const double _fieldIconSize = 18;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final margin = compactMargins
+        ? EdgeInsets.zero
+        : EdgeInsets.fromLTRB(
+            context.padding.top,
+            context.padding.top,
+            context.padding.top,
+            0,
+          );
 
     return Card(
-      margin:  EdgeInsets.fromLTRB(
-        context.padding.top,
-        context.padding.top,
-        context.padding.top,
-        0,
-      ),
+      margin: margin,
         elevation: 2,
         color: context.colors.surface,
         clipBehavior: Clip.hardEdge,

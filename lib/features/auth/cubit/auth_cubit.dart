@@ -13,6 +13,7 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthService _authService;
   final Duration _authCheckTimeout;
   final Duration _loginTimeout;
+  final Duration _verifyEmailTimeout;
   AuthService get authService => _authService;
 
   /// Startup profile check must finish within this window or become unauthenticated.
@@ -21,13 +22,19 @@ class AuthCubit extends Cubit<AuthState> {
   /// Login must fail fast so the button never spins forever.
   static const Duration loginTimeout = Duration(seconds: 15);
 
+  /// Email verification must fail fast so the screen never spins forever.
+  static const Duration verifyEmailTimeout = Duration(seconds: 15);
+
   AuthCubit({
     required AuthService authService,
     Duration? authCheckTimeout,
     Duration? loginTimeout,
+    Duration? verifyEmailTimeout,
   })  : _authService = authService,
         _authCheckTimeout = authCheckTimeout ?? AuthCubit.authCheckTimeout,
         _loginTimeout = loginTimeout ?? AuthCubit.loginTimeout,
+        _verifyEmailTimeout =
+            verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
         super(const AuthState(status: AuthStatus.initial));
 
   bool _requiresEmailVerification(String? message) {
@@ -326,12 +333,23 @@ class AuthCubit extends Cubit<AuthState> {
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
     try {
-      final message = await _authService.verifyEmail(token);
+      final message = await _authService
+          .verifyEmail(token)
+          .timeout(_verifyEmailTimeout);
       emit(
         state.copyWith(
           status: AuthStatus.emailVerified,
           error: null,
           message: message,
+        ),
+      );
+    } on TimeoutException {
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error:
+              'Email verification timed out. Please check your connection and try again.',
+          message: null,
         ),
       );
     } catch (e) {

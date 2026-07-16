@@ -14,7 +14,12 @@ class ObjectEventDetailMonoListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: GestureDetector(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: value));
+          context.showSuccess(ObjectEventDetailUiConstants.detailCopied);
+        },
         onLongPress: () {
           Clipboard.setData(ClipboardData(text: value));
           context.showSuccess(ObjectEventDetailUiConstants.detailCopied);

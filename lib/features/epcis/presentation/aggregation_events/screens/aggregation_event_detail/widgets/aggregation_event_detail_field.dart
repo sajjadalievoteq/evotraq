@@ -28,7 +28,14 @@ class AggregationEventDetailField extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 4),
-          GestureDetector(
+          InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: value == null || value == '—'
+                ? null
+                : () {
+                    Clipboard.setData(ClipboardData(text: value!));
+                    context.showSuccess('Copied to clipboard');
+                  },
             onLongPress: value == null || value == '—'
                 ? null
                 : () {

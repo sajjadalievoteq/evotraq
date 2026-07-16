@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/models/scan_result.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/list/operation_list_error_view.dart';
 import 'package:traqtrace_app/features/product_journey/cubit/journey_cubit.dart';
-import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_empty_state.dart';
+import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_recent_events_section.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_search_bar.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_sidebar_content.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_sidebar_skeleton.dart';
@@ -21,6 +22,7 @@ class JourneyLeftPanel extends StatelessWidget {
     required this.onClearSearch,
     required this.onSuggestionTap,
     required this.onRetry,
+    required this.onRecentEventTap,
     this.onScanResult,
   });
 
@@ -31,6 +33,7 @@ class JourneyLeftPanel extends StatelessWidget {
   final VoidCallback onClearSearch;
   final ValueChanged<ProductSearchResult> onSuggestionTap;
   final VoidCallback onRetry;
+  final ValueChanged<RecentEvent> onRecentEventTap;
   final ValueChanged<ScanResult>? onScanResult;
 
   @override
@@ -66,7 +69,7 @@ class JourneyLeftPanel extends StatelessWidget {
           else if (state.isLoaded && state.journey != null)
             Expanded(
               child: SingleChildScrollView(
-                padding:  EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   context.padding.top,
                   15,
                   context.padding.top,
@@ -75,16 +78,22 @@ class JourneyLeftPanel extends StatelessWidget {
                 child: JourneySidebarContent(journey: state.journey!),
               ),
             )
-          else
+          else if (state.hasError)
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(TraqSpacing.lg),
-                child: state.hasError
-                    ? OperationListErrorView(
-                        errorMessage: state.errorMessage ?? 'Unknown error',
-                        onRetry: onRetry,
-                      )
-                    : const JourneyEmptyState(),
+                child: OperationListErrorView(
+                  errorMessage: state.errorMessage ?? 'Unknown error',
+                  onRetry: onRetry,
+                ),
+              ),
+            )
+          else if (state.searchResults.isEmpty)
+            Expanded(
+              child: JourneyRecentEventsSection(
+                events: state.recentEvents,
+                isLoading: state.recentEventsLoading,
+                onEventTap: onRecentEventTap,
               ),
             ),
         ],

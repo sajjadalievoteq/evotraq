@@ -22,13 +22,8 @@
   static const metricTransformationEvents = 'TRANSFORMATION EVENTS';
   static const metricTotalEvents = 'TOTAL EVENTS';
 
-  static const quickActionGtinTitle = 'GTIN Management';
-  static const quickActionGtinSubtitle = 'GS1 identifiers';
-  static const quickActionGlnTitle = 'GLN Management';
-  static const quickActionSgtinTitle = 'SGTIN Management';
-  static const quickActionSsccTitle = 'SSCC Management';
-  static const quickActionCreateShipment = 'Create Shipment';
-  static const quickActionReceiveShipment = 'Receive Shipment';
+  static const quickActionShipping = 'Shipping';
+  static const quickActionReceiving = 'Receiving';
   static const quickActionReturnShipping = 'Return Shipping';
   static const quickActionReturnReceiving = 'Return Receiving';
   static const quickActionPacking = 'Packing';
@@ -87,7 +82,7 @@
   static String servicesVersion(String versionLabel) => 'Services $versionLabel';
 
   static const relativeJustNow = 'just now';
-  static const relativeUnderOneMin = '< 1 min ago';
+  static String relativeSecondsAgo(int seconds) => '${seconds}s ago';
   static String relativeMinutesAgo(int minutes) => '$minutes min ago';
   static const relativeOneHourAgo = '1 hr ago';
   static String relativeHoursAgo(int hours) => '$hours hrs ago';

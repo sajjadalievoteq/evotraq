@@ -162,7 +162,11 @@ class _EpcRowState extends State<_EpcRow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: GestureDetector(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(4),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
                 onTap: () => setState(() => _expanded = !_expanded),
                 child: SelectableText(
                   display,

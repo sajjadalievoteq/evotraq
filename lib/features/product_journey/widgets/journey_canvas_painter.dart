@@ -8,33 +8,42 @@ class JourneyCanvasPainter extends CustomPainter {
   JourneyCanvasPainter({
     required this.positions,
     required this.color,
-    this.progress = 1.0,
-  }) : _fullPath = _roundedPolylinePath(positions, radius: 24) {
-    // Precompute PathMetrics once — never recalculate inside paint().
-    if (progress < 1.0) {
-      _metrics = _fullPath.computeMetrics().toList();
-      _totalLength = _metrics!.fold(0.0, (sum, m) => sum + m.length);
-    }
-  }
+    required Animation<double> progress,
+    required Path fullPath,
+    required List<PathMetric> metrics,
+    required double totalLength,
+  })  : _progress = progress,
+        _fullPath = fullPath,
+        _metrics = metrics,
+        _totalLength = totalLength,
+        super(repaint: progress);
 
   final List<Offset> positions;
   final Color color;
-  final double progress;
-
+  final Animation<double> _progress;
   final Path _fullPath;
-  List<PathMetric>? _metrics;
-  double _totalLength = 0;
+  final List<PathMetric> _metrics;
+  final double _totalLength;
+
+  double get progress => _progress.value;
+
+  /// Build path + metrics once when pin centres change (not per animation frame).
+  static ({Path path, List<PathMetric> metrics, double totalLength}) prepare(
+    List<Offset> positions,
+  ) {
+    final path = _roundedPolylinePath(positions, radius: 24);
+    final metrics = path.computeMetrics().toList();
+    final totalLength = metrics.fold<double>(0, (sum, m) => sum + m.length);
+    return (path: path, metrics: metrics, totalLength: totalLength);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     if (positions.length < 2) return;
 
-    // When progress is 1.0, skip PathMetrics and draw the full path directly.
-    final drawPath = progress >= 1.0
-        ? _fullPath
-        : _extractSubPath(progress);
+    final p = progress;
+    final drawPath = p >= 1.0 ? _fullPath : _extractSubPath(p);
 
-    // Glow layer
     canvas.drawPath(
       drawPath,
       Paint()
@@ -46,7 +55,6 @@ class JourneyCanvasPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
 
-    // Main line layer
     canvas.drawPath(
       drawPath,
       Paint()
@@ -57,11 +65,10 @@ class JourneyCanvasPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
 
-    // Leading tip dot while the line is still drawing.
-    if (progress < 1.0 && progress > 0.02 && _metrics != null) {
-      final tipLen = (progress * _totalLength).clamp(0.0, _totalLength);
+    if (p < 1.0 && p > 0.02) {
+      final tipLen = (p * _totalLength).clamp(0.0, _totalLength);
       double consumed = 0;
-      for (final metric in _metrics!) {
+      for (final metric in _metrics) {
         if (consumed + metric.length >= tipLen) {
           final tangent = metric.getTangentForOffset(tipLen - consumed);
           if (tangent != null) {
@@ -78,12 +85,11 @@ class JourneyCanvasPainter extends CustomPainter {
     }
   }
 
-  /// Extracts the first [fraction] of the cached path using precomputed metrics.
   Path _extractSubPath(double fraction) {
     final result = Path();
     final tipLen = (_totalLength * fraction).clamp(0.0, _totalLength);
     double consumed = 0;
-    for (final metric in _metrics!) {
+    for (final metric in _metrics) {
       if (consumed >= tipLen) break;
       final end = math.min(metric.length, tipLen - consumed);
       if (end > 0) {
@@ -94,7 +100,10 @@ class JourneyCanvasPainter extends CustomPainter {
     return result;
   }
 
-  static Path _roundedPolylinePath(List<Offset> points, {required double radius}) {
+  static Path _roundedPolylinePath(
+    List<Offset> points, {
+    required double radius,
+  }) {
     final path = Path();
     if (points.isEmpty) return path;
     if (points.length == 1) {
@@ -123,7 +132,8 @@ class JourneyCanvasPainter extends CustomPainter {
 
       final r = math.min(radius, math.min(inLen / 2, outLen / 2));
       final inStop = corner - Offset(inVec.dx / inLen, inVec.dy / inLen) * r;
-      final outStop = corner + Offset(outVec.dx / outLen, outVec.dy / outLen) * r;
+      final outStop =
+          corner + Offset(outVec.dx / outLen, outVec.dy / outLen) * r;
 
       path
         ..lineTo(inStop.dx, inStop.dy)
@@ -138,5 +148,6 @@ class JourneyCanvasPainter extends CustomPainter {
   bool shouldRepaint(JourneyCanvasPainter old) =>
       !listEquals(old.positions, positions) ||
       old.color != color ||
-      old.progress != progress;
+      old._fullPath != _fullPath ||
+      old._progress != _progress;
 }

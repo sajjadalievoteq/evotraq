@@ -36,6 +36,7 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
     this.showPageHeader = true,
     this.showReferenceSection = true,
     this.showLocationSection = true,
+    this.showDestinationGln = true,
     this.showDocumentSection = true,
     this.readOnlyLocations = false,
     this.documentsRequired = false,
@@ -89,6 +90,7 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
   final bool showPageHeader;
   final bool showReferenceSection;
   final bool showLocationSection;
+  final bool showDestinationGln;
   final bool showDocumentSection;
   final bool readOnlyLocations;
   final bool documentsRequired;
@@ -194,13 +196,15 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                       onChanged: onSourceGlnChanged,
                       readOnly: true,
                     ),
-                    const SizedBox(height: 16),
-                    OperationGlnSelector(
-                      label: destinationGlnLabel,
-                      gln: destinationGln,
-                      onChanged: onDestinationGlnChanged,
-                      readOnly: true,
-                    ),
+                    if (showDestinationGln) ...[
+                      const SizedBox(height: 16),
+                      OperationGlnSelector(
+                        label: destinationGlnLabel,
+                        gln: destinationGln,
+                        onChanged: onDestinationGlnChanged,
+                        readOnly: true,
+                      ),
+                    ],
                   ] else ...[
                     OperationGlnSelector(
                       label: sourceGlnLabel,
@@ -209,14 +213,16 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
                       errorText: sourceGlnError,
                       onChanged: onSourceGlnChanged,
                     ),
-                    const SizedBox(height: 16),
-                    OperationGlnSelector(
-                      label: destinationGlnLabel,
-                      hintText: destinationGlnHint,
-                      gln: destinationGln,
-                      errorText: destinationGlnError,
-                      onChanged: onDestinationGlnChanged,
-                    ),
+                    if (showDestinationGln) ...[
+                      const SizedBox(height: 16),
+                      OperationGlnSelector(
+                        label: destinationGlnLabel,
+                        hintText: destinationGlnHint,
+                        gln: destinationGln,
+                        errorText: destinationGlnError,
+                        onChanged: onDestinationGlnChanged,
+                      ),
+                    ],
                   ],
                 ],
               ),

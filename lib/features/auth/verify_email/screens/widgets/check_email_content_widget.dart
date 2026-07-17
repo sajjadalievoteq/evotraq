@@ -5,8 +5,9 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_motion.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
-
 import 'package:traqtrace_app/core/utils/email_provider_launch_utils.dart';
 
 class CheckEmailContentWidget extends StatelessWidget {
@@ -30,24 +31,25 @@ class CheckEmailContentWidget extends StatelessWidget {
     final emailText = email?.trim();
     final inboxDestination = resolveEmailInboxDestination(emailText);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return AuthStaggeredEntrance(
       children: [
-        Container(
-          width: 96,
-          height: 96,
-          decoration: BoxDecoration(
-            color: primary.withOpacity(
-              Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12,
+        AuthIconPop(
+          child: Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: primary.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.12,
+              ),
+              borderRadius: BorderRadius.circular(TraqRadius.lg.x),
             ),
-            borderRadius: BorderRadius.circular(TraqRadius.lg.x),
-          ),
-          child: Center(
-            child: SvgPicture.asset(
-              AppAssets.iconMail,
-              width: 48,
-              height: 48,
-              colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+            child: Center(
+              child: SvgPicture.asset(
+                AppAssets.iconMail,
+                width: 48,
+                height: 48,
+                colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
+              ),
             ),
           ),
         ),
@@ -113,13 +115,17 @@ class CheckEmailContentWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: AuthActionButton(
-            label: 'RESEND EMAIL',
-            onPressed: onResend,
-            isLoading: isResending,
-            isEnabled: onResend != null && !isResending,
+        AnimatedSize(
+          duration: AuthMotion.durationOf(context, AuthMotion.swap),
+          curve: AuthMotion.curve,
+          child: SizedBox(
+            width: double.infinity,
+            child: AuthActionButton(
+              label: 'RESEND EMAIL',
+              onPressed: onResend,
+              isLoading: isResending,
+              isEnabled: onResend != null && !isResending,
+            ),
           ),
         ),
         const SizedBox(height: 12),

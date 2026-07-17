@@ -1,4 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/gln_check_digit_validator.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_pharma_readiness_checker.dart';
 
 class ReturnShippingPharmaReadinessChecker {
@@ -6,25 +7,31 @@ class ReturnShippingPharmaReadinessChecker {
 
   static List<String> findIssues({
     required GLN? sourceGln,
-    required GLN? destinationGln,
     required List<String> epcs,
   }) {
-    return OperationPharmaReadinessChecker.twoGlnIssues(
-      sourceGln: sourceGln,
-      destinationGln: destinationGln,
-      epcs: epcs,
-      sourceLabel: 'Source GLN',
-      destinationLabel: 'Destination GLN',
-      sourceRequiredMessage:
-          'Source (Ship From) GLN is required for GS1 pharma compliance.',
-      destinationRequiredMessage:
-          'Destination (Ship To) GLN is required for GS1 pharma compliance.',
-      sameLocationMessage:
-          'Source and destination GLN are identical. '
-          'A shipment must move between different legal entities or locations.',
-      duplicateEpcsMessage:
-          'Duplicate EPCs detected. Each serialized item or container '
-          'can only appear once in a shipment.',
+    final issues = <String>[];
+    if (sourceGln == null) {
+      issues.add(
+        'Source (Ship From) GLN is required for GS1 pharma compliance.',
+      );
+    } else if (!GlnCheckDigitValidator.isValid(sourceGln.glnCode)) {
+      issues.add(
+        'Source GLN "${sourceGln.glnCode}" has an invalid GS1 check digit.',
+      );
+    }
+    if (epcs.isEmpty) {
+      issues.add(
+        'No EPCs captured. At least one SGTIN or SSCC is required.',
+      );
+    }
+    issues.addAll(
+      OperationPharmaReadinessChecker.epcIssues(
+        epcs,
+        duplicateMessage:
+            'Duplicate EPCs detected. Each serialized item or container '
+            'can only appear once in a shipment.',
+      ),
     );
+    return issues;
   }
 }

@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/build_success_message_widget.dart';
-
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/auth/forgot_password/screens/widgets/forgot_password_form_widget.dart';
@@ -58,35 +58,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BackgroundContainerWidget(
+    return AuthScreenHost(
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.error) {
             context.showError(state.error ?? 'An error occurred');
           }
         },
-        child: AuthResponsiveFormLayout(
-          header: _isSubmitted
-              ? AuthFormHeader.checkEmail
-              : AuthFormHeader.forgotPassword,
-          child: _isSubmitted
-              ? BuildSuccessMessage(
-                  title: 'Check Your Email',
-                  message:
-                      'If an account exists with the email you provided, we have sent password reset instructions.',
-                  buttonLabel: 'BACK TO LOGIN',
-                  onButtonPressed: () {
-                    context.go(Constants.loginRoute);
-                  },
-                )
-              : ForgotPasswordForm(
-                  formKey: _formKey,
-                  emailController: _emailController,
-                  isSubmitting: _isSubmitting,
-                  hasRequiredInput: _hasRequiredInput,
-                  onSubmit: _submitForm,
-                  onFormChanged: _updateButtonState,
-                ),
+        child: AuthStatusSwitcher(
+          statusKey: _isSubmitted ? 'submitted' : 'form',
+          child: AuthResponsiveFormLayout(
+            header: _isSubmitted
+                ? AuthFormHeader.checkEmail
+                : AuthFormHeader.forgotPassword,
+            child: _isSubmitted
+                ? BuildSuccessMessage(
+                    title: 'Check Your Email',
+                    message:
+                        'If an account exists with the email you provided, we have sent password reset instructions.',
+                    buttonLabel: 'BACK TO LOGIN',
+                    onButtonPressed: () {
+                      context.go(Constants.loginRoute);
+                    },
+                  )
+                : ForgotPasswordForm(
+                    formKey: _formKey,
+                    emailController: _emailController,
+                    isSubmitting: _isSubmitting,
+                    hasRequiredInput: _hasRequiredInput,
+                    onSubmit: _submitForm,
+                    onFormChanged: _updateButtonState,
+                  ),
+          ),
         ),
       ),
     );

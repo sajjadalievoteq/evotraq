@@ -6,8 +6,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/signup/screens/widgets/signup_form_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BackgroundContainerWidget(
+    return AuthScreenHost(
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.error) {

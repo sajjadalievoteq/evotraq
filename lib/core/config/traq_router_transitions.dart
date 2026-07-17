@@ -36,4 +36,15 @@ abstract final class TraqRouterTransitions {
       },
     );
   }
+
+  /// No page chrome animation — [AuthShell] owns the form swap transition.
+  static Page<T> authShellPage<T extends Object?>({
+    required LocalKey key,
+    required Widget child,
+  }) {
+    return NoTransitionPage<T>(
+      key: key,
+      child: SelectionArea(child: child),
+    );
+  }
 }

@@ -71,7 +71,8 @@ class ReturnShippingReferenceDetailsStep extends StatelessWidget {
   Widget build(BuildContext context) => ShipmentReferenceDetailsStep(
         pageTitle: 'Return Shipping Details',
         pageSubtitle:
-            'Capture shipping reference, origin, destination, and dispatch details.',
+            'Capture return-from location and dispatch details. '
+            'Goods are returned to the original shipper automatically.',
         operationLabel: 'Return Shipping',
         referenceSectionTitle: 'Return Shipping Reference',
         eventTimeLabel: 'Event Date & Time',
@@ -92,6 +93,7 @@ class ReturnShippingReferenceDetailsStep extends StatelessWidget {
         showPageHeader: showPageHeader,
         showReferenceSection: showReferenceSection,
         showLocationSection: showLocationSection,
+        showDestinationGln: false,
         showDocumentSection: showDocumentSection,
         readOnlyLocations: readOnlyLocations,
         returnAuthorizationController: returnAuthorizationController,

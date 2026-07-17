@@ -55,6 +55,11 @@ class TraqTheme {
         outline: c.borderVariant,
         outlineVariant: c.border,
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        selectionColor: c.textMuted.withValues(alpha: 0.30),
+        cursorColor: c.primary,
+        selectionHandleColor: c.primary,
+      ),
       appBarTheme: TraqThemeAppBar.appBarTheme(c, text),
       inputDecorationTheme: TraqThemeInputs.inputDecoration(c, text),
       filledButtonTheme: TraqThemeButtons.filled(c, text, onPrimaryInk),

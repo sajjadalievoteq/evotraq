@@ -375,6 +375,7 @@ class GlnDetailFormBody extends StatelessWidget {
                 CustomButtonWidget(
                   onTap: onSubmit,
                   title: GlnUiConstants.detailSaveButton,
+                  height: 50,
                 ),
               const SizedBox(height: 32),
             ],

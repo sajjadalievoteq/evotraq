@@ -397,6 +397,7 @@ class SsccDetailFormBody extends StatelessWidget {
                   CustomButtonWidget(
                     onTap: onSave,
                     title: SsccUiConstants.detailSaveButton,
+                    height: 50,
                   ),
                   const SizedBox(height: 32),
                 ],
@@ -405,6 +406,7 @@ class SsccDetailFormBody extends StatelessWidget {
                   CustomButtonWidget(
                     onTap: onSave,
                     title: SsccUiConstants.detailSaveButton,
+                    height: 50,
                   ),
                 const SizedBox(height: 32),
               ],

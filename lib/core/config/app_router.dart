@@ -60,9 +60,11 @@ import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_serializ
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/shipping_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving/receiving_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/receiving_operation_detail_screen.dart';
+import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping/return_shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/return_shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
@@ -116,6 +118,7 @@ import 'package:traqtrace_app/features/auth/signup/screens/signup_screen.dart';
 import 'package:traqtrace_app/features/auth/reset_password/screens/reset_password_screen.dart';
 import 'package:traqtrace_app/features/splash/presentation/splash_screen.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/verify_email_screen.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_shell.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -217,78 +220,84 @@ class AppRouter {
           child: const SplashScreen(),
         ),
       ),
-      GoRoute(
-        path: Constants.loginRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const LoginScreen(),
-        ),
-      ),
-      GoRoute(
-        path: Constants.registerRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const RegisterScreen(),
-        ),
-      ),
-      GoRoute(
-        path: Constants.checkEmailRoute,
-        pageBuilder: (context, state) {
-          final email = state.uri.queryParameters['email'];
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: CheckEmailScreen(email: email),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.forgotPasswordRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ForgotPasswordScreen(),
-        ),
-      ),
-      GoRoute(
-        path: Constants.resetPasswordRoute,
-        pageBuilder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: ResetPasswordScreen(token: token),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.authResetPasswordRoute,
-        pageBuilder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: ResetPasswordScreen(token: token),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.verifyEmailRoute,
-        pageBuilder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          final email = state.uri.queryParameters['email'];
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: VerifyEmailScreen(token: token, email: email),
-          );
-        },
-      ),
-      GoRoute(
-        path: Constants.verifyEmailAliasRoute,
-        pageBuilder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          final email = state.uri.queryParameters['email'];
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: VerifyEmailScreen(token: token, email: email),
-          );
-        },
+      // Persistent left branding + animated right-panel form swaps.
+      ShellRoute(
+        builder: (context, state, child) => AuthShell(child: child),
+        routes: [
+          GoRoute(
+            path: Constants.loginRoute,
+            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
+              key: state.pageKey,
+              child: const LoginScreen(),
+            ),
+          ),
+          GoRoute(
+            path: Constants.registerRoute,
+            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
+              key: state.pageKey,
+              child: const RegisterScreen(),
+            ),
+          ),
+          GoRoute(
+            path: Constants.checkEmailRoute,
+            pageBuilder: (context, state) {
+              final email = state.uri.queryParameters['email'];
+              return TraqRouterTransitions.authShellPage(
+                key: state.pageKey,
+                child: CheckEmailScreen(email: email),
+              );
+            },
+          ),
+          GoRoute(
+            path: Constants.forgotPasswordRoute,
+            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
+              key: state.pageKey,
+              child: const ForgotPasswordScreen(),
+            ),
+          ),
+          GoRoute(
+            path: Constants.resetPasswordRoute,
+            pageBuilder: (context, state) {
+              final token = state.uri.queryParameters['token'] ?? '';
+              return TraqRouterTransitions.authShellPage(
+                key: state.pageKey,
+                child: ResetPasswordScreen(token: token),
+              );
+            },
+          ),
+          GoRoute(
+            path: Constants.authResetPasswordRoute,
+            pageBuilder: (context, state) {
+              final token = state.uri.queryParameters['token'] ?? '';
+              return TraqRouterTransitions.authShellPage(
+                key: state.pageKey,
+                child: ResetPasswordScreen(token: token),
+              );
+            },
+          ),
+          GoRoute(
+            path: Constants.verifyEmailRoute,
+            pageBuilder: (context, state) {
+              final token = state.uri.queryParameters['token'] ?? '';
+              final email = state.uri.queryParameters['email'];
+              return TraqRouterTransitions.authShellPage(
+                key: state.pageKey,
+                child: VerifyEmailScreen(token: token, email: email),
+              );
+            },
+          ),
+          GoRoute(
+            path: Constants.verifyEmailAliasRoute,
+            pageBuilder: (context, state) {
+              final token = state.uri.queryParameters['token'] ?? '';
+              final email = state.uri.queryParameters['email'];
+              return TraqRouterTransitions.authShellPage(
+                key: state.pageKey,
+                child: VerifyEmailScreen(token: token, email: email),
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: Constants.homeRoute,
@@ -327,6 +336,20 @@ class AppRouter {
             child: JourneyDashboardScreen(initialEpc: epc),
           );
         },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: Constants.inboxOutboxRoute,
+        pageBuilder: (context, state) => TraqRouterTransitions.page(
+          key: state.pageKey,
+          child: const InboxOutboxScreen(),
+        ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
           if (!isAuthenticated) {
@@ -1686,7 +1709,6 @@ class AppRouter {
           return null;
         },
       ),
-
       GoRoute(
         path: Constants.opReceivingRoute,
         pageBuilder: (context, state) => TraqRouterTransitions.page(

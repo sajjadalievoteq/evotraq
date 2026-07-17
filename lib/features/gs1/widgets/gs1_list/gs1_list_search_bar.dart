@@ -17,6 +17,7 @@ class Gs1ListSearchBar extends StatelessWidget {
     required this.onQueryChanged,
     required this.onToggleAdvancedFilters,
     required this.onClear,
+    this.showAdvancedFilterIcon = true,
     this.onRefresh,
     this.onQuickFilters,
     this.sortTooltip,
@@ -35,6 +36,7 @@ class Gs1ListSearchBar extends StatelessWidget {
   final ValueChanged<String> onQueryChanged;
   final VoidCallback onToggleAdvancedFilters;
   final VoidCallback onClear;
+  final bool showAdvancedFilterIcon;
   final VoidCallback? onRefresh;
   final VoidCallback? onQuickFilters;
   final String? sortTooltip;
@@ -119,18 +121,19 @@ class Gs1ListSearchBar extends StatelessWidget {
                                   color: fieldIconColor,
                                   tooltip: 'Clear',
                                 ),
-                              IconButton(
-                                onPressed: onToggleAdvancedFilters,
-                                iconSize: _fieldIconSize,
-                                icon: TraqIcon(
-                                  NavIcons.advancedQuery,
-                                  size: _fieldIconSize,
+                              if (showAdvancedFilterIcon)
+                                IconButton(
+                                  onPressed: onToggleAdvancedFilters,
+                                  iconSize: _fieldIconSize,
+                                  icon: TraqIcon(
+                                    NavIcons.advancedQuery,
+                                    size: _fieldIconSize,
+                                  ),
+                                  color: fieldIconColor,
+                                  tooltip: showAdvancedFilters
+                                      ? 'Hide Advanced Filters'
+                                      : 'Advanced Filters',
                                 ),
-                                color: fieldIconColor,
-                                tooltip: showAdvancedFilters
-                                    ? 'Hide Advanced Filters'
-                                    : 'Advanced Filters',
-                              ),
                             ],
                           ),
                           border: OutlineInputBorder(

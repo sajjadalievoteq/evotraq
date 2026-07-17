@@ -100,6 +100,7 @@ class AppAssets {
   static const String iconHourglass = '$_traqIcons/hourglass.svg';
   static const String iconHub = '$_traqIcons/hub.svg';
   static const String iconInbox = '$_traqIcons/inbox.svg';
+  static const String iconInboxOutbox = '$_traqIcons/inbox-outbox.svg';
   static const String iconInvoice = '$_traqIcons/invoice.svg';
   static const String iconKey = '$_traqIcons/key.svg';
   static const String iconKeyboard = '$_traqIcons/keyboard.svg';

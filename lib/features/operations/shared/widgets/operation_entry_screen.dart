@@ -17,6 +17,7 @@ class OperationEntryScreen extends StatefulWidget {
     required this.detailViewBuilder,
     required this.detailAwaitBuilder,
     this.fallbackList,
+    this.showFloatingActionButton = true,
   });
 
   final String appBarTitle;
@@ -38,6 +39,7 @@ class OperationEntryScreen extends StatefulWidget {
   final Widget Function(BuildContext context, {required bool listLoading})
       detailAwaitBuilder;
   final Widget? fallbackList;
+  final bool showFloatingActionButton;
 
   @override
   State<OperationEntryScreen> createState() => _OperationEntryScreenState();
@@ -82,6 +84,7 @@ class _OperationEntryScreenState extends State<OperationEntryScreen> {
           listBuilder: widget.listBuilder,
           detailViewBuilder: widget.detailViewBuilder,
           detailAwaitBuilder: widget.detailAwaitBuilder,
+          showFloatingActionButton: widget.showFloatingActionButton,
         ),
         fallback: widget.fallbackList ??
             widget.listBuilder(

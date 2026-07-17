@@ -52,6 +52,7 @@ abstract final class NavIcons {
   static const String dashboard = AppAssets.iconDashboard;
   static const String profile = AppAssets.iconUser;
   static const String productJourney = AppAssets.iconProductJourney;
+  static const String inboxOutbox = AppAssets.iconInboxOutbox;
 
   // --- Master data / serialization ---
   static const String masterData = AppAssets.iconDataset;
@@ -80,6 +81,8 @@ abstract final class NavIcons {
   static const String logistics = AppAssets.iconTruck;
   static const String shippings = AppAssets.iconShipment;
   static const String receivings = AppAssets.iconReceivingInbound;
+  static const String inbox = AppAssets.iconReceivingInbound;
+  static const String outbox = AppAssets.iconShipment;
 
   static const String commissioning = AppAssets.iconPrecisionManufacturing;
   static const String packing = AppAssets.iconPackingSealed;

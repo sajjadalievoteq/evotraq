@@ -297,7 +297,8 @@ class SSCC {
       childCount: json['childCount'] as int?,
       totalLeafCount: json['totalLeafCount'] as int?,
       shipFromGln: json['shipFromGLN'] as String?,
-      shipToGln: json['shipToGLN'] as String?,
+      shipToGln: (json['shipToGLN'] as String?) ??
+          (json['inTransitDestinationGln'] as String?),
       billToGln: json['billToGLN'] as String?,
       shipForGln: json['shipForGLN'] as String?,
       currentLocationGln: json['currentLocationGLN'] as String?,

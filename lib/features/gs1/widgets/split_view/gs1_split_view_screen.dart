@@ -31,6 +31,7 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
     required this.detailAwaitBuilder,
     this.fabNavigateRoute,
     this.isListLoading,
+    this.showFloatingActionButton = true,
   }) : assert(
           fabNavigateRoute != null || detailCreateBuilder != null,
           'detailCreateBuilder is required when fabNavigateRoute is not set',
@@ -74,6 +75,7 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   /// Optional: when provided, drives [detailAwaitBuilder]'s `listLoading` and
   /// shows the await pane (skeleton) while the list is loading.
   final bool Function(TState state)? isListLoading;
+  final bool showFloatingActionButton;
 
   @override
   State<Gs1SplitViewScreen<TCubit, TState>> createState() =>
@@ -128,17 +130,21 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
     return Scaffold(
       appBar: TraqAppBar(context, title: Text(widget.appBarTitle)),
       drawer: const AppDrawer(),
-      floatingActionButton: FloatingActionButton(
-        heroTag: widget.fabHeroTag,
-        onPressed: _onFabPressed,
-        tooltip: _useEmbeddedCreate && _isCreateMode
-            ? widget.fabCloseTooltip
-            : widget.fabAddTooltip,
-        child: TraqIcon(
-          _useEmbeddedCreate && _isCreateMode ? AppAssets.iconX : AppAssets.iconPlus,
-          color: Colors.white,
-        ),
-      ),
+      floatingActionButton: widget.showFloatingActionButton
+          ? FloatingActionButton(
+              heroTag: widget.fabHeroTag,
+              onPressed: _onFabPressed,
+              tooltip: _useEmbeddedCreate && _isCreateMode
+                  ? widget.fabCloseTooltip
+                  : widget.fabAddTooltip,
+              child: TraqIcon(
+                _useEmbeddedCreate && _isCreateMode
+                    ? AppAssets.iconX
+                    : AppAssets.iconPlus,
+                color: Colors.white,
+              ),
+            )
+          : null,
       body: BlocListener<TCubit, TState>(
         listenWhen: widget.listenWhenListChanged,
         listener: (context, state) {

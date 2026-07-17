@@ -51,6 +51,7 @@ import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/inbox_outbox/inbox_outbox_service.dart';
 import 'package:traqtrace_app/data/services/operations/update_status/update_status_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
@@ -175,6 +176,9 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<ShippingOperationService>(
     () => ShippingOperationService(dioService: getIt<DioService>()),
+  );
+  getIt.registerLazySingleton<InboxOutboxService>(
+    () => InboxOutboxService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<ReceivingOperationService>(

@@ -29,6 +29,7 @@ class Constants {
   static const String profileRoute = '/profile';
 
   static const String journeyDashboardRoute = '/dashboards/journey';
+  static const String inboxOutboxRoute = '/dashboards/inbox-outbox';
 
   static const String adminUsersRoute = '/admin/users';
   static const String adminApprovalsRoute = '/admin/approvals';

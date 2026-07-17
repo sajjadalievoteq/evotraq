@@ -68,10 +68,9 @@ class ShippingResponse {
           _readNonEmptyString(json['id']) ??
           _readNonEmptyString(metadata?['shippingOperationId']) ??
           _readNonEmptyString(metadata?['shipping_operation_id']) ??
-          _firstNonEmptyString(eventIds) ??
-          _readNonEmptyString(metadata?['event_id']) ??
-          _readNonEmptyString(metadata?['eventId']),
-      shippingReference: _readNonEmptyString(json['shippingReference']),
+          _readNonEmptyString(metadata?['return_shipping_operation_id']),
+      shippingReference: _readNonEmptyString(json['shippingReference']) ??
+          _readNonEmptyString(json['returnReference']),
       eventIds: eventIds,
       shippedEpcsCount: (json['shippedEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
@@ -122,9 +121,9 @@ class ShippingResponse {
   String? get navigableOperationId {
     final id = _readNonEmptyString(shippingOperationId);
     if (id != null) return id;
-    final eventId = _firstNonEmptyString(eventIds);
-    if (eventId != null) return eventId;
-    return _readNonEmptyString(metadata?['event_id']) ??
+    // Event id is a last-resort key; shipping GET resolves eventId and operation ids.
+    return _firstNonEmptyString(eventIds) ??
+        _readNonEmptyString(metadata?['event_id']) ??
         _readNonEmptyString(metadata?['eventId']);
   }
 

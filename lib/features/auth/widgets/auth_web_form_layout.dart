@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_surface_card.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
 import 'package:traqtrace_app/features/auth/widgets/branding_widget.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 
 class AuthWebFormLayout extends StatelessWidget {
@@ -26,11 +26,6 @@ class AuthWebFormLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final t = context.text;
-
-    Widget buildSurface(Widget content) {
-      return wrapInCard ? AuthSurfaceCard(child: content) : content;
-    }
 
     return SizedBox(
       width: layout.width,
@@ -58,7 +53,6 @@ class AuthWebFormLayout extends StatelessWidget {
                   Positioned.fill(
                     child: Container(color: Colors.black.withOpacity(0.2)),
                   ),
-
                   Padding(
                     padding: context.padding,
                     child: Align(
@@ -99,39 +93,11 @@ class AuthWebFormLayout extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    header.eyebrow,
-                                    style: t.body.copyWith(
-                                      color: c.textMuted,
-                                      fontSize: 12,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    header.title,
-                                    style: t.body.copyWith(
-                                      color: c.textPrimary,
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    header.subtitle,
-                                    style: t.body.copyWith(
-                                      color: c.textMuted,
-                                      fontSize: 12,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ],
+                              AuthFormPanel(
+                                header: header,
+                                wrapInCard: wrapInCard,
+                                child: child,
                               ),
-                              const SizedBox(height: 40),
-                              buildSurface(child),
                             ],
                           ),
                         ),

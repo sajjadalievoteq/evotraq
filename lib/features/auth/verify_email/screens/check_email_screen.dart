@@ -5,7 +5,8 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/widgets/check_email_content_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class CheckEmailScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BackgroundContainerWidget(
+    return AuthScreenHost(
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (!_isResendInFlight) {
@@ -68,13 +69,16 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
 
           return AuthResponsiveFormLayout(
             header: AuthFormHeader.checkEmail,
-            child: CheckEmailContentWidget(
-              email: resolvedEmail,
-              isResending:
-                  _isResendInFlight && state.status == AuthStatus.loading,
-              onResend: resolvedEmail == null
-                  ? null
-                  : () => _handleResend(resolvedEmail),
+            child: AuthStatusSwitcher(
+              statusKey: 'check-email',
+              child: CheckEmailContentWidget(
+                email: resolvedEmail,
+                isResending:
+                    _isResendInFlight && state.status == AuthStatus.loading,
+                onResend: resolvedEmail == null
+                    ? null
+                    : () => _handleResend(resolvedEmail),
+              ),
             ),
           );
         },

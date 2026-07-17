@@ -111,10 +111,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
   }
 
   bool _validateStep0Silent() =>
-      _sourceGln != null &&
-      _destinationGln != null &&
-      _sourceGln?.glnCode != _destinationGln?.glnCode &&
-      (!_isPrefilled || _selectedReturnReason != null);
+      _sourceGln != null && _selectedReturnReason != null;
 
   ReturnShippingReferenceDetailsStep _referenceDetailsStep({
     bool embeddedInPanel = false,
@@ -149,7 +146,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       showLocationSection: showLocationSection,
       showDocumentSection: _isPrefilled ? false : showDocumentSection,
       readOnlyLocations: _isPrefilled,
-      showReturnReasonField: _isPrefilled,
+      showReturnReasonField: true,
       selectedReturnReason: _selectedReturnReason,
       onReturnReasonChanged: (reason) =>
           setState(() => _selectedReturnReason = reason),
@@ -251,19 +248,12 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       case 0:
         final referenceError = ReturnShippingOperationStepValidator.validateReferenceStep(
           sourceGln: _sourceGln,
-          destinationGln: _destinationGln,
         );
         if (referenceError != null) {
-          if (referenceError.contains('Ship From')) {
-            setState(() => _sourceGlnError = referenceError);
-          } else if (referenceError.contains('Ship To')) {
-            setState(() => _destinationGlnError = referenceError);
-          } else {
-            context.showError(referenceError);
-          }
+          setState(() => _sourceGlnError = referenceError);
           return false;
         }
-        if (_isPrefilled && _selectedReturnReason == null) {
+        if (_selectedReturnReason == null) {
           context.showError(
             'Select a reason for return before continuing.',
           );
@@ -309,7 +299,6 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
 
       final pharmaIssues = ReturnShippingPharmaReadinessChecker.findIssues(
         sourceGln: _sourceGln,
-        destinationGln: _destinationGln,
         epcs: epcUris,
       );
       if (pharmaIssues.isNotEmpty && mounted) {
@@ -326,9 +315,11 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
       final shippingRequest = ReturnShippingRequest(
         epcs: epcUris,
         sourceGLN: _sourceGln!.glnCode,
-        destinationGLN: _destinationGln!.glnCode,
+        destinationGLN: _destinationGln?.glnCode,
         sourceLocation: OperationGlnDisplay.fromGln(_sourceGln),
-        destinationLocation: OperationGlnDisplay.fromGln(_destinationGln),
+        destinationLocation: _destinationGln != null
+            ? OperationGlnDisplay.fromGln(_destinationGln)
+            : null,
         returnAuthorizationNumber:
             _returnAuthorizationController.text.trim().isNotEmpty
                 ? _returnAuthorizationController.text.trim()
@@ -354,11 +345,9 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
         eventTime: _eventTime,
         sourceEventId: _pharmaContext?.sourceEventId,
         returnReason: _selectedReturnReason?.code,
-        actingGln: _isPrefilled
-            ? await OperationalGlnStore.getGln(
-                context.read<AuthCubit>().state.user?.id ?? 0,
-              )
-            : null,
+        actingGln: await OperationalGlnStore.getGln(
+          context.read<AuthCubit>().state.user?.id ?? 0,
+        ),
       );
 
       final response = await shippingService.createReturnShippingOperation(shippingRequest);

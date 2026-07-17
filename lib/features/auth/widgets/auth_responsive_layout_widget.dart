@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_mobile_form_layout.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_shell_scope.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_web_form_layout.dart';
 
 class AuthResponsiveFormLayout extends StatelessWidget {
@@ -26,6 +28,20 @@ class AuthResponsiveFormLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Inside AuthShell the left branding is persistent — only render the form.
+    if (AuthShellScope.isActive(context)) {
+      return AppLayoutBuilder(
+        builder: (context, layout) {
+          return AuthFormPanel(
+            header: header,
+            wrapInCard: wrapInCard,
+            compactHeader: !layout.isLarge,
+            child: child,
+          );
+        },
+      );
+    }
+
     return AppLayoutBuilder(
       builder: (context, layout) {
         if (layout.isLarge) {

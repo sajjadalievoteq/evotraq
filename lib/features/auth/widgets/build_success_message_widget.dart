@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 
 class BuildSuccessMessage extends StatelessWidget {
   final String title;
@@ -24,21 +25,18 @@ class BuildSuccessMessage extends StatelessWidget {
     final primary = c.primary;
     final textSecondary = c.textSecondary;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
+    return AuthStaggeredEntrance(
       children: [
         const SizedBox(height: 40),
-
-        SvgPicture.asset(
-          AppAssets.iconCheck,
-          width: 100,
-          height: 100,
-          colorFilter: ColorFilter.mode(c.success, BlendMode.srcIn),
+        AuthIconPop(
+          child: SvgPicture.asset(
+            AppAssets.iconCheck,
+            width: 100,
+            height: 100,
+            colorFilter: ColorFilter.mode(c.success, BlendMode.srcIn),
+          ),
         ),
-
         const SizedBox(height: 32),
-
         Text(
           title,
           style: TextStyle(
@@ -48,17 +46,13 @@ class BuildSuccessMessage extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-
         const SizedBox(height: 16),
-
         Text(
           message,
           style: TextStyle(fontSize: 16, color: textSecondary),
           textAlign: TextAlign.center,
         ),
-
         const SizedBox(height: 40),
-
         AuthActionButton(label: buttonLabel, onPressed: onButtonPressed),
       ],
     );

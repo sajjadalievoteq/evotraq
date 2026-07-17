@@ -234,7 +234,12 @@ class _AppDrawerState extends State<AppDrawer> {
                       onTap: () =>
                           _navigate(Constants.journeyDashboardRoute),
                     ),
-
+                    ListTile(
+                      leading: _svgLeading(NavIcons.inboxOutbox),
+                      title: const Text('Inbox / Outbox'),
+                      subtitle: const Text('In-transit shipments'),
+                      onTap: () => _navigate(Constants.inboxOutboxRoute),
+                    ),
                     const Divider(),
                     const Padding(
                       padding:
@@ -891,6 +896,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         iconAsset: NavIcons.logout,
                       ),
                     ),
+                    SizedBox(height: 16,)
                   ],
                 ),
               ),

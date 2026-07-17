@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/widgets/verify_email_content_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
-import 'package:traqtrace_app/core/widgets/background_container_widget.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   final String token;
@@ -42,7 +42,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BackgroundContainerWidget(
+    return AuthScreenHost(
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.emailVerified) {

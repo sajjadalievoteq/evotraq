@@ -244,13 +244,13 @@ class SgtinDetailFormBody extends StatelessWidget {
                 if (isEditing || isCreating) ...[
                   const SizedBox(height: 24),
                   SizedBox(
-                    height: 50,
                     width: double.infinity,
                     child: CustomButtonWidget(
                       title: isCreating
                           ? SgtinUiConstants.submitCreateSgtin
                           : SgtinUiConstants.submitUpdateSgtin,
                       onTap: isLocalLoading ? null : onSubmit,
+                      height: 50,
                     ),
                   ),
                 ],

@@ -56,11 +56,15 @@ class ReturnShippingReviewStep extends StatelessWidget {
                   'Auto-generated on submit',
                 ),
                 const SizedBox(height: 12),
-                OperationReviewGlnTransfer(
-                  sourceLabel: 'Ship From',
-                  sourceGln: sourceGln,
-                  destinationLabel: 'Ship To',
-                  destinationGln: destinationGln,
+                OperationReviewInfoRow(
+                  'Return From',
+                  sourceGln?.glnCode ?? '-',
+                ),
+                const SizedBox(height: 12),
+                OperationReviewInfoRow(
+                  'Return To',
+                  destinationGln?.glnCode ??
+                      'Original shipper (set automatically)',
                 ),
                 OperationReviewOptionalFields([
                   OperationReviewField(

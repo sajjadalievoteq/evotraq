@@ -6,7 +6,7 @@ class ReturnShippingRequest {
     this.returnReference,
     required this.epcs,
     required this.sourceGLN,
-    required this.destinationGLN,
+    this.destinationGLN,
     this.sourceLocation,
     this.destinationLocation,
     this.purchaseOrderNumber,
@@ -27,7 +27,7 @@ class ReturnShippingRequest {
   String? returnReference;
   List<String> epcs;
   String sourceGLN;
-  String destinationGLN;
+  String? destinationGLN;
   OperationGlnDisplay? sourceLocation;
   OperationGlnDisplay? destinationLocation;
   String? purchaseOrderNumber;
@@ -51,7 +51,8 @@ class ReturnShippingRequest {
         'returnReference': returnReference,
       'epcs': epcs,
       'sourceGLN': sourceGLN,
-      'destinationGLN': destinationGLN,
+      if (destinationGLN != null && destinationGLN!.isNotEmpty)
+        'destinationGLN': destinationGLN,
       if (sourceLocation != null) 'sourceLocation': sourceLocation!.toJson(),
       if (destinationLocation != null)
         'destinationLocation': destinationLocation!.toJson(),
@@ -79,7 +80,7 @@ class ReturnShippingRequest {
           .map((e) => e.toString())
           .toList(),
       sourceGLN: (json['sourceGLN'] ?? '').toString(),
-      destinationGLN: (json['destinationGLN'] ?? '').toString(),
+      destinationGLN: json['destinationGLN']?.toString(),
       purchaseOrderNumber: json['purchaseOrderNumber']?.toString(),
       despatchAdviceNumber: json['despatchAdviceNumber']?.toString(),
       billOfLadingNumber: json['billOfLadingNumber']?.toString(),

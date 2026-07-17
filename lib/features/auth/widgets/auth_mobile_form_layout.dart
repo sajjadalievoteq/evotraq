@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_surface_card.dart';
+import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
 import 'package:traqtrace_app/features/auth/widgets/branding_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
@@ -30,72 +30,42 @@ class AuthMobileFormLayout extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
 
-    Widget buildSurface(Widget content) {
-      return wrapInCard ? AuthSurfaceCard(child: content) : content;
-    }
-
     return CardWithBackgroundWidget(
       isPrimary: false,
       child: SizedBox(
-        height:MediaQuery.sizeOf(context).height,
+        height: MediaQuery.sizeOf(context).height,
         child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: smallMaxWidth),
             child: Padding(
-              padding:EdgeInsetsGeometry.fromLTRB( context.padding.bottom, 0,  context.padding.bottom,  context.padding.bottom),
+              padding: EdgeInsets.fromLTRB(
+                context.padding.bottom,
+                0,
+                context.padding.bottom,
+                context.padding.bottom,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-
-
+                  if (showBrandingOnSmall)
                     AuthBrandingSection(
                       layout: layout,
                       primary: c.primary,
                       textSecondary: c.textMuted,
                     ),
-
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        header.eyebrow,
-                        style: t.body.copyWith(
-                          color: c.textMuted,
-                          fontSize: 13,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        header.title,
-                        style: t.body.copyWith(
-                          color: c.textPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        header.subtitle,
-                        style: t.body.copyWith(
-                          color: c.textMuted,
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                      const SizedBox(height: 20),
-                      buildSurface(child),
-                      const SizedBox(height: 20),
-                    ],
+                  AuthFormPanel(
+                    header: header,
+                    wrapInCard: wrapInCard,
+                    compactHeader: true,
+                    child: child,
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
                           'GS1 EPCIS 2.0',
@@ -117,9 +87,7 @@ class AuthMobileFormLayout extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
-
-
+                  ),
                 ],
               ),
             ),

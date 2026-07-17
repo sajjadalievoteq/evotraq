@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
-
+import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 
 class ResetPasswordInvalidTokenWidget extends StatelessWidget {
@@ -20,14 +20,15 @@ class ResetPasswordInvalidTokenWidget extends StatelessWidget {
 
     return AuthResponsiveFormLayout(
       header: AuthFormHeader.invalidResetLink,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: AuthStaggeredEntrance(
         children: [
-          SvgPicture.asset(
-            AppAssets.iconAlert,
-            width: 80,
-            height: 80,
-            colorFilter: ColorFilter.mode(c.error, BlendMode.srcIn),
+          AuthIconPop(
+            child: SvgPicture.asset(
+              AppAssets.iconAlert,
+              width: 80,
+              height: 80,
+              colorFilter: ColorFilter.mode(c.error, BlendMode.srcIn),
+            ),
           ),
           const SizedBox(height: 24),
           Text(

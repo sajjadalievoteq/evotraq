@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
+import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
@@ -93,6 +94,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       _preloadGlnPickerCatalog();
+      _startCbvVocabulary();
     } on TimeoutException {
       await _forceUnauthenticated();
     } catch (e) {
@@ -120,6 +122,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       _preloadGlnPickerCatalog();
+      _startCbvVocabulary();
     } on TimeoutException {
       emit(
         state.copyWith(
@@ -207,6 +210,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       _preloadGlnPickerCatalog();
+      _startCbvVocabulary();
     } catch (e) {
       await _forceUnauthenticated();
     }
@@ -412,11 +416,22 @@ class AuthCubit extends Cubit<AuthState> {
   void _clearSessionCaches() {
     _clearHomeOverviewSession();
     _clearGlnPickerCatalog();
+    _resetCbvVocabulary();
   }
 
   void _preloadGlnPickerCatalog() {
     if (!getIt.isRegistered<GlnPickerCatalog>()) return;
     // Fire-and-forget: pickers read from cache once this completes.
     getIt<GlnPickerCatalog>().preload();
+  }
+
+  void _startCbvVocabulary() {
+    if (!getIt.isRegistered<CbvVocabularyService>()) return;
+    unawaited(getIt<CbvVocabularyService>().start());
+  }
+
+  void _resetCbvVocabulary() {
+    if (!getIt.isRegistered<CbvVocabularyService>()) return;
+    getIt<CbvVocabularyService>().reset();
   }
 }

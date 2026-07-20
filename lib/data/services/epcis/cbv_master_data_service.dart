@@ -26,6 +26,14 @@ class CbvMasterDataService {
       return _enabledOnlyCache!;
     }
 
+    final token = await _dioService.getAuthToken();
+    if (token == null || token.isEmpty) {
+      throw ApiException(
+        statusCode: 401,
+        message: 'Authentication required for CBV vocabulary',
+      );
+    }
+
     final url = '$_base${CbvMasterDataApiConsts.vocabulary}';
     final response = await _dioService.get(
       url,
@@ -33,6 +41,14 @@ class CbvMasterDataService {
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Authentication required for CBV vocabulary',
+        responseBody: response.data is String ? response.data as String? : null,
+      );
+    }
 
     if (response.statusCode != 200) {
       throw ApiException(

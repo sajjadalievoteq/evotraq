@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class AuthActionButton extends StatelessWidget {
@@ -22,6 +24,11 @@ class AuthActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final reduce = TraqAnimationManager.reduceMotion(context);
+    final duration = TraqAnimationManager.durationOf(
+      context,
+      TraqAnimationConstants.fastDuration,
+    );
 
     final loadingChild = SizedBox(
       width: 20,
@@ -34,20 +41,45 @@ class AuthActionButton extends StatelessWidget {
       style: TextStyle(fontSize: fontSize, color: Colors.white),
     );
 
+    final button = isLoading
+        ? FilledButton(onPressed: null, child: loadingChild)
+        : (isEnabled
+              ? FilledButton(onPressed: onPressed, child: labelChild)
+              : OutlinedButton(
+                  onPressed: null,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: colors.primary.withOpacity(0.55)),
+                    foregroundColor: colors.primary.withOpacity(0.75),
+                  ),
+                  child: Text(label, style: TextStyle(fontSize: fontSize)),
+                ));
+
     return SizedBox(
+      width: double.infinity,
       height: height,
-      child: isLoading
-          ? FilledButton(onPressed: null, child: loadingChild)
-          : (isEnabled
-                ? FilledButton(onPressed: onPressed, child: labelChild)
-                : OutlinedButton(
-                    onPressed: null,
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: colors.primary.withOpacity(0.55)),
-                      foregroundColor: colors.primary.withOpacity(0.75),
-                    ),
-                    child: Text(label, style: TextStyle(fontSize: fontSize)),
-                  )),
+      child: AnimatedSwitcher(
+        duration: duration,
+        switchInCurve: TraqAnimationConstants.curve,
+        switchOutCurve: TraqAnimationConstants.reverseCurve,
+        transitionBuilder: (child, animation) {
+          if (reduce) return child;
+          return TraqAnimationManager.fadeScaleTransition(
+            child,
+            animation,
+            beginScale: TraqAnimationConstants.buttonInitialScale,
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey<String>(
+            isLoading
+                ? 'loading'
+                : (isEnabled ? 'enabled' : 'disabled'),
+          ),
+          child: SizedBox(
+              height: 40,
+              width: double.infinity, child: button),
+        ),
+      ),
     );
   }
 }

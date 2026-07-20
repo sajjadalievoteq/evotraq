@@ -6,6 +6,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_input_field.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 
 import 'package:traqtrace_app/core/config/constants.dart';
 
@@ -37,74 +38,73 @@ class ForgotPasswordForm extends StatelessWidget {
     return Form(
       key: formKey,
       onChanged: onFormChanged,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: TraqStaggeredEntrance(
         children: [
-          const SizedBox(height: 24),
-
-          SvgPicture.asset(
-            AppAssets.iconLock,
-            width: 80,
-            height: 80,
-            colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
-          ),
-
-          const SizedBox(height: 24),
-
-          Text(
-            'Reset Your Password',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: primary,
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: SvgPicture.asset(
+              AppAssets.iconLock,
+              width: 80,
+              height: 80,
+              colorFilter: ColorFilter.mode(primary, BlendMode.srcIn),
             ),
-            textAlign: TextAlign.center,
           ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            'Enter your email address and we will send you instructions to reset your password.',
-            style: TextStyle(fontSize: 16, color: textSecondary),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 32),
-
-          AuthInputField(
-            controller: emailController,
-            labelText: 'Email',
-            type: AuthInputFieldType.email,
-            enabled: !isSubmitting,
-            onFieldSubmitted: (_) => onSubmit(),
-          ),
-
-          const SizedBox(height: 32),
-
-          AuthActionButton(
-            label: 'SEND RESET INSTRUCTIONS',
-            isLoading: isSubmitting,
-            isEnabled: hasRequiredInput && !isSubmitting,
-            onPressed: onSubmit,
-          ),
-
-          const SizedBox(height: 16),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Remember your password?',
-                style: TextStyle(color: textPrimary),
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Text(
+              'Reset Your Password',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: primary,
               ),
-              CustomTextButtonWidget(
-                title: 'Login',
-                onTap: () {
-                  context.go(Constants.loginRoute);
-                },
-              ),
-            ],
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              'Enter your email address and we will send you instructions to reset your password.',
+              style: TextStyle(fontSize: 16, color: textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 32),
+            child: AuthInputField(
+              controller: emailController,
+              labelText: 'Email',
+              type: AuthInputFieldType.email,
+              enabled: !isSubmitting,
+              onFieldSubmitted: (_) => onSubmit(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 32),
+            child: AuthActionButton(
+              label: 'SEND RESET INSTRUCTIONS',
+              isLoading: isSubmitting,
+              isEnabled: hasRequiredInput && !isSubmitting,
+              onPressed: onSubmit,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Remember your password?',
+                  style: TextStyle(color: textPrimary),
+                ),
+                CustomTextButtonWidget(
+                  title: 'Login',
+                  onTap: () {
+                    context.go(Constants.loginRoute);
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

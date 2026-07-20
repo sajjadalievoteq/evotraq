@@ -12,6 +12,7 @@ import 'package:traqtrace_app/features/auth/login/screens/widgets/login_username
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_input_field.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 
 class LoginFormWidget extends StatefulWidget {
   const LoginFormWidget({super.key, required this.state});
@@ -105,53 +106,59 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     return Form(
       key: _formKey,
       onChanged: _updateButtonState,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: TraqStaggeredEntrance(
         children: [
           usernameField,
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _passwordController,
-            labelText: 'Password',
-            type: AuthInputFieldType.password,
-            enabled: !isLoading,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: CustomTextButtonWidget(
-              title: 'Forgot Password?',
-              onTap: () {
-                context.go(Constants.forgotPasswordRoute);
-              },
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _passwordController,
+              labelText: 'Password',
+              type: AuthInputFieldType.password,
+              enabled: !isLoading,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submitForm(),
             ),
           ),
-          const SizedBox(height: 16),
-          AuthActionButton(
-            label: 'LOGIN',
-            isLoading: isLoading,
-            isEnabled: _hasRequiredInput && !isLoading,
-            onPressed: _submitForm,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Don\'t have an account?',
-                style: t.body.copyWith(color: c.textPrimary),
-              ),
-              CustomTextButtonWidget(
-                title: 'Register',
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: CustomTextButtonWidget(
+                title: 'Forgot Password?',
                 onTap: () {
-                  context.go(Constants.registerRoute);
+                  context.go(Constants.forgotPasswordRoute);
                 },
               ),
-            ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthActionButton(
+              label: 'LOGIN',
+              isLoading: isLoading,
+              isEnabled: _hasRequiredInput && !isLoading,
+              onPressed: _submitForm,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Don\'t have an account?',
+                  style: t.body.copyWith(color: c.textPrimary),
+                ),
+                CustomTextButtonWidget(
+                  title: 'Register',
+                  onTap: () {
+                    context.go(Constants.registerRoute);
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

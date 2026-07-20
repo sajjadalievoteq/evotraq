@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
 abstract final class TraqRouterTransitions {
   static const Duration _forward = Duration(milliseconds: 220);
@@ -37,14 +39,23 @@ abstract final class TraqRouterTransitions {
     );
   }
 
-  /// No page chrome animation — [AuthShell] owns the form swap transition.
+  /// Fade + scale for auth form routes inside AuthShell (no slide).
+  /// Animates only the page (right form); shell branding stays mounted.
   static Page<T> authShellPage<T extends Object?>({
     required LocalKey key,
     required Widget child,
   }) {
-    return NoTransitionPage<T>(
+    return CustomTransitionPage<T>(
       key: key,
       child: SelectionArea(child: child),
+      transitionDuration: TraqAnimationConstants.formDuration,
+      reverseTransitionDuration: TraqAnimationConstants.formDuration,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        if (TraqAnimationManager.reduceMotion(context)) {
+          return child;
+        }
+        return TraqAnimationManager.fadeScaleTransition(child, animation);
+      },
     );
   }
 }

@@ -116,7 +116,7 @@ import 'package:traqtrace_app/features/auth/verify_email/screens/check_email_scr
 import 'package:traqtrace_app/features/auth/login/screens/login_screen.dart';
 import 'package:traqtrace_app/features/auth/signup/screens/signup_screen.dart';
 import 'package:traqtrace_app/features/auth/reset_password/screens/reset_password_screen.dart';
-import 'package:traqtrace_app/features/splash/presentation/splash_screen.dart';
+import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/verify_email_screen.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell.dart';
 

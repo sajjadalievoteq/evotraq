@@ -121,7 +121,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
 
   getIt.registerLazySingleton<CbvVocabularyService>(
-    () => CbvVocabularyService(masterDataService: getIt<CbvMasterDataService>()),
+    () => CbvVocabularyService(
+      masterDataService: getIt<CbvMasterDataService>(),
+      dioService: getIt<DioService>(),
+    ),
   );
 
   getIt.registerLazySingleton<UserManagementService>(

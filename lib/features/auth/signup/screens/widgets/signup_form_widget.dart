@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_input_field.dart';
+import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
@@ -196,9 +197,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
     return Form(
       key: _formKey,
       onChanged: _updateButtonState,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
+      child: TraqStaggeredEntrance(
         children: [
           AuthInputField(
             controller: _firstNameController,
@@ -212,122 +211,136 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             },
             enabled: !isLoading,
           ),
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _lastNameController,
-            labelText: 'Last Name',
-            prefixAsset: AppAssets.iconUser,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your last name';
-              }
-              return null;
-            },
-            enabled: !isLoading,
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _lastNameController,
+              labelText: 'Last Name',
+              prefixAsset: AppAssets.iconUser,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your last name';
+                }
+                return null;
+              },
+              enabled: !isLoading,
+            ),
           ),
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _usernameController,
-            labelText: 'Username',
-            type: AuthInputFieldType.username,
-            prefixAsset: AppAssets.iconUser,
-            onChanged: _handleUsernameChanged,
-            suffixIcon:
-                _usernameAvailabilityStatus ==
-                    _UsernameAvailabilityStatus.checking
-                ? const Padding(
-                    padding: EdgeInsets.all(14),
-                    child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : null,
-            helperText: _usernameAvailabilityMessage,
-            helperTextColor: _usernameMessageColor(context),
-            validator: (value) {
-              final trimmedValue = value?.trim() ?? '';
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _usernameController,
+              labelText: 'Username',
+              type: AuthInputFieldType.username,
+              prefixAsset: AppAssets.iconUser,
+              onChanged: _handleUsernameChanged,
+              suffixIcon:
+                  _usernameAvailabilityStatus ==
+                      _UsernameAvailabilityStatus.checking
+                  ? const Padding(
+                      padding: EdgeInsets.all(14),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
+              helperText: _usernameAvailabilityMessage,
+              helperTextColor: _usernameMessageColor(context),
+              validator: (value) {
+                final trimmedValue = value?.trim() ?? '';
 
-              if (trimmedValue.isEmpty) {
-                return 'Please enter a username';
-              }
-              if (trimmedValue.length < 4) {
-                return 'Username must be at least 4 characters';
-              }
-              if (_usernameAvailabilityStatus ==
-                  _UsernameAvailabilityStatus.taken) {
-                return 'Username already taken';
-              }
-              return null;
-            },
-            enabled: !isLoading,
+                if (trimmedValue.isEmpty) {
+                  return 'Please enter a username';
+                }
+                if (trimmedValue.length < 4) {
+                  return 'Username must be at least 4 characters';
+                }
+                if (_usernameAvailabilityStatus ==
+                    _UsernameAvailabilityStatus.taken) {
+                  return 'Username already taken';
+                }
+                return null;
+              },
+              enabled: !isLoading,
+            ),
           ),
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _emailController,
-            labelText: 'Email',
-            type: AuthInputFieldType.email,
-            enabled: !isLoading,
-            onChanged: (value) {
-              widget.onEmailChanged?.call(value.trim());
-            },
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _emailController,
+              labelText: 'Email',
+              type: AuthInputFieldType.email,
+              enabled: !isLoading,
+              onChanged: (value) {
+                widget.onEmailChanged?.call(value.trim());
+              },
+            ),
           ),
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _passwordController,
-            labelText: 'Password',
-            type: AuthInputFieldType.password,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a password';
-              }
-              if (value.length < 8) {
-                return 'Password must be at least 8 characters';
-              }
-              return null;
-            },
-            enabled: !isLoading,
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _passwordController,
+              labelText: 'Password',
+              type: AuthInputFieldType.password,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                if (value.length < 8) {
+                  return 'Password must be at least 8 characters';
+                }
+                return null;
+              },
+              enabled: !isLoading,
+            ),
           ),
-          const SizedBox(height: 16),
-          AuthInputField(
-            controller: _confirmPasswordController,
-            labelText: 'Confirm Password',
-            type: AuthInputFieldType.password,
-            prefixAsset: AppAssets.iconLock,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please confirm your password';
-              }
-              if (value != _passwordController.text) {
-                return 'Passwords do not match';
-              }
-              return null;
-            },
-            enabled: !isLoading,
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: AuthInputField(
+              controller: _confirmPasswordController,
+              labelText: 'Confirm Password',
+              type: AuthInputFieldType.password,
+              prefixAsset: AppAssets.iconLock,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+              enabled: !isLoading,
+            ),
           ),
-          const SizedBox(height: 24),
-          AuthActionButton(
-            label: 'REGISTER',
-            isLoading: isLoading,
-            isEnabled: _hasRequiredInput && !isLoading,
-            onPressed: _submitForm,
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: AuthActionButton(
+              label: 'REGISTER',
+              isLoading: isLoading,
+              isEnabled: _hasRequiredInput && !isLoading,
+              onPressed: _submitForm,
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Already have an account?',
-                style: context.text.body.copyWith(color: textPrimary),
-              ),
-              CustomTextButtonWidget(
-                title: 'Login',
-                onTap: () {
-                  context.go(Constants.loginRoute);
-                },
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Already have an account?',
+                  style: context.text.body.copyWith(color: textPrimary),
+                ),
+                CustomTextButtonWidget(
+                  title: 'Login',
+                  onTap: () {
+                    context.go(Constants.loginRoute);
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

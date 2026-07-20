@@ -81,10 +81,9 @@ void main() async {
     );
     debugPrint('Dependencies initialized.');
 
-    // Non-blocking: hydrates the CBV vocabulary cache and kicks off a
-    // background fetch/retry loop for the app's lifetime. Never awaited so
-    // it can't delay first paint or the splash-to-home navigation.
-    unawaited(getIt<CbvVocabularyService>().start());
+    // Non-blocking: hydrate CBV from disk only. Network fetch waits until
+    // AuthCubit is authenticated (see AuthCubit._startCbvVocabulary).
+    unawaited(getIt<CbvVocabularyService>().hydrateFromCache());
 
     debugPrint('Starting TraqTraceApp...');
     runApp(const TraqTraceApp());

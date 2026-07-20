@@ -1,68 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
-/// Shared motion tokens for auth screen polish (Material-aligned, subtle).
+/// Thin auth alias over [TraqAnimationConstants] / [TraqAnimationManager].
+///
+/// Prefer the `core/animation` APIs in new code. Change timing in
+/// [TraqAnimationConstants].
 abstract final class AuthMotion {
-  static const Duration swap = Duration(milliseconds: 300);
-  static const Duration entrance = Duration(milliseconds: 400);
-  static const Duration status = Duration(milliseconds: 320);
-  static const Duration stagger = Duration(milliseconds: 90);
+  static Duration get swap => TraqAnimationConstants.swap;
+  static Duration get entrance => TraqAnimationConstants.entrance;
+  static Duration get status => TraqAnimationConstants.status;
+  static Duration get stagger => TraqAnimationConstants.stagger;
+  static Duration get brandingEntrance =>
+      TraqAnimationConstants.brandingEntrance;
+  static Duration get brandingStagger => TraqAnimationConstants.brandingStagger;
 
-  static const Curve curve = Curves.easeOutCubic;
-  static const Curve reverseCurve = Curves.easeInCubic;
-  static const Curve emphasized = Curves.easeOutCubic;
-  static const Curve iconPop = Curves.easeOutBack;
+  static Curve get curve => TraqAnimationConstants.curve;
+  static Curve get reverseCurve => TraqAnimationConstants.reverseCurve;
+  static Curve get emphasized => TraqAnimationConstants.curve;
+  static Curve get iconPop => TraqAnimationConstants.iconPop;
 
-  static const double slidePx = 14;
-  static const Offset slideRight = Offset(0.04, 0);
-  static const Offset slideUp = Offset(0, 0.035);
+  static double get brandingSlidePx => TraqAnimationConstants.brandingSlidePx;
+  static Offset get slideRight => TraqAnimationConstants.slideRight;
+  static Offset get slideUp => TraqAnimationConstants.slideUp;
 
   static bool reduceMotion(BuildContext context) =>
-      MediaQuery.disableAnimationsOf(context);
+      TraqAnimationManager.reduceMotion(context);
 
   static Duration durationOf(BuildContext context, Duration normal) =>
-      reduceMotion(context) ? Duration.zero : normal;
+      TraqAnimationManager.durationOf(context, normal);
 
-  /// Shared-axis fade-through for form swaps.
   static Widget fadeThroughTransition(
     Widget child,
     Animation<double> animation,
-  ) {
-    final curved = CurvedAnimation(
-      parent: animation,
-      curve: curve,
-      reverseCurve: reverseCurve,
-    );
-    return FadeTransition(
-      opacity: curved,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: slideRight,
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
-      ),
-    );
-  }
+  ) =>
+      TraqAnimationManager.fadeThroughTransition(child, animation);
 
-  /// Soft fade + slight rise for status / confirmation entrances.
   static Widget fadeRiseTransition(
     Widget child,
     Animation<double> animation,
-  ) {
-    final curved = CurvedAnimation(
-      parent: animation,
-      curve: curve,
-      reverseCurve: reverseCurve,
-    );
-    return FadeTransition(
-      opacity: curved,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: slideUp,
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
-      ),
-    );
-  }
+  ) =>
+      TraqAnimationManager.fadeRiseTransition(child, animation);
+
+  static Widget fadeScaleTransition(
+    Widget child,
+    Animation<double> animation, {
+    double beginScale = TraqAnimationConstants.formInitialScale,
+  }) =>
+      TraqAnimationManager.fadeScaleTransition(
+        child,
+        animation,
+        beginScale: beginScale,
+      );
 }

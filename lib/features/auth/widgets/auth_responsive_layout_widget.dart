@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_panel.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_mobile_form_layout.dart';
@@ -30,13 +31,33 @@ class AuthResponsiveFormLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     // Inside AuthShell the left branding is persistent — only render the form.
     if (AuthShellScope.isActive(context)) {
-      return AppLayoutBuilder(
-        builder: (context, layout) {
-          return AuthFormPanel(
-            header: header,
-            wrapInCard: wrapInCard,
-            compactHeader: !layout.isLarge,
-            child: child,
+      final isLarge = context.layout.isLarge;
+      final padding = context.padding;
+      // LayoutBuilder + minHeight lives on the form page (not around the
+      // ShellRoute Navigator), so centering is safe and matches the old
+      // vertically-centered right pane.
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final minHeight = constraints.hasBoundedHeight
+              ? (constraints.maxHeight - padding.vertical).clamp(0.0, double.infinity)
+              : 0.0;
+          return SingleChildScrollView(
+            padding: padding,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: largeFormMaxWidth,
+                minHeight: minHeight,
+              ),
+              child: Align(
+                alignment: isLarge ? Alignment.centerLeft : Alignment.center,
+                child: AuthFormPanel(
+                  header: header,
+                  wrapInCard: wrapInCard,
+                  compactHeader: !isLarge,
+                  child: child,
+                ),
+              ),
+            ),
           );
         },
       );

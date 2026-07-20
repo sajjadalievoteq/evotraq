@@ -5,7 +5,8 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_action_button.dart';
-import 'package:traqtrace_app/features/auth/widgets/auth_motion.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_staggered_entrance.dart';
 import 'package:traqtrace_app/core/widgets/custom_outlined_button_widget.dart';
 import 'package:traqtrace_app/core/utils/email_provider_launch_utils.dart';
@@ -116,8 +117,11 @@ class CheckEmailContentWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         AnimatedSize(
-          duration: AuthMotion.durationOf(context, AuthMotion.swap),
-          curve: AuthMotion.curve,
+          duration: TraqAnimationManager.durationOf(
+            context,
+            TraqAnimationConstants.swap,
+          ),
+          curve: TraqAnimationConstants.curve,
           child: SizedBox(
             width: double.infinity,
             child: AuthActionButton(

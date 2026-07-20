@@ -33,7 +33,7 @@ class AuthWebFormLayout extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 5,
+            flex: 7,
             child: Container(
               color: c.background,
               child: Stack(
@@ -77,33 +77,21 @@ class AuthWebFormLayout extends StatelessWidget {
             child: Container(
               color: c.surface,
               child: SafeArea(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      padding: context.padding,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: largeFormMaxWidth,
-                            minHeight:
-                                constraints.maxHeight -
-                                context.padding.vertical,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              AuthFormPanel(
-                                header: header,
-                                wrapInCard: wrapInCard,
-                                child: child,
-                              ),
-                            ],
-                          ),
+                child: SingleChildScrollView(
+                  padding: context.padding,
+                  child: Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AuthFormPanel(
+                          header: header,
+                          wrapInCard: wrapInCard,
+                          child: child,
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

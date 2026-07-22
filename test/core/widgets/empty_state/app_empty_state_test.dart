@@ -5,8 +5,8 @@ import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 
 void main() {
-  /// Disable animations so the looping breath controller does not make
-  /// [pumpAndSettle] hang indefinitely.
+  
+  
   Widget wrap(Widget child) {
     return MaterialApp(
       home: MediaQuery(

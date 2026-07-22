@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-/// Minimal typed persistence backed by a single Hive box.
-///
-/// Used for non-secure client preferences/caches.
-/// JWT/auth tokens remain in [flutter_secure_storage] / [TokenManager].
+
+
+
+
 class HiveStorage {
   HiveStorage._();
 
@@ -20,13 +20,13 @@ class HiveStorage {
     return box;
   }
 
-  /// Initializes Hive and opens the app preferences box.
+  
   static Future<void> init() async {
     await Hive.initFlutter();
     _box = await Hive.openBox<dynamic>(boxName);
   }
 
-  /// Test-only init that skips Flutter path_provider.
+  
   @visibleForTesting
   static Future<void> initForTests(String directoryPath) async {
     Hive.init(directoryPath);
@@ -49,6 +49,14 @@ class HiveStorage {
   }
 
   static Future<String?> getString(String key) async {
+    final value = _prefs.get(key);
+    if (value == null) return null;
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  /// Sync read for redirect-time lookups (Hive box must already be open).
+  static String? getStringSync(String key) {
     final value = _prefs.get(key);
     if (value == null) return null;
     if (value is String) return value;

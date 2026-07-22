@@ -19,7 +19,7 @@ abstract final class JourneyPinLayout {
   static const double _bandGap = 16.0;
   static const double _bottomGap = 16.0;
 
-  /// Minimum usable band height so top/bottom lanes don't collapse on short screens.
+  
   static const double _minBandHeight = 220.0;
 
   static int seedForSteps(List<JourneyStep> steps) {

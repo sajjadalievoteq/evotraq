@@ -1,9 +1,9 @@
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 
-/// Legacy GS1 helpers for SSCC check-digit utilities.
-///
-/// For EPC URI generation use [Gs1Converter] / [EPCURIConverter] instead.
+
+
+
 class GS1Utils {
   static const Map<String, int> _aiLengths = {
     '00': 18,

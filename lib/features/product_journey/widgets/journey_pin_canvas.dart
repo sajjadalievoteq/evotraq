@@ -28,7 +28,7 @@ class JourneyPinsCanvas extends StatefulWidget {
   final ValueChanged<JourneyStep> onStepTapped;
   final JourneyEventFilter eventFilter;
 
-  /// Space reserved above the serpentine band (e.g. floating search/chips).
+  
   final double topInset;
 
   @override

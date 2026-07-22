@@ -32,7 +32,7 @@ class ApiException implements Exception {
     return 'ApiException: $message';
   }
 
-  /// User-facing text for snackbars — prefers backend validation details.
+  
   String getUserFriendlyMessage() {
     if (statusCode == null &&
         (responseBody == null || responseBody!.trim().isEmpty) &&

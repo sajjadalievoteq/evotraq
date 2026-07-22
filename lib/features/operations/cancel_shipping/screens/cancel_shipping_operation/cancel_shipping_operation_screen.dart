@@ -35,10 +35,14 @@ class CancelShippingOperationScreen extends StatefulWidget {
     super.key,
     this.embedded = false,
     this.onEmbeddedActionSuccess,
+    this.initialPrefill,
   });
 
   final bool embedded;
   final VoidCallback? onEmbeddedActionSuccess;
+
+  
+  final Map<String, dynamic>? initialPrefill;
 
   @override
   State<CancelShippingOperationScreen> createState() =>
@@ -78,6 +82,29 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
     _cancelReasonController.addListener(_onReferenceFieldChanged);
     _originalReferenceController.addListener(_onReferenceFieldChanged);
     _commentsController.addListener(_onReferenceFieldChanged);
+    _applyPrefill(widget.initialPrefill);
+  }
+
+  void _applyPrefill(Map<String, dynamic>? prefill) {
+    if (prefill == null || prefill.isEmpty) return;
+    final epcs = (prefill['epcs'] as List?)?.map((e) => e.toString()).toList();
+    if (epcs != null && epcs.isNotEmpty) {
+      _scannedEpcs
+        ..clear()
+        ..addAll(epcs);
+    }
+    final source = prefill['sourceGln'];
+    if (source is GLN) {
+      _sourceGln = source;
+    }
+    final destination = prefill['destinationGln'];
+    if (destination is GLN) {
+      _destinationGln = destination;
+    }
+    final originalRef = prefill['originalShippingReference']?.toString();
+    if (originalRef != null && originalRef.isNotEmpty) {
+      _originalReferenceController.text = originalRef;
+    }
   }
 
   CancelShippingReferenceDetailsStep _referenceDetailsStep({
@@ -359,7 +386,7 @@ class _CancelShippingOperationScreenState extends State<CancelShippingOperationS
       return;
     }
     setState(() => _scannedEpcs.add(epc));
-    // Soft warning is advisory â€” don't block the next scan on status round-trip.
+    
     _checkEpcStatus(epc);
   }
 

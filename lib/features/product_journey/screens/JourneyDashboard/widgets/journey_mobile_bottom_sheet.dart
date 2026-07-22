@@ -38,8 +38,8 @@ class JourneyMobileBottomSheet extends StatelessWidget {
           ),
         ],
       ),
-      // Handle must live inside this scroll view — DraggableScrollableSheet only
-      // expands from overscroll on [scrollController], not from a sibling above it.
+      
+      
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(
           dragDevices: _dragDevices,

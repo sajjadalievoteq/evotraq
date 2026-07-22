@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/core/widgets/gln_selector.dart';
 
-/// Presenter — GLN values and name controller owned by [GTINDetailScreen].
+
 class InformationProviderManufacturerCoreGroup extends StatelessWidget {
   const InformationProviderManufacturerCoreGroup({
     super.key,

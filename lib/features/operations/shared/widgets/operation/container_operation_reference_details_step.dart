@@ -16,8 +16,8 @@ import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';
 
-/// Shared packing / unpacking reference details. [isUnpacking] selects copy;
-/// [padWorkOrderBatchIcons] preserves packing's padded work-order/batch icons.
+
+
 class ContainerOperationReferenceDetailsStep extends StatelessWidget {
   const ContainerOperationReferenceDetailsStep({
     super.key,

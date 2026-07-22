@@ -51,7 +51,7 @@ class AggregationEventFormValidators {
     if (Gs1CanonicalIdentifier.isSscc(trimmed)) {
       final extracted = Gs1CanonicalIdentifier.extractSscc18(trimmed);
       if (extracted != null && SsccFormat.isValidSscc(extracted)) return null;
-      // URN shape accepted by classify but may lack a reconstructable check digit.
+      
       if (_ssccUrn.hasMatch(trimmed)) {
         return _validateSsccEpcUri(trimmed);
       }

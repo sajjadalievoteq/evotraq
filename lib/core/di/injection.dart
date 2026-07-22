@@ -9,7 +9,7 @@ import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
-import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
+import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 
@@ -37,6 +37,7 @@ import '../../features/operations/commissioning/utils/commissioning_serial_pool_
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
+import 'package:traqtrace_app/core/storage/last_route_store.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
@@ -51,7 +52,7 @@ import '../../data/services/reference_data_validation_service.dart';
 import '../../data/services/service_account_service.dart';
 import '../../data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/operations/inbox_outbox/inbox_outbox_service.dart';
+import 'package:traqtrace_app/data/services/inbox_outbox/inbox_outbox_service.dart';
 import 'package:traqtrace_app/data/services/operations/update_status/update_status_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/return_shipping/return_shipping_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
@@ -142,6 +143,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<HomeOverviewSessionStore>(
     () => HomeOverviewSessionStore(),
   );
+
+  getIt.registerLazySingleton<LastRouteStore>(() => LastRouteStore());
 
   getIt.registerLazySingleton<SGTINService>(
     () => SGTINService(dioService: getIt<DioService>()),
@@ -353,7 +356,8 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerSingleton<AuthCubit>(
     AuthCubit(authService: getIt<AuthService>()),
   );
-  // Avoid constructor cycle: wire after both DioService and AuthCubit exist.
+  
+  
   getIt<DioService>().onUnauthorized = () {
     unawaited(getIt<AuthCubit>().sessionExpired());
   };

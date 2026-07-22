@@ -4,8 +4,8 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/empty_state_visual.dart';
 
-/// Empty / awaiting-selection placeholder for detail panes (not a loading state).
-/// Detail loading must use the feature's detail skeleton, not this widget.
+
+
 class AppEmptyDetail extends StatelessWidget {
   const AppEmptyDetail({
     super.key,

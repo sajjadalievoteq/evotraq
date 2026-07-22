@@ -17,11 +17,11 @@ void main() {
     });
 
     test('parses GS1 AI SSCC notation', () {
-      final result = parseToEPC('(00)003664798000000011');
+      final result = parseToEPC('(00)003664798000000016');
 
       expect(result.type, EPCType.sscc);
-      expect(result.epc, 'https://id.gs1.org/00/003664798000000011');
-      expect(result.sscc, '003664798000000011');
+      expect(result.epc, 'https://id.gs1.org/00/003664798000000016');
+      expect(result.sscc, '003664798000000016');
     });
 
     test('parses GS1 AI GTIN-only notation as GTIN', () {

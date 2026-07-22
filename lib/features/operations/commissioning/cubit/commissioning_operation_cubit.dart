@@ -55,8 +55,8 @@ class CommissioningOperationCubit extends Cubit<CommissioningOperationState> {
     emit(state.copyWith(clearBatchState: true));
   }
 
-  /// Resolves pharma batch context from GTIN code (no master-data GTIN fetch).
-  /// Returns true when a pharmaceutical extension exists for batch lookup.
+  
+  
   Future<bool> onPharmaGtinIdentified(String gtinCode) async {
     _cancelBatchLookupDebounce();
     _lookupGeneration++;

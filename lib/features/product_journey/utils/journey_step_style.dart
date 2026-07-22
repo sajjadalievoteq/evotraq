@@ -10,8 +10,8 @@ abstract final class JourneyStepStyle {
     return c.primary;
   }
 
-  /// CBV biz-step token (e.g. `decommissioning`), not substring matching.
-  /// `decommissioning` must not match `commissioning`.
+  
+  
   static String? bizStepToken(String businessStep) =>
       CbvDisplayUtils.shortName(businessStep)?.toLowerCase();
 

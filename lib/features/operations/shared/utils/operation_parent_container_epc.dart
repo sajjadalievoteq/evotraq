@@ -2,7 +2,7 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_validators.dart';
 
-/// Resolves the stored parent-container key from a parsed scan.
+
 String parentContainerIdFromParsed(EPCParseResult parsed) {
   return switch (parsed.type) {
     EPCType.sscc => parsed.sscc ?? parsed.raw,
@@ -11,7 +11,7 @@ String parentContainerIdFromParsed(EPCParseResult parsed) {
   };
 }
 
-/// Returns a user-facing error when [parsed] cannot be used as parent container.
+
 String? validateParentContainerEpc(EPCParseResult parsed) {
   return switch (parsed.type) {
     EPCType.sscc => () {

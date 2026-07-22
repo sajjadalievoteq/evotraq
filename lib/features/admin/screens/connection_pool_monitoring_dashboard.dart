@@ -34,9 +34,9 @@ class _ConnectionPoolMonitoringDashboardState
       const LoadState.loading();
   LoadState<String> _recommendationsState = const LoadState.loading();
 
-  /// All four tabs render fields derived from the single merged
-  /// `getConnectionPoolDashboard()` response, so one fetch satisfies every
-  /// tab. Guards against re-fetching every time the user switches tabs.
+  
+  
+  
   bool _dataLoaded = false;
 
   Timer? _refreshTimer;
@@ -85,8 +85,8 @@ class _ConnectionPoolMonitoringDashboardState
     _loadAllData();
   }
 
-  /// Reloads all previously-loaded data by re-triggering the one merged
-  /// fetch. Used by both the refresh button and per-tab retry actions.
+  
+  
   void _refreshData() {
     _dataLoaded = true;
     _loadAllData();

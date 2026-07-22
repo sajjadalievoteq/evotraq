@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Presenter — controllers and role flags owned by [GTINDetailScreen].
+
 class PackagingHierarchyTradeItemRolesCoreGroup extends StatelessWidget {
   const PackagingHierarchyTradeItemRolesCoreGroup({
     super.key,

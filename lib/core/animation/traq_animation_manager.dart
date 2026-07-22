@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 
-/// App-wide animation helpers (reduced-motion, shared transitions).
-///
-/// Tunable values live in [TraqAnimationConstants]. Widgets:
-/// [TraqStaggeredEntrance], [TraqStatusSwitcher], [TraqIconPop].
-///
-/// Prefer subtle **fade + scale** over large slides (premium Material Motion).
+
+
+
+
+
+
 abstract final class TraqAnimationManager {
-  static bool reduceMotion(BuildContext context) =>
-      MediaQuery.disableAnimationsOf(context);
+  /// Single toggle for reduced-motion honoring.
+  ///
+  /// Always returns `false` so page transitions and entrance animations play
+  /// regardless of OS/browser `prefers-reduced-motion`. To restore respecting
+  /// that preference, replace the body with:
+  /// `MediaQuery.disableAnimationsOf(context)`.
+  static bool reduceMotion(BuildContext context) => false;
 
   static Duration durationOf(BuildContext context, Duration normal) =>
       reduceMotion(context) ? Duration.zero : normal;
 
-  /// Premium form / page transition: opacity + slight scale (no slide).
+  
   static Widget fadeScaleTransition(
     Widget child,
     Animation<double> animation, {
@@ -36,8 +41,8 @@ abstract final class TraqAnimationManager {
     );
   }
 
-  /// Auth / form route swaps. Historically “fade-through”; now fade + scale
-  /// with no noticeable translation. API preserved for callers.
+  
+  /// Peer-level fade-through (subtle scale, no slide).
   static Widget fadeThroughTransition(
     Widget child,
     Animation<double> animation,
@@ -45,11 +50,11 @@ abstract final class TraqAnimationManager {
     return fadeScaleTransition(
       child,
       animation,
-      beginScale: TraqAnimationConstants.formInitialScale,
+      beginScale: TraqAnimationConstants.navFadeThroughBeginScale,
     );
   }
 
-  /// Status / confirmation swaps. Fade + scale (no slide). API preserved.
+  
   static Widget fadeRiseTransition(
     Widget child,
     Animation<double> animation,

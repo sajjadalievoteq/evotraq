@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Placeholder box for use inside [AppShimmer] loading states.
+
 class AppSkeletonBox extends StatelessWidget {
   const AppSkeletonBox({
     super.key,

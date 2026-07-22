@@ -16,7 +16,7 @@ class HomeCubit extends Cubit<HomeState> {
   final DashboardService _dashboardService;
   final HomeOverviewSessionStore _sessionStore;
 
-  /// Production default polling interval while the dashboard is visible.
+  
   final Duration pollInterval;
 
   static const Duration _maxPollBackoff = Duration(minutes: 5);
@@ -45,12 +45,16 @@ class HomeCubit extends Cubit<HomeState> {
             healthLoading: true,
           ),
         );
-        // Revalidate in background — do not block the return of load().
+        
         unawaited(
           _revalidate(
             accountEmail: accountEmail,
             keepExistingOnError: true,
-          ),
+          ).then((_) {
+            if (!isClosed) {
+              _startHealthLoad(accountEmail: accountEmail);
+            }
+          }),
         );
         return;
       }
@@ -67,6 +71,9 @@ class HomeCubit extends Cubit<HomeState> {
       accountEmail: accountEmail,
       keepExistingOnError: forceRefresh && state.hasPayload,
     );
+    if (!isClosed) {
+      _startHealthLoad(accountEmail: accountEmail);
+    }
   }
 
   Future<void> refresh({String? accountEmail}) async {
@@ -90,13 +97,16 @@ class HomeCubit extends Cubit<HomeState> {
         accountEmail: accountEmail,
         keepExistingOnError: true,
       );
+      if (!isClosed) {
+        _startHealthLoad(accountEmail: accountEmail);
+      }
       return;
     }
 
     await load(accountEmail: accountEmail, forceRefresh: true);
   }
 
-  /// Starts (or restarts) periodic background SWR while the dashboard is open.
+  
   void startPolling({String? accountEmail}) {
     if (isClosed) return;
     _pollAccountEmail = accountEmail ?? _pollAccountEmail;
@@ -105,14 +115,14 @@ class HomeCubit extends Cubit<HomeState> {
     _pollTimer = Timer.periodic(_currentPollInterval, (_) => _onPollTick());
   }
 
-  /// Cancels the poll timer without resetting backoff (pause may resume later).
+  
   void stopPolling() {
     _pollTimer?.cancel();
     _pollTimer = null;
     _isPolling = false;
   }
 
-  /// Immediate background refresh on app/tab foreground, then restart polling.
+  
   Future<void> onAppResumed({String? accountEmail}) async {
     if (isClosed) return;
     final email = accountEmail ?? _pollAccountEmail;
@@ -128,8 +138,8 @@ class HomeCubit extends Cubit<HomeState> {
 
   void _onPollTick() {
     if (isClosed || !_isPolling || _isRevalidating) return;
-    // Claim the lock synchronously so a later tick cannot also enter before
-    // `_revalidate` runs to its first await.
+    
+    
     _isRevalidating = true;
     unawaited(
       _revalidate(
@@ -166,7 +176,6 @@ class HomeCubit extends Cubit<HomeState> {
           stats: overview.stats,
           recentEvents: overview.recentEvents,
           lastDataRefreshAt: refreshedAt,
-          healthLoading: true,
           clearError: true,
           refreshFailed: false,
         ),
@@ -182,8 +191,6 @@ class HomeCubit extends Cubit<HomeState> {
         ),
       );
 
-      _startHealthLoad(accountEmail: accountEmail);
-
       if (adjustPollBackoff) {
         _restorePollInterval();
       }
@@ -193,11 +200,7 @@ class HomeCubit extends Cubit<HomeState> {
         _increasePollBackoff();
       }
       if (keepExistingOnError && state.hasPayload) {
-        // Revalidation failed but we have a cached snapshot to keep showing.
-        // Flag it so the UI can indicate the numbers may be stale instead of
-        // presenting a retained (possibly zero) snapshot as live data.
-        emit(state.copyWith(healthLoading: false, refreshFailed: true));
-        _startHealthLoad(accountEmail: accountEmail);
+        emit(state.copyWith(refreshFailed: true));
         return;
       }
       emit(

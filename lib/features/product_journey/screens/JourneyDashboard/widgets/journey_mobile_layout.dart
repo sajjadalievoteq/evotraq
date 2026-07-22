@@ -46,7 +46,6 @@ class JourneyMobileLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final loaded = state.isLoaded && state.journey != null;
 
     return Column(

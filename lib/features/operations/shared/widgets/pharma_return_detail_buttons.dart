@@ -335,16 +335,18 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
     }
 
     final operationalGln = await OperationalGlnStore.getGln(user.id);
-    if (!PharmaReturnEligibility.glnMatches(
-      operationalGln,
-      widget.operation.sourceGLN,
-    )) {
-      setState(() {
-        _loading = false;
-        _disabledReason = operationalGln == null
-            ? 'Set your Operational GLN in Profile to accept returns'
-            : 'Your Operational GLN does not match this operation\'s source location';
-      });
+    
+    
+    final expectedGln = widget.operation.isReturnShipping
+        ? (widget.operation.destinationGLN ??
+            widget.operation.destinationLocation?.glnCode)
+        : (widget.operation.sourceGLN ??
+            widget.operation.sourceLocation?.glnCode);
+
+    if (!PharmaReturnEligibility.glnMatches(operationalGln, expectedGln)) {
+      
+      
+      setState(() => _loading = false);
       return;
     }
 
@@ -354,6 +356,10 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
       _loading = false;
       _eligible = contextData != null && contextData.isValid;
       _context = contextData;
+      if (!_eligible && widget.operation.isReturnShipping) {
+        _disabledReason =
+            'Return context could not be resolved for this shipment';
+      }
     });
   }
 

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
 class TraceNetworkBackground extends StatefulWidget {
@@ -77,7 +78,7 @@ class _TraceNetworkBackgroundState extends State<TraceNetworkBackground>
   @override
   Widget build(BuildContext context) {
     final colors = TraqColors.of(context);
-    final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final reduceMotion = TraqAnimationManager.reduceMotion(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {

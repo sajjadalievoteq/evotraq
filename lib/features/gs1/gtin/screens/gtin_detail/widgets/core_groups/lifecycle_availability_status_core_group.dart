@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_field_shimmer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Presenter — status and date values owned by [GTINDetailScreen].
+
 class LifecycleAvailabilityStatusCoreGroup extends StatelessWidget {
   const LifecycleAvailabilityStatusCoreGroup({
     super.key,

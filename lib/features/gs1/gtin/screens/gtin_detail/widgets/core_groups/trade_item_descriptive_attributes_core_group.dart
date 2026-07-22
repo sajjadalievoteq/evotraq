@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-/// Presenter — controllers owned by [GTINDetailScreen].
+
 class TradeItemDescriptiveAttributesCoreGroup extends StatelessWidget {
   const TradeItemDescriptiveAttributesCoreGroup({
     super.key,

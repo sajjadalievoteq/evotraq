@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,8 +8,24 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/auth/login/screens/login_screen.dart';
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
 class TestAuthService extends AuthService {
   TestAuthService() : super(dioService: DioService());
@@ -44,6 +62,13 @@ class TestAuthService extends AuthService {
 Widget buildTestApp(AuthCubit authCubit) {
   final router = GoRouter(
     initialLocation: Constants.loginRoute,
+    refreshListenable: GoRouterRefreshStream(authCubit.stream),
+    redirect: (context, state) {
+      if (authCubit.state.status == AuthStatus.authenticated) {
+        return '/home';
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: Constants.loginRoute,
@@ -70,7 +95,10 @@ Widget buildTestApp(AuthCubit authCubit) {
     ],
   );
 
-  return MaterialApp.router(routerConfig: router);
+  return MaterialApp.router(
+    routerConfig: router,
+    theme: TraqTheme.light(),
+  );
 }
 
 void main() {
@@ -100,8 +128,8 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'password123');
       await tester.pumpAndSettle();
 
-      final loginButton = tester.widget<ElevatedButton>(
-        find.byType(ElevatedButton),
+      final loginButton = tester.widget<FilledButton>(
+        find.byType(FilledButton),
       );
       loginButton.onPressed!.call();
       await tester.pumpAndSettle();
@@ -126,8 +154,8 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'password123');
       await tester.pumpAndSettle();
 
-      final loginButton = tester.widget<ElevatedButton>(
-        find.byType(ElevatedButton),
+      final loginButton = tester.widget<FilledButton>(
+        find.byType(FilledButton),
       );
       loginButton.onPressed!.call();
       await tester.pumpAndSettle();

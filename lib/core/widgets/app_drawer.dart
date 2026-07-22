@@ -89,8 +89,9 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   void _navigate(String route, {bool isDashboard = false, Object? extra}) {
-    final offset =
-        _scrollController.hasClients ? _scrollController.offset : 0.0;
+    final offset = _scrollController.hasClients
+        ? _scrollController.offset
+        : 0.0;
     _didNavigate = true;
     if (isDashboard) {
       DrawerScrollMemory.clearRestore();
@@ -203,10 +204,8 @@ class _AppDrawerState extends State<AppDrawer> {
                     ListTile(
                       leading: _svgLeading(NavIcons.dashboard),
                       title: const Text('Dashboard'),
-                      onTap: () => _navigate(
-                        Constants.homeRoute,
-                        isDashboard: true,
-                      ),
+                      onTap: () =>
+                          _navigate(Constants.homeRoute, isDashboard: true),
                     ),
                     ListTile(
                       leading: _svgLeading(NavIcons.profile),
@@ -216,8 +215,11 @@ class _AppDrawerState extends State<AppDrawer> {
 
                     const Divider(),
                     const Padding(
-                      padding:
-                          EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                      padding: EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        bottom: 8.0,
+                      ),
                       child: Text(
                         'DASHBOARDS',
                         style: TextStyle(
@@ -231,8 +233,13 @@ class _AppDrawerState extends State<AppDrawer> {
                       leading: _svgLeading(NavIcons.productJourney),
                       title: const Text('Product Journey'),
                       subtitle: const Text('Track supply chain flow'),
-                      onTap: () =>
-                          _navigate(Constants.journeyDashboardRoute),
+                      onTap: () => _navigate(Constants.journeyDashboardRoute),
+                    ),
+                    ListTile(
+                      leading: _svgLeading(NavIcons.productHierarchy),
+                      title: const Text('Product Hierarchy'),
+                      subtitle: const Text('Explore packaging hierarchy'),
+                      onTap: () => _navigate(Constants.productHierarchyRoute),
                     ),
                     ListTile(
                       leading: _svgLeading(NavIcons.inboxOutbox),
@@ -242,8 +249,11 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     const Divider(),
                     const Padding(
-                      padding:
-                          EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                      padding: EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        bottom: 8.0,
+                      ),
                       child: Text(
                         'COCKPIT',
                         style: TextStyle(
@@ -261,15 +271,13 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.gtin),
                           title: const Text('GTIN Management'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () => _navigate(Constants.gs1GtinsRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.gln),
                           title: const Text('GLN Management'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () => _navigate(Constants.gs1GlnsRoute),
                         ),
                       ],
@@ -282,18 +290,14 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.sscc),
                           title: const Text('SSCC Management'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.gs1SsccsRoute),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () => _navigate(Constants.gs1SsccsRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.sgtin),
                           title: const Text('SGTIN Management'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.gs1SgtinsRoute),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () => _navigate(Constants.gs1SgtinsRoute),
                         ),
                       ],
                     ),
@@ -305,18 +309,16 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.objectEvents),
                           title: const Text('Object Events'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                              Constants.epcisObjectEventsRoute),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () =>
+                              _navigate(Constants.epcisObjectEventsRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.aggregationEvents),
                           title: const Text('Aggregation Events'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                              Constants.epcisAggregationEventsRoute),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () =>
+                              _navigate(Constants.epcisAggregationEventsRoute),
                         ),
                       ],
                     ),
@@ -328,16 +330,13 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.allEvents),
                           title: const Text('All Events'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisEventsRoute),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+                          onTap: () => _navigate(Constants.epcisEventsRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.aggregationHierarchy),
                           title: const Text('Aggregation Hierarchy'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () {
                             final TextEditingController controller =
                                 TextEditingController();
@@ -390,24 +389,21 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.advancedQuery),
                           title: const Text('Advanced Query'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.epcisAdvancedQueryRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.supplyChainTraversal),
                           title: const Text('Supply Chain Traversal'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.epcisTraversalQueryRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.eventSerialization),
                           title: const Text('Event Serialization'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.epcisSerializationRoute),
                         ),
@@ -416,8 +412,11 @@ class _AppDrawerState extends State<AppDrawer> {
 
                     const Divider(),
                     const Padding(
-                      padding:
-                          EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                      padding: EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        bottom: 8.0,
+                      ),
                       child: Text(
                         'OPERATIONS',
                         style: TextStyle(
@@ -432,24 +431,21 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: const Text('Lifecycle'),
 
                       children: [
-                     ListTile(
-                       contentPadding:
-                       const EdgeInsets.only(left: 32.0),
-                    
-                     leading: _svgLeading(NavIcons.commissioning),
-                     title: const Text('Commissioning'),
-                     onTap: () =>
-                         _navigate(Constants.opCommissioningRoute),
-                                          ),
+                        ListTile(
+                          contentPadding: const EdgeInsets.only(left: 32.0),
+
+                          leading: _svgLeading(NavIcons.commissioning),
+                          title: const Text('Commissioning'),
+                          onTap: () =>
+                              _navigate(Constants.opCommissioningRoute),
+                        ),
 
                         ListTile(
-                          contentPadding:
-                          const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
 
                           leading: _svgLeading(NavIcons.updateStatus),
-                          title: const Text('Update Status'),
-                          onTap: () =>
-                              _navigate(Constants.opUpdateStatusRoute),
+                          title: const Text('Status Updating'),
+                          onTap: () => _navigate(Constants.opUpdateStatusRoute),
                         ),
                       ],
                     ),
@@ -458,8 +454,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: const Text('Packaging'),
                       children: [
                         ListTile(
-                          contentPadding:
-                          const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
 
                           leading: _svgLeading(NavIcons.packing),
                           title: const Text('Packing'),
@@ -467,8 +462,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
 
                         ListTile(
-                          contentPadding:
-                          const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
 
                           leading: _svgLeading(NavIcons.unpacking),
                           title: const Text('Unpacking'),
@@ -476,7 +470,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ],
                     ),
-
 
                     ExpansionTile(
                       leading: _svgLeading(NavIcons.logistics),
@@ -489,71 +482,65 @@ class _AppDrawerState extends State<AppDrawer> {
                           title: const Text('Shippings'),
                           children: [
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
                               leading: _svgLeading(NavIcons.shipping),
                               title: const Text('Shipping'),
-                              onTap: () =>
-                                  _navigate(Constants.opShippingRoute),
+                              onTap: () => _navigate(Constants.opShippingRoute),
                             ),
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
                               leading: _svgLeading(NavIcons.returnShipping),
                               title: const Text('Return Shipping'),
-                              onTap: () => _navigate(Constants.opReturnShippingRoute),
+                              onTap: () =>
+                                  _navigate(Constants.opReturnShippingRoute),
                             ),
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
 
                               leading: _svgLeading(NavIcons.cancelShipping),
                               title: const Text('Cancel Shipping'),
-                              onTap: () => _navigate(Constants.opCancelShippingRoute),
+                              onTap: () =>
+                                  _navigate(Constants.opCancelShippingRoute),
                             ),
-
                           ],
                         ),
                         ExpansionTile(
-
                           leading: _svgLeading(NavIcons.receivings),
                           title: const Text('Receivings'),
                           children: [
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
                               leading: _svgLeading(NavIcons.receiving),
                               title: const Text('Receiving'),
                               onTap: () =>
                                   _navigate(Constants.opReceivingRoute),
                             ),
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
                               leading: _svgLeading(NavIcons.returnReceiving),
                               title: const Text('Return Receiving'),
-                              onTap: () => _navigate(Constants.opReturnReceivingRoute),
+                              onTap: () =>
+                                  _navigate(Constants.opReturnReceivingRoute),
                             ),
                             ListTile(
-                              contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
                               leading: _svgLeading(NavIcons.cancelReceiving),
                               title: const Text('Cancel Receiving'),
-                              onTap: () => _navigate(Constants.opCancelReceivingRoute),
+                              onTap: () =>
+                                  _navigate(Constants.opCancelReceivingRoute),
                             ),
-
-
                           ],
                         ),
-
-
                       ],
                     ),
 
                     const Divider(),
                     const Padding(
-                      padding:
-                          EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                      padding: EdgeInsets.only(
+                        left: 16.0,
+                        top: 8.0,
+                        bottom: 8.0,
+                      ),
                       child: Text(
                         'GS1 TOOLS',
                         style: TextStyle(
@@ -566,8 +553,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     ListTile(
                       leading: _svgLeading(NavIcons.generateVerifyBarcode),
                       title: const Text('Generate / Verify Barcode'),
-                      onTap: () =>
-                          _navigate(Constants.barcodeGenerateRoute),
+                      onTap: () => _navigate(Constants.barcodeGenerateRoute),
                     ),
 
                     ExpansionTile(
@@ -577,32 +563,29 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.gs1ValidationDemo),
                           title: const Text('GS1 Validation Demo'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.gs1ValidationDemoRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.gs1ValidationTests),
                           title: const Text('GS1 Validation Tests'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.adminGs1ValidationRoute),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.integrationValidation),
                           title: const Text('Integration Validation'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () => _navigate(
-                              Constants.adminIntegrationValidationRoute),
+                            Constants.adminIntegrationValidationRoute,
+                          ),
                         ),
                         ListTile(
                           leading: _svgLeading(NavIcons.validationRules),
                           title: const Text('Validation Rules'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.adminValidationRulesRoute),
                         ),
@@ -616,8 +599,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ListTile(
                           leading: _svgLeading(NavIcons.epcConversion),
                           title: const Text('EPC Conversion'),
-                          contentPadding:
-                              const EdgeInsets.only(left: 32.0),
+                          contentPadding: const EdgeInsets.only(left: 32.0),
                           onTap: () =>
                               _navigate(Constants.gs1EpcConversionRoute),
                         ),
@@ -628,7 +610,10 @@ class _AppDrawerState extends State<AppDrawer> {
                       const Divider(),
                       const Padding(
                         padding: EdgeInsets.only(
-                            left: 16.0, top: 8.0, bottom: 8.0),
+                          left: 16.0,
+                          top: 8.0,
+                          bottom: 8.0,
+                        ),
                         child: Text(
                           'ADMIN',
                           style: TextStyle(
@@ -646,16 +631,13 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.userManagement),
                             title: const Text('User Management'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminUsersRoute),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
+                            onTap: () => _navigate(Constants.adminUsersRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.pendingApprovals),
                             title: const Text('Pending Approvals'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminApprovalsRoute),
                           ),
@@ -669,24 +651,22 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.notificationCenter),
                             title: const Text('Notification Center'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.notificationsRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.manageSubscriptions),
                             title: const Text('Manage Subscriptions'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.notificationSubscriptionsRoute),
+                              Constants.notificationSubscriptionsRoute,
+                            ),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.webhookConfiguration),
                             title: const Text('Webhook Configuration'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.notificationWebhooksRoute),
                           ),
@@ -700,24 +680,21 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.jobQueueManagement),
                             title: const Text('Job Queue Management'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminJobQueueRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.etlManagement),
                             title: const Text('ETL Management'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminEtlManagementRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.bulkExport),
                             title: const Text('Bulk Export'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminBulkExportRoute),
                           ),
@@ -731,26 +708,24 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.apiCollections),
                             title: const Text('API Collections'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminApiCollectionsRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.partnerManagement),
                             title: const Text('Partner Management'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminApiPartnersRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.serviceAccounts),
                             title: const Text('Service Accounts'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.adminApiServiceAccountsRoute),
+                              Constants.adminApiServiceAccountsRoute,
+                            ),
                           ),
                         ],
                       ),
@@ -762,59 +737,57 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.systemSettings),
                             title: const Text('System Settings'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminSettingsRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.cacheManagement),
                             title: const Text('Cache Management'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminCacheRoute),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
+                            onTap: () => _navigate(Constants.adminCacheRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.performanceTests),
                             title: const Text('Performance Tests'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminPerformanceTestsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(NavIcons.performanceOptimization),
+                            leading: _svgLeading(
+                              NavIcons.performanceOptimization,
+                            ),
                             title: const Text('Performance Optimization'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.adminPerformanceOptimizationRoute),
+                              Constants.adminPerformanceOptimizationRoute,
+                            ),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.systemMonitoring),
                             title: const Text('System Monitoring'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminMonitoringRoute),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.databasePartitioning),
                             title: const Text('Database Partitioning'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.adminDatabasePartitioningRoute),
+                              Constants.adminDatabasePartitioningRoute,
+                            ),
                           ),
                           ListTile(
-                            leading: _svgLeading(NavIcons.dataConsistencyIntegrity),
-                            title:
-                                const Text('Data Consistency & Integrity'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            leading: _svgLeading(
+                              NavIcons.dataConsistencyIntegrity,
+                            ),
+                            title: const Text('Data Consistency & Integrity'),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.adminDataConsistencyIntegrityRoute),
+                              Constants.adminDataConsistencyIntegrityRoute,
+                            ),
                           ),
                         ],
                       ),
@@ -826,16 +799,15 @@ class _AppDrawerState extends State<AppDrawer> {
                           ListTile(
                             leading: _svgLeading(NavIcons.eventGenerationTests),
                             title: const Text('Event Generation Tests'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                                Constants.adminEventGenerationTestRoute),
+                              Constants.adminEventGenerationTestRoute,
+                            ),
                           ),
                           ListTile(
                             leading: _svgLeading(NavIcons.industryTestData),
                             title: const Text('Industry Test Data'),
-                            contentPadding:
-                                const EdgeInsets.only(left: 32.0),
+                            contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
                                 _navigate(Constants.adminIndustryTestDataRoute),
                           ),
@@ -849,7 +821,6 @@ class _AppDrawerState extends State<AppDrawer> {
                         onTap: () =>
                             _navigate(Constants.adminCbvVocabularyRoute),
                       ),
-
                     ],
 
                     const Divider(),
@@ -857,7 +828,9 @@ class _AppDrawerState extends State<AppDrawer> {
                       leading: _svgLeading(NavIcons.postmanCollection),
                       title: const Text('Postman Collection'),
                       subtitle: Text(
-                        isAdmin ? 'Download or update the API collection' : 'Download the API collection',
+                        isAdmin
+                            ? 'Download or update the API collection'
+                            : 'Download the API collection',
                         style: const TextStyle(fontSize: 11),
                       ),
                       trailing: isAdmin
@@ -866,7 +839,9 @@ class _AppDrawerState extends State<AppDrawer> {
                               child: TraqIcon(
                                 NavIcons.security,
                                 size: 16,
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.7),
                               ),
                             )
                           : null,
@@ -888,15 +863,15 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: CustomButtonWidget(
                         onTap: () {
                           Navigator.pop(context);
-                          final host = router
-                              .routerDelegate.navigatorKey.currentContext;
+                          final host =
+                              router.routerDelegate.navigatorKey.currentContext;
                           showLogoutConfirmDialog(host ?? context);
                         },
                         title: 'Log Out',
                         iconAsset: NavIcons.logout,
                       ),
                     ),
-                    SizedBox(height: 16,)
+                    SizedBox(height: 16),
                   ],
                 ),
               ),

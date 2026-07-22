@@ -29,7 +29,7 @@ class JourneyCubit extends Cubit<JourneyState> {
     }
   }
 
-  /// Loads up to 10 recent events for the initial empty panel (once).
+  
   Future<void> loadRecentEvents() async {
     if (_recentEventsRequested) return;
     if (state.isLoaded || state.isLoading) return;
@@ -41,7 +41,7 @@ class JourneyCubit extends Cubit<JourneyState> {
       final events =
           await _dashboardService.getRecentEvents(limit: 10);
       if (isClosed) return;
-      // Ignore results if a journey search already took over.
+      
       if (state.isLoaded || state.isLoading) {
         emit(state.copyWith(recentEventsLoading: false));
         return;

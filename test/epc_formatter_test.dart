@@ -57,7 +57,7 @@ void main() {
     test('AI string without serial returns class Digital Link or null', () {
       const input = '(01)00629200080027';
       final result = EPCFormatter.formatToEPCUri(input);
-      // Class-level DL is acceptable; null also fine if converter rejects incomplete SGTIN.
+      
       expect(
         result == null || result == 'https://id.gs1.org/01/00629200080027',
         isTrue,

@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_rows.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
 
-/// Shared cancel shipping / cancel receiving UI. [isReceiving] selects copy only.
+
 class CancelOperationReviewStep extends StatelessWidget {
   const CancelOperationReviewStep({
     super.key,

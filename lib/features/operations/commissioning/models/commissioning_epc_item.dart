@@ -1,7 +1,7 @@
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_serial_pool_status.dart';
 
-/// One EPC queued for commissioning with pool validation metadata.
+
 class CommissioningEpcItem {
   const CommissioningEpcItem({
     required this.parsed,

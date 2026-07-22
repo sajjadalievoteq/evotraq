@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
-/// Motion style for [TraqStaggeredEntrance] children.
+
 enum TraqEntranceSlide {
-  /// Fade + tiny upward rise + scale (auth form fields).
+  
   up,
 
-  /// Fade + horizontal slide from right edge to settled left (auth branding).
+  
   fromRight,
 }
 
-/// One-shot fade + scale entrance (auth card / surface).
+
 class TraqFadeScaleEntrance extends StatefulWidget {
   const TraqFadeScaleEntrance({
     super.key,
@@ -85,7 +85,7 @@ class _TraqFadeScaleEntranceState extends State<TraqFadeScaleEntrance>
   }
 }
 
-/// Reusable one-shot staggered entrance for auth (and later other flows).
+
 class TraqStaggeredEntrance extends StatefulWidget {
   const TraqStaggeredEntrance({
     super.key,
@@ -107,8 +107,8 @@ class TraqStaggeredEntrance extends StatefulWidget {
   final double beginScale;
   final double? risePx;
 
-  /// Horizontal travel for [TraqEntranceSlide.fromRight]. When null, uses
-  /// [LayoutBuilder] max width or [TraqAnimationConstants.brandingSlidePx].
+  
+  
   final double? slidePx;
 
   @override
@@ -297,7 +297,7 @@ class _TraqStaggerItem extends StatelessWidget {
   }
 }
 
-/// Cross-fades status states with fade + scale (no slide).
+
 class TraqStatusSwitcher extends StatelessWidget {
   const TraqStatusSwitcher({
     super.key,
@@ -331,7 +331,7 @@ class TraqStatusSwitcher extends StatelessWidget {
   }
 }
 
-/// Soft scale-in for status icons.
+
 class TraqIconPop extends StatelessWidget {
   const TraqIconPop({super.key, required this.child});
 

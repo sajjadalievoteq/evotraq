@@ -375,13 +375,5 @@ class _ValidationRuleDemoRouteState extends State<ValidationRuleDemoRoute> {
     return null;
   }
   
-  static Route<dynamic> route() {
-    return MaterialPageRoute(
-      builder: (context) => const ValidationRuleDemoRoute(),
-    );
-  }
 
-  static void navigate(BuildContext context) {
-    Navigator.of(context).push(route());
-  }
 }

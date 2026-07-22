@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dio/dio.dart';
@@ -104,14 +103,33 @@ void main() {
         () async => dio.handleUnauthorized(publicOptions),
         returnsNormally,
       );
-      // Public auth path must not notify again within debounce either;
-      // handleUnauthorized returns early before notify.
+      
+      
       expect(calls, 1);
     });
 
-    test('non-public handleUnauthorized notifies callback', () async {
+    test('non-public authenticated 401 notifies callback', () async {
       final dio = DioService();
-      dio.resetUnauthorizedDebounceForTest();
+      dio.resetUnauthorizedGuardsForTest(clearGrace: true);
+      var calls = 0;
+      dio.onUnauthorized = () => calls++;
+
+      
+      
+      await dio.handleUnauthorized(
+        RequestOptions(
+          path: '/api/users/profile',
+          headers: {'Authorization': 'Bearer real-token'},
+        ),
+      );
+
+      expect(calls, 1);
+    });
+
+    test('non-public tokenless 401 does not notify (startup race guard)',
+        () async {
+      final dio = DioService();
+      dio.resetUnauthorizedGuardsForTest(clearGrace: true);
       var calls = 0;
       dio.onUnauthorized = () => calls++;
 
@@ -119,7 +137,7 @@ void main() {
         RequestOptions(path: '/api/users/profile'),
       );
 
-      expect(calls, 1);
+      expect(calls, 0);
     });
   });
 }

@@ -156,7 +156,7 @@ class GS1BarcodeParser {
       return barcode;
     }
 
-    // ASCII GS (29). Some web/HID scanners also emit '|' for FNC1.
+    
     String normalized = barcode
         .replaceAll(String.fromCharCode(29), '<GS>')
         .replaceAll('|', '<GS>');
@@ -267,7 +267,7 @@ class GS1BarcodeParser {
       } else {
         int nextAI = gs1ElementString.indexOf('(', currentPosition);
         int nextGS = gs1ElementString.indexOf('<GS>', currentPosition);
-        // Pipe may still appear if parentheses form was already present.
+        
         int nextPipe = gs1ElementString.indexOf('|', currentPosition);
 
         int endOfValue = gs1ElementString.length;

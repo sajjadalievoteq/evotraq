@@ -28,13 +28,13 @@ String? gs1AiToEpcUri(String input) {
 
   final ai00Digits = ai00?.replaceAll(RegExp(r'\D'), '') ?? '';
 
-  // True SSCC only when AI(00) carries a real 18-digit SSCC.
-  // Do not left-pad shorter values (e.g. a 14-digit GTIN mistyped as AI 00).
+  
+  
   if (ai00Digits.length == 18 && SsccFormat.isValidSscc(ai00Digits)) {
     return Gs1Converter.ssccToEpc(ai00Digits);
   }
 
-  // SGTIN: AI(01)+AI(21), or AI(00)+AI(21) when AI(00) is GTIN-shaped (common scan typo).
+  
   var gtinCandidate = gtin?.replaceAll(RegExp(r'\D'), '') ?? '';
   if (gtinCandidate.isEmpty &&
       ai00Digits.isNotEmpty &&
@@ -68,7 +68,7 @@ String? gs1AiToEpcUri(String input) {
   return null;
 }
 
-/// Normalizes scan/API input to canonical GS1 Digital Link for storage.
+
 String normalizeEpcInput(String input) {
   final trimmed = input.trim();
   if (trimmed.isEmpty) return trimmed;

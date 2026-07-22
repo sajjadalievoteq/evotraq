@@ -25,7 +25,7 @@ void main() {
     });
 
     test('Parse barcode with FNC1 separator', () {
-      // Simulate FNC1 character (ASCII 29)
+      
       String barcode = '01189024111140261721022810AFG8007A';
       barcode += String.fromCharCode(29);
       barcode += '210SIATXTA39607034P';

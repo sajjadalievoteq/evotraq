@@ -1,10 +1,10 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+
 
 part of 'realtime_notification.dart';
 
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
+
+
+
 
 RealtimeNotification _$RealtimeNotificationFromJson(
   Map<String, dynamic> json,

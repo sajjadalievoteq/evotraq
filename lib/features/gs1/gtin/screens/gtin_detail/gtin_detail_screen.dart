@@ -221,7 +221,7 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
   }
 
   Future<void> _submitForm() async {
-    // Ensure every section is mounted so Form validators + extension keys run.
+    
     if (!_forceMountAllSections) {
       setState(() => _forceMountAllSections = true);
       await Future<void>.delayed(Duration.zero);

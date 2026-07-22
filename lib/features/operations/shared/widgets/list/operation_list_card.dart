@@ -12,18 +12,19 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_select
 import 'package:traqtrace_app/features/operations/commissioning/utils/commissioning_batch_status_utils.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_status_utils.dart';
 
-/// Single list card used by every operation list screen.
+
 class OperationListCard extends StatelessWidget {
   const OperationListCard({
     super.key,
     required this.operation,
     required this.isSelected,
-    required this.onTap,
+    required this.onTap, this.isInboxOutbox=false,
   });
 
   final Operation operation;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool? isInboxOutbox;
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +63,11 @@ class OperationListCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      status.label,
+                     isInboxOutbox==true?  displayOperationTypeName(operation.operationType.toString())=='Shipping'?"Outgoing":'Incoming':status.label ,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
-                        fontWeight: FontWeight.bold,
+
                       ),
                     ),
                   ),
@@ -108,7 +109,11 @@ class OperationListCard extends StatelessWidget {
       ),
     );
   }
+  static String displayOperationTypeName(String operationType) {
 
+    final name = operationType;
+    return '${name[0].toUpperCase()}${name.substring(1)}';
+  }
   String _title() {
     final ref = operation.operationReference;
     return switch (operation.operationType) {
@@ -163,7 +168,7 @@ class OperationListCard extends StatelessWidget {
     };
   }
 
-  /// Three middle rows — commissioning shows product identity; others use shared fields.
+  
   List<_CardRow> _rows() {
     if (operation.operationType == OperationType.commissioning) {
       return [
@@ -191,7 +196,7 @@ class OperationListCard extends StatelessWidget {
     ];
   }
 
-  /// Prefer a serial/EPC sample so the card shows what was commissioned.
+  
   String _commissioningSerialOrLocation() {
     final epcs = operation.epcList;
     if (epcs != null && epcs.isNotEmpty) {
@@ -213,7 +218,7 @@ class OperationListCard extends StatelessWidget {
   _CardRow _row(String text, String icon) =>
       _CardRow(text: text, iconAsset: icon);
 
-  /// Any GLN / location present on the shared [Operation] model.
+  
   String _sharedLocation() {
     for (final value in [
       operation.locationGLN,

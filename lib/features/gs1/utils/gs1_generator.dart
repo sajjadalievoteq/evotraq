@@ -10,8 +10,8 @@ class GS1Generator {
     return _uuid.v4();
   }
 
-  /// Builds a GS1 Digital Link SGTIN from Pure Identity components.
-  /// [itemReference] is the EPC item reference (indicator digit + item ref).
+  
+  
   static String generateSGTIN(
     String companyPrefix,
     String itemReference,
@@ -56,7 +56,7 @@ class GS1Generator {
     return sgtins;
   }
 
-  /// Builds a GS1 Digital Link GLN (AI 414) from Pure Identity components.
+  
   static String generateGLN(String companyPrefix, String locationReference) {
     final gcp = companyPrefix.replaceAll(RegExp(r'\D'), '');
     final loc = locationReference.replaceAll(RegExp(r'\D'), '');
@@ -65,8 +65,8 @@ class GS1Generator {
     return Gs1Converter.glnToEpc(gln13) ?? 'https://id.gs1.org/414/$gln13';
   }
 
-  /// Builds a GS1 Digital Link SSCC from Pure Identity components.
-  /// [serialReference] is the EPC serial reference (extension digit + serial).
+  
+  
   static String generateSSCC(String companyPrefix, String serialReference) {
     final gcp = companyPrefix.replaceAll(RegExp(r'\D'), '');
     final serialRef = serialReference.replaceAll(RegExp(r'\D'), '');

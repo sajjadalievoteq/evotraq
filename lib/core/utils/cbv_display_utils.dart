@@ -1,10 +1,10 @@
-/// Human-readable labels for GS1 CBV biz steps, dispositions, and lifecycle status.
+
 abstract final class CbvDisplayUtils {
   static const String cbvUrlPrefix = 'https://ref.gs1.org/cbv/';
   static const String bizStepUrnPrefix = 'urn:epcglobal:cbv:bizstep:';
   static const String dispUrnPrefix = 'urn:epcglobal:cbv:disp:';
 
-  /// Extracts the canonical short token (e.g. `shipping`, `in_transit`).
+  
   static String? shortName(String? value) {
     if (value == null) return null;
     final trimmed = value.trim();
@@ -36,17 +36,17 @@ abstract final class CbvDisplayUtils {
     return trimmed;
   }
 
-  /// Display label for a CBV biz-step URI/URL or short name.
+  
   static String displayBizStep(String? value, {String fallback = 'Unknown'}) {
     return _display(shortName(value), fallback: fallback);
   }
 
-  /// Display label for a CBV disposition URI/URL or short name.
+  
   static String displayDisposition(String? value, {String fallback = 'Unknown'}) {
     return _display(shortName(value), fallback: fallback);
   }
 
-  /// Display label for XS-017 / master-data lifecycle status (e.g. `IN_TRANSIT`).
+  
   static String displayLifecycleStatus(String? value, {String fallback = '—'}) {
     return _display(shortName(value), fallback: fallback);
   }

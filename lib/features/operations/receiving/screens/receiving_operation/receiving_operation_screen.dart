@@ -32,11 +32,15 @@ class ReceivingOperationScreen extends StatefulWidget {
     super.key,
     this.embedded = false,
     this.onEmbeddedActionSuccess,
+    this.initialPrefill,
   });
 
   final bool embedded;
 
   final VoidCallback? onEmbeddedActionSuccess;
+
+  
+  final Map<String, dynamic>? initialPrefill;
 
   @override
   State<ReceivingOperationScreen> createState() => _ReceivingOperationScreenState();
@@ -72,6 +76,45 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
   @override
   void initState() {
     super.initState();
+    _applyPrefill(widget.initialPrefill);
+  }
+
+  void _applyPrefill(Map<String, dynamic>? prefill) {
+    if (prefill == null || prefill.isEmpty) return;
+    final epcs = (prefill['epcs'] as List?)?.map((e) => e.toString()).toList();
+    if (epcs != null && epcs.isNotEmpty) {
+      _scannedEpcs
+        ..clear()
+        ..addAll(epcs);
+    }
+    final source = prefill['sourceGln'];
+    if (source is GLN) {
+      _sourceGln = source;
+    }
+    final receiving = prefill['receivingGln'];
+    if (receiving is GLN) {
+      _receivingGln = receiving;
+    }
+    final carrier = prefill['carrier']?.toString();
+    if (carrier != null && carrier.isNotEmpty) {
+      _carrierController.text = carrier;
+    }
+    final tracking = prefill['trackingNumber']?.toString();
+    if (tracking != null && tracking.isNotEmpty) {
+      _trackingController.text = tracking;
+    }
+    final bol = prefill['billOfLadingNumber']?.toString();
+    if (bol != null && bol.isNotEmpty) {
+      _billOfLadingController.text = bol;
+    }
+    final po = prefill['purchaseOrderNumber']?.toString();
+    if (po != null && po.isNotEmpty) {
+      _purchaseOrderController.text = po;
+    }
+    final desadv = prefill['despatchAdviceNumber']?.toString();
+    if (desadv != null && desadv.isNotEmpty) {
+      _despatchAdviceController.text = desadv;
+    }
   }
 
   bool _validateStep0Silent() =>
@@ -307,7 +350,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           await receivingService.createReceivingOperation(receivingRequest);
 
       if (response.isSuccessOrPartial) {
-        // Auto-accept immediately using the receiving GLN the user selected.
+        
         final eventId = response.eventIds?.isNotEmpty == true
             ? response.eventIds!.first
             : null;
@@ -327,7 +370,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
               );
             }
           } catch (_) {
-            // Auto-accept failed â€” still navigate, user can accept manually.
+            
             if (mounted) {
               context.showSuccess(
                 'Receiving operation created. Tap "Accept Goods" on the record to complete acceptance.',
@@ -394,7 +437,7 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    // Soft warning is advisory â€” don't block toast / next scan on status round-trip.
+    
     _loadSoftWarning(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');

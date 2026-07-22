@@ -1,5 +1,5 @@
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
-import 'package:traqtrace_app/data/services/operations/hierarchy/hierarchy_service.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
@@ -26,7 +26,7 @@ abstract final class UnpackingContainerContentsLoader {
         ? first.totalPages - 1
         : 0;
     if (remainingPages <= 0) {
-      // hasMore without reliable totalPages — fall back to sequential fetch.
+      
       var page = 1;
       while (true) {
         final result = await hierarchyService.getHierarchyChildren(

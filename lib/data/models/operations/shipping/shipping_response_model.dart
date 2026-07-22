@@ -5,6 +5,7 @@ class ShippingResponse {
   ShippingResponse({
     this.shippingOperationId,
     this.shippingReference,
+    this.businessStep,
     this.eventIds,
     this.shippedEpcsCount,
     this.epcList,
@@ -28,6 +29,7 @@ class ShippingResponse {
 
   String? shippingOperationId;
   String? shippingReference;
+  String? businessStep;
   List<String>? eventIds;
   int? shippedEpcsCount;
   List<String>? epcList;
@@ -71,6 +73,9 @@ class ShippingResponse {
           _readNonEmptyString(metadata?['return_shipping_operation_id']),
       shippingReference: _readNonEmptyString(json['shippingReference']) ??
           _readNonEmptyString(json['returnReference']),
+      businessStep: _readNonEmptyString(json['businessStep']) ??
+          _readNonEmptyString(metadata?['businessStep']) ??
+          _readNonEmptyString(metadata?['business_step']),
       eventIds: eventIds,
       shippedEpcsCount: (json['shippedEpcsCount'] as num?)?.toInt() ??
           (json['processedEpcsCount'] as num?)?.toInt() ??
@@ -121,7 +126,7 @@ class ShippingResponse {
   String? get navigableOperationId {
     final id = _readNonEmptyString(shippingOperationId);
     if (id != null) return id;
-    // Event id is a last-resort key; shipping GET resolves eventId and operation ids.
+    
     return _firstNonEmptyString(eventIds) ??
         _readNonEmptyString(metadata?['event_id']) ??
         _readNonEmptyString(metadata?['eventId']);
@@ -135,4 +140,15 @@ class ShippingResponse {
       status == OperationStatus.success || status == OperationStatus.partialSuccess;
   bool get hasErrors =>
       status == OperationStatus.failed || status == OperationStatus.validationError;
+
+  
+  bool get isReturnShipping {
+    final step = businessStep?.toLowerCase() ?? '';
+    if (step.contains('returning')) return true;
+    final meta = metadata;
+    if (meta == null) return false;
+    return meta.containsKey('return_shipping_operation_id') ||
+        meta.containsKey('returnShippingOperationId') ||
+        meta.containsKey('return_shipping_reference');
+  }
 }

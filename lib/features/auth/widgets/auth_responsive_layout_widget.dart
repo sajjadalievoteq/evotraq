@@ -29,13 +29,13 @@ class AuthResponsiveFormLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inside AuthShell the left branding is persistent — only render the form.
+    
     if (AuthShellScope.isActive(context)) {
       final isLarge = context.layout.isLarge;
       final padding = context.padding;
-      // LayoutBuilder + minHeight lives on the form page (not around the
-      // ShellRoute Navigator), so centering is safe and matches the old
-      // vertically-centered right pane.
+      
+      
+      
       return LayoutBuilder(
         builder: (context, constraints) {
           final minHeight = constraints.hasBoundedHeight

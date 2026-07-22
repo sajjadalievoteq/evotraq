@@ -45,9 +45,9 @@ class _PerformanceOptimizationDashboardState extends State<PerformanceOptimizati
     super.dispose();
   }
 
-  /// All five tabs render fields derived from the single merged
-  /// `getPerformanceReport()` response, so one fetch satisfies every tab.
-  /// Triggers that fetch the first time any tab is viewed.
+  
+  
+  
   void _ensureTabLoaded(int index) {
     if (_reportLoaded) return;
     _reportLoaded = true;

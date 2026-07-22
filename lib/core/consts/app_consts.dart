@@ -30,6 +30,7 @@ class Constants {
 
   static const String journeyDashboardRoute = '/dashboards/journey';
   static const String inboxOutboxRoute = '/dashboards/inbox-outbox';
+  static const String productHierarchyRoute = '/dashboards/product-hierarchy';
 
   static const String adminUsersRoute = '/admin/users';
   static const String adminApprovalsRoute = '/admin/approvals';
@@ -121,7 +122,8 @@ class Constants {
       '/epcis/transformation-events/new';
   static const String epcisEventDetailRoute = '/epcis/events/:id';
   static const String epcisGenericEventDetailTitle = 'Event Details';
-  static const String epcisGenericEventDetailViewingPrefix = 'Viewing event ID:';
+  static const String epcisGenericEventDetailViewingPrefix =
+      'Viewing event ID:';
   static const String routerNotFoundTitle = 'Page Not Found';
   static const String routerNotFoundMessagePrefix = 'No route defined for';
   static const String epcisObjectEventDetailRoute = '/epcis/object-events/:id';
@@ -149,11 +151,13 @@ class Constants {
   static const String opReceivingDetailRoute =
       '/operations/receiving/:operationId';
   static const String opReturnShippingRoute = '/operations/return-shipping';
-  static const String opReturnShippingCreateRoute = '/operations/return-shipping/create';
+  static const String opReturnShippingCreateRoute =
+      '/operations/return-shipping/create';
   static const String opReturnShippingDetailRoute =
       '/operations/return-shipping/:operationId';
   static const String opReturnReceivingRoute = '/operations/return-receiving';
-  static const String opReturnReceivingCreateRoute = '/operations/return-receiving/create';
+  static const String opReturnReceivingCreateRoute =
+      '/operations/return-receiving/create';
   static const String opReturnReceivingDetailRoute =
       '/operations/return-receiving/:operationId';
   static const String opCancelShippingRoute = '/operations/cancel-shipping';
@@ -169,8 +173,7 @@ class Constants {
 
   static const String opPackingRoute = '/operations/packing';
   static const String opPackingCreateRoute = '/operations/packing/create';
-  static const String opPackingDetailRoute =
-      '/operations/packing/:operationId';
+  static const String opPackingDetailRoute = '/operations/packing/:operationId';
   static const String hierarchyRoute = '/hierarchy';
   static const String opUnpackingRoute = '/operations/unpacking';
   static const String opUnpackingCreateRoute = '/operations/unpacking/create';

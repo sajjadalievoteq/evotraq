@@ -384,7 +384,7 @@ class PharmaService {
     return _decode(r.data, GtinBatch.fromJson);
   }
 
-  /// Returns null when the batch is not registered (404). Throws on other errors.
+  
   Future<GtinBatch?> tryGetBatchByLot(int gtinId, String batchLot) async {
     final t = await _token();
     final r = await _get(_P.batchByLot('$gtinId', batchLot), t);

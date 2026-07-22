@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/notifications/domain/models/notification_
 
 import 'notification_system_test.mocks.dart';
 
-// Generate mocks
+
 @GenerateMocks([NotificationApiService, WebSocketService])
 void main() {
   group('Notification System Integration Tests', () {
@@ -21,7 +21,7 @@ void main() {
       mockApiService = MockNotificationApiService();
       mockWsService = MockWebSocketService();
       
-      // Setup WebSocket service streams
+      
       when(mockWsService.notificationStream)
           .thenAnswer((_) => const Stream.empty());
       when(mockWsService.connectionStream)
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('should create subscription via API service', () async {
-      // Arrange
+      
       final subscription = NotificationSubscription(
         id: '1',
         subscriptionName: 'Test Subscription',
@@ -59,17 +59,17 @@ void main() {
       when(mockApiService.createSubscription(request))
           .thenAnswer((_) async => subscription);
 
-      // Act
+      
       final result = await mockApiService.createSubscription(request);
 
-      // Assert
+      
       expect(result.id, equals('1'));
       expect(result.subscriptionType, equals('TRANSFORMATION'));
       verify(mockApiService.createSubscription(request)).called(1);
     });
 
     test('should fetch subscriptions via API service', () async {
-      // Arrange
+      
       final subscriptions = [
         NotificationSubscription(
           id: '1',
@@ -94,10 +94,10 @@ void main() {
       when(mockApiService.getSubscriptions(page: 0, size: 20))
           .thenAnswer((_) async => subscriptions);
 
-      // Act
+      
       final result = await mockApiService.getSubscriptions(page: 0, size: 20);
 
-      // Assert
+      
       expect(result.length, equals(2));
       expect(result[0].subscriptionType, equals('TRANSFORMATION'));
       expect(result[1].subscriptionType, equals('TRANSACTION'));
@@ -105,19 +105,19 @@ void main() {
     });
 
     test('should initialize WebSocket service correctly', () {
-      // Act
+      
       mockWsService.initialize('http://localhost:8080', 'test-token');
 
-      // Assert
+      
       verify(mockWsService.initialize('http://localhost:8080', 'test-token')).called(1);
     });
 
     test('should handle notification cubit state transitions', () async {
-      // Arrange
+      
       when(mockApiService.getSubscriptions(page: 0, size: 20))
           .thenAnswer((_) async => []);
 
-      // Assert
+      
       final expectation = expectLater(
         cubit.stream,
         emitsInOrder([
@@ -126,7 +126,7 @@ void main() {
         ]),
       );
 
-      // Act
+      
       cubit.loadSubscriptions();
 
       await expectation;
@@ -135,19 +135,19 @@ void main() {
     });
 
     test('should handle WebSocket token updates', () {
-      // Arrange
+      
       mockWsService.initialize('http://localhost:8080', 'old-token');
 
-      // Act
+      
       mockWsService.updateAccessToken('new-token');
 
-      // Assert
+      
       verify(mockWsService.initialize('http://localhost:8080', 'old-token')).called(1);
       verify(mockWsService.updateAccessToken('new-token')).called(1);
     });
 
     test('should handle subscription creation via cubit', () async {
-      // Arrange
+      
       final subscription = NotificationSubscription(
         id: '1',
         subscriptionName: 'Test Subscription',
@@ -170,7 +170,7 @@ void main() {
       when(mockApiService.getSubscriptions(page: 0, size: 20))
           .thenAnswer((_) async => [subscription]);
 
-      // Assert
+      
       final expectation = expectLater(
         cubit.stream,
         emitsInOrder([
@@ -181,7 +181,7 @@ void main() {
         ]),
       );
 
-      // Act
+      
       cubit.createSubscription(
         subscriptionName: 'Test Subscription',
         webhookUrl: 'https://example.com/webhook',

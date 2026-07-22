@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/product_journey/screens/JourneyDetails/wi
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDetails/widgets/journey_panel_section.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDetails/widgets/journey_product_summary_section.dart';
 
-/// Composes journey detail sections (sidebar / bottom-sheet content).
+
 class JourneyDetailsScreen extends StatelessWidget {
   const JourneyDetailsScreen({super.key, required this.journey});
 

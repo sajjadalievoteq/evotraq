@@ -159,7 +159,8 @@ class AppAssets {
   static const String iconBusiness = '$_traqIcons/business.svg';
   static const String iconNetworkCheck = '$_traqIcons/network-check.svg';
   static const String iconSmokingRooms = '$_traqIcons/smoking-rooms.svg';
-  static const String iconWorkspacePremium = '$_traqIcons/workspace-premium.svg';
+  static const String iconWorkspacePremium =
+      '$_traqIcons/workspace-premium.svg';
   static const String iconCropFree = '$_traqIcons/crop-free.svg';
   static const String iconGrade = '$_traqIcons/grade.svg';
   static const String iconMonetization = '$_traqIcons/monetization.svg';
@@ -173,7 +174,8 @@ class AppAssets {
   static const String iconPackingSealed = '$_traqIcons/packing-sealed.svg';
   static const String iconAccepting = '$_traqIcons/accepting.svg';
   static const String iconReturning = '$_traqIcons/returning.svg';
-  static const String iconReceivingInbound = '$_traqIcons/receiving-inbound.svg';
+  static const String iconReceivingInbound =
+      '$_traqIcons/receiving-inbound.svg';
   static const String iconInspecting = '$_traqIcons/inspecting.svg';
   static const String iconLoadingCargo = '$_traqIcons/loading-cargo.svg';
   static const String iconUnloadingCargo = '$_traqIcons/unloading-cargo.svg';
@@ -186,4 +188,6 @@ class AppAssets {
   static const String iconUpdateStatus = '$_traqIcons/update-status.svg';
   static const String iconObjectEvent = '$_traqIcons/object-event.svg';
   static const String iconProductJourney = '$_traqIcons/product-journey.svg';
+  static const String iconProductHierarchy =
+      '$_traqIcons/product-hierarchy.svg';
 }

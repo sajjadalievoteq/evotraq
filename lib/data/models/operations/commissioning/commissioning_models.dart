@@ -26,10 +26,10 @@ class CommissioningRequest {
 
   String? readPointGLN;
 
-  /// UI/review only — not sent to POST /commissioning/bulk.
+  
   String? identifierType;
 
-  /// UI/review only — not sent to POST /commissioning/bulk (use serialNumbers).
+  
   List<String>? canonicalIdentifiers;
 
   CommissioningRequest({
@@ -60,9 +60,9 @@ class CommissioningRequest {
       'serialNumbers': serialNumbers,
       'batchLotNumber': batchLotNumber,
       'commissioningLocationGLN': commissioningLocationGLN,
-      // Backend fields are LocalDate (yyyy-MM-dd). Send date-only — a full ISO
-      // datetime fails LocalDate deserialization (the cause of the commissioning
-      // 500). Matches gtin_model.dart / gtin_pharmaceutical_extension_model.dart.
+      
+      
+      
       'productionDate': productionDate?.toIso8601String().split('T').first,
       'expiryDate': expiryDate?.toIso8601String().split('T').first,
       'bestBeforeDate': bestBeforeDate?.toIso8601String().split('T').first,
@@ -111,7 +111,7 @@ class CommissioningRequest {
   }
 }
 
-/// Request body for POST /commissioning/sscc.
+
 class SsccCommissioningRequest {
   String? commissioningReference;
   List<String> epcUris;
@@ -121,7 +121,7 @@ class SsccCommissioningRequest {
   String? notes;
   String? countryOfOrigin;
 
-  /// Child SGTIN EPC URIs aggregated into the parent SSCC after commissioning.
+  
   List<String>? childEpcUris;
 
   SsccCommissioningRequest({

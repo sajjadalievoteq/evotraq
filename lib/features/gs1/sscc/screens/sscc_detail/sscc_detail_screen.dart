@@ -225,7 +225,7 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     });
     if (RegExp(r'^\d{18}$').hasMatch(code)) {
       _cubit.fetchSSCCByCode(code);
-      // Aggregation links only need the SSCC code — overlap with primary fetch.
+      
       _loadAggregationLinks(code);
     } else {
       _cubit.fetchSSCCById(code);

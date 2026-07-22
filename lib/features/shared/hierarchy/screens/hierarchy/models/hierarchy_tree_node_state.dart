@@ -1,4 +1,4 @@
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 
 class HierarchyTreeNodeState {
   final HierarchyNode node;

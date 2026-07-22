@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_country_code_picker_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Presenter — controller owned by [GTINDetailScreen].
+
 class ClassificationMarketOriginCoreGroup extends StatelessWidget {
   const ClassificationMarketOriginCoreGroup({
     super.key,

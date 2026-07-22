@@ -1,5 +1,5 @@
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_parent_container_epc.dart';
 import 'package:traqtrace_app/features/operations/unpacking/utils/unpacking_scope.dart';
 

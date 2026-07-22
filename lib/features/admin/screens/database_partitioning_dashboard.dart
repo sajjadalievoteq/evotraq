@@ -12,10 +12,10 @@ import 'package:traqtrace_app/features/admin/widgets/load_state.dart';
 import 'package:traqtrace_app/features/admin/widgets/load_state_view.dart';
 import 'package:traqtrace_app/features/admin/widgets/keep_alive_tab_view.dart';
 
-/// Combined overview data backing the Overview tab's stat cards and the
-/// Partitions tab's summary card, fetched via a single
-/// `getDashboardOverview()` call instead of two separate monitoring/health
-/// calls.
+
+
+
+
 class _OverviewData {
   final PartitionStatistics statistics;
   final Map<String, dynamic> health;
@@ -37,17 +37,17 @@ class _DatabasePartitioningDashboardState
   late final DatabasePartitioningService _partitioningService;
   late TabController _tabController;
 
-  /// Tabs whose data has already been fetched at least once, so switching
-  /// back to a tab doesn't re-trigger its fetch and the refresh button
-  /// knows which tabs' data to reload.
+  
+  
+  
   final Set<int> _loadedTabs = {};
 
-  /// Overview tab (index 0) + Partitions tab's summary card (index 1) both
-  /// derive from this single merged `getDashboardOverview()` response.
+  
+  
   LoadState<_OverviewData> _overviewState = const LoadState.loading();
 
-  /// Partitions tab's full partition list (index 1). `getDashboardOverview()`
-  /// only returns a count, not the full list, so this stays a separate call.
+  
+  
   LoadState<List<PartitionMetadata>> _metadataState = const LoadState.loading();
 
   final List<String> _validTables = [
@@ -81,12 +81,12 @@ class _DatabasePartitioningDashboardState
     super.dispose();
   }
 
-  /// Triggers only the data fetch(es) a given tab needs, the first time that
-  /// tab is viewed:
-  /// - Overview (0): merged overview call (statistics + health).
-  /// - Partitions (1): the same merged overview call (for its summary card)
-  ///   plus the separate partition metadata list call.
-  /// - Archive (2) / Maintenance (3): static content, nothing to fetch.
+  
+  
+  
+  
+  
+  
   void _ensureTabLoaded(int index) {
     if (_loadedTabs.contains(index)) return;
     _loadedTabs.add(index);
@@ -166,9 +166,9 @@ class _DatabasePartitioningDashboardState
     }
   }
 
-  /// Refresh button semantics: reload every tab's data that has already been
-  /// loaded at least once, without triggering fetches for tabs never
-  /// visited (those will fetch fresh on first visit via [_ensureTabLoaded]).
+  
+  
+  
   Future<void> _refreshLoadedTabs() async {
     final futures = <Future<void>>[];
 

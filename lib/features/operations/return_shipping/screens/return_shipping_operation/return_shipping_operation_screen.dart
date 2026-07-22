@@ -412,7 +412,7 @@ class _ReturnShippingOperationScreenState extends State<ReturnShippingOperationS
     }
 
     setState(() => _scannedEpcs.add(barcode));
-    // Soft warning is advisory â€” don't block toast / next scan on status round-trip.
+    
     _checkEpcStatus(barcode);
     if (showSuccessToast) {
       context.showSuccess('Item added');

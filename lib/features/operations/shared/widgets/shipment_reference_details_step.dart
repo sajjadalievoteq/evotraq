@@ -449,14 +449,14 @@ class ShipmentReferenceDetailsStep extends StatelessWidget {
       trackingController != null ||
       notesController != null;
 
-  /// Shipping DSCSA T3: PO and/or DESADV.
+  
   bool get _shippingT3DocumentFields =>
       purchaseOrderController != null &&
       despatchAdviceController != null &&
       receivingAdviceController == null &&
       invoiceController == null;
 
-  /// Receiving DSCSA T3: RECADV, Invoice, and/or DESADV.
+  
   bool get _receivingT3DocumentFields =>
       receivingAdviceController != null || invoiceController != null;
 }

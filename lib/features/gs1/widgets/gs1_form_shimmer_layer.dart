@@ -17,7 +17,7 @@ class Gs1FormShimmerLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!show) return formColumn;
 
-    // Skeleton only — do not build the real form underneath Opacity(0).
+    
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDark ? Colors.grey.shade700 : Colors.grey.shade100;

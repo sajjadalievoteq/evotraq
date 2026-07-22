@@ -30,9 +30,9 @@ class _ResourceManagementDashboardState
       const LoadState.loading();
   LoadState<List<dynamic>> _recommendationsState = const LoadState.loading();
 
-  /// Guards the single merged fetch (`getComprehensiveAnalysis`) so the two
-  /// tabs that depend on it (System Monitor + Recommendations) share one
-  /// network call instead of each tab triggering its own.
+  
+  
+  
   bool _dataLoaded = false;
   bool _isLoading = false;
   Timer? _refreshTimer;
@@ -59,10 +59,10 @@ class _ResourceManagementDashboardState
     super.dispose();
   }
 
-  /// Lazily triggers the shared merged fetch the first time a tab that
-  /// needs it (System Monitor = 0, Recommendations = 2) is viewed. The
-  /// Optimization tab (1) has no data dependency, so viewing it alone
-  /// never triggers a network call.
+  
+  
+  
+  
   void _ensureTabLoaded(int index) {
     if (_dataLoaded) return;
     if (index == 0 || index == 2) {
@@ -87,10 +87,10 @@ class _ResourceManagementDashboardState
     });
   }
 
-  /// Reloads all resource-management data via the merged comprehensive
-  /// analysis endpoint (superset of the old system-metrics +
-  /// recommendations fan-out). Also used by the refresh button, which
-  /// re-triggers this shared fetch and repopulates both tabs' states.
+  
+  
+  
+  
   Future<void> _loadAllData() async {
     if (mounted) {
       setState(() {

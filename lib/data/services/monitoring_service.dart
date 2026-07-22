@@ -131,8 +131,8 @@ class MonitoringService {
     }
   }
 
-  /// Merged performance + storage + integrity summary in a single call,
-  /// used by [_fetchAllMetrics] to replace 3 separate requests with 1.
+  
+  
   Future<Map<String, dynamic>> getMonitoringSummary() async {
     try {
       final response = await _dioService.get(

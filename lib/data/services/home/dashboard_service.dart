@@ -54,9 +54,9 @@ class DashboardService {
     );
   }
 
-  /// Loads master-data counts, recent events, and event totals from the same
-  /// event list responses (avoids a second round of size=1 event count calls).
-  /// Kept for backward compatibility; Home screen uses [getSummary].
+  
+  
+  
   Future<({DashboardStats stats, List<RecentEvent> recentEvents})>
       getStatsAndRecentEvents({int recentLimit = 10}) async {
     final token = await _dioService.getAuthToken();
@@ -93,7 +93,7 @@ class DashboardService {
     return (stats: stats, recentEvents: eventPage.events);
   }
 
-  /// Single-request dashboard payload (counts, event totals, recent events, throughput).
+  
   Future<({DashboardStats stats, List<RecentEvent> recentEvents})> getSummary({
     int recentLimit = 5,
     int throughputHours = 24,

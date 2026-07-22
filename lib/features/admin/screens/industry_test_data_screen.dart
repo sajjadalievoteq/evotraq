@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -34,6 +35,14 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   int _eventProgress = 0;
   int _eventTotal = 0;
 
+  final TextEditingController _hierarchyLevelsController =
+      TextEditingController(text: '10');
+  final TextEditingController _hierarchyChildrenController =
+      TextEditingController(text: '100');
+  String? _lastHierarchyRunId;
+  String? _lastHierarchyRootEpc;
+  String? _lastHierarchyRootSscc;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +60,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _hierarchyLevelsController.dispose();
+    _hierarchyChildrenController.dispose();
     super.dispose();
   }
 
@@ -349,31 +360,159 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
     }
   }
 
-  Future<void> _generatePharmaEvents() async {
+  Future<void> _generatePharmaFullSupplyChain() async {
     if (_testDataService == null || _isLoading) return;
 
     setState(() {
       _isLoading = true;
       _eventProgress = 0;
-      _eventTotal = 200;
-      _statusMessage = 'Starting EPCIS event generation for pharmaceutical supply chain...';
+      _eventTotal = 3;
+      _statusMessage =
+          'Generating connected pharma supply chain (master data + operations). '
+          'This can take several minutes…';
       _isError = false;
     });
 
     try {
-      await _testDataService!.generatePharmaEvents(
-        onProgress: (current, total, eventInfo) {
+      final result = await _testDataService!.generatePharmaFullConnectedSupplyChain(
+        onProgress: (current, total, status) {
           setState(() {
             _eventProgress = current;
             _eventTotal = total;
-            _statusMessage = 'Creating Event $current/$total: $eventInfo';
+            _statusMessage = status;
+          });
+        },
+      );
+      final shipping = result['shippingOperationsCreated'] ?? 0;
+      final receiving = result['receivingOperationsCreated'] ?? 0;
+      final inTransit = result['inTransitShipmentsOpen'] ?? 0;
+      final commissioning = result['commissioningBatchesCreated'] ?? 0;
+      final errCount = (result['errors'] is List)
+          ? (result['errors'] as List).length
+          : 0;
+      _setStatus(
+        'Connected supply chain ready: $commissioning commissioning, '
+        '$shipping ship, $receiving receive, $inTransit open in-transit. '
+        '${errCount > 0 ? "$errCount warning(s) — non-fatal; check server logs. " : ""}'
+        'Set operational GLN to seeded distributor/pharmacy for Inbox/Outbox.',
+        isError: errCount > 0 && receiving == 0,
+      );
+    } catch (e) {
+      _setStatus(
+        'Error generating connected supply chain: ${e.toString()}',
+        isError: true,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _generatePackedHierarchy() async {
+    if (_testDataService == null || _isLoading) return;
+
+    final levels = int.tryParse(_hierarchyLevelsController.text.trim());
+    final children = int.tryParse(_hierarchyChildrenController.text.trim());
+    if (levels == null || levels < 1 || levels > 12) {
+      _setStatus('Levels must be an integer from 1 to 12.', isError: true);
+      return;
+    }
+    if (children == null || children < 1 || children > 200) {
+      _setStatus(
+        'Children per level must be an integer from 1 to 200.',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _eventProgress = 0;
+      _eventTotal = 2;
+      _statusMessage =
+          'Generating packed hierarchy (depth $levels, $children children/level)…';
+      _isError = false;
+    });
+
+    try {
+      final result = await _testDataService!.generatePackedHierarchy(
+        levels: levels,
+        childrenPerLevel: children,
+        onProgress: (current, total, status) {
+          setState(() {
+            _eventProgress = current;
+            _eventTotal = total;
+            _statusMessage = status;
           });
         },
       );
 
-      _setStatus('Successfully created $_eventTotal EPCIS events for pharmaceutical supply chain!');
+      final runId = result['runId']?.toString();
+      final rootEpc = result['rootEpc']?.toString();
+      final rootSscc = result['rootSsccCode']?.toString();
+      final depth = (result['depth'] as num?)?.toInt() ?? levels;
+      final sscc = (result['totalSscc'] as num?)?.toInt() ?? 0;
+      final sgtin = (result['totalSgtin'] as num?)?.toInt() ?? 0;
+      final ms = (result['processingTimeMs'] as num?)?.toInt() ?? 0;
+
+      setState(() {
+        _lastHierarchyRunId = runId;
+        _lastHierarchyRootEpc = rootEpc;
+        _lastHierarchyRootSscc = rootSscc;
+      });
+
+      final searchHint = (rootSscc != null && rootSscc.isNotEmpty)
+          ? rootSscc
+          : (rootEpc ?? '');
+      _setStatus(
+        'Hierarchy ready — search this root in Product Hierarchy:\n'
+        '$searchHint\n\n'
+        'depth $depth · $sscc SSCC / $sgtin SGTIN · ${ms}ms · runId=$runId',
+      );
     } catch (e) {
-      _setStatus('Error generating pharmaceutical events: ${e.toString()}', isError: true);
+      _setStatus(
+        'Error generating packed hierarchy: ${e.toString()}',
+        isError: true,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _cleanupPackedHierarchy() async {
+    if (_testDataService == null || _isLoading) return;
+    final runId = _lastHierarchyRunId;
+    if (runId == null || runId.isEmpty) {
+      _setStatus(
+        'No hierarchy runId yet — generate one first, or paste a known runId.',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _statusMessage = 'Cleaning up hierarchy runId=$runId…';
+      _isError = false;
+    });
+
+    try {
+      final result = await _testDataService!.cleanupPackedHierarchy(runId: runId);
+      final deleted = (result['deletedRows'] as num?)?.toInt() ?? 0;
+      setState(() {
+        _lastHierarchyRunId = null;
+        _lastHierarchyRootEpc = null;
+        _lastHierarchyRootSscc = null;
+      });
+      _setStatus('Hierarchy cleanup done — ≈$deleted rows removed for runId=$runId.');
+    } catch (e) {
+      _setStatus(
+        'Error cleaning hierarchy: ${e.toString()}',
+        isError: true,
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -407,34 +546,41 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
       body: Column(
         children: [
           if (_statusMessage != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: _isError 
-                  ? Colors.red.shade100 
-                  : Colors.green.shade100,
-              child: Row(
-                children: [
-                  TraqIcon(
-                    _isError ? AppAssets.iconXCircle : AppAssets.iconInfo,
-                    color: _isError ? Colors.red : Colors.green,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _statusMessage!,
-                      style: TextStyle(
-                        color: _isError ? Colors.red.shade900 : Colors.green.shade900,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 180),
+              child: Material(
+                color: _isError
+                    ? Colors.red.shade100
+                    : Colors.green.shade100,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TraqIcon(
+                        _isError ? AppAssets.iconXCircle : AppAssets.iconInfo,
+                        color: _isError ? Colors.red : Colors.green,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SelectableText(
+                          _statusMessage!,
+                          style: TextStyle(
+                            color: _isError
+                                ? Colors.red.shade900
+                                : Colors.green.shade900,
+                          ),
+                        ),
+                      ),
+                      if (_isLoading)
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                    ],
                   ),
-                  if (_isLoading)
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                ],
+                ),
               ),
             ),
           
@@ -700,6 +846,167 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               ),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            elevation: 3,
+            color: const Color(0xFF1B3328),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'One-Click Connected Supply Chain',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Seeds master data and runs real operations (commissioning, packing, '
+                    'shipping, receiving, returns, unpack, decommission) so operation lists, '
+                    'Inbox, Outbox, and product journey screens populate with linked data.',
+                    style: TextStyle(fontSize: 13, color: Colors.white70),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _generatePharmaFullSupplyChain,
+                      icon: const TraqIcon(AppAssets.iconArrowR, color: Colors.white),
+                      label: const Text('Generate Full Connected Pharma Supply Chain'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF2D4A3E),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+
+          Card(
+            elevation: 3,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2D4A3E).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const TraqIcon(
+                          NavIcons.productHierarchy,
+                          color: Color(0xFF2D4A3E),
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Deep Packed Hierarchy (Product Hierarchy stress test)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Builds a nested SSCC chain for the Product Hierarchy screen. '
+                    'Each level packs ~N direct children (N−1 leaf SGTINs + 1 nested SSCC; '
+                    'deepest level is all SGTINs). Requires pharma GLN + GTIN already seeded. '
+                    'Defaults: 10 levels × 100 children (~1k items).',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _hierarchyLevelsController,
+                          enabled: !_isLoading,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Levels (1–12)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _hierarchyChildrenController,
+                          enabled: !_isLoading,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Children / level (1–200)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_lastHierarchyRunId != null) ...[
+                    const SizedBox(height: 12),
+                    _buildHierarchyRootResultCard(),
+                  ],
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              _isLoading ? null : _generatePackedHierarchy,
+                          icon: const TraqIcon(
+                            NavIcons.aggregationHierarchy,
+                            color: Colors.white,
+                          ),
+                          label: const Text('Generate Deep Hierarchy'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2D4A3E),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading || _lastHierarchyRunId == null
+                              ? null
+                              : _cleanupPackedHierarchy,
+                          icon: const TraqIcon(AppAssets.iconXCircle),
+                          label: const Text('Cleanup Last Run'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF2D4A3E),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           
           const SizedBox(height: 24),
           
@@ -803,21 +1110,20 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Create complete pharmaceutical supply chain EPCIS events:\n'
-                    '• Commissioning events (manufacturing)\n'
-                    '• Aggregation events (packing)\n'
-                    '• Shipping events (manufacturer → distributor → pharmacy)\n'
-                    '• Receiving events (at each location)\n'
-                    'All events include proper pharmaceutical compliance data.',
+                    'Creates lifecycle EPCIS events via real operations (same as Connected Supply Chain):\n'
+                    '• Commissioning (SGTIN + SSCC)\n'
+                    '• Packing / aggregation\n'
+                    '• Shipping & receiving (manufacturer → distributor → pharmacy)\n'
+                    'Raw event inserts are disabled so Product Journey never shows duplicate steps.',
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _generatePharmaEvents,
+                      onPressed: _isLoading ? null : _generatePharmaFullSupplyChain,
                       icon: TraqIcon(AppAssets.iconArrowR),
-                      label: const Text('Generate Supply Chain Events'),
+                      label: const Text('Generate via Connected Supply Chain'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2D4A3E),
                         foregroundColor: Colors.white,
@@ -831,6 +1137,84 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHierarchyRootResultCard() {
+    final sscc = _lastHierarchyRootSscc;
+    final epc = _lastHierarchyRootEpc;
+    final runId = _lastHierarchyRunId;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D4A3E).withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF2D4A3E).withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Root parent — paste into Product Hierarchy search',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          if (sscc != null && sscc.isNotEmpty)
+            _buildCopyableRootRow(label: 'SSCC', value: sscc),
+          if (epc != null && epc.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _buildCopyableRootRow(label: 'EPC', value: epc),
+          ],
+          if (runId != null && runId.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _buildCopyableRootRow(label: 'runId', value: runId),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCopyableRootRow({required String label, required String value}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 48,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+          ),
+        ),
+        IconButton(
+          tooltip: 'Copy $label',
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          icon: const TraqIcon(AppAssets.iconCopy, size: 18),
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: value));
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Copied $label'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

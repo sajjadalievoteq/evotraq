@@ -799,7 +799,7 @@ class _CommissioningOperationViewState extends State<CommissioningOperationView>
       countryOfOrigin: _countryOfOriginController.text.trim().isNotEmpty
           ? _countryOfOriginController.text.trim().toUpperCase()
           : null,
-      // SSCC child aggregation is not collected on this screen.
+      
       childEpcUris: null,
     );
   }

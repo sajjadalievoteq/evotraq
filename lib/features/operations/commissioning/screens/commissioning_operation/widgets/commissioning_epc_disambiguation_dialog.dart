@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_pool_match.dart';
 
-/// Prompts the operator to pick one pool record when a bare serial is ambiguous.
+
 class CommissioningEpcDisambiguationDialog extends StatelessWidget {
   const CommissioningEpcDisambiguationDialog({
     super.key,

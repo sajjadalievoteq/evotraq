@@ -271,7 +271,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
         childEpcs: epcUris,
         packingLocationGLN: _packingLocationGLN!.glnCode,
         operationLocation: OperationGlnDisplay.fromGln(_packingLocationGLN),
-        // Pharma packing auto-commissions ALLOCATED SSCCs; mirror location as read point.
+        
         readPointGLN: _packingLocationGLN!.glnCode,
         closeContainer: _closeContainer,
         workOrderNumber: _workOrderController.text.trim().isNotEmpty

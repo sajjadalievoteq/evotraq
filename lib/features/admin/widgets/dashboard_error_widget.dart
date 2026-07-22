@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared error rendering for admin monitoring dashboards, matching the
-/// visual style already used ad-hoc across the connection pool/resource/
-/// thread pool dashboards' `_buildErrorWidget` helpers.
+
+
+
 class DashboardErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;

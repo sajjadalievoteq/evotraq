@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_date_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-/// Presenter — controllers/values owned by [GTINDetailScreen].
+
 class MarketingAuthorizationBoundGroup extends StatelessWidget {
   const MarketingAuthorizationBoundGroup({
     super.key,

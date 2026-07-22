@@ -22,7 +22,7 @@ class CancelShippingRequest {
   final OperationGlnDisplay? sourceLocation;
   final OperationGlnDisplay? destinationLocation;
   final String cancelReason;
-  /// Shipper / source GLN authorizing the cancel (CX-7).
+  
   final String actingGln;
   final String? originalShippingReference;
   final String? comments;

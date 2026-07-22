@@ -14,18 +14,18 @@ import 'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_s
     if (dart.library.html)
         'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_web.dart';
 
-/// Camera acquisition for GS1 barcode scanning (Web + Android + iOS + macOS).
-///
-/// Public API (constructor, callbacks, overlay) is preserved. Downstream GS1
-/// parsing is unchanged — this widget only delivers raw barcode strings.
-///
-/// Mounted only after an explicit "Scan with Camera" tap so browser permission
-/// is never requested on page load.
-///
-/// **mobile_scanner 7.2.1 web lifecycle:** MediaStream tracks are released by
-/// [MobileScannerController.stop] (ZXing `reset`). [dispose] also calls
-/// platform `stop`. We disable [MobileScanner.useAppLifecycleState] and own
-/// stop/start ourselves to avoid racing dispose vs the widget's observer.
+
+
+
+
+
+
+
+
+
+
+
+
 class GS1BarcodeScannerWidget extends StatefulWidget {
   const GS1BarcodeScannerWidget({
     super.key,
@@ -46,10 +46,10 @@ class GS1BarcodeScannerWidget extends StatefulWidget {
   final Widget? loadingWidget;
   final Widget? errorWidget;
 
-  /// Optional: host can mark camera capability as available after start.
+  
   final VoidCallback? onCameraBecameAvailable;
 
-  /// Optional: host can mark camera capability as unavailable after failure.
+  
   final VoidCallback? onCameraUnavailable;
 
   @override
@@ -68,10 +68,10 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
   String? _lastDetectedValue;
   DateTime? _lastDetectedAt;
 
-  /// True while a live controller exists (not fully released).
+  
   bool _cameraHeld = false;
 
-  /// In-flight full release; prevents overlapping dispose / recreate.
+  
   Future<void>? _releaseFuture;
 
   VoidCallback? _unsubscribeVisibility;
@@ -118,7 +118,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     _releaseFuture = null;
   }
 
-  /// Full release: stop (releases web MediaStream) then dispose. Idempotent.
+  
   Future<void> _releaseFully() {
     return _releaseFuture ??= _doReleaseFully();
   }
@@ -135,7 +135,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
       controller.removeListener(_onControllerChanged);
     } catch (_) {}
 
-    // mobile_scanner 7.2.1 web: stop() → ZXing reset() stops MediaStreamTracks.
+    
     try {
       await controller.stop();
     } catch (e) {
@@ -147,16 +147,16 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
       debugPrint('GS1BarcodeScanner: dispose failed: $e');
     }
 
-    // Clear any leftover browser tracks after plugin teardown.
+    
     forceStopActiveCameraTracks();
 
     _controller = null;
   }
 
-  /// Pause only (keep controller) — matches mobile_scanner README lifecycle.
+  
   Future<void> _pauseCameraForLifecycle() async {
     if (!_cameraHeld || _controller == null) return;
-    // Permission dialogs also fire inactive; only stop if already running.
+    
     if (!_controller!.value.isRunning) return;
     try {
       await _controller!.stop();
@@ -176,8 +176,8 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     if (mounted) setState(() {});
   }
 
-  /// MobileScanner can notify during mount/layout. Never setState or notify the
-  /// parent synchronously from that path — it triggers `!_dirty` on ancestors.
+  
+  
   void _onControllerChanged() {
     if (!mounted || !_cameraHeld || _controllerUpdateScheduled) return;
     _controllerUpdateScheduled = true;
@@ -258,8 +258,8 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     return rawValue.isNotEmpty ? rawValue : null;
   }
 
-  /// Single-mode: fully release the MediaStream before notifying the parent
-  /// (parent still switches to details / unmounts). Continuous mode keeps scanning.
+  
+  
   Future<void> _handleValidGS1Barcode(String gs1ElementString) async {
     if (widget.scanMode == ScanMode.single) {
       await _releaseFully();
@@ -322,8 +322,8 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Own lifecycle only — MobileScanner.useAppLifecycleState is false.
-    // Do not dispose on inactive (permission popups); stop releases the stream.
+    
+    
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
@@ -341,7 +341,7 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
     WidgetsBinding.instance.removeObserver(this);
     _unsubscribeVisibility?.call();
     _unsubscribeVisibility = null;
-    // Kick off stop+dispose immediately; cannot await in State.dispose.
+    
     unawaited(_releaseFully());
     super.dispose();
   }
@@ -394,14 +394,14 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
       children: [
         MobileScanner(
           controller: controller,
-          // Avoid racing our WidgetsBindingObserver (dispose vs stop/start).
+          
           useAppLifecycleState: false,
           onDetect: _onDetect,
           placeholderBuilder: (_) =>
               widget.loadingWidget ??
               const Center(child: CircularProgressIndicator()),
           errorBuilder: (context, error) {
-            // errorBuilder runs during build — only schedule side effects.
+            
             final message = _friendlyError(error);
             if (_errorMessage != message && !_controllerUpdateScheduled) {
               _controllerUpdateScheduled = true;

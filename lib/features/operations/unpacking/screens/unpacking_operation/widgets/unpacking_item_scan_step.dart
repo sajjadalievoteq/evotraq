@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_input_widget.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_node.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_scanning_mode.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_manual_entry_card.dart';

@@ -1,4 +1,4 @@
-/// Pharma batch master lookup lifecycle for commissioning step 1.
+
 enum CommissioningBatchLookupStatus {
   idle,
   lookingUp,

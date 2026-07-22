@@ -9,7 +9,7 @@ import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_u
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
 
-/// Recent-event list card styled to match [OperationListCard], bound to [RecentEvent].
+
 class JourneyRecentEventCard extends StatelessWidget {
   const JourneyRecentEventCard({
     super.key,

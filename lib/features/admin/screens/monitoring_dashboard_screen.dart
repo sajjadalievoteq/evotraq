@@ -38,9 +38,9 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   StreamSubscription<IntegrityStatistics>? _integritySubscription;
   StreamSubscription<List<PerformanceAlert>>? _alertsSubscription;
 
-  // Each metric group tracks its own load lifecycle independently, so a
-  // failure in one (e.g. storage) never blanks the cards/tabs backed by
-  // the others (e.g. performance, integrity).
+  
+  
+  
   LoadState<PerformanceMetrics> _performanceState = const LoadState.loading();
   LoadState<StorageStatistics> _storageState = const LoadState.loading();
   LoadState<IntegrityStatistics> _integrityState = const LoadState.loading();
@@ -140,10 +140,10 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
       _monitoringService.startRealTimeMonitoring(interval: const Duration(seconds: 10));
 
     } catch (e) {
-      // Initialization itself failed (e.g. service lookup) before any
-      // subscription could be set up; surface the failure per metric group
-      // so the tabs can each show their own error/retry instead of a single
-      // screen-wide blank/error state.
+      
+      
+      
+      
       if (mounted) {
         setState(() {
           final message = 'Failed to initialize monitoring: $e';
@@ -278,9 +278,9 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
   }
 
   Widget _buildBody() {
-    // Each tab renders independently and each metric group manages its own
-    // loading/empty/error state via LoadStateView, so a failure in one
-    // metric (e.g. storage) never blanks the tabs backed by the others.
+    
+    
+    
     return TabBarView(
       controller: _tabController,
       children: [
@@ -306,9 +306,9 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
 
           const SizedBox(height: 16),
 
-          // Alerts depend only on the alerts metric group, so a failure
-          // fetching alerts doesn't affect the overview card above or the
-          // performance charts below.
+          
+          
+          
           LoadStateView<List<PerformanceAlert>>(
             state: _alertsState,
             loadingWidget: const SizedBox.shrink(),
@@ -328,8 +328,8 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
             },
           ),
 
-          // Real-time performance / event type charts depend only on the
-          // performance metric group.
+          
+          
           LoadStateView<PerformanceMetrics>(
             state: _performanceState,
             loadingWidget: const SizedBox.shrink(),

@@ -2,7 +2,7 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_parser.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 
-/// Resolves list-search input via the shared [parseToEPC] pipeline.
+
 class SgtinSearchInputResolver {
   const SgtinSearchInputResolver({
     required this.raw,

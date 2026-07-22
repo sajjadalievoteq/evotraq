@@ -1,9 +1,9 @@
-/// Status of a single metric group's independent load lifecycle, so one
-/// failing/empty metric doesn't have to blank an entire dashboard tab.
+
+
 enum LoadStatus { loading, success, empty, error }
 
-/// Small value holder pairing a [LoadStatus] with the data (on success) or
-/// error message (on error) for one metric group.
+
+
 class LoadState<T> {
   final LoadStatus status;
   final T? data;

@@ -50,9 +50,9 @@ class JourneyEventFilterChips extends StatelessWidget {
   }
 }
 
-/// A single filter chip that springs into its selected state and
-/// bounces back when deselected — using a single AnimationController
-/// that plays forward on select and reverses on deselect.
+
+
+
 class _AnimatedFilterChip extends StatefulWidget {
   const _AnimatedFilterChip({
     required this.filter,
@@ -79,11 +79,11 @@ class _AnimatedFilterChipState extends State<_AnimatedFilterChip>
     _ctrl = AnimationController(
       vsync: this,
       duration: JourneyAnimationConstants.filterChipBounce,
-      // Start at 1.0 so chips aren't invisible on first build.
+      
       value: 1.0,
     );
-    // Dips to 0.88 at the midpoint then springs back to 1.0 via easeOutBack.
-    // The controller drives 0→1 and the tween maps that to 0.88→1.0→1.08→1.0.
+    
+    
     _scale = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween(begin: 1.0, end: 0.88)
@@ -102,7 +102,7 @@ class _AnimatedFilterChipState extends State<_AnimatedFilterChip>
   void didUpdateWidget(_AnimatedFilterChip old) {
     super.didUpdateWidget(old);
     if (!old.isSelected && widget.isSelected) {
-      // Newly selected — play the press-and-spring sequence.
+      
       _ctrl.forward(from: 0.0);
     }
   }

@@ -1,17 +1,17 @@
 import 'dart:convert';
 
-/// Central parser for backend error JSON across all TraqTrace API calls.
-///
-/// Priority (when multiple fields exist):
-/// 1. `messages`
-/// 2. `errors` / `fieldErrors`
-/// 3. nested `error.messages` / `error.errors`
-/// 4. `message`
-/// 5. nested `error` string
+
+
+
+
+
+
+
+
 class BackendErrorParser {
   BackendErrorParser._();
 
-  /// Parsed display text + metadata from a response body string or map.
+  
   static BackendErrorDetails parse(Object? body) {
     final map = _asMap(body);
     if (map == null) {
@@ -23,16 +23,16 @@ class BackendErrorParser {
   static BackendErrorDetails parseMap(Map<String, dynamic> json) {
     final parts = <String>[];
 
-    // 1. messages
+    
     _collectList(parts, json['messages']);
 
-    // 2. errors + fieldErrors (only if messages absent)
+    
     if (parts.isEmpty) {
       _collectList(parts, json['errors']);
       _collectFieldErrors(parts, json['fieldErrors']);
     }
 
-    // 3. nested error.messages / error.errors / error.fieldErrors
+    
     final nested = json['error'];
     if (parts.isEmpty && nested is Map) {
       final nestedMap = Map<String, dynamic>.from(nested);
@@ -43,7 +43,7 @@ class BackendErrorParser {
       }
     }
 
-    // 4. top-level message (only when nothing more specific was found)
+    
     if (parts.isEmpty) {
       final headline = cleanLine(json['message']?.toString());
       if (headline != null) {
@@ -51,7 +51,7 @@ class BackendErrorParser {
       }
     }
 
-    // 5. nested error as plain string
+    
     if (parts.isEmpty && nested is String) {
       final line = cleanLine(nested);
       if (line != null) parts.add(line);
@@ -65,7 +65,7 @@ class BackendErrorParser {
     );
   }
 
-  /// True when the body looks like an API error payload (not an operation success DTO).
+  
   static bool isStructuredErrorBody(Map<String, dynamic> json) {
     if (json.containsKey('shippingOperationId') ||
         json.containsKey('receivingOperationId') ||

@@ -77,8 +77,8 @@ class _GS1BarcodeScannerScreenState extends State<GS1BarcodeScannerScreen> {
     } catch (_) {
     }
 
-    // Wired is default when HID is possible; camera starts only after
-    // explicit "Scan with Camera" tap (browser permission safety).
+    
+    
     if (_scannerDetection.supportsWired) {
       _isWiredActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {

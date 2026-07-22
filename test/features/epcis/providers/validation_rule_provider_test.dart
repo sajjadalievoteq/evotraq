@@ -21,7 +21,7 @@ void main() {
     setUp(() {
       mockService = MockValidationRuleService();
       
-      // Default behavior for getAllRules - return sample rules
+      
       when(mockService.getAllRules()).thenAnswer((_) async => [
         ValidationRule(
           ruleId: 'obj_action',
@@ -47,7 +47,7 @@ void main() {
     test('should load predefined rules on initialization', () async {
       await cubit.loadValidationRules();
       
-      // Verify predefined rules are loaded
+      
       expect(cubit.rules, isNotEmpty);
       expect(cubit.rules.any((r) => r.ruleId.contains('obj_action')), true);
       verify(mockService.getAllRules()).called(greaterThanOrEqualTo(1));
@@ -77,10 +77,10 @@ void main() {
 
       await cubit.loadValidationRules();
       
-      // Get rules for Object Events
+      
       final objectRules = cubit.getRulesByEventType(EventType.ObjectEvent);
       
-      // Verify rules are filtered correctly
+      
       expect(objectRules, isNotEmpty);
       expect(objectRules.every((r) => r.eventType == EventType.ObjectEvent || r.eventType == EventType.ALL), true);
       expect(objectRules.any((r) => r.eventType == EventType.AggregationEvent), false);
@@ -101,10 +101,10 @@ void main() {
 
       await cubit.loadValidationRules();
       
-      // Get rules for specific category
+      
       final formatRules = cubit.getRulesByCategory('format');
       
-      // Verify rules are filtered correctly
+      
       for (final rule in formatRules) {
         expect(rule.category, 'format');
       }
@@ -127,17 +127,17 @@ void main() {
 
       await cubit.loadValidationRules();
       
-      // Create the rule first
+      
       final createdRule = await cubit.createValidationRule(testRule);
       expect(createdRule, isNotNull);
       
-      // Update the rule with different severity
+      
       if (createdRule?.id != null) {
         final updatedRule = createdRule!.copyWith(
           severity: RuleSeverity.ERROR,
         );
         
-        // Update the rule
+        
         final result = await cubit.updateValidationRule(createdRule.id!, updatedRule);
         expect(result, isNotNull);
         expect(result?.severity, RuleSeverity.ERROR);
@@ -147,7 +147,7 @@ void main() {
   
   group('ValidationRule model tests', () {
     test('should convert between JSON and model correctly', () {
-      // Create a rule
+      
       final rule = ValidationRule(
         ruleId: 'test_rule',
         name: 'Test Rule',
@@ -158,13 +158,13 @@ void main() {
         enabled: true,
       );
       
-      // Convert to JSON
+      
       final json = rule.toJson();
       
-      // Create new rule from JSON
+      
       final recreatedRule = ValidationRule.fromJson(json);
       
-      // Verify values
+      
       expect(recreatedRule.ruleId, rule.ruleId);
       expect(recreatedRule.name, rule.name);
       expect(recreatedRule.description, rule.description);
@@ -175,17 +175,17 @@ void main() {
     });
     
     test('should correctly determine severity properties', () {
-      // Test severity display names
+      
       expect(RuleSeverity.INFO.displayName, 'Info');
       expect(RuleSeverity.WARNING.displayName, 'Warning');
       expect(RuleSeverity.ERROR.displayName, 'Error');
       
-      // Test severity colors are different
+      
       expect(RuleSeverity.INFO.color, isNotNull);
       expect(RuleSeverity.WARNING.color, isNotNull);
       expect(RuleSeverity.ERROR.color, isNotNull);
       
-      // Test severity icon assets are different
+      
       expect(RuleSeverity.INFO.iconAsset, isNotNull);
       expect(RuleSeverity.WARNING.iconAsset, isNotNull);
       expect(RuleSeverity.ERROR.iconAsset, isNotNull);

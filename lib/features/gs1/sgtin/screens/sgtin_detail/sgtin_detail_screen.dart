@@ -331,7 +331,7 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
           } else if (widget.epcUri != null &&
               state.sgtin!.canonicalIdentifier == widget.epcUri &&
               state.sgtin!.id != _loadedSgtinId) {
-            // Navigated from product journey — loaded by EPC URI instead of DB PK.
+            
             _populateForm(state.sgtin!);
           }
 

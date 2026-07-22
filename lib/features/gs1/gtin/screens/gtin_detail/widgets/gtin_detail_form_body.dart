@@ -25,7 +25,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
 import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
-/// Form body that binds presenters to screen-owned [GtinDetailScreenFields].
+
 class GtinDetailFormBody extends StatelessWidget {
   const GtinDetailFormBody({
     super.key,
@@ -133,7 +133,7 @@ class GtinDetailFormBody extends StatelessWidget {
             gtin: gtin,
             gtinCodeText: fields.gtinCodeController.text,
           ),
-          // Primary above-the-fold sections: eager mount.
+          
           GtinIdentificationStructureCoreGroup(
             isReadOnly: idStructureReadOnly,
             gtinCodeController: fields.gtinCodeController,

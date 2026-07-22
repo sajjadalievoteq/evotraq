@@ -1,46 +1,54 @@
 import 'package:flutter/material.dart';
 
-/// Auth motion playground tokens (Phase 1).
-///
-/// Keep these calm and fast — total auth entrance should feel under ~500ms.
-/// Edit `*Ms` / scale / offset values here.
+
+
+
+
 abstract final class TraqAnimationConstants {
-  // ── Curves ───────────────────────────────────────────────────────────────
+  
   static const Curve curve = Curves.easeOutCubic;
   static const Curve reverseCurve = Curves.easeInCubic;
   static const Curve iconPop = Curves.easeOutCubic;
 
-  // ── Durations (ms) ───────────────────────────────────────────────────────
-  /// Auth card / form page swap (fade + scale).
+  
+  
   static const int formDurationMs = 280;
 
-  /// Quick feedback (button loading morph, small fades).
+  
   static const int fastDurationMs = 160;
 
-  /// Status / error / success cross-fades.
+  
   static const int statusMs = 260;
 
-  /// Stagger between auth children (fields, brand lines).
+  
   static const int staggerDelayMs = 36;
 
-  /// Each staggered child’s own motion window.
+  
   static const int entranceMs = 280;
 
-  /// Left branding: slide from panel right edge to settled left position.
+  
   static const int brandingEntranceMs = 820;
   static const int brandingStaggerMs = 88;
 
-  /// Splash coordinated entrance (icon → logo → status → progress).
-  /// Total ≈ entrance + stagger × 3 ≈ 500–700ms.
+  
+  
   static const int splashEntranceMs = 280;
   static const int splashStaggerMs = 70;
   static const int splashProgressCycleMs = 1800;
   static const Curve splashProgressCurve = Curves.easeInOutCubic;
 
-  /// Alias of [formDurationMs].
+  /// Splash logo lean: tilt right on bottom-right, then settle back.
+  static const double splashTiltAngle = 0.25; // ~7°
+  static const int splashTiltOutDurationMs = 800;
+  static const int splashTiltReturnDurationMs = 560;
+  static const int splashTiltPauseMs = 600;
+  static const Curve splashTiltOutCurve = Curves.easeOut;
+  static const Curve splashTiltReturnCurve = Curves.easeInBack;
+
+  
   static const int swapMs = formDurationMs;
 
-  // ── Scales ───────────────────────────────────────────────────────────────
+  
   static const double formInitialScale = 0.97;
   static const double fieldInitialScale = 0.98;
   static const double buttonInitialScale = 0.95;
@@ -48,25 +56,45 @@ abstract final class TraqAnimationConstants {
   static const double iconPopBeginScale = 0.92;
   static const double splashInitialScale = 0.98;
 
-  // ── Offsets (px) — keep tiny ─────────────────────────────────────────────
-  /// Form field / line rise.
+  
+  
   static const double fieldOffsetPx = 6;
 
-  /// Splash fade-rise travel (icon / logo / status).
+  
   static const double splashRisePx = 5;
 
-  /// Branding horizontal travel when width is unknown (prefer [LayoutBuilder] width).
+  
   static const double brandingSlidePx = 64;
 
   static const double entranceFadePortion = 0.6;
 
-  // Legacy fractional tokens (prefer px above).
+  
   static const double slideUpDy = 0.015;
   static const double slideRightDx = 0.0;
   static const Offset slideUp = Offset(0, slideUpDy);
   static const Offset slideRight = Offset(slideRightDx, 0);
 
-  // ── Duration getters ─────────────────────────────────────────────────────
+  // Router / navigation motion language — slide-first, buttery decelerations.
+  static const int navForwardMs = 420;
+  static const int navReverseMs = 360;
+  static const Curve navCurve = Curves.easeOutCubic;
+  static const Curve navReverseCurve = Curves.easeInCubic;
+
+  /// Peer replace: soft vertical slide + fade (scale kept nearly neutral).
+  static const double navFadeThroughBeginScale = 0.99;
+  static const double navFadeThroughIncomingStart = 0.0;
+  static const double navFadeThroughOutgoingEnd = 0.45;
+  static const double navFadeThroughDy = 0.04;
+
+  /// List → detail: clear horizontal slide is the primary cue.
+  static const double navSharedAxisDx = 0.18;
+  static const double navSharedAxisBeginScale = 1.0;
+  static const double navSharedAxisOutgoingDx = 0.08;
+
+  /// Modal / create: vertical slide up.
+  static const double navModalBeginScale = 0.99;
+  static const double navModalDy = 0.08;
+
   static Duration get formDuration =>
       const Duration(milliseconds: formDurationMs);
   static Duration get fastDuration =>
@@ -85,6 +113,21 @@ abstract final class TraqAnimationConstants {
       const Duration(milliseconds: splashStaggerMs);
   static Duration get splashProgressCycle =>
       const Duration(milliseconds: splashProgressCycleMs);
+  static Duration get splashTiltOutDuration =>
+      const Duration(milliseconds: splashTiltOutDurationMs);
+  static Duration get splashTiltReturnDuration =>
+      const Duration(milliseconds: splashTiltReturnDurationMs);
+  static Duration get splashTiltPause =>
+      const Duration(milliseconds: splashTiltPauseMs);
+  static Duration get splashTiltCycle => Duration(
+        milliseconds: splashTiltOutDurationMs +
+            splashTiltReturnDurationMs +
+            splashTiltPauseMs,
+      );
+  static Duration get navForward =>
+      const Duration(milliseconds: navForwardMs);
+  static Duration get navReverse =>
+      const Duration(milliseconds: navReverseMs);
 
   static Duration get swap => formDuration;
   static Duration get stagger => staggerDelay;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Screen-owned lazy GLN detail field holders (GTIN-style `_c` / seed map).
-/// Mixed into [_GLNDetailScreenState] — not a separate form-model abstraction.
+
+
 mixin GlnDetailScreenFields {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _seedTexts = {};
@@ -171,6 +171,6 @@ mixin GlnDetailScreenFields {
     }
   }
 
-  /// Save/read: prefer live controller text, else seed.
+  
   String glnFieldText(String key) => _text(key);
 }

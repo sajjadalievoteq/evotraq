@@ -84,6 +84,7 @@ class PharmaReturnContextBuilder {
 
     PharmaReturnReason? resolvedReason = returnReason;
     String? resolvedReturnShippingEventId = returnShippingEventId;
+    String resolvedSourceEventId = eventId;
 
     final epcEvents = await _findEventsForEpcs(epcs);
     final alreadyReceived = epcEvents.any(
@@ -104,15 +105,21 @@ class PharmaReturnContextBuilder {
       if (inTransitEvent == null) return null;
       resolvedReturnShippingEventId = inTransitEvent.eventId;
       final ilmd = inTransitEvent.ilmd ?? const {};
+      final sourceFromIlmd = ilmd[_ilmdSourceEventId]?.toString();
+      if (sourceFromIlmd != null && sourceFromIlmd.trim().isNotEmpty) {
+        resolvedSourceEventId = sourceFromIlmd.trim();
+      }
       resolvedReason = PharmaReturnReason.fromCode(
         ilmd[_ilmdReturnReason]?.toString(),
       );
       if (resolvedReason == null) return null;
+    } else if (operation.isReturnShipping) {
+      resolvedReturnShippingEventId ??= eventId;
     }
 
     final product = await _resolveProduct(epcs);
     return PharmaReturnContext(
-      sourceEventId: eventId,
+      sourceEventId: resolvedSourceEventId,
       epcs: List<String>.from(epcs),
       senderGln: operation.sourceGLN ?? '',
       receiverGln: operation.destinationGLN ?? '',

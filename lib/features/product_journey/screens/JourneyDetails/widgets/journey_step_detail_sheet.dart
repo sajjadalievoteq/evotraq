@@ -123,9 +123,9 @@ abstract final class JourneyStepDetailSheet {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        // push (not go) so the Journey Dashboard stays on the
-                        // navigation stack and is restored with its state intact
-                        // when the user navigates back from the event detail page.
+                        
+                        
+                        
                         context.push(_eventDetailRoute(step.eventType, step.eventId));
                       },
                       icon: const TraqIcon(AppAssets.iconOpenNew),

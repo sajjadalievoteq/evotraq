@@ -4,7 +4,7 @@ import 'package:traqtrace_app/data/models/epcis/object_event.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 
 
-// Simple mock implementation of ValidationService for testing
+
 class MockValidationService implements ValidationService {
   bool shouldSucceed = true;
   List<dynamic> validationErrors = [];
@@ -84,10 +84,10 @@ void main() {
 
   group('ValidationCubit Tests', () {
     test('validateObjectEvent should return true for valid event', () async {
-      // Arrange
+      
       mockValidationService.shouldSucceed = true;
       
-      // Act
+      
       final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-1',
@@ -100,21 +100,21 @@ void main() {
         )
       );
       
-      // Assert
+      
       expect(result, true);
       expect(cubit.isValid, true);
       expect(cubit.validationErrors, isEmpty);
     });
     
     test('validateObjectEvent should return false and set errors for invalid event', () async {
-      // Arrange
+      
       mockValidationService.shouldSucceed = false;
       mockValidationService.validationErrors = [
         {'field': 'action', 'message': 'Action is required'},
         {'field': 'businessStep', 'message': 'Business step is required'}
       ];
       
-      // Act
+      
       final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-2',
@@ -124,14 +124,14 @@ void main() {
         )
       );
       
-      // Assert
+      
       expect(result, false);
       expect(cubit.isValid, false);
       expect(cubit.validationErrors.length, 2);
     });
     
     test('clearValidation should reset validation state', () async {
-      // Arrange
+      
       mockValidationService.shouldSucceed = false;
       mockValidationService.validationErrors = [{'field': 'test', 'message': 'Error 1'}];
       await cubit.validateObjectEvent(
@@ -143,21 +143,21 @@ void main() {
         )
       );
       
-      // Act
+      
       cubit.clearValidation();
       
-      // Assert
-      expect(cubit.isValid, false); // Default state is not valid
+      
+      expect(cubit.isValid, false); 
       expect(cubit.state.lastValidationResult, isNull);
       expect(cubit.validationErrors, isEmpty);
     });
     
     test('Error state should be handled properly', () async {
-      // Arrange
+      
       mockValidationService.shouldSucceed = false;
       mockValidationService.error = 'Connection error';
       
-      // Act
+      
       final result = await cubit.validateObjectEvent(
         ObjectEvent(
           eventId: 'test-event-id-4',
@@ -167,7 +167,7 @@ void main() {
         )
       );
       
-      // Assert
+      
       expect(result, false);
       expect(cubit.state.error, contains('Connection error'));
     });

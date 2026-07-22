@@ -31,7 +31,7 @@ class GS1Validator {
 
   static bool isValidEPCURI(String? epcUri) {
     if (epcUri == null || epcUri.isEmpty) return false;
-    // Deprecated wrapper — prefer Gs1CanonicalIdentifier.isValid.
+    
     return Gs1CanonicalIdentifier.isValid(epcUri);
   }
 

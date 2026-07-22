@@ -165,7 +165,7 @@ class AuthService {
 
   Future<AuthResponse> login(LoginRequest request) async {
     try {
-      // Drop any stale session token before authenticating.
+      
       await _dioService.removeAuthToken();
 
       final response = await _dioService.post(

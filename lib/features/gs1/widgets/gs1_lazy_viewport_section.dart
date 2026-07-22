@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// Builds [builder] only once the section intersects the scroll viewport
-/// (plus a cache ahead), or immediately when [forceMount]/[eager] is true.
-///
-/// Values must live in screen-owned state so unmounting never loses input.
-/// Do not use [AutomaticKeepAliveClientMixin] — ownership is the keep-alive.
+
+
+
+
+
 class Gs1LazyViewportSection extends StatefulWidget {
   const Gs1LazyViewportSection({
     super.key,

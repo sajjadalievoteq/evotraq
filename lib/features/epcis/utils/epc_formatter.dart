@@ -2,13 +2,13 @@ import 'package:traqtrace_app/core/utils/gs1/gs1_converter.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
 import 'package:traqtrace_app/features/barcode/services/epc_uri_converter.dart';
 
-/// Formats identifiers to the project-canonical GS1 Digital Link form.
+
 class EPCFormatter {
   static String? formatToEPCUri(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return null;
 
-    // Bare Pure Identity body → wrap as URN then normalize to Digital Link.
+    
     if (!trimmed.contains(':') &&
         RegExp(r'^\d+\.[0-9A-Za-z]+\.[A-Za-z0-9 !"%-?_\.\-]+$')
             .hasMatch(trimmed)) {

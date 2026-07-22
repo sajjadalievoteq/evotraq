@@ -1,7 +1,7 @@
 import 'dart:html' as html;
 
-/// Belt-and-suspenders for Flutter web: stop any leftover camera tracks on
-/// video elements after mobile_scanner stop/dispose (clears LED / recording).
+
+
 void forceStopActiveCameraTracks() {
   try {
     final videos = html.document.querySelectorAll('video');

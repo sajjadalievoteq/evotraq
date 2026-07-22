@@ -3,7 +3,7 @@ import 'package:traqtrace_app/data/models/operations/packing/packing_response_mo
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
-/// User-facing packing error text for wizard submit and API failures.
+
 abstract final class PackingSubmitErrorMessage {
   static String epcConversionFailures(List<String> failedBarcodes) =>
       OperationApiErrorMessage.epcConversionFailures(failedBarcodes);

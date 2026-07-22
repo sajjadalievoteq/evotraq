@@ -26,8 +26,8 @@ class _ThreadPoolManagementDashboardState
   late AdvancedPerformanceService _performanceService;
   late final TabController _tabController;
 
-  /// Both the metrics and contention groups come from the single merged
-  /// `getThreadPoolDashboard()` call, so one fetch satisfies both tabs.
+  
+  
   bool _dashboardLoaded = false;
   LoadState<Map<String, dynamic>> _metricsState = const LoadState.loading();
   LoadState<Map<String, dynamic>> _contentionState =
@@ -82,9 +82,9 @@ class _ThreadPoolManagementDashboardState
     });
   }
 
-  /// Every tab's content is derived from the single merged
-  /// `getThreadPoolDashboard()` response, so one fetch satisfies every tab.
-  /// Triggers that fetch the first time any tab is viewed.
+  
+  
+  
   void _ensureTabLoaded(int index) {
     if (_dashboardLoaded) return;
     _dashboardLoaded = true;
@@ -122,8 +122,8 @@ class _ThreadPoolManagementDashboardState
     }
   }
 
-  /// Refresh button semantics: re-trigger the one merged fetch that backs
-  /// every tab, regardless of which tab is currently active.
+  
+  
   void _refreshDashboardData() {
     _dashboardLoaded = true;
     _loadThreadPoolDashboard();

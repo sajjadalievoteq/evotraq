@@ -20,17 +20,19 @@ class DashboardQuickActionsSkeleton extends StatelessWidget {
               < 900 => 3,
               _ => 4,
             };
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                childAspectRatio: 18 / 6,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+            return SelectionContainer.disabled(
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: 18 / 6,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: 8,
+                itemBuilder: (context, index) => const Card(),
               ),
-              itemCount: 8,
-              itemBuilder: (context, index) => const Card(),
             );
           },
         ),

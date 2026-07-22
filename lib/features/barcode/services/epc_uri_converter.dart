@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/features/barcode/services/gs1_barcode_parser.dart';
 
-/// Converts GS1 identifiers and barcodes to canonical GS1 Digital Link EPC URIs.
+
 class EPCURIConverter {
   static const String _dlBase = 'https://id.gs1.org';
 
-  /// Canonical GS1 Digital Link form for storage (EPCIS 2.0).
+  
   static String normalizeForStorage(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return trimmed;
@@ -32,8 +32,8 @@ class EPCURIConverter {
     if (RegExp(r'^\d{18}$').hasMatch(barcode)) {
       final gtin14 = barcode.substring(0, 14);
       final serial = barcode.substring(14);
-      // Prefer GTIN-14 + serial when the first 14 digits are a valid GTIN —
-      // many GTINs start with "00" and were previously misclassified as SSCC.
+      
+      
       if (CheckDigitUtils.isValidMod10(gtin14) && serial.isNotEmpty) {
         return convertGTINSerialToEPCUri(gtin14, serial);
       }
@@ -47,7 +47,7 @@ class EPCURIConverter {
       final serial = parsed['SERIAL']?.toString();
       final gtinRaw = parsed['GTIN']?.toString();
 
-      // Real SSCC only (18 digits). Shorter AI(00) values are often mistyped GTINs.
+      
       if (ssccDigits.length == 18) {
         return convertSSCCToEPCUri(ssccDigits);
       }
@@ -117,7 +117,7 @@ class EPCURIConverter {
 
     try {
       final normalizedSscc = sscc.replaceAll(RegExp(r'[^0-9]'), '');
-      // Require a full 18-digit SSCC — never pad shorter values into a fake SSCC.
+      
       if (normalizedSscc.length != 18) return null;
       return '$_dlBase/00/$normalizedSscc';
     } catch (e) {
@@ -298,7 +298,7 @@ class EPCURIConverter {
     return null;
   }
 
-  /// Extract the 18-digit SSCC from a Digital Link or Pure Identity URN.
+  
   static String? extractSSCCFromEPCUri(String epcUri) {
     final dlMatch =
         RegExp(r'^https://id\.gs1\.org/00/(\d{18})$').firstMatch(epcUri);

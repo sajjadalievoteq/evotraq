@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
+import 'package:traqtrace_app/core/storage/last_route_store.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -17,13 +18,13 @@ class AuthCubit extends Cubit<AuthState> {
   final Duration _verifyEmailTimeout;
   AuthService get authService => _authService;
 
-  /// Startup profile check must finish within this window or become unauthenticated.
+  
   static const Duration authCheckTimeout = Duration(seconds: 10);
 
-  /// Login must fail fast so the button never spins forever.
+  
   static const Duration loginTimeout = Duration(seconds: 15);
 
-  /// Email verification must fail fast so the screen never spins forever.
+  
   static const Duration verifyEmailTimeout = Duration(seconds: 15);
 
   AuthCubit({
@@ -37,6 +38,7 @@ class AuthCubit extends Cubit<AuthState> {
         _verifyEmailTimeout =
             verifyEmailTimeout ?? AuthCubit.verifyEmailTimeout,
         super(const AuthState(status: AuthStatus.initial));
+
 
   bool _requiresEmailVerification(String? message) {
     final normalized = message?.trim().toLowerCase();
@@ -76,14 +78,22 @@ class AuthCubit extends Cubit<AuthState> {
         .replaceFirst('ApiException: ', '');
   }
 
-  Future<void> checkAuth() async {
+  
+  
+  
+  
+  Future<void> checkAuth({
+    Duration minSplashDelay = Duration.zero,
+  }) async {
     emit(
       state.copyWith(status: AuthStatus.loading, error: null, message: null),
     );
+    final startedAt = DateTime.now();
     try {
       final user = await _authService
           .getCurrentUser()
           .timeout(_authCheckTimeout);
+      await _awaitMinSplash(startedAt, minSplashDelay);
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -96,9 +106,20 @@ class AuthCubit extends Cubit<AuthState> {
       _preloadGlnPickerCatalog();
       _startCbvVocabulary();
     } on TimeoutException {
+      await _awaitMinSplash(startedAt, minSplashDelay);
       await _forceUnauthenticated();
     } catch (e) {
+      await _awaitMinSplash(startedAt, minSplashDelay);
       await _forceUnauthenticated();
+    }
+  }
+
+  
+  Future<void> _awaitMinSplash(DateTime startedAt, Duration minDelay) async {
+    if (minDelay <= Duration.zero) return;
+    final remaining = minDelay - DateTime.now().difference(startedAt);
+    if (remaining > Duration.zero) {
+      await Future.delayed(remaining);
     }
   }
 
@@ -179,12 +200,12 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _authService.logout();
     } catch (_) {
-      // Local session clear must proceed even if token delete fails.
+      
     }
     await _forceUnauthenticated();
   }
 
-  /// Clears the session after 401 / expiry. Idempotent if already unauthenticated.
+  
   Future<void> sessionExpired() async {
     if (state.status == AuthStatus.unauthenticated) return;
     try {
@@ -413,15 +434,22 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  void _clearLastRoute() {
+    if (getIt.isRegistered<LastRouteStore>()) {
+      unawaited(getIt<LastRouteStore>().clear());
+    }
+  }
+
   void _clearSessionCaches() {
     _clearHomeOverviewSession();
     _clearGlnPickerCatalog();
+    _clearLastRoute();
     _resetCbvVocabulary();
   }
 
   void _preloadGlnPickerCatalog() {
     if (!getIt.isRegistered<GlnPickerCatalog>()) return;
-    // Fire-and-forget: pickers read from cache once this completes.
+    
     getIt<GlnPickerCatalog>().preload();
   }
 

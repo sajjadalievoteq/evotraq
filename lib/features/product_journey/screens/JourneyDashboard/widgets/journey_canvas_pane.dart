@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/features/product_journey/cubit/journey_cubit.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_empty_state.dart';
@@ -65,7 +64,7 @@ class JourneyCanvasPane extends StatelessWidget {
     }
 
     if (state.isLoading) {
-      // Same Column shell as loaded — header takes real space, diagram below.
+      
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

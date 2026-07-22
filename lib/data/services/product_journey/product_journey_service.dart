@@ -32,8 +32,8 @@ class ProductJourneyService {
       final headers = await _getHeaders();
       final canonicalEpc = await _resolveCanonicalEpc(epcUri, headers);
 
-      // Query param (not path): Digital Links like https://id.gs1.org/00/... contain
-      // '/' which breaks Flutter web XMLHttpRequest when placed in the URL path.
+      
+      
       final response = await _dioService.get(
         '$_baseUrl/product-journey/epc',
         queryParameters: {'epc': canonicalEpc},
@@ -63,9 +63,9 @@ class ProductJourneyService {
     try {
       final headers = await _getHeaders();
 
-      // Search by serial number to retrieve the canonical EPC stored by the
-      // backend. This avoids GCP-length guessing and replaces the old
-      // /identifiers/sgtins/search endpoint (which does not exist).
+      
+      
+      
       final searchResponse = await _dioService.get(
         '$_baseUrl/product-journey/search',
         queryParameters: {'q': serialNumber, 'size': '5'},
@@ -94,7 +94,7 @@ class ProductJourneyService {
         }
       }
 
-      // Fallback: construct EPC directly using the converter (correct GCP split).
+      
       final epcUri =
           EPCURIConverter.convertGTINSerialToEPCUri(gtin, serialNumber);
       if (epcUri != null) return getJourneyByEpc(epcUri);
@@ -114,7 +114,7 @@ class ProductJourneyService {
     return getJourneyByEpc(canonical);
   }
 
-  /// Resolves SGTIN, SSCC, GS1 barcodes, EPC URNs, or plain serial via [parseToEPC].
+  
   Future<ProductJourney?> getJourneyByIdentifier(String input) async {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return null;
@@ -152,7 +152,7 @@ class ProductJourneyService {
       return getJourneyByEpc(trimmed);
     }
 
-    // Safety net: if AI notation somehow reached here, normalize it.
+    
     if (trimmed.contains('(') && trimmed.contains(')')) {
       final normalized = gs1AiToEpcUri(trimmed);
       if (normalized != null) return getJourneyByEpc(normalized);
@@ -180,7 +180,7 @@ class ProductJourneyService {
   Future<List<ProductSearchResult>> searchProducts(String query) async {
     final trimmed = query.trim();
 
-    // Pure EPC identity — show as a direct trace suggestion without hitting the API.
+    
     if (Gs1CanonicalIdentifier.isSerializedInstance(trimmed) ||
         Gs1CanonicalIdentifier.isValid(trimmed)) {
       try {
@@ -208,27 +208,27 @@ class ProductJourneyService {
       }
     }
 
-    // GS1 AI notation e.g. (01)00629...(21)SERIAL — parse and show the
-    // resolved EPC as a suggestion; use the serial for the backend search.
+    
+    
     if (trimmed.contains('(') && trimmed.contains(')')) {
       try {
         final parsed = parseToEPC(trimmed);
         final displayId = parsed.serial ?? parsed.gtin ?? trimmed;
-        // Show the resolved EPC as a direct suggestion.
+        
         final suggestion = ProductSearchResult(
           identifier: parsed.epc,
           displayName: displayId,
           type: _inferIdentifierType(parsed.epc),
           description: 'Trace by GS1 barcode',
         );
-        // Also search the backend by serial for additional matches.
+        
         if (parsed.serial != null) {
           final extra = await _backendSearch(parsed.serial!, size: 9);
           return [suggestion, ...extra.where((r) => r.identifier != parsed.epc)];
         }
         return [suggestion];
       } on EPCParseException catch (_) {
-        // Fall through to raw backend search.
+        
       }
     }
 

@@ -360,7 +360,7 @@ class _CancelReceivingOperationScreenState extends State<CancelReceivingOperatio
       return;
     }
     setState(() => _scannedEpcs.add(epc));
-    // Soft warning is advisory â€” don't block the next scan on status round-trip.
+    
     _checkEpcStatus(epc);
   }
 

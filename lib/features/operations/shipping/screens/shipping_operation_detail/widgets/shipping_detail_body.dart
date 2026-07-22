@@ -7,7 +7,7 @@ import 'package:traqtrace_app/features/operations/shared/widgets/detail/operatio
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_messages_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_processing_stats_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_status_banner.dart';
-import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
+import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_in_transit_actions.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/utils/shipping_detail_helpers.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_two_gln_location_card.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_shipped_items_card.dart';
@@ -78,7 +78,7 @@ class ShippingDetailBody extends StatelessWidget {
             statusLabel: OperationStatusUtils.detailLabel(operation.status),
             processingTimeMs: operation.processingTimeMs,
           ),
-          AcceptReturnButton(operation: operation),
+          ShippingInTransitActions(operation: operation),
           const SizedBox(height: 32),
         ],
       ),

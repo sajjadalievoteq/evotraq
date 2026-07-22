@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_page.dart';
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_summary.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_page.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_summary.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
 class HierarchyService {

@@ -90,7 +90,7 @@ class _InMemoryValidationRuleService implements ValidationRuleService {
   Future<void> initializePredefinedRules() async {}
 }
 
-/// Tests focused on the performance features of the validation service
+
 void main() {
 
   group('ValidationRuleProvider Performance Tests', () {
@@ -142,13 +142,13 @@ void main() {
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
       
-      // Get rules for specific event types
+      
       final objectRules = cubit.rules.where((r) => r.eventType == EventType.ObjectEvent).toList();
       final aggregationRules = cubit.rules.where((r) => r.eventType == EventType.AggregationEvent).toList();
       final transformationRules = cubit.rules.where((r) => r.eventType == EventType.TransformationEvent).toList();
       final transactionRules = cubit.rules.where((r) => r.eventType == EventType.TransactionEvent).toList();
       
-      // Verify the filters work correctly and efficiently
+      
       for (final rule in objectRules) {
         expect(rule.eventType == EventType.ObjectEvent, true);
       }
@@ -157,7 +157,7 @@ void main() {
         expect(rule.eventType == EventType.AggregationEvent, true);
       }
       
-      // Make sure rules exist for all event types
+      
       expect(objectRules.isNotEmpty, true);
       expect(aggregationRules.isNotEmpty, true);
       expect(transactionRules.isNotEmpty, true);
@@ -194,11 +194,11 @@ void main() {
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
       
-      // Get rules that mention specific fields in their description
+      
       final actionRules = cubit.rules.where((r) => 
         r.description?.toLowerCase().contains('action') == true).toList();
       
-      // Should find some rules related to action field
+      
       expect(actionRules.isNotEmpty, true);
       
       for (final rule in actionRules) {
@@ -227,8 +227,8 @@ void main() {
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
       
-      // Add many custom rules
-      const int ruleCount = 10; // Reduced for testing
+      
+      const int ruleCount = 10; 
       for (int i = 0; i < ruleCount; i++) {
         await cubit.createValidationRule(ValidationRule(
           ruleId: 'custom_rule_$i',
@@ -245,18 +245,18 @@ void main() {
         ));
       }
       
-      // Verify we can still filter efficiently
+      
       final stopwatch = Stopwatch()..start();
       
-      // Run a series of filter operations to measure performance
+      
       for (int i = 0; i < 10; i++) {
         cubit.rules.where((r) => r.eventType == EventType.ObjectEvent).toList();
       }
       
       stopwatch.stop();
       
-      // Filtering should be fast even with many rules
-      // This is a performance guideline rather than a strict assertion
+      
+      
       expect(stopwatch.elapsedMilliseconds < 1000, true,
           reason: 'Rule filtering took too long: ${stopwatch.elapsedMilliseconds}ms');
     });
@@ -282,7 +282,7 @@ void main() {
       addTearDown(cubit.close);
       await cubit.loadValidationRules();
       
-      // Add some custom rules
+      
       const int ruleCount = 5;
       for (int i = 0; i < ruleCount; i++) {
         await cubit.createValidationRule(ValidationRule(
@@ -296,14 +296,14 @@ void main() {
       }
       
       final stopwatch = Stopwatch()..start();
-      await cubit.resetToDefaults(); // Uses actual reset method
+      await cubit.resetToDefaults(); 
       stopwatch.stop();
       
-      // Reset should be fast
+      
       expect(stopwatch.elapsedMilliseconds < 5000, true,
           reason: 'Reset to defaults took too long: ${stopwatch.elapsedMilliseconds}ms');
       
-      // Should have rules after reset (predefined rules)
+      
       expect(cubit.rules.length, greaterThan(0));
     });
   });

@@ -195,7 +195,7 @@ void main() {
         pollInterval: pollInterval,
       );
       await cubit.load(accountEmail: 'user@example.com');
-      // Allow background SWR from load() to finish so _isRevalidating clears.
+      
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(cubit.state.status, HomeLoadStatus.success);
       return cubit;
@@ -226,6 +226,7 @@ void main() {
         recentLimit: anyNamed('recentLimit'),
         throughputHours: anyNamed('throughputHours'),
       )).called(greaterThanOrEqualTo(1));
+      verifyNever(mockService.getSystemHealth());
 
       cubit.stopPolling();
       clearInteractions(mockService);
@@ -234,6 +235,7 @@ void main() {
         recentLimit: anyNamed('recentLimit'),
         throughputHours: anyNamed('throughputHours'),
       ));
+      verifyNever(mockService.getSystemHealth());
 
       await cubit.close();
     });
@@ -260,7 +262,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 55));
       expect(summaryCalls, 1);
 
-      // Several intervals while the first request is still gated.
+      
       await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(summaryCalls, 1);
 

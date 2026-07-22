@@ -7,7 +7,7 @@ import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_empty_state.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_recent_event_card.dart';
 
-/// Initial-state recent events under the journey search bar.
+
 class JourneyRecentEventsSection extends StatelessWidget {
   const JourneyRecentEventsSection({
     super.key,

@@ -30,7 +30,7 @@ class CommissioningEpcResolveAmbiguous extends CommissioningEpcResolveOutcome {
   final List<CommissioningPoolMatch> matches;
 }
 
-/// Parses commissioning input and resolves bare serials against the serial pool.
+
 class CommissioningEpcResolver {
   const CommissioningEpcResolver({
     required SGTINService sgtinService,

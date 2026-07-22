@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
-import 'package:traqtrace_app/data/models/operations/hierarchy/hierarchy_summary.dart';
+import 'package:traqtrace_app/data/models/hierarchy/hierarchy_summary.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/cubit/hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
@@ -39,7 +39,6 @@ List<_HierarchyItem> _flatten(HierarchyTreeNodeState node, int depth) {
   }
   return items;
 }
-
 
 class HierarchyScreen extends StatelessWidget {
   const HierarchyScreen({
@@ -99,9 +98,9 @@ class _HierarchyView extends StatelessWidget {
                   Text(message, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<HierarchyCubit>()
-                        .loadRoot(normalizeHierarchyEpc(rootEpc)),
+                    onPressed: () => context.read<HierarchyCubit>().loadRoot(
+                      normalizeHierarchyEpc(rootEpc),
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -147,6 +146,8 @@ class _HierarchyView extends StatelessWidget {
                         key: ValueKey(nodeState.node.epc),
                         nodeState: nodeState,
                         depth: depth,
+                        onExpand: cubit.expand,
+                        onCollapse: cubit.collapse,
                         isHighlighted: () {
                           final selected = highlightEpc;
                           if (selected == null) return false;
@@ -197,7 +198,8 @@ class _HierarchySummaryBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
           children: [
-            TraqIcon(NavIcons.aggregationEvents,
+            TraqIcon(
+              NavIcons.aggregationEvents,
               size: 18,
               color: theme.colorScheme.primary,
             ),
@@ -213,9 +215,7 @@ class _HierarchySummaryBanner extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextSpan(
-                      text: ' item${total == 1 ? '' : 's'} total',
-                    ),
+                    TextSpan(text: ' item${total == 1 ? '' : 's'} total'),
                     const TextSpan(text: '  ·  '),
                     TextSpan(
                       text: '$direct',

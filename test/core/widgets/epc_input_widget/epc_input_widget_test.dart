@@ -37,7 +37,7 @@ void main() {
 
     expect(added, isNotNull);
     expect(added!.type, EPCType.sgtin);
-    expect(added!.epc, 'urn:epc:id:sgtin:0629200.008002.SN123');
+    expect(added!.epc, 'https://id.gs1.org/01/00629200080027/21/SN123');
   });
 
   testWidgets('EPCInputWidget shows type badge after valid manual input',

@@ -1,12 +1,12 @@
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 
-/// Shared nav / empty-state / journey icons — single source of truth.
-///
-/// Prefer [forBizStep] for operation CBV tokens; use the screen constants for
-/// drawer tiles and empty-list / empty-detail call sites.
+
+
+
+
 abstract final class NavIcons {
-  /// CBV biz-step token (e.g. `unpacking`) → dedicated icon asset.
+  
   static String forBizStep(String businessStep) {
     final token = CbvDisplayUtils.shortName(businessStep)?.toLowerCase();
     if (token != null) {
@@ -41,20 +41,21 @@ abstract final class NavIcons {
     return epcisEvents;
   }
 
-  // --- Chrome / chrome controls ---
+  
   static const String chevronRight = AppAssets.iconChevronR;
   static const String themeSun = AppAssets.iconSun;
   static const String themeMoon = AppAssets.iconMoon;
   static const String logout = AppAssets.iconLogout;
   static const String security = AppAssets.iconSecurity;
 
-  // --- Top-level ---
+  
   static const String dashboard = AppAssets.iconDashboard;
   static const String profile = AppAssets.iconUser;
   static const String productJourney = AppAssets.iconProductJourney;
+  static const String productHierarchy = AppAssets.iconProductHierarchy;
   static const String inboxOutbox = AppAssets.iconInboxOutbox;
 
-  // --- Master data / serialization ---
+  
   static const String masterData = AppAssets.iconDataset;
   static const String gtin = AppAssets.iconGtin;
   static const String gln = AppAssets.iconGln;
@@ -62,12 +63,12 @@ abstract final class NavIcons {
   static const String sscc = AppAssets.iconSscc;
   static const String sgtin = AppAssets.iconSgtin;
 
-  // --- EPCIS events ---
+  
   static const String epcisEvents = AppAssets.iconEvent;
   static const String objectEvents = AppAssets.iconObjectEvent;
   static const String aggregationEvents = AppAssets.iconAggregate;
 
-  // --- Event queries ---
+  
   static const String eventQueries = AppAssets.iconSearch;
   static const String allEvents = AppAssets.iconEvent;
   static const String aggregationHierarchy = AppAssets.iconHierarchy;
@@ -75,7 +76,7 @@ abstract final class NavIcons {
   static const String supplyChainTraversal = AppAssets.iconRoute;
   static const String eventSerialization = AppAssets.iconChip;
 
-  // --- Operations (drawer groups + screens) ---
+  
   static const String lifecycle = AppAssets.iconPrecisionManufacturing;
   static const String packaging = AppAssets.iconPackage;
   static const String logistics = AppAssets.iconTruck;
@@ -96,7 +97,7 @@ abstract final class NavIcons {
   static const String updateStatus = AppAssets.iconUpdateStatus;
   static const String shipmentCorrection = AppAssets.iconTransform;
 
-  // --- Tools ---
+  
   static const String generateVerifyBarcode = AppAssets.iconQr;
   static const String validation = AppAssets.iconCheck;
   static const String gs1ValidationDemo = AppAssets.iconFlask;
@@ -106,29 +107,29 @@ abstract final class NavIcons {
   static const String conversion = AppAssets.iconTransform;
   static const String epcConversion = AppAssets.iconTransform;
 
-  // --- Admin: users ---
+  
   static const String userManagement = AppAssets.iconUsers;
   static const String pendingApprovals = AppAssets.iconApproval;
 
-  // --- Admin: notifications ---
+  
   static const String notifications = AppAssets.iconNotification;
   static const String notificationCenter = AppAssets.iconNotification;
   static const String manageSubscriptions = AppAssets.iconMail;
   static const String webhookConfiguration = AppAssets.iconWebhook;
 
-  // --- Admin: batch ---
+  
   static const String batchProcessing = AppAssets.iconSpinner;
   static const String jobQueueManagement = AppAssets.iconQueue;
   static const String etlManagement = AppAssets.iconTransform;
   static const String bulkExport = AppAssets.iconDownload;
 
-  // --- Admin: API ---
+  
   static const String apiManagement = AppAssets.iconApi;
   static const String apiCollections = AppAssets.iconFolder;
   static const String partnerManagement = AppAssets.iconBusiness;
   static const String serviceAccounts = AppAssets.iconKey;
 
-  // --- Admin: system ---
+  
   static const String systemTools = AppAssets.iconBuild;
   static const String systemSettings = AppAssets.iconSettings;
   static const String cacheManagement = AppAssets.iconCloud;
@@ -138,13 +139,13 @@ abstract final class NavIcons {
   static const String databasePartitioning = AppAssets.iconDatabase;
   static const String dataConsistencyIntegrity = AppAssets.iconVerified;
 
-  // --- Admin: tests / vocab ---
+  
   static const String testDataGeneration = AppAssets.iconFlask;
   static const String eventGenerationTests = AppAssets.iconEvent;
   static const String industryTestData = AppAssets.iconFactory;
   static const String cbvVocabulary = AppAssets.iconTag;
 
-  // --- Footer ---
+  
   static const String postmanCollection = AppAssets.iconDownload;
   static const String helpSupport = AppAssets.iconHelpCircle;
 }

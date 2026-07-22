@@ -16,11 +16,11 @@ class OperationEpcProductSubtitle extends StatelessWidget {
   final String epc;
   final String? productName;
 
-  /// Session-scoped memoization keyed by EPC. Caching the *Future* both
-  /// deduplicates concurrent lookups (in-flight guard) and prevents re-fetching
-  /// on every rebuild — the FutureBuilder below gets the same completed future
-  /// for a given EPC instead of issuing fresh /sgtins/serial + /gtins/code calls
-  /// each time the (always-mounted, on desktop) items panel rebuilds.
+  
+  
+  
+  
+  
   static const int _maxCacheEntries = 256;
   static final Map<String, Future<String?>> _resolveCache = {};
   static final Map<String, Future<String?>> _gtinNameCache = {};
@@ -28,7 +28,7 @@ class OperationEpcProductSubtitle extends StatelessWidget {
   static Future<String?> resolveProductName(String epc) {
     final cached = _resolveCache.remove(epc);
     if (cached != null) {
-      // Re-insert so this key becomes most-recently used.
+      
       _resolveCache[epc] = cached;
       return cached;
     }
@@ -43,7 +43,7 @@ class OperationEpcProductSubtitle extends StatelessWidget {
     final gtinService = getIt<GTINService>();
 
     if (type == OperationScanItemType.sgtin) {
-      // Prefer GTIN from EPC URI — avoids an extra SGTIN-by-serial round trip.
+      
       final gtinFromUri = Gs1CanonicalIdentifier.extractGtin(epc);
       if (gtinFromUri != null) {
         return _productNameForGtin(gtinService, gtinFromUri);

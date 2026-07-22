@@ -382,60 +382,7 @@ class _ObjectEventFormScreenState extends State<ObjectEventFormScreen>
     });
   }
 
-  void _showHelpDialog() =>
-      ObjectEventFormEntryDialogs.showHelpDialog(context: context);
 
-  Future<void> _runSchemaValidationTest() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _validationErrors = [];
-    });
-
-    try {
-      final validationProvider = context.read<ValidationCubit>();
-      final minimalEvent = ObjectEvent(
-        eventId: 'test_${DateTime.now().millisecondsSinceEpoch}',
-        recordTime: DateTime.now(),
-        eventTime: DateTime.now().subtract(const Duration(seconds: 5)),
-        eventTimeZone: '+00:00',
-        epcisVersion: EPCISVersion.v2_0,
-        action: 'OBSERVE',
-        epcList: ['https://id.gs1.org/01/10614141073464/21/1000'],
-        readPoint: GLN.fromCode('1234567890128'),
-        certificationInfo: [
-          CertificationInfo(
-            certificateId: 'test-cert',
-            certificationStandard: 'test-standard',
-            certificationAgency: 'test-agency',
-          ),
-        ],
-      );
-
-      print('\n======== TESTING MINIMAL EVENT ========');
-      ObjectEventFormEventMapper.debugObjectEvent(minimalEvent);
-      final minimalResult = await validationProvider.validateObjectEvent(
-        minimalEvent,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-
-      await ObjectEventFormEntryDialogs.showSchemaValidationTestResults(
-        context: context,
-        passed: minimalResult,
-        error: validationProvider.state.error,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Error in validation test: ${e.toString()}';
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

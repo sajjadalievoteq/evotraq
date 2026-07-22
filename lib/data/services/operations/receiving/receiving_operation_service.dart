@@ -9,6 +9,7 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_request_model.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_api_error_message.dart';
 
 class ReceivingOperationService {
   ReceivingOperationService({
@@ -40,10 +41,27 @@ class ReceivingOperationService {
         acceptAllStatusCodes: true,
       );
 
-      if (response.statusCode == 201 ||
-          response.statusCode == 200 ||
-          response.statusCode == 207) {
-        final responseData = decodeApiResponseBody(response.data);
+      final statusCode = response.statusCode;
+      final body = response.data?.toString();
+
+      if (statusCode == 201 ||
+          statusCode == 200 ||
+          statusCode == 207 ||
+          statusCode == 422 ||
+          statusCode == 400) {
+        if (body == null || body.trim().isEmpty) {
+          throw ApiExceptionMapper.fromHttpResponse(
+            response,
+            fallbackMessage: 'Failed to create receiving operation',
+          );
+        }
+        final responseData = jsonDecode(body) as Map<String, dynamic>;
+        if (OperationApiErrorMessage.isStructuredErrorBody(responseData)) {
+          throw ApiExceptionMapper.fromHttpResponse(
+            response,
+            fallbackMessage: 'Failed to create receiving operation',
+          );
+        }
         return ReceivingResponse.fromJson(responseData);
       }
 

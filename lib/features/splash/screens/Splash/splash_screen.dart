@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
-import 'package:traqtrace_app/features/splash/screens/Splash/utils/splash_navigation_utils.dart';
 import 'package:traqtrace_app/features/splash/screens/Splash/widgets/splash_content.dart';
+
+
+
+
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,9 +23,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool _navigated = false;
   bool _initialized = false;
-  bool _canNavigate = false;
   bool _assetsReady = false;
 
   @override
@@ -28,11 +31,12 @@ class _SplashScreenState extends State<SplashScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      _precacheAndInit();
+      unawaited(_precacheAssets());
+      unawaited(_runStartupAuthCheck());
     }
   }
 
-  Future<void> _precacheAndInit() async {
+  Future<void> _precacheAssets() async {
     await Future.wait([
       precacheImage(const AssetImage(AppAssets.traqBackgroundPng), context)
           .catchError((_) {}),
@@ -42,48 +46,42 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
     setState(() => _assetsReady = true);
-
-    await _initializeApp();
   }
 
-  Future<void> _initializeApp() async {
-    final authCubit = context.read<AuthCubit>();
-    final authCheck = authCubit.checkAuth();
-    final minDelay = Future.delayed(const Duration(seconds: 2));
+  
+  
+  
+  
+  
+  Future<void> _runStartupAuthCheck() async {
+    final auth = getIt<AuthCubit>();
+    final dio = getIt<DioService>();
+
+    
+    if (auth.state.status != AuthStatus.initial) return;
+
+    
+    await dio.warmAuthTokenFromStorage();
 
     try {
-      await Future.wait([authCheck, minDelay])
-          .timeout(const Duration(seconds: 10));
+      
+      await auth.checkAuth(
+        minSplashDelay: const Duration(milliseconds: 1700),
+      );
     } catch (e) {
-      debugPrint('Auth check took too long or failed: $e');
-    } finally {
-      // Guarantee a terminal auth state so the router never stays on splash.
-      final status = authCubit.state.status;
-      if (status == AuthStatus.initial || status == AuthStatus.loading) {
-        await authCubit.sessionExpired();
-      }
-      if (mounted) {
-        setState(() => _canNavigate = true);
-        _checkAndNavigate(authCubit.state);
-      }
+      debugPrint('Startup checkAuth failed: $e');
     }
-  }
 
-  void _checkAndNavigate(AuthState state) {
-    if (!_canNavigate || _navigated || !mounted) return;
-
-    final pendingLocation = resolveSplashPendingLocation(context);
-    if (state.status == AuthStatus.authenticated) {
-      _go(pendingLocation ?? Constants.homeRoute);
-    } else if (state.status == AuthStatus.unauthenticated) {
-      _go(Constants.loginRoute);
+    
+    final status = auth.state.status;
+    if (status == AuthStatus.initial || status == AuthStatus.loading) {
+      await auth.sessionExpired();
     }
-  }
 
-  void _go(String location) {
-    if (_navigated || !mounted) return;
-    _navigated = true;
-    context.go(location);
+    
+    if (auth.state.isAuthenticated) {
+      dio.markAuthSettled();
+    }
   }
 
   @override
@@ -104,20 +102,16 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
-        child: BlocListener<AuthCubit, AuthState>(
-          listenWhen: (prev, curr) => prev.status != curr.status,
-          listener: (context, state) => _checkAndNavigate(state),
-          child: CardWithBackgroundWidget(
-            isPrimary: false,
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: SplashContent(
-                  iconSize: iconSize,
-                  logoSize: logoSize,
-                ),
+        child: CardWithBackgroundWidget(
+          isPrimary: false,
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: SplashContent(
+                iconSize: iconSize,
+                logoSize: logoSize,
               ),
             ),
           ),

@@ -9,15 +9,15 @@ import 'package:traqtrace_app/features/auth/widgets/auth_shell_scope.dart';
 import 'package:traqtrace_app/features/auth/widgets/branding_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 
-/// Persistent auth chrome: left branding stays mounted across auth routes.
-///
-/// [child] is go_router's ShellRoute [Navigator] (GlobalKey'd). It must be
-/// rendered directly — never inside [AnimatedSwitcher] / keyed swap — or the
-/// navigator is duplicated/reparented mid-layout and throws relayout assertions.
-/// Form swap motion belongs on the route page ([TraqRouterTransitions.authShellPage]).
-///
-/// Branding entrance is owned by [TraqStaggeredEntrance] State (once per mount);
-/// do not latch [playEntrance] here — auth rebuilds would skip the animation.
+
+
+
+
+
+
+
+
+
 class AuthShell extends StatelessWidget {
   const AuthShell({super.key, required this.child});
 

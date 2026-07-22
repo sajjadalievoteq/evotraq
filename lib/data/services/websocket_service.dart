@@ -83,7 +83,7 @@ class WebSocketService {
     }
   }
 
-  /// Cancels heartbeat/subscription and closes the channel to avoid leaks on reconnect.
+  
   void _teardownChannel({required bool sendDisconnect}) {
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;

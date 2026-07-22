@@ -39,7 +39,7 @@ void main() {
         '0614141007776',
       );
       expect(event, isA<ObjectEvent>());
-      return (event as ObjectEvent).bizData?['epcType'] as String?;
+      return (event as ObjectEvent).bizData?['epcType'];
     }
 
     test('classifies Digital Link SGTIN', () async {

@@ -18,7 +18,7 @@ class GLNCubit extends Cubit<GLNState> {
 
   GlnPickerCatalog get _pickerCatalog => getIt<GlnPickerCatalog>();
 
-  /// Returns the session GLN picker list (loaded at login / auth startup).
+  
   Future<List<GLN>> fetchGlnsForPicker({
     bool forceRefresh = false,
   }) {

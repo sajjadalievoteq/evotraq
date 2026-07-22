@@ -1,4 +1,4 @@
-/// User-facing validation copy for the packing operation wizard steps.
+
 abstract final class PackingStepValidationMessages {
   static const packingLocationRequired =
       'Select where packing is taking place. Search for your site by name or GLN.';

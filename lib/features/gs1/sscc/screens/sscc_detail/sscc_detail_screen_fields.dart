@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 
-/// Screen-owned SSCC detail field holders (same ownership pattern as GTIN/GLN).
-/// Mixed into [_SSCCDetailScreenState] — not a separate form-model abstraction.
-///
-/// Controllers are allocated on first access and disposed from [_controllers].
-/// Save reads controller text when created, otherwise the seed/hydrate value.
+
+
+
+
+
 mixin SsccDetailScreenFields {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _seedTexts = {};
@@ -15,7 +15,7 @@ mixin SsccDetailScreenFields {
         () => TextEditingController(text: _seedTexts[key] ?? ''),
       );
 
-  /// Save/read precedence: live controller text if allocated, else seed.
+  
   String _text(String key) =>
       _controllers[key]?.text ?? _seedTexts[key] ?? '';
 

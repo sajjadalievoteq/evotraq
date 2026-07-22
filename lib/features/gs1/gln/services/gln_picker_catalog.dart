@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 
-/// Session-scoped GLN list used by pickers. Loaded once after auth; refreshed
-/// only when a GLN is created/updated/deleted.
+
+
 class GlnPickerCatalog {
   GlnPickerCatalog({required GLNService glnService}) : _glnService = glnService;
 

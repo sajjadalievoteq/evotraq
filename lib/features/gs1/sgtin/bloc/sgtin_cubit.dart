@@ -170,7 +170,7 @@ class SGTINCubit extends Cubit<SGTINState> {
           ));
           return;
         } catch (_) {
-          // Fall back to GTIN/serial advanced search below.
+          
         }
       }
 

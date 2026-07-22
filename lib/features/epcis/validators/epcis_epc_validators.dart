@@ -12,8 +12,8 @@ abstract final class EpcisEpcValidators {
       return required ? 'EPC is required' : null;
     }
     final trimmed = value.trim();
-    // Phase 2: normalize once at the validator boundary so URN / DL / AI
-    // are treated equivalently before form validation.
+    
+    
     final canonical = Gs1CanonicalIdentifier.forStorage(trimmed);
     if (Gs1CanonicalIdentifier.isValid(canonical) ||
         Gs1CanonicalIdentifier.isValid(trimmed) ||

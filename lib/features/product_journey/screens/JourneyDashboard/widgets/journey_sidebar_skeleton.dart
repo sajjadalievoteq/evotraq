@@ -4,9 +4,9 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 
-/// Skeleton loading state for [JourneySidebarContent].
-/// Mirrors the exact section/card layout so there is no layout shift
-/// when the real content arrives.
+
+
+
 class JourneySidebarSkeleton extends StatelessWidget {
   const JourneySidebarSkeleton({super.key});
 
@@ -19,25 +19,25 @@ class JourneySidebarSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Journey Summary (KPI grid 2 × 2) ─────────────────────────
+            
             _Section(
               child: _KpiGridSkeleton(),
             ),
             const SizedBox(height: TraqSpacing.lg),
 
-            // ── Product Summary ───────────────────────────────────────────
+            
             _Section(
               child: _ProductSummarySkeleton(),
             ),
             const SizedBox(height: TraqSpacing.lg),
 
-            // ── Current State (4 icon-label-value rows) ───────────────────
+            
             _Section(
               child: _IconRowCardSkeleton(rowCount: 4),
             ),
             const SizedBox(height: TraqSpacing.lg),
 
-            // ── Journey Metrics (3 icon-label-value rows) ─────────────────
+            
             _Section(
               child: _IconRowCardSkeleton(rowCount: 3),
             ),
@@ -51,11 +51,11 @@ class JourneySidebarSkeleton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Layout helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
-/// White rounded box — inside [AppShimmer] it gets the sweep animation.
+
+
+
+
 class _Box extends StatelessWidget {
   const _Box({
     this.width = double.infinity,
@@ -73,8 +73,8 @@ class _Box extends StatelessWidget {
   }
 }
 
-/// Section wrapper — mirrors [JourneyPanelSection]:
-/// a short label line at the top followed by the content.
+
+
 class _Section extends StatelessWidget {
   const _Section({required this.child});
 
@@ -85,7 +85,7 @@ class _Section extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Section label (e.g. "JOURNEY SUMMARY")
+        
         const _Box(width: 88, height: 10),
         const SizedBox(height: TraqSpacing.sm),
         child,
@@ -94,11 +94,11 @@ class _Section extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section skeletons
-// ─────────────────────────────────────────────────────────────────────────────
 
-/// Mirrors [JourneyKpiGrid] — 2 × 2 card grid.
+
+
+
+
 class _KpiGridSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -130,9 +130,9 @@ class _KpiTileSkeleton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Icon placeholder
+            
             const _Box(width: 16, height: 16, radius: 4),
-            // Value + label
+            
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -149,8 +149,8 @@ class _KpiTileSkeleton extends StatelessWidget {
   }
 }
 
-/// Mirrors [JourneyProductSummarySection] — Card with header row + EPC +
-/// divider + 4 label-value rows.
+
+
 class _ProductSummarySkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -161,7 +161,7 @@ class _ProductSummarySkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon + title + type badge
+            
             Row(
               children: const [
                 _Box(width: 18, height: 18, radius: 4),
@@ -172,12 +172,12 @@ class _ProductSummarySkeleton extends StatelessWidget {
               ],
             ),
             const SizedBox(height: TraqSpacing.md),
-            // EPC URI line
+            
             const _Box(width: 56, height: 10),
             const SizedBox(height: 4),
             const _Box(height: 12),
             const Divider(height: TraqSpacing.xl),
-            // 4 label-value rows
+            
             ..._labelValueRows(count: 4),
           ],
         ),
@@ -186,8 +186,8 @@ class _ProductSummarySkeleton extends StatelessWidget {
   }
 }
 
-/// Mirrors [JourneyCurrentStateSection] and [JourneyMetricsSection] —
-/// Card with N icon-label-value rows.
+
+
 class _IconRowCardSkeleton extends StatelessWidget {
   const _IconRowCardSkeleton({required this.rowCount});
 

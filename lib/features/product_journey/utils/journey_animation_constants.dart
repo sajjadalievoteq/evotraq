@@ -1,13 +1,13 @@
-/// Central tuning for Product Journey canvas and related UI animations.
-///
-/// Change the `*Ms` values here to speed up or slow down animations globally.
+
+
+
 abstract final class JourneyAnimationConstants {
-  // ── Canvas pane (journey switch fade) ─────────────────────────────────────
+  
   static const int canvasPaneSwitchMs = 800;
 
-  // ── Canvas entrance (connector line + pin stagger) ────────────────────────
-  /// Total entrance duration. Line draws over [lineProgressEnd] of this window;
-  /// pins stagger from [pinStaggerStartOffset] through the remainder.
+  
+  
+  
   static const int canvasEntranceMs = 1200;
   static const double lineProgressStart = 0.0;
   static const double lineProgressEnd = 0.60;
@@ -16,18 +16,18 @@ abstract final class JourneyAnimationConstants {
   static const double pinStaggerWindow = 0.45;
   static const double pinStaggerMaxStart = 0.95;
 
-  // ── Canvas filter / dimming ─────────────────────────────────────────────
+  
   static const int pinFilterDimMs = 260;
   static const int pinFilterBounceMs = 920;
 
-  // ── Pin markers ─────────────────────────────────────────────────────────
+  
   static const int pinSelectedPulseMs = 1400;
   static const int pinSelectedScaleMs = 220;
 
-  // ── Event filter chips (canvas overlay) ─────────────────────────────────
+  
   static const int filterChipBounceMs = 280;
 
-  // ── Step markers (left panel / mobile list) ───────────────────────────────
+  
   static const int stepMarkerScaleMs = 200;
 
   static Duration get canvasPaneSwitch =>

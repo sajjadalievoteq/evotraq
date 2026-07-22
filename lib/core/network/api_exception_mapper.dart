@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 
-/// Builds [ApiException] instances that preserve backend validation text.
+
 abstract final class ApiExceptionMapper {
   static ApiException fromHttpResponse(
     Response<dynamic> response, {

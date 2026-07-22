@@ -34,18 +34,18 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   List<dynamic> _integrityJobs = [];
   List<Map<String, dynamic>> _correctionWorkflows = [];
 
-  // Per-tab independent load state, replacing the old shared
-  // _isLoading/_errorMessage pair so one tab's failure/empty result
-  // doesn't blank the others.
+  
+  
+  
   LoadState<Map<String, dynamic>> _consistencyReportState = const LoadState.empty();
   LoadState<List<dynamic>> _anomaliesState = const LoadState.empty();
   LoadState<Map<String, dynamic>> _correctionStatisticsState = const LoadState.loading();
   LoadState<List<dynamic>> _jobsState = const LoadState.loading();
   LoadState<List<Map<String, dynamic>>> _workflowDataState = const LoadState.loading();
 
-  // Tracks which of the 5 tabs have had their data loaded at least once, so
-  // switching tabs the first time triggers a load, and manual/periodic
-  // refreshes only touch tabs the user has actually viewed.
+  
+  
+  
   final Set<int> _loadedTabs = {};
 
   bool _isGeneratingReport = false;
@@ -81,8 +81,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     _jobsState = _integrityJobs.isEmpty ? const LoadState.empty() : LoadState.success(_integrityJobs);
     _workflowDataState = _correctionWorkflows.isEmpty ? const LoadState.empty() : LoadState.success(_correctionWorkflows);
 
-    // Only load the tab that's actually visible on first build; the other
-    // 4 tabs load lazily the first time the user switches to them.
+    
+    
     _ensureTabLoaded(_tabController.index);
     _startAutoRefresh();
   }
@@ -124,16 +124,16 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   void _startAutoRefresh() {
     _refreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       if (mounted) {
-        // Only refresh tabs the user has already viewed - don't force-load
-        // tabs that were never opened.
+        
+        
         _refreshLoadedTabs();
       }
     });
   }
 
-  /// Loads the data a given tab index needs, if it has any auto-loaded data
-  /// group (tabs 0/1 are purely user-action-driven via their own buttons and
-  /// have nothing to auto-load here).
+  
+  
+  
   Future<void> _triggerTabLoad(int index) {
     switch (index) {
       case 2:
@@ -154,9 +154,9 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
     _triggerTabLoad(index);
   }
 
-  /// Manual refresh (app bar action / filter changes): reload every tab
-  /// that has already been loaded at least once, matching the "refresh
-  /// reloads everything already loaded" semantic used elsewhere.
+  
+  
+  
   Future<void> _refreshLoadedTabs() async {
     if (!mounted) return;
     setState(() {
@@ -217,8 +217,8 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             : LoadState.success(_correctionWorkflows);
       });
     } catch (e) {
-      // Keep existing workflows on load failure; only surface an error
-      // state if we have nothing to show at all.
+      
+      
       if (mounted) {
         setState(() {
           _workflowDataState = _correctionWorkflows.isNotEmpty

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Marks the subtree as hosted inside [AuthShell] so screens/layouts
-/// render form-only content (left branding stays mounted in the shell).
+
+
 class AuthShellScope extends InheritedWidget {
   const AuthShellScope({
     super.key,

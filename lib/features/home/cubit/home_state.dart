@@ -29,9 +29,9 @@ class HomeState extends Equatable {
   final bool throughputLoading;
   final bool healthLoading;
 
-  /// True when a background revalidation failed and the data currently shown is
-  /// a retained (possibly stale) cached snapshot. Lets the UI surface a
-  /// "couldn't refresh" hint instead of presenting stale numbers as live.
+  
+  
+  
   final bool refreshFailed;
 
   bool get isLoading => status == HomeLoadStatus.loading;

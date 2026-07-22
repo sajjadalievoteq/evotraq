@@ -22,7 +22,7 @@ class CommissioningPoolCheckResult {
   final String? blockReason;
 }
 
-/// Validates that a parsed EPC exists in the serial pool and can be commissioned.
+
 class CommissioningSerialPoolChecker {
   const CommissioningSerialPoolChecker({
     required SGTINService sgtinService,
@@ -67,7 +67,7 @@ class CommissioningSerialPoolChecker {
       );
     }
 
-    // Prefer exact lookups so Digital Link / URN input resolves reliably.
+    
     final byEpc = await _tryGetByEpc(parsed.epc);
     if (byEpc != null) return _sgtinStatusResult(byEpc);
 
@@ -94,7 +94,7 @@ class CommissioningSerialPoolChecker {
       if (s.serialNumber != serial) return false;
       if (gtin == null || gtin.isEmpty) return true;
       final code = s.gtinCode;
-      if (code == null || code.isEmpty) return true;
+      if (code.isEmpty) return true;
       try {
         return GtinFormat.normalizeGtinTo14(code) ==
             GtinFormat.normalizeGtinTo14(gtin);
@@ -124,7 +124,7 @@ class CommissioningSerialPoolChecker {
       final sgtin = await _sgtinService.getSGTINBySerialNumber(serial);
       if (expectedGtin == null || expectedGtin.isEmpty) return sgtin;
       final code = sgtin.gtinCode;
-      if (code == null || code.isEmpty) return sgtin;
+      if (code.isEmpty) return sgtin;
       try {
         if (GtinFormat.normalizeGtinTo14(code) !=
             GtinFormat.normalizeGtinTo14(expectedGtin)) {

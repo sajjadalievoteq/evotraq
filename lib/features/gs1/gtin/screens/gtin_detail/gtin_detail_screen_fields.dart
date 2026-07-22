@@ -4,11 +4,11 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 
-/// Screen-owned GTIN detail field holders (same ownership pattern as GLN/SSCC/SGTIN).
-/// Mixed into [_GTINDetailScreenState] — not a separate form-model abstraction.
-///
-/// Controllers are allocated on first access and disposed from [_controllers].
-/// Save reads controller text when created, otherwise the seed/hydrate value.
+
+
+
+
+
 mixin GtinDetailScreenFields {
   static final DateFormat _dateFmt = DateFormat('yyyy-MM-dd');
   static final DateFormat _dateTimeNoOffsetFmt =
@@ -20,7 +20,7 @@ mixin GtinDetailScreenFields {
   TextEditingController _c(String key) => _controllers[key] ??=
       TextEditingController(text: _seedTexts[key] ?? '');
 
-  /// Save/read precedence: live controller text if allocated, else seed.
+  
   String _text(String key) =>
       _controllers[key]?.text ?? _seedTexts[key] ?? '';
 
@@ -32,17 +32,17 @@ mixin GtinDetailScreenFields {
     }
   }
 
-  // Identification
+  
   TextEditingController get gtinCodeController => _c('gtinCode');
 
-  // Masterdata
+  
   TextEditingController get brandNameController => _c('brandName');
   TextEditingController get manufacturerController => _c('manufacturer');
   TextEditingController get unitDescriptorController => _c('unitDescriptor');
   TextEditingController get packSizeController => _c('packSize');
   String? productStatus;
 
-  // Marketing auth
+  
   TextEditingController get registrationNumberController =>
       _c('registrationNumber');
   TextEditingController get registrationDateDisplayController =>
@@ -52,7 +52,7 @@ mixin GtinDetailScreenFields {
   DateTime? registrationDate;
   DateTime? expirationDate;
 
-  // Descriptive
+  
   TextEditingController get functionalNameController => _c('functionalName');
   TextEditingController get tradeItemDescriptionController =>
       _c('tradeItemDescription');
@@ -60,7 +60,7 @@ mixin GtinDetailScreenFields {
   TextEditingController get targetMarketCountryController =>
       _c('targetMarketCountry');
 
-  // Packaging hierarchy
+  
   TextEditingController get nextLowerLevelGtinController =>
       _c('nextLowerLevelGtin');
   TextEditingController get nextLowerLevelQuantityController =>
@@ -79,7 +79,7 @@ mixin GtinDetailScreenFields {
   bool isInvoiceUnit = false;
   bool isVariableUnit = false;
 
-  // Net content
+  
   TextEditingController get netContentController => _c('netContent');
   TextEditingController get netContentUomController => _c('netContentUom');
   TextEditingController get grossWeightController => _c('grossWeight');
@@ -89,16 +89,16 @@ mixin GtinDetailScreenFields {
   TextEditingController get depthController => _c('depth');
   TextEditingController get dimUomController => _c('dimUom');
 
-  // Classification
+  
   TextEditingController get countryOfOriginController => _c('countryOfOrigin');
 
-  // Info provider
+  
   TextEditingController get informationProviderNameController =>
       _c('informationProviderName');
   GLN? informationProviderGln;
   GLN? manufacturerGln;
 
-  // Lifecycle
+  
   TextEditingController get effectiveDateDisplayController =>
       _c('effectiveDateDisplay');
   TextEditingController get startAvailDateDisplayController =>
@@ -113,11 +113,11 @@ mixin GtinDetailScreenFields {
   DateTime? endAvailDate;
   DateTime? publicationDate;
 
-  // Batch / serial
+  
   String? hasBatchNumberIndicator;
   String? hasSerialNumberIndicator;
 
-  // Audit
+  
   TextEditingController get createdByController => _c('createdBy');
   TextEditingController get updatedByController => _c('updatedBy');
 
@@ -282,7 +282,7 @@ mixin GtinDetailScreenFields {
   double? _doubleOrNullText(String s) =>
       s.trim().isEmpty ? null : double.tryParse(s.trim());
 
-  /// Same required-field semantics as on-screen validators.
+  
   String? validateGtinFieldsForSave({required bool isReadOnly}) {
     if (isReadOnly) return null;
     return GtinFieldValidators.validateProductName(_text('brandName')) ??
@@ -346,6 +346,6 @@ mixin GtinDetailScreenFields {
     );
   }
 
-  /// Debug/measurement helper — count of allocated controllers.
+  
   int get allocatedGtinControllerCount => _controllers.length;
 }

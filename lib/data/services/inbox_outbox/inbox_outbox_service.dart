@@ -4,10 +4,10 @@ import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/api_exception_mapper.dart';
 import 'package:traqtrace_app/core/network/api_response_body.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/data/models/inbox_outbox/inbox_outbox_list_filter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/data/services/operations/inbox_outbox/inbox_outbox_direction.dart';
-import 'package:traqtrace_app/features/inbox_outbox/models/inbox_outbox_list_filter.dart';
+import 'package:traqtrace_app/data/services/inbox_outbox/inbox_outbox_direction.dart';
 
 class InboxOutboxService {
   InboxOutboxService({required DioService dioService}) : _dioService = dioService;

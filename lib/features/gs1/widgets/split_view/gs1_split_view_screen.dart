@@ -67,13 +67,13 @@ class Gs1SplitViewScreen<TCubit extends StateStreamable<TState>, TState>
   final Widget Function(BuildContext context, VoidCallback onEmbeddedActionSuccess)?
       detailCreateBuilder;
 
-  /// Await / empty detail pane. [listLoading] is true while the master list is
-  /// loading (only when [isListLoading] selector is provided).
+  
+  
   final Widget Function(BuildContext context, {required bool listLoading})
       detailAwaitBuilder;
 
-  /// Optional: when provided, drives [detailAwaitBuilder]'s `listLoading` and
-  /// shows the await pane (skeleton) while the list is loading.
+  
+  
   final bool Function(TState state)? isListLoading;
   final bool showFloatingActionButton;
 
@@ -197,8 +197,8 @@ class _Gs1SplitViewScreenState<TCubit extends StateStreamable<TState>, TState>
         }
 
         if (widget.isEmptyNoMatch(state)) {
-          // Empty / filtered-out list: keep the detail pane on the await
-          // placeholder (Select a …), never a blank Center().
+          
+          
           return widget.detailAwaitBuilder(context, listLoading: false);
         }
 

@@ -5,7 +5,7 @@ import 'package:traqtrace_app/features/operations/commissioning/cubit/commission
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation/widgets/commissioning_batch_dates_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_item_scan_step.dart';
 
-/// Plain item scan step — matches Update Status operation layout.
+
 class CommissioningStep2SerialNumbers extends StatelessWidget {
   const CommissioningStep2SerialNumbers({
     super.key,

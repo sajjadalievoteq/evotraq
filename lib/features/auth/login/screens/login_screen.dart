@@ -11,27 +11,9 @@ import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_responsive_layout_widget.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_screen_host.dart';
 
-class LoginScreen extends StatefulWidget {
+
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  bool _authCheckStarted = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_authCheckStarted) return;
-    _authCheckStarted = true;
-
-    final authCubit = context.read<AuthCubit>();
-    if (authCubit.state.status == AuthStatus.initial) {
-      authCubit.checkAuth();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           } else if (state.status == AuthStatus.error) {
             context.showError(state.error ?? 'Authentication failed');
-          } else if (state.status == AuthStatus.authenticated) {
-            context.go(Constants.homeRoute);
           }
+          
         },
         builder: (context, state) {
           return AuthResponsiveFormLayout(

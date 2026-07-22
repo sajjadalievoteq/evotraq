@@ -3,7 +3,7 @@ import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/commissioning/models/commissioning_epc_item.dart';
 
-/// Step 3 — preview of the EPCIS ObjectEvent that will be emitted.
+
 class CommissioningEpcisPreviewCard extends StatelessWidget {
   const CommissioningEpcisPreviewCard({
     super.key,

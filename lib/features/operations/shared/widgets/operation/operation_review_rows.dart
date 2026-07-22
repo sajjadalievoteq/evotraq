@@ -63,7 +63,7 @@ class OperationReviewField {
   final String value;
 }
 
-/// Renders spaced info rows only for non-empty values.
+
 class OperationReviewOptionalFields extends StatelessWidget {
   const OperationReviewOptionalFields(this.fields, {super.key});
 
@@ -160,7 +160,7 @@ class OperationReviewGlnTransfer extends StatelessWidget {
   }
 }
 
-/// Numbered EPC list with type badge chips (shipping / receiving review).
+
 class OperationReviewEpcBadgeList extends StatelessWidget {
   const OperationReviewEpcBadgeList({
     super.key,

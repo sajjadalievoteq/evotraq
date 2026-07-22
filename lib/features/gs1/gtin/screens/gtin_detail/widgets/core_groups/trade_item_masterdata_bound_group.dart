@@ -6,7 +6,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 
-/// Presenter — controllers/values owned by [GTINDetailScreen].
+
 class TradeItemMasterdataBoundGroup extends StatelessWidget {
   const TradeItemMasterdataBoundGroup({
     super.key,

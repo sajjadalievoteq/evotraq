@@ -5,7 +5,7 @@ import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
 
-/// In-memory + Hive cache for home dashboard SWR.
+
 class HomeOverviewSessionStore {
   HomeOverviewSessionStore({
     this.maxReuseAge = const Duration(days: 7),
@@ -16,8 +16,8 @@ class HomeOverviewSessionStore {
   final Duration maxReuseAge;
   HomeOverviewBundle? _bundle;
 
-  /// Returns cached overview for [accountEmail] if present (may be stale).
-  /// Used for stale-while-revalidate paints; age only discards very old disk entries.
+  
+  
   Future<HomeOverviewBundle?> readFor(String? accountEmail) async {
     if (accountEmail == null || accountEmail.isEmpty) return null;
 
@@ -43,7 +43,7 @@ class HomeOverviewSessionStore {
     }
   }
 
-  /// Compatibility: only returns memory/disk cache when still "fresh".
+  
   Future<HomeOverviewBundle?> readIfValidFor(String? accountEmail) =>
       readFor(accountEmail);
 
@@ -54,7 +54,7 @@ class HomeOverviewSessionStore {
     try {
       await HiveStorage.putString(_prefsKey(email), json.encode(bundle.toJson()));
     } catch (_) {
-      // Memory cache still holds the bundle.
+      
     }
   }
 
@@ -62,8 +62,8 @@ class HomeOverviewSessionStore {
     final email = _bundle?.accountEmail;
     _bundle = null;
     if (email == null || email.isEmpty) return;
-    // Fire-and-forget disk eviction so logout stays synchronous.
-    // ignore: discarded_futures
+    
+    
     _clearPersisted(email);
   }
 

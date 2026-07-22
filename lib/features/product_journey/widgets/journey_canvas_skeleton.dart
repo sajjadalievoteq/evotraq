@@ -7,15 +7,15 @@ import 'package:traqtrace_app/core/widgets/shimmer_wrapper.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_pin_layout.dart';
 import 'package:traqtrace_app/features/product_journey/widgets/journey_canvas_painter.dart';
 
-/// Skeleton for the product-journey canvas diagram (and optional header).
-/// Prefer composing header via [JourneyCanvasPane] so padding matches the loaded UI.
+
+
 class JourneyCanvasSkeleton extends StatelessWidget {
   const JourneyCanvasSkeleton({
     super.key,
     this.includeHeader = true,
   });
 
-  /// When false, only the diagram skeleton is shown.
+  
   final bool includeHeader;
 
   @override
@@ -37,7 +37,7 @@ class JourneyCanvasSkeleton extends StatelessWidget {
   }
 }
 
-/// Shared with [JourneyCanvasPane] so loading and loaded use the same top inset.
+
 EdgeInsets journeyCanvasHeaderPadding(BuildContext context) {
   return EdgeInsets.fromLTRB(
     context.padding.top,
@@ -47,7 +47,7 @@ EdgeInsets journeyCanvasHeaderPadding(BuildContext context) {
   );
 }
 
-/// Timeline header + filter chips placeholder.
+
 class JourneyCanvasHeaderSkeleton extends StatelessWidget {
   const JourneyCanvasHeaderSkeleton({super.key});
 
@@ -115,7 +115,7 @@ class JourneyCanvasHeaderSkeleton extends StatelessWidget {
 class JourneyCanvasDiagramSkeleton extends StatefulWidget {
   const JourneyCanvasDiagramSkeleton({super.key});
 
-  /// Serpentine columns on the horizontal canvas (2 pins per column).
+  
   static const int horizontalLevels = 6;
 
   @override

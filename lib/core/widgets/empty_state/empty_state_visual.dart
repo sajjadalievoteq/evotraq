@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
-/// Shared visual shell for [AppEmptyState] / [AppEmptyDetail].
+
 class EmptyStateVisualScaffold extends StatefulWidget {
   const EmptyStateVisualScaffold({
     super.key,
@@ -47,7 +48,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduce = MediaQuery.disableAnimationsOf(context);
+    final reduce = TraqAnimationManager.reduceMotion(context);
     if (reduce) {
       _breathController.stop();
       _breathController.value = 0;
@@ -67,7 +68,7 @@ class _EmptyStateVisualScaffoldState extends State<EmptyStateVisualScaffold>
     final layout = context.layout;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final reduceMotion = TraqAnimationManager.reduceMotion(context);
     final metrics = _metricsFor(layout, widget.density);
 
     final content = Semantics(
@@ -301,7 +302,7 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-/// Hover elevation wrapper for desktop primary CTAs.
+
 class EmptyStateHoverAction extends StatefulWidget {
   const EmptyStateHoverAction({super.key, required this.child});
 
@@ -333,5 +334,5 @@ class _EmptyStateHoverActionState extends State<EmptyStateHoverAction> {
   }
 }
 
-/// Default empty-list icon when a call site does not specify one.
+
 const kDefaultEmptyStateIcon = NavIcons.packaging;

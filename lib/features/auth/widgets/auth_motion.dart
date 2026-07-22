@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 
-/// Thin auth alias over [TraqAnimationConstants] / [TraqAnimationManager].
-///
-/// Prefer the `core/animation` APIs in new code. Change timing in
-/// [TraqAnimationConstants].
+
+
+
+
 abstract final class AuthMotion {
   static Duration get swap => TraqAnimationConstants.swap;
   static Duration get entrance => TraqAnimationConstants.entrance;

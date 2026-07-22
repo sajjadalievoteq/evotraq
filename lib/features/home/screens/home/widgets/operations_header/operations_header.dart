@@ -43,7 +43,7 @@ class OperationsHeader extends StatelessWidget {
                SizedBox(
                    width: 400,
                    child: HomeOperationsSearchField()),
-                const SizedBox(width: 5),
+                const SizedBox(width: 10),
                 actions,
               ],
             ),

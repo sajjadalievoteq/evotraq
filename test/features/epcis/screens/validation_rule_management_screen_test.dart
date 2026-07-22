@@ -24,7 +24,7 @@ void main() {
   testWidgets('ValidationRuleManagementScreen shows rules and UI elements', (
     WidgetTester tester,
   ) async {
-    // Set up test data
+    
     final testRules = [
       ValidationRule(
         ruleId: '1',
@@ -99,7 +99,7 @@ void main() {
       mockSystemSettingsCubit.stream,
     ).thenAnswer((_) => Stream<SystemSettingsState>.value(systemSettingsState));
 
-    // Build the widget
+    
     await tester.pumpWidget(
       MaterialApp(
         home: MultiBlocProvider(
@@ -118,21 +118,21 @@ void main() {
       ),
     );
 
-    // Wait for widget to build
+    
     await tester.pumpAndSettle();
 
-    // Verify screen title
+    
     expect(find.textContaining('Validation Rule Management'), findsOneWidget);
 
-    // Verify UI controls
-    expect(find.byType(TextField), findsOneWidget); // Search field
-    expect(find.byType(FloatingActionButton), findsOneWidget); // Main FAB menu button
+    
+    expect(find.byType(TextField), findsOneWidget); 
+    expect(find.byType(FloatingActionButton), findsOneWidget); 
 
-    // Verify rules list displays
+    
     expect(find.byType(Card), findsWidgets);
     expect(find.textContaining('Rule'), findsWidgets);
 
-    // Verify severity indicators (chips or icons)
+    
     expect(find.text('Error'), findsWidgets);
     expect(find.text('Warning'), findsWidgets);
     expect(find.text('Info'), findsWidgets);

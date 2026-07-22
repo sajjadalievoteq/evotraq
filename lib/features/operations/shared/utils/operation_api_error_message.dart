@@ -1,7 +1,7 @@
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/backend_error_parser.dart';
 
-/// Operation-facing facade over [BackendErrorParser] (kept for existing call sites).
+
 abstract final class OperationApiErrorMessage {
   static bool isStructuredErrorBody(Map<String, dynamic> json) =>
       BackendErrorParser.isStructuredErrorBody(json);

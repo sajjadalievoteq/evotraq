@@ -12,22 +12,15 @@ class HomeOperationsHeaderActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Wrap(
-      spacing: 5,
-      runSpacing: 5,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        TraqElevatedIconButton(
-          onPressed: () => context.go(HomeNavigation.epcisObjectEventNew),
-          icon: SvgPicture.asset(
-            AppAssets.iconPlus,
-            width: 20,
-            height: 20,
-            colorFilter: ColorFilter.mode(scheme.onPrimary, BlendMode.srcIn),
-          ),
-          label: HomeStrings.newEventButton,
-        ),
-      ],
+    return TraqElevatedIconButton(
+      onPressed: () => context.go(HomeNavigation.epcisObjectEventNew),
+      icon: SvgPicture.asset(
+        AppAssets.iconPlus,
+        width: 20,
+        height: 20,
+        colorFilter: ColorFilter.mode(scheme.onPrimary, BlendMode.srcIn),
+      ),
+      label: HomeStrings.newEventButton,
     );
   }
 }

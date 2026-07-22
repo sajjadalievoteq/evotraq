@@ -4,7 +4,7 @@ import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 
-/// Presenter — values owned by [GTINDetailScreen].
+
 class ProductionBatchSerialDateAssociationsCoreGroup extends StatelessWidget {
   const ProductionBatchSerialDateAssociationsCoreGroup({
     super.key,

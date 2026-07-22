@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
@@ -84,19 +84,22 @@ class QuickActionsGrid extends StatelessWidget {
 
         const childAspectRatio = 18 / 6;
 
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: childAspectRatio,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+        
+        return SelectionContainer.disabled(
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: actions.length,
+            itemBuilder: (context, index) {
+              return DashboardQuickActionCard(action: actions[index]);
+            },
           ),
-          itemCount: actions.length,
-          itemBuilder: (context, index) {
-            return DashboardQuickActionCard(action: actions[index]);
-          },
         );
       },
     );

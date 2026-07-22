@@ -212,9 +212,9 @@ class AdvancedPerformanceService {
     }
   }
 
-  /// Merged connection pool dashboard (status + leaks + health + recommendations)
-  /// in a single call, to replace the 4 separate calls the connection pool
-  /// monitoring dashboard used to make on open.
+  
+  
+  
   Future<Map<String, dynamic>> getConnectionPoolDashboard() async {
     final token = await _tokenManager.getToken();
     if (token == null) {
@@ -288,9 +288,9 @@ class AdvancedPerformanceService {
     }
   }
 
-  /// Merged thread pool dashboard (metrics + contention analysis) in a single
-  /// call, to replace the 2 separate calls the thread pool management
-  /// dashboard used to make on open.
+  
+  
+  
   Future<Map<String, dynamic>> getThreadPoolDashboard() async {
     final token = await _tokenManager.getToken();
     if (token == null) {

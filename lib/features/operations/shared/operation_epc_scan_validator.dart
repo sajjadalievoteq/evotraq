@@ -113,7 +113,7 @@ class OperationEpcScanValidator {
       );
     }
 
-    // Prefer facade extractors for Digital Link / URN instance identities.
+    
     if (Gs1CanonicalIdentifier.isSgtin(rawBarcode)) {
       final serial = _cleanIdentifier(
         Gs1CanonicalIdentifier.extractSerial(rawBarcode),
@@ -251,8 +251,8 @@ class OperationEpcScanValidator {
     );
   }
 
-  /// Same as [validateAndAdd], but loads EPC status in parallel with existence
-  /// validation so successful scans wait for one round-trip instead of two.
+  
+  
   Future<({OperationEpcScanOutcome outcome, T? status})>
       validateAndAddWithStatus<T>(
     String rawBarcode, {

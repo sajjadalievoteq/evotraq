@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/app_skeleton_box.dart';
 
-/// Loading placeholder that mirrors [OperationListCard] layout.
+
 class OperationListCardSkeleton extends StatelessWidget {
   const OperationListCardSkeleton({super.key});
 

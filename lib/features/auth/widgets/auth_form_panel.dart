@@ -4,8 +4,8 @@ import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_surface_card.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 
-/// Auth card chrome: title lines stagger in, then the card fades into focus.
-/// Field-level stagger lives inside each form widget.
+
+
 class AuthFormPanel extends StatelessWidget {
   const AuthFormPanel({
     super.key,

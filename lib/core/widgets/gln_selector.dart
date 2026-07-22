@@ -16,8 +16,8 @@ class GLNSelector extends StatefulWidget {
   final bool isRequired;
   final String? errorText;
 
-  /// Optional override. When null, uses the session [GlnPickerCatalog]
-  /// loaded at app auth/startup.
+  
+  
   final List<GLN>? pickerCatalog;
 
   const GLNSelector({

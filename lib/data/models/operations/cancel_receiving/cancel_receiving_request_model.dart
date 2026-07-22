@@ -22,7 +22,7 @@ class CancelReceivingRequest {
   final OperationGlnDisplay? sourceLocation;
   final OperationGlnDisplay? receivingLocation;
   final String cancelReason;
-  /// Receiver GLN authorizing the cancel (CX-7).
+  
   final String actingGln;
   final String? originalReceivingReference;
   final String? comments;

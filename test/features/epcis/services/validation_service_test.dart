@@ -20,14 +20,14 @@ void main() {
       dioService: mockDioService,
     );
 
-    // Set up mock token response
+    
     when(mockDioService.getAuthToken()).thenAnswer((_) async => 'test-token');
     when(mockDioService.baseUrl).thenReturn('http://test-api.com/api');
   });
 
   group('ValidationService Tests', () {
     test('validateObjectEvent should call correct endpoint', () async {
-      // Arrange
+      
       final testEventData = {
         'action': 'ADD',
         'businessStep': 'urn:epcglobal:cbv:bizstep:commissioning',
@@ -52,14 +52,14 @@ void main() {
         statusCode: 200,
       ));
       
-      // Act
+      
       final result = await validationService.validateObjectEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], true);
       expect(result['validationErrors'], isEmpty);
       
-      // Verify the correct endpoint was called
+      
       verify(mockDioService.post(
         argThat(contains('/validate/object-event')),
         data: anyNamed('data'),
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('validateObjectEventModel should process ObjectEvent model', () async {
-      // Arrange
+      
       final testEvent = ObjectEvent(
         eventId: 'test-event-id-1',
         recordTime: DateTime.now(),
@@ -99,16 +99,16 @@ void main() {
         statusCode: 200,
       ));
       
-      // Act
+      
       final result = await validationService.validateObjectEventModel(testEvent);
       
-      // Assert
+      
       expect(result['valid'], true);
       expect(result['validationErrors'], isEmpty);
     });
 
     test('validateAggregationEvent should call correct endpoint', () async {
-      // Arrange
+      
       final testEventData = {
         'action': 'ADD',
         'businessStep': 'urn:epcglobal:cbv:bizstep:packing',
@@ -134,14 +134,14 @@ void main() {
         statusCode: 200,
       ));
       
-      // Act
+      
       final result = await validationService.validateAggregationEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], true);
       expect(result['validationErrors'], isEmpty);
       
-      // Verify the correct endpoint was called
+      
       verify(mockDioService.post(
         argThat(contains('/validate/aggregation-event')),
         data: anyNamed('data'),
@@ -152,7 +152,7 @@ void main() {
     });
 
     test('validateTransactionEvent should call correct endpoint', () async {
-      // Arrange
+      
       final testEventData = {
         'action': 'ADD',
         'businessStep': 'urn:epcglobal:cbv:bizstep:shipping',
@@ -180,14 +180,14 @@ void main() {
         statusCode: 200,
       ));
       
-      // Act
+      
       final result = await validationService.validateTransactionEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], true);
       expect(result['validationErrors'], isEmpty);
       
-      // Verify the correct endpoint was called
+      
       verify(mockDioService.post(
         argThat(contains('/validate/transaction-event')),
         data: anyNamed('data'),
@@ -198,7 +198,7 @@ void main() {
     });
 
     test('validateTransformationEvent should call correct endpoint', () async {
-      // Arrange
+      
       final testEventData = {
         'inputEPCList': ['urn:epc:id:sgtin:0614141.107346.1', 'urn:epc:id:sgtin:0614141.107346.2'],
         'outputEPCList': ['urn:epc:id:sgtin:0614141.107347.1'],
@@ -223,14 +223,14 @@ void main() {
         statusCode: 200,
       ));
       
-      // Act
+      
       final result = await validationService.validateTransformationEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], true);
       expect(result['validationErrors'], isEmpty);
       
-      // Verify the correct endpoint was called
+      
       verify(mockDioService.post(
         argThat(contains('/validate/transformation-event')),
         data: anyNamed('data'),
@@ -241,7 +241,7 @@ void main() {
     });
     
     test('validateEvent should handle server errors', () async {
-      // Arrange
+      
       final testEventData = {
         'action': 'ADD',
         'businessStep': 'urn:epcglobal:cbv:bizstep:commissioning',
@@ -259,16 +259,16 @@ void main() {
         statusCode: 500,
       ));
       
-      // Act
+      
       final result = await validationService.validateEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], false);
       expect(result.containsKey('error'), true);
     });
     
     test('validation should handle connection errors', () async {
-      // Arrange
+      
       final testEventData = {
         'action': 'ADD',
         'businessStep': 'urn:epcglobal:cbv:bizstep:commissioning',
@@ -282,10 +282,10 @@ void main() {
         acceptAllStatusCodes: anyNamed('acceptAllStatusCodes'),
       )).thenThrow(DioException(requestOptions: RequestOptions(path: ''), message: 'Network error'));
       
-      // Act
+      
       final result = await validationService.validateEvent(testEventData);
       
-      // Assert
+      
       expect(result['valid'], false);
       expect(result.containsKey('error'), true);
       expect(result['error'].toString().contains('Network error'), true);

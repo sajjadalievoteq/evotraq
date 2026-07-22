@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
+import 'package:traqtrace_app/core/config/splash_redirect_utils.dart';
 import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabulary_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
@@ -22,6 +23,10 @@ import 'package:traqtrace_app/features/admin/screens/data_consistency_integrity_
 import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/validation_rule_management_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/validation_rules_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/validation_rules/screens/rule_editor_screen.dart';
+import 'package:traqtrace_app/features/notifications/presentation/widgets/notifications_shell.dart';
+import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_shell.dart';
+import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';
+import 'package:traqtrace_app/features/api_management/widgets/api_management_shell.dart';
 import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln/gln_screen.dart';
@@ -60,7 +65,7 @@ import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_serializ
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/shipping_operation_detail_screen.dart';
-import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox_screen.dart';
+import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/inbox_outbox_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving/receiving_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/receiving_operation_detail_screen.dart';
@@ -99,6 +104,7 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/webhoo
 import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/journey_dashboard_screen.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/product_hierarchy_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_management_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/partner_detail_screen.dart';
 import 'package:traqtrace_app/features/api_management/screens/credential_management_screen.dart';
@@ -119,6 +125,8 @@ import 'package:traqtrace_app/features/auth/reset_password/screens/reset_passwor
 import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/verify_email_screen.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell.dart';
+import 'package:traqtrace_app/core/storage/last_route_store.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -150,8 +158,19 @@ class AppRouter {
   );
 
   final AuthCubit authCubit;
+  final LastRouteStore lastRouteStore;
 
-  AppRouter({required this.authCubit});
+  /// Last-route restore is once per auth session. Re-applying it on every
+  /// splash/login visit traps browser Back on the same page after restart.
+  bool _lastRouteRestoreConsumed = false;
+
+  AppRouter({
+    required this.authCubit,
+    LastRouteStore? lastRouteStore,
+  }) : lastRouteStore = lastRouteStore ??
+            (getIt.isRegistered<LastRouteStore>()
+                ? getIt<LastRouteStore>()
+                : LastRouteStore());
 
   bool _isAuthCheckPending() {
     return authCubit.state.status == AuthStatus.initial ||
@@ -177,16 +196,63 @@ class AppRouter {
         path == Constants.forgotPasswordRoute;
   }
 
-  String? _buildSplashRedirect(GoRouterState state) {
-    final currentLocation = state.uri.toString();
-    if (state.uri.path == Constants.splashRoute) {
-      return null;
+  /// Returns the Hive last-route at most once until logout.
+  String? _takePersistedLanding() {
+    if (_lastRouteRestoreConsumed) return null;
+    final loc = lastRouteStore.readLocation();
+    _lastRouteRestoreConsumed = true;
+    return loc;
+  }
+
+  String _authenticatedLanding({String? fromQuery}) {
+    final from = resolveSplashPendingLocationFrom(fromQuery);
+    if (from != null) {
+      // Explicit deep link counts as the session restore.
+      _lastRouteRestoreConsumed = true;
+      return from;
+    }
+    return _takePersistedLanding() ?? Constants.homeRoute;
+  }
+
+  String? computeRedirect({
+    required String path,
+    String? fromQuery,
+    String? currentLocation,
+  }) {
+    final authState = authCubit.state;
+    final isAuthenticated = authState.isAuthenticated;
+    final hasEstablishedSession = authState.user != null;
+
+    // Allow a fresh restore after the next login in this process.
+    if (authState.status == AuthStatus.unauthenticated) {
+      _lastRouteRestoreConsumed = false;
     }
 
-    return Uri(
-      path: Constants.splashRoute,
-      queryParameters: {'from': currentLocation},
-    ).toString();
+    if (_isAuthCheckPending() && !isAuthenticated && !_isPublicPath(path)) {
+      if (hasEstablishedSession) return null;
+      if (path == Constants.splashRoute) return null;
+      // Preserve deep link through auth bootstrap so refresh does not drop to home.
+      return splashLocationWithFrom(currentLocation ?? path);
+    }
+
+    if (path == Constants.splashRoute && !_isAuthCheckPending()) {
+      if (isAuthenticated) {
+        return _authenticatedLanding(fromQuery: fromQuery);
+      }
+      return loginLocationWithFrom(fromQuery);
+    }
+
+    if (isAuthenticated && _isAuthOnlyPath(path)) {
+      return resolvePendingLocationFrom(fromQuery) ??
+          _takePersistedLanding() ??
+          Constants.homeRoute;
+    }
+
+    if (!isAuthenticated && !_isPublicPath(path) && !_isAuthCheckPending()) {
+      return loginLocationWithFrom(currentLocation ?? path);
+    }
+
+    return null;
   }
 
   late final GoRouter router = GoRouter(
@@ -194,49 +260,47 @@ class AppRouter {
     debugLogDiagnostics: _enableRouterDiagnostics,
     initialLocation: Constants.splashRoute,
     redirect: (context, state) {
-      final path = state.uri.path;
-
-      if (_isAuthCheckPending() && !_isPublicPath(path)) {
-        return _buildSplashRedirect(state);
+      final redirectTo = computeRedirect(
+        path: state.uri.path,
+        fromQuery: state.uri.queryParameters['from'],
+        currentLocation: state.uri.toString(),
+      );
+      // Persist only when we are staying on a real authenticated destination.
+      if (redirectTo == null &&
+          authCubit.state.isAuthenticated &&
+          !_isPublicPath(state.uri.path)) {
+        lastRouteStore.saveLocation(state.uri.toString());
       }
-
-      if (authCubit.state.isAuthenticated && _isAuthOnlyPath(path)) {
-        return Constants.homeRoute;
-      }
-
-      if (!authCubit.state.isAuthenticated &&
-          !_isPublicPath(path) &&
-          !_isAuthCheckPending()) {
-        return Constants.loginRoute;
-      }
-
-      return null;
+      return redirectTo;
     },
     routes: [
       GoRoute(
         path: Constants.splashRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
+          animate: false,
           child: const SplashScreen(),
         ),
       ),
-      // Persistent left branding + animated right-panel form swaps.
+      
       ShellRoute(
         builder: (context, state, child) => AuthShell(child: child),
         routes: [
           GoRoute(
             path: Constants.loginRoute,
-            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
-              key: state.pageKey,
-              child: const LoginScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                TraqRouterTransitions.authShellPage(
+                  key: state.pageKey,
+                  child: const LoginScreen(),
+                ),
           ),
           GoRoute(
             path: Constants.registerRoute,
-            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
-              key: state.pageKey,
-              child: const RegisterScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                TraqRouterTransitions.authShellPage(
+                  key: state.pageKey,
+                  child: const RegisterScreen(),
+                ),
           ),
           GoRoute(
             path: Constants.checkEmailRoute,
@@ -250,10 +314,11 @@ class AppRouter {
           ),
           GoRoute(
             path: Constants.forgotPasswordRoute,
-            pageBuilder: (context, state) => TraqRouterTransitions.authShellPage(
-              key: state.pageKey,
-              child: const ForgotPasswordScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                TraqRouterTransitions.authShellPage(
+                  key: state.pageKey,
+                  child: const ForgotPasswordScreen(),
+                ),
           ),
           GoRoute(
             path: Constants.resetPasswordRoute,
@@ -301,7 +366,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.homeRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const HomeScreen(),
         ),
@@ -315,7 +380,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.profileRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ProfileScreen(),
         ),
@@ -331,7 +396,7 @@ class AppRouter {
         path: Constants.journeyDashboardRoute,
         pageBuilder: (context, state) {
           final epc = state.uri.queryParameters['epc'];
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
             child: JourneyDashboardScreen(initialEpc: epc),
           );
@@ -346,7 +411,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.inboxOutboxRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const InboxOutboxScreen(),
         ),
@@ -359,8 +424,25 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: Constants.productHierarchyRoute,
+        pageBuilder: (context, state) {
+          final epc = state.uri.queryParameters['epc'];
+          return TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: ProductHierarchyScreen(initialEpc: epc),
+          );
+        },
+        redirect: (context, state) {
+          final isAuthenticated = authCubit.state.isAuthenticated;
+          if (!isAuthenticated) {
+            return Constants.loginRoute;
+          }
+          return null;
+        },
+      ),
+      GoRoute(
         path: Constants.adminUsersRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const UserManagementScreen(),
         ),
@@ -381,7 +463,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminApprovalsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ApprovalsScreen(),
         ),
@@ -402,7 +484,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminSettingsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const SystemSettingsScreen(),
         ),
@@ -423,7 +505,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminGs1ValidationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GS1ValidationScreen(),
         ),
@@ -444,7 +526,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminPerformanceTestsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const PerformanceTestScreen(),
         ),
@@ -465,7 +547,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminPerformanceOptimizationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const PerformanceOptimizationDashboard(),
         ),
@@ -486,7 +568,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminMonitoringRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const MonitoringDashboardScreen(),
         ),
@@ -507,7 +589,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminIntegrationValidationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const IntegrationValidationScreen(),
         ),
@@ -528,7 +610,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminEventGenerationTestRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const EventGenerationTestScreen(),
         ),
@@ -549,7 +631,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminIndustryTestDataRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const IndustryTestDataScreen(),
         ),
@@ -570,7 +652,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminCbvVocabularyRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const CbvVocabularyManagementScreen(),
         ),
@@ -589,108 +671,113 @@ class AppRouter {
           return null;
         },
       ),
-      GoRoute(
-        path: Constants.adminValidationRulesRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ValidationRuleManagementScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminValidationRulesHelpRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ValidationRulesHelpScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminValidationRulesNewRoute,
-        pageBuilder: (context, state) {
-          final ruleId = state.pathParameters['ruleId'] ?? '';
-          return TraqRouterTransitions.page(
+      ShellRoute(
+        builder: (context, state, child) => EpcisShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.adminValidationRulesRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: RuleEditorRouteScreen(
-              ruleId: ruleId,
-              isPredefined: false,
-              isNew: true,
-            ),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+            child: const ValidationRuleManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminValidationRulesEditRoute,
-        pageBuilder: (context, state) {
-          final ruleId = state.pathParameters['ruleId'] ?? '';
-          final isPredefined =
-              state.uri.queryParameters['predefined'] == 'true';
-          return TraqRouterTransitions.page(
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminValidationRulesHelpRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
-            child: RuleEditorRouteScreen(
-              ruleId: ruleId,
-              isPredefined: isPredefined,
-            ),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+            child: const ValidationRulesHelpScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminValidationRulesNewRoute,
+          pageBuilder: (context, state) {
+            final ruleId = state.pathParameters['ruleId'] ?? '';
+            return TraqRouterTransitions.modalPage(
+              key: state.pageKey,
+              child: RuleEditorRouteScreen(
+                ruleId: ruleId,
+                isPredefined: false,
+                isNew: true,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
+
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
+
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminValidationRulesEditRoute,
+          pageBuilder: (context, state) {
+            final ruleId = state.pathParameters['ruleId'] ?? '';
+            final isPredefined =
+                state.uri.queryParameters['predefined'] == 'true';
+            return TraqRouterTransitions.modalPage(
+              key: state.pageKey,
+              child: RuleEditorRouteScreen(
+                ruleId: ruleId,
+                isPredefined: isPredefined,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
+
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
+
+            return null;
+          },
+        ),
+        ],
       ),
       GoRoute(
         path: Constants.adminDatabasePartitioningRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const DatabasePartitioningDashboard(),
         ),
@@ -711,7 +798,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminCacheRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const CacheManagementScreen(),
         ),
@@ -732,7 +819,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminJobQueueRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const JobQueueManagementScreen(),
         ),
@@ -753,7 +840,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminEtlManagementRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ETLManagementScreen(),
         ),
@@ -774,7 +861,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminBulkExportRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const BulkExportManagementScreen(),
         ),
@@ -795,7 +882,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminDataConsistencyIntegrityRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const DataConsistencyIntegrityDashboard(),
         ),
@@ -814,189 +901,194 @@ class AppRouter {
           return null;
         },
       ),
-      GoRoute(
-        path: Constants.adminApiPartnersRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const PartnerManagementScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiPartnerDetailRoute,
-        pageBuilder: (context, state) {
-          final partnerId = state.pathParameters['partnerId'] ?? '';
-          return TraqRouterTransitions.page(
+      ShellRoute(
+        builder: (context, state, child) => ApiManagementShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.adminApiPartnersRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: PartnerDetailScreen(partnerId: partnerId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+            child: const PartnerManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiPartnerCredentialsRoute,
-        pageBuilder: (context, state) {
-          final partnerId = state.pathParameters['partnerId'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: CredentialManagementScreen(partnerId: partnerId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiPartnerAnalyticsRoute,
-        pageBuilder: (context, state) {
-          final partnerId = state.pathParameters['partnerId'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: ApiAnalyticsScreen(partnerId: partnerId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiServiceAccountsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ServiceAccountManagementScreen(),
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+        GoRoute(
+          path: Constants.adminApiPartnerDetailRoute,
+          pageBuilder: (context, state) {
+            final partnerId = state.pathParameters['partnerId'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: PartnerDetailScreen(partnerId: partnerId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiCollectionsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ApiCollectionManagementScreen(),
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+        GoRoute(
+          path: Constants.adminApiPartnerCredentialsRoute,
+          pageBuilder: (context, state) {
+            final partnerId = state.pathParameters['partnerId'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: CredentialManagementScreen(partnerId: partnerId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiPartnerAccessRoute,
-        pageBuilder: (context, state) {
-          final partnerId = state.pathParameters['partnerId'] ?? '';
-          return TraqRouterTransitions.page(
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminApiPartnerAnalyticsRoute,
+          pageBuilder: (context, state) {
+            final partnerId = state.pathParameters['partnerId'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: ApiAnalyticsScreen(partnerId: partnerId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
+
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
+
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminApiServiceAccountsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: PartnerAccessManagementScreen(initialPartnerId: partnerId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+            child: const ServiceAccountManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.adminApiAccessRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const PartnerAccessManagementScreen(),
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
+        GoRoute(
+          path: Constants.adminApiCollectionsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const ApiCollectionManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
 
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
 
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
 
-          return null;
-        },
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminApiPartnerAccessRoute,
+          pageBuilder: (context, state) {
+            final partnerId = state.pathParameters['partnerId'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: PartnerAccessManagementScreen(initialPartnerId: partnerId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
+
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
+
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.adminApiAccessRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const PartnerAccessManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            final user = authCubit.state.user;
+
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+
+            if (user?.role != 'ADMIN') {
+              return Constants.homeRoute;
+            }
+
+            return null;
+          },
+        ),
+        ],
       ),
       GoRoute(
         path: Constants.gs1GtinsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GTINScreen(),
         ),
@@ -1010,7 +1102,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GtinNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const GTINDetailScreen(isEditing: true),
         ),
@@ -1026,7 +1118,7 @@ class AppRouter {
         path: Constants.gs1GtinDetailRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
           );
@@ -1043,7 +1135,7 @@ class AppRouter {
         path: Constants.gs1GtinEditRoute,
         pageBuilder: (context, state) {
           final gtinCode = state.pathParameters['gtinCode'] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
           );
@@ -1058,7 +1150,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GlnsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GLNScreen(),
         ),
@@ -1072,7 +1164,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1GlnNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const GLNDetailScreen(isEditing: true),
         ),
@@ -1089,7 +1181,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final glnId =
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: GLNDetailScreen(glnId: glnId, isEditing: false),
           );
@@ -1107,7 +1199,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final glnId =
               state.pathParameters[GlnRouteConstants.pathParamGlnId] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: GLNDetailScreen(glnId: glnId, isEditing: true),
           );
@@ -1122,7 +1214,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1SsccsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const SSCCScreen(),
         ),
@@ -1136,7 +1228,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1SsccNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const SSCCDetailScreen(isEditing: true),
         ),
@@ -1152,7 +1244,7 @@ class AppRouter {
         path: Constants.gs1SsccDetailRoute,
         pageBuilder: (context, state) {
           final ssccCode = state.pathParameters['ssccId'] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: SSCCDetailScreen(
               isEditing: false,
@@ -1172,7 +1264,7 @@ class AppRouter {
         path: Constants.gs1SsccEditRoute,
         pageBuilder: (context, state) {
           final ssccCode = state.pathParameters['ssccId'] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: SSCCDetailScreen(
               isEditing: true,
@@ -1189,89 +1281,96 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: Constants.gs1SgtinsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const SGTINScreen(),
+      ShellRoute(
+        builder: (context, state, child) => SgtinShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.gs1SgtinsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const SGTINScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const SGTINDetailScreen(isEditing: true),
+        GoRoute(
+          path: Constants.gs1SgtinNewRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const SGTINDetailScreen(isEditing: true),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
+        GoRoute(
+          path: Constants.gs1SgtinByEpcRoute,
+          pageBuilder: (context, state) {
+            final epcUri = state.extra as String? ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: SGTINDetailScreen(
+                epcUri: epcUri.isNotEmpty ? epcUri : null,
+                isEditing: false,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.gs1SgtinDetailRoute,
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: SGTINDetailScreen(sgtinId: id, isEditing: false),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.gs1SgtinEditRoute,
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: SGTINDetailScreen(sgtinId: id, isEditing: true),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        ],
       ),
-      GoRoute(
-        path: Constants.gs1SgtinByEpcRoute,
-        pageBuilder: (context, state) {
-          final epcUri = state.extra as String? ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: SGTINDetailScreen(epcUri: epcUri.isNotEmpty ? epcUri : null, isEditing: false),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinDetailRoute,
-        pageBuilder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: SGTINDetailScreen(sgtinId: id, isEditing: false),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.gs1SgtinEditRoute,
-        pageBuilder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: SGTINDetailScreen(sgtinId: id, isEditing: true),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
       GoRoute(
         path: Constants.gs1EpcConversionRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const EPCConversionScreen(),
         ),
@@ -1285,7 +1384,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.gs1ValidationDemoRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GS1ValidationDemoScreen(),
         ),
@@ -1297,376 +1396,380 @@ class AppRouter {
           return null;
         },
       ),
-      GoRoute(
-        path: Constants.epcisEventsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const EPCISEventsListScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisObjectEventsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ObjectEventScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisAggregationEventsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const AggregationEventScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionEventsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransactionEventsListScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransformationEventsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransformationEventsListScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
-      GoRoute(
-        path: Constants.epcisAdvancedQueryRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const AdvancedQueryScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
-      GoRoute(
-        path: Constants.epcisTraversalQueryRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TraversalQueryScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
-      GoRoute(
-        path: Constants.epcisSerializationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const EPCISSerializationScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
-      GoRoute(
-        path: Constants.epcisObjectEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ObjectEventFormScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisObjectEventBatchImportRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ObjectEventBatchImportScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisAggregationEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const AggregationEventFormScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransactionEventFormScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionEventHelpRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransactionEventsHelpScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransformationEventNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransformationEventFormScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-
-      GoRoute(
-        path: Constants.epcisEventDetailRoute,
-        pageBuilder: (context, state) {
-          final eventId = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
+      ShellRoute(
+        builder: (context, state, child) => EpcisShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.epcisEventsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: EpcisGenericEventDetailScreen(eventId: eventId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisObjectEventDetailQueryRoute,
-        pageBuilder: (context, state) {
-          final eventId =
-              state.uri.queryParameters[ObjectEventRouteConstants
-                  .queryEventId] ??
-              '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: ObjectEventDetailScreen(eventId: eventId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisObjectEventDetailRoute,
-        pageBuilder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: ObjectEventDetailScreen(eventId: id),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          final id = state.pathParameters['id'] ?? '';
-          if (id.contains(':') || id.contains(';') || id.contains('/')) {
-            return ObjectEventRouteConstants.detailLocation(id);
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisAggregationEventDetailRoute,
-        pageBuilder: (context, state) {
-          final aggregationEventId = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: AggregationEventDetailScreen(eventId: aggregationEventId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionEventDetailRoute,
-        pageBuilder: (context, state) {
-          final transactionEventId = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
-            key: state.pageKey,
-            child: TransactionEventFormScreen(
-              transactionEventId: transactionEventId,
-            ),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionDocumentsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransactionDocumentScreen(),
+            child: const EPCISEventsListScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransactionDocumentHelpRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const TransactionDocumentHelpScreen(),
+        GoRoute(
+          path: Constants.epcisObjectEventsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const ObjectEventScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisTransformationEventDetailRoute,
-        pageBuilder: (context, state) {
-          final transformationEventId = state.pathParameters['id'] ?? '';
-          return TraqRouterTransitions.page(
+        GoRoute(
+          path: Constants.epcisAggregationEventsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: TransformationEventFormScreen(
-              transformationEventId: transformationEventId,
-            ),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.epcisAggregationEventHierarchyRoute,
-        pageBuilder: (context, state) {
-          final epc = state.pathParameters['epc'] ?? '';
-          final Map<String, dynamic> extra =
-              (state.extra as Map<String, dynamic>?) ?? {};
-          final isParent = extra['isParent'] as bool? ?? true;
-
-          return TraqRouterTransitions.page(
+            child: const AggregationEventScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionEventsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: AggregationEventHierarchyScreen(
-              epc: epc,
-              isParent: isParent,
-            ),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
+            child: const TransactionEventsListScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransformationEventsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const TransformationEventsListScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
 
+        GoRoute(
+          path: Constants.epcisAdvancedQueryRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const AdvancedQueryScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+
+        GoRoute(
+          path: Constants.epcisTraversalQueryRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const TraversalQueryScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+
+        GoRoute(
+          path: Constants.epcisSerializationRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const EPCISSerializationScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+
+        GoRoute(
+          path: Constants.epcisObjectEventNewRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const ObjectEventFormScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisObjectEventBatchImportRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const ObjectEventBatchImportScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisAggregationEventNewRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const AggregationEventFormScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionEventNewRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const TransactionEventFormScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionEventHelpRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.sharedAxisHorizontalPage(
+            key: state.pageKey,
+            child: const TransactionEventsHelpScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransformationEventNewRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
+            key: state.pageKey,
+            child: const TransformationEventFormScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+
+        GoRoute(
+          path: Constants.epcisEventDetailRoute,
+          pageBuilder: (context, state) {
+            final eventId = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: EpcisGenericEventDetailScreen(eventId: eventId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisObjectEventDetailQueryRoute,
+          pageBuilder: (context, state) {
+            final eventId =
+                state.uri.queryParameters[ObjectEventRouteConstants
+                    .queryEventId] ??
+                '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: ObjectEventDetailScreen(eventId: eventId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisObjectEventDetailRoute,
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: ObjectEventDetailScreen(eventId: id),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            final id = state.pathParameters['id'] ?? '';
+            if (id.contains(':') || id.contains(';') || id.contains('/')) {
+              return ObjectEventRouteConstants.detailLocation(id);
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisAggregationEventDetailRoute,
+          pageBuilder: (context, state) {
+            final aggregationEventId = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: AggregationEventDetailScreen(eventId: aggregationEventId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionEventDetailRoute,
+          pageBuilder: (context, state) {
+            final transactionEventId = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: TransactionEventFormScreen(
+                transactionEventId: transactionEventId,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionDocumentsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const TransactionDocumentScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransactionDocumentHelpRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.sharedAxisHorizontalPage(
+            key: state.pageKey,
+            child: const TransactionDocumentHelpScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisTransformationEventDetailRoute,
+          pageBuilder: (context, state) {
+            final transformationEventId = state.pathParameters['id'] ?? '';
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: TransformationEventFormScreen(
+                transformationEventId: transformationEventId,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.epcisAggregationEventHierarchyRoute,
+          pageBuilder: (context, state) {
+            final epc = state.pathParameters['epc'] ?? '';
+            final Map<String, dynamic> extra =
+                (state.extra as Map<String, dynamic>?) ?? {};
+            final isParent = extra['isParent'] as bool? ?? true;
+
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: AggregationEventHierarchyScreen(
+                epc: epc,
+                isParent: isParent,
+              ),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        ],
+      ),
       GoRoute(
         path: Constants.opShippingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ShippingScreen(),
         ),
@@ -1680,7 +1783,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opShippingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const ShippingOperationScreen(),
         ),
@@ -1696,7 +1799,7 @@ class AppRouter {
         path: Constants.opShippingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: ShippingOperationDetailScreen(operationId: operationId),
           );
@@ -1711,7 +1814,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opReceivingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ReceivingScreen(),
         ),
@@ -1725,9 +1828,13 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opReceivingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
-          child: const ReceivingOperationScreen(),
+          child: ReceivingOperationScreen(
+            initialPrefill: state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : null,
+          ),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1741,7 +1848,7 @@ class AppRouter {
         path: Constants.opReceivingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: ReceivingOperationDetailScreen(operationId: operationId),
           );
@@ -1757,7 +1864,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opReturnShippingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ReturnShippingScreen(),
         ),
@@ -1771,7 +1878,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opReturnShippingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: ReturnShippingOperationScreen(
             pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
@@ -1789,7 +1896,7 @@ class AppRouter {
         path: Constants.opReturnShippingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: ReturnShippingOperationDetailScreen(
               operationId: operationId,
@@ -1807,7 +1914,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opCancelShippingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const CancelShippingScreen(),
         ),
@@ -1821,9 +1928,13 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opCancelShippingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
-          child: const CancelShippingOperationScreen(),
+          child: CancelShippingOperationScreen(
+            initialPrefill: state.extra is Map<String, dynamic>
+                ? state.extra as Map<String, dynamic>
+                : null,
+          ),
         ),
         redirect: (context, state) {
           final isAuthenticated = authCubit.state.isAuthenticated;
@@ -1837,7 +1948,7 @@ class AppRouter {
         path: Constants.opCancelShippingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: CancelShippingOperationDetailScreen(
               operationId: operationId,
@@ -1855,7 +1966,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opCancelReceivingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const CancelReceivingScreen(),
         ),
@@ -1869,7 +1980,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opCancelReceivingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const CancelReceivingOperationScreen(),
         ),
@@ -1885,7 +1996,7 @@ class AppRouter {
         path: Constants.opCancelReceivingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: CancelReceivingOperationDetailScreen(
               operationId: operationId,
@@ -1903,7 +2014,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opReturnReceivingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const ReturnReceivingScreen(),
         ),
@@ -1917,7 +2028,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opReturnReceivingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: ReturnReceivingOperationScreen(
             pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
@@ -1935,7 +2046,7 @@ class AppRouter {
         path: Constants.opReturnReceivingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: ReturnReceivingOperationDetailScreen(
               operationId: operationId,
@@ -1953,7 +2064,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opPackingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const PackingScreen(),
         ),
@@ -1967,7 +2078,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opPackingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: PackingOperationScreen(),
         ),
@@ -1985,7 +2096,7 @@ class AppRouter {
           final rootEpc = state.uri.queryParameters['rootEpc'] ?? '';
           final title =
               state.uri.queryParameters['title'] ?? 'Container Hierarchy';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: HierarchyScreen(rootEpc: rootEpc, title: title),
           );
@@ -2002,7 +2113,7 @@ class AppRouter {
         path: Constants.opPackingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: PackingOperationDetailScreen(operationId: operationId),
           );
@@ -2018,7 +2129,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opUnpackingRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const UnpackingScreen(),
         ),
@@ -2032,7 +2143,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opUnpackingCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const UnpackingOperationScreen(),
         ),
@@ -2048,7 +2159,7 @@ class AppRouter {
         path: Constants.opUnpackingDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: UnpackingOperationDetailScreen(operationId: operationId),
           );
@@ -2064,7 +2175,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opUpdateStatusRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const UpdateStatusScreen(),
         ),
@@ -2078,7 +2189,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opUpdateStatusCreateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const UpdateStatusOperationScreen(),
         ),
@@ -2094,7 +2205,7 @@ class AppRouter {
         path: Constants.opUpdateStatusDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId']!;
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: UpdateStatusOperationDetailScreen(operationId: operationId),
           );
@@ -2110,7 +2221,7 @@ class AppRouter {
 
       GoRoute(
         path: Constants.opCommissioningRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const CommissioningScreen(),
         ),
@@ -2124,7 +2235,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.opCommissioningNewRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.modalPage(
           key: state.pageKey,
           child: const CommissioningOperationScreen(),
         ),
@@ -2140,7 +2251,7 @@ class AppRouter {
         path: Constants.opCommissioningDetailRoute,
         pageBuilder: (context, state) {
           final operationId = state.pathParameters['operationId'] ?? '';
-          return TraqRouterTransitions.page(
+          return TraqRouterTransitions.sharedAxisHorizontalPage(
             key: state.pageKey,
             child: CommissioningOperationDetailScreen(batchId: operationId),
           );
@@ -2154,69 +2265,73 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: Constants.notificationsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const NotificationCenterScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.notificationSubscriptionsRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const SubscriptionManagementScreen(),
-        ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.notificationDetailRoute,
-        pageBuilder: (context, state) {
-          final subscriptionId = state.pathParameters['subscriptionId']!;
-          return TraqRouterTransitions.page(
+      ShellRoute(
+        builder: (context, state, child) => NotificationsShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.notificationsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
-            child: SubscriptionDetailsScreen(subscriptionId: subscriptionId),
-          );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
-      ),
-      GoRoute(
-        path: Constants.notificationWebhooksRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const WebhookConfigurationScreen(),
+            child: const NotificationCenterScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
+        GoRoute(
+          path: Constants.notificationSubscriptionsRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const SubscriptionManagementScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.notificationDetailRoute,
+          pageBuilder: (context, state) {
+            final subscriptionId = state.pathParameters['subscriptionId']!;
+            return TraqRouterTransitions.sharedAxisHorizontalPage(
+              key: state.pageKey,
+              child: SubscriptionDetailsScreen(subscriptionId: subscriptionId),
+            );
+          },
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        GoRoute(
+          path: Constants.notificationWebhooksRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const WebhookConfigurationScreen(),
+          ),
+          redirect: (context, state) {
+            final isAuthenticated = authCubit.state.isAuthenticated;
+            if (!isAuthenticated) {
+              return Constants.loginRoute;
+            }
+            return null;
+          },
+        ),
+        ],
       ),
-
       GoRoute(
         path: Constants.barcodeScanRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GS1BarcodeScannerScreen(title: 'GS1 Barcode Scanner'),
         ),
@@ -2230,7 +2345,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.barcodeGenerateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const BarcodeGenerationScreen(),
         ),
@@ -2244,7 +2359,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.barcodeVerifyRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
+        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
           key: state.pageKey,
           child: const GS1BarcodeScannerScreen(
             title: 'Verify GS1 Barcode',
@@ -2260,15 +2375,20 @@ class AppRouter {
         },
       ),
       TransactionEventValidationDemoRoute.getRoute(),
-      GoRoute(
-        path: Constants.demoValidationRulesRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.page(
-          key: state.pageKey,
-          child: const ValidationRuleManagementScreen(),
+      ShellRoute(
+        builder: (context, state, child) => EpcisShell(child: child),
+        routes: [
+        GoRoute(
+          path: Constants.demoValidationRulesRoute,
+          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: const ValidationRuleManagementScreen(),
+          ),
         ),
+        ],
       ),
     ],
-    errorPageBuilder: (context, state) => TraqRouterTransitions.page(
+    errorPageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
       key: state.pageKey,
       child: RouterNotFoundScreen(uri: state.uri.toString()),
     ),

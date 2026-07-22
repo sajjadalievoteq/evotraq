@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
-import 'package:traqtrace_app/core/animation/traq_indeterminate_progress.dart';
 import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/splash/screens/Splash/widgets/splash_brand_icon.dart';
@@ -30,7 +29,9 @@ class SplashContent extends StatelessWidget {
         Align(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 20),
-            child: SplashBrandIcon(size: iconSize),
+            child: SplashBrandIconTilt(
+              child: SplashBrandIcon(size: iconSize),
+            ),
           ),
         ),
         Align(
@@ -63,9 +64,7 @@ class SplashContent extends StatelessWidget {
             ),
           ),
         ),
-        const Align(
-          child: TraqIndeterminateProgress(),
-        ),
+
       ],
     );
   }

@@ -28,7 +28,7 @@ class JourneySearchBar extends StatelessWidget {
   final VoidCallback onClear;
   final ValueChanged<ScanResult>? onScanResult;
 
-  /// When true, uses tight card margins (mobile column layout).
+  
   final bool compactMargins;
 
   static const double _fieldIconSize = 18;

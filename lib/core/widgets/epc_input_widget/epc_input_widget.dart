@@ -27,7 +27,7 @@ class EPCInputWidget extends StatefulWidget {
   final String? label;
   final bool? scannerAvailable;
 
-  /// When [parseToEPC] fails, optionally resolve bare serials or other formats.
+  
   final Future<EPCParseResult?> Function(String input)? onParseFallback;
 
   @override

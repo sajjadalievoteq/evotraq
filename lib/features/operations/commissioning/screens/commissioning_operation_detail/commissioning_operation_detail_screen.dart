@@ -36,7 +36,7 @@ Future<Map<String, ItemStatus>> _fetchCommissioningItemStatuses(
         result[sgtin.serialNumber] = sgtin.status;
       }
     } catch (_) {
-      // Fall through to per-serial lookups for any missing items.
+      
     }
   }
 

@@ -92,8 +92,8 @@ EPCParseResult parseToEPC(String input) {
     }
   }
 
-  // Bare numeric SSCC / GTIN+serial — only after structured SGTIN/GTIN attempts.
-  // Many GTIN-14 values start with "00"; do not treat those as SSCC.
+  
+  
   final ssccCandidate = _tryParseBareSsccOrGtinSerial(raw);
   if (ssccCandidate != null) {
     return ssccCandidate;
@@ -102,12 +102,12 @@ EPCParseResult parseToEPC(String input) {
   throw EPCParseException('Unrecognized barcode format: $raw');
 }
 
-/// Disambiguates pure numeric input that could be SSCC-18 or GTIN-14 + serial.
+
 EPCParseResult? _tryParseBareSsccOrGtinSerial(String raw) {
   final stripped = SsccFormat.stripSsccInput(raw);
   if (!RegExp(r'^\d+$').hasMatch(stripped)) return null;
 
-  // AI(00) + 18-digit SSCC element string (20 digits).
+  
   if (stripped.length == 20 && stripped.startsWith('00')) {
     final sscc18 = stripped.substring(2);
     if (SsccFormat.isValidSscc(sscc18)) {

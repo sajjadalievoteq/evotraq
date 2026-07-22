@@ -276,7 +276,7 @@ class _PinBodyPainter extends CustomPainter {
     final circleCenter = Offset(cx, cy);
 
     if (isSelected) {
-      // Pulse: glow radius oscillates between r+4 and r+14
+      
       final glowR = r + 4 + pulseValue * 10;
       canvas.drawCircle(
         circleCenter,

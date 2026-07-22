@@ -5,7 +5,7 @@ import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 
-// Test implementation of State to mix in the EventFormValidationMixin
+
 class TestValidationFormState extends StatefulWidget {
   final Function(State state) onStateCreated;
   
@@ -64,7 +64,7 @@ void main() {
         validationService: MockValidationServiceSimple(),
       );
       
-      // Create a test widget and get its state
+      
       final testWidget = MaterialApp(
         home: BlocProvider<ValidationCubit>.value(
           value: mockCubit,
@@ -77,7 +77,7 @@ void main() {
       await tester.pumpWidget(testWidget);
       await tester.pumpAndSettle();
       
-      // Test: should set and get field errors
+      
       formState.setFieldError('name', 'Name is required');
       formState.setFieldError('quantity', 'Must be positive');
       
@@ -85,12 +85,12 @@ void main() {
       expect(formState.getFieldError('quantity'), 'Must be positive');
       expect(formState.getFieldError('nonexistent'), isNull);
       
-      // Test: should clear field errors
+      
       formState.clearFieldErrors();
       expect(formState.getFieldError('field1'), isNull);
       expect(formState.getFieldError('field2'), isNull);
       
-      // Test: should validate field with function
+      
       String? validator(String value) {
         return value.isEmpty ? 'Field is required' : null;
       }
@@ -103,7 +103,7 @@ void main() {
       expect(isValid, true);
       expect(formState.getFieldError('field1'), isNull);
       
-      // Test: should map validation errors to fields
+      
       final Map<String, String> fieldMappings = {
         'businessstep': 'bizStep',
         'eventtime': 'eventTimeField',
@@ -121,7 +121,7 @@ void main() {
       expect(formState.getFieldError('bizStep'), 'Invalid business step');
       expect(formState.getFieldError('eventTimeField'), 'The field "eventTime" is required');
       
-      // Test: should get field validation status
+      
       formState.clearFieldErrors();
       expect(formState.getFieldValidationStatus('statusField'), ValidationStatus.notValidated);
       
@@ -131,7 +131,7 @@ void main() {
       formState.setFieldError('statusField', null);
       expect(formState.getFieldValidationStatus('statusField'), ValidationStatus.valid);
       
-      // Test: should validate with progressive feedback
+      
       String? feedbackValidator(String value) {
         if (value.isEmpty) return 'Field is required';
         if (value.length < 3) return 'Must be at least 3 characters';
@@ -150,7 +150,7 @@ void main() {
       expect(isValid, true);
       expect(formState.getFieldError('feedbackField'), isNull);
       
-      // Test: should process validation result
+      
       final Map<String, String> processMappings = {
         'eventtime': 'eventTimeField',
       };
@@ -171,7 +171,7 @@ void main() {
 
     group('EventFormValidationMixin Helper Tests', () {
       test('Placeholder for future non-widget tests', () {
-        // Logic that doesn't require a widget can go here
+        
       });
     });
   });

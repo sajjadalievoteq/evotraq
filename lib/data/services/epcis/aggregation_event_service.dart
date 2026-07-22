@@ -111,7 +111,7 @@ class AggregationEventService {
       acceptAllStatusCodes: true,
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
@@ -445,14 +445,14 @@ class AggregationEventService {
     final body = json.encode(requestData);
 
     final response = await _dioService.post(
-      '$_baseUrl/pack',
+      _baseUrl,
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
@@ -514,14 +514,14 @@ class AggregationEventService {
     final body = json.encode(requestData);
 
     final response = await _dioService.post(
-      '$_baseUrl/unpack',
+      _baseUrl,
       headers: headers,
       data: body,
       responseType: ResponseType.plain,
       acceptAllStatusCodes: true,
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       return AggregationEvent.fromJson(json.decode(response.data));
     } else {
       throw Exception(_getDetailedErrorMessage(response));
@@ -594,8 +594,11 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/contents',
-        queryParameters: {'parentEPC': parentEPC},
+        '${_dioService.baseUrl}/events/query/traversal/contained-items',
+        queryParameters: {
+          'containerEpc': parentEPC,
+          'includeNested': 'false',
+        },
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
@@ -617,8 +620,11 @@ class AggregationEventService {
 
     try {
       final response = await _dioService.get(
-        '$_baseUrl/contents',
-        queryParameters: {'parentEPC': epc},
+        '${_dioService.baseUrl}/events/query/traversal/contained-items',
+        queryParameters: {
+          'containerEpc': epc,
+          'includeNested': 'false',
+        },
         headers: headers,
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,

@@ -27,7 +27,7 @@ class JourneyCanvasPainter extends CustomPainter {
 
   double get progress => _progress.value;
 
-  /// Build path + metrics once when pin centres change (not per animation frame).
+  
   static ({Path path, List<PathMetric> metrics, double totalLength}) prepare(
     List<Offset> positions,
   ) {

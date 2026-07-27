@@ -264,11 +264,6 @@ class _SupplyChainVisualizationWidgetState extends State<SupplyChainVisualizatio
     final hierarchyDepth = hierarchy['hierarchyDepth'] ?? 0;
     final totalItemCount = hierarchy['totalItemCount'] ?? 0;
     
-    print('DEBUG UI VALUES:');
-    print('  - directChildren.length: ${directChildren.length}');
-    print('  - totalItemCount: $totalItemCount');
-    print('  - hierarchyDepth: $hierarchyDepth');
-    print('  - parentEpc: ${hierarchy['parentEpc']}');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),

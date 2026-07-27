@@ -2,19 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/gs1/widgets/card_with_background_widget.dart';
 import 'package:traqtrace_app/features/splash/screens/Splash/widgets/splash_content.dart';
 
-
-
-
-
-
+/// Cold-start branding only. Auth bootstrap runs at app level so deep-link
+/// refresh never routes through this screen.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -32,7 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!_initialized) {
       _initialized = true;
       unawaited(_precacheAssets());
-      unawaited(_runStartupAuthCheck());
     }
   }
 
@@ -46,42 +38,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
     setState(() => _assetsReady = true);
-  }
-
-  
-  
-  
-  
-  
-  Future<void> _runStartupAuthCheck() async {
-    final auth = getIt<AuthCubit>();
-    final dio = getIt<DioService>();
-
-    
-    if (auth.state.status != AuthStatus.initial) return;
-
-    
-    await dio.warmAuthTokenFromStorage();
-
-    try {
-      
-      await auth.checkAuth(
-        minSplashDelay: const Duration(milliseconds: 1700),
-      );
-    } catch (e) {
-      debugPrint('Startup checkAuth failed: $e');
-    }
-
-    
-    final status = auth.state.status;
-    if (status == AuthStatus.initial || status == AuthStatus.loading) {
-      await auth.sessionExpired();
-    }
-
-    
-    if (auth.state.isAuthenticated) {
-      dio.markAuthSettled();
-    }
   }
 
   @override

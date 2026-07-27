@@ -104,45 +104,15 @@ class PackingOperationService {
     }
   }
 
+  /// Convenience list view of [getPackingOperationsPage].
+  /// Prefer the page method for paged UIs; operational reads use `/operations/packing`
+  /// (not `/events/aggregation/business-step/packing`).
   Future<List<PackingResponse>> getAllPackingOperations({
     int page = 0,
     int size = 20,
   }) async {
-    try {
-      final headers = await _headers;
-      final response = await _dioService.get(
-        _baseUrl,
-        queryParameters: {'page': page.toString(), 'size': size.toString()},
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = decodeApiResponseBody(response.data);
-        final operations = responseData['operations'] as List;
-        return operations.map((op) => PackingResponse.fromJson(op)).toList();
-      }
-
-      throw ApiExceptionMapper.fromHttpResponse(
-        response,
-        fallbackMessage: 'Failed to get packing operations',
-      );
-    } on ApiException {
-      rethrow;
-    } on DioException catch (e, stackTrace) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        stackTrace: stackTrace,
-        fallbackMessage: 'Network error while loading packing operations',
-      );
-    } catch (e, stackTrace) {
-      debugPrint('[PackingOperationService.list] unexpected: $e\n$stackTrace');
-      throw ApiException(
-        message: 'Unexpected error loading packing operations',
-        originalException: e,
-      );
-    }
+    final pageResult = await getPackingOperationsPage(page: page, size: size);
+    return pageResult.operations;
   }
 
   Future<List<PackingResponse>> getPackingOperationsByReference(

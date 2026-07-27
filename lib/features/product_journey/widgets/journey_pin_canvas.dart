@@ -172,14 +172,13 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
             ),
             for (int i = 0; i < steps.length - 1; i++) ...[
               if (_durationBetween(steps, i).inSeconds > 0)
-                Builder(builder: (context) {
-                  final anchor = JourneyPinLayout.durationLabelAnchor(
-                    centres[i],
-                    centres[i + 1],
-                    axis: axis,
-                  );
-                  if (anchor == null) return const SizedBox.shrink();
-                  return Positioned(
+                if (JourneyPinLayout.durationLabelAnchor(
+                      centres[i],
+                      centres[i + 1],
+                      axis: axis,
+                    )
+                    case final anchor?)
+                  Positioned(
                     left: anchor.dx - _chipHalfW + 50,
                     top: anchor.dy - _chipHalfH + 50,
                     child: _AnimatedPin(
@@ -195,8 +194,7 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
                         ),
                       ),
                     ),
-                  );
-                }),
+                  ),
             ],
             for (int i = 0; i < steps.length; i++)
               Positioned(
@@ -224,6 +222,19 @@ class _JourneyPinsCanvasState extends State<JourneyPinsCanvas>
           ],
         ),
       );
+
+      // Horizontal (desktop): the cross-axis is vertical and cannot scroll, so
+      // if the natural canvas is taller than the viewport (short screen) scale
+      // the whole serpentine to fit — never trim top or bottom. (Vertical/mobile
+      // handles overflow via the vertical scroll view below.)
+      if (axis == SerpentineAxis.horizontal && canvasH > viewportH + 0.5) {
+        return Center(
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: canvas,
+          ),
+        );
+      }
 
       final scrollAxis =
           axis == SerpentineAxis.horizontal ? Axis.horizontal : Axis.vertical;

@@ -193,25 +193,21 @@ class _JourneyCanvasDiagramSkeletonState
                   ),
                 ),
                 for (int i = 0; i < pinCount - 1; i++)
-                  Builder(
-                    builder: (context) {
-                      final anchor = JourneyPinLayout.durationLabelAnchor(
+                  if (JourneyPinLayout.durationLabelAnchor(
                         centres[i],
                         centres[i + 1],
                         axis: axis,
-                      );
-                      if (anchor == null) return const SizedBox.shrink();
-                      return Positioned(
-                        left: anchor.dx - _chipHalfW + 50,
-                        top: anchor.dy - _chipHalfH + 50,
-                        child: const AppSkeletonBox(
-                          width: 48,
-                          height: 18,
-                          radius: 10,
-                        ),
-                      );
-                    },
-                  ),
+                      )
+                      case final anchor?)
+                    Positioned(
+                      left: anchor.dx - _chipHalfW + 50,
+                      top: anchor.dy - _chipHalfH + 50,
+                      child: const AppSkeletonBox(
+                        width: 48,
+                        height: 18,
+                        radius: 10,
+                      ),
+                    ),
                 for (int i = 0; i < pinCount; i++)
                   Positioned(
                     left: centres[i].dx - _pinW / 2,

@@ -27,11 +27,8 @@ class SplashContent extends StatelessWidget {
       beginScale: TraqAnimationConstants.splashInitialScale,
       children: [
         Align(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: SplashBrandIconTilt(
-              child: SplashBrandIcon(size: iconSize),
-            ),
+          child: SplashBrandIconTilt(
+            child: SplashBrandIcon(size: iconSize),
           ),
         ),
         Align(
@@ -49,21 +46,7 @@ class SplashContent extends StatelessWidget {
             ),
           ),
         ),
-        Align(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 36),
-            child: Text(
-              'Preparing your workspace…',
-              textAlign: TextAlign.center,
-              style: t.bodySm.copyWith(
-                fontSize: 16,
-                letterSpacing: 0.15,
-                color: c.textMuted,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ),
+
 
       ],
     );

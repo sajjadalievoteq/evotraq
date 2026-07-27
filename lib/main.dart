@@ -24,7 +24,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/storage/hive_storage.dart';
-import 'package:traqtrace_app/core/storage/last_route_store.dart';
+import 'package:traqtrace_app/core/auth/auth_session_bootstrap.dart';
 
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
@@ -50,10 +50,7 @@ void main() async {
     debugPrint('Initializing dependencies...');
     await initDependencies(appConfig);
     getIt.registerSingleton<AppRouter>(
-      AppRouter(
-        authCubit: getIt<AuthCubit>(),
-        lastRouteStore: getIt<LastRouteStore>(),
-      ),
+      AppRouter(authCubit: getIt<AuthCubit>()),
     );
     debugPrint('Dependencies initialized.');
     unawaited(getIt<CbvVocabularyService>().hydrateFromCache());
@@ -87,8 +84,19 @@ void main() async {
   }
 }
 
-class TraqTraceApp extends StatelessWidget {
+class TraqTraceApp extends StatefulWidget {
   const TraqTraceApp({super.key});
+
+  @override
+  State<TraqTraceApp> createState() => _TraqTraceAppState();
+}
+
+class _TraqTraceAppState extends State<TraqTraceApp> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(bootstrapAuthSession());
+  }
 
   @override
   Widget build(BuildContext context) {

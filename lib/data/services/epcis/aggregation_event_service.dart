@@ -284,6 +284,8 @@ class AggregationEventService {
     }
   }
 
+  /// Resolves the active parent of [childEPC] via `/container` only.
+  /// Does not re-fetch child ADD events (use event history APIs for that).
   Future<AggregationEvent> findCurrentParentOfChild(String childEPC) async {
     final headers = await _getHeaders();
 
@@ -297,15 +299,23 @@ class AggregationEventService {
       );
 
       if (response.statusCode == 200) {
-        final String parentEPC = json.decode(response.data);
-
-        List<AggregationEvent> events =
-            await findAggregationEventsByChildEPCAndAction(childEPC, 'ADD');
-        return events.firstWhere(
-          (event) => event.parentID == parentEPC,
-          orElse: () => throw Exception(
-            "No active aggregation found for child $childEPC",
-          ),
+        final decoded = json.decode(response.data);
+        final parentEPC = decoded is String
+            ? decoded
+            : decoded?.toString() ?? '';
+        final cleaned = parentEPC.replaceAll('"', '').trim();
+        if (cleaned.isEmpty || cleaned == 'null') {
+          throw Exception("Child $childEPC is not currently in any container");
+        }
+        final now = DateTime.now();
+        return AggregationEvent(
+          eventId: 'active-parent-$childEPC',
+          eventTime: now,
+          recordTime: now,
+          eventTimeZone: '+00:00',
+          action: 'ADD',
+          parentID: cleaned,
+          childEPCs: [childEPC],
         );
       } else if (response.statusCode == 404) {
         throw Exception("Child $childEPC is not currently in any container");
@@ -390,6 +400,9 @@ class AggregationEventService {
     }
   }
 
+  /// @Deprecated Prefer [PackingOperationService.createPackingOperation]
+  /// (`POST /operations/packing`). Kept for non-UI callers only.
+  @Deprecated('Use PackingOperationService.createPackingOperation instead')
   Future<AggregationEvent> createPackEvent(
     String parentEPC,
     List<String> childEPCs,
@@ -459,6 +472,9 @@ class AggregationEventService {
     }
   }
 
+  /// @Deprecated Prefer [UnpackingOperationService.createUnpackingOperation]
+  /// (`POST /operations/unpacking`). Kept for non-UI callers only.
+  @Deprecated('Use UnpackingOperationService.createUnpackingOperation instead')
   Future<AggregationEvent> createUnpackEvent(
     String parentEPC,
     List<String>? childEPCs,
@@ -589,68 +605,72 @@ class AggregationEventService {
     }
   }
 
+  /// Direct children of [parentEPC] via the canonical hierarchy children API
+  /// (`GET /events/aggregation/children`). Prefer this over traversal
+  /// `contained-items` for product/ops UIs.
   Future<List<String>> findContainerContents(String parentEPC) async {
     final headers = await _getHeaders();
+    const pageSize = 200;
+    final all = <String>[];
+    var page = 0;
 
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/query/traversal/contained-items',
-        queryParameters: {
-          'containerEpc': parentEPC,
-          'includeNested': 'false',
-        },
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
+      while (true) {
+        final response = await _dioService.get(
+          '$_baseUrl/children',
+          queryParameters: {
+            'parentEPC': parentEPC,
+            'page': page.toString(),
+            'size': pageSize.toString(),
+          },
+          headers: headers,
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
+        );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.data);
-        return List<String>.from(jsonData);
-      } else {
-        throw Exception(_getDetailedErrorMessage(response));
+        if (response.statusCode != 200) {
+          throw Exception(_getDetailedErrorMessage(response));
+        }
+
+        final data = json.decode(response.data) as Map<String, dynamic>;
+        final children = data['children'] as List<dynamic>? ?? const [];
+        for (final raw in children) {
+          if (raw is! Map<String, dynamic>) continue;
+          final epc = raw['epc']?.toString().trim();
+          if (epc != null && epc.isNotEmpty) all.add(epc);
+        }
+
+        final hasMore = data['hasMore'] as bool? ?? false;
+        final totalPages = (data['totalPages'] as num?)?.toInt() ?? (page + 1);
+        if (!hasMore || page + 1 >= totalPages) break;
+        page++;
       }
+      return all;
     } catch (e) {
       rethrow;
     }
   }
 
+  /// Integrity check using the same children/container APIs as the hierarchy UI
+  /// (no separate traversal `contained-items` round-trip).
   Future<bool> verifyHierarchy(String epc) async {
-    final headers = await _getHeaders();
-
     try {
-      final response = await _dioService.get(
-        '${_dioService.baseUrl}/events/query/traversal/contained-items',
-        queryParameters: {
-          'containerEpc': epc,
-          'includeNested': 'false',
-        },
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else if (response.statusCode == 404) {
-        try {
-          final containerResponse = await _dioService.get(
-            '$_baseUrl/container',
-            queryParameters: {'childEPC': epc},
-            headers: headers,
-            responseType: ResponseType.plain,
-            acceptAllStatusCodes: true,
-          );
-
-          return containerResponse.statusCode == 200;
-        } catch (_) {
-          return false;
-        }
-      } else {
-        throw Exception(_getDetailedErrorMessage(response));
-      }
+      await findContainerContents(epc);
+      return true;
     } catch (_) {
-      return false;
+      try {
+        final headers = await _getHeaders();
+        final containerResponse = await _dioService.get(
+          '$_baseUrl/container',
+          queryParameters: {'childEPC': epc},
+          headers: headers,
+          responseType: ResponseType.plain,
+          acceptAllStatusCodes: true,
+        );
+        return containerResponse.statusCode == 200;
+      } catch (_) {
+        return false;
+      }
     }
   }
 }

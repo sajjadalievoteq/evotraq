@@ -6,7 +6,6 @@ import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarc
 import 'package:traqtrace_app/features/shared/hierarchy/screens/hierarchy/models/hierarchy_tree_node_state.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
-
 class ProductHierarchyFlatRow extends StatelessWidget {
   const ProductHierarchyFlatRow({
     super.key,
@@ -16,19 +15,42 @@ class ProductHierarchyFlatRow extends StatelessWidget {
     required this.onExpand,
     required this.onCollapse,
     required this.onLoadMore,
+    this.focusEpc,
+    this.searchedEpc,
+    this.flashFocusEpc,
+    this.parentHasParent = false,
+    this.rootEpc,
+    this.onClimb,
   });
 
   final ProductHierarchyFlatItem item;
   final String? selectedEpc;
+  final String? focusEpc;
+  final String? searchedEpc;
+  final String? flashFocusEpc;
+  final bool parentHasParent;
+  final String? rootEpc;
   final ValueChanged<HierarchyTreeNodeState> onSelect;
   final ValueChanged<HierarchyTreeNodeState> onExpand;
   final ValueChanged<HierarchyTreeNodeState> onCollapse;
   final ValueChanged<HierarchyTreeNodeState> onLoadMore;
+  final ValueChanged<HierarchyTreeNodeState>? onClimb;
 
-  bool _selected(HierarchyTreeNodeState n) {
-    if (selectedEpc == null) return false;
-    return normalizeHierarchyEpc(n.node.epc) ==
-        normalizeHierarchyEpc(selectedEpc!);
+  bool _same(String? a, String? b) {
+    if (a == null || b == null) return false;
+    return normalizeHierarchyEpc(a) == normalizeHierarchyEpc(b);
+  }
+
+  bool _canClimb(HierarchyTreeNodeState n) {
+    // Leaves never climb.
+    if (!n.node.hasChildren) return false;
+    // Only the current view-root can climb — and only if it sits under a parent
+    // that isn't already shown in this view. Every other node's parent is
+    // already visible one row up, so no arrow.
+    if (rootEpc != null && _same(n.node.epc, rootEpc)) {
+      return parentHasParent;
+    }
+    return false;
   }
 
   @override
@@ -58,12 +80,17 @@ class ProductHierarchyFlatRow extends StatelessWidget {
             child: ProductHierarchyNodeTile(
               key: ValueKey(nodeState.node.epc),
               nodeState: nodeState,
-              isHighlighted: _selected(nodeState),
+              isHighlighted: _same(nodeState.node.epc, selectedEpc) ||
+                  nodeState.node.isFocused,
+              isFlashing: _same(nodeState.node.epc, flashFocusEpc),
+              isSearchMatch: _same(nodeState.node.epc, searchedEpc),
               isGroupHeader: isExpandedHeader,
               showBorder: !isExpandedHeader && !inGroupBody,
+              canClimb: _canClimb(nodeState),
               onSelect: onSelect,
               onExpand: onExpand,
               onCollapse: onCollapse,
+              onClimb: onClimb,
             ),
           ),
         ),
@@ -89,8 +116,6 @@ class ProductHierarchyFlatRow extends StatelessWidget {
     };
   }
 }
-
-
 
 class ProductHierarchyLoadMoreSentinel extends StatefulWidget {
   const ProductHierarchyLoadMoreSentinel({

@@ -93,12 +93,18 @@ abstract final class JourneyPinLayout {
   }) {
     const lanes = 2;
     final usableTop = topInset + _bandGap;
-    final minHeight = usableTop + _minBandHeight + _bottomGap;
+    // A pin marker occupies `pinRadius` above its centre and `pinHeight -
+    // pinRadius` below it (Positioned top = centre.dy - pinRadius, height =
+    // pinHeight). Anchor the upper lane from the TOP and the lower lane from the
+    // BOTTOM so BOTH markers stay fully contained at any height — this is what
+    // prevents vertical trimming (previously the lower lane's marker body hung
+    // past the canvas bottom on short/medium viewports).
+    final belowCentre = pinHeight - pinRadius;
+    final minHeight =
+        usableTop + pinRadius + _minBandHeight + belowCentre + _bottomGap;
     final height = math.max(viewportH, minHeight);
-    final usableBottom = height - _bottomGap;
-    final band = math.max(_minBandHeight, usableBottom - usableTop);
-    final topY = usableTop + band * 0.05;
-    final bottomY = usableTop + band * 0.75;
+    final topY = usableTop + pinRadius;
+    final bottomY = height - _bottomGap - belowCentre;
     final startX = _edgePad + pinWidth / 2;
 
     final cols = (count / lanes).ceil();

@@ -30,10 +30,9 @@ class ProductJourneyService {
   Future<ProductJourney?> getJourneyByEpc(String epcUri) async {
     try {
       final headers = await _getHeaders();
-      final canonicalEpc = await _resolveCanonicalEpc(epcUri, headers);
+      // Backend already canonicalizes; avoid a prior /search round-trip.
+      final canonicalEpc = Gs1CanonicalIdentifier.forStorage(epcUri);
 
-      
-      
       final response = await _dioService.get(
         '$_baseUrl/product-journey/epc',
         queryParameters: {'epc': canonicalEpc},
@@ -264,60 +263,6 @@ class ProductJourneyService {
       debugPrint('ProductJourneyService: Error searching products: $e');
       return [];
     }
-  }
-
-  Future<String> _resolveCanonicalEpc(
-    String epcUri,
-    Map<String, String> headers,
-  ) async {
-    final normalized = Gs1CanonicalIdentifier.forStorage(epcUri);
-    if (!Gs1CanonicalIdentifier.isSgtin(normalized) &&
-        !Gs1CanonicalIdentifier.isSscc(normalized)) {
-      return normalized;
-    }
-    try {
-      final serialOrSscc = Gs1CanonicalIdentifier.extractSerial(normalized) ??
-          Gs1CanonicalIdentifier.extractSscc18(normalized) ??
-          '';
-      if (serialOrSscc.isEmpty) return normalized;
-
-      final response = await _dioService.get(
-        '$_baseUrl/product-journey/search',
-        queryParameters: {'q': serialOrSscc, 'size': '5'},
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        final data = decodeApiResponseBody(response.data);
-        final List<dynamic> items = data is List ? data : const [];
-        for (final item in items) {
-          final candidate = Map<String, dynamic>.from(item as Map);
-          final identifier = candidate['identifier']?.toString();
-          if (identifier == null || identifier.isEmpty) continue;
-          final candidateSerial = candidate['serialNumber']?.toString();
-          final displayName = candidate['displayName']?.toString();
-          final type = candidate['type']?.toString();
-          final matchesSgtin = (type == 'SGTIN') &&
-              (candidateSerial == serialOrSscc || displayName == serialOrSscc);
-          final matchesSscc = (type == 'SSCC') &&
-              (displayName == serialOrSscc ||
-                  identifier.endsWith(serialOrSscc) ||
-                  identifier.contains(serialOrSscc));
-          if (matchesSgtin || matchesSscc) {
-            debugPrint(
-              'ProductJourneyService: Resolved canonical EPC '
-              '$epcUri → $identifier',
-            );
-            return identifier;
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('ProductJourneyService: EPC normalization failed: $e');
-    }
-    return normalized;
   }
 
   String _inferIdentifierType(String identifier) {

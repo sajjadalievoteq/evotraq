@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/splash_redirect_utils.dart';
-import 'package:traqtrace_app/core/storage/last_route_store.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -24,7 +23,6 @@ AuthState _authenticated() => AuthState(
       ),
       token: 'tok',
     );
-
 
 List<String> _collectRedirectTrail({
   required AppRouter router,
@@ -121,7 +119,7 @@ void main() {
       expect(uri.queryParameters['from'], Constants.homeRoute);
     });
 
-    test('FP-6: pending keeps /splash put and never redirects to login', () {
+    test('FP-6: pending keeps URL put — no splash park on protected routes', () {
       for (final status in [AuthStatus.initial, AuthStatus.loading]) {
         when(() => authCubit.state).thenReturn(AuthState(status: status));
         expect(
@@ -129,71 +127,47 @@ void main() {
           isNull,
           reason: 'splash must stay for $status',
         );
-        final parked = appRouter.computeRedirect(
-          path: Constants.homeRoute,
-          currentLocation: Constants.homeRoute,
+        expect(
+          appRouter.computeRedirect(
+            path: Constants.homeRoute,
+            currentLocation: Constants.homeRoute,
+          ),
+          isNull,
+          reason: 'protected URL must not redirect to splash for $status',
         );
-        expect(parked, isNotNull);
-        expect(parked!.startsWith(Constants.splashRoute), isTrue);
-        final uri = Uri.parse(parked);
-        expect(uri.path, Constants.splashRoute);
-        expect(uri.queryParameters['from'], Constants.homeRoute);
-        expect(parked, isNot(equals(Constants.loginRoute)));
+        expect(
+          appRouter.computeRedirect(path: '/'),
+          Constants.splashRoute,
+          reason: 'bare / cold-starts on splash for $status',
+        );
       }
     });
 
-    test('auth-loading bounce preserves deep link as from', () {
+    test('auth-loading keeps deep link URL (no splash?from=)', () {
       when(() => authCubit.state).thenReturn(
         const AuthState(status: AuthStatus.loading),
       );
-      final parked = appRouter.computeRedirect(
-        path: '/dashboards/journey',
-        currentLocation: '/dashboards/journey?epc=urn:epc:id:sgtin:1',
-      );
-      expect(parked, isNotNull);
-      final uri = Uri.parse(parked!);
-      expect(uri.path, Constants.splashRoute);
       expect(
-        uri.queryParameters['from'],
-        '/dashboards/journey?epc=urn:epc:id:sgtin:1',
+        appRouter.computeRedirect(
+          path: '/dashboards/journey',
+          currentLocation: '/dashboards/journey?epc=urn:epc:id:sgtin:1',
+        ),
+        isNull,
       );
     });
 
-    test('on /splash + authenticated restores lastRoute when no from', () {
-      final store = LastRouteStore(debounce: Duration.zero);
-      store.debugSetLocation('/operations/shipping');
-      final router = AppRouter(authCubit: authCubit, lastRouteStore: store);
+    test('authenticated splash without from → home (no Hive restore)', () {
       when(() => authCubit.state).thenReturn(_authenticated());
       expect(
-        router.computeRedirect(path: Constants.splashRoute),
-        '/operations/shipping',
-      );
-      // Once consumed, Back to splash must not re-apply last route.
-      expect(
-        router.computeRedirect(path: Constants.splashRoute),
+        appRouter.computeRedirect(path: Constants.splashRoute),
         Constants.homeRoute,
       );
-      expect(
-        router.computeRedirect(
-          path: Constants.splashRoute,
-          fromQuery: '/home',
-        ),
-        '/home',
-      );
     });
 
-    test('authenticated login without from restores lastRoute only once', () {
-      final store = LastRouteStore(debounce: Duration.zero);
-      store.debugSetLocation('/operations/shipping');
-      final router = AppRouter(authCubit: authCubit, lastRouteStore: store);
+    test('authenticated login without from → home', () {
       when(() => authCubit.state).thenReturn(_authenticated());
-
       expect(
-        router.computeRedirect(path: Constants.loginRoute),
-        '/operations/shipping',
-      );
-      expect(
-        router.computeRedirect(path: Constants.loginRoute),
+        appRouter.computeRedirect(path: Constants.loginRoute),
         Constants.homeRoute,
       );
     });
@@ -215,14 +189,14 @@ void main() {
 
         expect(trail, isNotEmpty);
         expect(trail.last, Constants.homeRoute);
-        
+
         final firstHome = trail.indexOf(Constants.homeRoute);
         expect(firstHome, isNonNegative);
         expect(
           trail.skip(firstHome).where((l) => l.startsWith(Constants.splashRoute)),
           isEmpty,
         );
-        
+
         expect(
           trail.where((l) => l == Constants.homeRoute).length,
           lessThanOrEqualTo(1),
@@ -274,6 +248,23 @@ void main() {
       expect(locations.first, Constants.homeRoute);
       expect(locations.where((e) => e == Constants.splashRoute), isEmpty);
       expect(locations.skip(1).every((e) => e == null), isTrue);
+    });
+
+    test('refresh of deep link: pending→authenticated stays put', () {
+      const deep = '/gs1/gtins/00629200080027';
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.loading),
+      );
+      expect(
+        appRouter.computeRedirect(path: deep, currentLocation: deep),
+        isNull,
+      );
+
+      when(() => authCubit.state).thenReturn(_authenticated());
+      expect(
+        appRouter.computeRedirect(path: deep, currentLocation: deep),
+        isNull,
+      );
     });
   });
 }

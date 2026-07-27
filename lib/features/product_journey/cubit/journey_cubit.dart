@@ -22,6 +22,17 @@ class JourneyCubit extends Cubit<JourneyState> {
   final ProductJourneyService _service;
   final DashboardService _dashboardService;
   bool _recentEventsRequested = false;
+  final Map<String, ProductJourney?> _journeyCache = {};
+
+  Future<ProductJourney?> _getJourneyCached(String identifier) async {
+    final key = identifier.trim();
+    if (_journeyCache.containsKey(key)) {
+      return _journeyCache[key];
+    }
+    final journey = await _service.getJourneyByIdentifier(key);
+    _journeyCache[key] = journey;
+    return journey;
+  }
 
   void maybeSearch(String? identifier) {
     if (identifier != null && identifier.isNotEmpty) {
@@ -38,8 +49,8 @@ class JourneyCubit extends Cubit<JourneyState> {
     _recentEventsRequested = true;
     emit(state.copyWith(recentEventsLoading: true));
     try {
-      final events =
-          await _dashboardService.getRecentEvents(limit: 10);
+      final summary = await _dashboardService.getSummary(recentLimit: 10);
+      final events = summary.recentEvents;
       if (isClosed) return;
       
       if (state.isLoaded || state.isLoading) {
@@ -71,7 +82,7 @@ class JourneyCubit extends Cubit<JourneyState> {
       eventFilter: JourneyEventFilter.all,
     ));
     try {
-      final journey = await _service.getJourneyByIdentifier(identifier.trim());
+      final journey = await _getJourneyCached(identifier);
       if (isClosed) return;
       if (journey == null || journey.steps.isEmpty) {
         emit(state.copyWith(
@@ -125,6 +136,7 @@ class JourneyCubit extends Cubit<JourneyState> {
 
   void clear() {
     final recent = state.recentEvents;
+    _journeyCache.clear();
     emit(JourneyState(recentEvents: recent));
     if (recent.isEmpty) {
       _recentEventsRequested = false;

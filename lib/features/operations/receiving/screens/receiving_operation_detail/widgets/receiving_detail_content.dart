@@ -55,7 +55,6 @@ class ReceivingDetailContent extends StatelessWidget {
 
     return ReceivingDetailBody(
       operation: operation!,
-      onOperationUpdated: onOperationUpdated,
     );
   }
 }

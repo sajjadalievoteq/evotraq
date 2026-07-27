@@ -3,6 +3,12 @@ import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters.dart';
 import 'package:traqtrace_app/data/models/epcis/advanced_query_result.dart';
 
+/// EPCIS admin / power-user query service.
+///
+/// Wraps the `/events/query/traversal/*` backend endpoints — these are
+/// intentionally for the EPCIS advanced-query and traversal explorer UI only.
+/// Product hierarchy and product journey screens use dedicated, paginated
+/// endpoints (`/events/aggregation/children`, `/product-journey/*`) instead.
 class AdvancedQueryService {
   final DioService _dioService;
 

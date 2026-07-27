@@ -102,45 +102,14 @@ class UnpackingOperationService {
     }
   }
 
+  /// Convenience list view of [getUnpackingOperationsPage].
+  /// Prefer `/operations/unpacking` for operational UIs (not aggregation bizStep filters).
   Future<List<UnpackingResponse>> getAllUnpackingOperations({
     int page = 0,
     int size = 20,
   }) async {
-    try {
-      final headers = await _headers;
-      final response = await _dioService.get(
-        _baseUrl,
-        queryParameters: {'page': page.toString(), 'size': size.toString()},
-        headers: headers,
-        responseType: ResponseType.plain,
-        acceptAllStatusCodes: true,
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = decodeApiResponseBody(response.data);
-        final operations = responseData['operations'] as List;
-        return operations.map((op) => UnpackingResponse.fromJson(op)).toList();
-      }
-
-      throw ApiExceptionMapper.fromHttpResponse(
-        response,
-        fallbackMessage: 'Failed to get unpacking operations',
-      );
-    } on ApiException {
-      rethrow;
-    } on DioException catch (e, stackTrace) {
-      throw ApiExceptionMapper.fromDio(
-        e,
-        stackTrace: stackTrace,
-        fallbackMessage: 'Network error while loading unpacking operations',
-      );
-    } catch (e, stackTrace) {
-      debugPrint('[UnpackingOperationService.list] unexpected: $e\n$stackTrace');
-      throw ApiException(
-        message: 'Unexpected error loading unpacking operations',
-        originalException: e,
-      );
-    }
+    final pageResult = await getUnpackingOperationsPage(page: page, size: size);
+    return pageResult.operations;
   }
 
   Future<List<UnpackingResponse>> getUnpackingOperationsByReference(

@@ -12,7 +12,7 @@ class CommissioningPoolCheckResult {
   const CommissioningPoolCheckResult({
     required this.status,
     this.sourceStatus,
-    this.targetStatus = 'COMMISSIONED',
+    this.targetStatus = 'ACTIVE',
     this.blockReason,
   });
 
@@ -156,24 +156,34 @@ class CommissioningSerialPoolChecker {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.preReserved,
         sourceStatus: status.name,
-        targetStatus: ItemStatus.COMMISSIONED.name,
+        targetStatus: ItemStatus.ACTIVE.name,
       );
     }
 
+    // Legacy orphan: COMMISSIONED without event — still retryable.
     if (status == ItemStatus.COMMISSIONED) {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.preReserved,
         sourceStatus: status.name,
-        targetStatus: ItemStatus.COMMISSIONED.name,
+        targetStatus: ItemStatus.ACTIVE.name,
       );
     }
 
-    if (!sgtin_rules.canTransition(status, ItemStatus.COMMISSIONED)) {
+    // Orphan after GS1 path: ACTIVE without commissioning event id.
+    if (status == ItemStatus.ACTIVE) {
+      return CommissioningPoolCheckResult(
+        status: CommissioningSerialPoolStatus.preReserved,
+        sourceStatus: status.name,
+        targetStatus: ItemStatus.ACTIVE.name,
+      );
+    }
+
+    if (!sgtin_rules.canTransition(status, ItemStatus.ACTIVE)) {
       return CommissioningPoolCheckResult(
         status: CommissioningSerialPoolStatus.notTransitionable,
         sourceStatus: status.name,
         blockReason:
-            'Cannot transition from ${status.name} to COMMISSIONED',
+            'Cannot transition from ${status.name} to ACTIVE',
       );
     }
 

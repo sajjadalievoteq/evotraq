@@ -9,6 +9,7 @@ const Map<ItemStatus, Set<ItemStatus>> allowedTransitionsMap = {
   },
   ItemStatus.ALLOCATED: {
     ItemStatus.COMMISSIONED,
+    ItemStatus.ACTIVE,
   },
   ItemStatus.COMMISSIONED: {
     ItemStatus.ACTIVE,

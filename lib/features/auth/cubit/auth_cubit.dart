@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
-import 'package:traqtrace_app/core/storage/last_route_store.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
@@ -434,16 +433,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  void _clearLastRoute() {
-    if (getIt.isRegistered<LastRouteStore>()) {
-      unawaited(getIt<LastRouteStore>().clear());
-    }
-  }
-
   void _clearSessionCaches() {
     _clearHomeOverviewSession();
     _clearGlnPickerCatalog();
-    _clearLastRoute();
     _resetCbvVocabulary();
   }
 

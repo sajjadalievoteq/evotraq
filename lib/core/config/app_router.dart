@@ -125,8 +125,6 @@ import 'package:traqtrace_app/features/auth/reset_password/screens/reset_passwor
 import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart';
 import 'package:traqtrace_app/features/auth/verify_email/screens/verify_email_screen.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_shell.dart';
-import 'package:traqtrace_app/core/storage/last_route_store.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -158,19 +156,8 @@ class AppRouter {
   );
 
   final AuthCubit authCubit;
-  final LastRouteStore lastRouteStore;
 
-  /// Last-route restore is once per auth session. Re-applying it on every
-  /// splash/login visit traps browser Back on the same page after restart.
-  bool _lastRouteRestoreConsumed = false;
-
-  AppRouter({
-    required this.authCubit,
-    LastRouteStore? lastRouteStore,
-  }) : lastRouteStore = lastRouteStore ??
-            (getIt.isRegistered<LastRouteStore>()
-                ? getIt<LastRouteStore>()
-                : LastRouteStore());
+  AppRouter({required this.authCubit});
 
   bool _isAuthCheckPending() {
     return authCubit.state.status == AuthStatus.initial ||
@@ -178,7 +165,9 @@ class AppRouter {
   }
 
   bool _isPublicPath(String path) {
-    return path == Constants.splashRoute ||
+    return path == '/' ||
+        path.isEmpty ||
+        path == Constants.splashRoute ||
         path == Constants.loginRoute ||
         path == Constants.registerRoute ||
         path == Constants.checkEmailRoute ||
@@ -196,24 +185,10 @@ class AppRouter {
         path == Constants.forgotPasswordRoute;
   }
 
-  /// Returns the Hive last-route at most once until logout.
-  String? _takePersistedLanding() {
-    if (_lastRouteRestoreConsumed) return null;
-    final loc = lastRouteStore.readLocation();
-    _lastRouteRestoreConsumed = true;
-    return loc;
-  }
+  bool _isRootPath(String path) => path == '/' || path.isEmpty;
 
-  String _authenticatedLanding({String? fromQuery}) {
-    final from = resolveSplashPendingLocationFrom(fromQuery);
-    if (from != null) {
-      // Explicit deep link counts as the session restore.
-      _lastRouteRestoreConsumed = true;
-      return from;
-    }
-    return _takePersistedLanding() ?? Constants.homeRoute;
-  }
-
+  /// Pure auth/location state machine. Browser URL is the source of truth —
+  /// no Hive restore and no parking protected URLs on `/splash`.
   String? computeRedirect({
     required String path,
     String? fromQuery,
@@ -221,34 +196,34 @@ class AppRouter {
   }) {
     final authState = authCubit.state;
     final isAuthenticated = authState.isAuthenticated;
-    final hasEstablishedSession = authState.user != null;
 
-    // Allow a fresh restore after the next login in this process.
-    if (authState.status == AuthStatus.unauthenticated) {
-      _lastRouteRestoreConsumed = false;
+    // Auth still resolving: keep the current URL (including deep links).
+    // Only send bare `/` to splash for cold-start branding.
+    if (_isAuthCheckPending() && !isAuthenticated) {
+      if (_isRootPath(path)) return Constants.splashRoute;
+      return null;
     }
 
-    if (_isAuthCheckPending() && !isAuthenticated && !_isPublicPath(path)) {
-      if (hasEstablishedSession) return null;
-      if (path == Constants.splashRoute) return null;
-      // Preserve deep link through auth bootstrap so refresh does not drop to home.
-      return splashLocationWithFrom(currentLocation ?? path);
-    }
-
-    if (path == Constants.splashRoute && !_isAuthCheckPending()) {
+    // Cold-start / explicit splash exit.
+    if (path == Constants.splashRoute) {
       if (isAuthenticated) {
-        return _authenticatedLanding(fromQuery: fromQuery);
+        return resolveSplashPendingLocationFrom(fromQuery) ??
+            Constants.homeRoute;
       }
       return loginLocationWithFrom(fromQuery);
     }
 
-    if (isAuthenticated && _isAuthOnlyPath(path)) {
-      return resolvePendingLocationFrom(fromQuery) ??
-          _takePersistedLanding() ??
-          Constants.homeRoute;
+    if (_isRootPath(path)) {
+      return isAuthenticated ? Constants.homeRoute : Constants.loginRoute;
     }
 
-    if (!isAuthenticated && !_isPublicPath(path) && !_isAuthCheckPending()) {
+    // Authenticated users leave auth-only screens (honor login `from=`).
+    if (isAuthenticated && _isAuthOnlyPath(path)) {
+      return resolvePendingLocationFrom(fromQuery) ?? Constants.homeRoute;
+    }
+
+    // Settled unauthenticated → login, preserving the requested deep link.
+    if (!isAuthenticated && !_isPublicPath(path)) {
       return loginLocationWithFrom(currentLocation ?? path);
     }
 
@@ -260,18 +235,11 @@ class AppRouter {
     debugLogDiagnostics: _enableRouterDiagnostics,
     initialLocation: Constants.splashRoute,
     redirect: (context, state) {
-      final redirectTo = computeRedirect(
+      return computeRedirect(
         path: state.uri.path,
         fromQuery: state.uri.queryParameters['from'],
         currentLocation: state.uri.toString(),
       );
-      // Persist only when we are staying on a real authenticated destination.
-      if (redirectTo == null &&
-          authCubit.state.isAuthenticated &&
-          !_isPublicPath(state.uri.path)) {
-        lastRouteStore.saveLocation(state.uri.toString());
-      }
-      return redirectTo;
     },
     routes: [
       GoRoute(
@@ -370,13 +338,6 @@ class AppRouter {
           key: state.pageKey,
           child: const HomeScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.profileRoute,
@@ -384,13 +345,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ProfileScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.journeyDashboardRoute,
@@ -401,13 +355,6 @@ class AppRouter {
             child: JourneyDashboardScreen(initialEpc: epc),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.inboxOutboxRoute,
@@ -415,13 +362,6 @@ class AppRouter {
           key: state.pageKey,
           child: const InboxOutboxScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.productHierarchyRoute,
@@ -432,13 +372,6 @@ class AppRouter {
             child: ProductHierarchyScreen(initialEpc: epc),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.adminUsersRoute,
@@ -447,12 +380,11 @@ class AppRouter {
           child: const UserManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -468,12 +400,11 @@ class AppRouter {
           child: const ApprovalsScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -489,12 +420,11 @@ class AppRouter {
           child: const SystemSettingsScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -510,12 +440,11 @@ class AppRouter {
           child: const GS1ValidationScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.loginRoute;
@@ -531,12 +460,11 @@ class AppRouter {
           child: const PerformanceTestScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -552,12 +480,11 @@ class AppRouter {
           child: const PerformanceOptimizationDashboard(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -573,12 +500,11 @@ class AppRouter {
           child: const MonitoringDashboardScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -594,12 +520,11 @@ class AppRouter {
           child: const IntegrationValidationScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -615,12 +540,11 @@ class AppRouter {
           child: const EventGenerationTestScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -636,12 +560,11 @@ class AppRouter {
           child: const IndustryTestDataScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -657,12 +580,11 @@ class AppRouter {
           child: const CbvVocabularyManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -681,12 +603,11 @@ class AppRouter {
             child: const ValidationRuleManagementScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -702,12 +623,11 @@ class AppRouter {
             child: const ValidationRulesHelpScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -730,12 +650,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -759,12 +678,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -782,12 +700,11 @@ class AppRouter {
           child: const DatabasePartitioningDashboard(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -803,12 +720,11 @@ class AppRouter {
           child: const CacheManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -824,12 +740,11 @@ class AppRouter {
           child: const JobQueueManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -845,12 +760,11 @@ class AppRouter {
           child: const ETLManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -866,12 +780,11 @@ class AppRouter {
           child: const BulkExportManagementScreen(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -887,12 +800,11 @@ class AppRouter {
           child: const DataConsistencyIntegrityDashboard(),
         ),
         redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          final user = authCubit.state.user;
-
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
+          if (!authCubit.state.isAuthenticated) {
+            // Top-level redirect owns login?from= while auth settles.
+            return null;
           }
+          final user = authCubit.state.user;
 
           if (user?.role != 'ADMIN') {
             return Constants.homeRoute;
@@ -911,12 +823,11 @@ class AppRouter {
             child: const PartnerManagementScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -935,12 +846,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -959,12 +869,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -983,12 +892,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -1004,12 +912,11 @@ class AppRouter {
             child: const ServiceAccountManagementScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -1025,12 +932,11 @@ class AppRouter {
             child: const ApiCollectionManagementScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -1049,12 +955,11 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -1070,12 +975,11 @@ class AppRouter {
             child: const PartnerAccessManagementScreen(),
           ),
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            final user = authCubit.state.user;
-
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
+            final user = authCubit.state.user;
 
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
@@ -1092,13 +996,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GTINScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1GtinNewRoute,
@@ -1106,13 +1003,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GTINDetailScreen(isEditing: true),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1GtinDetailRoute,
@@ -1122,13 +1012,6 @@ class AppRouter {
             key: state.pageKey,
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: false),
           );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
         },
       ),
       GoRoute(
@@ -1140,13 +1023,6 @@ class AppRouter {
             child: GTINDetailScreen(gtinCode: gtinCode, isEditing: true),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1GlnsRoute,
@@ -1154,13 +1030,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GLNScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1GlnNewRoute,
@@ -1168,13 +1037,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GLNDetailScreen(isEditing: true),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1GlnDetailRoute,
@@ -1185,13 +1047,6 @@ class AppRouter {
             key: state.pageKey,
             child: GLNDetailScreen(glnId: glnId, isEditing: false),
           );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
         },
       ),
       GoRoute(
@@ -1204,13 +1059,6 @@ class AppRouter {
             child: GLNDetailScreen(glnId: glnId, isEditing: true),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1SsccsRoute,
@@ -1218,13 +1066,6 @@ class AppRouter {
           key: state.pageKey,
           child: const SSCCScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1SsccNewRoute,
@@ -1232,13 +1073,6 @@ class AppRouter {
           key: state.pageKey,
           child: const SSCCDetailScreen(isEditing: true),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1SsccDetailRoute,
@@ -1251,13 +1085,6 @@ class AppRouter {
               ssccCode: ssccCode.isNotEmpty ? ssccCode : null,
             ),
           );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
         },
       ),
       GoRoute(
@@ -1272,13 +1099,6 @@ class AppRouter {
             ),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       ShellRoute(
@@ -1290,13 +1110,6 @@ class AppRouter {
             key: state.pageKey,
             child: const SGTINScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.gs1SgtinNewRoute,
@@ -1304,13 +1117,6 @@ class AppRouter {
             key: state.pageKey,
             child: const SGTINDetailScreen(isEditing: true),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.gs1SgtinByEpcRoute,
@@ -1324,13 +1130,6 @@ class AppRouter {
               ),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.gs1SgtinDetailRoute,
@@ -1340,13 +1139,6 @@ class AppRouter {
               key: state.pageKey,
               child: SGTINDetailScreen(sgtinId: id, isEditing: false),
             );
-          },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
           },
         ),
         GoRoute(
@@ -1358,13 +1150,6 @@ class AppRouter {
               child: SGTINDetailScreen(sgtinId: id, isEditing: true),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         ],
       ),
@@ -1374,13 +1159,6 @@ class AppRouter {
           key: state.pageKey,
           child: const EPCConversionScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.gs1ValidationDemoRoute,
@@ -1388,13 +1166,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GS1ValidationDemoScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       ShellRoute(
         builder: (context, state, child) => EpcisShell(child: child),
@@ -1405,13 +1176,6 @@ class AppRouter {
             key: state.pageKey,
             child: const EPCISEventsListScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisObjectEventsRoute,
@@ -1419,13 +1183,6 @@ class AppRouter {
             key: state.pageKey,
             child: const ObjectEventScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisAggregationEventsRoute,
@@ -1433,13 +1190,6 @@ class AppRouter {
             key: state.pageKey,
             child: const AggregationEventScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionEventsRoute,
@@ -1447,13 +1197,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransactionEventsListScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransformationEventsRoute,
@@ -1461,13 +1204,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransformationEventsListScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
 
         GoRoute(
@@ -1476,13 +1212,6 @@ class AppRouter {
             key: state.pageKey,
             child: const AdvancedQueryScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
 
         GoRoute(
@@ -1491,13 +1220,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TraversalQueryScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
 
         GoRoute(
@@ -1506,13 +1228,6 @@ class AppRouter {
             key: state.pageKey,
             child: const EPCISSerializationScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
 
         GoRoute(
@@ -1521,13 +1236,6 @@ class AppRouter {
             key: state.pageKey,
             child: const ObjectEventFormScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisObjectEventBatchImportRoute,
@@ -1535,13 +1243,6 @@ class AppRouter {
             key: state.pageKey,
             child: const ObjectEventBatchImportScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisAggregationEventNewRoute,
@@ -1549,13 +1250,6 @@ class AppRouter {
             key: state.pageKey,
             child: const AggregationEventFormScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionEventNewRoute,
@@ -1563,13 +1257,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransactionEventFormScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionEventHelpRoute,
@@ -1577,13 +1264,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransactionEventsHelpScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransformationEventNewRoute,
@@ -1591,13 +1271,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransformationEventFormScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
 
         GoRoute(
@@ -1608,13 +1281,6 @@ class AppRouter {
               key: state.pageKey,
               child: EpcisGenericEventDetailScreen(eventId: eventId),
             );
-          },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
           },
         ),
         GoRoute(
@@ -1629,13 +1295,6 @@ class AppRouter {
               child: ObjectEventDetailScreen(eventId: eventId),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisObjectEventDetailRoute,
@@ -1647,9 +1306,9 @@ class AppRouter {
             );
           },
           redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
+            if (!authCubit.state.isAuthenticated) {
+              // Top-level redirect owns login?from= while auth settles.
+              return null;
             }
             final id = state.pathParameters['id'] ?? '';
             if (id.contains(':') || id.contains(';') || id.contains('/')) {
@@ -1667,13 +1326,6 @@ class AppRouter {
               child: AggregationEventDetailScreen(eventId: aggregationEventId),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionEventDetailRoute,
@@ -1686,13 +1338,6 @@ class AppRouter {
               ),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionDocumentsRoute,
@@ -1700,13 +1345,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransactionDocumentScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransactionDocumentHelpRoute,
@@ -1714,13 +1352,6 @@ class AppRouter {
             key: state.pageKey,
             child: const TransactionDocumentHelpScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.epcisTransformationEventDetailRoute,
@@ -1732,13 +1363,6 @@ class AppRouter {
                 transformationEventId: transformationEventId,
               ),
             );
-          },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
           },
         ),
         GoRoute(
@@ -1757,13 +1381,6 @@ class AppRouter {
               ),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         ],
       ),
@@ -1773,13 +1390,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ShippingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opShippingCreateRoute,
@@ -1787,13 +1397,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ShippingOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opShippingDetailRoute,
@@ -1804,13 +1407,6 @@ class AppRouter {
             child: ShippingOperationDetailScreen(operationId: operationId),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReceivingRoute,
@@ -1818,13 +1414,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ReceivingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReceivingCreateRoute,
@@ -1836,13 +1425,6 @@ class AppRouter {
                 : null,
           ),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReceivingDetailRoute,
@@ -1853,13 +1435,6 @@ class AppRouter {
             child: ReceivingOperationDetailScreen(operationId: operationId),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -1868,13 +1443,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ReturnShippingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReturnShippingCreateRoute,
@@ -1884,13 +1452,6 @@ class AppRouter {
             pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
           ),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReturnShippingDetailRoute,
@@ -1903,13 +1464,6 @@ class AppRouter {
             ),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -1918,13 +1472,6 @@ class AppRouter {
           key: state.pageKey,
           child: const CancelShippingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCancelShippingCreateRoute,
@@ -1936,13 +1483,6 @@ class AppRouter {
                 : null,
           ),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCancelShippingDetailRoute,
@@ -1955,13 +1495,6 @@ class AppRouter {
             ),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -1970,13 +1503,6 @@ class AppRouter {
           key: state.pageKey,
           child: const CancelReceivingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCancelReceivingCreateRoute,
@@ -1984,13 +1510,6 @@ class AppRouter {
           key: state.pageKey,
           child: const CancelReceivingOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCancelReceivingDetailRoute,
@@ -2003,13 +1522,6 @@ class AppRouter {
             ),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -2018,13 +1530,6 @@ class AppRouter {
           key: state.pageKey,
           child: const ReturnReceivingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReturnReceivingCreateRoute,
@@ -2034,13 +1539,6 @@ class AppRouter {
             pharmaReturnContext: _pharmaReturnContextFromExtra(state.extra),
           ),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opReturnReceivingDetailRoute,
@@ -2053,13 +1551,6 @@ class AppRouter {
             ),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -2068,13 +1559,6 @@ class AppRouter {
           key: state.pageKey,
           child: const PackingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opPackingCreateRoute,
@@ -2082,13 +1566,6 @@ class AppRouter {
           key: state.pageKey,
           child: PackingOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.hierarchyRoute,
@@ -2101,13 +1578,6 @@ class AppRouter {
             child: HierarchyScreen(rootEpc: rootEpc, title: title),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opPackingDetailRoute,
@@ -2118,13 +1588,6 @@ class AppRouter {
             child: PackingOperationDetailScreen(operationId: operationId),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -2133,13 +1596,6 @@ class AppRouter {
           key: state.pageKey,
           child: const UnpackingScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opUnpackingCreateRoute,
@@ -2147,13 +1603,6 @@ class AppRouter {
           key: state.pageKey,
           child: const UnpackingOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opUnpackingDetailRoute,
@@ -2164,13 +1613,6 @@ class AppRouter {
             child: UnpackingOperationDetailScreen(operationId: operationId),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -2179,13 +1621,6 @@ class AppRouter {
           key: state.pageKey,
           child: const UpdateStatusScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opUpdateStatusCreateRoute,
@@ -2193,13 +1628,6 @@ class AppRouter {
           key: state.pageKey,
           child: const UpdateStatusOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opUpdateStatusDetailRoute,
@@ -2210,13 +1638,6 @@ class AppRouter {
             child: UpdateStatusOperationDetailScreen(operationId: operationId),
           );
         },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
 
       GoRoute(
@@ -2225,13 +1646,6 @@ class AppRouter {
           key: state.pageKey,
           child: const CommissioningScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCommissioningNewRoute,
@@ -2239,13 +1653,6 @@ class AppRouter {
           key: state.pageKey,
           child: const CommissioningOperationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.opCommissioningDetailRoute,
@@ -2255,13 +1662,6 @@ class AppRouter {
             key: state.pageKey,
             child: CommissioningOperationDetailScreen(batchId: operationId),
           );
-        },
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
         },
       ),
 
@@ -2274,13 +1674,6 @@ class AppRouter {
             key: state.pageKey,
             child: const NotificationCenterScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.notificationSubscriptionsRoute,
@@ -2288,13 +1681,6 @@ class AppRouter {
             key: state.pageKey,
             child: const SubscriptionManagementScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.notificationDetailRoute,
@@ -2305,13 +1691,6 @@ class AppRouter {
               child: SubscriptionDetailsScreen(subscriptionId: subscriptionId),
             );
           },
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         GoRoute(
           path: Constants.notificationWebhooksRoute,
@@ -2319,13 +1698,6 @@ class AppRouter {
             key: state.pageKey,
             child: const WebhookConfigurationScreen(),
           ),
-          redirect: (context, state) {
-            final isAuthenticated = authCubit.state.isAuthenticated;
-            if (!isAuthenticated) {
-              return Constants.loginRoute;
-            }
-            return null;
-          },
         ),
         ],
       ),
@@ -2335,13 +1707,6 @@ class AppRouter {
           key: state.pageKey,
           child: const GS1BarcodeScannerScreen(title: 'GS1 Barcode Scanner'),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.barcodeGenerateRoute,
@@ -2349,13 +1714,6 @@ class AppRouter {
           key: state.pageKey,
           child: const BarcodeGenerationScreen(),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       GoRoute(
         path: Constants.barcodeVerifyRoute,
@@ -2366,13 +1724,6 @@ class AppRouter {
             verifyWithBackend: true,
           ),
         ),
-        redirect: (context, state) {
-          final isAuthenticated = authCubit.state.isAuthenticated;
-          if (!isAuthenticated) {
-            return Constants.loginRoute;
-          }
-          return null;
-        },
       ),
       TransactionEventValidationDemoRoute.getRoute(),
       ShellRoute(

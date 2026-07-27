@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_form_header.dart';
 import 'package:traqtrace_app/features/auth/widgets/auth_surface_card.dart';
-import 'package:traqtrace_app/core/theme/traq_theme.dart';
-
-
 
 class AuthFormPanel extends StatelessWidget {
   const AuthFormPanel({
@@ -31,37 +29,35 @@ class AuthFormPanel extends StatelessWidget {
 
     final surface = wrapInCard ? AuthSurfaceCard(child: child) : child;
 
+    // Header is static — field stagger inside the form + one surface fade/scale
+    // is enough. Avoid stacking a third entrance ticker on the same panel.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        TraqStaggeredEntrance(
-          children: [
-            Text(
-              header.eyebrow,
-              style: t.body.copyWith(
-                color: c.textMuted,
-                fontSize: eyebrowSize,
-              ),
-              textAlign: TextAlign.left,
-            ),
-            Text(
-              header.title,
-              style: t.body.copyWith(
-                color: c.textPrimary,
-                fontSize: titleSize,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              header.subtitle,
-              style: t.body.copyWith(
-                color: c.textMuted,
-                fontSize: bodySize,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ],
+        Text(
+          header.eyebrow,
+          style: t.body.copyWith(
+            color: c.textMuted,
+            fontSize: eyebrowSize,
+          ),
+          textAlign: TextAlign.left,
+        ),
+        Text(
+          header.title,
+          style: t.body.copyWith(
+            color: c.textPrimary,
+            fontSize: titleSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          header.subtitle,
+          style: t.body.copyWith(
+            color: c.textMuted,
+            fontSize: bodySize,
+          ),
+          textAlign: TextAlign.left,
         ),
         SizedBox(height: gapAfterHeader),
         TraqFadeScaleEntrance(child: surface),

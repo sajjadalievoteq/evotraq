@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/operations/packing/packing_request_model.dart';
+import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_request_model.dart';
 import 'package:traqtrace_app/data/services/epcis/aggregation_event_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
+import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
+import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/utils/aggregation_event_list_utils.dart';
 import 'package:traqtrace_app/features/gs1/gln/services/gln_picker_catalog.dart';
 import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
@@ -147,14 +151,22 @@ class AggregationEventsState extends Equatable {
 
 class AggregationEventsCubit extends Cubit<AggregationEventsState> {
   final AggregationEventService _service;
+  final PackingOperationService _packingService;
+  final UnpackingOperationService _unpackingService;
   final GLNService _glnService;
 
   final Map<String, GLN> _glnCache = {};
 
   AggregationEventsCubit({
     AggregationEventService? service,
+    PackingOperationService? packingService,
+    UnpackingOperationService? unpackingService,
     GLNService? glnService,
   })  : _service = service ?? getIt<AggregationEventService>(),
+        _packingService =
+            packingService ?? getIt<PackingOperationService>(),
+        _unpackingService =
+            unpackingService ?? getIt<UnpackingOperationService>(),
         _glnService = glnService ?? getIt<GLNService>(),
         super(const AggregationEventsState());
 
@@ -457,6 +469,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }
   }
 
+  /// Pack via `/operations/packing` (validated projection path), not raw aggregation POST.
   Future<AggregationEvent> createPackEvent({
     required String parentEPC,
     required List<String> childEPCs,
@@ -472,15 +485,40 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       clearError: true,
     ));
     try {
-      final newEvent = await _service.createPackEvent(
-        parentEPC,
-        childEPCs,
-        locationGLN,
-        businessStep,
-        disposition,
-        bizData,
-        sourceList: sourceList,
-        destinationList: destinationList,
+      final ref = bizData['traqtrace:packingReference']?.trim();
+      final result = await _packingService.createPackingOperation(
+        PackingRequest(
+          packingReference: (ref != null && ref.isNotEmpty)
+              ? ref
+              : 'AGG-FORM-${DateTime.now().millisecondsSinceEpoch}',
+          parentContainerId: parentEPC,
+          childEpcs: childEPCs,
+          packingLocationGLN: locationGLN,
+          readPointGLN: locationGLN,
+          workOrderNumber: bizData['traqtrace:workOrderNumber'],
+          batchNumber: bizData['traqtrace:batchNumber'],
+          productionOrder: bizData['traqtrace:productionOrder'],
+          additionalData: bizData.isEmpty ? null : Map<String, String>.from(bizData),
+        ),
+      );
+      if (result.hasErrors) {
+        throw Exception(
+          (result.messages ?? const <String>[]).join('\n').trim().isEmpty
+              ? 'Packing operation failed'
+              : result.messages!.join('\n'),
+        );
+      }
+
+      final newEvent = await _resolveCreatedAggregationEvent(
+        preferredEventId: result.eventIds?.where((e) => e.trim().isNotEmpty).firstOrNull
+            ?? result.navigableOperationId,
+        parentEPC: parentEPC,
+        childEPCs: childEPCs,
+        locationGLN: locationGLN,
+        businessStep: businessStep,
+        disposition: disposition,
+        action: 'ADD',
+        bizData: bizData,
       );
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
@@ -497,6 +535,7 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
     }
   }
 
+  /// Unpack via `/operations/unpacking` (validated projection path), not raw aggregation POST.
   Future<AggregationEvent> createUnpackEvent({
     required String parentEPC,
     List<String>? childEPCs,
@@ -512,15 +551,41 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       clearError: true,
     ));
     try {
-      final newEvent = await _service.createUnpackEvent(
-        parentEPC,
-        childEPCs,
-        locationGLN,
-        businessStep,
-        disposition,
-        bizData,
-        sourceList: sourceList,
-        destinationList: destinationList,
+      final children = childEPCs ?? const <String>[];
+      final ref = bizData['traqtrace:unpackingReference']?.trim();
+      final result = await _unpackingService.createUnpackingOperation(
+        UnpackingRequest(
+          unpackingReference: (ref != null && ref.isNotEmpty)
+              ? ref
+              : 'AGG-FORM-${DateTime.now().millisecondsSinceEpoch}',
+          parentContainerId: parentEPC,
+          childEpcs: children,
+          unpackingLocationGLN: locationGLN,
+          readPointGLN: locationGLN,
+          workOrderNumber: bizData['traqtrace:workOrderNumber'],
+          batchNumber: bizData['traqtrace:batchNumber'],
+          productionOrder: bizData['traqtrace:productionOrder'],
+          additionalData: bizData.isEmpty ? null : Map<String, String>.from(bizData),
+        ),
+      );
+      if (result.hasErrors) {
+        throw Exception(
+          (result.messages ?? const <String>[]).join('\n').trim().isEmpty
+              ? 'Unpacking operation failed'
+              : result.messages!.join('\n'),
+        );
+      }
+
+      final newEvent = await _resolveCreatedAggregationEvent(
+        preferredEventId: result.eventIds?.where((e) => e.trim().isNotEmpty).firstOrNull
+            ?? result.navigableOperationId,
+        parentEPC: parentEPC,
+        childEPCs: children,
+        locationGLN: locationGLN,
+        businessStep: businessStep,
+        disposition: disposition,
+        action: 'DELETE',
+        bizData: bizData,
       );
       emit(state.copyWith(
         status: AggregationEventsStatus.success,
@@ -535,6 +600,41 @@ class AggregationEventsCubit extends Cubit<AggregationEventsState> {
       ));
       rethrow;
     }
+  }
+
+  Future<AggregationEvent> _resolveCreatedAggregationEvent({
+    required String? preferredEventId,
+    required String parentEPC,
+    required List<String> childEPCs,
+    required String locationGLN,
+    required String businessStep,
+    required String disposition,
+    required String action,
+    required Map<String, String> bizData,
+  }) async {
+    final id = preferredEventId?.trim();
+    if (id != null && id.isNotEmpty) {
+      try {
+        return await _service.getAggregationEventByIdentifier(id);
+      } catch (_) {
+        // Fall through to a client-side stub for list UX.
+      }
+    }
+    final now = DateTime.now();
+    return AggregationEvent(
+      eventId: id ?? 'pending-${now.millisecondsSinceEpoch}',
+      eventTime: now,
+      recordTime: now,
+      eventTimeZone: '+00:00',
+      action: action,
+      parentID: parentEPC,
+      childEPCs: childEPCs,
+      businessStep: businessStep,
+      disposition: disposition,
+      readPoint: GLN.fromCode(locationGLN),
+      businessLocation: GLN.fromCode(locationGLN),
+      bizData: bizData.isEmpty ? null : Map<String, String>.from(bizData),
+    );
   }
 
 

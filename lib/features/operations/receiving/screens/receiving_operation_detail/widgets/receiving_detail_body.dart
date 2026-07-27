@@ -18,11 +18,9 @@ class ReceivingDetailBody extends StatelessWidget {
   const ReceivingDetailBody({
     super.key,
     required this.operation,
-    this.onOperationUpdated,
   });
 
   final ReceivingResponse operation;
-  final ValueChanged<ReceivingResponse>? onOperationUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -79,10 +77,6 @@ class ReceivingDetailBody extends StatelessWidget {
           OperationDetailProcessingStatsCard(
             statusLabel: OperationStatusUtils.detailLabel(operation.status),
             processingTimeMs: operation.processingTimeMs,
-          ),
-          AcceptGoodsButton(
-            operation: operation,
-            onAccepted: onOperationUpdated,
           ),
           InitiateReturnShippingButton(operation: operation),
           const SizedBox(height: 32),

@@ -37,7 +37,6 @@ import '../../features/operations/commissioning/utils/commissioning_serial_pool_
 import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
-import 'package:traqtrace_app/core/storage/last_route_store.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
@@ -143,8 +142,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
   getIt.registerLazySingleton<HomeOverviewSessionStore>(
     () => HomeOverviewSessionStore(),
   );
-
-  getIt.registerLazySingleton<LastRouteStore>(() => LastRouteStore());
 
   getIt.registerLazySingleton<SGTINService>(
     () => SGTINService(dioService: getIt<DioService>()),

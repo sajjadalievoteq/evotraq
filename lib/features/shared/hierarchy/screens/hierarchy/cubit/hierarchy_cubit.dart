@@ -21,16 +21,17 @@ class HierarchyCubit extends Cubit<HierarchyState> {
 
     try {
       final rootEpc = await _service.getRootContainer(normalizedInput);
-
-      final pageFuture    = _service.getHierarchyChildren(rootEpc, page: 0, size: _pageSize);
-      final summaryFuture = _service.getHierarchySummary(rootEpc);
-
-      final page = await pageFuture;
+      final page = await _service.getHierarchyChildren(
+        rootEpc,
+        page: 0,
+        size: _pageSize,
+      );
 
       final rootNode = HierarchyNode(
         epc: rootEpc,
         type: 'EPC',
-        hasChildren: page.children.isNotEmpty,
+        hasChildren: page.children.isNotEmpty || page.total > 0,
+        childCount: page.total,
       );
       final rootState = HierarchyTreeNodeState(
         node: rootNode,
@@ -44,19 +45,19 @@ class HierarchyCubit extends Cubit<HierarchyState> {
       );
 
       final highlight = (normalizedInput != rootEpc) ? normalizedInput : null;
-      emit(HierarchyLoaded(rootState, highlightEpc: highlight));
+      // Derive summary from children page — avoid a second traversal hierarchy call.
+      final hasNested = page.children.any((c) => c.hasChildren);
+      final summary = HierarchySummary(
+        totalItemCount: page.total,
+        hierarchyDepth: hasNested ? 2 : 1,
+        directChildCount: page.total,
+      );
 
-      final summary = await summaryFuture;
-      if (summary != null && !isClosed) {
-        final current = state;
-        if (current is HierarchyLoaded) {
-          emit(HierarchyLoaded(
-            current.root,
-            summary: summary,
-            highlightEpc: current.highlightEpc,
-          ));
-        }
-      }
+      emit(HierarchyLoaded(
+        rootState,
+        summary: summary,
+        highlightEpc: highlight,
+      ));
     } catch (e) {
       emit(HierarchyError(e.toString()));
     }

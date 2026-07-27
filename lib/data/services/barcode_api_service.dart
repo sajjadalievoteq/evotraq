@@ -45,13 +45,9 @@ class BarcodeApiService {
       );
 
       debugPrint('Barcode validation response status: ${response.statusCode}');
-      debugPrint('Barcode validation response body: ${response.data}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.data);
-      } else if (response.statusCode == 404) {
-        debugPrint('First endpoint not found, trying alternative GS1 validation endpoint');
-        return _tryAlternativeGS1Validation(barcodeData, headers);
       } else {
         throw ApiException(
           statusCode: response.statusCode,
@@ -63,40 +59,6 @@ class BarcodeApiService {
     } catch (e) {
       debugPrint('Error during barcode validation: $e');
       rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> _tryAlternativeGS1Validation(String barcodeData, Map<String, String> headers) async {
-    debugPrint(
-      'Trying alternative validation API: $_baseUrl/barcode/verify/gs1-element-string',
-    );
-
-    final response = await _dioService.get(
-      '$_baseUrl/barcode/verify/gs1-element-string',
-      headers: headers,
-      queryParameters: {'gs1ElementString': barcodeData},
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-
-    debugPrint('Alternative validation response status: ${response.statusCode}');
-    debugPrint('Alternative validation response body: ${response.data}');
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.data);
-      return {
-        'isValid': result['valid'] ?? false,
-        'message': result['valid'] == true ? 'Valid GS1 barcode' : 'Invalid GS1 barcode format',
-        'data': barcodeData,
-        'validationResults': result['validationResults'],
-      };
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message:
-            _parseErrorMessage(response.data.toString()) ??
-            'Failed to verify barcode: ${response.statusCode}',
-      );
     }
   }
 

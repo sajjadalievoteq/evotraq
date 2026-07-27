@@ -473,7 +473,12 @@ class _AggregationEventFormScreenState extends State<AggregationEventFormScreen>
       }
       if (!mounted) return;
 
-  context.showSuccess('Aggregation event created');
+      final successLabel = _selectedAction == 'ADD'
+          ? 'Packing operation created'
+          : _selectedAction == 'DELETE'
+              ? 'Unpacking operation created'
+              : 'Aggregation event created';
+      context.showSuccess(successLabel);
       if (widget.embedded) {
         widget.onEmbeddedActionSuccess?.call();
       } else {

@@ -29,6 +29,7 @@ class GS1BarcodeApiService {
 
   Future<Map<String, dynamic>> verifyGS1Barcode(String gs1ElementString) async {
     final headers = await _getHeaders();
+    // Backend maps both /barcodes/gs1/verify and /barcodes/verify to the same handler.
     final queryParameters = {'data': gs1ElementString};
 
     debugPrint(
@@ -53,48 +54,16 @@ class GS1BarcodeApiService {
         debugPrint('GS1 barcode verification successful: ${result.toString()}');
         return result;
       } else {
-        return await _tryAlternativeEndpoint(gs1ElementString, headers);
+        throw ApiException(
+          statusCode: response.statusCode,
+          message:
+              _parseErrorMessage(response.data.toString()) ??
+              'Failed to verify GS1 barcode: ${response.statusCode}',
+        );
       }
     } catch (e) {
       debugPrint('Error during barcode verification: $e');
       rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> _tryAlternativeEndpoint(String gs1ElementString, Map<String, String> headers) async {
-    final queryParameters = {'data': gs1ElementString};
-
-    debugPrint(
-      'Trying alternative GS1 verification endpoint: $_baseUrl/barcodes/verify',
-    );
-
-    final response = await _dioService.get(
-      '$_baseUrl/barcodes/verify',
-      headers: headers,
-      queryParameters: queryParameters,
-      responseType: ResponseType.plain,
-      acceptAllStatusCodes: true,
-    );
-    debugPrint('Alternative endpoint response status: ${response.statusCode}');
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.data);
-      if (!result.containsKey('valid') && result.containsKey('success')) {
-        return {
-          'valid': result['success'],
-          'gs1ElementString': gs1ElementString,
-          'parsedData': result['extractedData'] ?? {},
-          'humanReadable': result['humanReadable'] ?? result['extractedData'] ?? {},
-        };
-      }
-      return result;
-    } else {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message:
-            _parseErrorMessage(response.data.toString()) ??
-            'Failed to verify GS1 barcode: ${response.statusCode}',
-      );
     }
   }
 

@@ -106,7 +106,12 @@ class _AggregationEventHierarchyScreenState
 
     try {
       final cubit = context.read<AggregationEventsCubit>();
-      _isVerified = await cubit.verifyHierarchy(widget.epc);
+      // Parent mode already loaded contents via children API — don't re-fetch.
+      if (widget.isParent) {
+        _isVerified = _error == null;
+      } else {
+        _isVerified = await cubit.verifyHierarchy(widget.epc);
+      }
 
       if (mounted) {
         showDialog<void>(

@@ -106,12 +106,14 @@ class TransactionEventsCubit extends Cubit<TransactionEventsState> {
         events =
             await _service.findTransactionEventsByDispositionAndEPC(disposition, "");
       } else {
-        final addEvents = await _service.findTransactionEventsByAction("ADD");
-        final observeEvents =
-            await _service.findTransactionEventsByAction("OBSERVE");
-        final deleteEvents = await _service.findTransactionEventsByAction("DELETE");
+        // TODO: server-side paged multi-action query
+        final results = await Future.wait([
+          _service.findTransactionEventsByAction("ADD"),
+          _service.findTransactionEventsByAction("OBSERVE"),
+          _service.findTransactionEventsByAction("DELETE"),
+        ]);
 
-        events = [...addEvents, ...observeEvents, ...deleteEvents];
+        events = [...results[0], ...results[1], ...results[2]];
         events.sort((a, b) => b.eventTime.compareTo(a.eventTime));
       }
 

@@ -126,7 +126,7 @@ void main() {
     );
 
     test(
-      'transient loading with established user on /home does not redirect to splash',
+      'transient loading on /home stays put (no splash, no login bounce)',
       () {
         when(() => authCubit.state).thenReturn(_loadingWithUser());
         expect(

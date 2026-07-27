@@ -400,13 +400,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           onTap: () =>
                               _navigate(Constants.epcisTraversalQueryRoute),
                         ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.eventSerialization),
-                          title: const Text('Event Serialization'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisSerializationRoute),
-                        ),
+
                       ],
                     ),
 
@@ -555,7 +549,13 @@ class _AppDrawerState extends State<AppDrawer> {
                       title: const Text('Generate / Verify Barcode'),
                       onTap: () => _navigate(Constants.barcodeGenerateRoute),
                     ),
-
+                    ListTile(
+                      leading: _svgLeading(NavIcons.eventSerialization),
+                      title: const Text('Event Serialization'),
+                      trailing: _svgTrailingChevron(),
+                      onTap: () =>
+                          _navigate(Constants.epcisSerializationRoute),
+                    ),
                     ExpansionTile(
                       leading: _svgLeading(NavIcons.validation),
                       title: const Text('Validation'),

@@ -44,6 +44,8 @@ class _ProductHierarchyScreenState extends State<ProductHierarchyScreen> {
         final epc = widget.initialEpc;
         if (epc != null && epc.isNotEmpty) {
           cubit.openHierarchy(epc);
+        } else {
+          cubit.loadRecentParents();
         }
         return cubit;
       },

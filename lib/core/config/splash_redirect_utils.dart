@@ -29,18 +29,6 @@ String? resolveSplashPendingLocationFrom(String? location) {
   return location;
 }
 
-
-String splashLocationWithFrom(String? from) {
-  final target = resolvePendingLocationFrom(from);
-  if (target == null) return Constants.splashRoute;
-
-  return Uri(
-    path: Constants.splashRoute,
-    queryParameters: {'from': target},
-  ).toString();
-}
-
-
 String loginLocationWithFrom(String? from) {
   final target = resolvePendingLocationFrom(from);
   if (target == null) return Constants.loginRoute;

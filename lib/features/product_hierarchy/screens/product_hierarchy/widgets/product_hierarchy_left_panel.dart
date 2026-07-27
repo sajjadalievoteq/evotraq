@@ -7,9 +7,11 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_detail.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_recent_parents_section.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_search_header.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_content.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_skeleton.dart';
+import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_identifier_utils.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/widgets/journey_suggestions_dropdown.dart';
 
 class ProductHierarchyLeftPanel extends StatelessWidget {
@@ -36,7 +38,7 @@ class ProductHierarchyLeftPanel extends StatelessWidget {
                   isSearching: state.isSearching,
                   onClear: () {
                     searchController.clear();
-                    cubit.clearSuggestions();
+                    cubit.clear();
                   },
                   onScanResult: (ScanResult result) {
                     if (!result.isValid) return;
@@ -59,9 +61,16 @@ class ProductHierarchyLeftPanel extends StatelessWidget {
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    if (state.isLoadingDetails) {
+                    // Show skeleton during any primary loading phase:
+                    // 1. Initial hierarchy/root resolution
+                    // 2. Climbing to a higher parent
+                    // 3. Loading specific node/journey details
+                    if (state.isLoadingDetails ||
+                        state.isResolvingRoot ||
+                        state.isClimbing) {
                       return const ProductHierarchySidebarSkeleton();
                     }
+
                     final journey = state.selectedJourney;
                     final root = state.root;
                     if (journey != null && root != null) {
@@ -86,12 +95,22 @@ class ProductHierarchyLeftPanel extends StatelessWidget {
                         subtitle: state.detailsError!,
                       );
                     }
-                    return const AppEmptyDetail(
-                      iconAsset: NavIcons.productHierarchy,
-                      title: 'No node selected',
-                      subtitle:
-                          'Search an SSCC or SGTIN to inspect its packaging hierarchy.',
-                    );
+                    // Suggestions win while typing; otherwise show recent packs.
+                    if (state.searchResults.isEmpty) {
+                      return ProductHierarchyRecentParentsSection(
+                        parents: state.recentParents,
+                        isLoading: state.recentParentsLoading,
+                        onTap: (op) {
+                          final epc = normalizeProductHierarchyInput(
+                            op.parentContainerId ?? '',
+                          );
+                          if (epc.isEmpty) return;
+                          searchController.text = epc;
+                          cubit.openHierarchy(epc);
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
                   },
                 ),
               ),

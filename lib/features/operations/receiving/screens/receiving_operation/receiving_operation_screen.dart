@@ -350,41 +350,14 @@ class _ReceivingOperationScreenState extends State<ReceivingOperationScreen> {
           await receivingService.createReceivingOperation(receivingRequest);
 
       if (response.isSuccessOrPartial) {
-        
-        final eventId = response.eventIds?.isNotEmpty == true
-            ? response.eventIds!.first
-            : null;
-        final receiverGln = _receivingGln?.glnCode;
-
-        if (eventId != null && receiverGln != null) {
-          try {
-            await receivingService.acceptGoods(
-              receivingEventId: eventId,
-              receiverGln: receiverGln,
-            );
-            if (mounted) {
-              context.showSuccess(
-                response.status == OperationStatus.partialSuccess
-                    ? 'Receiving submitted with warnings and goods accepted automatically.'
-                    : 'Receiving operation completed and goods accepted.',
-              );
-            }
-          } catch (_) {
-            
-            if (mounted) {
-              context.showSuccess(
-                'Receiving operation created. Tap "Accept Goods" on the record to complete acceptance.',
-              );
-            }
-          }
-        } else {
-          if (mounted) {
-            context.showSuccess(
-              response.status == OperationStatus.partialSuccess
-                  ? 'Receiving submitted with warnings. Open the record for details.'
-                  : 'Receiving operation completed successfully.',
-            );
-          }
+        if (mounted) {
+          context.showSuccess(
+            response.status == OperationStatus.partialSuccess
+                ? 'Receiving submitted with warnings. Open the record for details.'
+                : response.isAccepted
+                    ? 'Receiving completed and goods accepted.'
+                    : 'Receiving operation completed successfully.',
+          );
         }
 
         if (!mounted) return;

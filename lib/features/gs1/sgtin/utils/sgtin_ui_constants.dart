@@ -7,15 +7,18 @@ abstract final class SgtinUiConstants {
 
   static const List<String> statusOptions = [
     filterAll,
+    'ALLOCATED',
     'COMMISSIONED',
-    'PACKED',
-    'SHIPPED',
+    'ACTIVE',
     'IN_TRANSIT',
     'RECEIVED',
     'DISPENSED',
-    'DAMAGED',
+    'RETURNED',
     'RECALLED',
-    'DECOMMISSIONED',
+    'DESTROYED',
+    'EXPIRED',
+    'STOLEN',
+    'EXCEPTION',
   ];
 
   static const List<String> sortFieldOptions = [

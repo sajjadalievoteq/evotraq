@@ -27,8 +27,10 @@ abstract final class TraqAnimationConstants {
   static const int entranceMs = 280;
 
   
-  static const int brandingEntranceMs = 820;
-  static const int brandingStaggerMs = 88;
+  /// Branding panel entrance — short enough to avoid feeling sluggish alongside
+  /// the auth form motion that runs in parallel.
+  static const int brandingEntranceMs = 360;
+  static const int brandingStaggerMs = 48;
 
   
   
@@ -74,9 +76,9 @@ abstract final class TraqAnimationConstants {
   static const Offset slideUp = Offset(0, slideUpDy);
   static const Offset slideRight = Offset(slideRightDx, 0);
 
-  // Router / navigation motion language — slide-first, buttery decelerations.
-  static const int navForwardMs = 420;
-  static const int navReverseMs = 360;
+  // Router / navigation motion language — slide-first, snappy decelerations.
+  static const int navForwardMs = 280;
+  static const int navReverseMs = 240;
   static const Curve navCurve = Curves.easeOutCubic;
   static const Curve navReverseCurve = Curves.easeInCubic;
 

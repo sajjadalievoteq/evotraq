@@ -163,7 +163,7 @@ class CommissioningStep3Review extends StatelessWidget {
                       return SgtinInfoRow(
                         '${index + 1}',
                         '${item.epc}\n'
-                        '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'COMMISSIONED'}',
+                        '${item.sourceStatus ?? '?'} → ${item.targetStatus ?? 'ACTIVE'}',
                         monospace: true,
                       );
                     },

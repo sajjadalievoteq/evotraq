@@ -140,7 +140,8 @@ class ReceivingResponse {
 
   bool get isSuccessOrPartial =>
       status == OperationStatus.success ||
-      status == OperationStatus.partialSuccess;
+      status == OperationStatus.partialSuccess ||
+      status == OperationStatus.accepted;
   bool get hasErrors =>
       status == OperationStatus.failed ||
       status == OperationStatus.validationError;

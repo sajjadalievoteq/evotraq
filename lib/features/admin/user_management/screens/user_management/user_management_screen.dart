@@ -11,8 +11,8 @@ import 'package:traqtrace_app/features/admin/user_management/screens/user_manage
 import 'package:traqtrace_app/features/admin/user_management/screens/user_management/widgets/user_management_form_dialog.dart';
 import 'package:traqtrace_app/features/admin/user_management/screens/user_management/widgets/user_management_list_content.dart';
 import 'package:traqtrace_app/features/admin/user_management/screens/user_management/widgets/user_management_loading_view.dart';
+import 'package:traqtrace_app/features/admin/utils/admin_user_search_utils.dart';
 import 'package:traqtrace_app/features/admin/user_management/utils/user_management_constants.dart';
-import 'package:traqtrace_app/features/admin/user_management/utils/user_management_search_utils.dart';
 import 'dart:async';
 
 class UserManagementScreen extends StatelessWidget {
@@ -176,7 +176,7 @@ class _UserManagementViewState extends State<_UserManagementView> {
               final filteredUsers = query.isEmpty
                   ? state.users
                   : state.users
-                      .where((user) => userManagementMatchesSearch(user, query))
+                      .where((user) => adminUserMatchesSearch(user, query))
                       .toList();
 
               return Column(

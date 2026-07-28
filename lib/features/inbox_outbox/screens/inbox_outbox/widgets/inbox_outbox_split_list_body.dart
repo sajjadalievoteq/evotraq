@@ -8,12 +8,11 @@ import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/data/models/inbox_outbox/inbox_outbox_list_filter.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/services/inbox_outbox/inbox_outbox_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
+import 'package:traqtrace_app/features/inbox_outbox/cubit/inbox_outbox_cubit.dart';
 import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/widgets/inbox_outbox_results.dart';
 import 'package:traqtrace_app/features/inbox_outbox/screens/inbox_outbox/widgets/inbox_outbox_toolbar.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
@@ -47,38 +46,12 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
   bool _showFilterChips = true;
   String? _myGln;
   InboxOutboxListFilter _listFilter = InboxOutboxListFilter.all;
-  late final OperationsCubit<Operation> _cubit;
+  late final InboxOutboxCubit _cubit;
 
   @override
   void initState() {
     super.initState();
-    _cubit = OperationsCubit<Operation>(
-      loadErrorMessage:
-          'Could not load in-transit shipments. Check your connection and tap Retry.',
-      loadMoreErrorMessage:
-          'Could not load more shipments. Check your connection and try again.',
-      fetchList: ({required page, required size}) async {
-        final gln = _myGln;
-        if (gln == null) {
-          return const OperationPage<Operation>(
-            operations: [],
-            page: 0,
-            size: 20,
-            count: 0,
-            total: 0,
-            totalPages: 0,
-          );
-        }
-        final pageResult = await getIt<InboxOutboxService>().getFilteredInTransitPage(
-          gln: gln,
-          filter: _listFilter,
-          page: page,
-          size: size,
-          search: _searchController.text,
-        );
-        return pageResult.map((r) => r.toOperation());
-      },
-    );
+    _cubit = InboxOutboxCubit(service: getIt<InboxOutboxService>());
     _loadOperationalGln();
   }
 
@@ -95,6 +68,11 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
       _myGln = stored;
     });
     if (stored != null) {
+      _cubit.setContext(
+        gln: stored,
+        filter: _listFilter,
+        search: _searchController.text,
+      );
       await _cubit.loadInitial();
     }
   }
@@ -119,6 +97,11 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
   void _onFilterSelected(InboxOutboxListFilter filter) {
     if (_listFilter == filter) return;
     setState(() => _listFilter = filter);
+    _cubit.setContext(
+      gln: _myGln,
+      filter: _listFilter,
+      search: _searchController.text,
+    );
     _cubit.refresh();
   }
 
@@ -142,7 +125,7 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
 
     return BlocProvider.value(
       value: _cubit,
-      child: BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+      child: BlocConsumer<InboxOutboxCubit, OperationsState<Operation>>(
         listener: (context, state) {
           if (!widget.embedded) return;
           final ids = state.items.map((op) => op.navigableOperationId).whereType<String>().toList();
@@ -155,10 +138,29 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
               searchController: _searchController,
               showFilterChips: _showFilterChips,
               selectedFilter: _listFilter,
-              onRefresh: _cubit.refresh,
-              onQueryChanged: (_) => _cubit.refresh(),
+              onRefresh: () {
+                _cubit.setContext(
+                  gln: _myGln,
+                  filter: _listFilter,
+                  search: _searchController.text,
+                );
+                _cubit.refresh();
+              },
+              onQueryChanged: (_) {
+                _cubit.setContext(
+                  gln: _myGln,
+                  filter: _listFilter,
+                  search: _searchController.text,
+                );
+                _cubit.refresh();
+              },
               onClear: () {
                 _searchController.clear();
+                _cubit.setContext(
+                  gln: _myGln,
+                  filter: _listFilter,
+                  search: _searchController.text,
+                );
                 _cubit.refresh();
               },
               onFilterSelected: _onFilterSelected,

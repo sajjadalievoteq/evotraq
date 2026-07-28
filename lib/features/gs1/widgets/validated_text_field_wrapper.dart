@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -158,14 +159,14 @@ class _ValidatedTextFieldWrapperState extends State<ValidatedTextFieldWrapper> {
       ? Padding(
         padding: const EdgeInsets.only(right: 5),
         child: TraqIcon(AppAssets.iconCheck,
-            color: Colors.green,
+            color: AppColorMapper.successColor(context),
             size: 18,
           ),
       )
       : Padding(
       padding: const EdgeInsets.only(right: 5),
         child: TraqIcon(AppAssets.iconAlert,
-            color: Colors.red,
+            color: AppColorMapper.errorColor(context),
             size: 18,
           ),
       );

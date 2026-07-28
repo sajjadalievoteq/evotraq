@@ -7,6 +7,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_form
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validated_text_field.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class ValidationRuleDemoScreen extends StatefulWidget {
   const ValidationRuleDemoScreen({Key? key}) : super(key: key);
@@ -99,15 +100,15 @@ class _ValidationRuleDemoScreenState extends State<ValidationRuleDemoScreen> wit
                 switch (severity) {
                   case ValidationSeverity.info:
                     label = 'Info';
-                    color = Colors.blue;
+                    color = AppColorMapper.infoColor(context);
                     break;
                   case ValidationSeverity.warning:
                     label = 'Warning';
-                    color = Colors.orange;
+                    color = AppColorMapper.warningColor(context);
                     break;
                   case ValidationSeverity.error:
                     label = 'Error';
-                    color = Colors.red;
+                    color = AppColorMapper.errorColor(context);
                     break;
                 }
                 

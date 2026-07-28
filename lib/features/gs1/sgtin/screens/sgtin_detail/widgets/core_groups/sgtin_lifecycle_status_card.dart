@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/widgets/core_groups/sgtin_lifecycle_status_field.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_card_helpers.dart';
@@ -52,13 +53,19 @@ class SgtinLifecycleStatusCard extends StatelessWidget {
             SgtinInfoRow(
               'Decommissioned At',
               sgtinFormatDt(sgtin!.decommissionedDate),
-              valueColor: Colors.red.shade700,
+              valueColor: AppColorMapper.itemStatusColor(
+                context,
+                ItemStatus.DESTROYED,
+              ),
             ),
             const SizedBox(height: 12),
             SgtinInfoRow(
               'Decommission Reason',
               sgtin!.decommissionedReason,
-              valueColor: Colors.red.shade700,
+              valueColor: AppColorMapper.itemStatusColor(
+                context,
+                ItemStatus.DESTROYED,
+              ),
             ),
           ],
         ],

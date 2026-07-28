@@ -14,6 +14,8 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_resolution.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/epcis/mixins/event_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
+import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';

@@ -2,14 +2,20 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/update_status/update_status_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/update_status/update_status_operation_service.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 import 'package:traqtrace_app/features/operations/update_status/screens/update_status_operation_detail/widgets/update_status_detail_content.dart';
 
 final _updateStatusDetailConfig =
     OperationDetailScreenConfig<UpdateStatusResponse>(
-  loader: (id) =>
-      getIt<UpdateStatusOperationService>().getUpdateStatusOperation(id),
+  createCubit: (fallbackErrorMessage) {
+    final service = getIt<UpdateStatusOperationService>();
+    return OperationDetailCubit<UpdateStatusResponse>(
+      fetchDetail: service.getUpdateStatusOperation,
+      fallbackErrorMessage: fallbackErrorMessage,
+    );
+  },
   contentBuilder: (
     context, {
     required awaitingSelection,

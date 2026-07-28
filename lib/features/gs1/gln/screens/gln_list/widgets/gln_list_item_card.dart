@@ -5,6 +5,7 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_selection_style.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class GlnListItemCard extends StatelessWidget {
   const GlnListItemCard({
@@ -162,12 +163,14 @@ class GlnListItemCard extends StatelessWidget {
                               children: [
                                 TraqIcon(AppAssets.iconTrash,
                                   size: 20,
-                                  color: Colors.red,
+                                  color: AppColorMapper.errorColor(context),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   GlnUiConstants.menuDelete,
-                                  style: const TextStyle(color: Colors.red),
+                                  style: TextStyle(
+                                    color: AppColorMapper.errorColor(context),
+                                  ),
                                 ),
                               ],
                             ),

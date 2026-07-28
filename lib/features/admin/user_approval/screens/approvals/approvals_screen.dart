@@ -9,10 +9,10 @@ import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/wid
 import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approval_reject_dialog.dart';
 import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approvals_header_section.dart';
 import 'package:traqtrace_app/features/admin/user_approval/screens/approvals/widgets/user_approvals_loading_view.dart';
+import 'package:traqtrace_app/features/admin/user_approval/cubit/user_approval_cubit.dart';
+import 'package:traqtrace_app/features/admin/user_approval/cubit/user_approval_state.dart';
+import 'package:traqtrace_app/features/admin/utils/admin_user_search_utils.dart';
 import 'package:traqtrace_app/features/admin/user_approval/utils/user_approval_constants.dart';
-import 'package:traqtrace_app/features/admin/user_approval/utils/user_approval_search_utils.dart';
-import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
-import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_state.dart';
 import 'dart:async';
 
 class ApprovalsScreen extends StatelessWidget {
@@ -21,7 +21,7 @@ class ApprovalsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<UserManagementCubit>(),
+      create: (_) => getIt<UserApprovalCubit>(),
       child: const _ApprovalsView(),
     );
   }
@@ -42,7 +42,7 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
   @override
   void initState() {
     super.initState();
-    context.read<UserManagementCubit>().loadApprovals();
+    context.read<UserApprovalCubit>().loadApprovals();
 
     _searchController.addListener(() {
       _searchDebounce?.cancel();
@@ -62,7 +62,7 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
   Future<void> _refreshApprovalsList() async {
     setState(() => _isRefreshing = true);
     try {
-      await context.read<UserManagementCubit>().loadApprovals();
+      await context.read<UserApprovalCubit>().loadApprovals();
     } finally {
       if (mounted) {
         setState(() => _isRefreshing = false);
@@ -71,18 +71,18 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
   }
 
   Future<void> _approveUser(UserResponse user) async {
-    final cubit = context.read<UserManagementCubit>();
+    final cubit = context.read<UserApprovalCubit>();
     await cubit.approveUser(user.id);
-    if (!mounted || cubit.state.status == UserManagementStatus.error) {
+    if (!mounted || cubit.state.status == UserApprovalStatus.error) {
       return;
     }
     context.showSuccess(UserApprovalConstants.approveUserSuccess);
   }
 
   Future<void> _rejectUser(UserResponse user) async {
-    final cubit = context.read<UserManagementCubit>();
+    final cubit = context.read<UserApprovalCubit>();
     await cubit.rejectUser(user.id);
-    if (!mounted || cubit.state.status == UserManagementStatus.error) {
+    if (!mounted || cubit.state.status == UserApprovalStatus.error) {
       return;
     }
     context.showSuccess(UserApprovalConstants.rejectUserSuccess);
@@ -104,9 +104,9 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
       showAppBar: true,
       appBarTitle: UserApprovalConstants.pageTitle,
       showDrawer: true,
-      child: BlocConsumer<UserManagementCubit, UserManagementState>(
+      child: BlocConsumer<UserApprovalCubit, UserApprovalState>(
         listener: (context, state) {
-          if (state.status == UserManagementStatus.error) {
+          if (state.status == UserApprovalStatus.error) {
             if (_isRefreshing) {
               setState(() => _isRefreshing = false);
             }
@@ -120,7 +120,7 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
             safeArea: false,
             scrollable: false,
             builder: (context, layout) {
-              if (state.status == UserManagementStatus.loading &&
+              if (state.status == UserApprovalStatus.loading &&
                   state.pendingApprovals.isEmpty) {
                 return const UserApprovalsLoadingView();
               }
@@ -129,7 +129,7 @@ class _ApprovalsViewState extends State<_ApprovalsView> {
               final filteredApprovals = query.isEmpty
                   ? state.pendingApprovals
                   : state.pendingApprovals
-                      .where((user) => userApprovalMatchesSearch(user, query))
+                      .where((user) => adminUserMatchesSearch(user, query))
                       .toList();
 
               return Column(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/widgets/commissioning_detail_serial_item_row.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/detail/operation_detail_group_card.dart';
 
 class CommissioningDetailSerialNumbersCard extends StatefulWidget {
@@ -43,18 +45,44 @@ class _CommissioningDetailSerialNumbersCardState
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                TraqIcon(AppAssets.iconCheck, size: 14, color: Colors.green[700]),
+                TraqIcon(
+                  AppAssets.iconCheck,
+                  size: 14,
+                  color: AppColorMapper.operationStatusColor(
+                    context,
+                    OperationStatus.success,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${successItems.length} succeeded',
-                  style: TextStyle(fontSize: 12, color: Colors.green[700]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColorMapper.operationStatusColor(
+                      context,
+                      OperationStatus.success,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
-                TraqIcon(AppAssets.iconX, size: 14, color: Colors.red[700]),
+                TraqIcon(
+                  AppAssets.iconX,
+                  size: 14,
+                  color: AppColorMapper.operationStatusColor(
+                    context,
+                    OperationStatus.failed,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${failedItems.length} failed',
-                  style: TextStyle(fontSize: 12, color: Colors.red[700]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColorMapper.operationStatusColor(
+                      context,
+                      OperationStatus.failed,
+                    ),
+                  ),
                 ),
               ],
             ),

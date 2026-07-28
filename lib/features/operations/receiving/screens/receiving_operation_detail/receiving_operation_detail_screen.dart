@@ -3,11 +3,18 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation_detail/widgets/receiving_detail_content.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
 final _receivingDetailConfig = OperationDetailScreenConfig<ReceivingResponse>(
-  loader: (id) => getIt<ReceivingOperationService>().getReceivingOperation(id),
+  createCubit: (fallbackErrorMessage) {
+    final service = getIt<ReceivingOperationService>();
+    return OperationDetailCubit<ReceivingResponse>(
+      fetchDetail: service.getReceivingOperation,
+      fallbackErrorMessage: fallbackErrorMessage,
+    );
+  },
   contentBuilder: (
     context, {
     required awaitingSelection,

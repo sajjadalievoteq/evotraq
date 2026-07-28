@@ -48,7 +48,7 @@ class SsccLifecycleStatusField extends StatelessWidget {
               value: selectedStatus,
               child: Row(
                 children: [
-                  TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(selectedStatus!), size: 12),
+                  TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(context, selectedStatus!), size: 12),
                   const SizedBox(width: 8),
                   Text(status_rules.friendlyLabel(selectedStatus!)),
                 ],
@@ -59,7 +59,7 @@ class SsccLifecycleStatusField extends StatelessWidget {
                 value: s,
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(s), size: 12),
+                    TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(context, s), size: 12),
                     const SizedBox(width: 8),
                     Text(status_rules.friendlyLabel(s)),
                   ],
@@ -89,8 +89,8 @@ class SsccLifecycleStatusField extends StatelessWidget {
           ? status_rules.friendlyLabel(selectedStatus!)
           : 'Draft',
       valueColor: selectedStatus != null
-          ? status_rules.statusColor(selectedStatus!)
-          : Colors.blueGrey,
+          ? status_rules.statusColor(context, selectedStatus!)
+          : status_rules.statusColor(context, LogisticUnitStatus.DRAFT),
     );
   }
 }

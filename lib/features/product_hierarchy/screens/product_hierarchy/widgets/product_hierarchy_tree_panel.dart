@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/core/widgets/empty_state/app_empty_state.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_state.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/utils/product_hierarchy_tree_flatten.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_flat_row.dart';
+import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_tree_empty_views.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_tree_skeleton.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_epc_utils.dart';
 
@@ -150,25 +149,15 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
         }
 
         if ((state.hierarchyError ?? '').isNotEmpty) {
-          return AppEmptyState(
-            iconAsset: NavIcons.aggregationHierarchy,
-            title: 'Unable to load hierarchy',
-            subtitle: state.hierarchyError!,
+          return ProductHierarchyTreeErrorView(
+            message: state.hierarchyError!,
           );
         }
 
         final root = state.root;
         if (root == null) {
-          final hasRecent = state.recentParents.isNotEmpty;
-          return AppEmptyState(
-            iconAsset: NavIcons.aggregationHierarchy,
-            title: hasRecent
-                ? 'No SSCC or SGTIN has selected'
-                : 'No hierarchy to display',
-             
-            subtitle: hasRecent
-                ? 'Select an SSCC or SGTIN from the list to view its packaging tree.'
-                : 'Search an SSCC or SGTIN to render its packaging tree.',
+          return ProductHierarchyTreeIdleView(
+            hasRecentParents: state.recentParents.isNotEmpty,
           );
         }
 

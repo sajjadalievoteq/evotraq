@@ -10,6 +10,7 @@ import 'package:traqtrace_app/features/barcode/widgets/camera_media_stream_stub.
 import 'package:traqtrace_app/features/barcode/widgets/scanner_overlay.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_stub.dart'
     if (dart.library.html)
         'package:traqtrace_app/features/barcode/widgets/scanner_page_visibility_web.dart';
@@ -356,7 +357,10 @@ class _GS1BarcodeScannerWidgetState extends State<GS1BarcodeScannerWidget>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
+                  TraqIcon(AppAssets.iconAlert,
+                    color: AppColorMapper.errorColor(context),
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Camera Error',

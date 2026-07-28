@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -403,7 +404,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       state.error!,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(color: AppColorMapper.errorColor(context)),
                     ),
                   ),
               ],
@@ -487,7 +488,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            TraqIcon(AppAssets.iconAlert, color: Colors.orange, size: 28),
+            TraqIcon(AppAssets.iconAlert, color: AppColorMapper.warningColor(context), size: 28),
             const SizedBox(width: 12),
             Text('Change to ${newMode.displayName} Mode'),
           ],
@@ -501,20 +502,20 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: AppColorMapper.errorColor(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(color: AppColorMapper.errorColor(context).withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconTrash, color: Colors.red.shade700),
+                    TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'WARNING: This will permanently delete ALL data!',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: AppColorMapper.errorColor(context),
                         ),
                       ),
                     ),
@@ -569,7 +570,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorMapper.errorColor(context),
               foregroundColor: Colors.white,
             ),
             child: const Text('Delete All & Switch Mode'),
@@ -614,7 +615,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
             count.toString(),
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: count > 0 ? Colors.red : Colors.grey,
+              color: count > 0 ? AppColorMapper.errorColor(context) : Colors.grey,
             ),
           ),
         ],

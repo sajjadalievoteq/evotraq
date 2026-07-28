@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class ObjectEventHelpWidget extends StatelessWidget {
   const ObjectEventHelpWidget({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class ObjectEventHelpWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            _buildRequiredFieldsSection(),
+            _buildRequiredFieldsSection(context),
             const SizedBox(height: 16.0),
             const Text(
               'Object Identification Options',
@@ -91,7 +92,7 @@ class ObjectEventHelpWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRequiredFieldsSection() {
+  Widget _buildRequiredFieldsSection(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
@@ -99,27 +100,27 @@ class ObjectEventHelpWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildRequiredField(
+            _buildRequiredField(context,
               'Event Time & Time Zone',
               'The date, time, and time zone when the event occurred. Must be specified in ISO 8601 format.',
             ),
-            _buildRequiredField(
+            _buildRequiredField(context,
               'Action',
               'Specifies how this event relates to the lifecycle of the objects. Must be one of: ADD, OBSERVE, or DELETE.',
             ),
-            _buildRequiredField(
+            _buildRequiredField(context,
               'Business Step',
               'Identifies the specific business step within a business process that this event represents. Standard values are defined in the GS1 Core Business Vocabulary (CBV).',
             ),
-            _buildRequiredField(
+            _buildRequiredField(context,
               'Disposition',
               'Indicates the business condition of the objects following the event. Standard values are defined in the GS1 Core Business Vocabulary (CBV).',
             ),
-            _buildRequiredField(
+            _buildRequiredField(context,
               'Business Location GLN',
               'The location where the objects are after the event occurred, specified as a Global Location Number (GLN).',
             ),
-            _buildRequiredField(
+            _buildRequiredField(context,
               'EPCs, EPC Classes, or Quantity',
               'At least one of these must be present to identify what objects the event pertains to.',
             ),
@@ -327,13 +328,17 @@ class ObjectEventHelpWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRequiredField(String title, String description) {
+  Widget _buildRequiredField(
+    BuildContext context,
+    String title,
+    String description,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TraqIcon(AppAssets.iconCheck, color: Colors.green),
+          TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context)),
           const SizedBox(width: 8.0),
           Expanded(
             child: Column(

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/utils/number_format_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/data/services/bulk_export_service.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class BulkExportPanel extends StatefulWidget {
@@ -26,12 +26,7 @@ class BulkExportPanel extends StatefulWidget {
 }
 
 class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderStateMixin {
-  DioService get _dio => getIt<DioService>();
-
-  dynamic _decodeBody(dynamic data) {
-    if (data is String) return json.decode(data);
-    return data;
-  }
+  BulkExportService get _service => getIt<BulkExportService>();
 
   late TabController _tabController;
   late Timer _refreshTimer;
@@ -114,26 +109,13 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportJobs() async {
     try {
-      final qp = <String, dynamic>{};
-      if (_selectedFormat != 'ALL') {
-        qp['format'] = _selectedFormat;
-      }
-      if (_selectedStatus != 'ALL') {
-        qp['status'] = _selectedStatus;
-      }
-
-      final response = await _dio.get(
-        '/bulk-export/jobs',
-        queryParameters: qp.isEmpty ? null : qp,
-        headers: await _getHeaders(),
+      final jobs = await _service.getExportJobs(
+        format: _selectedFormat,
+        status: _selectedStatus,
       );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _exportJobs =
-              List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      setState(() {
+        _exportJobs = jobs;
+      });
     } catch (e) {
       debugPrint('Error loading export jobs: $e');
     }
@@ -141,17 +123,10 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportTemplates() async {
     try {
-      final response = await _dio.get(
-        '/bulk-export/templates',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _exportTemplates =
-              List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      final templates = await _service.getExportTemplates();
+      setState(() {
+        _exportTemplates = templates;
+      });
     } catch (e) {
       debugPrint('Error loading export templates: $e');
     }
@@ -159,18 +134,10 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportHistory() async {
     try {
-      final response = await _dio.get(
-        '/bulk-export/history',
-        queryParameters: {'limit': 100},
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _exportHistory =
-              List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      final history = await _service.getExportHistory(limit: 100);
+      setState(() {
+        _exportHistory = history;
+      });
     } catch (e) {
       debugPrint('Error loading export history: $e');
     }
@@ -178,27 +145,13 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _loadExportStats() async {
     try {
-      final response = await _dio.get(
-        '/bulk-export/statistics',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _exportStats = _decodeBody(response.data);
-        });
-      }
+      final stats = await _service.getExportStatistics();
+      setState(() {
+        _exportStats = stats;
+      });
     } catch (e) {
       debugPrint('Error loading export stats: $e');
     }
-  }
-
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await widget.tokenManager.getToken();
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${token ?? ''}',
-    };
   }
 
   @override
@@ -214,7 +167,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
@@ -275,11 +228,11 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Active', activeExports, AppAssets.iconPlay, color: Colors.green),
+                  _buildSummaryItem('Active', activeExports, AppAssets.iconPlay, color: AppColorMapper.successColor(context)),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Pending', pendingExports, AppAssets.iconClock, color: Colors.orange),
+                  _buildSummaryItem('Pending', pendingExports, AppAssets.iconClock, color: AppColorMapper.warningColor(context)),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Failed', failedExports, AppAssets.iconXCircle, color: Colors.red),
+                  _buildSummaryItem('Failed', failedExports, AppAssets.iconXCircle, color: AppColorMapper.errorColor(context)),
                 ],
               ),
             ),
@@ -320,7 +273,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TraqIcon(iconAsset, size: 20, color: color ?? Colors.blue),
+        TraqIcon(iconAsset, size: 20, color: color ?? AppColorMapper.infoColor(context)),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,7 +444,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AdminHelperMappers.exportJobStatusColor(status),
+                    color: AdminHelperMappers.exportJobStatusColor(context, status),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -507,7 +460,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AdminHelperMappers.exportFormatColor(format),
+                    color: AdminHelperMappers.exportFormatColor(context, format),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -564,7 +517,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 value: progress / 100.0,
                 backgroundColor: Colors.grey.shade300,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  AdminHelperMappers.exportJobStatusColor(status),
+                  AdminHelperMappers.exportJobStatusColor(context, status),
                 ),
               ),
               const SizedBox(height: 8),
@@ -611,7 +564,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AdminHelperMappers.exportFormatColor(format),
+            color: AdminHelperMappers.exportFormatColor(context, format),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -645,7 +598,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
           children: [
             IconButton(
               onPressed: () => _useTemplate(template),
-              icon: TraqIcon(AppAssets.iconArrowR, color: Colors.green),
+              icon: TraqIcon(AppAssets.iconArrowR, color: AppColorMapper.successColor(context)),
               tooltip: 'Use Template',
             ),
             PopupMenuButton<String>(
@@ -686,7 +639,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AdminHelperMappers.exportFormatColor(format),
+            color: AdminHelperMappers.exportFormatColor(context, format),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -704,7 +657,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: AdminHelperMappers.exportJobStatusColor(status),
+                color: AdminHelperMappers.exportJobStatusColor(context, status),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -740,7 +693,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             if (status == 'COMPLETED')
               IconButton(
                 onPressed: () => _downloadExport(export['job_id'] ?? export['jobId'] ?? ''),
-                icon: TraqIcon(AppAssets.iconDownload, color: Colors.blue),
+                icon: TraqIcon(AppAssets.iconDownload, color: AppColorMapper.infoColor(context)),
                 tooltip: 'Download',
               ),
             IconButton(
@@ -827,7 +780,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                             width: 12,
                             height: 12,
                             decoration: BoxDecoration(
-                              color: AdminHelperMappers.exportFormatColor(format),
+                              color: AdminHelperMappers.exportFormatColor(context, format),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -841,7 +794,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                               value: percentage / 100,
                               backgroundColor: Colors.grey.shade300,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                AdminHelperMappers.exportFormatColor(format),
+                                AdminHelperMappers.exportFormatColor(context, format),
                               ),
                             ),
                           ),
@@ -869,7 +822,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TraqIcon(iconAsset, size: 32, color: Colors.blue),
+            TraqIcon(iconAsset, size: 32, color: AppColorMapper.infoColor(context)),
             const SizedBox(height: 8),
             Text(
               title,
@@ -879,10 +832,10 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppColorMapper.infoColor(context),
               ),
             ),
           ],
@@ -1001,15 +954,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _cancelExport(String jobId) async {
     try {
-      final response = await _dio.delete(
-        '/bulk-export/jobs/$jobId',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        context.showSuccess('Export cancelled successfully');
-        _loadExportJobs();
-      }
+      await _service.cancelExport(jobId);
+      context.showSuccess('Export cancelled successfully');
+      _loadExportJobs();
     } catch (e) {
       context.showError('Failed to cancel export: $e');
     }
@@ -1017,32 +964,17 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _downloadExport(String jobId) async {
     try {
-      final jobResponse = await _dio.get(
-        '/bulk-export/jobs',
-        headers: await _getHeaders(),
-      );
+      final jobs = await _service.getExportJobs();
+      final job = jobs.firstWhere((j) => j['job_id'] == jobId, orElse: () => {});
 
-      if (jobResponse.statusCode == 200) {
-        final jobs =
-            List<Map<String, dynamic>>.from(_decodeBody(jobResponse.data));
-        final job = jobs.firstWhere((j) => j['job_id'] == jobId, orElse: () => {});
-        
-        if (job.isNotEmpty &&
-            job['execution_result']?['export_result']?['file_id'] != null) {
-          final fileId = job['execution_result']['export_result']['file_id'];
-
-          final downloadUrl = job['execution_result']['export_result']['download_url'];
-          final response = await _dio.get(
-            '${widget.baseUrl}$downloadUrl',
-            headers: await _getHeaders(),
-          );
-
-          if (response.statusCode == 200) {
-            context.showSuccess('Download started for file: $fileId');
-          }
-        } else {
-          context.showWarning('No export file available for download');
-        }
+      if (job.isNotEmpty &&
+          job['execution_result']?['export_result']?['file_id'] != null) {
+        final fileId = job['execution_result']['export_result']['file_id'];
+        final downloadUrl = job['execution_result']['export_result']['download_url'];
+        await _service.downloadExport(downloadUrl);
+        context.showSuccess('Download started for file: $fileId');
+      } else {
+        context.showWarning('No export file available for download');
       }
     } catch (e) {
       context.showError('Failed to download export: $e');
@@ -1051,15 +983,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _retryExport(String jobId) async {
     try {
-      final response = await _dio.post(
-        '/bulk-export/jobs/$jobId/retry',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        context.showInfo('Export retry started');
-        _loadExportJobs();
-      }
+      await _service.retryExport(jobId);
+      context.showInfo('Export retry started');
+      _loadExportJobs();
     } catch (e) {
       context.showError('Failed to retry export: $e');
     }
@@ -1067,18 +993,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _executeExportJob(String jobId) async {
     try {
-      final response = await _dio.post(
-        '/bulk-export/jobs/$jobId/execute',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        final result = _decodeBody(response.data);
-        context.showSuccess('Export job executed successfully: ${result['status']}');
-        _loadExportJobs();
-      } else {
-        throw Exception('Failed to execute export job');
-      }
+      await _service.executeExportJob(jobId);
+      context.showSuccess('Export job executed successfully');
+      _loadExportJobs();
     } catch (e) {
       context.showError('Failed to execute export job: $e');
     }
@@ -1105,15 +1022,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
     if (confirmed == true) {
       try {
-        final response = await _dio.delete(
-          '/bulk-export/jobs/$jobId/delete',
-          headers: await _getHeaders(),
-        );
-
-        if (response.statusCode == 200) {
-          context.showSuccess('Export deleted successfully');
-          _loadExportJobs();
-        }
+        await _service.deleteExport(jobId);
+        context.showSuccess('Export deleted successfully');
+        _loadExportJobs();
       } catch (e) {
         context.showError('Failed to delete export: $e');
       }
@@ -1126,15 +1037,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _duplicateTemplate(String templateId) async {
     try {
-      final response = await _dio.post(
-        '/bulk-export/templates/$templateId/duplicate',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        context.showSuccess('Template duplicated successfully');
-        _loadExportTemplates();
-      }
+      await _service.duplicateTemplate(templateId);
+      context.showSuccess('Template duplicated successfully');
+      _loadExportTemplates();
     } catch (e) {
       context.showError('Failed to duplicate template: $e');
     }
@@ -1142,14 +1047,8 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
   Future<void> _exportTemplateConfig(String templateId) async {
     try {
-      final response = await _dio.get(
-        '/bulk-export/templates/$templateId/export',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        context.showSuccess('Template configuration exported');
-      }
+      await _service.exportTemplateConfig(templateId);
+      context.showSuccess('Template configuration exported');
     } catch (e) {
       context.showError('Failed to export template: $e');
     }
@@ -1176,15 +1075,9 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
 
     if (confirmed == true) {
       try {
-        final response = await _dio.delete(
-          '/bulk-export/templates/$templateId',
-          headers: await _getHeaders(),
-        );
-
-        if (response.statusCode == 200) {
-          context.showSuccess('Template deleted successfully');
-          _loadExportTemplates();
-        }
+        await _service.deleteTemplate(templateId);
+        context.showSuccess('Template deleted successfully');
+        _loadExportTemplates();
       } catch (e) {
         context.showError('Failed to delete template: $e');
       }
@@ -1261,7 +1154,7 @@ class BulkExportPanelState extends State<BulkExportPanel> with TickerProviderSta
                 const SizedBox(height: 8),
                 const Text('Error:', style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(export['execution_result']['error_message'] ?? 'Unknown error', 
-                     style: const TextStyle(color: Colors.red)),
+                     style: TextStyle(color: AppColorMapper.errorColor(context))),
               ],
             ],
           ),
@@ -1306,12 +1199,7 @@ class CreateExportDialog extends StatefulWidget {
 }
 
 class _CreateExportDialogState extends State<CreateExportDialog> {
-  DioService get _dio => getIt<DioService>();
-
-  dynamic _decodeBody(dynamic data) {
-    if (data is String) return json.decode(data);
-    return data;
-  }
+  BulkExportService get _service => getIt<BulkExportService>();
 
   final _formKey = GlobalKey<FormState>();
   String? _selectedTemplateId;
@@ -1344,20 +1232,10 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
 
   Future<void> _loadTemplates() async {
     try {
-      final token = await widget.tokenManager.getToken();
-      final response = await _dio.get(
-        '/bulk-export/templates',
-        headers: {
-          'Authorization': 'Bearer ${token ?? ''}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _templates = _decodeBody(response.data);
-        });
-      }
+      final templates = await _service.getExportTemplates();
+      setState(() {
+        _templates = templates;
+      });
     } catch (e) {
       print('Error loading templates: $e');
     }
@@ -1371,7 +1249,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
     });
 
     try {
-      Map<String, dynamic> exportData;
+      late Map<String, dynamic> exportData;
 
       if (_selectedTemplateId != null) {
         Map<String, dynamic> templateParams = {
@@ -1379,7 +1257,7 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
           'format': _selectedFormat,
           ..._exportConfig,
         };
-        
+
         if (_startDate != null && _endDate != null) {
           templateParams['start_date'] = _startDate!.toIso8601String();
           templateParams['end_date'] = _endDate!.toIso8601String();
@@ -1389,43 +1267,15 @@ class _CreateExportDialogState extends State<CreateExportDialog> {
           templateParams['start_date'] = thirtyDaysAgo.toIso8601String();
           templateParams['end_date'] = now.toIso8601String();
         }
-        
-        final token = await widget.tokenManager.getToken();
-        final response = await _dio.post(
-          '/bulk-export/templates/$_selectedTemplateId/apply',
-          headers: {
-            'Authorization': 'Bearer ${token ?? ''}',
-            'Content-Type': 'application/json',
-          },
-          data: json.encode(templateParams),
-        );
 
-        if (response.statusCode == 201) {
-          exportData = _decodeBody(response.data);
-        } else {
-          throw Exception('Failed to create export from template');
-        }
+        exportData = await _service.applyTemplate(_selectedTemplateId!, templateParams);
       } else {
-        final token = await widget.tokenManager.getToken();
-        final response = await _dio.post(
-          '/bulk-export/jobs',
-          headers: {
-            'Authorization': 'Bearer ${token ?? ''}',
-            'Content-Type': 'application/json',
-          },
-          data: json.encode({
-            'name': _exportName,
-            'format': _selectedFormat,
-            'configuration': _exportConfig,
-            'schedule': null,
-          }),
-        );
-
-        if (response.statusCode == 201) {
-          exportData = _decodeBody(response.data);
-        } else {
-          throw Exception('Failed to create export job');
-        }
+        exportData = await _service.createExportJob({
+          'name': _exportName,
+          'format': _selectedFormat,
+          'configuration': _exportConfig,
+          'schedule': null,
+        });
       }
 
       if (mounted) {
@@ -1641,12 +1491,7 @@ class BulkExportDialog extends StatefulWidget {
 }
 
 class _BulkExportDialogState extends State<BulkExportDialog> {
-  DioService get _dio => getIt<DioService>();
-
-  dynamic _decodeBody(dynamic data) {
-    if (data is String) return json.decode(data);
-    return data;
-  }
+  BulkExportService get _service => getIt<BulkExportService>();
 
   final _formKey = GlobalKey<FormState>();
   String _exportName = '';
@@ -1685,39 +1530,16 @@ class _BulkExportDialogState extends State<BulkExportDialog> {
         queryData['end_date'] = _endDate!.toIso8601String();
       }
 
-      String endpoint;
-      Map<String, dynamic> requestBody;
+      final exportData = _exportType == 'streaming'
+          ? await _service.createStreamingExport(queryData)
+          : await _service.createPaginatedExport(queryData);
 
-      if (_exportType == 'streaming') {
-        endpoint = '${widget.baseUrl}/bulk-export/streaming';
-        requestBody = queryData;
-      } else {
-        endpoint = '${widget.baseUrl}/bulk-export/paginated';
-        requestBody = queryData;
-      }
-
-      final token = await widget.tokenManager.getToken();
-      final response = await _dio.post(
-        endpoint,
-        headers: {
-          'Authorization': 'Bearer ${token ?? ''}',
-          'Content-Type': 'application/json',
-        },
-        data: json.encode(requestBody),
-      );
-
-      if (response.statusCode == 201) {
-        final exportData = _decodeBody(response.data);
-
-        if (mounted) {
-          Navigator.of(context).pop();
-          widget.onExportCreated();
-          context.showSuccess(
-            'Bulk export session "${exportData['session_id']}" created successfully',
-          );
-        }
-      } else {
-        throw Exception('Failed to create bulk export');
+      if (mounted) {
+        Navigator.of(context).pop();
+        widget.onExportCreated();
+        context.showSuccess(
+          'Bulk export session "${exportData['session_id']}" created successfully',
+        );
       }
     } catch (e) {
       if (mounted) {

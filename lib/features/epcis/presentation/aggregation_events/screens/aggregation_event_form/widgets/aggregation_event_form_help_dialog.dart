@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/utils/aggregation_event_form_help_content.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_event_form_help_section.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -57,13 +58,16 @@ class AggregationEventFormHelpDialog extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: AppColorMapper.infoSoft(context),
                       borderRadius: BorderRadius.circular(4.0),
-                      border: Border.all(color: Colors.blue.shade200),
+                      border: Border.all(
+                        color: AppColorMapper.infoColor(context)
+                            .withValues(alpha: 0.3),
+                      ),
                     ),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'GS1 Standards Compliance',
                           style: TextStyle(fontWeight: FontWeight.bold),

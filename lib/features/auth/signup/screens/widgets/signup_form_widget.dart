@@ -13,6 +13,7 @@ import 'package:traqtrace_app/features/auth/widgets/auth_input_field.dart';
 import 'package:traqtrace_app/core/animation/traq_staggered_entrance.dart';
 
 import 'package:traqtrace_app/core/config/constants.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 
 enum _UsernameAvailabilityStatus { initial, checking, available, taken, error }
@@ -177,7 +178,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
     final c = context.colors;
     switch (_usernameAvailabilityStatus) {
       case _UsernameAvailabilityStatus.available:
-        return Colors.green.shade600;
+        return AppColorMapper.successColor(context);
       case _UsernameAvailabilityStatus.taken:
         return Theme.of(context).colorScheme.error;
       case _UsernameAvailabilityStatus.error:

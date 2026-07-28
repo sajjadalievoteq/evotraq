@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class EventTypeMetricsChart extends StatelessWidget {
   final Map<String, EventTypeMetrics> eventTypeMetrics;
@@ -37,10 +38,10 @@ class EventTypeMetricsChart extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               height: 300,
-              child: _buildChart(),
+              child: _buildChart(context),
             ),
             const SizedBox(height: 16),
-            _buildMetricsSummary(),
+            _buildMetricsSummary(context),
           ],
         ),
       ),
@@ -62,7 +63,7 @@ class EventTypeMetricsChart extends StatelessWidget {
     }
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(BuildContext context) {
     final eventTypes = eventTypeMetrics.keys.toList();
     final maxValue = _getMaxValue();
 
@@ -76,6 +77,7 @@ class EventTypeMetricsChart extends StatelessWidget {
         values: _getValues(),
         maxValue: maxValue,
         metricType: metricType,
+        brightness: Theme.of(context).brightness,
       ),
       size: const Size(double.infinity, 300),
     );
@@ -103,7 +105,7 @@ class EventTypeMetricsChart extends StatelessWidget {
     return values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
   }
 
-  Widget _buildMetricsSummary() {
+  Widget _buildMetricsSummary(BuildContext context) {
     return Column(
       children: [
         const Text(
@@ -115,13 +117,17 @@ class EventTypeMetricsChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...eventTypeMetrics.entries.map((entry) {
-          return _buildEventTypeRow(entry.key, entry.value);
+          return _buildEventTypeRow(context, entry.key, entry.value);
         }).toList(),
       ],
     );
   }
 
-  Widget _buildEventTypeRow(String eventType, EventTypeMetrics metrics) {
+  Widget _buildEventTypeRow(
+    BuildContext context,
+    String eventType,
+    EventTypeMetrics metrics,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
@@ -136,7 +142,10 @@ class EventTypeMetricsChart extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: AdminEventVisualizationUtils.eventTypeColor(eventType),
+              color: AdminEventVisualizationUtils.eventTypeColor(
+                eventType,
+                context: context,
+              ),
               shape: BoxShape.circle,
             ),
           ),
@@ -193,6 +202,7 @@ class EventTypeMetricsChart extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: AdminHelperMappers.successRateColor(
+                      context,
                       metrics.successRate,
                     ),
                   ),
@@ -232,9 +242,9 @@ class EventTypeMetricsChart extends StatelessWidget {
                 children: [
                   Text(
                     metrics.totalErrors.toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Colors.red,
+                      color: AppColorMapper.errorColor(context),
                     ),
                   ),
                   Text(
@@ -259,12 +269,14 @@ class BarChartPainter extends CustomPainter {
   final List<double> values;
   final double maxValue;
   final String metricType;
+  final Brightness brightness;
 
   BarChartPainter({
     required this.eventTypes,
     required this.values,
     required this.maxValue,
     required this.metricType,
+    required this.brightness,
   });
 
   @override
@@ -302,7 +314,11 @@ class BarChartPainter extends CustomPainter {
       final x = 60 + (chartWidth / eventTypes.length) * i + barSpacing / 2;
       final y = chartHeight + 10 - barHeight;
 
-      paint.color = AdminEventVisualizationUtils.eventTypeColor(eventType);
+      paint.color = AppColorMapper.eventType(
+        eventType,
+        scheme: AppEventColorScheme.admin,
+        brightness: brightness,
+      );
 
       final rect = Rect.fromLTWH(x, y, barWidth, barHeight);
       canvas.drawRRect(

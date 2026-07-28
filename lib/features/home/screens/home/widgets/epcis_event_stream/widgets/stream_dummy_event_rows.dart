@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 
 class StreamDummyEventRows extends StatelessWidget {
@@ -19,49 +20,42 @@ class StreamDummyEventRows extends StatelessWidget {
   static const _rows = <({
     String time,
     String type,
-    Color dot,
     String location,
     String urn,
   })>[
     (
       time: '14:32:08.221Z',
       type: 'commissioning',
-      dot: Color(0xFF7B61FF),
       location: 'JLP-AE-01.LINE-3',
       urn: 'https://id.gs1.org/01/10860003130305/21/1234567890',
     ),
     (
       time: '14:31:52.104Z',
       type: 'packing',
-      dot: Color(0xFFFF8A34),
       location: 'PHA-DXB-04.MHS-1',
       urn: 'https://id.gs1.org/00/086001382318765432',
     ),
     (
       time: '14:31:41.887Z',
       type: 'shipping',
-      dot: Color(0xFF2196F3),
       location: 'JLP-AE-01.DOCK-2',
       urn: 'https://id.gs1.org/01/10860003130305/21/1234567891',
     ),
     (
       time: '14:30:19.002Z',
       type: 'receiving',
-      dot: Color(0xFFE91E8C),
       location: 'PHA-DXB-04.GATE-A',
       urn: 'https://id.gs1.org/00/086001382318765433',
     ),
     (
       time: '14:29:55.441Z',
       type: 'inspecting',
-      dot: Color(0xFF00BCD4),
       location: 'JLP-AE-01.QC-1',
       urn: 'https://id.gs1.org/01/10860003130305/21/1234567892',
     ),
     (
       time: '14:28:12.330Z',
       type: 'transforming',
-      dot: Color(0xFF009688),
       location: 'PHA-DXB-04.LAB-2',
       urn: 'https://id.gs1.org/01/10860003130305/21/1234567893',
     ),
@@ -98,6 +92,7 @@ class StreamDummyEventRows extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, c) {
                 final narrow = c.maxWidth < 520;
+                final dot = AppColorMapper.bizStepColor(context, _rows[i].type);
                 if (narrow) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +106,7 @@ class StreamDummyEventRows extends StatelessWidget {
                             height: 8,
                             margin: const EdgeInsets.only(right: 8),
                             decoration: BoxDecoration(
-                              color: _rows[i].dot,
+                              color: dot,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -148,7 +143,7 @@ class StreamDummyEventRows extends StatelessWidget {
                             height: 8,
                             margin: const EdgeInsets.only(right: 8, top: 3),
                             decoration: BoxDecoration(
-                              color: _rows[i].dot,
+                              color: dot,
                               shape: BoxShape.circle,
                             ),
                           ),

@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
 
 class ObjectEventActionChip extends StatelessWidget {
   const ObjectEventActionChip({super.key, required this.action});
 
   final String? action;
 
-  static Color colorFor(String? action) {
+  static Color colorFor(BuildContext context, String? action) {
+    final p = OperationPalette.of(context);
     switch (action?.toUpperCase()) {
       case 'ADD':
-        return Colors.green;
+        return p.statusSuccess;
       case 'DELETE':
-        return Colors.red;
+        return p.statusFailed;
       case 'OBSERVE':
       default:
-        return Colors.blue;
+        return p.eventObject;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final label = action?.toUpperCase() ?? 'OBSERVE';
-    final color = colorFor(action);
+    final color = colorFor(context, action);
     return Chip(
       label: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: OperationPalette.onColor(color),
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),

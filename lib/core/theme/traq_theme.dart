@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
 
 part 'traq_theme_colors.dart';
 part 'traq_theme_tokens.dart';
@@ -98,6 +99,7 @@ class TraqTheme {
 extension TraqContextX on BuildContext {
   TraqColors get colors => TraqColors.of(this);
   TraqText get text => TraqText.of(this);
+  OperationPalette get operationPalette => OperationPalette.of(this);
 
   Widget get appBarFlexibleBackground =>
       TraqTheme.appBarFlexibleBackground(colors);

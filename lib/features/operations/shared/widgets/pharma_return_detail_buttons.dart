@@ -5,14 +5,14 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
+import 'package:traqtrace_app/features/operations/receiving/cubit/receiving_acceptance_cubit.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 
@@ -31,13 +31,17 @@ class AcceptGoodsButton extends StatefulWidget {
 }
 
 class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
-  bool _loading = false;
+  late final ReceivingAcceptanceCubit _acceptanceCubit;
+  bool _evaluating = false;
   bool _eligible = false;
   String? _disabledReason;
 
   @override
   void initState() {
     super.initState();
+    _acceptanceCubit = ReceivingAcceptanceCubit(
+      service: getIt<ReceivingOperationService>(),
+    );
     _evaluate();
   }
 
@@ -56,19 +60,19 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
 
   Future<void> _evaluate() async {
     setState(() {
-      _loading = true;
+      _evaluating = true;
       _eligible = false;
       _disabledReason = null;
     });
 
     if (widget.operation.isAccepted || !widget.operation.isAwaitingAcceptance) {
-      setState(() => _loading = false);
+      setState(() => _evaluating = false);
       return;
     }
 
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
-      setState(() => _loading = false);
+      setState(() => _evaluating = false);
       return;
     }
 
@@ -78,7 +82,7 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
       widget.operation.receivingGLN,
     );
     setState(() {
-      _loading = false;
+      _evaluating = false;
       _eligible = matches;
       if (!matches) {
         _disabledReason = operationalGln == null
@@ -107,55 +111,76 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
       return;
     }
 
-    setState(() => _loading = true);
-    try {
-      final updated = await getIt<ReceivingOperationService>().acceptGoods(
-        receivingEventId: eventId,
-        receiverGln: operationalGln,
-      );
-      if (!mounted) return;
-      context.showSuccess('Goods accepted successfully.');
-      widget.onAccepted?.call(updated);
-    } on ApiException catch (e) {
-      if (mounted) context.showError(e.getUserFriendlyMessage());
-    } catch (_) {
-      if (mounted) {
-        context.showError('Unable to accept goods. Please try again.');
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    _acceptanceCubit.acceptGoods(
+      receivingEventId: eventId,
+      receiverGln: operationalGln,
+    );
+  }
+
+  @override
+  void dispose() {
+    _acceptanceCubit.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loading && !_eligible && _disabledReason == null) {
+    if (!_evaluating && !_eligible && _disabledReason == null) {
       return const SizedBox.shrink();
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CustomElevatedButton(
-            label: 'Accept Goods',
-            onPressed: _eligible && !_loading ? _onPressed : () {},
-            isLoading: _loading,
-            isEnabled: _eligible && !_loading,
-          ),
-          if (!_loading && !_eligible && _disabledReason != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _disabledReason!,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.error,
-              ),
+    return BlocProvider<ReceivingAcceptanceCubit>.value(
+      value: _acceptanceCubit,
+      child: BlocConsumer<ReceivingAcceptanceCubit, ReceivingAcceptanceState>(
+        listener: (context, state) {
+          if (state.status == ReceivingAcceptanceStatus.success) {
+            context.showSuccess('Goods accepted successfully.');
+            final updated = state.updatedOperation;
+            if (updated != null) {
+              widget.onAccepted?.call(updated);
+            }
+            context.read<ReceivingAcceptanceCubit>().reset();
+            return;
+          }
+          if (state.status == ReceivingAcceptanceStatus.error) {
+            final message = state.errorMessage?.trim();
+            context.showError(
+              (message == null || message.isEmpty)
+                  ? 'Unable to accept goods. Please try again.'
+                  : message,
+            );
+            context.read<ReceivingAcceptanceCubit>().reset();
+          }
+        },
+        builder: (context, state) {
+          final submitting = state.status == ReceivingAcceptanceStatus.loading;
+          final loading = _evaluating || submitting;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomElevatedButton(
+                  label: 'Accept Goods',
+                  onPressed: _eligible && !loading ? _onPressed : () {},
+                  isLoading: loading,
+                  isEnabled: _eligible && !loading,
+                ),
+                if (!loading && !_eligible && _disabledReason != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    _disabledReason!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-        ],
+          );
+        },
       ),
     );
   }

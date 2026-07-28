@@ -92,7 +92,7 @@ class KeyMetricsGrid extends StatelessWidget {
             stats?.totalEvents.toString() ?? '0',
             NavIcons.allEvents,
             context.colors.textMuted,
-            () => context.go(HomeNavigation.epcisEvents),
+            () => context.go(HomeNavigation.epcisObjectEvents),
           ),
         ];
 

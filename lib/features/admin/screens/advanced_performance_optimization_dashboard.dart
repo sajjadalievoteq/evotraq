@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -44,12 +42,7 @@ class _AdvancedPerformanceOptimizationDashboardState
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   void _startAutoRefresh() {
@@ -175,17 +168,17 @@ class _AdvancedPerformanceOptimizationDashboardState
                 children: [
                   if (_lastAutoOptimizationResult != null)
                     Card(
-                      color: Colors.green.shade50,
+                      color: AppColorMapper.successColor(context).withValues(alpha: 0.1),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            TraqIcon(AppAssets.iconCheck, color: Colors.green),
+                            TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context)),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 _lastAutoOptimizationResult!,
-                                style: TextStyle(color: Colors.green.shade700),
+                                style: TextStyle(color: AppColorMapper.successColor(context)),
                               ),
                             ),
                           ],
@@ -198,17 +191,17 @@ class _AdvancedPerformanceOptimizationDashboardState
 
                   if (_errorMessage != null)
                     Card(
-                      color: Colors.red.shade50,
+                      color: AppColorMapper.errorColor(context).withValues(alpha: 0.1),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            TraqIcon(AppAssets.iconAlert, color: Colors.red),
+                            TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context)),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 _errorMessage!,
-                                style: TextStyle(color: Colors.red.shade700),
+                                style: TextStyle(color: AppColorMapper.errorColor(context)),
                               ),
                             ),
                           ],
@@ -380,7 +373,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Memory Usage',
                 _getMemoryUsage(systemResources),
                 NavIcons.eventSerialization,
-                Colors.blue,
+                AppColorMapper.infoColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -389,7 +382,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'CPU Usage',
                 _getCpuUsage(systemResources),
                 NavIcons.performanceOptimization,
-                Colors.green,
+                AppColorMapper.successColor(context),
               ),
             ),
           ],
@@ -402,7 +395,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Active Connections',
                 _getActiveConnections(connectionPool),
                 AppAssets.iconLink,
-                Colors.orange,
+                AppColorMapper.warningColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -411,7 +404,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Active Threads',
                 _getActiveThreads(threadPools),
                 AppAssets.iconSettings,
-                Colors.purple,
+                AppColorMapper.chartColor(context, 5),
               ),
             ),
           ],
@@ -467,7 +460,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Query Plan Analysis',
                 'Analyze SQL execution plans and optimize query performance',
                 AppAssets.iconBarChart,
-                Colors.blue,
+                AppColorMapper.infoColor(context),
                 () => _showComingSoonDialog('Query Plan Analysis'),
               ),
             ),
@@ -477,7 +470,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Connection Pool Monitoring',
                 'Monitor HikariCP connections and detect leaks',
                 AppAssets.iconHub,
-                Colors.green,
+                AppColorMapper.successColor(context),
                 () => _showComingSoonDialog('Connection Pool Monitoring'),
               ),
             ),
@@ -491,7 +484,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Thread Pool Management',
                 'Manage thread pools with backpressure strategies',
                 AppAssets.iconSettings,
-                Colors.orange,
+                AppColorMapper.warningColor(context),
                 () => _showComingSoonDialog('Thread Pool Management'),
               ),
             ),
@@ -501,7 +494,7 @@ class _AdvancedPerformanceOptimizationDashboardState
                 'Resource Management',
                 'Monitor and optimize system resources',
                 AppAssets.iconComputer,
-                Colors.purple,
+                AppColorMapper.chartColor(context, 5),
                 () => _showComingSoonDialog('Resource Management'),
               ),
             ),

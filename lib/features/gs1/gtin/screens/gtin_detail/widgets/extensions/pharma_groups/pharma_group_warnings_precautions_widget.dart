@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_validated_field.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
@@ -133,7 +134,7 @@ class _WarningsPrecautionsGroupWidgetState
             title: const Text('Black Box Warning'),
             subtitle: const Text('FDA\'s most serious warning'),
             value: _blackBoxWarning,
-            activeThumbColor: Colors.red,
+            activeThumbColor: AppColorMapper.errorColor(context),
             onChanged: widget.isEditing
                 ? (value) {
                     setState(() => _blackBoxWarning = value);

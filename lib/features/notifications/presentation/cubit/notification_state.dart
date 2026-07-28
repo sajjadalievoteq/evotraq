@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/models/notification_subscription.dart';
-import '../../domain/models/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart';
 
 enum NotificationStatus { initial, loading, success, error, subscriptionCreated, subscriptionUpdated, subscriptionDeleted, webSocketConnected, webSocketDisconnected }
 

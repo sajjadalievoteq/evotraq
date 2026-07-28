@@ -1,19 +1,18 @@
-import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
 abstract final class GlnFormat {
-  static final RegExp _numeric13 = RegExp(r'^\d{13}$');
-
   static String stripGlnInput(String? raw) {
     if (raw == null) return '';
     return raw.replaceAll(RegExp(r'[\s\u00A0\-\u2010-\u2015\.\/]'), '').trim();
   }
 
   static bool isValidGln(String stripped) {
-    if (!_numeric13.hasMatch(stripped)) return false;
-    final body = stripped.substring(0, 12);
-    final want = int.parse(stripped[12]);
-    final got = GtinFormat.calculateCheckDigitForBody(body);
-    return got >= 0 && want == got;
+    return CheckDigitUtils.validateGS1CheckDigit(
+          stripped,
+          allowedLengths: CheckDigitUtils.glnLengths,
+          label: 'GLN',
+        ) ==
+        null;
   }
 
   static bool isValidLei(String normalized20) {

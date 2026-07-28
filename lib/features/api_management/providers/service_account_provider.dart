@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/api_management/models/service_account.dart';
+import 'package:traqtrace_app/data/models/api_management/service_account.dart';
 
 
 import '../../../data/services/service_account_service.dart';

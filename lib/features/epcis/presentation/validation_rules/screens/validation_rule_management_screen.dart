@@ -9,9 +9,15 @@ import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.
 import 'package:uuid/uuid.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class ValidationRuleManagementScreen extends StatefulWidget {
-  const ValidationRuleManagementScreen({Key? key}) : super(key: key);
+  const ValidationRuleManagementScreen({
+    Key? key,
+    this.embedded = false,
+  }) : super(key: key);
+
+  final bool embedded;
 
   @override
   State<ValidationRuleManagementScreen> createState() =>
@@ -33,6 +39,20 @@ class _ValidationRuleManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final body = Column(
+      children: [
+        _buildFilterBar(),
+        Expanded(child: _buildRuleList()),
+      ],
+    );
+
+    if (widget.embedded) {
+      return Scaffold(
+        body: body,
+        floatingActionButton: _buildFloatingMenu(),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Validation Rule Management'),
@@ -50,12 +70,7 @@ class _ValidationRuleManagementScreenState
         ],
       ),
       drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          _buildFilterBar(),
-          Expanded(child: _buildRuleList()),
-        ],
-      ),
+      body: body,
       floatingActionButton: _buildFloatingMenu(),
     );
   }
@@ -215,7 +230,7 @@ class _ValidationRuleManagementScreenState
                       });
                       _showHelp();
                     },
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColorMapper.infoColor(context),
                     child: TraqIcon(AppAssets.iconInfo),
                   ),
                 )
@@ -236,7 +251,7 @@ class _ValidationRuleManagementScreenState
                       });
                       _importRules();
                     },
-                    backgroundColor: Colors.orange,
+                    backgroundColor: AppColorMapper.warningColor(context),
                     child: const TraqIcon(AppAssets.iconUpload),
                   ),
                 )
@@ -257,7 +272,7 @@ class _ValidationRuleManagementScreenState
                       });
                       _addNewRule();
                     },
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColorMapper.successColor(context),
                     child: TraqIcon(AppAssets.iconPlus),
                   ),
                 )
@@ -295,7 +310,7 @@ class _ValidationRuleManagementScreenState
               children: [
                 Text(
                   'Error loading rules: ${state.error}',
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColorMapper.errorColor(context)),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(

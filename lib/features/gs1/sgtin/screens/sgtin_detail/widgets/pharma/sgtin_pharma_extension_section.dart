@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
-
-import 'package:traqtrace_app/core/widgets/traq_icon.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class SgtinPharmaExtensionSection extends StatelessWidget {
   const SgtinPharmaExtensionSection({
@@ -42,13 +42,14 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
               const SizedBox(height: 8),
               _infoRow(context, 'EMVO Upload Status',
                   ext.emvoUploadStatus!,
-                  valueColor: _submissionColor(ext.emvoUploadStatus)),
+                  valueColor: _submissionColor(context, ext.emvoUploadStatus)),
             ],
             if (ext.tatmeenSubmissionStatus != null) ...[
               const SizedBox(height: 8),
               _infoRow(context, 'Tatmeen Submission',
                   ext.tatmeenSubmissionStatus!,
-                  valueColor: _submissionColor(ext.tatmeenSubmissionStatus)),
+                  valueColor:
+                      _submissionColor(context, ext.tatmeenSubmissionStatus)),
             ],
             if (ext.dscsaTransactionHash != null) ...[
               const SizedBox(height: 8),
@@ -64,7 +65,7 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
           _boolRow(context, 'Cold Chain Excursion', ext.coldChainExcursionFlag,
-              trueColor: Colors.red.shade600),
+              trueColor: AppColorMapper.errorColor(context)),
           if (ext.tempMinRecorded != null) ...[
             const SizedBox(height: 8),
             _infoRow(context, 'Min Temp Recorded',
@@ -89,18 +90,20 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ),
           _infoRow(context, 'Anti-Tamper Seal Status',
               ext.antiTamperStatus.displayName,
-              valueColor: _tamperColor(ext.antiTamperStatus)),
+              valueColor: _tamperColor(context, ext.antiTamperStatus)),
           if (ext.fraudScore != null) ...[
             const SizedBox(height: 8),
             _infoRow(context, 'Fraud Risk Score',
                 ext.fraudScore!.toStringAsFixed(2),
-                valueColor: ext.fraudScore! > 0.5 ? Colors.red.shade600 : null),
+                valueColor: ext.fraudScore! > 0.5
+                    ? AppColorMapper.errorColor(context)
+                    : null),
           ],
           if (ext.duplicateEvidenceCount > 0) ...[
             const SizedBox(height: 8),
             _infoRow(context, 'Duplicate Evidence Records',
                 ext.duplicateEvidenceCount.toString(),
-                valueColor: Colors.deepOrange.shade600),
+                valueColor: AppColorMapper.warningColor(context)),
           ],
           const SizedBox(height: 16),
 
@@ -121,7 +124,7 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
           ),
           _infoRow(context, 'Return Status',
               ext.returnStatus.displayName,
-              valueColor: _returnColor(ext.returnStatus)),
+              valueColor: _returnColor(context, ext.returnStatus)),
           if (ext.dispenseEventId != null) ...[
             const SizedBox(height: 8),
             _infoRow(context, 'Dispense Event ID',
@@ -139,7 +142,7 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4, bottom: 8),
           ),
           _boolRow(context, 'Recall Affected', ext.recallAffectedFlag,
-              trueColor: Colors.red.shade700),
+              trueColor: AppColorMapper.errorColor(context)),
           if (ext.recallNotificationId != null) ...[
             const SizedBox(height: 8),
             _infoRow(context, 'Recall Notification ID',
@@ -229,7 +232,7 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final color = value
-        ? (trueColor ?? Colors.green.shade700)
+        ? (trueColor ?? AppColorMapper.successColor(context))
         : (falseColor ?? Colors.grey);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -259,43 +262,43 @@ class SgtinPharmaExtensionSection extends StatelessWidget {
     );
   }
 
-  Color? _tamperColor(SgtinAntiTamperStatus status) {
+  Color? _tamperColor(BuildContext context, SgtinAntiTamperStatus status) {
     switch (status) {
       case SgtinAntiTamperStatus.intact:
-        return Colors.green.shade700;
+        return AppColorMapper.successColor(context);
       case SgtinAntiTamperStatus.broken:
       case SgtinAntiTamperStatus.missing:
-        return Colors.red.shade700;
+        return AppColorMapper.errorColor(context);
       case SgtinAntiTamperStatus.notApplicable:
         return null;
     }
   }
 
-  Color? _returnColor(SgtinReturnStatus status) {
+  Color? _returnColor(BuildContext context, SgtinReturnStatus status) {
     switch (status) {
       case SgtinReturnStatus.notReturned:
         return null;
       case SgtinReturnStatus.returnPending:
-        return Colors.orange.shade700;
+        return AppColorMapper.warningColor(context);
       case SgtinReturnStatus.returnVerified:
-        return Colors.green.shade700;
+        return AppColorMapper.successColor(context);
       case SgtinReturnStatus.returnRejected:
-        return Colors.red.shade700;
+        return AppColorMapper.errorColor(context);
     }
   }
 
-  Color? _submissionColor(String? status) {
+  Color? _submissionColor(BuildContext context, String? status) {
     switch (status?.toUpperCase()) {
       case 'ACKNOWLEDGED':
       case 'ACCEPTED':
-        return Colors.green.shade700;
+        return AppColorMapper.successColor(context);
       case 'UPLOADED':
       case 'SUBMITTED':
-        return Colors.teal.shade600;
+        return AppColorMapper.infoColor(context);
       case 'PENDING':
-        return Colors.orange.shade700;
+        return AppColorMapper.warningColor(context);
       case 'REJECTED':
-        return Colors.red.shade700;
+        return AppColorMapper.errorColor(context);
       default:
         return null;
     }

@@ -99,16 +99,14 @@ class Constants {
   static const String gs1SgtinByEpcRoute = '/gs1/sgtins/by-epc';
   static const String gs1EpcConversionRoute = '/gs1/epc-conversion';
   static const String gs1ValidationDemoRoute = '/gs1/validation-demo';
+  static const String validationWorkbenchRoute = '/validation';
+  static const String gs1ToolsRoute = '/gs1/tools';
 
-  static const String epcisEventsRoute = '/epcis/events';
   static const String epcisObjectEventsRoute = '/epcis/object-events';
   static const String epcisAggregationEventsRoute = '/epcis/aggregation-events';
   static const String epcisTransactionEventsRoute = '/epcis/transaction-events';
   static const String epcisTransformationEventsRoute =
       '/epcis/transformation-events';
-  static const String epcisAdvancedQueryRoute = '/epcis/advanced-query';
-  static const String epcisTraversalQueryRoute = '/epcis/traversal-query';
-  static const String epcisSerializationRoute = '/epcis/serialization';
   static const String epcisObjectEventNewRoute = '/epcis/object-events/new';
   static const String epcisObjectEventBatchImportRoute =
       '/epcis/object-events/batch-import';
@@ -139,8 +137,7 @@ class Constants {
       '/epcis/transaction-documents/help';
   static const String epcisTransformationEventDetailRoute =
       '/epcis/transformation-events/:id';
-  static const String epcisAggregationEventHierarchyRoute =
-      '/epcis/aggregation-events/hierarchy/:epc';
+  static const String epcisSerializationRoute = '/epcis/serialization';
 
   static const String opShippingRoute = '/operations/shipping';
   static const String opShippingCreateRoute = '/operations/shipping/create';

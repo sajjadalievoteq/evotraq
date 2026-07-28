@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/core_groups/sscc_lifecycle_status_field.dart';
@@ -73,7 +74,10 @@ class SsccLifecycleStatusCard extends StatelessWidget {
             SgtinInfoRow(
               'Decommissioned At',
               ssccFormatDt(sscc!.decommissionedAt),
-              valueColor: Colors.red.shade700,
+              valueColor: AppColorMapper.logisticUnitStatusColor(
+                context,
+                LogisticUnitStatus.DECOMMISSIONED,
+              ),
             ),
           ],
         ],

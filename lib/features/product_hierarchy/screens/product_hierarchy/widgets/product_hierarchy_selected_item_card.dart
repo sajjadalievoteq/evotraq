@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/hierarchy/hierarchy_node.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_info.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
-import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_chrome.dart';
+import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_type_badge.dart';
 import 'package:traqtrace_app/features/product_hierarchy/utils/product_hierarchy_display_utils.dart';
 
 

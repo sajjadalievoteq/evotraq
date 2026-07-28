@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class GlnActiveChip extends StatelessWidget {
   const GlnActiveChip({super.key, required this.active});
@@ -12,7 +13,8 @@ class GlnActiveChip extends StatelessWidget {
         active ? 'Active' : 'Inactive',
         style: const TextStyle(color: Colors.white, fontSize: 12),
       ),
-      backgroundColor: active ? Colors.green : Colors.grey,
+      backgroundColor:
+          active ? AppColorMapper.successColor(context) : Colors.grey,
     );
   }
 }

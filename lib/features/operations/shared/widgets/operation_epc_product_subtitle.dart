@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
-import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
-import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/features/shared/reference_data/cubit/reference_data_cubit.dart';
 
 class OperationEpcProductSubtitle extends StatelessWidget {
   const OperationEpcProductSubtitle({
@@ -16,112 +12,6 @@ class OperationEpcProductSubtitle extends StatelessWidget {
   final String epc;
   final String? productName;
 
-  
-  
-  
-  
-  
-  static const int _maxCacheEntries = 256;
-  static final Map<String, Future<String?>> _resolveCache = {};
-  static final Map<String, Future<String?>> _gtinNameCache = {};
-
-  static Future<String?> resolveProductName(String epc) {
-    final cached = _resolveCache.remove(epc);
-    if (cached != null) {
-      
-      _resolveCache[epc] = cached;
-      return cached;
-    }
-    while (_resolveCache.length >= _maxCacheEntries) {
-      _resolveCache.remove(_resolveCache.keys.first);
-    }
-    return _resolveCache.putIfAbsent(epc, () => _resolveProductNameUncached(epc));
-  }
-
-  static Future<String?> _resolveProductNameUncached(String epc) async {
-    final type = OperationEpcScanValidator.resolveEpcType(epc);
-    final gtinService = getIt<GTINService>();
-
-    if (type == OperationScanItemType.sgtin) {
-      
-      final gtinFromUri = Gs1CanonicalIdentifier.extractGtin(epc);
-      if (gtinFromUri != null) {
-        return _productNameForGtin(gtinService, gtinFromUri);
-      }
-      final serial = Gs1CanonicalIdentifier.extractSerial(epc);
-      if (serial == null) return null;
-      try {
-        final sgtin = await getIt<SGTINService>().getSGTINBySerialNumber(serial);
-        return _productNameForGtin(gtinService, sgtin.gtinCode);
-      } catch (_) {
-        return null;
-      }
-    }
-
-    if (type == OperationScanItemType.sscc) {
-      final ssccCode = Gs1CanonicalIdentifier.extractSscc18(epc);
-      if (ssccCode == null) return null;
-      try {
-        final sscc = await getIt<SSCCService>().getSSCCByCode(ssccCode);
-        final contained = sscc.containedGtin?.trim();
-        if (contained != null && contained.isNotEmpty) {
-          return _productNameForGtin(gtinService, contained);
-        }
-        final children = sscc.childSgtins;
-        if (children == null || children.isEmpty) return null;
-        final firstChild = children.first;
-        final gtinFromUri = Gs1CanonicalIdentifier.extractGtin(firstChild);
-        if (gtinFromUri != null) {
-          return _productNameForGtin(gtinService, gtinFromUri);
-        }
-        final childSerial = Gs1CanonicalIdentifier.extractSerial(firstChild);
-        if (childSerial != null) {
-          try {
-            final sgtin =
-                await getIt<SGTINService>().getSGTINBySerialNumber(childSerial);
-            return _productNameForGtin(gtinService, sgtin.gtinCode);
-          } catch (_) {}
-        }
-      } catch (_) {
-        return null;
-      }
-    }
-
-    if (type == OperationScanItemType.gtin ||
-        Gs1CanonicalIdentifier.isLotOrClassLevel(epc)) {
-      final gtinCode = Gs1CanonicalIdentifier.extractGtin(epc);
-      if (gtinCode != null) {
-        return _productNameForGtin(gtinService, gtinCode);
-      }
-    }
-
-    return null;
-  }
-
-  static Future<String?> _productNameForGtin(
-    GTINService gtinService,
-    String gtinCode,
-  ) {
-    final cached = _gtinNameCache.remove(gtinCode);
-    if (cached != null) {
-      _gtinNameCache[gtinCode] = cached;
-      return cached;
-    }
-    while (_gtinNameCache.length >= _maxCacheEntries) {
-      _gtinNameCache.remove(_gtinNameCache.keys.first);
-    }
-    return _gtinNameCache.putIfAbsent(gtinCode, () async {
-      try {
-        final gtin = await gtinService.getGTIN(gtinCode);
-        if (gtin.tradeItemDescription?.trim().isNotEmpty == true) {
-          return gtin.tradeItemDescription;
-        }
-        if (gtin.productName.trim().isNotEmpty) return gtin.productName;
-      } catch (_) {}
-      return null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (productName != null) {
@@ -129,7 +19,7 @@ class OperationEpcProductSubtitle extends StatelessWidget {
     }
 
     return FutureBuilder<String?>(
-      future: resolveProductName(epc),
+      future: context.read<ReferenceDataCubit>().resolveProductName(epc),
       builder: (context, snapshot) {
         return _productNameText(snapshot.data);
       },

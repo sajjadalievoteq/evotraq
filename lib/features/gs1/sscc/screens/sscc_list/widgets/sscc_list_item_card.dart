@@ -16,6 +16,7 @@ import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_item_select
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SsccListItemCard extends StatelessWidget {
   const SsccListItemCard({
@@ -209,12 +210,14 @@ class SsccListItemCard extends StatelessWidget {
                                 children: [
                                   TraqIcon(AppAssets.iconTrash,
                                     size: 20,
-                                    color: Colors.red,
+                                    color: AppColorMapper.errorColor(context),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     SsccUiConstants.menuDelete,
-                                    style: const TextStyle(color: Colors.red),
+                                    style: TextStyle(
+                                      color: AppColorMapper.errorColor(context),
+                                    ),
                                   ),
                                 ],
                               ),

@@ -6,11 +6,6 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
-
-/// Runs once at app start so auth settles without routing through `/splash`.
-///
-/// Splash delay applies only on genuine cold start (`/` or `/splash`). Refresh
-/// of a deep link uses no artificial delay so the browser URL stays put.
 Future<void> bootstrapAuthSession() async {
   final auth = getIt<AuthCubit>();
   final dio = getIt<DioService>();
@@ -44,10 +39,9 @@ Duration _startupSplashDelay() {
     if (path.isEmpty ||
         path == '/' ||
         path == Constants.splashRoute) {
-      return const Duration(milliseconds: 1700);
+      return const Duration(milliseconds: 2000);
     }
     return Duration.zero;
   }
-  // Native cold start always shows splash branding.
-  return const Duration(milliseconds: 1700);
+  return const Duration(milliseconds: 2000);
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
 
 class AggregationEventActionChip extends StatelessWidget {
   const AggregationEventActionChip({super.key, required this.action});
@@ -7,7 +8,7 @@ class AggregationEventActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (color, label) = _resolve(action);
+    final (color, label) = _resolve(context, action);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -26,14 +27,16 @@ class AggregationEventActionChip extends StatelessWidget {
     );
   }
 
-  static (Color, String) _resolve(String? action) {
+  static (Color, String) _resolve(BuildContext context, String? action) {
+    final p = OperationPalette.of(context);
     return switch (action?.toUpperCase()) {
-      'ADD' => (Colors.green, 'ADD'),
-      'OBSERVE' => (Colors.blue, 'OBSERVE'),
-      'DELETE' => (Colors.orange, 'DELETE'),
-      _ => (Colors.grey, action ?? '—'),
+      'ADD' => (p.statusSuccess, 'ADD'),
+      'OBSERVE' => (p.eventObject, 'OBSERVE'),
+      'DELETE' => (p.statusPartialSuccess, 'DELETE'),
+      _ => (p.neutral, action ?? '—'),
     };
   }
 
-  static Color colorFor(String? action) => _resolve(action).$1;
+  static Color colorFor(BuildContext context, String? action) =>
+      _resolve(context, action).$1;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/features/admin/user_management/utils/user_management_constants.dart';
@@ -24,10 +25,10 @@ class UserManagementUserDetails extends StatelessWidget {
     final colors = context.colors;
 
     final Color roleColor = switch (user.role) {
-      'ADMIN' => Colors.purple,
+      'ADMIN' => AppColorMapper.chartColor(context, 5),
       'MANUFACTURER' => colors.primary,
-      'DISTRIBUTOR' => Colors.orange,
-      'RETAILER' => Colors.teal,
+      'DISTRIBUTOR' => AppColorMapper.warningColor(context),
+      'RETAILER' => AppColorMapper.chartColor(context, 3),
       _ => colors.success,
     };
 
@@ -92,7 +93,7 @@ class UserManagementUserDetails extends StatelessWidget {
               UserManagementUserInfoBadge(
                 label: 'Approval',
                 value: UserManagementConstants.pendingStatus,
-                valueColor: Colors.orange.shade800,
+                valueColor: AppColorMapper.warningColor(context),
               ),
           ],
         ),

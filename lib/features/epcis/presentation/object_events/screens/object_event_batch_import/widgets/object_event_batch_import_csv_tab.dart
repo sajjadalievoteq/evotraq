@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class ObjectEventBatchImportCsvTab extends StatelessWidget {
   const ObjectEventBatchImportCsvTab({
@@ -100,56 +101,65 @@ class ObjectEventBatchImportCsvTab extends StatelessWidget {
           ],
           if (importResults != null) ...[
             const SizedBox(height: 16),
-            Card(
-              color: importResults!['success']
-                  ? Colors.green[50]
-                  : Colors.red[50],
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Import Results',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: importResults!['success']
-                            ? Colors.green[700]
-                            : Colors.red[700],
-                      ),
+            Builder(
+              builder: (context) {
+                final success = importResults!['success'] == true;
+                final resultColor = success
+                    ? AppColorMapper.successColor(context)
+                    : AppColorMapper.errorColor(context);
+                return Card(
+                  color: resultColor.withValues(alpha: 0.1),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Import Results',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: resultColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('Total Events: ${importResults!['totalEvents']}'),
+                        Text('Successful: ${importResults!['successfulEvents']}'),
+                        Text('Failed: ${importResults!['failedEvents']}'),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text('Total Events: ${importResults!['totalEvents']}'),
-                    Text('Successful: ${importResults!['successfulEvents']}'),
-                    Text('Failed: ${importResults!['failedEvents']}'),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ],
           if (importError != null) ...[
             const SizedBox(height: 16),
-            Card(
-              color: Colors.red[50],
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Import Error',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
-                      ),
+            Builder(
+              builder: (context) {
+                final error = AppColorMapper.errorColor(context);
+                return Card(
+                  color: error.withValues(alpha: 0.1),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Import Error',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: error,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(importError!),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(importError!),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ],

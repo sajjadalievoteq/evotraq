@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
@@ -35,7 +36,7 @@ class OperationListCard extends StatelessWidget {
     final rowColor =
         Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
 
-    final status = _status();
+    final status = _status(context);
     final rows = _rows();
     final countLabel = _countLabel();
 
@@ -137,7 +138,7 @@ class OperationListCard extends StatelessWidget {
     };
   }
 
-  ({Color color, String label}) _status() {
+  ({Color color, String label}) _status(BuildContext context) {
     if (operation.operationType == OperationType.commissioning) {
       final name = operation.commissioningBatchStatus;
       final batchStatus = name == null
@@ -147,13 +148,13 @@ class OperationListCard extends StatelessWidget {
               orElse: () => CommissioningBatchStatus.pending,
             );
       return (
-        color: CommissioningBatchStatusUtils.color(batchStatus),
+        color: CommissioningBatchStatusUtils.color(context, batchStatus),
         label: CommissioningBatchStatusUtils.label(batchStatus),
       );
     }
     final status = operation.status ?? OperationStatus.failed;
     return (
-      color: OperationStatusUtils.colorFor(status),
+      color: OperationStatusUtils.colorFor(context, status),
       label: OperationStatusUtils.label(status),
     );
   }
@@ -319,11 +320,24 @@ class _Footer extends StatelessWidget {
           ),
           if (failed > 0) ...[
             const SizedBox(width: 12),
-            TraqIcon(AppAssets.iconAlert, size: 14, color: Colors.red[600]),
+            TraqIcon(
+              AppAssets.iconAlert,
+              size: 14,
+              color: AppColorMapper.operationStatusColor(
+                context,
+                OperationStatus.failed,
+              ),
+            ),
             const SizedBox(width: 4),
             Text(
               '$failed failed',
-              style: TextStyle(color: Colors.red[600], fontSize: 12),
+              style: TextStyle(
+                color: AppColorMapper.operationStatusColor(
+                  context,
+                  OperationStatus.failed,
+                ),
+                fontSize: 12,
+              ),
             ),
           ],
         ],

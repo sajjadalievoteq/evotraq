@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_types.dart' as types;
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
@@ -53,7 +54,7 @@ class ObjectEventFormEventSummarySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ObjectEventFormSectionCard(
-      color: Colors.blue[50],
+      color: AppColorMapper.infoSoft(context),
       title: 'Event Summary',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

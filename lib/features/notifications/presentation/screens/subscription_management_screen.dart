@@ -10,6 +10,7 @@ import '../widgets/notification_subscription_help.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key});
@@ -248,7 +249,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         children: [
           TraqIcon(AppAssets.iconAlert,
             size: 64,
-            color: Colors.red[300],
+            color: AppColorMapper.errorColor(context).withValues(alpha: 0.55),
           ),
           const SizedBox(height: 16),
           Text(
@@ -315,7 +316,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
               Navigator.of(context).pop();
               context.read<NotificationCubit>().deleteSubscription(subscriptionId);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColorMapper.errorColor(context),
+            ),
             child: const Text('Delete'),
           ),
         ],

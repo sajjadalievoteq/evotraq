@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -6,7 +7,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
-import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
 import '../widgets/create_subscription_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -94,13 +95,13 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                           ],
                         ),
                       ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          TraqIcon(AppAssets.iconTrash, color: Colors.red),
+                          TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
                           SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
+                          Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
                         ],
                       ),
                     ),
@@ -313,15 +314,15 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
 
     switch (status) {
       case 'ACTIVE':
-        chipColor = Colors.green;
+        chipColor = AppColorMapper.successColor(context);
         chipIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'PAUSED':
-        chipColor = Colors.orange;
+        chipColor = AppColorMapper.warningColor(context);
         chipIconAsset = AppAssets.iconPause;
         break;
       case 'ERROR':
-        chipColor = Colors.red;
+        chipColor = AppColorMapper.errorColor(context);
         chipIconAsset = AppAssets.iconXCircle;
         break;
       default:
@@ -377,7 +378,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
               context.read<NotificationCubit>().deleteSubscription(widget.subscriptionId);
               context.go('/notifications/subscriptions');
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColorMapper.errorColor(context)),
             child: const Text('Delete'),
           ),
         ],

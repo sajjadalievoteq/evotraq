@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/epc_input_widget/epc_types.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -189,12 +190,15 @@ class CommissioningStep3Review extends StatelessWidget {
           const SizedBox(height: 24),
           if (items.isNotEmpty)
             Card(
-              color: Colors.blue.shade50,
+              color: AppColorMapper.infoSoft(context),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconInfo, color: Colors.blue.shade700),
+                    TraqIcon(
+                      AppAssets.iconInfo,
+                      color: AppColorMapper.infoColor(context),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -203,7 +207,7 @@ class CommissioningStep3Review extends StatelessWidget {
                         'one GS1 EPCIS 2.0 ObjectEvent (action ADD, '
                         'bizStep commissioning).',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: AppColorMapper.infoColor(context),
                             ),
                       ),
                     ),

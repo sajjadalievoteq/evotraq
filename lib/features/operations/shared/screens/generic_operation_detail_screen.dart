@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
 class GenericOperationDetailScreen<T> extends StatefulWidget {
@@ -29,13 +30,12 @@ class GenericOperationDetailScreen<T> extends StatefulWidget {
 
 class _GenericOperationDetailScreenState<T>
     extends State<GenericOperationDetailScreen<T>> {
-  T? _operation;
-  bool _isLoading = false;
-  String? _errorMessage;
+  late final OperationDetailCubit<T> _cubit;
 
   @override
   void initState() {
     super.initState();
+    _cubit = widget.config.createCubit(widget.config.fallbackErrorMessage);
     _startLoadIfNeeded();
   }
 
@@ -54,93 +54,87 @@ class _GenericOperationDetailScreenState<T>
 
   void _startLoadIfNeeded({bool force = false}) {
     if (widget.operationId == null || widget.awaitingSelection) return;
-    if (!force && _isLoading) return;
-    _isLoading = true;
-    _errorMessage = null;
-    _operation = null;
+    if (!force && _cubit.state.isLoading) return;
     _load();
   }
 
   Future<void> _load() async {
     final id = widget.operationId;
     if (id == null) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _operation = null;
-    });
-
-    try {
-      final result = await widget.config.loader(id);
-      if (mounted) setState(() => _operation = result);
-    } on ApiException catch (e) {
-      if (mounted) setState(() => _errorMessage = e.getUserFriendlyMessage());
-    } catch (_) {
-      if (mounted) {
-        setState(() => _errorMessage = widget.config.fallbackErrorMessage);
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    await _cubit.load(id);
   }
 
   void _onOperationUpdated(T updated) {
-    setState(() => _operation = updated);
+    _cubit.setOperation(updated);
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final content = widget.config.contentBuilder(
-      context,
-      awaitingSelection: widget.awaitingSelection,
-      listLoading: widget.listLoading,
-      isLoading: _isLoading,
-      errorMessage: _errorMessage,
-      operation: _operation,
-      onRetry: _load,
-      onOperationUpdated: _onOperationUpdated,
-    );
+    return BlocProvider<OperationDetailCubit<T>>.value(
+      value: _cubit,
+      child: BlocBuilder<OperationDetailCubit<T>, OperationDetailState<T>>(
+        builder: (context, detailState) {
+          final content = widget.config.contentBuilder(
+            context,
+            awaitingSelection: widget.awaitingSelection,
+            listLoading: widget.listLoading,
+            isLoading: detailState.isLoading,
+            errorMessage: detailState.errorMessage,
+            operation: detailState.operation,
+            onRetry: _load,
+            onOperationUpdated: _onOperationUpdated,
+          );
 
-    if (widget.embedded) return content;
+          if (widget.embedded) return content;
 
-    if (_isLoading && _operation == null && _errorMessage == null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Loading…')),
-        drawer: widget.config.drawer,
-        body: content,
-      );
-    }
+          if (detailState.isLoading &&
+              detailState.operation == null &&
+              detailState.errorMessage == null) {
+            return Scaffold(
+              appBar: TraqAppBar(context, title: const Text('Loading…')),
+              drawer: widget.config.drawer,
+              body: content,
+            );
+          }
 
-    if (_errorMessage != null) {
-      return Scaffold(
-        appBar: TraqAppBar(context, title: const Text('Error')),
-        drawer: widget.config.drawer,
-        body: content,
-      );
-    }
+          if (detailState.errorMessage != null) {
+            return Scaffold(
+              appBar: TraqAppBar(context, title: const Text('Error')),
+              drawer: widget.config.drawer,
+              body: content,
+            );
+          }
 
-    return Scaffold(
-      drawer: widget.config.drawer,
-      appBar: TraqAppBar(
-        context,
-        leading: IconButton(
-          icon: TraqIcon(AppAssets.iconChevronL),
-          onPressed: () => context.go(widget.config.listRoute),
-        ),
-        title: Text(
-          _operation != null
-              ? widget.config.titleBuilder(_operation as T)
-              : widget.config.defaultTitle,
-        ),
-        actions: [
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: _load,
-          ),
-        ],
+          return Scaffold(
+            drawer: widget.config.drawer,
+            appBar: TraqAppBar(
+              context,
+              leading: IconButton(
+                icon: TraqIcon(AppAssets.iconChevronL),
+                onPressed: () => context.go(widget.config.listRoute),
+              ),
+              title: Text(
+                detailState.operation != null
+                    ? widget.config.titleBuilder(detailState.operation as T)
+                    : widget.config.defaultTitle,
+              ),
+              actions: [
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconRefresh),
+                  onPressed: _load,
+                ),
+              ],
+            ),
+            body: content,
+          );
+        },
       ),
-      body: content,
     );
   }
 }

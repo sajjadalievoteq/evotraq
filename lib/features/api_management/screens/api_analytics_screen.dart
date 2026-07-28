@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
-import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/api_audit.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -191,13 +192,13 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
   Widget _buildSummaryCards(ApiUsageStats stats) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), NavIcons.apiManagement, Colors.blue)),
+        Expanded(child: _buildStatCard('Total Requests', stats.totalRequests.toString(), NavIcons.apiManagement, AppColorMapper.infoColor(context))),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Successful', '${stats.successRate.toStringAsFixed(1)}%', AppAssets.iconCheckCircle, Colors.green)),
+        Expanded(child: _buildStatCard('Successful', '${stats.successRate.toStringAsFixed(1)}%', AppAssets.iconCheckCircle, AppColorMapper.successColor(context))),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Failed', stats.failedRequests.toString(), AppAssets.iconXCircle, Colors.red)),
+        Expanded(child: _buildStatCard('Failed', stats.failedRequests.toString(), AppAssets.iconXCircle, AppColorMapper.errorColor(context))),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', NavIcons.performanceTests, Colors.orange)),
+        Expanded(child: _buildStatCard('Avg Response', '${stats.avgResponseTime.toStringAsFixed(0)} ms', NavIcons.performanceTests, AppColorMapper.warningColor(context))),
       ],
     );
   }
@@ -294,12 +295,12 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildResponseTimeStat('Min', stats.minResponseTime, Colors.green),
-                _buildResponseTimeStat('Avg', stats.avgResponseTime, Colors.blue),
-                _buildResponseTimeStat('P50', stats.p50ResponseTime, Colors.orange),
-                _buildResponseTimeStat('P95', stats.p95ResponseTime, Colors.deepOrange),
-                _buildResponseTimeStat('P99', stats.p99ResponseTime, Colors.red),
-                _buildResponseTimeStat('Max', stats.maxResponseTime, Colors.red.shade900),
+                _buildResponseTimeStat('Min', stats.minResponseTime, AppColorMapper.successColor(context)),
+                _buildResponseTimeStat('Avg', stats.avgResponseTime, AppColorMapper.infoColor(context)),
+                _buildResponseTimeStat('P50', stats.p50ResponseTime, AppColorMapper.warningColor(context)),
+                _buildResponseTimeStat('P95', stats.p95ResponseTime, AppColorMapper.chartColor(context, 4)),
+                _buildResponseTimeStat('P99', stats.p99ResponseTime, AppColorMapper.errorColor(context)),
+                _buildResponseTimeStat('Max', stats.maxResponseTime, AppColorMapper.errorColor(context)),
               ],
             ),
           ],
@@ -383,10 +384,10 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
 
   Widget _buildAuditLogCard(ApiAuditLog log) {
     final statusColor = log.isSuccess
-        ? Colors.green
+        ? AppColorMapper.successColor(context)
         : log.isClientError
-            ? Colors.orange
-            : Colors.red;
+            ? AppColorMapper.warningColor(context)
+            : AppColorMapper.errorColor(context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -395,7 +396,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: ApiUiUtils.methodColor(log.httpMethod).withOpacity(0.1),
+            color: ApiUiUtils.methodColor(context, log.httpMethod).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -404,7 +405,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 10,
-                color: ApiUiUtils.methodColor(log.httpMethod),
+                color: ApiUiUtils.methodColor(context, log.httpMethod),
               ),
             ),
           ),
@@ -490,7 +491,7 @@ class _ApiAnalyticsScreenState extends State<ApiAnalyticsScreen> with SingleTick
               value,
               style: TextStyle(
                 fontSize: 12,
-                color: isError ? Colors.red : null,
+                color: isError ? AppColorMapper.errorColor(context) : null,
                 fontFamily: 'monospace',
               ),
             ),

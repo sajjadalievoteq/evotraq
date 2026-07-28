@@ -90,10 +90,12 @@ class EpcisEventStreamCard extends StatelessWidget {
                           BlendMode.srcIn,
                         ),
                       ),
-                      onPressed: () => context.go(HomeNavigation.epcisEvents),
+                      onPressed: () =>
+                          context.go(HomeNavigation.epcisObjectEvents),
                     ),
                     TextButton(
-                      onPressed: () => context.go(HomeNavigation.epcisEvents),
+                      onPressed: () =>
+                          context.go(HomeNavigation.epcisObjectEvents),
                       child: Text(
                         HomeStrings.epcisStreamViewAll,
                         style: context.text.body.copyWith(

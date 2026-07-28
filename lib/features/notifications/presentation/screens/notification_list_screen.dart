@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -8,7 +9,7 @@ import '../widgets/subscription_card.dart';
 import '../widgets/create_subscription_dialog.dart';
 import '../widgets/notification_quick_guide.dart';
 
-import '../../domain/models/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -68,11 +69,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
             builder: (context, state) {
               if (state.status == NotificationStatus.webSocketConnected) {
                 return TraqIcon(AppAssets.iconWifi,
-                  color: Colors.green,
+                  color: AppColorMapper.successColor(context),
                 );
               } else if (state.status == NotificationStatus.webSocketDisconnected) {
                 return TraqIcon(AppAssets.iconWifiOff,
-                  color: Colors.red,
+                  color: AppColorMapper.errorColor(context),
                 );
               }
               return TraqIcon(AppAssets.iconWifiOff,
@@ -213,13 +214,13 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         children: [
           TraqIcon(AppAssets.iconAlert,
             size: 64,
-            color: Colors.red[400],
+            color: AppColorMapper.errorColor(context),
           ),
           const SizedBox(height: 16),
           Text(
             'Error',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.red[600],
+                  color: AppColorMapper.errorColor(context),
                 ),
           ),
           const SizedBox(height: 8),
@@ -282,7 +283,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
               Navigator.of(dialogContext).pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorMapper.errorColor(context),
               foregroundColor: Colors.white,
             ),
             child: const Text('Delete'),

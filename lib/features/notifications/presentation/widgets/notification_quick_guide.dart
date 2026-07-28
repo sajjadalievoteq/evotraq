@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -17,38 +18,42 @@ class NotificationQuickGuide extends StatelessWidget {
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconLightbulb, color: Colors.amber[700]),
+                TraqIcon(AppAssets.iconLightbulb, color: AppColorMapper.warningColor(context)),
                 const SizedBox(width: 8),
                 Text(
                   'Quick Setup Guide',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amber[700],
+                    color: AppColorMapper.warningColor(context),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             _buildGuideStep(
+              context,
               '1.',
               'Create Subscription',
               'Tap the + button to create your first notification subscription',
               AppAssets.iconAddCircle,
             ),
             _buildGuideStep(
+              context,
               '2.',
               'Configure Webhook',
               'Set up your webhook URL where notifications will be sent',
               NavIcons.webhookConfiguration,
             ),
             _buildGuideStep(
+              context,
               '3.',
               'Filter Events',
               'Use advanced options to filter specific event types, business steps, or dispositions',
               AppAssets.iconFilter,
             ),
             _buildGuideStep(
+              context,
               '4.',
               'Test & Monitor',
               'Test your webhook and monitor delivery statistics',
@@ -57,14 +62,14 @@ class NotificationQuickGuide extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                TraqIcon(AppAssets.iconInfo, size: 16, color: Colors.blue[600]),
+                TraqIcon(AppAssets.iconInfo, size: 16, color: AppColorMapper.infoColor(context)),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     'Click the help icon (?) in the create dialog for detailed guidance',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.blue[600],
+                      color: AppColorMapper.infoColor(context),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -78,6 +83,7 @@ class NotificationQuickGuide extends StatelessWidget {
   }
 
   Widget _buildGuideStep(
+    BuildContext context,
     String number,
     String title,
     String description,
@@ -92,7 +98,7 @@ class NotificationQuickGuide extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: Colors.blue[100],
+              color: AppColorMapper.infoSoft(context),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -101,7 +107,7 @@ class NotificationQuickGuide extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
+                  color: AppColorMapper.infoColor(context),
                 ),
               ),
             ),

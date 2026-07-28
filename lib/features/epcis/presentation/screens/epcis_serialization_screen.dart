@@ -4,6 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
+import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
+import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/services/epcis/epcis_serialization_service.dart';
 import 'package:traqtrace_app/data/models/epcis/epcis_query_parameters_dto.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -63,38 +67,63 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: TraqIcon(AppAssets.iconMenu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
+      appBar: TraqAppBar(
+        context,
         title: const Text('EPCIS Serialization & Format Conversion'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
       ),
       drawer: const AppDrawer(),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Format Conversion'),
-              Tab(text: 'Validation'),
-              Tab(text: 'Export'),
-              Tab(text: 'Import'),
-            ],
+          Padding(
+            padding: context.horizontalPadding.add(
+              const EdgeInsets.only(top: TraqSpacing.lg, bottom: TraqSpacing.md),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'EPCIS Serialization & Format Conversion',
+                  style: context.text.h2,
+                ),
+                const SizedBox(height: TraqSpacing.sm),
+                Text(
+                  'Convert, validate, import and export EPCIS XML and JSON-LD documents.',
+                  style: context.text.body.copyWith(color: context.colors.textSecondary),
+                ),
+              ],
+            ),
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildFormatConversionTab(),
-                _buildValidationTab(),
-                _buildExportTab(),
-                _buildImportTab(),
+            child: NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyTabBarDelegate(
+                    color: context.colors.background,
+                    borderColor: context.colors.border,
+                    tabBar: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabs: const [
+                        Tab(text: 'Format Conversion'),
+                        Tab(text: 'Validation'),
+                        Tab(text: 'Export'),
+                        Tab(text: 'Import'),
+                      ],
+                    ),
+                  ),
+                ),
               ],
+              body: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildFormatConversionTab(),
+                  _buildValidationTab(),
+                  _buildExportTab(),
+                  _buildImportTab(),
+                ],
+              ),
             ),
           ),
         ],
@@ -103,506 +132,451 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
   }
 
   Widget _buildFormatConversionTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    final editorHeight = context.isMobile ? 240.0 : 420.0;
+    return SingleChildScrollView(
+      padding: context.horizontalPadding.add(
+        const EdgeInsets.only(top: TraqSpacing.lg, bottom: TraqSpacing.xl),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Format Conversion',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
+              padding: TraqSpacing.surfacePad,
+              child: context.isMobile
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _formatDropdown(
+                          label: 'Input Format',
                           value: _selectedInputFormat,
-                          decoration: const InputDecoration(
-                            labelText: 'Input Format',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: _formats.map((format) {
-                            return DropdownMenuItem(
-                              value: format,
-                              child: Text(format),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedInputFormat = value!;
-                            });
-                          },
+                          onChanged: (value) =>
+                              setState(() => _selectedInputFormat = value!),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      TraqIcon(AppAssets.iconChevronR),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
+                        const SizedBox(height: TraqSpacing.md),
+                        Center(
+                          child: IconButton(
+                            tooltip: 'Swap formats',
+                            onPressed: () => setState(() {
+                              final oldInput = _selectedInputFormat;
+                              _selectedInputFormat = _selectedOutputFormat;
+                              _selectedOutputFormat = oldInput;
+                            }),
+                            icon: TraqIcon(AppAssets.iconTransform),
+                          ),
+                        ),
+                        const SizedBox(height: TraqSpacing.md),
+                        _formatDropdown(
+                          label: 'Output Format',
                           value: _selectedOutputFormat,
-                          decoration: const InputDecoration(
-                            labelText: 'Output Format',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: _formats.map((format) {
-                            return DropdownMenuItem(
-                              value: format,
-                              child: Text(format),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedOutputFormat = value!;
-                            });
-                          },
+                          onChanged: (value) =>
+                              setState(() => _selectedOutputFormat = value!),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: _formatDropdown(
+                            label: 'Input Format',
+                            value: _selectedInputFormat,
+                            onChanged: (value) =>
+                                setState(() => _selectedInputFormat = value!),
+                          ),
+                        ),
+                        const SizedBox(width: TraqSpacing.lg),
+                        IconButton(
+                          tooltip: 'Swap formats',
+                          onPressed: () => setState(() {
+                            final oldInput = _selectedInputFormat;
+                            _selectedInputFormat = _selectedOutputFormat;
+                            _selectedOutputFormat = oldInput;
+                          }),
+                          icon: TraqIcon(AppAssets.iconTransform),
+                        ),
+                        const SizedBox(width: TraqSpacing.lg),
+                        Expanded(
+                          child: _formatDropdown(
+                            label: 'Output Format',
+                            value: _selectedOutputFormat,
+                            onChanged: (value) =>
+                                setState(() => _selectedOutputFormat = value!),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Input ($_selectedInputFormat)',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          TextButton.icon(
-                            onPressed: () => _loadSampleData(),
-                            icon: const TraqIcon(AppAssets.iconBraces),
-                            label: const Text('Load Sample'),
-                          ),
-                        ],
+          const SizedBox(height: TraqSpacing.lg),
+          context.isMobile
+              ? Column(
+                  children: [
+                    _editorPanel(
+                      title: 'Input ($_selectedInputFormat)',
+                      height: editorHeight,
+                      controller: _inputController,
+                      hintText: 'Paste your EPCIS data here...',
+                      trailing: TextButton.icon(
+                        onPressed: _loadSampleData,
+                        icon: const TraqIcon(AppAssets.iconBraces),
+                        label: const Text('Load Sample'),
                       ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _inputController,
-                          maxLines: null,
-                          expands: true,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Paste your EPCIS data here...',
-                          ),
+                    ),
+                    const SizedBox(height: TraqSpacing.lg),
+                    _editorPanel(
+                      title: 'Output ($_selectedOutputFormat)',
+                      height: editorHeight,
+                      controller: _outputController,
+                      readOnly: true,
+                      hintText: 'Converted data will appear here...',
+                      trailing: TextButton.icon(
+                        onPressed: _outputController.text.isNotEmpty
+                            ? () => _copyToClipboard(_outputController.text)
+                            : null,
+                        icon: const TraqIcon(AppAssets.iconCopy),
+                        label: const Text('Copy'),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _editorPanel(
+                        title: 'Input ($_selectedInputFormat)',
+                        height: editorHeight,
+                        controller: _inputController,
+                        hintText: 'Paste your EPCIS data here...',
+                        trailing: TextButton.icon(
+                          onPressed: _loadSampleData,
+                          icon: const TraqIcon(AppAssets.iconBraces),
+                          label: const Text('Load Sample'),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _convertFormat,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : TraqIcon(AppAssets.iconTransform),
-                      label: const Text('Convert'),
                     ),
-                    const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: () => _clearAll(),
-                      icon: TraqIcon(AppAssets.iconX),
-                      label: const Text('Clear'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
+                    const SizedBox(width: TraqSpacing.lg),
+                    Expanded(
+                      child: _editorPanel(
+                        title: 'Output ($_selectedOutputFormat)',
+                        height: editorHeight,
+                        controller: _outputController,
+                        readOnly: true,
+                        hintText: 'Converted data will appear here...',
+                        trailing: TextButton.icon(
+                          onPressed: _outputController.text.isNotEmpty
+                              ? () => _copyToClipboard(_outputController.text)
+                              : null,
+                          icon: const TraqIcon(AppAssets.iconCopy),
+                          label: const Text('Copy'),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Output ($_selectedOutputFormat)',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          TextButton.icon(
-                            onPressed: _outputController.text.isNotEmpty
-                                ? () => _copyToClipboard(_outputController.text)
-                                : null,
-                            icon: const TraqIcon(AppAssets.iconCopy),
-                            label: const Text('Copy'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _outputController,
-                          maxLines: null,
-                          expands: true,
-                          readOnly: true,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Converted data will appear here...',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_errorMessage != null)
-            Container(
-              margin: const EdgeInsets.only(top: 16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                border: Border.all(color: Colors.red.shade200),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
+          const SizedBox(height: TraqSpacing.lg),
+          Card(
+            child: Padding(
+              padding: TraqSpacing.surfacePad,
+              child: Wrap(
+                spacing: TraqSpacing.sm,
+                runSpacing: TraqSpacing.sm,
                 children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(color: Colors.red.shade600),
-                    ),
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _convertFormat,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : TraqIcon(AppAssets.iconTransform),
+                    label: const Text('Convert'),
                   ),
-                  IconButton(
-                    onPressed: () => setState(() => _errorMessage = null),
+                  OutlinedButton.icon(
+                    onPressed: _clearAll,
                     icon: TraqIcon(AppAssets.iconX),
-                    color: Colors.red.shade600,
+                    label: const Text('Clear'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _loadSampleData,
+                    icon: const TraqIcon(AppAssets.iconBraces),
+                    label: const Text('Load Sample'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _outputController.text.isNotEmpty
+                        ? () => _copyToClipboard(_outputController.text)
+                        : null,
+                    icon: const TraqIcon(AppAssets.iconCopy),
+                    label: const Text('Copy Output'),
                   ),
                 ],
               ),
             ),
+          ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: TraqSpacing.lg),
+            _errorCard(_errorMessage!, onDismiss: () => setState(() => _errorMessage = null)),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildValidationTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return SingleChildScrollView(
+      padding: context.horizontalPadding.add(
+        const EdgeInsets.only(top: TraqSpacing.lg, bottom: TraqSpacing.xl),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: TraqSpacing.surfacePad,
+              child: Wrap(
+                spacing: TraqSpacing.sm,
+                runSpacing: TraqSpacing.sm,
                 children: [
-                  const Text(
-                    'Schema Validation',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : () => _validateSchema('XML'),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : TraqIcon(AppAssets.iconCheck),
+                    label: const Text('Validate XML (EPCIS 1.3)'),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Validate EPCIS documents against standard schemas'),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _isLoading ? null : () => _validateSchema('XML'),
-                        icon: _isLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : TraqIcon(AppAssets.iconCheck),
-                        label: const Text('Validate XML (EPCIS 1.3)'),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: _isLoading ? null : () => _validateSchema('JSON'),
-                        icon: _isLoading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : TraqIcon(AppAssets.iconCheck),
-                        label: const Text('Validate JSON (EPCIS 2.0)'),
-                      ),
-                    ],
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : () => _validateSchema('JSON'),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : TraqIcon(AppAssets.iconCheck),
+                    label: const Text('Validate JSON (EPCIS 2.0)'),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: TextField(
-              controller: _validationInputController,
-              maxLines: null,
-              expands: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'EPCIS Document to Validate',
-                hintText: 'Paste your EPCIS document here...',
-              ),
-            ),
+          const SizedBox(height: TraqSpacing.lg),
+          _editorPanel(
+            title: 'EPCIS Document to Validate',
+            height: context.isMobile ? 260 : 380,
+            controller: _validationInputController,
+            hintText: 'Paste your EPCIS document here...',
           ),
-          if (_validationErrorMessage != null)
-            Container(
-              margin: const EdgeInsets.only(top: 16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                border: Border.all(color: Colors.red.shade200),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _validationErrorMessage!,
-                      style: TextStyle(color: Colors.red.shade600),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => setState(() => _validationErrorMessage = null),
-                    icon: TraqIcon(AppAssets.iconX),
-                    color: Colors.red.shade600,
-                  ),
-                ],
-              ),
+          const SizedBox(height: TraqSpacing.lg),
+          _editorPanel(
+            title: 'Validation Result',
+            height: context.isMobile ? 220 : 300,
+            controller: _outputController,
+            readOnly: true,
+            hintText: 'Validation output will appear here...',
+          ),
+          if (_validationErrorMessage != null) ...[
+            const SizedBox(height: TraqSpacing.lg),
+            _errorCard(
+              _validationErrorMessage!,
+              onDismiss: () => setState(() => _validationErrorMessage = null),
             ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildExportTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Export Events - Query Filters',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Configure filters to select which EPCIS events to export'),
-                    const SizedBox(height: 16),
-                    
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: const InputDecoration(
+    return SingleChildScrollView(
+      padding: context.horizontalPadding.add(
+        const EdgeInsets.only(top: TraqSpacing.lg, bottom: TraqSpacing.xl),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: TraqSpacing.surfacePad,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Export Events - Query Filters',
+                    style: context.text.h3,
+                  ),
+                  const SizedBox(height: TraqSpacing.sm),
+                  Text(
+                    'Configure filters to select which EPCIS events to export.',
+                    style: context.text.body.copyWith(color: context.colors.textSecondary),
+                  ),
+                  const SizedBox(height: TraqSpacing.lg),
+                  context.isMobile
+                      ? Column(
+                          children: [
+                            _exportFilterField(
                               labelText: 'Start Date (Optional)',
                               hintText: '2025-01-01T00:00:00Z',
-                              border: OutlineInputBorder(),
+                              onChanged: (value) => _startDateFilter = value,
                             ),
-                            onChanged: (value) {
-                              _startDateFilter = value;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            decoration: const InputDecoration(
+                            const SizedBox(height: TraqSpacing.md),
+                            _exportFilterField(
                               labelText: 'End Date (Optional)',
                               hintText: '2025-12-31T23:59:59Z',
-                              border: OutlineInputBorder(),
+                              onChanged: (value) => _endDateFilter = value,
                             ),
-                            onChanged: (value) {
-                              _endDateFilter = value;
-                            },
-                          ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: _exportFilterField(
+                                labelText: 'Start Date (Optional)',
+                                hintText: '2025-01-01T00:00:00Z',
+                                onChanged: (value) => _startDateFilter = value,
+                              ),
+                            ),
+                            const SizedBox(width: TraqSpacing.md),
+                            Expanded(
+                              child: _exportFilterField(
+                                labelText: 'End Date (Optional)',
+                                hintText: '2025-12-31T23:59:59Z',
+                                onChanged: (value) => _endDateFilter = value,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'EPCs (Optional)',
-                        hintText: 'Enter EPCs separated by commas (e.g., https://id.gs1.org/01/10614148123456/21/400)',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _epcFilter = value;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Business Steps (Optional)',
-                        hintText: 'Enter business steps separated by commas (e.g., receiving, shipping)',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _businessStepFilter = value;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Business Locations (Optional)',
-                        hintText: 'Enter GLN codes separated by commas (e.g., 1234567890123)',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _locationFilter = value;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Max Results (Optional)',
-                        hintText: 'Enter maximum number of events to export (e.g., 1000)',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        _limitFilter = value;
-                      },
-                    ),
-                  ],
-                ),
+                  const SizedBox(height: TraqSpacing.md),
+                  _exportFilterField(
+                    labelText: 'EPCs (Optional)',
+                    hintText: 'Comma-separated EPCs (e.g., https://id.gs1.org/01/10614148123456/21/400)',
+                    onChanged: (value) => _epcFilter = value,
+                  ),
+                  const SizedBox(height: TraqSpacing.md),
+                  _exportFilterField(
+                    labelText: 'Business Steps (Optional)',
+                    hintText: 'Comma-separated business steps (e.g., receiving, shipping)',
+                    onChanged: (value) => _businessStepFilter = value,
+                  ),
+                  const SizedBox(height: TraqSpacing.md),
+                  _exportFilterField(
+                    labelText: 'Business Locations (Optional)',
+                    hintText: 'Comma-separated GLNs (e.g., 1234567890123)',
+                    onChanged: (value) => _locationFilter = value,
+                  ),
+                  const SizedBox(height: TraqSpacing.md),
+                  _exportFilterField(
+                    labelText: 'Max Results (Optional)',
+                    hintText: 'Maximum number of events (e.g., 1000)',
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => _limitFilter = value,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Export to Format',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Select format and click to export the filtered events'),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _isLoading ? null : () => _exportEvents('CSV'),
-                          icon: const TraqIcon(AppAssets.iconTable),
-                          label: const Text('Export to CSV'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _isLoading ? null : () => _exportEvents('PDF'),
-                          icon: const TraqIcon(AppAssets.iconPdf),
-                          label: const Text('Export to PDF'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _isLoading ? null : () => _exportEvents('HTML'),
-                          icon: const TraqIcon(AppAssets.iconGlobe),
-                          label: const Text('Export to HTML'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _isLoading ? null : () => _exportEvents('EXCEL'),
-                          icon: const TraqIcon(AppAssets.iconGrid),
-                          label: const Text('Export to Excel'),
-                        ),
-                      ],
-                    ),
-                    if (_isLoading) ...[
-                      const SizedBox(height: 16),
-                      const LinearProgressIndicator(),
-                      const SizedBox(height: 8),
-                      const Text('Exporting events...'),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
-              Card(
-                color: Colors.red.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          const SizedBox(height: TraqSpacing.lg),
+          Card(
+            child: Padding(
+              padding: TraqSpacing.surfacePad,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Export to Format', style: context.text.h3),
+                  const SizedBox(height: TraqSpacing.sm),
+                  Text(
+                    'Select a format to export events that match the current filters.',
+                    style: context.text.body.copyWith(color: context.colors.textSecondary),
+                  ),
+                  const SizedBox(height: TraqSpacing.md),
+                  Wrap(
+                    spacing: TraqSpacing.sm,
+                    runSpacing: TraqSpacing.sm,
                     children: [
-                      const Text(
-                        'Export Error',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : () => _exportEvents('CSV'),
+                        icon: const TraqIcon(AppAssets.iconTable),
+                        label: const Text('Export CSV'),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : () => _exportEvents('PDF'),
+                        icon: const TraqIcon(AppAssets.iconPdf),
+                        label: const Text('Export PDF'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : () => _exportEvents('HTML'),
+                        icon: const TraqIcon(AppAssets.iconGlobe),
+                        label: const Text('Export HTML'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : () => _exportEvents('EXCEL'),
+                        icon: const TraqIcon(AppAssets.iconGrid),
+                        label: const Text('Export Excel'),
                       ),
                     ],
                   ),
-                ),
+                  if (_isLoading) ...[
+                    const SizedBox(height: TraqSpacing.md),
+                    const LinearProgressIndicator(),
+                    const SizedBox(height: TraqSpacing.sm),
+                    Text(
+                      'Exporting events...',
+                      style: context.text.body.copyWith(color: context.colors.textSecondary),
+                    ),
+                  ],
+                ],
               ),
-            ],
+            ),
+          ),
+          const SizedBox(height: TraqSpacing.lg),
+          _editorPanel(
+            title: 'Export Output',
+            height: context.isMobile ? 220 : 280,
+            controller: _outputController,
+            readOnly: true,
+            hintText: 'Export response will appear here...',
+          ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: TraqSpacing.lg),
+            _errorCard(
+              _errorMessage!,
+              onDismiss: () => setState(() => _errorMessage = null),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildImportTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    final editorHeight = context.isMobile ? 240.0 : 360.0;
+    return SingleChildScrollView(
+      padding: context.horizontalPadding.add(
+        const EdgeInsets.only(top: TraqSpacing.lg, bottom: TraqSpacing.xl),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: TraqSpacing.surfacePad,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Import EPCIS Events',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text('Import EPCIS Events', style: context.text.h3),
+                  const SizedBox(height: TraqSpacing.sm),
+                  Text(
+                    'Paste XML or JSON-LD EPCIS documents containing events to store in the system.',
+                    style: context.text.body.copyWith(color: context.colors.textSecondary),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Import EPCIS events into the database. Paste XML or JSON-LD EPCIS documents containing events to be stored in the system.',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
+                  const SizedBox(height: TraqSpacing.md),
+                  Wrap(
+                    spacing: TraqSpacing.sm,
+                    runSpacing: TraqSpacing.sm,
                     children: [
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : () => _importEvents('XML'),
@@ -614,12 +588,7 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                               )
                             : const TraqIcon(AppAssets.iconCloudUpload),
                         label: const Text('Import XML Events'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                        ),
                       ),
-                      const SizedBox(width: 16),
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : () => _importEvents('JSON-LD'),
                         icon: _isLoading
@@ -630,14 +599,9 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
                               )
                             : const TraqIcon(AppAssets.iconCloudUpload),
                         label: const Text('Import JSON-LD Events'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                        ),
                       ),
-                      const Spacer(),
-                      TextButton.icon(
-                        onPressed: () => _loadImportSampleData(),
+                      OutlinedButton.icon(
+                        onPressed: _loadImportSampleData,
                         icon: const TraqIcon(AppAssets.iconBraces),
                         label: const Text('Load Sample'),
                       ),
@@ -647,88 +611,169 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Row(
+          const SizedBox(height: TraqSpacing.lg),
+          context.isMobile
+              ? Column(
+                  children: [
+                    _editorPanel(
+                      title: 'EPCIS Document to Import',
+                      height: editorHeight,
+                      controller: _importInputController,
+                      hintText:
+                          'Paste your EPCIS document here...\n\nThis imports all events contained in the document.',
+                    ),
+                    const SizedBox(height: TraqSpacing.lg),
+                    _editorPanel(
+                      title: 'Import Results',
+                      height: editorHeight,
+                      controller: _outputController,
+                      readOnly: true,
+                      hintText: 'Import results and statistics will appear here...',
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _editorPanel(
+                        title: 'EPCIS Document to Import',
+                        height: editorHeight,
+                        controller: _importInputController,
+                        hintText:
+                            'Paste your EPCIS document here...\n\nThis imports all events contained in the document.',
+                      ),
+                    ),
+                    const SizedBox(width: TraqSpacing.lg),
+                    Expanded(
+                      child: _editorPanel(
+                        title: 'Import Results',
+                        height: editorHeight,
+                        controller: _outputController,
+                        readOnly: true,
+                        hintText: 'Import results and statistics will appear here...',
+                      ),
+                    ),
+                  ],
+                ),
+          if (_importErrorMessage != null) ...[
+            const SizedBox(height: TraqSpacing.lg),
+            _errorCard(
+              _importErrorMessage!,
+              onDismiss: () => setState(() => _importErrorMessage = null),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _exportFilterField({
+    required String labelText,
+    required String hintText,
+    required ValueChanged<String> onChanged,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _formatDropdown({
+    required String label,
+    required String value,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      items: _formats
+          .map((format) => DropdownMenuItem(value: format, child: Text(format)))
+          .toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _editorPanel({
+    required String title,
+    required double height,
+    required TextEditingController controller,
+    required String hintText,
+    Widget? trailing,
+    bool readOnly = false,
+  }) {
+    return Card(
+      child: Padding(
+        padding: TraqSpacing.surfacePad,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
                 Expanded(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'EPCIS Document to Import',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _importInputController,
-                          maxLines: null,
-                          expands: true,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Paste your EPCIS document here...\n\nThis will import all events contained in the document into the database.',
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
-                const SizedBox(width: 16),
+                if (trailing != null) trailing,
+              ],
+            ),
+            const SizedBox(height: TraqSpacing.sm),
+            SizedBox(
+              height: height,
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+                expands: true,
+                readOnly: readOnly,
+                style: const TextStyle(fontFamily: 'monospace'),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: hintText,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _errorCard(String message, {required VoidCallback onDismiss}) {
+    return Builder(
+      builder: (context) {
+        final color = AppColorMapper.errorColor(context);
+        return Card(
+          color: color.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.all(TraqSpacing.md),
+            child: Row(
+              children: [
+                TraqIcon(AppAssets.iconAlert, color: color),
+                const SizedBox(width: TraqSpacing.sm),
                 Expanded(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Import Results',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _outputController,
-                          maxLines: null,
-                          expands: true,
-                          readOnly: true,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Import results and statistics will appear here...',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: Text(message, style: TextStyle(color: color)),
+                ),
+                IconButton(
+                  onPressed: onDismiss,
+                  icon: TraqIcon(AppAssets.iconX),
+                  color: color,
                 ),
               ],
             ),
           ),
-          if (_importErrorMessage != null)
-            Container(
-              margin: const EdgeInsets.only(top: 16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                border: Border.all(color: Colors.red.shade200),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.red.shade600),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _importErrorMessage!,
-                      style: TextStyle(color: Colors.red.shade600),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => setState(() => _importErrorMessage = null),
-                    icon: TraqIcon(AppAssets.iconX),
-                    color: Colors.red.shade600,
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1078,5 +1123,50 @@ class _EPCISSerializationScreenState extends State<EPCISSerializationScreen>
   void _showImportError(String message) {
     setState(() => _importErrorMessage = message);
     context.showError(message);
+  }
+}
+
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  _StickyTabBarDelegate({
+    required this.tabBar,
+    required this.color,
+    required this.borderColor,
+  });
+
+  final TabBar tabBar;
+  final Color color;
+  final Color borderColor;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: color,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: borderColor),
+            bottom: BorderSide(color: borderColor),
+          ),
+        ),
+        child: tabBar,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
+    return oldDelegate.tabBar != tabBar ||
+        oldDelegate.color != color ||
+        oldDelegate.borderColor != borderColor;
   }
 }

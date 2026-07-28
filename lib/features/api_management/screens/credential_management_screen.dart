@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
-import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/partner_credential.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -213,7 +215,7 @@ class _CredentialManagementScreenState
                     ],
                   ),
                 ),
-                _buildStatusChip(credential.statusText, isActive),
+                _buildStatusChip(context, credential.statusText, isActive),
                 const SizedBox(width: 8),
                 PopupMenuButton<String>(
                   onSelected: (action) =>
@@ -230,11 +232,13 @@ class _CredentialManagementScreenState
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'revoke',
                         child: Text(
                           'Revoke',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(
+                            color: AppColorMapper.errorColor(context),
+                          ),
                         ),
                       ),
                     ],
@@ -259,7 +263,9 @@ class _CredentialManagementScreenState
                   _buildInfoChip(
                     'Expires: ${ApiUiUtils.formatDate(credential.expiresAt!)}',
                     NavIcons.epcisEvents,
-                    color: credential.isExpired ? Colors.red : null,
+                    color: credential.isExpired
+                        ? AppColorMapper.errorColor(context)
+                        : null,
                   ),
                 ],
               ],
@@ -275,17 +281,20 @@ class _CredentialManagementScreenState
     );
   }
 
-  Widget _buildStatusChip(String label, bool isActive) {
+  Widget _buildStatusChip(BuildContext context, String label, bool isActive) {
+    final color = isActive
+        ? AppColorMapper.successColor(context)
+        : AppColorMapper.errorColor(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade100 : Colors.red.shade100,
+        color: OperationPalette.soft(color),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isActive ? Colors.green.shade800 : Colors.red.shade800,
+          color: color,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -364,7 +373,9 @@ class _CredentialManagementScreenState
                 context.showSuccess('Credential revoked');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColorMapper.errorColor(context),
+            ),
             child: const Text('Revoke'),
           ),
         ],
@@ -521,7 +532,10 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          TraqIcon(AppAssets.iconCheck, color: Colors.green.shade600),
+          TraqIcon(
+            AppAssets.iconCheck,
+            color: AppColorMapper.successColor(context),
+          ),
           const SizedBox(width: 8),
           const Text('Credential Created'),
         ],
@@ -535,13 +549,21 @@ class _CreateCredentialDialogState extends State<_CreateCredentialDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
+                color: OperationPalette.soft(
+                  AppColorMapper.warningColor(context),
+                ),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(
+                  color: AppColorMapper.warningColor(context)
+                      .withValues(alpha: 0.35),
+                ),
               ),
               child: Row(
                 children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.amber.shade700),
+                  TraqIcon(
+                    AppAssets.iconAlert,
+                    color: AppColorMapper.warningColor(context),
+                  ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -693,7 +715,10 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          TraqIcon(AppAssets.iconEdit, color: Colors.blue),
+          TraqIcon(
+            AppAssets.iconEdit,
+            color: AppColorMapper.infoColor(context),
+          ),
           const SizedBox(width: 8),
           const Text('Edit Credential'),
         ],
@@ -772,6 +797,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
               runSpacing: 8,
               children: ['read', 'write', 'admin'].map((scope) {
                 final isSelected = _selectedScopes.contains(scope);
+                final scopeColor = ApiUiUtils.scopeColor(context, scope);
                 return FilterChip(
                   label: Text(scope),
                   selected: isSelected,
@@ -784,8 +810,8 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
                       }
                     });
                   },
-                  selectedColor: ApiUiUtils.scopeColor(scope).withOpacity(0.2),
-                  checkmarkColor: ApiUiUtils.scopeColor(scope),
+                  selectedColor: scopeColor.withValues(alpha: 0.2),
+                  checkmarkColor: scopeColor,
                 );
               }).toList(),
             ),
@@ -794,7 +820,7 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: AppColorMapper.infoSoft(context),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -802,16 +828,17 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconInfo,
+                      TraqIcon(
+                        AppAssets.iconInfo,
                         size: 16,
-                        color: Colors.blue.shade700,
+                        color: AppColorMapper.infoColor(context),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Scope descriptions:',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
-                          color: Colors.blue.shade700,
+                          color: AppColorMapper.infoColor(context),
                         ),
                       ),
                     ],
@@ -819,15 +846,24 @@ class _EditCredentialDialogState extends State<_EditCredentialDialog> {
                   const SizedBox(height: 8),
                   Text(
                     '• read: GET requests (view data)',
-                    style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColorMapper.infoColor(context),
+                    ),
                   ),
                   Text(
                     '• write: POST/PUT/PATCH/DELETE (modify data)',
-                    style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColorMapper.infoColor(context),
+                    ),
                   ),
                   Text(
                     '• admin: Administrative operations',
-                    style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColorMapper.infoColor(context),
+                    ),
                   ),
                 ],
               ),

@@ -18,6 +18,7 @@ import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class GLNListScreen extends StatefulWidget {
   const GLNListScreen({
@@ -320,7 +321,9 @@ class _GLNListScreenState extends State<GLNListScreen> {
               Navigator.of(dialogContext).pop();
               context.read<GLNCubit>().deleteGLN(gln.glnCode);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorMapper.errorColor(dialogContext),
+            ),
             child: Text(GlnUiConstants.dialogDelete),
           ),
         ],

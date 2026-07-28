@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/data/services/service_account_service.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_collection_cubit.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
@@ -22,16 +21,13 @@ class ApiManagementShell extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ApiCollectionCubit>(
-          create: (context) =>
-              ApiCollectionCubit(dioService: getIt<DioService>()),
+          create: (context) => ApiCollectionCubit(),
         ),
         BlocProvider<ApiManagementCubit>(
-          create: (context) =>
-              ApiManagementCubit(dioService: getIt<DioService>()),
+          create: (context) => ApiManagementCubit(),
         ),
         BlocProvider<PartnerAccessCubit>(
-          create: (context) =>
-              PartnerAccessCubit(dioService: getIt<DioService>()),
+          create: (context) => PartnerAccessCubit(),
         ),
         BlocProvider<ServiceAccountCubit>(
           create: (context) =>

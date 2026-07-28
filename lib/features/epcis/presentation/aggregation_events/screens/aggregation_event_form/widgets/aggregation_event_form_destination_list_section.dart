@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class AggregationEventFormDestinationListSection extends StatelessWidget {
   const AggregationEventFormDestinationListSection({
@@ -54,7 +55,10 @@ class AggregationEventFormDestinationListSection extends StatelessWidget {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: const TraqIcon(AppAssets.iconTrash, color: Colors.red, size: 20),
+                          icon: TraqIcon(AppAssets.iconTrash,
+                            color: AppColorMapper.errorColor(context),
+                            size: 20,
+                          ),
                           onPressed: () => onRemoveDestinationEntry(index),
                           tooltip: 'Remove',
                         ),

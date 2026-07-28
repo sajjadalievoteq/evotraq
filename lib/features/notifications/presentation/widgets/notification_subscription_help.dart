@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -8,11 +9,14 @@ class NotificationSubscriptionHelp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          TraqIcon(AppAssets.iconInfo, color: Colors.blue),
-          SizedBox(width: 8),
-          Text('Notification Subscription Help'),
+          TraqIcon(
+            AppAssets.iconInfo,
+            color: AppColorMapper.infoColor(context),
+          ),
+          const SizedBox(width: 8),
+          const Text('Notification Subscription Help'),
         ],
       ),
       content: SizedBox(
@@ -23,6 +27,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSection(
+                context,
                 'Basic Information',
                 [
                   _buildHelpItem(
@@ -59,6 +64,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context,
                 'Event Filtering (Advanced)',
                 [
                   _buildHelpItem(
@@ -100,9 +106,11 @@ class NotificationSubscriptionHelp extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context,
                 'Examples',
                 [
                   _buildExampleCard(
+                    context,
                     'Warehouse Receiving Alerts',
                     '''Monitor all items being received at warehouse:
 • Event Types: Object Event
@@ -111,6 +119,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
 • Webhook: https://yourapp.com/webhooks/receiving''',
                   ),
                   _buildExampleCard(
+                    context,
                     'Product Recall Monitoring',
                     '''Track recalled products:
 • Event Types: Object Event
@@ -119,6 +128,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
 • Webhook: https://yourapp.com/webhooks/recalls''',
                   ),
                   _buildExampleCard(
+                    context,
                     'Shipment Tracking',
                     '''Monitor shipping events:
 • Event Types: Object Event, Aggregation Event
@@ -129,13 +139,29 @@ class NotificationSubscriptionHelp extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSection(
+                context,
                 'Best Practices',
                 [
-                  _buildTip('Start with broad filters and refine based on notification volume'),
-                  _buildTip('Test your webhook endpoint before creating subscriptions'),
-                  _buildTip('Use descriptive names to easily identify subscriptions'),
-                  _buildTip('Monitor webhook delivery rates in subscription statistics'),
-                  _buildTip('Set up proper error handling in your webhook endpoint'),
+                  _buildTip(
+                    context,
+                    'Start with broad filters and refine based on notification volume',
+                  ),
+                  _buildTip(
+                    context,
+                    'Test your webhook endpoint before creating subscriptions',
+                  ),
+                  _buildTip(
+                    context,
+                    'Use descriptive names to easily identify subscriptions',
+                  ),
+                  _buildTip(
+                    context,
+                    'Monitor webhook delivery rates in subscription statistics',
+                  ),
+                  _buildTip(
+                    context,
+                    'Set up proper error handling in your webhook endpoint',
+                  ),
                 ],
               ),
             ],
@@ -151,16 +177,20 @@ class NotificationSubscriptionHelp extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
+  Widget _buildSection(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.blue,
+            color: AppColorMapper.infoColor(context),
           ),
         ),
         const SizedBox(height: 12),
@@ -202,28 +232,33 @@ class NotificationSubscriptionHelp extends StatelessWidget {
     );
   }
 
-  Widget _buildExampleCard(String title, String description) {
+  Widget _buildExampleCard(
+    BuildContext context,
+    String title,
+    String description,
+  ) {
+    final info = AppColorMapper.infoColor(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue[50],
+        color: AppColorMapper.infoSoft(context),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue[200]!),
+        border: Border.all(color: info.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              TraqIcon(AppAssets.iconLightbulb, color: Colors.blue[700], size: 16),
+              TraqIcon(AppAssets.iconLightbulb, color: info, size: 16),
               const SizedBox(width: 4),
               Text(
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color: Colors.blue[700],
+                  color: info,
                 ),
               ),
             ],
@@ -233,7 +268,7 @@ class NotificationSubscriptionHelp extends StatelessWidget {
             description,
             style: TextStyle(
               fontSize: 13,
-              color: Colors.blue[800],
+              color: info,
               height: 1.3,
             ),
           ),
@@ -242,13 +277,17 @@ class NotificationSubscriptionHelp extends StatelessWidget {
     );
   }
 
-  Widget _buildTip(String tip) {
+  Widget _buildTip(BuildContext context, String tip) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TraqIcon(AppAssets.iconCheck, size: 16, color: Colors.green[600]),
+          TraqIcon(
+            AppAssets.iconCheck,
+            size: 16,
+            color: AppColorMapper.successColor(context),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

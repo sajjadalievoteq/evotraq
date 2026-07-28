@@ -10,8 +10,8 @@ import 'package:traqtrace_app/data/services/epcis/object_event_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_reason.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_reason.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 

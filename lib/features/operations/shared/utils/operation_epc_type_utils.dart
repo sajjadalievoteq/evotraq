@@ -17,11 +17,11 @@ abstract final class OperationEpcTypeUtils {
     };
   }
 
-  static Color colorFromValue(String value) {
-    return color(OperationEpcScanValidator.resolveEpcType(value));
+  static Color colorFromValue(BuildContext context, String value) {
+    return color(context, OperationEpcScanValidator.resolveEpcType(value));
   }
 
-  static Color color(OperationScanItemType type) {
-    return AppColorMapper.operationEpcType(type);
+  static Color color(BuildContext context, OperationScanItemType type) {
+    return AppColorMapper.operationEpcTypeColor(context, type);
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_constants.dart';
+import 'package:traqtrace_app/core/animation/traq_animation_manager.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/theme/theme_cubit.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
@@ -13,6 +15,7 @@ import 'package:traqtrace_app/core/widgets/postman_collection_dialog.dart';
 import 'package:traqtrace_app/features/auth/widgets/logout_confirm_dialog.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
+import 'package:traqtrace_app/core/widgets/traq_expansion_tile.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
 class DrawerScrollMemory {
@@ -130,8 +133,9 @@ class _AppDrawerState extends State<AppDrawer> {
           width: drawerWidth,
           elevation: 4,
           shape: drawerShape,
-          child: Column(
-            children: [
+          child: _DrawerAnimatedContent(
+            child: Column(
+              children: [
               BlocBuilder<ThemeCubit, ThemeState>(
                 buildWhen: (previous, current) =>
                     previous.isDarkMode != current.isDarkMode,
@@ -264,7 +268,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
 
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.masterData),
                       title: const Text('Master Data'),
                       children: [
@@ -283,7 +287,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.serialization),
                       title: const Text('Serialization'),
                       children: [
@@ -302,7 +306,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.epcisEvents),
                       title: const Text('EPCIS Events'),
                       children: [
@@ -323,87 +327,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    ExpansionTile(
-                      leading: _svgLeading(NavIcons.eventQueries),
-                      title: const Text('Event Queries'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.allEvents),
-                          title: const Text('All Events'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(Constants.epcisEventsRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.aggregationHierarchy),
-                          title: const Text('Aggregation Hierarchy'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () {
-                            final TextEditingController controller =
-                                TextEditingController();
-
-                            showDialog(
-                              context: context,
-                              builder: (dialogContext) => AlertDialog(
-                                title: const Text('Enter EPC'),
-                                content: TextField(
-                                  controller: controller,
-                                  decoration: const InputDecoration(
-                                    labelText: 'EPC',
-                                    hintText:
-                                        'Enter parent EPC to visualize its hierarchy',
-                                  ),
-                                  onSubmitted: (value) {
-                                    if (value.isNotEmpty) {
-                                      Navigator.pop(dialogContext);
-                                      _navigate(
-                                        '/epcis/aggregation-events/hierarchy/$value',
-                                        extra: {'isParent': true},
-                                      );
-                                    }
-                                  },
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(dialogContext),
-                                    child: const Text('CANCEL'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      final value = controller.text;
-                                      if (value.isNotEmpty) {
-                                        Navigator.pop(dialogContext);
-                                        _navigate(
-                                          '/epcis/aggregation-events/hierarchy/$value',
-                                          extra: {'isParent': true},
-                                        );
-                                      }
-                                    },
-                                    child: const Text('VIEW'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.advancedQuery),
-                          title: const Text('Advanced Query'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisAdvancedQueryRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.supplyChainTraversal),
-                          title: const Text('Supply Chain Traversal'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisTraversalQueryRoute),
-                        ),
-
-                      ],
-                    ),
-
                     const Divider(),
                     const Padding(
                       padding: EdgeInsets.only(
@@ -420,7 +343,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ),
                     ),
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.lifecycle),
                       title: const Text('Lifecycle'),
 
@@ -443,7 +366,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ],
                     ),
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.packaging),
                       title: const Text('Packaging'),
                       children: [
@@ -465,12 +388,12 @@ class _AppDrawerState extends State<AppDrawer> {
                       ],
                     ),
 
-                    ExpansionTile(
+                    TraqExpansionTile(
                       leading: _svgLeading(NavIcons.logistics),
                       title: const Text('Logistics'),
                       childrenPadding: EdgeInsets.only(left: 22),
                       children: [
-                        ExpansionTile(
+                        TraqExpansionTile(
                           backgroundColor: context.colors.surface,
                           leading: _svgLeading(NavIcons.shippings),
                           title: const Text('Shippings'),
@@ -498,7 +421,7 @@ class _AppDrawerState extends State<AppDrawer> {
                             ),
                           ],
                         ),
-                        ExpansionTile(
+                        TraqExpansionTile(
                           leading: _svgLeading(NavIcons.receivings),
                           title: const Text('Receivings'),
                           children: [
@@ -546,64 +469,13 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     ListTile(
                       leading: _svgLeading(NavIcons.generateVerifyBarcode),
-                      title: const Text('Generate / Verify Barcode'),
-                      onTap: () => _navigate(Constants.barcodeGenerateRoute),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.eventSerialization),
-                      title: const Text('Event Serialization'),
+                      title: const Text('GS1 Tools'),
+                      subtitle: const Text(
+                        'Tools · Validation · Serialization',
+                        style: TextStyle(fontSize: 11),
+                      ),
                       trailing: _svgTrailingChevron(),
-                      onTap: () =>
-                          _navigate(Constants.epcisSerializationRoute),
-                    ),
-                    ExpansionTile(
-                      leading: _svgLeading(NavIcons.validation),
-                      title: const Text('Validation'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.gs1ValidationDemo),
-                          title: const Text('GS1 Validation Demo'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.gs1ValidationDemoRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.gs1ValidationTests),
-                          title: const Text('GS1 Validation Tests'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.adminGs1ValidationRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.integrationValidation),
-                          title: const Text('Integration Validation'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(
-                            Constants.adminIntegrationValidationRoute,
-                          ),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.validationRules),
-                          title: const Text('Validation Rules'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.adminValidationRulesRoute),
-                        ),
-                      ],
-                    ),
-
-                    ExpansionTile(
-                      leading: _svgLeading(NavIcons.conversion),
-                      title: const Text('Conversion'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.epcConversion),
-                          title: const Text('EPC Conversion'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.gs1EpcConversionRoute),
-                        ),
-                      ],
+                      onTap: () => _navigate(Constants.gs1ToolsRoute),
                     ),
 
                     if (isAdmin) ...[
@@ -624,7 +496,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                       ),
 
-                      ExpansionTile(
+                      TraqExpansionTile(
                         leading: _svgLeading(NavIcons.userManagement),
                         title: const Text('User Management'),
                         children: [
@@ -644,7 +516,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      ExpansionTile(
+                      TraqExpansionTile(
                         leading: _svgLeading(NavIcons.notifications),
                         title: const Text('Notifications'),
                         children: [
@@ -673,7 +545,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      ExpansionTile(
+                      TraqExpansionTile(
                         leading: _svgLeading(NavIcons.batchProcessing),
                         title: const Text('Batch Processing'),
                         children: [
@@ -701,36 +573,36 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      ExpansionTile(
-                        leading: _svgLeading(NavIcons.apiManagement),
-                        title: const Text('API Management'),
-                        children: [
-                          ListTile(
-                            leading: _svgLeading(NavIcons.apiCollections),
-                            title: const Text('API Collections'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminApiCollectionsRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.partnerManagement),
-                            title: const Text('Partner Management'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminApiPartnersRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.serviceAccounts),
-                            title: const Text('Service Accounts'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(
-                              Constants.adminApiServiceAccountsRoute,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // ExpansionTile(
+                      //   leading: _svgLeading(NavIcons.apiManagement),
+                      //   title: const Text('API Management'),
+                      //   children: [
+                      //     ListTile(
+                      //       leading: _svgLeading(NavIcons.apiCollections),
+                      //       title: const Text('API Collections'),
+                      //       contentPadding: const EdgeInsets.only(left: 32.0),
+                      //       onTap: () =>
+                      //           _navigate(Constants.adminApiCollectionsRoute),
+                      //     ),
+                      //     ListTile(
+                      //       leading: _svgLeading(NavIcons.partnerManagement),
+                      //       title: const Text('Partner Management'),
+                      //       contentPadding: const EdgeInsets.only(left: 32.0),
+                      //       onTap: () =>
+                      //           _navigate(Constants.adminApiPartnersRoute),
+                      //     ),
+                      //     ListTile(
+                      //       leading: _svgLeading(NavIcons.serviceAccounts),
+                      //       title: const Text('Service Accounts'),
+                      //       contentPadding: const EdgeInsets.only(left: 32.0),
+                      //       onTap: () => _navigate(
+                      //         Constants.adminApiServiceAccountsRoute,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
 
-                      ExpansionTile(
+                      TraqExpansionTile(
                         leading: _svgLeading(NavIcons.systemTools),
                         title: const Text('System Tools'),
                         children: [
@@ -792,7 +664,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ],
                       ),
 
-                      ExpansionTile(
+                      TraqExpansionTile(
                         leading: _svgLeading(NavIcons.testDataGeneration),
                         title: const Text('Test Data Generation'),
                         children: [
@@ -820,6 +692,13 @@ class _AppDrawerState extends State<AppDrawer> {
 
                         onTap: () =>
                             _navigate(Constants.adminCbvVocabularyRoute),
+                      ),
+                      ListTile(
+                        trailing: _svgTrailingChevron(),
+                        leading: _svgLeading(NavIcons.validationRules),
+                        title: const Text('Validation Rules'),
+                        onTap: () =>
+                            _navigate(Constants.adminValidationRulesRoute),
                       ),
                     ],
 
@@ -876,6 +755,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
               ),
             ],
+            ),
           ),
         );
       },
@@ -899,6 +779,122 @@ abstract final class AppDrawerMetrics {
       medium: 300,
       expanded: 320,
       large: (layout.width * 0.20).clamp(340.0, 400.0),
+    );
+  }
+}
+
+class _DrawerAnimatedContent extends StatefulWidget {
+  const _DrawerAnimatedContent({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_DrawerAnimatedContent> createState() => _DrawerAnimatedContentState();
+}
+
+class _DrawerAnimatedContentState extends State<_DrawerAnimatedContent>
+    with SingleTickerProviderStateMixin {
+  static const double _closedOpacity = 0.86;
+  static const double _closedScale = 0.972;
+  static const double _closedDx = 0.03;
+
+  late final AnimationController _controller;
+  late final CurvedAnimation _curved;
+  Animation<double>? _routeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+    _curved = CurvedAnimation(
+      parent: _controller,
+      curve: TraqAnimationConstants.curve,
+      reverseCurve: TraqAnimationConstants.reverseCurve,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncDurations();
+    _bindRouteAnimation();
+  }
+
+  void _syncDurations() {
+    _controller.duration = TraqAnimationManager.durationOf(
+      context,
+      TraqAnimationConstants.navForward,
+    );
+    _controller.reverseDuration = TraqAnimationManager.durationOf(
+      context,
+      TraqAnimationConstants.navReverse,
+    );
+  }
+
+  void _bindRouteAnimation() {
+    final routeAnimation = ModalRoute.of(context)?.animation;
+    if (_routeAnimation == routeAnimation) {
+      return;
+    }
+    _routeAnimation?.removeStatusListener(_onRouteStatusChanged);
+    _routeAnimation = routeAnimation;
+    if (_routeAnimation == null) {
+      _controller.value = 1.0;
+      return;
+    }
+
+    _controller.value = _routeAnimation!.value.clamp(0.0, 1.0);
+    _routeAnimation!.addStatusListener(_onRouteStatusChanged);
+  }
+
+  void _onRouteStatusChanged(AnimationStatus status) {
+    if (!mounted) {
+      return;
+    }
+    switch (status) {
+      case AnimationStatus.forward:
+      case AnimationStatus.completed:
+        _controller.forward();
+      case AnimationStatus.reverse:
+      case AnimationStatus.dismissed:
+        _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _routeAnimation?.removeStatusListener(_onRouteStatusChanged);
+    _curved.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (TraqAnimationManager.reduceMotion(context)) {
+      return widget.child;
+    }
+
+    return AnimatedBuilder(
+      animation: _curved,
+      builder: (context, _) {
+        final t = _curved.value.clamp(0.0, 1.0);
+        final opacity = _closedOpacity + (1 - _closedOpacity) * t;
+        final scale = _closedScale + (1 - _closedScale) * t;
+        final dx = _closedDx * (1 - t);
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform.translate(
+            offset: Offset(dx * MediaQuery.sizeOf(context).width, 0),
+            child: Transform.scale(
+              scale: scale,
+              alignment: Alignment.centerLeft,
+              child: widget.child,
+            ),
+          ),
+        );
+      },
     );
   }
 }

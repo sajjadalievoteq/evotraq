@@ -38,7 +38,7 @@ class SgtinLifecycleStatusField extends StatelessWidget {
               value: selectedStatus,
               child: Row(
                 children: [
-                  TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(selectedStatus!), size: 12),
+                  TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(context, selectedStatus!), size: 12),
                   const SizedBox(width: 8),
                   Text(status_rules.friendlyLabel(selectedStatus!)),
                 ],
@@ -49,7 +49,7 @@ class SgtinLifecycleStatusField extends StatelessWidget {
                 value: s,
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(s), size: 12),
+                    TraqIcon(AppAssets.iconCircle, color: status_rules.statusColor(context, s), size: 12),
                     const SizedBox(width: 8),
                     Text(status_rules.friendlyLabel(s)),
                   ],
@@ -76,8 +76,8 @@ class SgtinLifecycleStatusField extends StatelessWidget {
           ? status_rules.friendlyLabel(selectedStatus!)
           : status_rules.friendlyLabel(ItemStatus.ALLOCATED),
       valueColor: selectedStatus != null
-          ? status_rules.statusColor(selectedStatus!)
-          : status_rules.statusColor(ItemStatus.ALLOCATED),
+          ? status_rules.statusColor(context, selectedStatus!)
+          : status_rules.statusColor(context, ItemStatus.ALLOCATED),
     );
   }
 }

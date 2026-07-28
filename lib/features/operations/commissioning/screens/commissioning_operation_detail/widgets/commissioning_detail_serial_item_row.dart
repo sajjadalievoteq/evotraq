@@ -4,10 +4,12 @@ import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart' 
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/utils/hierarchy_navigation.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class CommissioningDetailSerialItemRow extends StatelessWidget {
   const CommissioningDetailSerialItemRow({
@@ -28,7 +30,15 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
           TraqIcon(
             item.success ? AppAssets.iconCheck : AppAssets.iconX,
             size: 16,
-            color: item.success ? Colors.green[600] : Colors.red[600],
+            color: item.success
+                ? AppColorMapper.operationStatusColor(
+                    context,
+                    OperationStatus.success,
+                  )
+                : AppColorMapper.operationStatusColor(
+                    context,
+                    OperationStatus.failed,
+                  ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -52,7 +62,13 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
                 if (!item.success && item.errorMessage != null)
                   Text(
                     item.errorMessage!,
-                    style: TextStyle(fontSize: 11, color: Colors.red[600]),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColorMapper.operationStatusColor(
+                        context,
+                        OperationStatus.failed,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -80,7 +96,7 @@ class CommissioningDetailSerialItemRow extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                backgroundColor: status_rules.statusColor(currentStatus!),
+                backgroundColor: status_rules.statusColor(context, currentStatus!),
                 padding: EdgeInsets.zero,
                 labelPadding: const EdgeInsets.symmetric(horizontal: 6),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -73,11 +74,11 @@ class ETLManagementScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.purple.shade100,
+                                    color: AppColorMapper.chartColor(context, 5).withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: TraqIcon(AppAssets.iconTransform,
-                                    color: Colors.purple.shade700,
+                                    color: AppColorMapper.chartColor(context, 5),
                                     size: 24,
                                   ),
                                 ),
@@ -105,13 +106,13 @@ class ETLManagementScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
+                                    color: AppColorMapper.successColor(context).withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
                                     'Phase 3.3',
                                     style: TextStyle(
-                                      color: Colors.green.shade700,
+                                      color: AppColorMapper.successColor(context),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12,
                                     ),
@@ -145,11 +146,11 @@ class ETLManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            TraqIcon(AppAssets.iconInfo, color: Colors.purple),
-            SizedBox(width: 8),
-            Text('ETL Management Help'),
+            TraqIcon(AppAssets.iconInfo, color: AppColorMapper.chartColor(context, 5)),
+            const SizedBox(width: 8),
+            const Text('ETL Management Help'),
           ],
         ),
         content: const SingleChildScrollView(

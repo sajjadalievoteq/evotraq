@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -66,12 +64,7 @@ class _ThreadPoolManagementDashboardState
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   void _startAutoRefresh() {
@@ -330,7 +323,7 @@ class _ThreadPoolManagementDashboardState
                 'Active Threads',
                 activeThreads.toString(),
                 AppAssets.iconPlay,
-                Colors.green,
+                AppColorMapper.successColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -339,7 +332,7 @@ class _ThreadPoolManagementDashboardState
                 'Core Pool Size',
                 corePoolSize.toString(),
                 AppAssets.iconSettings,
-                Colors.blue,
+                AppColorMapper.infoColor(context),
               ),
             ),
           ],
@@ -352,7 +345,7 @@ class _ThreadPoolManagementDashboardState
                 'Max Pool Size',
                 maximumPoolSize.toString(),
                 NavIcons.databasePartitioning,
-                Colors.purple,
+                AppColorMapper.chartColor(context, 5),
               ),
             ),
             const SizedBox(width: 8),
@@ -361,7 +354,7 @@ class _ThreadPoolManagementDashboardState
                 'Queue Size',
                 queueSize.toString(),
                 NavIcons.jobQueueManagement,
-                Colors.orange,
+                AppColorMapper.warningColor(context),
               ),
             ),
           ],
@@ -497,22 +490,22 @@ class _ThreadPoolManagementDashboardState
                   _buildStrategyDescription(
                     'CALLER_RUNS',
                     'Executes the task in the caller thread',
-                    Colors.green,
+                    AppColorMapper.successColor(context),
                   ),
                   _buildStrategyDescription(
                     'ABORT',
                     'Throws RejectedExecutionException',
-                    Colors.red,
+                    AppColorMapper.errorColor(context),
                   ),
                   _buildStrategyDescription(
                     'DISCARD',
                     'Silently discards the task',
-                    Colors.orange,
+                    AppColorMapper.warningColor(context),
                   ),
                   _buildStrategyDescription(
                     'DISCARD_OLDEST',
                     'Discards the oldest unhandled task',
-                    Colors.blue,
+                    AppColorMapper.infoColor(context),
                   ),
                 ],
               ),

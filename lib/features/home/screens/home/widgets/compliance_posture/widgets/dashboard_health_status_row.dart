@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 
 class DashboardHealthStatusRow extends StatelessWidget {
@@ -23,7 +24,9 @@ class DashboardHealthStatusRow extends StatelessWidget {
             height: 10,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isHealthy ? Colors.green : Colors.red,
+              color: isHealthy
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
             ),
           ),
           const SizedBox(width: 12),

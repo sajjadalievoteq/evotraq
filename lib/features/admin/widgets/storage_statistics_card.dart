@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/number_format_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/features/epcis/presentation/utils/epcis_event_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -39,7 +40,7 @@ class StorageStatisticsCard extends StatelessWidget {
                     'Total Events',
                     _formatNumber(storage.totalEvents),
                     NavIcons.epcisEvents,
-                    Colors.blue,
+                    AppColorMapper.chartColor(context, 0),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -48,7 +49,7 @@ class StorageStatisticsCard extends StatelessWidget {
                     'Storage Used',
                     '${storage.storageUsedGB.toStringAsFixed(2)} GB',
                     NavIcons.databasePartitioning,
-                    Colors.orange,
+                    AppColorMapper.chartColor(context, 1),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -57,7 +58,7 @@ class StorageStatisticsCard extends StatelessWidget {
                     'Partitions',
                     '${storage.partitionDistribution.length}',
                     AppAssets.iconGrid,
-                    Colors.green,
+                    AppColorMapper.chartColor(context, 2),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -66,7 +67,7 @@ class StorageStatisticsCard extends StatelessWidget {
                     'Compression Ratio',
                     '${storage.compressionRatio.toStringAsFixed(1)}:1',
                     AppAssets.iconCompress,
-                    Colors.purple,
+                    AppColorMapper.chartColor(context, 3),
                   ),
                 ),
               ],
@@ -80,7 +81,7 @@ class StorageStatisticsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...storage.eventTypeDistribution.entries.map((entry) => 
-              _buildEventTypeRow(entry.key, entry.value)
+              _buildEventTypeRow(context, entry.key, entry.value)
             ).toList(),
             
             const SizedBox(height: 24),
@@ -92,7 +93,7 @@ class StorageStatisticsCard extends StatelessWidget {
             const SizedBox(height: 12),
             SizedBox(
               height: 200,
-              child: _buildPartitionChart(),
+              child: _buildPartitionChart(context),
             ),
             
             const SizedBox(height: 24),
@@ -138,7 +139,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   icon: const TraqIcon(AppAssets.iconCompress),
                   label: const Text('Compress Events'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColorMapper.successColor(context),
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -180,7 +181,11 @@ class StorageStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEventTypeRow(String eventType, double percentage) {
+  Widget _buildEventTypeRow(
+    BuildContext context,
+    String eventType,
+    double percentage,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -197,7 +202,7 @@ class StorageStatisticsCard extends StatelessWidget {
               value: percentage / 100,
               backgroundColor: Colors.grey.withOpacity(0.3),
               valueColor: AlwaysStoppedAnimation(
-                EpcisEventUiUtils.eventTypeColor(eventType),
+                EpcisEventUiUtils.eventTypeColor(context, eventType),
               ),
             ),
           ),
@@ -208,7 +213,7 @@ class StorageStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPartitionChart() {
+  Widget _buildPartitionChart(BuildContext context) {
     final maxCount = storage.partitionDistribution.values.isNotEmpty 
         ? storage.partitionDistribution.values.reduce((a, b) => a > b ? a : b)
         : 1;
@@ -232,7 +237,7 @@ class StorageStatisticsCard extends StatelessWidget {
                   width: 40,
                   height: height,
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: AppColorMapper.infoColor(context),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

@@ -1,5 +1,5 @@
-import 'package:traqtrace_app/features/cache/models/cache_statistics.dart';
-import 'package:traqtrace_app/features/cache/models/cache_health.dart';
+import 'package:traqtrace_app/data/models/cache/cache_statistics.dart';
+import 'package:traqtrace_app/data/models/cache/cache_health.dart';
 
 import '../../core/network/dio_service.dart';
 

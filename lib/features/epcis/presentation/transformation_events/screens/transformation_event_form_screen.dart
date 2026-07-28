@@ -22,6 +22,7 @@ import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class TransformationEventFormScreen extends StatefulWidget {
   final TransformationEvent? event;
@@ -552,7 +553,13 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
+                TraqIcon(AppAssets.iconTransform,
+                  color: AppColorMapper.eventTypeColor(
+                    context,
+                    'transformation',
+                    scheme: AppEventColorScheme.epcis,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Transformation Event',
@@ -576,17 +583,18 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
   }
   
   Widget _buildErrorMessage(String message) {
+    final error = AppColorMapper.errorColor(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Card(
-        color: Colors.red.shade50,
+        color: error.withValues(alpha: 0.1),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              TraqIcon(AppAssets.iconAlert, color: Colors.red),
+              TraqIcon(AppAssets.iconAlert, color: error),
               const SizedBox(width: 16),
-              Expanded(child: Text(message, style: const TextStyle(color: Colors.red))),
+              Expanded(child: Text(message, style: TextStyle(color: error))),
             ],
           ),
         ),
@@ -799,7 +807,11 @@ class _TransformationEventFormScreenState extends State<TransformationEventFormS
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.bold,
-          color: Colors.indigo,
+          color: AppColorMapper.eventTypeColor(
+            context,
+            'transformation',
+            scheme: AppEventColorScheme.epcis,
+          ),
         ),
       ),
     );

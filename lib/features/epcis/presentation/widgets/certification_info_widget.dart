@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/epcis/certification_info.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -140,7 +141,7 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
                         'Expires: ${dateFormat.format(certification.expirationDate!)}',
                         style: TextStyle(
                           color: certification.expirationDate!.isBefore(DateTime.now())
-                              ? Colors.red
+                              ? AppColorMapper.errorColor(context)
                               : null,
                         ),
                       ),
@@ -157,8 +158,8 @@ class _CertificationInfoWidgetState extends State<CertificationInfoWidget> {
                     Expanded(
                       child: Text(
                         certification.documentUrl!,
-                        style: const TextStyle(
-                          color: Colors.blue,
+                        style: TextStyle(
+                          color: AppColorMapper.infoColor(context),
                           decoration: TextDecoration.underline,
                         ),
                         overflow: TextOverflow.ellipsis,

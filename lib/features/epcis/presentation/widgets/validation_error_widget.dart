@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -24,9 +25,11 @@ class ValidationErrorWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final error = AppColorMapper.errorColor(context);
+
     return Card(
-      color: Colors.red[50],
-      margin:      context.horizontalPadding,
+      color: error.withValues(alpha: 0.1),
+      margin: context.horizontalPadding,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -34,7 +37,7 @@ class ValidationErrorWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconAlert, color: Colors.red),
+                TraqIcon(AppAssets.iconAlert, color: error),
                 const SizedBox(width: 8.0),
                 Text(
                   title ?? 'Validation Errors',
@@ -53,13 +56,13 @@ class ValidationErrorWidget extends StatelessWidget {
               ],
             ),
             const Divider(),
-            ...validationErrors.map((error) {
-              if (error is Map<String, dynamic>) {
-                return _buildStructuredError(error);
-              } else if (error is String) {
-                return _buildSimpleError(error);
+            ...validationErrors.map((e) {
+              if (e is Map<String, dynamic>) {
+                return _buildStructuredError(context, e);
+              } else if (e is String) {
+                return _buildSimpleError(context, e);
               } else {
-                return _buildSimpleError(error.toString());
+                return _buildSimpleError(context, e.toString());
               }
             }).toList(),
           ],
@@ -68,18 +71,19 @@ class ValidationErrorWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSimpleError(String message) {
+  Widget _buildSimpleError(BuildContext context, String message) {
+    final error = AppColorMapper.errorColor(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TraqIcon(AppAssets.iconChevronR, color: Colors.red, size: 20),
+          TraqIcon(AppAssets.iconChevronR, color: error, size: 20),
           const SizedBox(width: 4.0),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: error),
             ),
           ),
         ],
@@ -87,9 +91,10 @@ class ValidationErrorWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStructuredError(Map<String, dynamic> error) {
-    final field = error['field'] as String? ?? 'Unknown';
-    final message = error['message'] as String? ?? 'Invalid value';
+  Widget _buildStructuredError(BuildContext context, Map<String, dynamic> errorMap) {
+    final field = errorMap['field'] as String? ?? 'Unknown';
+    final message = errorMap['message'] as String? ?? 'Invalid value';
+    final error = AppColorMapper.errorColor(context);
     
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -98,13 +103,13 @@ class ValidationErrorWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              TraqIcon(AppAssets.iconChevronR, color: Colors.red, size: 20),
+              TraqIcon(AppAssets.iconChevronR, color: error, size: 20),
               const SizedBox(width: 4.0),
               Text(
                 field,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: error,
                 ),
               ),
             ],
@@ -113,7 +118,7 @@ class ValidationErrorWidget extends StatelessWidget {
             padding: const EdgeInsets.only(left: 28.0),
             child: Text(
               message,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: error),
             ),
           ),
         ],

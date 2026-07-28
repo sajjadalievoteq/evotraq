@@ -24,6 +24,11 @@ class AuthState extends Equatable {
   final String? message;
   final String? registeredEmail;
 
+  /// True after the first startup [AuthCubit.checkAuth] / [AuthCubit.sessionExpired]
+  /// settles. Stays true for the rest of the app session so login/register loading
+  /// never re-shows the startup splash.
+  final bool bootstrapCompleted;
+
   const AuthState({
     this.status = AuthStatus.initial,
     this.user,
@@ -31,6 +36,7 @@ class AuthState extends Equatable {
     this.error,
     this.message,
     this.registeredEmail,
+    this.bootstrapCompleted = false,
   });
 
   AuthState copyWith({
@@ -40,6 +46,7 @@ class AuthState extends Equatable {
     String? error,
     String? message,
     String? registeredEmail,
+    bool? bootstrapCompleted,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -48,6 +55,7 @@ class AuthState extends Equatable {
       error: error,
       message: message,
       registeredEmail: registeredEmail,
+      bootstrapCompleted: bootstrapCompleted ?? this.bootstrapCompleted,
     );
   }
 
@@ -61,5 +69,6 @@ class AuthState extends Equatable {
     error,
     message,
     registeredEmail,
+    bootstrapCompleted,
   ];
 }

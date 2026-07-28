@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
-import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
-import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
-import 'package:traqtrace_app/features/api_management/config/api_config.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/partner_credential.dart';
+import 'package:traqtrace_app/data/models/api_management/api_audit.dart';
+import 'package:traqtrace_app/data/services/api_management/api_config.dart';
 
 class ApiManagementService {
   final String _integrationLayerUrl;

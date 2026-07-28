@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../data/services/notification_api_service.dart' as api;
 import '../../../../data/services/websocket_service.dart';
 
-import '../../domain/models/notification_subscription.dart';
-import '../../domain/models/realtime_notification.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart';
 import 'notification_state.dart';
 
 class NotificationCubit extends Cubit<NotificationState> {

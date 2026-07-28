@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_event_visualization_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class StorageUtilizationChart extends StatelessWidget {
   final StorageStatistics storageStats;
@@ -34,36 +36,37 @@ class StorageUtilizationChart extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 220,
-                  child: _buildPieChart(),
+                  child: _buildPieChart(context),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStorageLegend(),
+                  child: _buildStorageLegend(context),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _buildStorageMetrics(),
+            _buildStorageMetrics(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPieChart() {
+  Widget _buildPieChart(BuildContext context) {
     return SizedBox(
       height: 200,
       width: 200,
       child: CustomPaint(
         painter: PieChartPainter(
           eventTypeDistribution: storageStats.eventTypeDistribution,
+          brightness: Theme.of(context).brightness,
         ),
         size: const Size(200, 200),
       ),
     );
   }
 
-  Widget _buildStorageLegend() {
+  Widget _buildStorageLegend(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -79,7 +82,7 @@ class StorageUtilizationChart extends StatelessWidget {
           return _buildLegendItem(
             entry.key,
             entry.value,
-            AdminEventVisualizationUtils.eventTypeColor(entry.key),
+            AdminEventVisualizationUtils.eventTypeColor(entry.key, context: context),
           );
         }).toList(),
       ],
@@ -118,7 +121,7 @@ class StorageUtilizationChart extends StatelessWidget {
     );
   }
 
-  Widget _buildStorageMetrics() {
+  Widget _buildStorageMetrics(BuildContext context) {
     return Column(
       children: [
         const Divider(),
@@ -130,40 +133,40 @@ class StorageUtilizationChart extends StatelessWidget {
                 'Total Storage',
                 '${storageStats.totalStorageCapacityGB.toStringAsFixed(0)} GB',
                 NavIcons.databasePartitioning,
-                Colors.blue,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildMetricCard(
-                'Compression',
-                '${storageStats.compressionRatio.toStringAsFixed(1)}:1',
-                AppAssets.iconCompress,
-                Colors.green,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildMetricCard(
-                'Partitions',
-                storageStats.partitionDistribution.length.toString(),
-                NavIcons.masterData,
-                Colors.orange,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildMetricCard(
-                'Avg Size',
-                '${storageStats.averagePartitionSize.toStringAsFixed(1)} MB',
-                AppAssets.iconFolder,
-                Colors.purple,
-              ),
-            ),
+                AppColorMapper.chartColor(context, 0),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Compression',
+                    '${storageStats.compressionRatio.toStringAsFixed(1)}:1',
+                    AppAssets.iconCompress,
+                    AppColorMapper.chartColor(context, 1),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Partitions',
+                    storageStats.partitionDistribution.length.toString(),
+                    NavIcons.masterData,
+                    AppColorMapper.chartColor(context, 2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMetricCard(
+                    'Avg Size',
+                    '${storageStats.averagePartitionSize.toStringAsFixed(1)} MB',
+                    AppAssets.iconFolder,
+                    AppColorMapper.chartColor(context, 3),
+                  ),
+                ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildPartitionDistribution(),
+        _buildPartitionDistribution(context),
       ],
     );
   }
@@ -201,7 +204,7 @@ class StorageUtilizationChart extends StatelessWidget {
     );
   }
 
-  Widget _buildPartitionDistribution() {
+  Widget _buildPartitionDistribution(BuildContext context) {
     if (storageStats.partitionDistribution.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -222,6 +225,7 @@ class StorageUtilizationChart extends StatelessWidget {
           child: CustomPaint(
             painter: PartitionBarChartPainter(
               partitionDistribution: storageStats.partitionDistribution,
+              brightness: Theme.of(context).brightness,
             ),
             size: const Size(double.infinity, 100),
           ),
@@ -238,7 +242,10 @@ class StorageUtilizationChart extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: AdminEventVisualizationUtils.partitionColor(entry.key),
+                    color: AdminEventVisualizationUtils.partitionColor(
+                      entry.key,
+                      context: context,
+                    ),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -259,8 +266,12 @@ class StorageUtilizationChart extends StatelessWidget {
 
 class PieChartPainter extends CustomPainter {
   final Map<String, double> eventTypeDistribution;
+  final Brightness brightness;
 
-  PieChartPainter({required this.eventTypeDistribution});
+  PieChartPainter({
+    required this.eventTypeDistribution,
+    required this.brightness,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -275,9 +286,13 @@ class PieChartPainter extends CustomPainter {
 
     for (final entry in eventTypeDistribution.entries) {
       final sweepAngle = (entry.value / 100) * 2 * 3.14159;
-      
-      paint.color = AdminEventVisualizationUtils.eventTypeColor(entry.key);
-      
+
+      paint.color = AppColorMapper.eventType(
+        entry.key,
+        scheme: AppEventColorScheme.admin,
+        brightness: brightness,
+      );
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
@@ -290,7 +305,7 @@ class PieChartPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..color = Colors.white
         ..strokeWidth = 2;
-      
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
@@ -338,18 +353,27 @@ class PieChartPainter extends CustomPainter {
 
 class PartitionBarChartPainter extends CustomPainter {
   final Map<String, int> partitionDistribution;
+  final Brightness brightness;
 
-  PartitionBarChartPainter({required this.partitionDistribution});
+  PartitionBarChartPainter({
+    required this.partitionDistribution,
+    required this.brightness,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (partitionDistribution.isEmpty) return;
 
-    final maxValue = partitionDistribution.values.reduce((a, b) => a > b ? a : b);
+    final maxValue =
+        partitionDistribution.values.reduce((a, b) => a > b ? a : b);
     final barWidth = size.width / partitionDistribution.length * 0.8;
     final barSpacing = size.width / partitionDistribution.length * 0.2;
+    final palette = brightness == Brightness.dark
+        ? OperationPalette.dark
+        : OperationPalette.light;
 
     final paint = Paint()..style = PaintingStyle.fill;
+    final colors = palette.chartSeries;
 
     int index = 0;
     for (final entry in partitionDistribution.entries) {
@@ -357,7 +381,7 @@ class PartitionBarChartPainter extends CustomPainter {
       final x = index * (barWidth + barSpacing) + barSpacing / 2;
       final y = size.height - barHeight - 10;
 
-      paint.color = AdminEventVisualizationUtils.partitionColor(entry.key);
+      paint.color = colors[entry.key.hashCode.abs() % colors.length];
 
       canvas.drawRRect(
         RRect.fromRectAndRadius(

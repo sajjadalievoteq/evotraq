@@ -3,13 +3,19 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/cancel_shipping/cancel_shipping_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/cancel_shipping/cancel_shipping_operation_service.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation_detail/widgets/cancel_shipping_detail_content.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 
 final _cancelShippingDetailConfig =
     OperationDetailScreenConfig<CancelShippingResponse>(
-  loader: (id) =>
-      getIt<CancelShippingOperationService>().getCancelShippingOperation(id),
+  createCubit: (fallbackErrorMessage) {
+    final service = getIt<CancelShippingOperationService>();
+    return OperationDetailCubit<CancelShippingResponse>(
+      fetchDetail: service.getCancelShippingOperation,
+      fallbackErrorMessage: fallbackErrorMessage,
+    );
+  },
   contentBuilder: (
     context, {
     required awaitingSelection,

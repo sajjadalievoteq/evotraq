@@ -7,7 +7,6 @@ class UserManagementState extends Equatable {
   const UserManagementState({
     this.status = UserManagementStatus.initial,
     this.users = const [],
-    this.pendingApprovals = const [],
     this.togglingUserId,
     this.currentPage = 0,
     this.totalItems = 0,
@@ -17,7 +16,6 @@ class UserManagementState extends Equatable {
 
   final UserManagementStatus status;
   final List<UserResponse> users;
-  final List<UserResponse> pendingApprovals;
   final int? togglingUserId;
   final int currentPage;
   final int totalItems;
@@ -27,7 +25,6 @@ class UserManagementState extends Equatable {
   UserManagementState copyWith({
     UserManagementStatus? status,
     List<UserResponse>? users,
-    List<UserResponse>? pendingApprovals,
     int? togglingUserId,
     bool clearTogglingUserId = false,
     int? currentPage,
@@ -39,7 +36,6 @@ class UserManagementState extends Equatable {
     return UserManagementState(
       status: status ?? this.status,
       users: users ?? this.users,
-      pendingApprovals: pendingApprovals ?? this.pendingApprovals,
       togglingUserId: clearTogglingUserId
           ? null
           : togglingUserId ?? this.togglingUserId,
@@ -54,7 +50,6 @@ class UserManagementState extends Equatable {
   List<Object?> get props => [
     status,
     users,
-    pendingApprovals,
     togglingUserId,
     currentPage,
     totalItems,

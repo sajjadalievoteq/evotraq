@@ -21,7 +21,7 @@ class DashboardRecentEventTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeAgo = _formatTimeAgo(event.eventTime);
 
-    final eventColor = EpcisEventUiUtils.eventTypeColor(event.eventType);
+    final eventColor = EpcisEventUiUtils.eventTypeColor(context, event.eventType);
 
     return LayoutBuilder(
       builder: (context, constraints) {

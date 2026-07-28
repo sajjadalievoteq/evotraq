@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 
 class PerformanceChart extends StatelessWidget {
   final List<PerformanceMetrics> metrics;
@@ -36,7 +38,7 @@ class PerformanceChart extends StatelessWidget {
           child: _buildChart(),
         ),
         const SizedBox(height: 4),
-        _buildLegend(),
+        _buildLegend(context),
       ],
     );
   }
@@ -67,6 +69,7 @@ class PerformanceChart extends StatelessWidget {
           painter: LineChartPainter(
             metrics: metrics,
             chartType: chartType,
+            brightness: Theme.of(context).brightness,
           ),
           size: Size(constraints.maxWidth, constraints.maxHeight),
         );
@@ -74,16 +77,44 @@ class PerformanceChart extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(BuildContext context) {
     return SizedBox(
       height: 20,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildLegendItem('Object', Colors.blue),
-          _buildLegendItem('Aggregation', Colors.green),
-          _buildLegendItem('Transaction', Colors.red),
-          _buildLegendItem('Transform', Colors.purple),
+          _buildLegendItem(
+            'Object',
+            AppColorMapper.eventTypeColor(
+              context,
+              'Object',
+              scheme: AppEventColorScheme.admin,
+            ),
+          ),
+          _buildLegendItem(
+            'Aggregation',
+            AppColorMapper.eventTypeColor(
+              context,
+              'Aggregation',
+              scheme: AppEventColorScheme.admin,
+            ),
+          ),
+          _buildLegendItem(
+            'Transaction',
+            AppColorMapper.eventTypeColor(
+              context,
+              'Transaction',
+              scheme: AppEventColorScheme.admin,
+            ),
+          ),
+          _buildLegendItem(
+            'Transform',
+            AppColorMapper.eventTypeColor(
+              context,
+              'Transformation',
+              scheme: AppEventColorScheme.admin,
+            ),
+          ),
         ],
       ),
     );
@@ -114,10 +145,12 @@ class PerformanceChart extends StatelessWidget {
 class LineChartPainter extends CustomPainter {
   final List<PerformanceMetrics> metrics;
   final String chartType;
+  final Brightness brightness;
 
   LineChartPainter({
     required this.metrics,
     required this.chartType,
+    required this.brightness,
   });
 
   @override
@@ -190,7 +223,15 @@ class LineChartPainter extends CustomPainter {
 
   void _drawDataLines(Canvas canvas, Size size, Paint paint, Paint pointPaint,
       double minY, double rangeY) {
-    final colors = [Colors.blue, Colors.green, Colors.red, Colors.purple];
+    final p = brightness == Brightness.dark
+        ? OperationPalette.dark
+        : OperationPalette.light;
+    final colors = [
+      p.eventObject,
+      p.eventAggregation,
+      p.eventTransactionAdmin,
+      p.eventTransformation,
+    ];
     final dataPoints = _getDataPoints();
 
     for (int seriesIndex = 0; seriesIndex < dataPoints.length; seriesIndex++) {

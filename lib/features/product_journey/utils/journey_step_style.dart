@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 
 abstract final class JourneyStepStyle {
 
   static Color colorFor(BuildContext context, String businessStep) {
-    final c = context.colors;
-    return c.primary;
+    return AppColorMapper.bizStepColor(context, businessStep);
   }
 
   

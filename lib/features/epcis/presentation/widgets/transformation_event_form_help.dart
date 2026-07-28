@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class TransformationEventFormHelp extends StatelessWidget {
   const TransformationEventFormHelp({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class TransformationEventFormHelp extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    TraqIcon(AppAssets.iconInfo, color: Colors.blue),
+                    TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context)),
                     const SizedBox(width: 12),
                     Text(
                       'Form Guidance',

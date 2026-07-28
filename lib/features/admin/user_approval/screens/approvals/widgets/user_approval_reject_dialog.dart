@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/data/models/user_management/user_management_models.dart';
 import 'package:traqtrace_app/features/admin/user_approval/utils/user_approval_constants.dart';
@@ -45,9 +46,9 @@ class UserApprovalRejectDialog extends StatelessWidget {
             Navigator.of(context).pop();
             onConfirm();
           },
-          child: const Text(
+          child: Text(
             UserApprovalConstants.rejectLabel,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: AppColorMapper.errorColor(context)),
           ),
         ),
       ],

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:traqtrace_app/features/admin/models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class MonitoringService {

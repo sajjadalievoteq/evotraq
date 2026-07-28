@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -115,7 +116,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
             
           Row(
             children: [
-              TraqIcon(NavIcons.gln, size: 16, color: Colors.red),
+              TraqIcon(NavIcons.gln, size: 16, color: AppColorMapper.errorColor(context)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -137,7 +138,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                     Expanded(
                       child: Row(
                         children: [
-                          const TraqIcon(AppAssets.iconSwapVert, color: Colors.blue, size: 16),
+                          TraqIcon(AppAssets.iconSwapVert, color: AppColorMapper.infoColor(context), size: 16),
                           const SizedBox(width: 4),
                           Text('${_coordinates!.altitude!.toStringAsFixed(1)} m'),
                         ],
@@ -156,7 +157,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
               padding: const EdgeInsets.only(top: 4.0),
               child: Row(
                 children: [
-                  TraqIcon(AppAssets.iconInfo, size: 16, color: Colors.orange),
+                  TraqIcon(AppAssets.iconInfo, size: 16, color: AppColorMapper.warningColor(context)),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -210,8 +211,8 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                         CircleMarker(
                           point: position,
                           radius: _coordinates!.horizontalAccuracy!.toDouble(),
-                          color: Colors.blue.withOpacity(0.2),
-                          borderColor: Colors.blue.withOpacity(0.7),
+                          color: AppColorMapper.infoColor(context).withValues(alpha: 0.2),
+                          borderColor: AppColorMapper.infoColor(context).withValues(alpha: 0.7),
                           borderStrokeWidth: 2,
                           useRadiusInMeter: true,
                         ),
@@ -248,7 +249,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                               ),
                             TraqIcon(
                               NavIcons.gln,
-                              color: Colors.red,
+                              color: AppColorMapper.errorColor(context),
                               size: 40.0,
                             ),
                           ],
@@ -299,7 +300,7 @@ class _GeospatialCoordinatesWidgetState extends State<GeospatialCoordinatesWidge
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue,
+                    foregroundColor: AppColorMapper.infoColor(context),
                   ),
                   onPressed: _openInExternalMap,
                 ),

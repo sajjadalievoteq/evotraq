@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
@@ -18,7 +19,7 @@ class HomeErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context)),
           const SizedBox(height: 16),
           Text(
             HomeStrings.loadHomeFailed(message),

@@ -18,6 +18,7 @@ import 'package:traqtrace_app/features/gs1/utils/gs1_form_validation_mixin.dart'
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart' as gtin_model;
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SGTINDetailScreen extends StatefulWidget {
   const SGTINDetailScreen({
@@ -260,7 +261,9 @@ class _SGTINDetailScreenState extends State<SGTINDetailScreen>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorMapper.errorColor(ctx),
+            ),
             onPressed: () {
               if (reason.isNotEmpty) {
                 Navigator.pop(ctx);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/epcis/presentation/widgets/validation_error_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -37,7 +38,7 @@ void showValidationErrors(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TraqIcon(AppAssets.iconAlert,
-                          color: Colors.red,
+                          color: AppColorMapper.errorColor(context),
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -236,7 +237,7 @@ mixin EventFormValidationMixin<T extends StatefulWidget> on State<T> {
     context.showSnackBar(
       SnackBar(
         content: Text('${errors.length} validation errors found'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColorMapper.errorColor(context),
         action: SnackBarAction(
           label: 'View',
           textColor: Colors.white,

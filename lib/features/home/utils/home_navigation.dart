@@ -4,7 +4,6 @@ abstract final class HomeNavigation {
   static const String home = Constants.homeRoute;
 
   static const String notifications = Constants.notificationsRoute;
-  static const String epcisEvents = Constants.epcisEventsRoute;
   static const String epcisObjectEventNew = Constants.epcisObjectEventNewRoute;
 
   static const String gs1Gtins = Constants.gs1GtinsRoute;

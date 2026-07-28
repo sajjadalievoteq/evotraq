@@ -12,7 +12,7 @@ abstract final class TraqAnimationConstants {
 
   
   
-  static const int formDurationMs = 280;
+  static const int formDurationMs = 480;
 
   
   static const int fastDurationMs = 160;
@@ -77,8 +77,8 @@ abstract final class TraqAnimationConstants {
   static const Offset slideRight = Offset(slideRightDx, 0);
 
   // Router / navigation motion language — slide-first, snappy decelerations.
-  static const int navForwardMs = 280;
-  static const int navReverseMs = 240;
+  static const int navForwardMs = 480;
+  static const int navReverseMs = 440;
   static const Curve navCurve = Curves.easeOutCubic;
   static const Curve navReverseCurve = Curves.easeInCubic;
 

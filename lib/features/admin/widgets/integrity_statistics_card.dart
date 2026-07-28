@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
@@ -35,11 +36,13 @@ class IntegrityStatisticsCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AdminHelperMappers.integrityScoreColor(
+                      context,
                       integrity.overallIntegrityScore,
                     ).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: AdminHelperMappers.integrityScoreColor(
+                        context,
                         integrity.overallIntegrityScore,
                       ),
                     ),
@@ -48,6 +51,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Score: ${integrity.overallIntegrityScore.toStringAsFixed(1)}%',
                     style: TextStyle(
                       color: AdminHelperMappers.integrityScoreColor(
+                        context,
                         integrity.overallIntegrityScore,
                       ),
                       fontWeight: FontWeight.bold,
@@ -67,7 +71,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     integrity.hashCoveragePercentage,
                     integrity.totalEventsWithHashes,
                     AppAssets.iconFingerprint,
-                    Colors.blue,
+                    AppColorMapper.chartColor(context, 0),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -77,7 +81,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     integrity.signatureCoveragePercentage,
                     integrity.totalEventsWithSignatures,
                     AppAssets.iconVerified,
-                    Colors.green,
+                    AppColorMapper.chartColor(context, 1),
                   ),
                 ),
               ],
@@ -92,7 +96,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Audit Trail Entries',
                     '${integrity.auditTrailCount}',
                     AppAssets.iconHistory,
-                    Colors.orange,
+                    AppColorMapper.chartColor(context, 2),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -101,7 +105,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     'Immutable Events',
                     '${integrity.immutableEventsCount}',
                     AppAssets.iconLock,
-                    Colors.purple,
+                    AppColorMapper.chartColor(context, 3),
                   ),
                 ),
               ],
@@ -115,7 +119,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...integrity.integrityByEventType.entries.map((entry) => 
-              _buildEventTypeIntegrityRow(entry.key, entry.value)
+              _buildEventTypeIntegrityRow(context, entry.key, entry.value)
             ).toList(),
             
             const SizedBox(height: 24),
@@ -129,7 +133,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   TraqIcon(AppAssets.iconAlert,
-                    color: Colors.red,
+                    color: AppColorMapper.errorColor(context),
                     size: 20,
                   ),
                 ],
@@ -142,7 +146,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
                   itemCount: integrity.recentViolations.length,
                   itemBuilder: (context, index) {
                     final violation = integrity.recentViolations[index];
-                    return _buildViolationCard(violation);
+                    return _buildViolationCard(context, violation);
                   },
                 ),
               ),
@@ -250,7 +254,11 @@ class IntegrityStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEventTypeIntegrityRow(String eventType, int integrityCount) {
+  Widget _buildEventTypeIntegrityRow(
+    BuildContext context,
+    String eventType,
+    int integrityCount,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -259,7 +267,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: EpcisEventUiUtils.eventTypeColor(eventType),
+              color: EpcisEventUiUtils.eventTypeColor(context, eventType),
               shape: BoxShape.circle,
             ),
           ),
@@ -281,7 +289,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildViolationCard(IntegrityViolation violation) {
+  Widget _buildViolationCard(BuildContext context, IntegrityViolation violation) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
@@ -290,7 +298,7 @@ class IntegrityStatisticsCard extends StatelessWidget {
           children: [
             TraqIcon(
               AdminHelperMappers.severityIcon(violation.severity),
-              color: AdminHelperMappers.severityColor(violation.severity),
+              color: AdminHelperMappers.severityColor(context, violation.severity),
               size: 20,
             ),
             const SizedBox(width: 12),

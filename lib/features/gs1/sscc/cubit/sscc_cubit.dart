@@ -8,9 +8,6 @@ import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_filters.dart';
 import 'package:traqtrace_app/core/utils/gs1_utils.dart';
 
-export 'sscc_state.dart';
-export 'sscc_status.dart';
-
 class SSCCCubit extends Cubit<SSCCState> {
   final SSCCService _ssccService;
 

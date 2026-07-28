@@ -10,7 +10,7 @@ class SsccStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = status_rules.statusColor(status);
+    final color = status_rules.statusColor(context, status);
     final label = status_rules.friendlyLabel(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

@@ -4,6 +4,7 @@ import 'package:traqtrace_app/data/models/epcis/validation_rule.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class RuleEditorRouteScreen extends StatefulWidget {
   final String ruleId;
@@ -574,7 +575,8 @@ class _RuleEditorScreenState extends State<RuleEditorScreen> {
                 Navigator.of(context).pop();
               });
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete',
+                style: TextStyle(color: AppColorMapper.errorColor(context))),
           ),
         ],
       ),

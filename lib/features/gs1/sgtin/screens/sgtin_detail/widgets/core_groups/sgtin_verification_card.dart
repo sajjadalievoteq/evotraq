@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_card_helpers.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_info_row.dart';
@@ -33,7 +34,7 @@ class SgtinVerificationCard extends StatelessWidget {
             SgtinInfoRow(
               'Alert Count',
               sgtin.alertCount.toString(),
-              valueColor: Colors.orange.shade700,
+              valueColor: AppColorMapper.warningColor(context),
             ),
             const SizedBox(height: 12),
             SgtinInfoRow(

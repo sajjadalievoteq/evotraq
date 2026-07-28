@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 
 abstract final class OperationStatusUtils {
-  static Color colorFor(OperationStatus status) {
-    return AppColorMapper.operationStatus(status);
+  static Color colorFor(BuildContext context, OperationStatus status) {
+    return AppColorMapper.operationStatusColor(context, status);
   }
 
   static String iconAsset(OperationStatus status) {
-    return switch (status) {
-      OperationStatus.success => AppAssets.iconCheckCircle,
-      OperationStatus.partialSuccess => AppAssets.iconAlert,
-      OperationStatus.failed => AppAssets.iconXCircle,
-      OperationStatus.validationError => AppAssets.iconXCircle,
-      OperationStatus.accepted => AppAssets.iconBox,
-    };
+    return AppColorMapper.operationStatusIcon(status);
   }
 
   static String label(OperationStatus status) {

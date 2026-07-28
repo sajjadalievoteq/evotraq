@@ -14,9 +14,9 @@ import 'package:traqtrace_app/data/models/operations/shipping/shipping_request_m
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/services/reference_data_validation_service.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
-import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/widgets/aggregation_pharma_issues_dialog.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_epc_status_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/utils/shipping_pharma_readiness_checker.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/utils/shipping_operation_step_validator.dart';
@@ -81,6 +81,9 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
 
   late final OperationEpcScanValidator _epcScanValidator =
       OperationEpcScanValidator(getIt<ReferenceDataValidationService>());
+  late final OperationEpcStatusCubit _statusCubit = OperationEpcStatusCubit(
+    service: getIt(),
+  );
 
   @override
   void initState() {
@@ -177,6 +180,7 @@ class _ShippingOperationScreenState extends State<ShippingOperationScreen> {
     _carrierController.dispose();
     _trackingController.dispose();
     _gincNumberController.dispose();
+    _statusCubit.close();
     super.dispose();
   }
 
@@ -357,7 +361,7 @@ _showOperationError(
         barcode,
         alreadyScanned: _scannedEpcs,
         operationLabel: 'shipping',
-        loadStatus: (epc) => getIt<OperationEpcStatusService>().getEpcStatus(epc),
+        loadStatus: _statusCubit.loadStatus,
       );
       final outcome = result.outcome;
       if (!outcome.success) {

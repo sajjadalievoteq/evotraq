@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
@@ -20,7 +21,7 @@ class AlertsPanel extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final highestSeverity = _getHighestSeverity();
-    final highestSeverityColor = AdminHelperMappers.severityColor(highestSeverity);
+    final highestSeverityColor = AdminHelperMappers.severityColor(context, highestSeverity);
 
     return Card(
       color: highestSeverityColor.withOpacity(0.05),
@@ -52,7 +53,7 @@ class AlertsPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            ...alerts.take(3).map((alert) => _buildAlertRow(alert)).toList(),
+            ...alerts.take(3).map((alert) => _buildAlertRow(context, alert)).toList(),
             if (alerts.length > 3)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -70,7 +71,7 @@ class AlertsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildAlertRow(PerformanceAlert alert) {
+  Widget _buildAlertRow(BuildContext context, PerformanceAlert alert) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
@@ -78,14 +79,14 @@ class AlertsPanel extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AdminHelperMappers.severityColor(alert.severity).withOpacity(0.3),
+          color: AdminHelperMappers.severityColor(context, alert.severity).withOpacity(0.3),
         ),
       ),
       child: Row(
         children: [
           TraqIcon(
             AdminHelperMappers.severityIcon(alert.severity),
-            color: AdminHelperMappers.severityColor(alert.severity),
+            color: AdminHelperMappers.severityColor(context, alert.severity),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -120,7 +121,7 @@ class AlertsPanel extends StatelessWidget {
             ),
           if (alert.acknowledged)
             TraqIcon(AppAssets.iconCheck,
-              color: Colors.green,
+              color: AppColorMapper.successColor(context),
               size: 16,
             ),
         ],
@@ -186,14 +187,14 @@ class AlertsPanel extends StatelessWidget {
                               children: [
                                 TraqIcon(
                                   AdminHelperMappers.severityIcon(alert.severity),
-                                  color: AdminHelperMappers.severityColor(alert.severity),
+                                  color: AdminHelperMappers.severityColor(context, alert.severity),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   alert.severity.toUpperCase(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: AdminHelperMappers.severityColor(alert.severity),
+                                    color: AdminHelperMappers.severityColor(context, alert.severity),
                                   ),
                                 ),
                                 const Spacer(),
@@ -236,10 +237,10 @@ class AlertsPanel extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 if (alert.acknowledged)
-                                  const Text(
+                                  Text(
                                     'Acknowledged',
                                     style: TextStyle(
-                                      color: Colors.green,
+                                      color: AppColorMapper.successColor(context),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

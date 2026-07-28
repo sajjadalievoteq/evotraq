@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:traqtrace_app/data/models/epcis/cbv_vocabulary_item.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_master_data_service.dart';
+import 'package:traqtrace_app/features/admin/cbv_vocabulary/utils/cbv_vocabulary_state_utils.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
 import 'admin_cbv_vocabulary_state.dart';
 
@@ -73,7 +74,7 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
   }) async {
     if (state.togglingCodes.contains(code)) return;
 
-    final toggled = _replaceEnabled(current, code, enabled: enabled);
+    final toggled = cbvReplaceEnabled(current, code, enabled: enabled);
     emit(state.copyWith(togglingCodes: {...state.togglingCodes, code}));
     onUpdated(toggled);
 
@@ -84,7 +85,7 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       ));
       _vocabCubit.refresh();
     } catch (e) {
-      final reverted = _replaceEnabled(current, code, enabled: !enabled);
+      final reverted = cbvReplaceEnabled(current, code, enabled: !enabled);
       emit(state.copyWith(
         togglingCodes: {...state.togglingCodes}..remove(code),
       ));
@@ -199,10 +200,10 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
 
 
   Future<void> addPair(String bizCode, String dispCode) async {
-    final key = '$bizCode|$dispCode';
+    final key = cbvPairingKey(bizCode, dispCode);
     if (state.pairingKeys.contains(key)) return;
 
-    final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: true);
+    final updated = cbvPairMapWith(state.pairMap, bizCode, dispCode, add: true);
     emit(state.copyWith(
       pairMap: updated,
       pairingKeys: {...state.pairingKeys, key},
@@ -215,7 +216,7 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       ));
       _vocabCubit.refresh();
     } catch (e) {
-      final reverted = _pairMapWith(state.pairMap, bizCode, dispCode, add: false);
+      final reverted = cbvPairMapWith(state.pairMap, bizCode, dispCode, add: false);
       emit(state.copyWith(
         pairMap: reverted,
         pairingKeys: {...state.pairingKeys}..remove(key),
@@ -225,10 +226,10 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
   }
 
   Future<void> removePair(String bizCode, String dispCode) async {
-    final key = '$bizCode|$dispCode';
+    final key = cbvPairingKey(bizCode, dispCode);
     if (state.pairingKeys.contains(key)) return;
 
-    final updated = _pairMapWith(state.pairMap, bizCode, dispCode, add: false);
+    final updated = cbvPairMapWith(state.pairMap, bizCode, dispCode, add: false);
     emit(state.copyWith(
       pairMap: updated,
       pairingKeys: {...state.pairingKeys, key},
@@ -241,7 +242,7 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
       ));
       _vocabCubit.refresh();
     } catch (e) {
-      final reverted = _pairMapWith(state.pairMap, bizCode, dispCode, add: true);
+      final reverted = cbvPairMapWith(state.pairMap, bizCode, dispCode, add: true);
       emit(state.copyWith(
         pairMap: reverted,
         pairingKeys: {...state.pairingKeys}..remove(key),
@@ -250,35 +251,4 @@ class AdminCbvVocabularyCubit extends Cubit<AdminCbvVocabularyState> {
     }
   }
 
-  Map<String, List<String>> _pairMapWith(
-    Map<String, List<String>> current,
-    String bizCode,
-    String dispCode, {
-    required bool add,
-  }) {
-    final copy = {
-      for (final e in current.entries) e.key: List<String>.from(e.value),
-    };
-    if (add) {
-      copy.putIfAbsent(bizCode, () => []);
-      if (!copy[bizCode]!.contains(dispCode)) {
-        copy[bizCode]!.add(dispCode);
-      }
-    } else {
-      copy[bizCode]?.remove(dispCode);
-    }
-    return copy;
-  }
-
-
-  List<CbvVocabularyItem> _replaceEnabled(
-    List<CbvVocabularyItem> items,
-    String code, {
-    required bool enabled,
-  }) {
-    return items.map((item) {
-      if (item.code != code) return item;
-      return item.copyWith(enabled: enabled);
-    }).toList();
-  }
 }

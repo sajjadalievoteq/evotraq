@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/gs1/widgets/section_label.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/operation_epc_type_utils.dart';
@@ -48,7 +50,14 @@ class OperationReviewComplianceRow extends StatelessWidget {
             missing
                 ? '⚠ Not provided — DSCSA requires the original GINC'
                 : value,
-            style: TextStyle(color: missing ? Colors.orange[700] : null),
+            style: TextStyle(
+              color: missing
+                  ? AppColorMapper.operationStatusColor(
+                      context,
+                      OperationStatus.partialSuccess,
+                    )
+                  : null,
+            ),
           ),
         ),
       ],
@@ -189,7 +198,7 @@ class OperationReviewEpcBadgeList extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final epc = epcs[index];
-                final badgeColor = OperationEpcTypeUtils.colorFromValue(epc);
+                final badgeColor = OperationEpcTypeUtils.colorFromValue(context, epc);
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -1,30 +1,18 @@
 import 'package:traqtrace_app/core/utils/epc_uri_validators.dart' as epc_validators;
-import 'package:traqtrace_app/features/gs1/gln/utils/gln_format.dart';
-import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_format.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_validators.dart'
     as sgtin_validators;
-import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_format.dart';
 
+/// Identifier validation facade — all mod-10 / length rules via [CheckDigitUtils].
 abstract final class Gs1Validator {
-  static bool isValidGTIN(String? value) {
-    if (value == null || value.isEmpty) return false;
-    return GtinFormat.isValidGtin(GtinFormat.stripGtinInput(value));
-  }
+  static bool isValidGTIN(String? value) => CheckDigitUtils.isValidGtin(value);
 
-  static bool isValidGLN(String? value) {
-    if (value == null || value.isEmpty) return false;
-    return GlnFormat.isValidGln(GlnFormat.stripGlnInput(value));
-  }
+  static bool isValidGLN(String? value) => CheckDigitUtils.isValidGln(value);
 
-  static bool isValidSSCC(String? value) {
-    if (value == null || value.isEmpty) return false;
-    return SsccFormat.isValidSscc(SsccFormat.stripSsccInput(value));
-  }
+  static bool isValidSSCC(String? value) => CheckDigitUtils.isValidSscc(value);
 
-  static bool isValidSGTIN(String? gtin, String? serialNumber) {
-    if (!isValidGTIN(gtin)) return false;
-    return sgtin_validators.validateSerialNumber(serialNumber) == null;
-  }
+  static bool isValidSGTIN(String? gtin, String? serialNumber) =>
+      CheckDigitUtils.isValidSgtin(gtin, serialNumber);
 
   static bool isValidEpcUri(String value) {
     return epc_validators.isValidEpcUri(value);

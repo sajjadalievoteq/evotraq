@@ -11,6 +11,7 @@ import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import '../../../data/services/barcode_generation_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 
 class BarcodeGenerationScreen extends StatefulWidget {
@@ -482,18 +483,19 @@ class _BarcodeGenerationScreenState extends State<BarcodeGenerationScreen>
     }
 
     if (_errorMessage != null) {
+      final error = AppColorMapper.errorColor(context);
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.red[100],
+          color: error.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Error',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+              style: TextStyle(fontWeight: FontWeight.bold, color: error),
             ),
             const SizedBox(height: 8),
             Text(_errorMessage!),

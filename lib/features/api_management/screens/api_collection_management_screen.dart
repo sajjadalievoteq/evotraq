@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import '../models/api_collection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
 import '../cubit/api_collection_cubit.dart';
 import '../cubit/api_collection_state.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
@@ -65,7 +67,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
+                  TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
                   const SizedBox(height: 16),
                   Text('Error: ${state.error}'),
                   const SizedBox(height: 16),
@@ -128,11 +130,11 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
           const SizedBox(height: 12),
           Row(
             children: [
-              _buildStatChip('Total', state.totalCollections.toString(), Colors.blue),
+              _buildStatChip('Total', state.totalCollections.toString(), AppColorMapper.infoColor(context)),
               const SizedBox(width: 8),
-              _buildStatChip('Active', state.activeCollections.toString(), Colors.green),
+              _buildStatChip('Active', state.activeCollections.toString(), AppColorMapper.successColor(context)),
               const SizedBox(width: 8),
-              _buildStatChip('Public', state.publicCollections.toString(), Colors.orange),
+              _buildStatChip('Public', state.publicCollections.toString(), AppColorMapper.warningColor(context)),
             ],
           ),
         ],
@@ -251,7 +253,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
           color: isSelected ? Theme.of(context).colorScheme.primaryContainer : null,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: collection.isActive ? Colors.green : Colors.grey,
+              backgroundColor: collection.isActive ? AppColorMapper.successColor(context) : Colors.grey,
               child: Text(
                 collection.code.substring(0, 2).toUpperCase(),
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -265,12 +267,12 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    _buildMiniChip(collection.version, Colors.blue),
+                    _buildMiniChip(collection.version, AppColorMapper.infoColor(context)),
                     const SizedBox(width: 4),
                     if (collection.category != null)
-                      _buildMiniChip(collection.category!, Colors.purple),
+                      _buildMiniChip(collection.category!, OperationPalette.of(context).opUpdateStatus),
                     const SizedBox(width: 4),
-                    _buildMiniChip('${collection.apiCount} APIs', Colors.teal),
+                    _buildMiniChip('${collection.apiCount} APIs', OperationPalette.of(context).statusAccepted),
                   ],
                 ),
               ],
@@ -279,12 +281,14 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (collection.isPublic)
-                  const TraqIcon(AppAssets.iconGlobe, color: Colors.orange, size: 16),
+                  TraqIcon(AppAssets.iconGlobe, color: AppColorMapper.warningColor(context), size: 16),
                 const SizedBox(width: 4),
                 TraqIcon(
                   collection.isActive ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                   size: 16,
-                  color: collection.isActive ? Colors.green : Colors.red,
+                  color: collection.isActive
+                      ? AppColorMapper.successColor(context)
+                      : AppColorMapper.errorColor(context),
                 ),
               ],
             ),
@@ -371,9 +375,9 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                         child: Text(collection.isActive ? 'Deactivate' : 'Activate'),
                       ),
                       const PopupMenuDivider(),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
-                        child: Text('Delete', style: TextStyle(color: Colors.red)),
+                        child: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
                       ),
                     ],
                   ),
@@ -386,7 +390,9 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                     avatar: TraqIcon(
                       collection.isActive ? AppAssets.iconCheck : AppAssets.iconX,
                       size: 16,
-                      color: collection.isActive ? Colors.green : Colors.red,
+                      color: collection.isActive
+                      ? AppColorMapper.successColor(context)
+                      : AppColorMapper.errorColor(context),
                     ),
                     label: Text(collection.statusText),
                   ),
@@ -465,7 +471,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
   }
 
   Widget _buildApiCard(ApiDefinition api, String collectionId) {
-    final methodColor = ApiUiUtils.methodColor(api.httpMethod);
+    final methodColor = ApiUiUtils.methodColor(context, api.httpMethod);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -492,7 +498,9 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
             TraqIcon(
               api.isActive ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
               size: 16,
-              color: api.isActive ? Colors.green : Colors.red,
+              color: api.isActive
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
             ),
             PopupMenuButton<String>(
               onSelected: (value) => _handleApiAction(value, api, collectionId),
@@ -503,9 +511,9 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
                   child: Text(api.isActive ? 'Deactivate' : 'Activate'),
                 ),
                 const PopupMenuDivider(),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
-                  child: Text('Delete', style: TextStyle(color: Colors.red)),
+                  child: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
                 ),
               ],
             ),
@@ -598,7 +606,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                child: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
               ),
             ],
           ),
@@ -658,7 +666,7 @@ class _ApiCollectionManagementScreenState extends State<ApiCollectionManagementS
               TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                child: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
               ),
             ],
           ),

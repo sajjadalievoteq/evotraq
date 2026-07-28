@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -73,7 +74,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           IconButton(
             icon: TraqIcon(
               _isConnected ? AppAssets.iconWifi : AppAssets.iconWifiOff,
-              color: _isConnected ? Colors.green : Colors.red,
+              color: _isConnected
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
             ),
             onPressed: _toggleWebSocketConnection,
             tooltip: _isConnected ? 'Connected to real-time updates' : 'Disconnected',
@@ -153,9 +156,13 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _isConnected ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: _isConnected
+            ? AppColorMapper.successColor(context).withValues(alpha: 0.1)
+            : AppColorMapper.errorColor(context).withValues(alpha: 0.1),
         border: Border.all(
-          color: _isConnected ? Colors.green : Colors.red,
+          color: _isConnected
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(20),
@@ -168,13 +175,17 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 ? AppAssets.iconCheckCircle
                 : AppAssets.iconCircle,
             size: 16,
-            color: _isConnected ? Colors.green : Colors.red,
+            color: _isConnected
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
           ),
           const SizedBox(width: 6),
           Text(
             _isConnected ? 'Live' : 'Offline',
             style: TextStyle(
-              color: _isConnected ? Colors.green : Colors.red,
+              color: _isConnected
+                  ? AppColorMapper.successColor(context)
+                  : AppColorMapper.errorColor(context),
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -297,7 +308,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 children: [
                   TraqIcon(
                     _getNotificationIcon(subscription.subscriptionType),
-                    color: hasActivity ? Colors.blue : Colors.grey,
+                    color: hasActivity ? AppColorMapper.infoColor(context) : Colors.grey,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -327,19 +338,19 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: AppColorMapper.infoColor(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _buildStatColumn('Delivered', stats.successfulNotifications ?? 0, Colors.green),
+                        child: _buildStatColumn('Delivered', stats.successfulNotifications ?? 0, AppColorMapper.successColor(context)),
                       ),
                       Expanded(
-                        child: _buildStatColumn('Failed', stats.failedNotifications ?? 0, Colors.red),
+                        child: _buildStatColumn('Failed', stats.failedNotifications ?? 0, AppColorMapper.errorColor(context)),
                       ),
                       Expanded(
-                        child: _buildStatColumn('Total', stats.totalNotifications ?? 0, Colors.blue),
+                        child: _buildStatColumn('Total', stats.totalNotifications ?? 0, AppColorMapper.infoColor(context)),
                       ),
                     ],
                   ),
@@ -354,14 +365,16 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                         : AppAssets.iconPause,
                     size: 16,
                     color: subscription.status == 'ACTIVE'
-                        ? Colors.green
+                        ? AppColorMapper.successColor(context)
                         : Colors.grey,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     subscription.status ?? 'UNKNOWN',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: subscription.status == 'ACTIVE' ? Colors.green : Colors.grey,
+                      color: subscription.status == 'ACTIVE'
+                          ? AppColorMapper.successColor(context)
+                          : Colors.grey,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -386,7 +399,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.red,
+        color: AppColorMapper.errorColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -478,7 +491,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         children: [
           TraqIcon(AppAssets.iconAlert,
             size: 64,
-            color: Colors.red[300],
+            color: AppColorMapper.errorColor(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

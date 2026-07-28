@@ -14,7 +14,6 @@ import 'package:traqtrace_app/data/models/operations/packing/packing_request_mod
 import 'package:traqtrace_app/data/models/operations/shared/operation_gln_display.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
-import 'package:traqtrace_app/data/services/operations/shared/operation_epc_status_service.dart';
 import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
@@ -35,6 +34,7 @@ import 'package:traqtrace_app/features/operations/shared/utils/operation_scannin
 import 'package:traqtrace_app/features/operations/packing/utils/packing_submit_error_message.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_epc_status_cubit.dart';
 
 class PackingOperationScreen extends StatefulWidget {
   const PackingOperationScreen({super.key});
@@ -71,6 +71,9 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
   AggregationPharmaReadinessChecker? _pharmaReadinessChecker;
   late final OperationEpcScanValidator _epcScanValidator =
       OperationEpcScanValidator(getIt<ReferenceDataValidationService>());
+  late final OperationEpcStatusCubit _statusCubit = OperationEpcStatusCubit(
+    service: getIt(),
+  );
 
   bool _validateStep0Silent() => _packingLocationGLN != null;
 
@@ -158,6 +161,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
     _workOrderController.dispose();
     _batchNumberController.dispose();
     _productionOrderController.dispose();
+    _statusCubit.close();
     super.dispose();
   }
 
@@ -344,7 +348,7 @@ class _PackingOperationScreenState extends State<PackingOperationScreen> {
       barcode,
       alreadyScanned: _scannedEPCs,
       operationLabel: 'packing',
-      loadStatus: (epc) => getIt<OperationEpcStatusService>().getEpcStatus(epc),
+      loadStatus: _statusCubit.loadStatus,
     );
     final outcome = result.outcome;
     if (!outcome.success) {

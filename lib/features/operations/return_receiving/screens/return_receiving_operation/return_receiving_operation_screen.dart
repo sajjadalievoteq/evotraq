@@ -26,7 +26,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_split_cubit.dart';
 import 'package:traqtrace_app/core/utils/operation_error_translator.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';

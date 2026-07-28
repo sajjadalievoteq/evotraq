@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/api_exception.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/notifications/domain/models/notification_subscription.dart'
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart'
     as domain;
 
 class NotificationApiService {

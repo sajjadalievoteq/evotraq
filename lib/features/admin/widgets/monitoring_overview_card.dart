@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
@@ -22,7 +23,7 @@ class MonitoringOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final overallStatus = _getOverallStatus();
     final overallStatusColor =
-        AdminHelperMappers.monitoringOverallStatusColor(overallStatus);
+        AdminHelperMappers.monitoringOverallStatusColor(context, overallStatus);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -71,6 +72,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                     'Performance',
                     _getPerformanceStatus(),
                     AdminHelperMappers.monitoringPerformanceStatusColor(
+                      context,
                       _getPerformanceStatus(),
                     ),
                   ),
@@ -81,6 +83,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                     'Storage',
                     _getStorageStatus(),
                     AdminHelperMappers.monitoringStorageStatusColor(
+                      context,
                       _getStorageStatus(),
                     ),
                   ),
@@ -91,6 +94,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                     'Integrity',
                     _getIntegrityStatus(),
                     AdminHelperMappers.monitoringIntegrityStatusColor(
+                      context,
                       _getIntegrityStatus(),
                     ),
                   ),
@@ -101,6 +105,7 @@ class MonitoringOverviewCard extends StatelessWidget {
                     'Alerts',
                     _getAlertsStatus(),
                     AdminHelperMappers.monitoringAlertsStatusColor(
+                      context,
                       _getAlertsStatus(),
                     ),
                   ),
@@ -112,19 +117,19 @@ class MonitoringOverviewCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: AppColorMapper.errorColor(context).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  border: Border.all(color: AppColorMapper.errorColor(context).withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 20),
+                    TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context), size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'System has ${alerts.length} active alert${alerts.length != 1 ? 's' : ''}',
-                        style: const TextStyle(
-                          color: Colors.red,
+                        style: TextStyle(
+                          color: AppColorMapper.errorColor(context),
                           fontWeight: FontWeight.w500,
                         ),
                       ),

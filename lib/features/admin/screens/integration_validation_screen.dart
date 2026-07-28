@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
@@ -9,7 +9,12 @@ import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
 class IntegrationValidationScreen extends StatefulWidget {
-  const IntegrationValidationScreen({Key? key}) : super(key: key);
+  const IntegrationValidationScreen({
+    Key? key,
+    this.embedded = false,
+  }) : super(key: key);
+
+  final bool embedded;
 
   @override
   State<IntegrationValidationScreen> createState() =>
@@ -26,9 +31,7 @@ class _IntegrationValidationScreenState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _validationService ??= IntegrationValidationService(
-      dioService: getIt<DioService>(),
-    );
+    _validationService ??= getIt<IntegrationValidationService>();
   }
 
   Future<void> _runAllTests() async {
@@ -80,6 +83,20 @@ class _IntegrationValidationScreenState
   @override
   Widget build(BuildContext context) {
     final primaryColor = context.colors.primary;
+    final body = _isLoading
+        ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const AppLoadingIndicator(),
+                const SizedBox(height: 16),
+                const Text('Running integration validation tests...'),
+              ],
+            ),
+          )
+        : _buildBody();
+
+    if (widget.embedded) return body;
 
     return Scaffold(
       appBar: AppBar(
@@ -87,18 +104,7 @@ class _IntegrationValidationScreenState
         backgroundColor: primaryColor,
       ),
       drawer: const AppDrawer(),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const AppLoadingIndicator(),
-                  const SizedBox(height: 16),
-                  const Text('Running integration validation tests...'),
-                ],
-              ),
-            )
-          : _buildBody(),
+      body: body,
     );
   }
 
@@ -108,13 +114,13 @@ class _IntegrationValidationScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
+            TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context), size: 48),
             const SizedBox(height: 16),
             Text(
               'Error',
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.red),
+              ).textTheme.titleLarge?.copyWith(color: AppColorMapper.errorColor(context)),
             ),
             const SizedBox(height: 8),
             Text(_errorMessage!),
@@ -316,14 +322,14 @@ class _IntegrationValidationScreenState
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
+                          color: AppColorMapper.infoColor(context).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.blue, width: 1),
+                          border: Border.all(color: AppColorMapper.infoColor(context), width: 1),
                         ),
                         child: Text(
                           'Integration Test',
                           style: TextStyle(
-                            color: Colors.blue[700],
+                            color: AppColorMapper.infoColor(context),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -370,14 +376,14 @@ class _IntegrationValidationScreenState
     stepWidgets.add(
       Row(
         children: [
-          TraqIcon(AppAssets.iconCheck, size: 20, color: Colors.blue[700]),
+          TraqIcon(AppAssets.iconCheck, size: 20, color: AppColorMapper.infoColor(context)),
           const SizedBox(width: 8),
           Text(
             'Validation Steps',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
-              color: Colors.blue[700],
+              color: AppColorMapper.infoColor(context),
             ),
           ),
         ],
@@ -411,8 +417,8 @@ class _IntegrationValidationScreenState
                     : (isFailed ? AppAssets.iconXCircle : AppAssets.iconCircle),
                 size: 18,
                 color: isPassed
-                    ? Colors.green
-                    : (isFailed ? Colors.red : Colors.grey),
+                    ? AppColorMapper.successColor(context)
+                    : (isFailed ? AppColorMapper.errorColor(context) : Colors.grey),
               ),
               const SizedBox(width: 8),
               Expanded(child: Text(step)),
@@ -430,10 +436,10 @@ class _IntegrationValidationScreenState
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: passed
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+            ? AppColorMapper.successColor(context).withOpacity(0.1)
+            : AppColorMapper.errorColor(context).withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: passed ? Colors.green : Colors.red, width: 1),
+        border: Border.all(color: passed ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -441,7 +447,7 @@ class _IntegrationValidationScreenState
           TraqIcon(
             passed ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
             size: 16,
-            color: passed ? Colors.green : Colors.red,
+            color: passed ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
           ),
           const SizedBox(width: 4),
           Text(

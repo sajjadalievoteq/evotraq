@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 
 class OperationContainerSelectedCard extends StatelessWidget {
   const OperationContainerSelectedCard({
@@ -15,10 +16,13 @@ class OperationContainerSelectedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        AppColorMapper.operationTypeColor(context, OperationType.packing);
     return Card(
-      color: Colors.green[50],
+      color: AppColorMapper.operationTypeSoft(context, OperationType.packing),
       child: ListTile(
-        leading: TraqIcon(NavIcons.packaging, color: Colors.green),
+        leading: TraqIcon(AppColorMapper.operationTypeIcon(OperationType.packing),
+            color: color),
         title: const Text('Container Selected'),
         subtitle: Text(
           containerId,

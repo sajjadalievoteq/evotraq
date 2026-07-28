@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/epcis/presentation/widgets/transformation
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class TransformationEventsListScreen extends StatefulWidget {
   const TransformationEventsListScreen({Key? key}) : super(key: key);
@@ -523,7 +524,13 @@ class _TransformationEventsListScreenState
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
+                TraqIcon(AppAssets.iconTransform,
+                  color: AppColorMapper.eventTypeColor(
+                    context,
+                    'transformation',
+                    scheme: AppEventColorScheme.epcis,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'GS1 Transformation Events',
@@ -560,7 +567,7 @@ class _TransformationEventsListScreenState
               children: [
                 TraqIcon(AppAssets.iconAlert,
                   size: 48,
-                  color: Colors.redAccent,
+                  color: AppColorMapper.errorColor(context),
                 ),
                 const SizedBox(height: 16),
                 Text('Error: ${state.errorMessage}'),
@@ -624,6 +631,11 @@ class _TransformationEventsListScreenState
     final formattedDate = DateFormat(
       'yyyy-MM-dd HH:mm',
     ).format(event.eventTime);
+    final transformColor = AppColorMapper.eventTypeColor(
+      context,
+      'transformation',
+      scheme: AppEventColorScheme.epcis,
+    );
 
     return ListTile(
       onTap: () => _navigateToEventDetails(event),
@@ -632,10 +644,10 @@ class _TransformationEventsListScreenState
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.indigo.shade100,
+          color: transformColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: TraqIcon(AppAssets.iconTransform, color: Colors.indigo),
+        child: TraqIcon(AppAssets.iconTransform, color: transformColor),
       ),
       title: Text(
         'ID: ${event.transformationID}',

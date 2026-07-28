@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
+import 'package:traqtrace_app/features/operations/shared/operation_epc_scan_validator.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_epc_product_subtitle.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_hierarchy_row.dart';
 
@@ -54,7 +57,10 @@ class OperationScannedItemsList extends StatelessWidget {
                   '${scannedEpcs.length} EPC(s) $queuedLabel',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.teal[800],
+                    color: AppColorMapper.operationEpcTypeColor(
+                      context,
+                      OperationScanItemType.sscc,
+                    ),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -98,29 +104,43 @@ class OperationScannedItemsList extends StatelessWidget {
                           productName: itemProductNames[epc],
                         ),
                         if (warning != null)
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: Colors.amber, width: 1),
-                            ),
-                            child: Text(
-                              'Status: $warning — may be rejected',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.amber,
-                              ),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final warn = AppColorMapper.operationStatusColor(
+                                context,
+                                OperationStatus.partialSuccess,
+                              );
+                              return Container(
+                                margin: const EdgeInsets.only(top: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: warn.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: warn, width: 1),
+                                ),
+                                child: Text(
+                                  'Status: $warning — may be rejected',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: warn,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                       ],
                     ),
                     trailing: IconButton(
-                      icon: TraqIcon(AppAssets.iconTrash, color: Colors.red),
+                      icon: TraqIcon(
+                        AppAssets.iconTrash,
+                        color: AppColorMapper.operationStatusColor(
+                          context,
+                          OperationStatus.failed,
+                        ),
+                      ),
                       visualDensity: VisualDensity.compact,
                       onPressed: () => onRemoveItem(index),
                     ),

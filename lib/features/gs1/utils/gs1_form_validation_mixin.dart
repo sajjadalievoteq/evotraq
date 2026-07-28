@@ -66,33 +66,31 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
   }
 
   String? validateGTIN(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'GTIN Code is required';
-    }
-    if (!RegExp(r'^\d{8}$|^\d{12,14}$').hasMatch(value)) {
-      return 'Invalid GTIN format. Must be 8, 12, 13, or 14 digits.';
-    }
-    return null;
+    return CheckDigitUtils.validateGtin(value)?.replaceFirst('GTIN', 'GTIN Code');
   }
 
   String? validateGLN(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'GLN Code is required';
-    }
-    if (!RegExp(r'^\d{13}$').hasMatch(value)) {
-      return 'Invalid GLN format. Must be exactly 13 digits.';
-    }
-    return null;
+    return CheckDigitUtils.validateGln(value)?.replaceFirst('GLN', 'GLN Code');
   }
 
   String? validateSGTIN(String? value) {
     if (value == null || value.isEmpty) {
       return 'SGTIN is required';
     }
-    if (Gs1CanonicalIdentifier.isSgtin(value) ||
-        RegExp(r'\(01\)\d{14}\(21\)\w+').hasMatch(value)) {
-      return null;
+    final ai = RegExp(r'\(01\)(\d{8,14})\(21\)(.+)').firstMatch(value);
+    if (ai != null) {
+      return CheckDigitUtils.validateSgtin(ai.group(1), ai.group(2));
     }
+    final dl = RegExp(
+      r'https://id\.gs1\.org/01/(\d{14})/21/([^/?#]+)',
+    ).firstMatch(value);
+    if (dl != null) {
+      return CheckDigitUtils.validateSgtin(
+        dl.group(1),
+        Uri.decodeComponent(dl.group(2)!),
+      );
+    }
+    if (Gs1CanonicalIdentifier.isSgtin(value)) return null;
     return 'Invalid SGTIN format. Expected https://id.gs1.org/01/…/21/…';
   }
 
@@ -100,11 +98,12 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
     if (value == null || value.isEmpty) {
       return 'SSCC is required';
     }
-    if (Gs1CanonicalIdentifier.isSscc(value) ||
-        RegExp(r'\(00\)\d{18}').hasMatch(value)) {
-      return null;
+    if (Gs1CanonicalIdentifier.isSscc(value)) return null;
+    final aiMatch = RegExp(r'\(00\)(\d{18})').firstMatch(value);
+    if (aiMatch != null) {
+      return CheckDigitUtils.validateSscc(aiMatch.group(1));
     }
-    return 'Invalid SSCC format. Expected https://id.gs1.org/00/…';
+    return CheckDigitUtils.validateSscc(value);
   }
 
   String? validateCompanyPrefix(String? value) {
@@ -134,15 +133,14 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
 
     switch (ai) {
       case '00':
-        if (!RegExp(r'^\d{18}$').hasMatch(value)) {
-          return 'Invalid SSCC. Must be exactly 18 digits.';
-        }
-        break;
+        return CheckDigitUtils.validateSscc(value);
       case '01':
-        if (!RegExp(r'^\d{14}$').hasMatch(value)) {
-          return 'Invalid GTIN. Must be exactly 14 digits.';
-        }
-        break;
+        // AI (01) encodes GTIN-14 (zero-pad shorter GTINs first when applicable).
+        return CheckDigitUtils.validateGS1CheckDigit(
+          value,
+          allowedLengths: const {14},
+          label: 'GTIN',
+        );
       case '10':
         if (value.length > 20) {
           return 'Batch/Lot number too long. Maximum 20 characters.';
@@ -158,15 +156,12 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
         }
         break;
       case '21':
-        if (value.length > 20) {
-          return 'Serial number too long. Maximum 20 characters.';
+        if (!CheckDigitUtils.sgtinSerialCharset.hasMatch(value)) {
+          return 'Serial number must be 1–20 characters using GS1 AI‑21 charset';
         }
         break;
       case '414':
-        if (!RegExp(r'^\d{13}$').hasMatch(value)) {
-          return 'Invalid GLN. Must be exactly 13 digits.';
-        }
-        break;
+        return CheckDigitUtils.validateGln(value);
     }
 
     return null;

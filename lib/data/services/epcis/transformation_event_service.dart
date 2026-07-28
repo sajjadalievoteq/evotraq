@@ -21,6 +21,40 @@ class TransformationEventService {
     };
   }
 
+  Future<List<TransformationEvent>> getTransformationEvents({
+    int page = 0,
+    int size = 100,
+    String sortBy = 'eventTime',
+    String direction = 'DESC',
+  }) async {
+    final headers = await _getHeaders();
+    final response = await _dioService.get(
+      _baseUrl,
+      queryParameters: {
+        'page': '$page',
+        'size': '$size',
+        'sortBy': sortBy,
+        'direction': direction,
+      },
+      headers: headers,
+      responseType: ResponseType.plain,
+      acceptAllStatusCodes: true,
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.data);
+      if (data['content'] != null && data['content'] is List) {
+        return (data['content'] as List)
+            .map((item) => TransformationEvent.fromJson(item))
+            .toList();
+      }
+      throw Exception('Invalid response format');
+    }
+    throw Exception(
+      'Failed to load transformation events: ${response.statusCode}',
+    );
+  }
+
   Future<TransformationEvent> getTransformationEventById(String id) async {
     final headers = await _getHeaders();
     final response = await _dioService.get(

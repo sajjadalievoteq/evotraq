@@ -5,13 +5,10 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/config/router_not_found_screen.dart';
 import 'package:traqtrace_app/core/config/traq_router_transitions.dart';
 import 'package:traqtrace_app/core/config/splash_redirect_utils.dart';
-import 'package:traqtrace_app/features/barcode/screens/barcode_generation_screen.dart';
-import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabulary_management_screen.dart';
-import 'package:traqtrace_app/features/admin/screens/gs1_validation_screen.dart';
+import 'package:traqtrace_app/features/admin/cbv_vocabulary/screens/cbv_vocabulary_management/cbv_vocabulary_management_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/performance_test_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/event_generation_test_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/industry_test_data_screen.dart';
-import 'package:traqtrace_app/features/admin/screens/integration_validation_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/monitoring_dashboard_screen.dart';
 import 'package:traqtrace_app/features/admin/widgets/performance_optimization_dashboard.dart';
 import 'package:traqtrace_app/features/admin/screens/database_partitioning_dashboard.dart';
@@ -27,7 +24,8 @@ import 'package:traqtrace_app/features/notifications/presentation/widgets/notifi
 import 'package:traqtrace_app/features/gs1/sgtin/widgets/sgtin_shell.dart';
 import 'package:traqtrace_app/features/epcis/widgets/epcis_shell.dart';
 import 'package:traqtrace_app/features/api_management/widgets/api_management_shell.dart';
-import 'package:traqtrace_app/features/gs1/screens/epc_conversion_screen.dart';
+import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
+import 'package:traqtrace_app/features/gs1_tools/screens/gs1_tools_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln/gln_screen.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
@@ -37,11 +35,9 @@ import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin_detail/sgtin_deta
 import 'package:traqtrace_app/features/gs1/sgtin/screens/sgtin/sgtin_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc/sscc_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen.dart';
-import 'package:traqtrace_app/features/gs1/screens/validation/gs1_validation_demo_screen.dart';
 import 'package:traqtrace_app/features/home/screens/home/home_screen.dart';
 import 'package:traqtrace_app/features/user/screens/profile/profile_screen.dart';
 import 'package:traqtrace_app/features/admin/screens/system_settings_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_detail/object_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/utils/object_event_route_constants.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_batch_import/object_event_batch_import_screen.dart';
@@ -50,7 +46,6 @@ import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event/aggregation_event_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_detail/aggregation_event_detail_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_form/aggregation_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/screens/aggregation_event_hierarchy/aggregation_event_hierarchy_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_event_form_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_events_help_screen.dart';
@@ -58,10 +53,7 @@ import 'package:traqtrace_app/features/epcis/presentation/transaction_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/transaction_events/screens/transaction_document_help_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/transformation_events/screens/transformation_events_list_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/transformation_events/screens/transformation_event_form_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/query/screens/advanced_query_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/query/screens/traversal_query_screen.dart';
 import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_generic_event_detail_screen.dart';
-import 'package:traqtrace_app/features/epcis/presentation/screens/epcis_serialization_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping/shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation/shipping_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/shipping_operation_detail_screen.dart';
@@ -72,7 +64,7 @@ import 'package:traqtrace_app/features/operations/receiving/screens/receiving_op
 import 'package:traqtrace_app/features/operations/receiving/screens/receiving_operation/receiving_operation_screen.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping/return_shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation/return_shipping_operation_screen.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_context.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/return_shipping_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping/cancel_shipping_screen.dart';
 import 'package:traqtrace_app/features/operations/cancel_shipping/screens/cancel_shipping_operation/cancel_shipping_operation_screen.dart';
@@ -101,7 +93,6 @@ import 'package:traqtrace_app/features/notifications/presentation/screens/notifi
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_management_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/subscription_details_screen.dart';
 import 'package:traqtrace_app/features/notifications/presentation/screens/webhook_configuration_screen.dart';
-import 'package:traqtrace_app/features/barcode/screens/gs1_barcode_scanner_screen.dart';
 import 'package:traqtrace_app/features/epcis/routes/transaction_event_validation_demo_route.dart';
 import 'package:traqtrace_app/features/product_journey/screens/JourneyDashboard/journey_dashboard_screen.dart';
 import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/product_hierarchy_screen.dart';
@@ -435,22 +426,15 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminGs1ValidationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const GS1ValidationScreen(),
-        ),
         redirect: (context, state) {
           if (!authCubit.state.isAuthenticated) {
-            // Top-level redirect owns login?from= while auth settles.
             return null;
           }
           final user = authCubit.state.user;
-
           if (user?.role != 'ADMIN') {
             return Constants.loginRoute;
           }
-
-          return null;
+          return '${Constants.gs1ToolsRoute}?tool=batch';
         },
       ),
       GoRoute(
@@ -515,22 +499,13 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.adminIntegrationValidationRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const IntegrationValidationScreen(),
-        ),
+        // Integration self-tests write/delete DB rows and are not user-facing.
+        // Backend service remains @Profile("!prod") for CI/dev only.
         redirect: (context, state) {
           if (!authCubit.state.isAuthenticated) {
-            // Top-level redirect owns login?from= while auth settles.
             return null;
           }
-          final user = authCubit.state.user;
-
-          if (user?.role != 'ADMIN') {
-            return Constants.homeRoute;
-          }
-
-          return null;
+          return '${Constants.gs1ToolsRoute}?tool=batch';
         },
       ),
       GoRoute(
@@ -604,15 +579,12 @@ class AppRouter {
           ),
           redirect: (context, state) {
             if (!authCubit.state.isAuthenticated) {
-              // Top-level redirect owns login?from= while auth settles.
               return null;
             }
             final user = authCubit.state.user;
-
             if (user?.role != 'ADMIN') {
               return Constants.homeRoute;
             }
-
             return null;
           },
         ),
@@ -1154,29 +1126,47 @@ class AppRouter {
         ],
       ),
       GoRoute(
+        path: Constants.gs1ToolsRoute,
+        pageBuilder: (context, state) {
+          final toolId = state.uri.queryParameters['tool'];
+          return TraqRouterTransitions.fadeThroughPage(
+            key: state.pageKey,
+            child: Gs1ToolsScreen(
+              initialTool: Gs1ToolKindX.fromId(toolId),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: Constants.validationWorkbenchRoute,
+        redirect: (context, state) {
+          final sectionId =
+              (state.uri.queryParameters['section'] ?? '').toLowerCase();
+          if (sectionId == 'rules' || sectionId == 'validation-rules') {
+            return Constants.adminValidationRulesRoute;
+          }
+          if (sectionId == 'batch' ||
+              sectionId == 'tests' ||
+              sectionId == 'gs1-validation' ||
+              sectionId == 'integration') {
+            return '${Constants.gs1ToolsRoute}?tool=batch';
+          }
+          return '${Constants.gs1ToolsRoute}?tool=identifier';
+        },
+      ),
+      GoRoute(
         path: Constants.gs1EpcConversionRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const EPCConversionScreen(),
-        ),
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=epc',
       ),
       GoRoute(
         path: Constants.gs1ValidationDemoRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const GS1ValidationDemoScreen(),
-        ),
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=validator',
       ),
       ShellRoute(
         builder: (context, state, child) => EpcisShell(child: child),
         routes: [
-        GoRoute(
-          path: Constants.epcisEventsRoute,
-          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-            key: state.pageKey,
-            child: const EPCISEventsListScreen(),
-          ),
-        ),
         GoRoute(
           path: Constants.epcisObjectEventsRoute,
           pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
@@ -1203,30 +1193,6 @@ class AppRouter {
           pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
             key: state.pageKey,
             child: const TransformationEventsListScreen(),
-          ),
-        ),
-
-        GoRoute(
-          path: Constants.epcisAdvancedQueryRoute,
-          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-            key: state.pageKey,
-            child: const AdvancedQueryScreen(),
-          ),
-        ),
-
-        GoRoute(
-          path: Constants.epcisTraversalQueryRoute,
-          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-            key: state.pageKey,
-            child: const TraversalQueryScreen(),
-          ),
-        ),
-
-        GoRoute(
-          path: Constants.epcisSerializationRoute,
-          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-            key: state.pageKey,
-            child: const EPCISSerializationScreen(),
           ),
         ),
 
@@ -1361,23 +1327,6 @@ class AppRouter {
               key: state.pageKey,
               child: TransformationEventFormScreen(
                 transformationEventId: transformationEventId,
-              ),
-            );
-          },
-        ),
-        GoRoute(
-          path: Constants.epcisAggregationEventHierarchyRoute,
-          pageBuilder: (context, state) {
-            final epc = state.pathParameters['epc'] ?? '';
-            final Map<String, dynamic> extra =
-                (state.extra as Map<String, dynamic>?) ?? {};
-            final isParent = extra['isParent'] as bool? ?? true;
-
-            return TraqRouterTransitions.sharedAxisHorizontalPage(
-              key: state.pageKey,
-              child: AggregationEventHierarchyScreen(
-                epc: epc,
-                isParent: isParent,
               ),
             );
           },
@@ -1703,27 +1652,23 @@ class AppRouter {
       ),
       GoRoute(
         path: Constants.barcodeScanRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const GS1BarcodeScannerScreen(title: 'GS1 Barcode Scanner'),
-        ),
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=barcode',
       ),
       GoRoute(
         path: Constants.barcodeGenerateRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const BarcodeGenerationScreen(),
-        ),
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=barcode',
+      ),
+      GoRoute(
+        path: Constants.epcisSerializationRoute,
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=serialize-convert',
       ),
       GoRoute(
         path: Constants.barcodeVerifyRoute,
-        pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-          key: state.pageKey,
-          child: const GS1BarcodeScannerScreen(
-            title: 'Verify GS1 Barcode',
-            verifyWithBackend: true,
-          ),
-        ),
+        redirect: (context, state) =>
+            '${Constants.gs1ToolsRoute}?tool=barcode',
       ),
       TransactionEventValidationDemoRoute.getRoute(),
       ShellRoute(
@@ -1731,10 +1676,7 @@ class AppRouter {
         routes: [
         GoRoute(
           path: Constants.demoValidationRulesRoute,
-          pageBuilder: (context, state) => TraqRouterTransitions.fadeThroughPage(
-            key: state.pageKey,
-            child: const ValidationRuleManagementScreen(),
-          ),
+          redirect: (context, state) => Constants.adminValidationRulesRoute,
         ),
         ],
       ),

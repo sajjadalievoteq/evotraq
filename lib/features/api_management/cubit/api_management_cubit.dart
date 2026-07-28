@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/api_management/models/api_audit.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
-import 'package:traqtrace_app/features/api_management/models/partner_credential.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_audit.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/partner_credential.dart';
 
 import '../../../data/services/api_management_service.dart';
 
@@ -75,13 +75,8 @@ class ApiManagementCubit extends Cubit<ApiManagementState> {
   final ApiManagementService _service;
 
   ApiManagementCubit({
-    required DioService dioService,
     ApiManagementService? service,
-  }) : _service =
-           service ??
-           ApiManagementService(
-             dioService: dioService,
-           ),
+  }) : _service = service ?? getIt<ApiManagementService>(),
        super(const ApiManagementState());
 
   void _setLoading(bool loading) {

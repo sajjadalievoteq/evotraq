@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
@@ -69,11 +70,11 @@ class JobQueueManagementScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.shade100,
+                                    color: AppColorMapper.infoColor(context).withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: TraqIcon(AppAssets.iconList,
-                                    color: Colors.blue.shade700,
+                                    color: AppColorMapper.infoColor(context),
                                     size: 24,
                                   ),
                                 ),
@@ -101,13 +102,13 @@ class JobQueueManagementScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
+                                    color: AppColorMapper.successColor(context).withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
                                     'Phase 3.3',
                                     style: TextStyle(
-                                      color: Colors.green.shade700,
+                                      color: AppColorMapper.successColor(context),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12,
                                     ),
@@ -139,11 +140,11 @@ class JobQueueManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            TraqIcon(AppAssets.iconInfo, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Job Queue Management Help'),
+            TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context)),
+            const SizedBox(width: 8),
+            const Text('Job Queue Management Help'),
           ],
         ),
         content: const SingleChildScrollView(

@@ -12,6 +12,7 @@ import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/serial_entry_field.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/sscc_entry_field.dart';
 import 'package:traqtrace_app/features/epcis/validators/epcis_epc_validators.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
 
@@ -276,7 +277,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
             ),
           ],
         ],
@@ -338,7 +339,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
             ),
           ],
         ],
@@ -411,7 +412,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
             ),
           ],
         ],
@@ -495,7 +496,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
             ),
           ],
         ],
@@ -560,7 +561,7 @@ class _EPCConversionScreenState extends State<EPCConversionScreen> with SingleTi
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
             ),
           ],
         ],

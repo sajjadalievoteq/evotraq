@@ -1,11 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
 import 'package:traqtrace_app/data/services/notification_api_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_state.dart';
-import 'package:traqtrace_app/features/notifications/domain/models/notification_subscription.dart';
+
 
 import 'notification_system_test.mocks.dart';
 

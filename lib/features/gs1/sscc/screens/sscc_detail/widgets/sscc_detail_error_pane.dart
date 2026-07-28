@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SsccDetailErrorPane extends StatelessWidget {
   const SsccDetailErrorPane({
@@ -19,7 +20,11 @@ class SsccDetailErrorPane extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
+          TraqIcon(
+            AppAssets.iconAlert,
+            color: AppColorMapper.errorColor(context),
+            size: 48,
+          ),
           const SizedBox(height: 16),
           Text(
             errorMessage ?? SsccUiConstants.errorGeneric,

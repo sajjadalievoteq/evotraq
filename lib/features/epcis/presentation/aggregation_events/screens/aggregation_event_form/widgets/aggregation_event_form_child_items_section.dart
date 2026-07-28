@@ -6,6 +6,7 @@ import 'package:traqtrace_app/features/epcis/presentation/aggregation_events/scr
 import 'package:traqtrace_app/features/epcis/presentation/object_events/widgets/object_event_form_section_card.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class AggregationEventFormChildItemsSection extends StatelessWidget {
   const AggregationEventFormChildItemsSection({
@@ -82,7 +83,7 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 4),
                         child: IconButton(
                           icon: TraqIcon(AppAssets.iconTrash,
-                            color: Colors.red,
+                            color: AppColorMapper.errorColor(context),
                             size: 20,
                           ),
                           tooltip: 'Remove EPC',
@@ -130,7 +131,10 @@ class AggregationEventFormChildItemsSection extends StatelessWidget {
                           const Spacer(),
                           if (quantityRows.length > 1)
                             IconButton(
-                              icon: const TraqIcon(AppAssets.iconTrash, color: Colors.red, size: 20),
+                              icon: TraqIcon(AppAssets.iconTrash,
+                                color: AppColorMapper.errorColor(context),
+                                size: 20,
+                              ),
                               onPressed: () => onRemoveQuantityRow(index, row),
                             ),
                         ],

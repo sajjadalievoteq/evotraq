@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
-import 'package:traqtrace_app/features/api_management/models/service_account.dart';
+import 'package:traqtrace_app/data/models/api_management/service_account.dart';
 import 'package:traqtrace_app/features/api_management/providers/service_account_provider.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -78,13 +80,15 @@ class _ServiceAccountManagementScreenState
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColorMapper.infoSoft(context),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(
+          color: AppColorMapper.infoColor(context).withValues(alpha: 0.35),
+        ),
       ),
       child: Row(
         children: [
-          TraqIcon(AppAssets.iconInfo, color: Colors.blue.shade700),
+          TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context)),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
@@ -105,9 +109,9 @@ class _ServiceAccountManagementScreenState
         children: [
           _buildStatChip('Total', state.totalAccounts, Colors.grey),
           const SizedBox(width: 8),
-          _buildStatChip('Active', state.activeAccountsCount, Colors.green),
+          _buildStatChip('Active', state.activeAccountsCount, AppColorMapper.successColor(context)),
           const SizedBox(width: 8),
-          _buildStatChip('Inactive', state.inactiveAccounts.length, Colors.red),
+          _buildStatChip('Inactive', state.inactiveAccounts.length, AppColorMapper.errorColor(context)),
         ],
       ),
     );
@@ -276,11 +280,11 @@ class _ServiceAccountManagementScreenState
                       child: Text('Rotate Secret'),
                     ),
                     if (account.isActive)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'deactivate',
                         child: Text(
                           'Deactivate',
-                          style: TextStyle(color: Colors.orange),
+                          style: TextStyle(color: AppColorMapper.warningColor(context)),
                         ),
                       )
                     else
@@ -288,11 +292,11 @@ class _ServiceAccountManagementScreenState
                         value: 'activate',
                         child: Text('Activate'),
                       ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Text(
                         'Delete',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: AppColorMapper.errorColor(context)),
                       ),
                     ),
                   ],
@@ -330,7 +334,7 @@ class _ServiceAccountManagementScreenState
                   _buildInfoChip(
                     'Expires: ${ApiUiUtils.formatDate(account.expiresAt!)}',
                     NavIcons.epcisEvents,
-                    color: account.isExpired ? Colors.red : null,
+                    color: account.isExpired ? AppColorMapper.errorColor(context) : null,
                   ),
               ],
             ),
@@ -360,13 +364,19 @@ class _ServiceAccountManagementScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade100 : Colors.red.shade100,
+        color: OperationPalette.soft(
+          isActive
+              ? AppColorMapper.successColor(context)
+              : AppColorMapper.errorColor(context),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isActive ? Colors.green.shade800 : Colors.red.shade800,
+          color: isActive
+              ? AppColorMapper.successColor(context)
+              : AppColorMapper.errorColor(context),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -476,7 +486,7 @@ class _ServiceAccountManagementScreenState
                 context.showSuccess('${account.name} deactivated');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.orange),
+            style: TextButton.styleFrom(foregroundColor: AppColorMapper.warningColor(context)),
             child: const Text('Deactivate'),
           ),
         ],
@@ -506,7 +516,7 @@ class _ServiceAccountManagementScreenState
                 context.showSuccess('${account.name} deleted');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColorMapper.errorColor(context)),
             child: const Text('Delete'),
           ),
         ],
@@ -746,7 +756,7 @@ class _CredentialsDisplayDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          TraqIcon(AppAssets.iconCheck, color: Colors.green.shade600),
+          TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context)),
           const SizedBox(width: 8),
           const Text('Credentials Created'),
         ],
@@ -760,13 +770,15 @@ class _CredentialsDisplayDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
+                color: OperationPalette.soft(AppColorMapper.warningColor(context)),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(
+                  color: AppColorMapper.warningColor(context).withValues(alpha: 0.35),
+                ),
               ),
               child: Row(
                 children: [
-                  TraqIcon(AppAssets.iconAlert, color: Colors.amber.shade700),
+                  TraqIcon(AppAssets.iconAlert, color: AppColorMapper.warningColor(context)),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(

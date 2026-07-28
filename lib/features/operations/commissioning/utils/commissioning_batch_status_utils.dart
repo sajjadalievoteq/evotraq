@@ -4,8 +4,8 @@ import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/operations/commissioning/commissioning_models.dart';
 
 abstract final class CommissioningBatchStatusUtils {
-  static Color color(CommissioningBatchStatus status) {
-    return AppColorMapper.commissioningBatchStatus(status);
+  static Color color(BuildContext context, CommissioningBatchStatus status) {
+    return AppColorMapper.commissioningBatchStatusColor(context, status);
   }
 
   static String label(CommissioningBatchStatus status) {

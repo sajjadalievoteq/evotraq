@@ -69,7 +69,6 @@ abstract final class NavIcons {
   static const String aggregationEvents = AppAssets.iconAggregate;
 
   
-  static const String eventQueries = AppAssets.iconSearch;
   static const String allEvents = AppAssets.iconEvent;
   static const String aggregationHierarchy = AppAssets.iconHierarchy;
   static const String advancedQuery = AppAssets.iconAdvancedFilter;

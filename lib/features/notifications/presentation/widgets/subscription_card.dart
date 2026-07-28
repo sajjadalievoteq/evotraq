@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -88,15 +89,15 @@ class SubscriptionCard extends StatelessWidget {
 
     switch (subscription.status.toLowerCase()) {
       case 'active':
-        color = Colors.green;
+        color = AppColorMapper.successColor(context);
         iconAsset = AppAssets.iconCheckCircle;
         break;
       case 'paused':
-        color = Colors.orange;
+        color = AppColorMapper.warningColor(context);
         iconAsset = AppAssets.iconPause;
         break;
       case 'error':
-        color = Colors.red;
+        color = AppColorMapper.errorColor(context);
         iconAsset = AppAssets.iconXCircle;
         break;
       case 'expired':
@@ -184,13 +185,13 @@ class SubscriptionCard extends StatelessWidget {
               ],
             ),
           ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              TraqIcon(AppAssets.iconTrash, color: Colors.red),
+              TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
               SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Colors.red)),
+              Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
             ],
           ),
         ),
@@ -208,7 +209,7 @@ class SubscriptionCard extends StatelessWidget {
             'Success Rate',
             '${(stats.successRate * 100).toStringAsFixed(1)}%',
             AppAssets.iconCheckCircle,
-            Colors.green,
+            AppColorMapper.successColor(context),
           ),
         ),
         Expanded(
@@ -217,7 +218,7 @@ class SubscriptionCard extends StatelessWidget {
             'Total',
             stats.totalNotifications.toString(),
             NavIcons.notifications,
-            Colors.blue,
+            AppColorMapper.infoColor(context),
           ),
         ),
         Expanded(
@@ -226,7 +227,7 @@ class SubscriptionCard extends StatelessWidget {
             'Failed',
             stats.failedNotifications.toString(),
             AppAssets.iconXCircle,
-            Colors.red,
+            AppColorMapper.errorColor(context),
           ),
         ),
       ],

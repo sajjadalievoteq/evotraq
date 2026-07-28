@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_status.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation/operation_review_rows.dart';
 import 'package:traqtrace_app/features/shared/hierarchy/widgets/epc_contents_card.dart';
@@ -191,10 +193,16 @@ class CancelOperationExtras extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.08),
+                  color: AppColorMapper.operationStatusColor(
+                    context,
+                    OperationStatus.partialSuccess,
+                  ).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.3),
+                    color: AppColorMapper.operationStatusColor(
+                      context,
+                      OperationStatus.partialSuccess,
+                    ).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(

@@ -8,6 +8,7 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class TransactionDocumentScreen extends StatefulWidget {
   const TransactionDocumentScreen({Key? key}) : super(key: key);
@@ -91,21 +92,26 @@ class _TransactionDocumentScreenState extends State<TransactionDocumentScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (documentState.error != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.red[100],
-                    child: Row(
-                      children: [
-                        TraqIcon(AppAssets.iconAlert, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(documentState.error!)),
-                        IconButton(
-                          icon: TraqIcon(AppAssets.iconX),
-                          onPressed: () => documentCubit.clearError(),
+                  Builder(
+                    builder: (context) {
+                      final error = AppColorMapper.errorColor(context);
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(8),
+                        color: error.withValues(alpha: 0.2),
+                        child: Row(
+                          children: [
+                            TraqIcon(AppAssets.iconAlert, color: error),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(documentState.error!)),
+                            IconButton(
+                              icon: TraqIcon(AppAssets.iconX),
+                              onPressed: () => documentCubit.clearError(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 
                 _buildSection(

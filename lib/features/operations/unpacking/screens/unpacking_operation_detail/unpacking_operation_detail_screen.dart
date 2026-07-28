@@ -2,12 +2,19 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/unpacking/unpacking_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 import 'package:traqtrace_app/features/operations/unpacking/screens/unpacking_operation_detail/widgets/unpacking_detail_content.dart';
 
 final _unpackingDetailConfig = OperationDetailScreenConfig<UnpackingResponse>(
-  loader: (id) => getIt<UnpackingOperationService>().getUnpackingOperation(id),
+  createCubit: (fallbackErrorMessage) {
+    final service = getIt<UnpackingOperationService>();
+    return OperationDetailCubit<UnpackingResponse>(
+      fetchDetail: service.getUnpackingOperation,
+      fallbackErrorMessage: fallbackErrorMessage,
+    );
+  },
   contentBuilder: (
     context, {
     required awaitingSelection,

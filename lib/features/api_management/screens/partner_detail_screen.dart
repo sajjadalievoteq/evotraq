@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gln_entry_field.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
 import 'package:traqtrace_app/features/api_management/utils/api_ui_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -230,7 +232,7 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             Text(_errorMessage!),
             const SizedBox(height: 16),
@@ -312,9 +314,9 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildChip(_partner!.partnerType.displayName, AppAssets.iconCategory, Colors.blue),
+                      _buildChip(_partner!.partnerType.displayName, AppAssets.iconCategory, AppColorMapper.infoColor(context)),
                       const SizedBox(width: 8),
-                      _buildChip(_partner!.preferredDataFormat.displayName, AppAssets.iconBraces, Colors.purple),
+                      _buildChip(_partner!.preferredDataFormat.displayName, AppAssets.iconBraces, OperationPalette.of(context).opUpdateStatus),
                       const SizedBox(width: 8),
                       _buildSyncDirectionChip(_partner!.syncDirection),
                       const SizedBox(width: 8),
@@ -763,7 +765,9 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
                   'Status',
                   _partner!.lastSyncStatus ?? 'N/A',
                   _partner!.lastSyncStatus == 'SUCCESS' ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
-                  color: _partner!.lastSyncStatus == 'SUCCESS' ? Colors.green : Colors.red,
+                  color: _partner!.lastSyncStatus == 'SUCCESS'
+                      ? AppColorMapper.successColor(context)
+                      : AppColorMapper.errorColor(context),
                 ),
                 const SizedBox(width: 32),
                 _buildStatusItem(
@@ -786,17 +790,24 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: OperationPalette.soft(
+                    AppColorMapper.errorColor(context),
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconAlert, color: Colors.red.shade700),
+                    TraqIcon(
+                      AppAssets.iconAlert,
+                      color: AppColorMapper.errorColor(context),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Last Error: ${_partner!.lastSyncError}',
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(
+                          color: AppColorMapper.errorColor(context),
+                        ),
                       ),
                     ),
                   ],
@@ -886,15 +897,15 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
     switch (direction) {
       case SyncDirection.inbound:
         iconAsset = AppAssets.iconArrowD;
-        color = Colors.blue;
+        color = AppColorMapper.infoColor(context);
         break;
       case SyncDirection.outbound:
         iconAsset = AppAssets.iconArrowUpR;
-        color = Colors.orange;
+        color = AppColorMapper.warningColor(context);
         break;
       case SyncDirection.bidirectional:
         iconAsset = AppAssets.iconSwapVert;
-        color = Colors.purple;
+        color = OperationPalette.of(context).opUpdateStatus;
         break;
     }
 
@@ -917,16 +928,17 @@ class _PartnerDetailScreenState extends State<PartnerDetailScreen> {
   }
 
   Widget _buildStatusChip(bool active) {
+    final success = AppColorMapper.successColor(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: active ? Colors.green.shade100 : Colors.grey.shade200,
+        color: active ? OperationPalette.soft(success) : Colors.grey.shade200,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         active ? 'Active' : 'Inactive',
         style: TextStyle(
-          color: active ? Colors.green.shade800 : Colors.grey.shade600,
+          color: active ? success : Colors.grey.shade600,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

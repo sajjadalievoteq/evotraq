@@ -8,7 +8,6 @@ import 'package:traqtrace_app/data/models/epcis/aggregation_event.dart';
 import 'package:traqtrace_app/data/models/epcis/transaction_event.dart';
 import 'package:traqtrace_app/data/models/epcis/transformation_event.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 
 class _CachedValidationResult {
   final Map<String, dynamic> result;
@@ -93,11 +92,7 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   ValidationCubit({
     ValidationService? validationService,
-  }) : _validationService =
-           validationService ??
-           ValidationService(
-             dioService: getIt<DioService>(),
-           ),
+  }) : _validationService = validationService ?? getIt<ValidationService>(),
        super(ValidationState.initial());
 
   Future<bool> validateObjectEvent(ObjectEvent event) async {

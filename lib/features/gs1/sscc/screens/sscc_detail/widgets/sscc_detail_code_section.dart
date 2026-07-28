@@ -11,6 +11,7 @@ import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SsccDetailCodeSection extends StatelessWidget {
   const SsccDetailCodeSection({
@@ -211,8 +212,10 @@ class SsccDetailCodeSection extends StatelessWidget {
                           fillColor: ssccCodeController.text.isEmpty
                               ? Colors.grey.shade100
                               : (ssccCodeController.text.length == 18
-                                  ? Colors.green.shade50
-                                  : Colors.red.shade50),
+                                  ? AppColorMapper.successColor(context)
+                                      .withValues(alpha: 0.1)
+                                  : AppColorMapper.errorColor(context)
+                                      .withValues(alpha: 0.1)),
                         ),
                         readOnly: isReadOnly || !isManual,
                         keyboardType: TextInputType.text,

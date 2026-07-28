@@ -1,5 +1,5 @@
-
 import 'package:flutter/foundation.dart';
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 
 class GS1BarcodeParser {
   static const Map<String, String> _applicationIdentifiers = {
@@ -117,23 +117,57 @@ class GS1BarcodeParser {
       if (parsedData.containsKey('11')) {
         standardFields['PROD_DATE'] = parsedData['11']!;
       }
+      final gtin = standardFields['GTIN'];
+      final sscc = parsedData['00'];
+      final gln = parsedData['414'];
+      final checkDigitErrors = <String>[];
+      if (gtin != null &&
+          CheckDigitUtils.validateGS1CheckDigit(
+                gtin,
+                allowedLengths: CheckDigitUtils.gtinLengths,
+                label: 'GTIN',
+              ) !=
+              null) {
+        checkDigitErrors.add('GTIN check digit invalid');
+      }
+      if (sscc != null &&
+          CheckDigitUtils.validateGS1CheckDigit(
+                sscc,
+                allowedLengths: CheckDigitUtils.ssccLengths,
+                label: 'SSCC',
+              ) !=
+              null) {
+        checkDigitErrors.add('SSCC check digit invalid');
+      }
+      if (gln != null &&
+          CheckDigitUtils.validateGS1CheckDigit(
+                gln,
+                allowedLengths: CheckDigitUtils.glnLengths,
+                label: 'GLN',
+              ) !=
+              null) {
+        checkDigitErrors.add('GLN check digit invalid');
+      }
+
       return {
-        'valid': parsedData.isNotEmpty,
+        'valid': parsedData.isNotEmpty && checkDigitErrors.isEmpty,
+        'checkDigitErrors': checkDigitErrors,
         'gs1ElementString': normalizedBarcode,
         'rawBarcode': rawBarcode,
         'parsedData': parsedData,
         'humanReadable': humanReadable,
         'standardFields': standardFields,
-        'GTIN': standardFields['GTIN'],
+        'GTIN': gtin,
         'EXPIRY': standardFields['EXPIRY'],
         'EXPIRY_FORMATTED': standardFields['EXPIRY_FORMATTED'],
         'BATCH': standardFields['BATCH'],
         'SERIAL': standardFields['SERIAL'],
         'PROD_DATE': standardFields['PROD_DATE'],
-        'SSCC': parsedData['00'],
+        'SSCC': sscc,
         'CONTENT_GTIN': parsedData['02'],
-        'GLN': parsedData['414'],
-      };    } catch (e) {
+        'GLN': gln,
+      };
+    } catch (e) {
       debugPrint('Error parsing GS1 barcode: $e');
       return {
         'valid': false,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
@@ -134,7 +135,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconFlask, color: Colors.orange),
+                TraqIcon(AppAssets.iconFlask, color: AppColorMapper.warningColor(context)),
                 const SizedBox(width: 8),
                 Text(
                   'Test Webhook Endpoint',
@@ -297,11 +298,11 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildStatChip('Success', stats.successfulNotifications ?? 0, Colors.green),
+                    _buildStatChip('Success', stats.successfulNotifications ?? 0, AppColorMapper.successColor(context)),
                     const SizedBox(width: 8),
-                    _buildStatChip('Failed', stats.failedNotifications ?? 0, Colors.red),
+                    _buildStatChip('Failed', stats.failedNotifications ?? 0, AppColorMapper.errorColor(context)),
                     const SizedBox(width: 8),
-                    _buildStatChip('Total', stats.totalNotifications ?? 0, Colors.blue),
+                    _buildStatChip('Total', stats.totalNotifications ?? 0, AppColorMapper.infoColor(context)),
                   ],
                 ),
               ],
@@ -324,10 +325,10 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
     String iconAsset;
 
     if (hasErrors) {
-      color = Colors.orange;
+      color = AppColorMapper.warningColor(context);
       iconAsset = AppAssets.iconAlert;
     } else if (status == 'ACTIVE') {
-      color = Colors.green;
+      color = AppColorMapper.successColor(context);
       iconAsset = AppAssets.iconCheckCircle;
     } else {
       color = Colors.grey;
@@ -384,11 +385,11 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
             contentPadding: EdgeInsets.zero,
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: ListTile(
-            leading: TraqIcon(AppAssets.iconTrash, color: Colors.red),
-            title: Text('Delete', style: TextStyle(color: Colors.red)),
+            leading: TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
+            title: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -449,7 +450,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         children: [
           TraqIcon(AppAssets.iconAlert,
             size: 64,
-            color: Colors.red[300],
+            color: AppColorMapper.errorColor(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -629,7 +630,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
               Navigator.of(context).pop();
               context.read<NotificationCubit>().deleteSubscription(subscriptionId);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColorMapper.errorColor(context)),
             child: const Text('Delete'),
           ),
         ],

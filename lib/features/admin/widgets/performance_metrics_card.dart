@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -52,6 +53,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     performance.eventsPerSecond.toStringAsFixed(2),
                     NavIcons.performanceOptimization,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.eventsPerSecond,
                       100,
                       50,
@@ -65,6 +67,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.averageProcessingTimeMs.toStringAsFixed(1)}ms',
                     NavIcons.performanceTests,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.averageProcessingTimeMs,
                       100,
                       500,
@@ -85,6 +88,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.successRate.toStringAsFixed(1)}%',
                     AppAssets.iconCheckCircle,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.successRate,
                       95,
                       90,
@@ -98,6 +102,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.errorRate.toStringAsFixed(2)}%',
                     AppAssets.iconXCircle,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.errorRate,
                       1,
                       5,
@@ -118,6 +123,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.memoryUsagePercentage.toStringAsFixed(1)}%',
                     NavIcons.eventSerialization,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.memoryUsagePercentage,
                       70,
                       85,
@@ -132,6 +138,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.cpuUsagePercentage.toStringAsFixed(1)}%',
                     NavIcons.eventSerialization,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.cpuUsagePercentage,
                       70,
                       85,
@@ -152,6 +159,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.activeConnections}',
                     NavIcons.databasePartitioning,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.databaseConnectionUtilization,
                       70,
                       85,
@@ -166,6 +174,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                     '${performance.queuedTransactions}',
                     NavIcons.jobQueueManagement,
                     AdminHelperMappers.performanceColor(
+                      context,
                       performance.queuedTransactions.toDouble(),
                       5,
                       20,
@@ -191,7 +200,7 @@ class PerformanceMetricsCard extends StatelessWidget {
                   icon: const TraqIcon(AppAssets.iconMedical),
                   label: const Text('Resolve Deadlocks'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: AppColorMapper.warningColor(context),
                     foregroundColor: Colors.white,
                   ),
                 ),

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -36,12 +34,7 @@ class _QueryPlanAnalysisDashboardState
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   Future<void> _loadProblematicQueries() async {
@@ -205,17 +198,17 @@ class _QueryPlanAnalysisDashboardState
 
             if (_errorMessage != null)
               Card(
-                color: Colors.red.shade50,
+                color: AppColorMapper.errorColor(context).withValues(alpha: 0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      TraqIcon(AppAssets.iconAlert, color: Colors.red),
+                      TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade700),
+                          style: TextStyle(color: AppColorMapper.errorColor(context)),
                         ),
                       ),
                     ],
@@ -376,7 +369,7 @@ class _QueryPlanAnalysisDashboardState
             'Execution Time',
             executionTime.toString(),
             NavIcons.performanceTests,
-            Colors.blue,
+            AppColorMapper.infoColor(context),
           ),
         ),
         const SizedBox(width: 8),
@@ -385,7 +378,7 @@ class _QueryPlanAnalysisDashboardState
             'Complexity',
             complexity.toString(),
             AppAssets.iconTrendingUp,
-            Colors.orange,
+            AppColorMapper.warningColor(context),
           ),
         ),
         const SizedBox(width: 8),
@@ -394,7 +387,7 @@ class _QueryPlanAnalysisDashboardState
             'Node Count',
             nodeCount.toString(),
             NavIcons.aggregationHierarchy,
-            Colors.green,
+            AppColorMapper.successColor(context),
           ),
         ),
         const SizedBox(width: 8),
@@ -403,7 +396,7 @@ class _QueryPlanAnalysisDashboardState
             'Total Cost',
             cost.toString(),
             AppAssets.iconMonetization,
-            Colors.purple,
+            AppColorMapper.chartColor(context, 5),
           ),
         ),
       ],
@@ -482,7 +475,7 @@ class _QueryPlanAnalysisDashboardState
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconLightbulb, color: Colors.orange),
+                      TraqIcon(AppAssets.iconLightbulb, color: AppColorMapper.warningColor(context)),
                       const SizedBox(width: 8),
                       Text(
                         'Optimization Recommendations',
@@ -509,18 +502,18 @@ class _QueryPlanAnalysisDashboardState
     }
 
     if (_problematicQueries == null || _problematicQueries!.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconCheck, size: 64, color: Colors.green),
-            SizedBox(height: 16),
+            TraqIcon(AppAssets.iconCheck, size: 64, color: AppColorMapper.successColor(context)),
+            const SizedBox(height: 16),
             Text(
               'No problematic queries detected',
-              style: TextStyle(fontSize: 16, color: Colors.green),
+              style: TextStyle(fontSize: 16, color: AppColorMapper.successColor(context)),
             ),
-            SizedBox(height: 8),
-            Text(
+            const SizedBox(height: 8),
+            const Text(
               'Your queries are performing well!',
               style: TextStyle(color: Colors.grey),
             ),
@@ -538,8 +531,8 @@ class _QueryPlanAnalysisDashboardState
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: Colors.red.shade100,
-              child: TraqIcon(AppAssets.iconAlert, color: Colors.red),
+              backgroundColor: AppColorMapper.errorColor(context).withValues(alpha: 0.15),
+              child: TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context)),
             ),
             title: Text('Problematic Pattern #${index + 1}'),
             subtitle: Text(query.toString()),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_animation_constants.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_formatters.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_step_style.dart';
+
+import '../../../core/theme/traq_theme.dart';
 
 class JourneyPinMarker extends StatefulWidget {
   const JourneyPinMarker({
@@ -64,7 +67,7 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
 
   @override
   Widget build(BuildContext context) {
-    final color = JourneyStepStyle.colorFor(context, widget.step.businessStep);
+    final color = context.colors.primary;
     final title = JourneyStepStyle.titleFor(widget.step.businessStep);
     final icon = JourneyStepStyle.iconFor(widget.step.businessStep);
     final location = widget.step.locationName ?? widget.step.locationGLN;
@@ -232,17 +235,15 @@ class _JourneyPinMarkerState extends State<JourneyPinMarker>
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
                   color: widget.isFirst
-                      ? const Color(0xFF7BD389)
-                      : const Color(0xFF6FB7DC),
+                      ? AppColorMapper.journeyStartColor(context)
+                      : AppColorMapper.journeyLatestColor(context),
                   width: 1,
                 ),
               ),
               child: Text(
                 widget.isFirst ? 'START' : 'LATEST',
                 style: TextStyle(
-                  color: widget.isFirst
-                      ? const Color(0xFF7BD389)
-                      : const Color(0xFF6FB7DC),
+                  color: Colors.white,
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
                 ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/models/partition_models.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../data/services/database_partitioning_service.dart';
@@ -68,9 +68,7 @@ class _DatabasePartitioningDashboardState
       }
     });
 
-    _partitioningService = DatabasePartitioningService(
-      dioService: getIt<DioService>(),
-    );
+    _partitioningService = getIt<DatabasePartitioningService>();
 
     _ensureTabLoaded(_tabController.index);
   }
@@ -254,7 +252,7 @@ class _DatabasePartitioningDashboardState
                   'Total Partitions',
                   statistics.totalPartitions.toString(),
                   AppAssets.iconTable,
-                  Colors.blue,
+                  AppColorMapper.infoColor(context),
                 ),
               ),
               const SizedBox(width: 16),
@@ -263,7 +261,7 @@ class _DatabasePartitioningDashboardState
                   'Active Partitions',
                   statistics.activePartitions.toString(),
                   AppAssets.iconCheckCircle,
-                  Colors.green,
+                  AppColorMapper.successColor(context),
                 ),
               ),
             ],
@@ -276,7 +274,7 @@ class _DatabasePartitioningDashboardState
                   'Archived Partitions',
                   statistics.archivedPartitions.toString(),
                   AppAssets.iconArchive,
-                  Colors.orange,
+                  AppColorMapper.warningColor(context),
                 ),
               ),
               const SizedBox(width: 16),
@@ -285,7 +283,7 @@ class _DatabasePartitioningDashboardState
                   'Total Size',
                   '${(statistics.totalSizeGb != null && statistics.totalSizeGb! > 0) ? statistics.totalSizeGb!.toStringAsFixed(6) : (statistics.totalSizeMb != null ? (statistics.totalSizeMb! / 1024).toStringAsFixed(6) : '0.000000')} GB',
                   NavIcons.databasePartitioning,
-                  Colors.purple,
+                  AppColorMapper.chartColor(context, 5),
                 ),
               ),
             ],
@@ -338,7 +336,7 @@ class _DatabasePartitioningDashboardState
 
   Widget _buildPartitionSummaryCard(PartitionStatistics statistics) {
     return Card(
-      color: Colors.blue.withOpacity(0.1),
+      color: AppColorMapper.infoColor(context).withOpacity(0.1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -444,15 +442,15 @@ class _DatabasePartitioningDashboardState
 
     switch (status) {
       case 'HEALTHY':
-        statusColor = Colors.green;
+        statusColor = AppColorMapper.successColor(context);
         statusIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'WARNING':
-        statusColor = Colors.orange;
+        statusColor = AppColorMapper.warningColor(context);
         statusIconAsset = AppAssets.iconAlert;
         break;
       case 'CRITICAL':
-        statusColor = Colors.red;
+        statusColor = AppColorMapper.errorColor(context);
         statusIconAsset = AppAssets.iconXCircle;
         break;
       default:
@@ -521,7 +519,7 @@ class _DatabasePartitioningDashboardState
           height: 12,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: partition.status == 'ACTIVE' ? Colors.green : Colors.orange,
+            color: partition.status == 'ACTIVE' ? AppColorMapper.successColor(context) : AppColorMapper.warningColor(context),
           ),
         ),
       ),
@@ -648,15 +646,15 @@ class _DatabasePartitioningDashboardState
 
     switch (status) {
       case 'HEALTHY':
-        statusColor = Colors.green;
+        statusColor = AppColorMapper.successColor(context);
         statusIconAsset = AppAssets.iconCheckCircle;
         break;
       case 'WARNING':
-        statusColor = Colors.orange;
+        statusColor = AppColorMapper.warningColor(context);
         statusIconAsset = AppAssets.iconAlert;
         break;
       case 'CRITICAL':
-        statusColor = Colors.red;
+        statusColor = AppColorMapper.errorColor(context);
         statusIconAsset = AppAssets.iconXCircle;
         break;
       default:
@@ -705,20 +703,20 @@ class _DatabasePartitioningDashboardState
                 const SizedBox(height: 16),
 
                 if (issues.isNotEmpty) ...[
-                  const Text(
+                  Text(
                     'Issues Found:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: AppColorMapper.errorColor(context),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: AppColorMapper.errorColor(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      border: Border.all(color: AppColorMapper.errorColor(context).withOpacity(0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -731,7 +729,7 @@ class _DatabasePartitioningDashboardState
                                 children: [
                                   TraqIcon(AppAssets.iconAlert,
                                     size: 16,
-                                    color: Colors.red,
+                                    color: AppColorMapper.errorColor(context),
                                   ),
                                   const SizedBox(width: 4),
                                   Expanded(child: Text(issue.toString())),
@@ -746,20 +744,20 @@ class _DatabasePartitioningDashboardState
                 ],
 
                 if (recommendations.isNotEmpty) ...[
-                  const Text(
+                  Text(
                     'Recommendations:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: AppColorMapper.infoColor(context),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColorMapper.infoColor(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      border: Border.all(color: AppColorMapper.infoColor(context).withOpacity(0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -770,7 +768,7 @@ class _DatabasePartitioningDashboardState
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const TraqIcon(AppAssets.iconLightbulb, color: Colors.blue, size: 16),
+                                  TraqIcon(AppAssets.iconLightbulb, color: AppColorMapper.infoColor(context), size: 16),
                                   const SizedBox(width: 4),
                                   Expanded(child: Text(rec.toString())),
                                 ],
@@ -830,19 +828,19 @@ class _DatabasePartitioningDashboardState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: AppColorMapper.successColor(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      border: Border.all(color: AppColorMapper.successColor(context).withOpacity(0.3)),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        TraqIcon(AppAssets.iconCheck, color: Colors.green, size: 20),
-                        SizedBox(width: 8),
+                        TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context), size: 20),
+                        const SizedBox(width: 8),
                         Text(
                           'All partitions are healthy!',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: AppColorMapper.successColor(context),
                           ),
                         ),
                       ],
@@ -880,11 +878,11 @@ class _DatabasePartitioningDashboardState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            TraqIcon(AppAssets.iconInfo, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Database Partitioning Help'),
+            TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context)),
+            const SizedBox(width: 8),
+            const Text('Database Partitioning Help'),
           ],
         ),
         content: SizedBox(
@@ -898,7 +896,7 @@ class _DatabasePartitioningDashboardState
                   'Partitioning Strategy Overview',
                   'TraqTrace uses a Base Table Partitioning strategy optimized for JPA inheritance. This approach ensures efficient data management while maintaining compatibility with our object-relational mapping framework.',
                   AppAssets.iconInfo,
-                  Colors.blue,
+                  AppColorMapper.chartColor(context, 0),
                 ),
                 const SizedBox(height: 16),
 
@@ -910,7 +908,7 @@ class _DatabasePartitioningDashboardState
                       '• All event data flows through epcis_events, making it the optimal partition point\n'
                       '• This reduces complexity while maximizing performance benefits',
                   AppAssets.iconTable,
-                  Colors.green,
+                  AppColorMapper.chartColor(context, 1),
                 ),
                 const SizedBox(height: 16),
 
@@ -923,7 +921,7 @@ class _DatabasePartitioningDashboardState
                       '• Transformation Events: Data stored in epcis_events partitions, accessed via transformation_events view\n\n'
                       'This inheritance-based approach ensures all event types benefit from partitioning automatically.',
                   NavIcons.databasePartitioning,
-                  Colors.purple,
+                  AppColorMapper.chartColor(context, 2),
                 ),
                 const SizedBox(height: 16),
 
@@ -936,7 +934,7 @@ class _DatabasePartitioningDashboardState
                       '• Partitioning would add complexity without significant performance benefits\n'
                       '• Master data changes infrequently, so time-based partitioning is unnecessary',
                   AppAssets.iconCategory,
-                  Colors.orange,
+                  AppColorMapper.chartColor(context, 3),
                 ),
                 const SizedBox(height: 16),
 
@@ -949,7 +947,7 @@ class _DatabasePartitioningDashboardState
                       '• Health Check: Performs comprehensive analysis of partition health and performance\n\n'
                       'Regular maintenance ensures optimal database performance and prevents partition-related issues.',
                   NavIcons.systemTools,
-                  Colors.red,
+                  AppColorMapper.chartColor(context, 4),
                 ),
                 const SizedBox(height: 16),
 
@@ -962,7 +960,7 @@ class _DatabasePartitioningDashboardState
                       '• Automatic routing based on event timestamp\n'
                       '• Enables efficient query pruning and maintenance operations',
                   AppAssets.iconTag,
-                  Colors.teal,
+                  AppColorMapper.chartColor(context, 5),
                 ),
               ],
             ),

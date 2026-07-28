@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -88,11 +89,11 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
   Color _getColorForSeverity() {
     switch (widget.severity) {
       case ValidationSeverity.info:
-        return Colors.blue[700]!;
+        return AppColorMapper.infoColor(context);
       case ValidationSeverity.warning:
-        return Colors.orange[700]!;
+        return AppColorMapper.warningColor(context);
       case ValidationSeverity.error:
-        return Colors.red[700]!;
+        return AppColorMapper.errorColor(context);
     }
   }
   
@@ -131,14 +132,14 @@ class _FieldValidationIndicatorState extends State<FieldValidationIndicator> wit
       content = Row(
         children: [
           TraqIcon(AppAssets.iconCheck,
-            color: Colors.green[700],
+            color: AppColorMapper.successColor(context),
             size: 16,
           ),
           const SizedBox(width: 4),
           Text(
             'Valid',
             style: TextStyle(
-              color: Colors.green[700],
+              color: AppColorMapper.successColor(context),
               fontSize: 12,
             ),
           ),

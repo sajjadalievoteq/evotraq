@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
+import 'package:traqtrace_app/data/models/operations/shared/operation_type.dart';
 import 'package:traqtrace_app/features/home/utils/home_navigation.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/screens/home/widgets/quick_actions/widgets/dashboard_quick_action_card.dart';
@@ -9,65 +10,55 @@ class QuickActionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const actions = [
-      DashboardQuickAction(
-        iconAsset: NavIcons.commissioning,
+    final actions = [
+      (
+        type: OperationType.commissioning,
         title: HomeStrings.quickActionCommissioning,
-        color: Colors.cyan,
         route: HomeNavigation.opCommissioningNew,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.updateStatus,
+      (
+        type: OperationType.updateStatus,
         title: HomeStrings.quickActionUpdateStatus,
-        color: Colors.redAccent,
         route: HomeNavigation.opUpdateStatusCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.packing,
+      (
+        type: OperationType.packing,
         title: HomeStrings.quickActionPacking,
-        color: Colors.deepOrange,
         route: HomeNavigation.opPackingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.unpacking,
+      (
+        type: OperationType.unpacking,
         title: HomeStrings.quickActionUnpacking,
-        color: Colors.brown,
         route: HomeNavigation.opUnpackingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.shipping,
+      (
+        type: OperationType.shipping,
         title: HomeStrings.quickActionShipping,
-        color: Colors.indigo,
         route: HomeNavigation.opShippingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.returnShipping,
+      (
+        type: OperationType.returnShipping,
         title: HomeStrings.quickActionReturnShipping,
-        color: Colors.blueGrey,
         route: HomeNavigation.opReturnShippingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.cancelShipping,
+      (
+        type: OperationType.cancelShipping,
         title: HomeStrings.quickActionCancelShipping,
-        color: Colors.red,
         route: HomeNavigation.opCancelShippingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.receiving,
+      (
+        type: OperationType.receiving,
         title: HomeStrings.quickActionReceiving,
-        color: Colors.teal,
         route: HomeNavigation.opReceivingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.returnReceiving,
+      (
+        type: OperationType.returnReceiving,
         title: HomeStrings.quickActionReturnReceiving,
-        color: Colors.blueGrey,
         route: HomeNavigation.opReturnReceivingCreate,
       ),
-      DashboardQuickAction(
-        iconAsset: NavIcons.cancelReceiving,
+      (
+        type: OperationType.cancelReceiving,
         title: HomeStrings.quickActionCancelReceiving,
-        color: Colors.deepOrangeAccent,
         route: HomeNavigation.opCancelReceivingCreate,
       ),
     ];
@@ -84,7 +75,6 @@ class QuickActionsGrid extends StatelessWidget {
 
         const childAspectRatio = 18 / 6;
 
-        
         return SelectionContainer.disabled(
           child: GridView.builder(
             shrinkWrap: true,
@@ -97,7 +87,15 @@ class QuickActionsGrid extends StatelessWidget {
             ),
             itemCount: actions.length,
             itemBuilder: (context, index) {
-              return DashboardQuickActionCard(action: actions[index]);
+              final action = actions[index];
+              return DashboardQuickActionCard(
+                action: DashboardQuickAction(
+                  iconAsset: AppColorMapper.operationTypeIcon(action.type),
+                  title: action.title,
+                  color: AppColorMapper.operationTypeColor(context, action.type),
+                  route: action.route,
+                ),
+              );
             },
           ),
         );

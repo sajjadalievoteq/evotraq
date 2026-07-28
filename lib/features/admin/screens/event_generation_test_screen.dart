@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
@@ -48,9 +48,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testService ??= EventGenerationTestService(
-      dioService: getIt<DioService>(),
-    );
+    _testService ??= getIt<EventGenerationTestService>();
   }
 
   @override
@@ -255,11 +253,11 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
       case 'RUNNING':
         return c.success;
       case 'COMPLETED':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'ERROR':
         return c.error;
       case 'STOPPED':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       default:
         return c.primary;
     }
@@ -706,7 +704,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColorMapper.warningColor(context)),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('I Understand - Continue'),
           ),
@@ -731,7 +729,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColorMapper.errorColor(context)),
             onPressed: () async {
               final textController = TextEditingController();
               final textConfirmed = await showDialog<bool>(
@@ -758,7 +756,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppColorMapper.errorColor(context),
                       ),
                       onPressed: () {
                         Navigator.pop(
@@ -1394,7 +1392,7 @@ class _EventGenerationTestScreenState extends State<EventGenerationTestScreen>
                         icon: TraqIcon(AppAssets.iconAlert),
                         label: const Text('DANGER - Delete ALL SSCCs'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppColorMapper.errorColor(context),
                         ),
                       ),
                       ElevatedButton.icon(

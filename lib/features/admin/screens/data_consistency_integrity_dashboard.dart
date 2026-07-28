@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -653,7 +654,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconList, color: Colors.blue),
+                      TraqIcon(AppAssets.iconList, color: AppColorMapper.infoColor(context)),
                       const SizedBox(width: 8),
                       const Text(
                         'Consistency Validation',
@@ -719,7 +720,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Consistency Score',
                     '${score.toStringAsFixed(1)}%',
-                    AdminHelperMappers.scoreColor(score),
+                    AdminHelperMappers.scoreColor(context, score),
                     AppAssets.iconScore,
                   ),
                 ),
@@ -728,7 +729,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Events Analyzed',
                     total.toString(),
-                    Colors.blue,
+                    AppColorMapper.infoColor(context),
                     NavIcons.epcisEvents,
                   ),
                 ),
@@ -737,7 +738,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Violations Found',
                     violations.toString(),
-                    violations > 0 ? Colors.red : Colors.green,
+                    violations > 0 ? AppColorMapper.errorColor(context) : AppColorMapper.successColor(context),
                     AppAssets.iconAlert,
                   ),
                 ),
@@ -765,9 +766,9 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             ),
             const SizedBox(height: 16),
             if (violations.isEmpty)
-              const Text(
+              Text(
                 'No consistency violations found.',
-                style: TextStyle(color: Colors.green),
+                style: TextStyle(color: AppColorMapper.successColor(context)),
               )
             else
               ...violations.map((violation) => _buildViolationCard(violation)).toList(),
@@ -787,7 +788,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ExpansionTile(
         leading: TraqIcon(AppAssets.iconAlert,
-          color: AdminHelperMappers.dashboardSeverityColor(severity),
+          color: AdminHelperMappers.dashboardSeverityColor(context, severity),
         ),
         title: Text(type),
         subtitle: Text(description),
@@ -797,10 +798,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
             Chip(
               label: Text(severity),
               backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                context,
                 severity,
               ).withOpacity(0.1),
               labelStyle: TextStyle(
-                color: AdminHelperMappers.dashboardSeverityColor(severity),
+                color: AdminHelperMappers.dashboardSeverityColor(context, severity),
               ),
             ),
             const SizedBox(width: 8),
@@ -809,7 +811,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               icon: TraqIcon(AppAssets.iconBuild, size: 16),
               label: const Text('Correct'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: AppColorMapper.successColor(context),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
@@ -843,7 +845,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                         icon: TraqIcon(AppAssets.iconSparkle),
                         label: const Text('Apply Fix'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: AppColorMapper.warningColor(context),
                         ),
                       ),
                     ],
@@ -870,7 +872,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconSearch, color: Colors.orange),
+                      TraqIcon(AppAssets.iconSearch, color: AppColorMapper.warningColor(context)),
                       const SizedBox(width: 8),
                       const Text(
                         'Anomaly Detection',
@@ -924,7 +926,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
         leading: TraqIcon(AppAssets.iconAlert,
-          color: AdminHelperMappers.dashboardSeverityColor(severity),
+          color: AdminHelperMappers.dashboardSeverityColor(context, severity),
         ),
         title: Text(
           type,
@@ -936,7 +938,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
           children: [
             Chip(
               label: Text('${confidence.toStringAsFixed(0)}% confidence'),
-              backgroundColor: Colors.blue.withOpacity(0.1),
+              backgroundColor: AppColorMapper.infoColor(context).withOpacity(0.1),
             ),
             const SizedBox(width: 8),
             ElevatedButton.icon(
@@ -944,7 +946,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               icon: TraqIcon(AppAssets.iconSparkle, size: 16),
               label: const Text('Correct'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: AppColorMapper.warningColor(context),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
@@ -962,10 +964,12 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     Chip(
                       label: Text(severity),
                       backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                        context,
                         severity,
                       ).withOpacity(0.1),
                       labelStyle: TextStyle(
                         color: AdminHelperMappers.dashboardSeverityColor(
+                          context,
                           severity,
                         ),
                       ),
@@ -1009,7 +1013,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                       icon: TraqIcon(AppAssets.iconBuild),
                       label: const Text('Apply Correction'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColorMapper.successColor(context),
                       ),
                     ),
                   ],
@@ -1044,7 +1048,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconSettings, color: Colors.green),
+                      TraqIcon(AppAssets.iconSettings, color: AppColorMapper.successColor(context)),
                       const SizedBox(width: 8),
                       const Text(
                         'Correctable Errors',
@@ -1103,7 +1107,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Total Errors',
                     totalErrors.toString(),
-                    Colors.red,
+                    AppColorMapper.errorColor(context),
                     AppAssets.iconXCircle,
                   ),
                 ),
@@ -1112,7 +1116,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Workflows Created',
                     totalWorkflows.toString(),
-                    Colors.blue,
+                    AppColorMapper.infoColor(context),
                     AppAssets.iconWork,
                   ),
                 ),
@@ -1121,7 +1125,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                   child: _buildMetricCard(
                     'Approval Rate',
                     '${approvalRate.toStringAsFixed(1)}%',
-                    AdminHelperMappers.scoreColor(approvalRate),
+                    AdminHelperMappers.scoreColor(context, approvalRate),
                     AppAssets.iconCheck,
                   ),
                 ),
@@ -1151,7 +1155,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               children: [
                 TraqIcon(
                   isCorrectable ? NavIcons.systemTools : AppAssets.iconAlert,
-                  color: isCorrectable ? Colors.green : Colors.orange,
+                  color: isCorrectable ? AppColorMapper.successColor(context) : AppColorMapper.warningColor(context),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -1174,16 +1178,17 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 Chip(
                   label: Text(severity),
                   backgroundColor: AdminHelperMappers.dashboardSeverityColor(
+                    context,
                     severity,
                   ).withOpacity(0.1),
                   labelStyle: TextStyle(
-                    color: AdminHelperMappers.dashboardSeverityColor(severity),
+                    color: AdminHelperMappers.dashboardSeverityColor(context, severity),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Chip(
                   label: Text(correctionType),
-                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  backgroundColor: AppColorMapper.infoColor(context).withOpacity(0.1),
                 ),
               ],
             ),
@@ -1207,7 +1212,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconLock, color: Colors.purple),
+                      TraqIcon(AppAssets.iconLock, color: AppColorMapper.chartColor(context, 5)),
                       const SizedBox(width: 8),
                       const Text(
                         'Integrity Monitoring',
@@ -1283,7 +1288,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                           'Events Checked',
                           '${results['events_checked'] ?? 0}',
                           AppAssets.iconCalendar,
-                          Colors.blue,
+                          AppColorMapper.infoColor(context),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1292,7 +1297,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                           'Violations Found',
                           '${results['integrity_violations'] ?? 0}',
                           AppAssets.iconAlert,
-                          Colors.orange,
+                          AppColorMapper.warningColor(context),
                         ),
                       ),
                     ],
@@ -1302,7 +1307,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     'Overall Integrity Score',
                     '${results['overall_integrity_score'] ?? 0}%',
                     AppAssets.iconGrade,
-                    Colors.green,
+                    AppColorMapper.successColor(context),
                   ),
                   const SizedBox(height: 12),
                   if (results['integrity_violations'] != null && results['integrity_violations'] > 0)
@@ -1333,7 +1338,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Error: ${job['error'] ?? 'Unknown error occurred'}',
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: AppColorMapper.errorColor(context)),
               ),
             ),
           ],
@@ -1395,19 +1400,19 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                         'Missing Event Chain',
                         'EPC-12345: Gap detected between shipping and receiving events',
                         AppAssets.iconBrokenImage,
-                        Colors.red,
+                        AppColorMapper.errorColor(context),
                       ),
                       _buildViolationItem(
                         'Timestamp Inconsistency',
                         'EPC-67890: Receiving event timestamp precedes shipping event',
                         AppAssets.iconClock,
-                        Colors.orange,
+                        AppColorMapper.warningColor(context),
                       ),
                       _buildViolationItem(
                         'Location Mismatch',
                         'EPC-54321: Event location does not match expected business rules',
                         AppAssets.iconMapPin,
-                        Colors.blue,
+                        AppColorMapper.infoColor(context),
                       ),
                     ],
                   ),
@@ -1537,11 +1542,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                TraqIcon(AppAssets.iconCheck, color: Colors.green),
-                SizedBox(width: 8),
-                Text('Correction Workflow Started'),
+                TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context)),
+                const SizedBox(width: 8),
+                const Text('Correction Workflow Started'),
               ],
             ),
             content: Column(
@@ -1584,11 +1589,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                TraqIcon(AppAssets.iconAlert, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Workflow Creation Failed'),
+                TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context)),
+                const SizedBox(width: 8),
+                const Text('Workflow Creation Failed'),
               ],
             ),
             content: Text('Failed to start correction workflow: $e'),
@@ -1632,11 +1637,11 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
   Widget _buildJobStatusIcon(String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return TraqIcon(AppAssets.iconCheck, color: Colors.green);
+        return TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context));
       case 'RUNNING':
-        return TraqIcon(AppAssets.iconArrowR, color: Colors.blue);
+        return TraqIcon(AppAssets.iconArrowR, color: AppColorMapper.infoColor(context));
       case 'FAILED':
-        return TraqIcon(AppAssets.iconAlert, color: Colors.red);
+        return TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context));
       default:
         return TraqIcon(AppAssets.iconInfo, color: Colors.grey);
     }
@@ -1897,7 +1902,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                 children: [
                   Row(
                     children: [
-                      TraqIcon(AppAssets.iconGlobe, color: Colors.purple),
+                      TraqIcon(AppAssets.iconGlobe, color: AppColorMapper.chartColor(context, 5)),
                       const SizedBox(width: 8),
                       const Text(
                         'Correction Workflows',
@@ -2015,7 +2020,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AdminHelperMappers.workflowStatusColor(status),
+          backgroundColor: AdminHelperMappers.workflowStatusColor(context, status),
           child: TraqIcon(
             AdminHelperMappers.workflowStatusIcon(status),
             color: Colors.white,
@@ -2033,7 +2038,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               Text('Created: ${createdTime.toString().substring(0, 19)}'),
             if (status.toUpperCase() == 'COMPLETED' && executionResults != null && executionResults['corrected_violations'] != null) 
               Text('Corrected: ${(executionResults['corrected_violations'] as List).length} violations', 
-                   style: const TextStyle(color: Colors.green)),
+                   style: TextStyle(color: AppColorMapper.successColor(context))),
           ],
         ),
         trailing: Column(
@@ -2043,13 +2048,13 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
               status,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AdminHelperMappers.workflowStatusColor(status),
+                color: AdminHelperMappers.workflowStatusColor(context, status),
               ),
             ),
             if (completionTime != null)
               Text(
                 'Completed',
-                style: TextStyle(fontSize: 10, color: Colors.green),
+                style: TextStyle(fontSize: 10, color: AppColorMapper.successColor(context)),
               ),
           ],
         ),
@@ -2101,7 +2106,7 @@ class _DataConsistencyIntegrityDashboardState extends State<DataConsistencyInteg
                     ...((executionResults['corrected_violations'] as List).map((violation) => 
                       Padding(
                         padding: const EdgeInsets.only(left: 16, bottom: 4),
-                        child: Text('â€¢ $violation', style: const TextStyle(color: Colors.green)),
+                        child: Text('â€¢ $violation', style: TextStyle(color: AppColorMapper.successColor(context))),
                       )
                     )).toList(),
                     const SizedBox(height: 8),

@@ -6,7 +6,6 @@ import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/network/token_manager.dart';
 
-import 'package:traqtrace_app/data/services/epcis/advanced_query_service.dart';
 import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 
 import 'package:traqtrace_app/data/services/hierarchy/hierarchy_service.dart';
@@ -22,8 +21,12 @@ import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
 
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/admin/user_management/cubit/user_management_cubit.dart';
+import 'package:traqtrace_app/features/admin/user_approval/cubit/user_approval_cubit.dart';
 import 'package:traqtrace_app/features/admin/cbv_vocabulary/cubit/admin_cbv_vocabulary_cubit.dart';
 import 'package:traqtrace_app/features/epcis/cubit/cbv_vocabulary_cubit.dart';
+import 'package:traqtrace_app/data/services/bulk_export_service.dart';
+import 'package:traqtrace_app/data/services/etl_service.dart';
+import 'package:traqtrace_app/data/services/job_queue_service.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/data/services/user_management/user_management_service.dart';
 
@@ -38,7 +41,6 @@ import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
-import 'package:traqtrace_app/data/services/epcis/epcis_event_service.dart';
 import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import '../../data/services/gs1/gtin/gtin_service.dart';
 import '../../data/services/gtin_tobacco_extension_service.dart';
@@ -72,10 +74,18 @@ import '../../data/services/error_correction_service.dart';
 import '../../data/services/gs1_barcode_api_service.dart';
 import '../../data/services/cache_service.dart';
 import '../../data/services/performance_optimization_service.dart';
+import '../../data/services/performance_test_service.dart';
 import '../../data/services/user_service.dart';
 import '../../data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/epcis/validation_service.dart';
+import 'package:traqtrace_app/data/services/epcis/validation_rule_service.dart';
 import '../../data/services/websocket_service.dart';
+import '../../data/services/api_collection_service.dart';
+import '../../data/services/api_management_service.dart';
+import '../../data/services/partner_access_service.dart';
+import '../../data/services/monitoring_service.dart';
+import '../../data/services/event_generation_test_service.dart';
+import '../../data/services/integration_validation_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -88,6 +98,15 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   final dioService = DioService()..setBaseUrl(appConfig.apiBaseUrl);
   getIt.registerLazySingleton<DioService>(() => dioService);
+  getIt.registerLazySingleton<BulkExportService>(
+    () => BulkExportService(getIt<DioService>()),
+  );
+  getIt.registerLazySingleton<ETLService>(
+    () => ETLService(getIt<DioService>()),
+  );
+  getIt.registerLazySingleton<JobQueueService>(
+    () => JobQueueService(dioService: getIt<DioService>()),
+  );
   getIt.registerLazySingleton<TokenManager>(() => TokenManager());
   getIt.registerLazySingleton<Dio>(
     () => Dio(
@@ -262,10 +281,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => DatabasePartitioningService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<AdvancedQueryService>(
-    () => AdvancedQueryService(getIt<DioService>()),
-  );
-
   getIt.registerLazySingleton<PharmaceuticalService>(
     () => PharmaceuticalService(dioService: getIt<DioService>()),
   );
@@ -294,10 +309,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => ServiceAccountService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<EPCISEventService>(
-    () => EPCISEventService(dioService: getIt<DioService>()),
-  );
-
   getIt.registerLazySingleton<TransformationEventService>(
     () => TransformationEventService(dioService: getIt<DioService>()),
   );
@@ -322,12 +333,12 @@ Future<void> initDependencies(AppConfig appConfig) async {
     () => AggregationEventService(dioService: getIt<DioService>()),
   );
 
-  getIt.registerLazySingleton<EPCISSerializationService>(
-    () => EPCISSerializationService(dioService: getIt<DioService>()),
-  );
-
   getIt.registerLazySingleton<ValidationService>(
     () => ValidationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ValidationRuleService>(
+    () => ValidationRuleService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<DataConsistencyService>(
@@ -336,6 +347,10 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<ErrorCorrectionService>(
     () => ErrorCorrectionService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<EPCISSerializationService>(
+    () => EPCISSerializationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<GS1BarcodeApiService>(
@@ -348,6 +363,34 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<PerformanceOptimizationService>(
     () => PerformanceOptimizationService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ApiCollectionService>(
+    () => ApiCollectionService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<ApiManagementService>(
+    () => ApiManagementService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<PartnerAccessApiService>(
+    () => PartnerAccessApiService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<MonitoringService>(
+    () => MonitoringService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<PerformanceTestService>(
+    () => PerformanceTestService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<EventGenerationTestService>(
+    () => EventGenerationTestService(dioService: getIt<DioService>()),
+  );
+
+  getIt.registerLazySingleton<IntegrationValidationService>(
+    () => IntegrationValidationService(dioService: getIt<DioService>()),
   );
 
   getIt.registerSingleton<AuthCubit>(
@@ -369,6 +412,11 @@ Future<void> initDependencies(AppConfig appConfig) async {
   );
   getIt.registerFactory<UserManagementCubit>(
     () => UserManagementCubit(
+      userManagementService: getIt<UserManagementService>(),
+    ),
+  );
+  getIt.registerFactory<UserApprovalCubit>(
+    () => UserApprovalCubit(
       userManagementService: getIt<UserManagementService>(),
     ),
   );

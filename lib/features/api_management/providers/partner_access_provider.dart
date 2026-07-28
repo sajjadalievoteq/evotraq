@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import '../../../data/services/partner_access_service.dart';
-import '../models/api_collection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
 
 class PartnerAccessState extends Equatable {
   final String? selectedPartnerId;
@@ -79,9 +79,8 @@ class PartnerAccessCubit extends Cubit<PartnerAccessState> {
   final PartnerAccessApiService _service;
 
   PartnerAccessCubit({
-    required DioService dioService,
     PartnerAccessApiService? service,
-  }) : _service = service ?? PartnerAccessApiService(dioService: dioService),
+  }) : _service = service ?? getIt<PartnerAccessApiService>(),
        super(const PartnerAccessState.initial());
 
 

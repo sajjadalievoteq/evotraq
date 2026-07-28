@@ -2,12 +2,19 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
 import 'package:traqtrace_app/features/operations/shipping/screens/shipping_operation_detail/widgets/shipping_detail_content.dart';
 
 final _shippingDetailConfig = OperationDetailScreenConfig<ShippingResponse>(
-  loader: (id) => getIt<ShippingOperationService>().getShippingOperation(id),
+  createCubit: (fallbackErrorMessage) {
+    final service = getIt<ShippingOperationService>();
+    return OperationDetailCubit<ShippingResponse>(
+      fetchDetail: service.getShippingOperation,
+      fallbackErrorMessage: fallbackErrorMessage,
+    );
+  },
   contentBuilder: (
     context, {
     required awaitingSelection,

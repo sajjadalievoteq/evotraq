@@ -1,34 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
 
 abstract final class ApiUiUtils {
-  static Color methodColor(String method) {
+  static Color methodColor(BuildContext context, String method) {
+    final p = OperationPalette.of(context);
     switch (method.toUpperCase()) {
       case 'GET':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'POST':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'PUT':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'PATCH':
-        return Colors.teal;
+        return p.statusAccepted;
       case 'DELETE':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       default:
-        return Colors.purple;
+        return p.opUpdateStatus;
     }
   }
 
-  static Color scopeColor(String scope) {
+  static Color scopeColor(BuildContext context, String scope) {
     switch (scope.toLowerCase()) {
       case 'read':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'write':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'admin':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 

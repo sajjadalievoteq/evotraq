@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import '../../../core/network/dio_service.dart';
 import '../../../data/services/industry_test_data_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -52,9 +52,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testDataService ??= IndustryTestDataService(dioService: getIt<DioService>() 
- 
-    );
+    _testDataService ??= getIt<IndustryTestDataService>();
   }
 
   @override
@@ -550,8 +548,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
               constraints: const BoxConstraints(maxHeight: 180),
               child: Material(
                 color: _isError
-                    ? Colors.red.shade100
-                    : Colors.green.shade100,
+                    ? AppColorMapper.errorColor(context).withValues(alpha: 0.15)
+                    : AppColorMapper.successColor(context).withValues(alpha: 0.15),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(12),
                   child: Row(
@@ -559,7 +557,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                     children: [
                       TraqIcon(
                         _isError ? AppAssets.iconXCircle : AppAssets.iconInfo,
-                        color: _isError ? Colors.red : Colors.green,
+                        color: _isError ? AppColorMapper.errorColor(context) : AppColorMapper.successColor(context),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -567,8 +565,8 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
                           _statusMessage!,
                           style: TextStyle(
                             color: _isError
-                                ? Colors.red.shade900
-                                : Colors.green.shade900,
+                                ? AppColorMapper.errorColor(context)
+                                : AppColorMapper.successColor(context),
                           ),
                         ),
                       ),
@@ -785,10 +783,10 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
             spacing: 12,
             runSpacing: 12,
             children: [
-              _buildEventTypeChip('Object Events', AppAssets.iconBox, Colors.blue),
-              _buildEventTypeChip('Aggregation Events', AppAssets.iconCategory, Colors.green),
-              _buildEventTypeChip('Shipping Events', NavIcons.logistics, Colors.orange),
-              _buildEventTypeChip('Receiving Events', AppAssets.iconInbox, Colors.purple),
+              _buildEventTypeChip('Object Events', AppAssets.iconBox, AppColorMapper.infoColor(context)),
+              _buildEventTypeChip('Aggregation Events', AppAssets.iconCategory, AppColorMapper.successColor(context)),
+              _buildEventTypeChip('Shipping Events', NavIcons.logistics, AppColorMapper.warningColor(context)),
+              _buildEventTypeChip('Receiving Events', AppAssets.iconInbox, AppColorMapper.chartColor(context, 5)),
             ],
           ),
           
@@ -1307,7 +1305,7 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
   Widget _buildProductInfoCard() {
     return Card(
       elevation: 1,
-      color: Colors.blue.shade50,
+      color: AppColorMapper.infoColor(context).withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1315,14 +1313,14 @@ class _IndustryTestDataScreenState extends State<IndustryTestDataScreen>
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconInfo, color: Colors.blue.shade700),
+                TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context)),
                 const SizedBox(width: 8),
                 Text(
                   'Included Tobacco Brands (UAE Market)',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: AppColorMapper.infoColor(context),
                   ),
                 ),
               ],

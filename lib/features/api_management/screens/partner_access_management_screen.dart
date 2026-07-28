@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
-import '../models/api_collection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
 import '../providers/partner_access_provider.dart';
 import '../cubit/api_collection_cubit.dart';
 import '../cubit/api_management_cubit.dart';
@@ -132,7 +134,7 @@ class _PartnerAccessManagementScreenState
                           CircleAvatar(
                             radius: 12,
                             backgroundColor: p.active
-                                ? Colors.green
+                                ? AppColorMapper.successColor(context)
                                 : Colors.grey,
                             child: Text(
                               p.companyName.substring(0, 1).toUpperCase(),
@@ -211,7 +213,7 @@ class _PartnerAccessManagementScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red[300]),
+                TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
                 const SizedBox(height: 16),
                 Text('Error: ${state.error}'),
               ],
@@ -235,21 +237,21 @@ class _PartnerAccessManagementScreenState
                     'Collections',
                     summary.collectionAccessCount.toString(),
                     AppAssets.iconFolder,
-                    Colors.blue,
+                    AppColorMapper.infoColor(context),
                   ),
                   const SizedBox(width: 16),
                   _buildSummaryCard(
                     'Individual APIs',
                     summary.individualApiAccessCount.toString(),
                     NavIcons.apiManagement,
-                    Colors.green,
+                    AppColorMapper.successColor(context),
                   ),
                   const SizedBox(width: 16),
                   _buildSummaryCard(
                     'Total APIs',
                     summary.totalAccessibleApis.toString(),
                     AppAssets.iconCheckCircle,
-                    Colors.purple,
+                    OperationPalette.of(context).opUpdateStatus,
                   ),
                 ],
               ),
@@ -290,8 +292,8 @@ class _PartnerAccessManagementScreenState
                           leading: CircleAvatar(
                             backgroundColor:
                                 access.accessLevel == AccessLevel.full
-                                ? Colors.green
-                                : Colors.orange,
+                                ? AppColorMapper.successColor(context)
+                                : AppColorMapper.warningColor(context),
                             child: TraqIcon(
                               access.accessLevel == AccessLevel.full
                                   ? AppAssets.iconLock
@@ -306,9 +308,9 @@ class _PartnerAccessManagementScreenState
                           ),
                           trailing: access.isValid
                               ? TraqIcon(AppAssets.iconCheck,
-                                  color: Colors.green,
+                                  color: AppColorMapper.successColor(context),
                                 )
-                              : TraqIcon(AppAssets.iconAlert, color: Colors.orange),
+                              : TraqIcon(AppAssets.iconAlert, color: AppColorMapper.warningColor(context)),
                         ),
                       ),
                     ),
@@ -339,7 +341,7 @@ class _PartnerAccessManagementScreenState
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: ApiUiUtils.methodColor(access.httpMethod),
+                              color: ApiUiUtils.methodColor(context, access.httpMethod),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -361,9 +363,9 @@ class _PartnerAccessManagementScreenState
                           ),
                           trailing: access.isValid
                               ? TraqIcon(AppAssets.iconCheck,
-                                  color: Colors.green,
+                                  color: AppColorMapper.successColor(context),
                                 )
-                              : TraqIcon(AppAssets.iconAlert, color: Colors.orange),
+                              : TraqIcon(AppAssets.iconAlert, color: AppColorMapper.warningColor(context)),
                         ),
                       ),
                     ),
@@ -516,7 +518,7 @@ class _PartnerAccessManagementScreenState
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Revoke', style: TextStyle(color: Colors.red)),
+            child: Text('Revoke', style: TextStyle(color: AppColorMapper.errorColor(context))),
           ),
         ],
       ),
@@ -570,9 +572,9 @@ class _PartnerAccessManagementScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (collections.isEmpty)
-                      const Text(
+                      Text(
                         'No collections available',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: AppColorMapper.errorColor(context)),
                       )
                     else
                       DropdownButtonFormField<String>(
@@ -647,10 +649,10 @@ class _PartnerAccessManagementScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.05),
+                          color: AppColorMapper.infoColor(context).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.blue.withOpacity(0.2),
+                            color: AppColorMapper.infoColor(context).withValues(alpha: 0.2),
                           ),
                         ),
                         child: Column(
@@ -660,14 +662,14 @@ class _PartnerAccessManagementScreenState
                               children: [
                                 TraqIcon(AppAssets.iconGlobe,
                                   size: 18,
-                                  color: Colors.blue,
+                                  color: AppColorMapper.infoColor(context),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Select APIs (${selectedApiIds.length}/${availableApis.length})',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.blue,
+                                    color: AppColorMapper.infoColor(context),
                                   ),
                                 ),
                                 const Spacer(),
@@ -745,6 +747,7 @@ class _PartnerAccessManagementScreenState
                                                     ),
                                                 decoration: BoxDecoration(
                                                   color: ApiUiUtils.methodColor(
+                                                    context,
                                                     api.httpMethod,
                                                   ),
                                                   borderRadius:
@@ -966,8 +969,8 @@ class _ExpandableCollectionAccessCardState
                   children: [
                     CircleAvatar(
                       backgroundColor: access.accessLevel == AccessLevel.full
-                          ? Colors.green
-                          : Colors.orange,
+                          ? AppColorMapper.successColor(context)
+                          : AppColorMapper.warningColor(context),
                       child: TraqIcon(
                         access.accessLevel == AccessLevel.full
                             ? AppAssets.iconLock
@@ -1001,15 +1004,17 @@ class _ExpandableCollectionAccessCardState
                     Chip(
                       label: Text(access.accessLevel.displayName),
                       backgroundColor: access.accessLevel == AccessLevel.full
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
+                          ? AppColorMapper.successColor(context).withValues(alpha: 0.1)
+                          : AppColorMapper.warningColor(context).withValues(alpha: 0.1),
                     ),
                     const SizedBox(width: 8),
                     Chip(
                       avatar: TraqIcon(
                         access.isValid ? AppAssets.iconCheck : AppAssets.iconAlert,
                         size: 16,
-                        color: access.isValid ? Colors.green : Colors.orange,
+                        color: access.isValid
+                            ? AppColorMapper.successColor(context)
+                            : AppColorMapper.warningColor(context),
                       ),
                       label: Text(access.statusText),
                     ),
@@ -1024,11 +1029,11 @@ class _ExpandableCollectionAccessCardState
                       itemBuilder: (context) => [
                         const PopupMenuItem(value: 'edit', child: Text('Edit')),
                         const PopupMenuDivider(),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'revoke',
                           child: Text(
                             'Revoke Access',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: AppColorMapper.errorColor(context)),
                           ),
                         ),
                       ],
@@ -1047,10 +1052,10 @@ class _ExpandableCollectionAccessCardState
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.05),
+                        color: AppColorMapper.warningColor(context).withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: Colors.orange.withOpacity(0.2),
+                          color: AppColorMapper.warningColor(context).withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
@@ -1058,10 +1063,10 @@ class _ExpandableCollectionAccessCardState
                           TraqIcon(
                             _isExpanded ? AppAssets.iconChevronU : AppAssets.iconChevronD,
                             size: 20,
-                            color: Colors.orange[700],
+                            color: AppColorMapper.warningColor(context),
                           ),
                           const SizedBox(width: 8),
-                          TraqIcon(AppAssets.iconGlobe, size: 16, color: Colors.orange[700]),
+                          TraqIcon(AppAssets.iconGlobe, size: 16, color: AppColorMapper.warningColor(context)),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -1071,7 +1076,7 @@ class _ExpandableCollectionAccessCardState
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.orange[700],
+                                color: AppColorMapper.warningColor(context),
                               ),
                             ),
                           ),
@@ -1245,7 +1250,7 @@ class _ExpandableCollectionAccessCardState
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: ApiUiUtils.methodColor(api.httpMethod),
+                        color: ApiUiUtils.methodColor(context, api.httpMethod),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -1283,13 +1288,15 @@ class _ExpandableCollectionAccessCardState
                     TraqIcon(
                       apiAccess.isValid ? AppAssets.iconCheckCircle : AppAssets.iconAlert,
                       size: 16,
-                      color: apiAccess.isValid ? Colors.green : Colors.orange,
+                      color: apiAccess.isValid
+                          ? AppColorMapper.successColor(context)
+                          : AppColorMapper.warningColor(context),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
                       onPressed: () => _confirmRevokeApi(api, apiAccess),
                       icon: const TraqIcon(AppAssets.iconTrash, size: 18),
-                      color: Colors.red[400],
+                      color: AppColorMapper.errorColor(context),
                       tooltip: 'Revoke API access',
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
@@ -1322,7 +1329,7 @@ class _ExpandableCollectionAccessCardState
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Revoke', style: TextStyle(color: Colors.red)),
+            child: Text('Revoke', style: TextStyle(color: AppColorMapper.errorColor(context))),
           ),
         ],
       ),
@@ -1400,7 +1407,7 @@ class _ExpandableCollectionAccessCardState
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: ApiUiUtils.methodColor(api.httpMethod),
+                                color: ApiUiUtils.methodColor(context, api.httpMethod),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

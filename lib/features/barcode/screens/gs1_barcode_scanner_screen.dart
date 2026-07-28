@@ -12,6 +12,8 @@ import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scanner_widge
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 typedef GS1BarcodeCallback = void Function(
   String gs1ElementString,
@@ -403,19 +405,20 @@ class _TypeChip extends StatelessWidget {
     Gs1BarcodeType.unknown: 'Unknown',
   };
 
-  Color _color(ColorScheme cs) {
+  Color _color(BuildContext context) {
+    final palette = OperationPalette.of(context);
     switch (type) {
-      case Gs1BarcodeType.sgtin:   return cs.primary;
-      case Gs1BarcodeType.gtin:    return Colors.teal.shade600;
-      case Gs1BarcodeType.sscc:    return Colors.orange.shade700;
-      case Gs1BarcodeType.gln:     return Colors.purple.shade600;
-      case Gs1BarcodeType.unknown: return cs.outline;
+      case Gs1BarcodeType.sgtin:   return Theme.of(context).colorScheme.primary;
+      case Gs1BarcodeType.gtin:    return palette.epcGtin;
+      case Gs1BarcodeType.sscc:    return palette.epcSscc;
+      case Gs1BarcodeType.gln:     return AppColorMapper.infoColor(context);
+      case Gs1BarcodeType.unknown: return Theme.of(context).colorScheme.outline;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _color(Theme.of(context).colorScheme);
+    final color = _color(context);
     return Chip(
       label: Text(
         _labels[type] ?? 'Unknown',
@@ -481,6 +484,8 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final success = AppColorMapper.successColor(context);
+    final warning = AppColorMapper.warningColor(context);
     final rows = widget.details.displayRows;
 
     return SingleChildScrollView(
@@ -522,23 +527,20 @@ class _BarcodeDetailsViewState extends State<_BarcodeDetailsView>
               _TypeChip(type: widget.details.type),
               if (widget.details.isValid)
                 Chip(
-                  avatar: TraqIcon(AppAssets.iconCheck, size: 14,
-                      color: Colors.green.shade700),
+                  avatar: TraqIcon(AppAssets.iconCheck, size: 14, color: success),
                   label: Text('Valid',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.green.shade700)),
-                  backgroundColor: Colors.green.shade50,
+                      style: TextStyle(fontSize: 12, color: success)),
+                  backgroundColor: success.withValues(alpha: 0.1),
                   padding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
                 )
               else
                 Chip(
-                  avatar: TraqIcon(AppAssets.iconAlert, color: Colors.orange.shade700, size: 14),
+                  avatar: TraqIcon(AppAssets.iconAlert, color: warning, size: 14),
                   label: Text('Invalid GS1',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.orange.shade700)),
-                  backgroundColor: Colors.orange.shade50,
+                      style: TextStyle(fontSize: 12, color: warning)),
+                  backgroundColor: warning.withValues(alpha: 0.1),
                   padding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
@@ -657,15 +659,18 @@ class _VerificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ok = result['verified'] == true || result['valid'] == true;
+    final success = AppColorMapper.successColor(context);
+    final warning = AppColorMapper.warningColor(context);
+    final color = ok ? success : warning;
     return Card(
-      color: ok ? Colors.green.shade50 : Colors.orange.shade50,
+      color: color.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             TraqIcon(
               ok ? AppAssets.iconVerified : AppAssets.iconInfo,
-              color: ok ? Colors.green.shade700 : Colors.orange.shade700,
+              color: color,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -677,9 +682,7 @@ class _VerificationCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
-                      color: ok
-                          ? Colors.green.shade700
-                          : Colors.orange.shade700,
+                      color: color,
                     ),
                   ),
                   if (result['message'] != null)
@@ -902,7 +905,9 @@ class _WiredScannerReadyViewState extends State<_WiredScannerReadyView>
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: connected ? Colors.green : Colors.amber,
+                        color: connected
+                            ? AppColorMapper.successColor(context)
+                            : AppColorMapper.warningColor(context),
                       ),
                     ),
                     const SizedBox(width: 6),

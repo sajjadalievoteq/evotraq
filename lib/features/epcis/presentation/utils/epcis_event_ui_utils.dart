@@ -3,30 +3,20 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 abstract final class EpcisEventUiUtils {
-  static Color eventTypeColor(String eventType) {
-    return AppColorMapper.eventType(
+  static Color eventTypeColor(BuildContext context, String eventType) {
+    return AppColorMapper.eventTypeColor(
+      context,
       eventType,
       scheme: AppEventColorScheme.epcis,
     );
   }
 
-  static Color supplyChainStatusColor(String status) {
-    return AppColorMapper.supplyChainStatus(status);
+  static Color supplyChainStatusColor(BuildContext context, String status) {
+    return AppColorMapper.supplyChainStatus(context, status);
   }
 
-  static Color supplyChainNodeColor(String? type) {
-    switch (type) {
-      case 'manufacturer':
-        return Colors.blue;
-      case 'distributor':
-        return Colors.green;
-      case 'retailer':
-        return Colors.orange;
-      case 'warehouse':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+  static Color supplyChainNodeColor(BuildContext context, String? type) {
+    return AppColorMapper.supplyChainNodeColor(context, type);
   }
 
   static String supplyChainNodeIcon(String? type) {

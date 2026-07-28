@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/display_date_utils.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
@@ -98,13 +99,13 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
 
     return Row(
       children: [
-        _buildSummaryCard('Running', running, Colors.blue),
+        _buildSummaryCard('Running', running, AppColorMapper.infoColor(context)),
         const SizedBox(width: 8),
-        _buildSummaryCard('Completed', completed, Colors.green),
+        _buildSummaryCard('Completed', completed, AppColorMapper.successColor(context)),
         const SizedBox(width: 8),
-        _buildSummaryCard('Failed', failed, Colors.red),
+        _buildSummaryCard('Failed', failed, AppColorMapper.errorColor(context)),
         const SizedBox(width: 8),
-        _buildSummaryCard('Pending', pending, Colors.orange),
+        _buildSummaryCard('Pending', pending, AppColorMapper.warningColor(context)),
       ],
     );
   }
@@ -194,7 +195,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               children: [
                 TraqIcon(
                   AdminHelperMappers.bulkJobStatusIcon(job.status),
-                  color: AdminHelperMappers.bulkJobStatusColor(job.status),
+                  color: AdminHelperMappers.bulkJobStatusColor(context, job.status),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -226,7 +227,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               value: job.progressPercentage / 100,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(
-                AdminHelperMappers.bulkJobStatusColor(job.status),
+                AdminHelperMappers.bulkJobStatusColor(context, job.status),
               ),
             ),
             const SizedBox(height: 8),
@@ -274,20 +275,20 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: AppColorMapper.errorColor(context).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  border: Border.all(color: AppColorMapper.errorColor(context).withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 16),
+                    TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context), size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         job.errors.first,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Colors.red,
+                          color: AppColorMapper.errorColor(context),
                         ),
                       ),
                     ),
@@ -305,7 +306,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                     icon: TraqIcon(AppAssets.iconX, size: 16),
                     label: const Text('Cancel'),
                     style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColorMapper.errorColor(context),
                     ),
                   ),
                 if (job.status == 'FAILED')
@@ -314,7 +315,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                     icon: TraqIcon(AppAssets.iconRefresh, size: 16),
                     label: const Text('Retry'),
                     style: TextButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColorMapper.infoColor(context),
                     ),
                   ),
                 TextButton.icon(
@@ -334,10 +335,10 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AdminHelperMappers.bulkJobStatusColor(status).withOpacity(0.1),
+        color: AdminHelperMappers.bulkJobStatusColor(context, status).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AdminHelperMappers.bulkJobStatusColor(status).withOpacity(0.3),
+          color: AdminHelperMappers.bulkJobStatusColor(context, status).withOpacity(0.3),
         ),
       ),
       child: Text(
@@ -345,7 +346,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: AdminHelperMappers.bulkJobStatusColor(status),
+          color: AdminHelperMappers.bulkJobStatusColor(context, status),
         ),
       ),
     );
@@ -373,7 +374,7 @@ class _BulkJobsPanelState extends State<BulkJobsPanel> {
                 children: [
                   TraqIcon(
                     AdminHelperMappers.bulkJobStatusIcon(job.status),
-                    color: AdminHelperMappers.bulkJobStatusColor(job.status),
+                    color: AdminHelperMappers.bulkJobStatusColor(context, job.status),
                   ),
                   const SizedBox(width: 8),
                   Text(

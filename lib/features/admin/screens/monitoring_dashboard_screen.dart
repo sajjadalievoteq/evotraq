@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../data/services/monitoring_service.dart';
-import '../models/monitoring_models.dart';
+import 'package:traqtrace_app/data/models/admin/monitoring_models.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../widgets/performance_metrics_card.dart';
@@ -60,8 +59,7 @@ class _MonitoringDashboardScreenState extends State<MonitoringDashboardScreen>
 
   void _initializeMonitoring() async {
     try {
-      final dioService = getIt<DioService>();
-      _monitoringService = MonitoringServiceProvider.getInstance(dioService);
+      _monitoringService = getIt<MonitoringService>();
       
       _performanceSubscription = _monitoringService.performanceStream.listen(
         (performance) {

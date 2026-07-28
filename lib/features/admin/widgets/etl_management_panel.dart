@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import '../../../core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
+import 'package:traqtrace_app/data/services/etl_service.dart';
 import 'package:traqtrace_app/features/admin/widgets/utils/admin_helper_mappers.dart';
 
 class ETLManagementPanel extends StatefulWidget {
@@ -25,12 +25,7 @@ class ETLManagementPanel extends StatefulWidget {
 }
 
 class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProviderStateMixin {
-  DioService get _dio => getIt<DioService>();
-
-  dynamic _decodeBody(dynamic data) {
-    if (data is String) return json.decode(data);
-    return data;
-  }
+  ETLService get _service => getIt<ETLService>();
 
   late TabController _tabController;
   late Timer _refreshTimer;
@@ -117,21 +112,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadPipelines() async {
     try {
-      final qp = _selectedPipelineFilter != 'ALL'
-          ? <String, dynamic>{'status': _selectedPipelineFilter}
-          : null;
-
-      final response = await _dio.get(
-        '/etl/pipelines',
-        queryParameters: qp,
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _pipelines = List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      final pipelines = await _service.getPipelines(status: _selectedPipelineFilter);
+      setState(() {
+        _pipelines = pipelines;
+      });
     } catch (e) {
       debugPrint('Error loading pipelines: $e');
     }
@@ -139,22 +123,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadTransformations() async {
     try {
-      final qp = _selectedTransformationFilter != 'ALL'
-          ? <String, dynamic>{'type': _selectedTransformationFilter}
-          : null;
-
-      final response = await _dio.get(
-        '/etl/transformations',
-        queryParameters: qp,
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _transformations =
-              List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      final transformations =
+          await _service.getTransformations(type: _selectedTransformationFilter);
+      setState(() {
+        _transformations = transformations;
+      });
     } catch (e) {
       debugPrint('Error loading transformations: $e');
     }
@@ -162,18 +135,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadExecutionHistory() async {
     try {
-      final response = await _dio.get(
-        '/etl/executions',
-        queryParameters: {'limit': 50},
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _executionHistory =
-              List<Map<String, dynamic>>.from(_decodeBody(response.data));
-        });
-      }
+      final history = await _service.getExecutionHistory(limit: 50);
+      setState(() {
+        _executionHistory = history;
+      });
     } catch (e) {
       debugPrint('Error loading execution history: $e');
     }
@@ -181,16 +146,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadQualityMetrics() async {
     try {
-      final response = await _dio.get(
-        '/etl/quality-metrics',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _qualityMetrics = _decodeBody(response.data);
-        });
-      }
+      final metrics = await _service.getQualityMetrics();
+      setState(() {
+        _qualityMetrics = metrics;
+      });
     } catch (e) {
       debugPrint('Error loading quality metrics: $e');
     }
@@ -198,27 +157,13 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _loadPerformanceData() async {
     try {
-      final response = await _dio.get(
-        '/etl/performance',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _performanceData = _decodeBody(response.data);
-        });
-      }
+      final data = await _service.getPerformanceData();
+      setState(() {
+        _performanceData = data;
+      });
     } catch (e) {
       debugPrint('Error loading performance data: $e');
     }
-  }
-
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await widget.tokenManager.getToken();
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${token ?? ''}',
-    };
   }
 
   @override
@@ -234,7 +179,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
+            TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
@@ -297,11 +242,11 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
             Expanded(
               child: Row(
                 children: [
-                  _buildSummaryItem('Active', activePipelines, AppAssets.iconPlay, color: Colors.green),
+                  _buildSummaryItem('Active', activePipelines, AppAssets.iconPlay, color: AppColorMapper.successColor(context)),
                   const SizedBox(width: 24),
                   _buildSummaryItem('Total', totalPipelines, NavIcons.databasePartitioning),
                   const SizedBox(width: 24),
-                  _buildSummaryItem('Failed', failedPipelines, AppAssets.iconXCircle, color: Colors.red),
+                  _buildSummaryItem('Failed', failedPipelines, AppAssets.iconXCircle, color: AppColorMapper.errorColor(context)),
                 ],
               ),
             ),
@@ -336,7 +281,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TraqIcon(iconAsset, size: 20, color: color ?? Colors.blue),
+        TraqIcon(iconAsset, size: 20, color: color ?? AppColorMapper.infoColor(context)),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +463,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AdminHelperMappers.etlStatusColor(status),
+                    color: AdminHelperMappers.etlStatusColor(context, status),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -583,8 +528,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: successRate > 0.9 ? Colors.green : 
-                               successRate > 0.7 ? Colors.orange : Colors.red,
+                        color: successRate > 0.9 ? AppColorMapper.successColor(context) : 
+                               successRate > 0.7 ? AppColorMapper.warningColor(context) : AppColorMapper.errorColor(context),
                       ),
                     ),
                   ],
@@ -609,7 +554,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AdminHelperMappers.transformationTypeColor(type),
+            color: AdminHelperMappers.transformationTypeColor(context, type),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -657,7 +602,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         leading: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AdminHelperMappers.etlStatusColor(status),
+            color: AdminHelperMappers.etlStatusColor(context, status),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -713,7 +658,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AdminHelperMappers.qualityScoreColor(overallScore),
+                        color: AdminHelperMappers.qualityScoreColor(context, overallScore),
                         width: 8,
                       ),
                     ),
@@ -723,7 +668,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AdminHelperMappers.qualityScoreColor(overallScore),
+                          color: AdminHelperMappers.qualityScoreColor(context, overallScore),
                         ),
                       ),
                     ),
@@ -777,7 +722,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               value: score,
               backgroundColor: Colors.grey.shade300,
               valueColor: AlwaysStoppedAnimation<Color>(
-                AdminHelperMappers.qualityScoreColor(score),
+                AdminHelperMappers.qualityScoreColor(context, score),
               ),
             ),
             const SizedBox(height: 4),
@@ -786,7 +731,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AdminHelperMappers.qualityScoreColor(score),
+                color: AdminHelperMappers.qualityScoreColor(context, score),
               ),
             ),
           ],
@@ -850,7 +795,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TraqIcon(iconAsset, size: 32, color: Colors.blue),
+            TraqIcon(iconAsset, size: 32, color: AppColorMapper.infoColor(context)),
             const SizedBox(height: 8),
             Text(
               title,
@@ -860,10 +805,10 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppColorMapper.infoColor(context),
               ),
             ),
           ],
@@ -945,15 +890,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _toggleTransformation(String transformationId, bool enabled) async {
     try {
-      final response = await _dio.put(
-        '/etl/transformations/$transformationId/toggle',
-        headers: await _getHeaders(),
-        data: json.encode({'enabled': enabled}),
-      );
-
-      if (response.statusCode == 200) {
-        _loadTransformations();
-      }
+      await _service.toggleTransformation(transformationId, enabled);
+      _loadTransformations();
     } catch (e) {
       context.showError('Failed to toggle transformation: $e');
     }
@@ -961,15 +899,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _executePipeline(String pipelineId) async {
     try {
-      final response = await _dio.post(
-        '/etl/pipelines/$pipelineId/execute',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        context.showInfo('Pipeline execution started');
-        _loadPipelines();
-      }
+      await _service.executePipeline(pipelineId);
+      context.showInfo('Pipeline execution started');
+      _loadPipelines();
     } catch (e) {
       context.showError('Failed to execute pipeline: $e');
     }
@@ -996,15 +928,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
     if (confirmed == true) {
       try {
-        final response = await _dio.delete(
-          '/etl/pipelines/$pipelineId',
-          headers: await _getHeaders(),
-        );
-
-        if (response.statusCode == 200) {
-          context.showSuccess('Pipeline deleted successfully');
-          _loadPipelines();
-        }
+        await _service.deletePipeline(pipelineId);
+        context.showSuccess('Pipeline deleted successfully');
+        _loadPipelines();
       } catch (e) {
         context.showError('Failed to delete pipeline: $e');
       }
@@ -1032,15 +958,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
     if (confirmed == true) {
       try {
-        final response = await _dio.delete(
-          '/etl/transformations/$transformationId',
-          headers: await _getHeaders(),
-        );
-
-        if (response.statusCode == 200) {
-          context.showSuccess('Transformation deleted successfully');
-          _loadTransformations();
-        }
+        await _service.deleteTransformation(transformationId);
+        context.showSuccess('Transformation deleted successfully');
+        _loadTransformations();
       } catch (e) {
         context.showError('Failed to delete transformation: $e');
       }
@@ -1049,15 +969,8 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _testTransformation(String transformationId) async {
     try {
-      final response = await _dio.post(
-        '/etl/transformations/$transformationId/test',
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        final result = _decodeBody(response.data);
-        _showTestResults(result);
-      }
+      final result = await _service.testTransformation(transformationId);
+      _showTestResults(result);
     } catch (e) {
       context.showError('Failed to test transformation: $e');
     }
@@ -1552,9 +1465,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: AppColorMapper.infoColor(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.blue.shade200),
+                    border: Border.all(color: AppColorMapper.infoColor(context).withValues(alpha: 0.3)),
                   ),
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1604,19 +1517,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _createPipeline(String pipelineName, List<Map<String, dynamic>> transformationRules) async {
     try {
-      final response = await _dio.post(
-        '/etl/pipelines',
-        queryParameters: {'pipelineName': pipelineName},
-        headers: await _getHeaders(),
-        data: json.encode(transformationRules),
-      );
-
-      if (response.statusCode == 201) {
-        context.showSuccess('Pipeline "$pipelineName" created successfully');
-        _loadPipelines();
-      } else {
-        throw Exception('Failed to create pipeline: ${response.statusCode} ${response.statusMessage}');
-      }
+      await _service.createPipeline(pipelineName, transformationRules);
+      context.showSuccess('Pipeline "$pipelineName" created successfully');
+      _loadPipelines();
     } catch (e) {
       context.showError('Failed to create pipeline: $e');
     }
@@ -1624,18 +1527,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
 
   Future<void> _updatePipeline(String pipelineId, String pipelineName, List<Map<String, dynamic>> transformationRules) async {
     try {
-      final response = await _dio.put(
-        '/etl/pipelines/$pipelineId',
-        headers: await _getHeaders(),
-        data: json.encode(transformationRules),
-      );
-
-      if (response.statusCode == 200) {
-        context.showSuccess('Pipeline "$pipelineName" updated successfully');
-        _loadPipelines();
-      } else {
-        throw Exception('Failed to update pipeline: ${response.statusCode} ${response.statusMessage}');
-      }
+      await _service.updatePipeline(pipelineId, transformationRules);
+      context.showSuccess('Pipeline "$pipelineName" updated successfully');
+      _loadPipelines();
     } catch (e) {
       context.showError('Failed to update pipeline: $e');
     }
@@ -1656,18 +1550,9 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
         }
       };
 
-      final response = await _dio.post(
-        '/etl/jobs',
-        headers: await _getHeaders(),
-        data: json.encode(jobConfig),
-      );
-
-      if (response.statusCode == 201) {
-        context.showSuccess('Pipeline scheduled to run $frequency');
-        _loadPipelines();
-      } else {
-        throw Exception('Failed to schedule pipeline: ${response.statusCode} ${response.statusMessage}');
-      }
+      await _service.createETLJob(jobConfig);
+      context.showSuccess('Pipeline scheduled to run $frequency');
+      _loadPipelines();
     } catch (e) {
       context.showError('Failed to schedule pipeline: $e');
     }
@@ -1714,7 +1599,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
               if (execution['errorMessage'] != null) ...[
                 const SizedBox(height: 8),
                 const Text('Error:', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(execution['errorMessage'], style: const TextStyle(color: Colors.red)),
+                Text(execution['errorMessage'], style: TextStyle(color: AppColorMapper.errorColor(context))),
               ],
             ],
           ),
@@ -1747,7 +1632,7 @@ class ETLManagementPanelState extends State<ETLManagementPanel> with TickerProvi
                 const Text('Errors:', style: TextStyle(fontWeight: FontWeight.bold)),
                 ...result['errors'].map<Widget>((error) => Text(
                   '• $error',
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColorMapper.errorColor(context)),
                 )).toList(),
               ],
             ],

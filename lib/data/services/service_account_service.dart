@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/api_management/models/service_account.dart';
+import 'package:traqtrace_app/data/models/api_management/service_account.dart';
 
 class ServiceAccountService {
   final DioService _dioService;

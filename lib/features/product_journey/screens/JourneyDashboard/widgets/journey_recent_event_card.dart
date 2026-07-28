@@ -31,7 +31,7 @@ class JourneyRecentEventCard extends StatelessWidget {
     final rowColor =
         Gs1ListItemSelectionStyle.mutedColor(isSelected, muted);
 
-    final chipColor = EpcisEventUiUtils.eventTypeColor(event.eventType);
+    final chipColor = EpcisEventUiUtils.eventTypeColor(context, event.eventType);
     final chipLabel = _chipLabel();
     final title = _title();
     final rows = _rows();

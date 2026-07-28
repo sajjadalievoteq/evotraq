@@ -95,48 +95,6 @@ class UserManagementCubit extends Cubit<UserManagementState> {
     }
   }
 
-  Future<void> loadApprovals() async {
-    emit(state.copyWith(status: UserManagementStatus.loading));
-    try {
-      final pendingUsers = await _userManagementService.getPendingApprovals();
-      emit(
-        state.copyWith(
-          status: UserManagementStatus.success,
-          pendingApprovals: pendingUsers,
-          clearError: true,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
-      );
-    }
-  }
-
-  Future<void> approveUser(int userId) async {
-    emit(state.copyWith(status: UserManagementStatus.loading));
-    try {
-      await _userManagementService.approveUser(userId);
-      await loadApprovals();
-    } catch (e) {
-      emit(
-        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
-      );
-    }
-  }
-
-  Future<void> rejectUser(int userId) async {
-    emit(state.copyWith(status: UserManagementStatus.loading));
-    try {
-      await _userManagementService.rejectUser(userId);
-      await loadApprovals();
-    } catch (e) {
-      emit(
-        state.copyWith(status: UserManagementStatus.error, error: e.toString()),
-      );
-    }
-  }
-
   Future<void> changeUserRole(int userId, String role) async {
     emit(state.copyWith(status: UserManagementStatus.loading));
     try {

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/features/api_management/models/api_collection.dart';
-import 'package:traqtrace_app/features/api_management/config/api_config.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
+import 'package:traqtrace_app/data/services/api_management/api_config.dart';
 
 class PartnerAccessApiService {
   final String baseUrl;

@@ -1,6 +1,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 
 const Map<ItemStatus, Set<ItemStatus>> allowedTransitionsMap = {
@@ -107,33 +108,6 @@ const Map<ItemStatus, String> statusLabels = {
 String friendlyLabel(ItemStatus status) =>
     statusLabels[status] ?? status.name;
 
-Color statusColor(ItemStatus status) {
-  switch (status) {
-    case ItemStatus.RESERVED:
-      return Colors.grey.shade400;
-    case ItemStatus.ALLOCATED:
-      return Colors.blue.shade300;
-    case ItemStatus.COMMISSIONED:
-      return Colors.blue.shade600;
-    case ItemStatus.ACTIVE:
-      return Colors.green;
-    case ItemStatus.IN_TRANSIT:
-      return Colors.orange;
-    case ItemStatus.RECEIVED:
-      return Colors.teal;
-    case ItemStatus.DISPENSED:
-      return Colors.purple;
-    case ItemStatus.RETURNED:
-      return Colors.amber.shade700;
-    case ItemStatus.DESTROYED:
-      return Colors.red.shade800;
-    case ItemStatus.RECALLED:
-      return Colors.deepOrange;
-    case ItemStatus.STOLEN:
-      return Colors.red.shade900;
-    case ItemStatus.EXPIRED:
-      return Colors.brown;
-    case ItemStatus.EXCEPTION:
-      return Colors.red;
-  }
+Color statusColor(BuildContext context, ItemStatus status) {
+  return AppColorMapper.itemStatusColor(context, status);
 }

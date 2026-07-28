@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/utils/cbv_display_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
@@ -92,13 +93,13 @@ class JourneyStepCardContent extends StatelessWidget {
                   if (isFirst)
                     JourneyStepCardBadge(
                       label: 'START',
-                      color: const Color(0xFF7BD389),
+                      color: AppColorMapper.journeyStartColor(context),
                       onSelected: isSelected,
                     ),
                   if (isLast)
                     JourneyStepCardBadge(
                       label: 'LATEST',
-                      color: const Color(0xFF6FB7DC),
+                      color: AppColorMapper.journeyLatestColor(context),
                       onSelected: isSelected,
                     ),
                   const Spacer(),

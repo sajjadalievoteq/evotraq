@@ -3,20 +3,22 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
+/// Color/icon lookups for admin dashboards. All colors are theme-aware and
+/// resolved from [AppColorMapper] / `OperationPalette` — never raw [Colors].
 abstract final class AdminHelperMappers {
-  static Color bulkJobStatusColor(String status) {
+  static Color bulkJobStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'RUNNING':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'COMPLETED':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'FAILED':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'PENDING':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'CANCELLED':
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
@@ -36,57 +38,57 @@ abstract final class AdminHelperMappers {
     }
   }
 
-  static Color queueJobStatusColor(String status) {
+  static Color queueJobStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'RUNNING':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'FAILED':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'CANCELLED':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'QUEUED':
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color exportJobStatusColor(String status) {
+  static Color exportJobStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'PROCESSING':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'FAILED':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'CANCELLED':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'PENDING':
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color etlStatusColor(String status) {
+  static Color etlStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'ACTIVE':
       case 'COMPLETED':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'RUNNING':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'FAILED':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'INACTIVE':
       case 'SCHEDULED':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color severityColor(String severity) {
-    return AppColorMapper.severity(severity);
+  static Color severityColor(BuildContext context, String severity) {
+    return AppColorMapper.severity(context, severity);
   }
 
   static String severityIcon(String severity) {
@@ -104,27 +106,27 @@ abstract final class AdminHelperMappers {
     }
   }
 
-  static Color scoreColor(double score) {
-    return AppColorMapper.score(score);
+  static Color scoreColor(BuildContext context, double score) {
+    return AppColorMapper.score(context, score);
   }
 
-  static Color dashboardSeverityColor(String severity) {
-    return AppColorMapper.dashboardSeverity(severity);
+  static Color dashboardSeverityColor(BuildContext context, String severity) {
+    return AppColorMapper.dashboardSeverity(context, severity);
   }
 
-  static Color workflowStatusColor(String status) {
+  static Color workflowStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'IN_PROGRESS':
       case 'PENDING':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'AWAITING_APPROVAL':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'FAILED':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
@@ -144,21 +146,23 @@ abstract final class AdminHelperMappers {
     }
   }
 
-  static Color successRateColor(double successRate) {
-    return AppColorMapper.successRate(successRate);
+  static Color successRateColor(BuildContext context, double successRate) {
+    return AppColorMapper.successRate(context, successRate);
   }
 
-  static Color usageColor(double usage) {
-    return AppColorMapper.usage(usage);
+  static Color usageColor(BuildContext context, double usage) {
+    return AppColorMapper.usage(context, usage);
   }
 
   static Color performanceColor(
+    BuildContext context,
     double value,
     double good,
     double warning, {
     bool inverted = false,
   }) {
     return AppColorMapper.performance(
+      context,
       value,
       good,
       warning,
@@ -166,90 +170,86 @@ abstract final class AdminHelperMappers {
     );
   }
 
-  static Color exportFormatColor(String format) {
+  static Color exportFormatColor(BuildContext context, String format) {
     switch (format.toUpperCase()) {
       case 'CSV':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'JSON':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'XML':
-        return Colors.purple;
+        return AppColorMapper.chartColor(context, 3);
       case 'EPCIS':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'GS1_DIGITAL_LINK':
-        return Colors.teal;
+        return AppColorMapper.chartColor(context, 5);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color jobTypeColor(String jobType) {
+  static Color jobTypeColor(BuildContext context, String jobType) {
     switch (jobType.toUpperCase()) {
       case 'ETL':
-        return Colors.purple;
+        return AppColorMapper.chartColor(context, 3);
       case 'EXPORT':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'BULK_IMPORT':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'NOTIFICATION_BATCH':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color queueHealthColor(String health) {
+  static Color queueHealthColor(BuildContext context, String health) {
     switch (health.toLowerCase()) {
       case 'healthy':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'warning':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'critical':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       default:
-        return Colors.green;
+        return AppColorMapper.successColor(context);
     }
   }
 
-  static Color transformationTypeColor(String type) {
+  static Color transformationTypeColor(BuildContext context, String type) {
     switch (type.toUpperCase()) {
       case 'VALIDATION':
-        return Colors.blue;
+        return AppColorMapper.infoColor(context);
       case 'ENRICHMENT':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'NORMALIZATION':
-        return Colors.purple;
+        return AppColorMapper.chartColor(context, 3);
       case 'AGGREGATION':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color qualityScoreColor(double score) {
-    if (score >= 0.9) return Colors.green;
-    if (score >= 0.7) return Colors.orange;
-    return Colors.red;
+  static Color qualityScoreColor(BuildContext context, double score) {
+    return AppColorMapper.score(context, score * 100);
   }
 
-  static Color integrityScoreColor(double score) {
-    if (score >= 95) return Colors.green;
-    if (score >= 85) return Colors.orange;
-    return Colors.red;
+  static Color integrityScoreColor(BuildContext context, double score) {
+    return AppColorMapper.score(context, score);
   }
 
-  static Color monitoringOverallStatusColor(String status) {
+  static Color monitoringOverallStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'CRITICAL':
-        return Colors.red[800]!;
+        return AppColorMapper.errorColor(context);
       case 'WARNING':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'DEGRADED':
-        return Colors.yellow[700]!;
+        return AppColorMapper.warningColor(context);
       case 'HEALTHY':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
@@ -268,61 +268,61 @@ abstract final class AdminHelperMappers {
     }
   }
 
-  static Color monitoringPerformanceStatusColor(String status) {
+  static Color monitoringPerformanceStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'POOR':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'FAIR':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'SLOW':
-        return Colors.yellow[700]!;
+        return AppColorMapper.warningColor(context);
       case 'GOOD':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color monitoringStorageStatusColor(String status) {
+  static Color monitoringStorageStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'CRITICAL':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'HIGH':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'MODERATE':
-        return Colors.yellow[700]!;
+        return AppColorMapper.warningColor(context);
       case 'LOW':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color monitoringIntegrityStatusColor(String status) {
+  static Color monitoringIntegrityStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'POOR':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'FAIR':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'EXCELLENT':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 
-  static Color monitoringAlertsStatusColor(String status) {
+  static Color monitoringAlertsStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'NONE':
-        return Colors.green;
+        return AppColorMapper.successColor(context);
       case 'CRITICAL':
-        return Colors.red;
+        return AppColorMapper.errorColor(context);
       case 'HIGH':
-        return Colors.orange;
+        return AppColorMapper.warningColor(context);
       case 'ACTIVE':
-        return Colors.yellow[700]!;
+        return AppColorMapper.warningColor(context);
       default:
-        return Colors.grey;
+        return AppColorMapper.neutralColor(context);
     }
   }
 }

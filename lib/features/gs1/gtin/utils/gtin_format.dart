@@ -1,8 +1,7 @@
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+
 abstract final class GtinFormat {
   static final RegExp _numericOnly = RegExp(r'^\d+$');
-  static final RegExp _validLengths = RegExp(
-    r'^(?:\d{8}|\d{12}|\d{13}|\d{14})$',
-  );
 
   static String stripGtinInput(String? raw) {
     if (raw == null) return '';
@@ -14,31 +13,16 @@ abstract final class GtinFormat {
         !_numericOnly.hasMatch(bodyWithoutCheckDigit)) {
       return -1;
     }
-    var sum = 0;
-    var multiplyBy3 = true;
-    for (var i = bodyWithoutCheckDigit.length - 1; i >= 0; i--) {
-      final digit = int.parse(bodyWithoutCheckDigit[i]);
-      if (multiplyBy3) {
-        sum += digit * 3;
-      } else {
-        sum += digit;
-      }
-      multiplyBy3 = !multiplyBy3;
-    }
-    return (10 - (sum % 10)) % 10;
+    return CheckDigitUtils.calculateMod10(bodyWithoutCheckDigit);
   }
 
   static bool isValidGtin(String stripped) {
-    if (!_validLengths.hasMatch(stripped)) {
-      return false;
-    }
-    if (!_numericOnly.hasMatch(stripped)) {
-      return false;
-    }
-    final body = stripped.substring(0, stripped.length - 1);
-    final want = int.parse(stripped[stripped.length - 1]);
-    final got = calculateCheckDigitForBody(body);
-    return want == got;
+    return CheckDigitUtils.validateGS1CheckDigit(
+          stripped,
+          allowedLengths: CheckDigitUtils.gtinLengths,
+          label: 'GTIN',
+        ) ==
+        null;
   }
 
   static String normalizeGtinTo14(String validGtin) {

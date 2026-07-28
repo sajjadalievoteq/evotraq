@@ -5,7 +5,7 @@ import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_group_card.dart';
-import 'package:traqtrace_app/features/operations/shared/models/pharma_return_reason.dart';
+import 'package:traqtrace_app/data/models/operations/shared/pharma_return_reason.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_auto_reference_notice.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_event_time_tile.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_gln_selector.dart';

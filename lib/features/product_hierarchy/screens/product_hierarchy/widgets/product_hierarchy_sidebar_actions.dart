@@ -6,7 +6,7 @@ import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/product_hierarchy/cubit/product_hierarchy_cubit.dart';
-import 'package:traqtrace_app/features/product_hierarchy/screens/product_hierarchy/widgets/product_hierarchy_sidebar_chrome.dart';
+import 'package:traqtrace_app/features/product_hierarchy/widgets/product_hierarchy_section_label.dart';
 
 
 class ProductHierarchySidebarActions extends StatelessWidget {

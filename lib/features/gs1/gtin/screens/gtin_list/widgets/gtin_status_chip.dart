@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class GtinStatusChip extends StatelessWidget {
   const GtinStatusChip({super.key, required this.status});
@@ -8,11 +9,11 @@ class GtinStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chipColor = switch (status?.toLowerCase()) {
-      'active' => Colors.green,
-      'withdrawn' => Colors.red,
-      'suspended' => Colors.orange,
+      'active' => AppColorMapper.successColor(context),
+      'withdrawn' => AppColorMapper.errorColor(context),
+      'suspended' => AppColorMapper.warningColor(context),
       'discontinued' => Colors.grey,
-      _ => Colors.blue,
+      _ => AppColorMapper.infoColor(context),
     };
 
     return Chip(

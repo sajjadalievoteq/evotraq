@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
@@ -17,12 +18,12 @@ class DashboardErrorWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red),
+          TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context)),
           const SizedBox(height: 16),
           Text(
             'Error',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.red,
+              color: AppColorMapper.errorColor(context),
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/theme/operation_palette.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
@@ -6,7 +8,7 @@ import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/relative_time_utils.dart';
 import 'package:traqtrace_app/features/api_management/cubit/api_management_cubit.dart';
-import 'package:traqtrace_app/features/api_management/models/partner.dart';
+import 'package:traqtrace_app/data/models/api_management/partner.dart';
 import 'package:traqtrace_app/features/api_management/widgets/create_partner_dialog.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -70,7 +72,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TraqIcon(AppAssets.iconAlert, size: 64, color: Colors.red.shade300),
+                  TraqIcon(AppAssets.iconAlert, size: 64, color: AppColorMapper.errorColor(context).withValues(alpha: 0.5)),
                   const SizedBox(height: 16),
                   Text(state.errorMessage!),
                   const SizedBox(height: 16),
@@ -112,7 +114,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatCard('Total Partners', state.totalPartners.toString(), NavIcons.partnerManagement),
-          _buildStatCard('Active', state.activePartnersCount.toString(), AppAssets.iconCheckCircle, color: Colors.green),
+          _buildStatCard('Active', state.activePartnersCount.toString(), AppAssets.iconCheckCircle, color: AppColorMapper.successColor(context)),
           _buildStatCard('Inactive', state.inactivePartners.length.toString(), AppAssets.iconXCircle, color: Colors.grey),
         ],
       ),
@@ -258,9 +260,9 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                         value: partner.active ? 'deactivate' : 'activate',
                         child: Text(partner.active ? 'Deactivate' : 'Activate'),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
-                        child: Text('Delete', style: TextStyle(color: Colors.red)),
+                        child: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
                       ),
                     ],
                   ),
@@ -305,7 +307,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                         ),
                       ),
                     if (partner.webhookUrl != null)
-                      TraqIcon(AppAssets.iconSettings, size: 16, color: Colors.green.shade600),
+                      TraqIcon(AppAssets.iconSettings, size: 16, color: AppColorMapper.successColor(context)),
                   ],
                 ),
               ],
@@ -317,16 +319,17 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   }
 
   Widget _buildStatusChip(bool active) {
+    final success = AppColorMapper.successColor(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: active ? Colors.green.shade100 : Colors.grey.shade200,
+        color: active ? OperationPalette.soft(success) : Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         active ? 'Active' : 'Inactive',
         style: TextStyle(
-          color: active ? Colors.green.shade800 : Colors.grey.shade600,
+          color: active ? success : Colors.grey.shade600,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -359,15 +362,15 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     switch (direction) {
       case SyncDirection.inbound:
         iconAsset = AppAssets.iconArrowD;
-        color = Colors.blue;
+        color = AppColorMapper.infoColor(context);
         break;
       case SyncDirection.outbound:
         iconAsset = AppAssets.iconArrowUpR;
-        color = Colors.orange;
+        color = AppColorMapper.warningColor(context);
         break;
       case SyncDirection.bidirectional:
         iconAsset = AppAssets.iconSwapVert;
-        color = Colors.purple;
+        color = OperationPalette.of(context).opUpdateStatus;
         break;
     }
 
@@ -394,7 +397,11 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
 
   Widget _buildSyncStatusRow(Partner partner) {
     final isSuccess = partner.lastSyncStatus == 'SUCCESS';
-    final statusColor = isSuccess ? Colors.green : (partner.lastSyncStatus == 'FAILED' ? Colors.red : Colors.grey);
+    final statusColor = isSuccess
+        ? AppColorMapper.successColor(context)
+        : (partner.lastSyncStatus == 'FAILED'
+            ? AppColorMapper.errorColor(context)
+            : Colors.grey);
     
     return Row(
       children: [
@@ -471,7 +478,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                 context.showSuccess('Partner deleted');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColorMapper.errorColor(context)),
             child: const Text('Delete'),
           ),
         ],

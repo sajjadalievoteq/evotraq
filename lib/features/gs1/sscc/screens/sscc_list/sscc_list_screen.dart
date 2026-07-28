@@ -19,6 +19,7 @@ import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_text_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SSCCListScreen extends StatefulWidget {
   const SSCCListScreen({
@@ -328,7 +329,9 @@ class _SSCCListScreenState extends State<SSCCListScreen> {
               context.read<SSCCCubit>().deleteSSCC(deleteId);
               _searchImmediate();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorMapper.errorColor(dialogContext),
+            ),
             child: const Text(SsccUiConstants.dialogDelete),
           ),
         ],

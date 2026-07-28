@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/data/services/advanced_performance_service.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
@@ -71,12 +69,7 @@ class _ResourceManagementDashboardState
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   void _startAutoRefresh() {
@@ -335,17 +328,17 @@ class _ResourceManagementDashboardState
           children: [
             if (_lastOptimizationResult != null)
               Card(
-                color: Colors.green.shade50,
+                color: AppColorMapper.successColor(context).withValues(alpha: 0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      TraqIcon(AppAssets.iconCheck, color: Colors.green),
+                      TraqIcon(AppAssets.iconCheck, color: AppColorMapper.successColor(context)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _lastOptimizationResult!,
-                          style: TextStyle(color: Colors.green.shade700),
+                          style: TextStyle(color: AppColorMapper.successColor(context)),
                         ),
                       ),
                     ],
@@ -432,7 +425,7 @@ class _ResourceManagementDashboardState
                 'Memory Usage',
                 '${memoryUsage.toStringAsFixed(1)}%',
                 NavIcons.eventSerialization,
-                AdminHelperMappers.usageColor(memoryUsage.toDouble()),
+                AdminHelperMappers.usageColor(context, memoryUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
@@ -441,7 +434,7 @@ class _ResourceManagementDashboardState
                 'CPU Usage',
                 '${cpuUsage.toStringAsFixed(1)}%',
                 NavIcons.performanceOptimization,
-                AdminHelperMappers.usageColor(cpuUsage.toDouble()),
+                AdminHelperMappers.usageColor(context, cpuUsage.toDouble()),
               ),
             ),
           ],
@@ -454,7 +447,7 @@ class _ResourceManagementDashboardState
                 'Disk Usage',
                 '${diskUsage.toStringAsFixed(1)}%',
                 NavIcons.databasePartitioning,
-                AdminHelperMappers.usageColor(diskUsage.toDouble()),
+                AdminHelperMappers.usageColor(context, diskUsage.toDouble()),
               ),
             ),
             const SizedBox(width: 8),
@@ -463,7 +456,7 @@ class _ResourceManagementDashboardState
                 'Network Load',
                 '${networkLoad.toStringAsFixed(1)}%',
                 NavIcons.integrationValidation,
-                AdminHelperMappers.usageColor(networkLoad.toDouble()),
+                AdminHelperMappers.usageColor(context, networkLoad.toDouble()),
               ),
             ),
           ],
@@ -629,8 +622,8 @@ class _ResourceManagementDashboardState
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.blue.shade100,
-                child: TraqIcon(AppAssets.iconLightbulb, color: Colors.blue),
+                backgroundColor: AppColorMapper.infoColor(context).withValues(alpha: 0.15),
+                child: TraqIcon(AppAssets.iconLightbulb, color: AppColorMapper.infoColor(context)),
               ),
               title: Text('Recommendation #${index + 1}'),
               subtitle: Text(recommendation.toString()),

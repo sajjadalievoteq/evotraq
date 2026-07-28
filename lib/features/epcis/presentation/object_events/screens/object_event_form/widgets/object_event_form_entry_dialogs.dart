@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_help_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class ObjectEventFormEntryDialogs {
   ObjectEventFormEntryDialogs._();
@@ -68,7 +69,7 @@ class ObjectEventFormEntryDialogs {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TraqIcon(AppAssets.iconAlert,
-                            color: Colors.red,
+                            color: AppColorMapper.errorColor(dialogContext),
                             size: 18,
                           ),
                           const SizedBox(width: 8),
@@ -135,7 +136,9 @@ class ObjectEventFormEntryDialogs {
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
                     'Errors: ${error ?? "Unknown error"}',
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: AppColorMapper.errorColor(dialogContext),
+                    ),
                   ),
                 ),
             ],

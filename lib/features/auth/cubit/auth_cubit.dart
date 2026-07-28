@@ -100,6 +100,7 @@ class AuthCubit extends Cubit<AuthState> {
           error: null,
           message: null,
           registeredEmail: null,
+          bootstrapCompleted: true,
         ),
       );
       _preloadGlnPickerCatalog();
@@ -215,7 +216,10 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> _forceUnauthenticated() async {
     _clearSessionCaches();
-    emit(const AuthState(status: AuthStatus.unauthenticated));
+    emit(const AuthState(
+      status: AuthStatus.unauthenticated,
+      bootstrapCompleted: true,
+    ));
   }
 
   Future<void> getCurrentUser() async {

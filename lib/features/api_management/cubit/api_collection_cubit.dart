@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../../data/services/api_collection_service.dart';
-import '../models/api_collection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
 
 import 'api_collection_state.dart';
 
@@ -12,12 +12,8 @@ class ApiCollectionCubit extends Cubit<ApiCollectionState> {
   final ApiCollectionService _service;
 
   ApiCollectionCubit({
-    required DioService dioService,
     ApiCollectionService? service,
-  })  : _service = service ??
-            ApiCollectionService(
-              dioService: dioService,
-            ),
+  })  : _service = service ?? getIt<ApiCollectionService>(),
         super(const ApiCollectionState());
 
 

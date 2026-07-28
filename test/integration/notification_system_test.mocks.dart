@@ -6,13 +6,11 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart' as _i2;
+import 'package:traqtrace_app/data/models/notifications/realtime_notification.dart' as _i6;
 import 'package:traqtrace_app/data/services/notification_api_service.dart'
     as _i3;
 import 'package:traqtrace_app/data/services/websocket_service.dart' as _i5;
-import 'package:traqtrace_app/features/notifications/domain/models/notification_subscription.dart'
-    as _i2;
-import 'package:traqtrace_app/features/notifications/domain/models/realtime_notification.dart'
-    as _i6;
 
 
 

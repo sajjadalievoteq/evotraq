@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -63,12 +61,7 @@ class _ConnectionPoolMonitoringDashboardState
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   void _startAutoRefresh() {
@@ -270,7 +263,7 @@ class _ConnectionPoolMonitoringDashboardState
                 'Active',
                 activeConnections.toString(),
                 AppAssets.iconPlay,
-                Colors.green,
+                AppColorMapper.successColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -279,7 +272,7 @@ class _ConnectionPoolMonitoringDashboardState
                 'Idle',
                 idleConnections.toString(),
                 AppAssets.iconPause,
-                Colors.blue,
+                AppColorMapper.infoColor(context),
               ),
             ),
           ],
@@ -292,7 +285,7 @@ class _ConnectionPoolMonitoringDashboardState
                 'Total',
                 totalConnections.toString(),
                 NavIcons.databasePartitioning,
-                Colors.purple,
+                AppColorMapper.chartColor(context, 5),
               ),
             ),
             const SizedBox(width: 8),
@@ -301,7 +294,7 @@ class _ConnectionPoolMonitoringDashboardState
                 'Awaiting',
                 awaitingConnections.toString(),
                 AppAssets.iconClock,
-                Colors.orange,
+                AppColorMapper.warningColor(context),
               ),
             ),
           ],
@@ -429,10 +422,10 @@ class _ConnectionPoolMonitoringDashboardState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.orange.shade100,
+                    backgroundColor: AppColorMapper.warningColor(context).withValues(alpha: 0.15),
                     child: TraqIcon(
                       AppAssets.iconLightbulb,
-                      color: Colors.orange,
+                      color: AppColorMapper.warningColor(context),
                     ),
                   ),
                   const SizedBox(width: 12),

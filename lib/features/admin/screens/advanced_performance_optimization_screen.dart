@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'dart:async';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
-import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
-import 'package:traqtrace_app/core/network/token_manager.dart';
 
 import '../../../data/services/advanced_performance_service.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -46,12 +44,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
   }
 
   void _initializeService() {
-    final appConfig = getIt<AppConfig>();
-    _performanceService = AdvancedPerformanceService(
-      dioService: getIt<DioService>(),
-      tokenManager: getIt<TokenManager>(),
-      appConfig: appConfig,
-    );
+    _performanceService = getIt<AdvancedPerformanceService>();
   }
 
   void _startAutoRefresh() {
@@ -203,17 +196,17 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
           children: [
             if (_errorMessage != null)
               Card(
-                color: Colors.red.shade50,
+                color: AppColorMapper.errorColor(context).withValues(alpha: 0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      TraqIcon(AppAssets.iconAlert, color: Colors.red),
+                      TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade700),
+                          style: TextStyle(color: AppColorMapper.errorColor(context)),
                         ),
                       ),
                     ],
@@ -366,7 +359,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                 'Memory Usage',
                 _getMemoryUsage(systemResources),
                 NavIcons.eventSerialization,
-                Colors.blue,
+                AppColorMapper.infoColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -375,7 +368,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                 'CPU Usage',
                 _getCpuUsage(systemResources),
                 NavIcons.performanceOptimization,
-                Colors.green,
+                AppColorMapper.successColor(context),
               ),
             ),
           ],
@@ -388,7 +381,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                 'Active Connections',
                 _getActiveConnections(connectionPool),
                 AppAssets.iconLink,
-                Colors.orange,
+                AppColorMapper.warningColor(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -397,7 +390,7 @@ class _AdvancedPerformanceOptimizationScreenState extends State<AdvancedPerforma
                 'Active Threads',
                 _getActiveThreads(threadPools),
                 AppAssets.iconSettings,
-                Colors.purple,
+                AppColorMapper.chartColor(context, 5),
               ),
             ),
           ],

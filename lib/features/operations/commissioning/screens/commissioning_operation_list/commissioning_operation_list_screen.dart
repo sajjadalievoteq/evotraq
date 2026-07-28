@@ -10,12 +10,11 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/traq_app_bar.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_mapper.dart';
 import 'package:traqtrace_app/data/models/operations/shared/operation_metadata.dart';
-import 'package:traqtrace_app/data/models/operations/shared/operation_page.dart';
 import 'package:traqtrace_app/data/services/operations/commissioning/commissioning_operation_service.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_list/gs1_list_search_bar.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_list_body.dart';
+import 'package:traqtrace_app/features/operations/commissioning/cubit/commissioning_operation_list_cubit.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/utils/commissioning_operation_list_filter.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_advanced_filters_panel.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/widgets/commissioning_quick_filter_dialog.dart';
@@ -52,7 +51,7 @@ class _CommissioningOperationListScreenState
     extends State<CommissioningOperationListScreen> {
   final TextEditingController _gtinFilterController = TextEditingController();
 
-  late OperationsCubit<Operation> _cubit;
+  late CommissioningOperationListCubit _cubit;
   String _sortBy = 'createdAt';
   String _sortDir = 'desc';
   int _pageSize = 25;
@@ -70,37 +69,25 @@ class _CommissioningOperationListScreenState
     super.dispose();
   }
 
-  OperationsCubit<Operation> _buildCubit() {
-    return OperationsCubit<Operation>(
+  CommissioningOperationListCubit _buildCubit() {
+    final cubit = CommissioningOperationListCubit(
+      service: getIt<CommissioningOperationService>(),
       pageSize: _pageSize,
-      loadErrorMessage:
-          'Failed to load commissioning operations. Check your connection and tap Retry.',
-      loadMoreErrorMessage:
-          'Could not load more operations. Check your connection and try again.',
-      fetchList: ({required int page, required int size}) async {
-        final gtinFilter = _gtinFilterController.text.trim();
-        final result = await getIt<CommissioningOperationService>().listBatches(
-          page: page,
-          size: size,
-          gtin: gtinFilter.isEmpty ? null : gtinFilter,
-          sortBy: _sortBy,
-          sortDir: _sortDir,
-        );
-        return OperationPage<Operation>(
-          operations: result.batches
-              .map(OperationMapper.fromCommissioningBatch)
-              .toList(),
-          page: page,
-          size: size,
-          count: result.batches.length,
-          total: result.batches.length,
-          totalPages: result.isLast ? page + 1 : page + 2,
-        );
-      },
     );
+    cubit.configure(
+      gtin: _gtinFilterController.text,
+      sortBy: _sortBy,
+      sortDir: _sortDir,
+    );
+    return cubit;
   }
 
   void _reloadFromServer() {
+    _cubit.configure(
+      gtin: _gtinFilterController.text,
+      sortBy: _sortBy,
+      sortDir: _sortDir,
+    );
     _cubit.refresh();
   }
 
@@ -312,7 +299,7 @@ class _CommissioningOperationListBodyState
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<OperationsCubit<Operation>, OperationsState<Operation>>(
+    return BlocConsumer<CommissioningOperationListCubit, OperationsState<Operation>>(
       buildWhen: (previous, current) =>
           previous.items != current.items ||
           previous.isLoading != current.isLoading ||
@@ -335,7 +322,7 @@ class _CommissioningOperationListBodyState
       },
       builder: (context, state) {
         final filtered = _filteredOperations(state.items);
-        final cubit = context.read<OperationsCubit<Operation>>();
+        final cubit = context.read<CommissioningOperationListCubit>();
 
         final body = Gs1MasterListBody(
           toolbar: Column(

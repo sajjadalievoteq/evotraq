@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/widgets/gs1_fields/gtin_entry_field.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
@@ -212,21 +213,26 @@ class GtinAdvancedFiltersPanel extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green[50],
+                color: AppColorMapper.successColor(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.green[200]!),
+                border: Border.all(
+                  color: AppColorMapper.successColor(context).withValues(alpha: 0.35),
+                ),
               ),
               child: Row(
                 children: [
                   TraqIcon(AppAssets.iconCheck,
                     size: 16,
-                    color: Colors.green[700],
+                    color: AppColorMapper.successColor(context),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       GtinUiConstants.advancedFiltersSuccessBanner,
-                      style: TextStyle(fontSize: 12, color: Colors.green[700]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColorMapper.successColor(context),
+                      ),
                     ),
                   ),
                 ],

@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
-import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
+import 'package:traqtrace_app/features/shared/reference_data/cubit/reference_data_cubit.dart';
 
 
 
@@ -69,11 +68,7 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
 
   Future<GLN?> _resolveGln(String? code) async {
     if (code == null || code.trim().isEmpty) return null;
-    try {
-      return await getIt<GLNService>().getGLNByCode(code.trim());
-    } catch (_) {
-      return null;
-    }
+    return context.read<ReferenceDataCubit>().resolveGln(code.trim());
   }
 
   Future<void> _goReceive() async {

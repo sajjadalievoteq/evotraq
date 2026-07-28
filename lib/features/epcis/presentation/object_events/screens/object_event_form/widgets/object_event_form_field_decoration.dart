@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/utils/object_event_form_validation_context.dart';
 import 'package:traqtrace_app/features/epcis/presentation/object_events/screens/object_event_form/widgets/object_event_form_required_indicator.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
@@ -20,16 +21,22 @@ class ObjectEventFormFieldDecoration {
   }
 
   static Widget buildValidationStatus({
+    required BuildContext context,
     required String fieldName,
     required ObjectEventFormValidationContext validation,
   }) {
     final error = validation.getFieldError(fieldName);
 
     if (error != null && error.isNotEmpty) {
-      return TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 20);
+      return TraqIcon(
+        AppAssets.iconAlert,
+        color: AppColorMapper.errorColor(context),
+        size: 20,
+      );
     } else if (validation.hasFieldBeenValidated(fieldName)) {
-      return TraqIcon(AppAssets.iconCheck,
-        color: Colors.green,
+      return TraqIcon(
+        AppAssets.iconCheck,
+        color: AppColorMapper.successColor(context),
         size: 20,
       );
     }
@@ -53,9 +60,15 @@ class ObjectEventFormFieldDecoration {
       border: const OutlineInputBorder(),
       label: buildFieldLabel(context, label, isMandatory),
       suffixIcon: error != null && error.isNotEmpty
-          ? TraqIcon(AppAssets.iconAlert, color: Colors.red)
+          ? TraqIcon(
+              AppAssets.iconAlert,
+              color: AppColorMapper.errorColor(context),
+            )
           : hasBeenValidated
-          ? TraqIcon(AppAssets.iconCheck, color: Colors.green)
+          ? TraqIcon(
+              AppAssets.iconCheck,
+              color: AppColorMapper.successColor(context),
+            )
           : null,
       errorText: error,
     );

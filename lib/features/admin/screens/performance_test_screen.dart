@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
-import 'package:traqtrace_app/core/network/dio_service.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/app_loading_indicator.dart';
@@ -25,7 +25,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _testService ??= PerformanceTestService(dioService: getIt<DioService>());
+    _testService ??= getIt<PerformanceTestService>();
   }
 
   Future<void> _runAllTests() async {
@@ -133,13 +133,13 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TraqIcon(AppAssets.iconAlert, color: Colors.red, size: 48),
+            TraqIcon(AppAssets.iconAlert, color: AppColorMapper.errorColor(context), size: 48),
             const SizedBox(height: 16),
             Text(
               'Error',
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.red),
+              ).textTheme.titleLarge?.copyWith(color: AppColorMapper.errorColor(context)),
             ),
             const SizedBox(height: 8),
             Text(_errorMessage!),
@@ -242,7 +242,7 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
             ElevatedButton(
               onPressed: _runFrontendTests,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber[700],
+                backgroundColor: AppColorMapper.warningColor(context),
               ),
               child: const Text('Run Frontend Tests'),
             ),
@@ -298,11 +298,11 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: isBackendTest
-                              ? Colors.blue.withOpacity(0.1)
-                              : Colors.amber.withOpacity(0.1),
+                              ? AppColorMapper.infoColor(context).withOpacity(0.1)
+                              : AppColorMapper.warningColor(context).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: isBackendTest ? Colors.blue : Colors.amber,
+                            color: isBackendTest ? AppColorMapper.infoColor(context) : AppColorMapper.warningColor(context),
                             width: 1,
                           ),
                         ),
@@ -310,8 +310,8 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
                           testGroup,
                           style: TextStyle(
                             color: isBackendTest
-                                ? Colors.blue[700]
-                                : Colors.amber[700],
+                                ? AppColorMapper.infoColor(context)
+                                : AppColorMapper.warningColor(context),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -371,10 +371,10 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: passed
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+            ? AppColorMapper.successColor(context).withOpacity(0.1)
+            : AppColorMapper.errorColor(context).withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: passed ? Colors.green : Colors.red, width: 1),
+        border: Border.all(color: passed ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -382,13 +382,13 @@ class _PerformanceTestScreenState extends State<PerformanceTestScreen> {
           TraqIcon(
             passed ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
             size: 16,
-            color: passed ? Colors.green : Colors.red,
+            color: passed ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
           ),
           const SizedBox(width: 4),
           Text(
             passed ? 'PASSED' : 'FAILED',
             style: TextStyle(
-              color: passed ? Colors.green : Colors.red,
+              color: passed ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
               fontWeight: FontWeight.bold,
             ),
           ),

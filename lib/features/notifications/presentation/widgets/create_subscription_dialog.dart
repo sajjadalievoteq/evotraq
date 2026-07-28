@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -7,7 +8,7 @@ import '../cubit/notification_cubit.dart';
 import '../cubit/notification_state.dart';
 import '../constants/notification_constants.dart';
 import '../widgets/notification_subscription_help.dart';
-import '../../domain/models/notification_subscription.dart';
+import 'package:traqtrace_app/data/models/notifications/notification_subscription.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -348,9 +349,9 @@ class _CreateSubscriptionDialogState extends State<CreateSubscriptionDialog> {
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: AppColorMapper.infoSoft(context),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.blue[200]!),
+                    border: Border.all(color: AppColorMapper.infoColor(context).withValues(alpha: 0.35)),
                   ),
                   child: Wrap(
                     spacing: 4,

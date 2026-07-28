@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../models/api_collection.dart';
+import 'package:traqtrace_app/data/models/api_management/api_collection.dart';
 
 enum ApiCollectionStatus { initial, loading, success, error }
 

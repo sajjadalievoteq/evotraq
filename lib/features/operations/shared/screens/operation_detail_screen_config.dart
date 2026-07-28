@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 
 typedef OperationDetailContentBuilder<T> = Widget Function(
   BuildContext context, {
@@ -13,7 +14,7 @@ typedef OperationDetailContentBuilder<T> = Widget Function(
 
 class OperationDetailScreenConfig<T> {
   const OperationDetailScreenConfig({
-    required this.loader,
+    required this.createCubit,
     required this.contentBuilder,
     required this.titleBuilder,
     required this.listRoute,
@@ -22,7 +23,7 @@ class OperationDetailScreenConfig<T> {
     this.drawer,
   });
 
-  final Future<T> Function(String id) loader;
+  final OperationDetailCubit<T> Function(String fallbackErrorMessage) createCubit;
 
   final OperationDetailContentBuilder<T> contentBuilder;
 

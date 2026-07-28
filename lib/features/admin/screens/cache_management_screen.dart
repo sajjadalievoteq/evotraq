@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
 import '../../../data/services/cache_service.dart';
-import '../../cache/models/cache_statistics.dart';
-import '../../cache/models/cache_health.dart';
+import 'package:traqtrace_app/data/models/cache/cache_statistics.dart';
+import 'package:traqtrace_app/data/models/cache/cache_health.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/loading_overlay.dart';
 import 'package:traqtrace_app/core/widgets/error_message.dart';
@@ -157,13 +158,13 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     children: [
                       TraqIcon(
                         _health!.isUp ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
-                        color: _health!.isUp ? Colors.green : Colors.red,
+                        color: _health!.isUp ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _health!.status,
                         style: TextStyle(
-                          color: _health!.isUp ? Colors.green : Colors.red,
+                          color: _health!.isUp ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -200,19 +201,19 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                           'Hit Ratio',
                           '${(_statistics!.overallHitRatio * 100).toStringAsFixed(1)}%',
                           AppAssets.iconTarget,
-                          Colors.blue,
+                          AppColorMapper.infoColor(context),
                         ),
                         _buildStatCard(
                           'Total Hits',
                           _statistics!.totalHits.toString(),
                           AppAssets.iconThumbUp,
-                          Colors.green,
+                          AppColorMapper.successColor(context),
                         ),
                         _buildStatCard(
                           'Total Misses',
                           _statistics!.totalMisses.toString(),
                           AppAssets.iconThumbDown,
-                          Colors.orange,
+                          AppColorMapper.warningColor(context),
                         ),
                       ],
                     ),
@@ -224,19 +225,19 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                           'Cache Entries',
                           _statistics!.totalCacheEntries.toString(),
                           NavIcons.databasePartitioning,
-                          Colors.purple,
+                          AppColorMapper.chartColor(context, 5),
                         ),
                         _buildStatCard(
                           'Master Data',
                           _statistics!.masterDataEntries.toString(),
                           AppAssets.iconBraces,
-                          Colors.blue,
+                          AppColorMapper.infoColor(context),
                         ),
                         _buildStatCard(
                           'Hot Data',
                           _statistics!.hotDataEntries.toString(),
                           AppAssets.iconFlame,
-                          Colors.orange,
+                          AppColorMapper.warningColor(context),
                         ),
                       ],
                     ),
@@ -244,17 +245,17 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: AppColorMapper.infoColor(context).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          TraqIcon(AppAssets.iconInfo, color: Colors.blue, size: 16),
+                          TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context), size: 16),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Cache is active with ${_statistics!.totalCacheEntries} entries. Hit/Miss tracking available for manual cache operations only.',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.blue[700]),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColorMapper.infoColor(context)),
                             ),
                           ),
                         ],
@@ -286,11 +287,11 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
                     const SizedBox(height: 8),
                     _buildCacheTypeRow('Hot Data', _statistics!.hotDataHitRatio, _statistics!.hotDataHits, _statistics!.hotDataMisses),
                   ] else ...[
-                    _buildCacheSizeRow('Query Results', _statistics!.queryResultsEntries, AppAssets.iconSearch, Colors.blue),
+                    _buildCacheSizeRow('Query Results', _statistics!.queryResultsEntries, AppAssets.iconSearch, AppColorMapper.chartColor(context, 0)),
                     const SizedBox(height: 8),
-                    _buildCacheSizeRow('Master Data', _statistics!.masterDataEntries, AppAssets.iconBraces, Colors.green),
+                    _buildCacheSizeRow('Master Data', _statistics!.masterDataEntries, AppAssets.iconBraces, AppColorMapper.chartColor(context, 1)),
                     const SizedBox(height: 8),
-                    _buildCacheSizeRow('Hot Data', _statistics!.hotDataEntries, AppAssets.iconFlame, Colors.orange),
+                    _buildCacheSizeRow('Hot Data', _statistics!.hotDataEntries, AppAssets.iconFlame, AppColorMapper.chartColor(context, 2)),
                   ],
                 ],
               ),
@@ -334,7 +335,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
             value: hitRatio,
             backgroundColor: Colors.grey[300],
             valueColor: AlwaysStoppedAnimation<Color>(
-              hitRatio > 0.8 ? Colors.green : hitRatio > 0.5 ? Colors.orange : Colors.red,
+              hitRatio > 0.8 ? AppColorMapper.successColor(context) : hitRatio > 0.5 ? AppColorMapper.warningColor(context) : AppColorMapper.errorColor(context),
             ),
           ),
         ),
@@ -373,7 +374,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
         Text(
           entries > 0 ? 'Active' : 'Empty',
           style: TextStyle(
-            color: entries > 0 ? Colors.green : Colors.grey,
+            color: entries > 0 ? AppColorMapper.successColor(context) : Colors.grey,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -616,12 +617,12 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
     return ListTile(
       leading: TraqIcon(
         iconAsset,
-        color: isDestructive ? Colors.red : null,
+        color: isDestructive ? AppColorMapper.errorColor(context) : null,
       ),
       title: Text(
         title,
         style: TextStyle(
-          color: isDestructive ? Colors.red : null,
+          color: isDestructive ? AppColorMapper.errorColor(context) : null,
         ),
       ),
       subtitle: Text(description),
@@ -630,7 +631,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
             ? _showConfirmationDialog(title, () => _performCacheAction(action, title))
             : _performCacheAction(action, title),
         style: isDestructive
-            ? ElevatedButton.styleFrom(backgroundColor: Colors.red)
+            ? ElevatedButton.styleFrom(backgroundColor: AppColorMapper.errorColor(context))
             : null,
         child: Text(isDestructive ? 'Clear' : 'Execute'),
       ),
@@ -760,14 +761,14 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
               TraqIcon(
                 isHealthy ? AppAssets.iconCheckCircle : AppAssets.iconXCircle,
                 size: 16,
-                color: isHealthy ? Colors.green : Colors.red,
+                color: isHealthy ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
               ),
               const SizedBox(width: 8),
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isHealthy ? Colors.green : Colors.red,
+                      color: isHealthy ? AppColorMapper.successColor(context) : AppColorMapper.errorColor(context),
                     ),
               ),
             ],
@@ -790,7 +791,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue[600]!, Colors.blue[800]!],
+                  colors: [AppColorMapper.infoColor(context), AppColorMapper.infoColor(context)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -829,7 +830,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'System Overview',
             AppAssets.iconArchitecture,
-            Colors.blue,
+            AppColorMapper.infoColor(context),
             [
               'The TraqTrace caching system implements a multi-tier caching strategy designed to optimize performance for pharmaceutical track and trace operations.',
               'Our implementation uses Redis as the distributed cache backend with Spring Cache annotations for seamless integration.',
@@ -842,7 +843,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Cache Types Implemented',
             AppAssets.iconLayers,
-            Colors.green,
+            AppColorMapper.successColor(context),
             [
               '🔵 Query Results Cache (15-minute TTL): Stores complex EPCIS query results for fast retrieval',
               '🟡 Master Data Cache (1-hour TTL): Caches GS1 identifiers (GTIN, GLN, SSCC, SGTIN) and validation rules',
@@ -856,7 +857,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Technical Implementation',
             AppAssets.iconCode,
-            Colors.orange,
+            AppColorMapper.warningColor(context),
             [
               '• Spring Cache Integration: @Cacheable, @CacheEvict, and @CachePut annotations',
               '• Redis Backend: Lettuce connection factory with connection pooling',
@@ -872,7 +873,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Cached Services Coverage',
             AppAssets.iconSettings,
-            Colors.purple,
+            AppColorMapper.chartColor(context, 5),
             [
               '✅ GS1 Identifier Services: GTIN, GLN, SSCC, SGTIN services',
               '✅ EPCIS Event Services: Object, Aggregation, Transaction, Transformation events',
@@ -887,7 +888,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Development Environment (Current)',
             AppAssets.iconComputer,
-            Colors.teal,
+            AppColorMapper.chartColor(context, 3),
             [
               '🐳 Docker Redis (required for default backend profile)',
               '   • Image: redis:7-alpine (see backend/docker-compose.yml)',
@@ -917,7 +918,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Production Environment (Azure)',
             AppAssets.iconCloud,
-            Colors.deepPurple,
+            AppColorMapper.chartColor(context, 4),
             [
               '☁️ Azure Redis Cache (Managed Service)',
               '   • Tier: Standard (Primary + Replica)',
@@ -943,7 +944,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Performance Benefits',
             NavIcons.performanceOptimization,
-            Colors.red,
+            AppColorMapper.errorColor(context),
             [
               '🚀 Response Time Reduction: Up to 90% faster for cached queries',
               '💾 Database Load Reduction: Significant decrease in PostgreSQL queries',
@@ -958,7 +959,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Available Management Operations',
             AppAssets.iconSecurity,
-            Colors.indigo,
+            AppColorMapper.chartColor(context, 0),
             [
               '🔄 Cache Warm-up: Pre-populate cache with frequently accessed data',
               '🧹 Selective Clearing: Clear specific cache types (Master Data, Hot Data, Query Results)',
@@ -974,7 +975,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Best Practices & Guidelines',
             AppAssets.iconThumbUp,
-            Colors.green[700]!,
+            AppColorMapper.successColor(context),
             [
               '• Monitor cache hit ratios regularly (target: >80%)',
               '• Use cache warm-up after deployments',
@@ -991,7 +992,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
           _buildHelpSection(
             'Troubleshooting Common Issues',
             AppAssets.iconBug,
-            Colors.red[700]!,
+            AppColorMapper.errorColor(context),
             [
               '🔥 "Unable to connect to Redis" or cache health DOWN:',
               '   1. Check container: docker compose ps   or   docker ps --filter name=traqtrace-redis',
@@ -1029,7 +1030,7 @@ class _CacheManagementScreenState extends State<CacheManagementScreen>
             ),
             child: Column(
               children: [
-                TraqIcon(AppAssets.iconInfo, color: Colors.blue[700], size: 24),
+                TraqIcon(AppAssets.iconInfo, color: AppColorMapper.infoColor(context), size: 24),
                 const SizedBox(height: 8),
                 Text(
                   'Cache Management System v3.2',

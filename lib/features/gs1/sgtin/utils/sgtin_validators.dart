@@ -1,3 +1,4 @@
+import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/data/models/gs1/sgtin/sgtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/sgtin/utils/sgtin_status_rules.dart'
@@ -55,13 +56,9 @@ String? validateGtin(String? value) {
 
 String? validateGln(String? value, {String fieldName = 'GLN'}) {
   if (value == null || value.isEmpty) return null;
-  if (!RegExp(r'^\d{13}$').hasMatch(value)) {
-    return '$fieldName must be exactly 13 digits';
-  }
-  if (!_luhnCheck(value)) {
-    return '$fieldName has an invalid check digit';
-  }
-  return null;
+  final err = CheckDigitUtils.validateGln(value);
+  if (err == null) return null;
+  return err.replaceFirst('GLN', fieldName);
 }
 
 String? validateExpiryDate(DateTime? value) {
@@ -190,19 +187,4 @@ String? validateOriginalSgtinRef(String? value) {
     return 'Original SGTIN reference must follow the format <gtin>/<serialNumber>';
   }
   return null;
-}
-
-bool _luhnCheck(String digits) {
-  int sum = 0;
-  bool odd = false;
-  for (int i = digits.length - 1; i >= 0; i--) {
-    int d = int.parse(digits[i]);
-    if (odd) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-    odd = !odd;
-  }
-  return sum % 10 == 0;
 }

@@ -92,7 +92,7 @@ class UpdateStatusReviewStep extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                             leading: TraqIcon(
                               AppAssets.iconQr,
-                              color: OperationEpcTypeUtils.colorFromValue(epc),
+                              color: OperationEpcTypeUtils.colorFromValue(context, epc),
                             ),
                             title: Text(
                               epc,

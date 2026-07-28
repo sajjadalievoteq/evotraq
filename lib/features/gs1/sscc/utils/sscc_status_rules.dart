@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 import 'package:traqtrace_app/data/models/gs1/serialization/sscc/sscc_model.dart';
 
 const Map<LogisticUnitStatus, Set<LogisticUnitStatus>> ssccAllowedTransitions = {
@@ -80,23 +81,8 @@ const Map<LogisticUnitStatus, String> statusLabels = {
 String friendlyLabel(LogisticUnitStatus status) =>
     statusLabels[status] ?? status.name;
 
-Color statusColor(LogisticUnitStatus status) {
-  switch (status) {
-    case LogisticUnitStatus.DRAFT:
-      return Colors.blueGrey;
-    case LogisticUnitStatus.ALLOCATED:
-      return Colors.blue.shade400;
-    case LogisticUnitStatus.ACTIVE:
-      return Colors.green.shade700;
-    case LogisticUnitStatus.IN_TRANSIT:
-      return Colors.orange.shade700;
-    case LogisticUnitStatus.RECEIVED:
-      return Colors.teal.shade700;
-    case LogisticUnitStatus.DECOMMISSIONED:
-      return Colors.brown.shade600;
-    case LogisticUnitStatus.VOIDED:
-      return Colors.red.shade800;
-  }
+Color statusColor(BuildContext context, LogisticUnitStatus status) {
+  return AppColorMapper.logisticUnitStatusColor(context, status);
 }
 
 const Map<UnitType, String> unitTypeLabels = {

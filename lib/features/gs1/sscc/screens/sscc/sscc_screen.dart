@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_cubit.dart';
+import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_state.dart';
+import 'package:traqtrace_app/features/gs1/sscc/cubit/sscc_status.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/sscc_detail_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_list/sscc_list_screen.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';

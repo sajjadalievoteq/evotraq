@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -362,7 +364,8 @@ class _ReturnShippingOperationListBodyState
             title: const Text('Return Shipping'),
           ),
           drawer: const AppDrawer(),
-          floatingActionButton: widget.onEmbeddedCreate != null
+          floatingActionButton: widget.onEmbeddedCreate != null ||
+                  !context.canPerform(OperationSteps.returnShip)
               ? null
               : FloatingActionButton.extended(
                   onPressed: () =>

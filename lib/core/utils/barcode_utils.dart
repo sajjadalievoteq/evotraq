@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_parser.dart';
+import 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 
 export 'package:traqtrace_app/data/models/barcode/barcode_details.dart';
 
@@ -68,20 +69,4 @@ BarcodeDetails extractBarcodeDetails(String rawBarcode) {
   );
 }
 
-DateTime? _parseGs1Date(String? yymmdd) {
-  if (yymmdd == null || yymmdd.length != 6) return null;
-  try {
-    final year  = int.parse('20${yymmdd.substring(0, 2)}');
-    final month = int.parse(yymmdd.substring(2, 4));
-    final day   = int.parse(yymmdd.substring(4, 6));
-
-    if (month < 1 || month > 12) return null;
-
-    if (day == 0) {
-      return DateTime(year, month + 1, 0);
-    }
-    return DateTime(year, month, day);
-  } catch (_) {
-    return null;
-  }
-}
+DateTime? _parseGs1Date(String? yymmdd) => Gs1DateUtils.parseYymmdd(yymmdd);

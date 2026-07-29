@@ -1,22 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(
     this._dashboardService,
     this._sessionStore, {
+    AuthCubit? authCubit,
     this.pollInterval = const Duration(seconds: 60),
-  })  : _currentPollInterval = pollInterval,
+  })  : _authCubit = authCubit ?? getIt<AuthCubit>(),
+        _currentPollInterval = pollInterval,
         super(const HomeState(status: HomeLoadStatus.loading));
 
   final DashboardService _dashboardService;
   final HomeOverviewSessionStore _sessionStore;
+  final AuthCubit _authCubit;
 
-  
   final Duration pollInterval;
 
   static const Duration _maxPollBackoff = Duration(minutes: 5);
@@ -28,10 +32,19 @@ class HomeCubit extends Cubit<HomeState> {
   bool _isRevalidating = false;
   bool _isPolling = false;
 
+  bool get _canReadDashboard => _authCubit.state.canReadDashboard;
+
+  bool get _canReadHealth => _authCubit.state.canReadSystemHealth;
+
   Future<void> load({
     String? accountEmail,
     bool forceRefresh = false,
   }) async {
+    if (!_canReadDashboard) {
+      emit(const HomeState(status: HomeLoadStatus.success));
+      return;
+    }
+
     if (!forceRefresh) {
       final cached = await _sessionStore.readFor(accountEmail);
       if (cached != null) {
@@ -42,10 +55,10 @@ class HomeCubit extends Cubit<HomeState> {
             recentEvents: cached.recentEvents,
             healthStatus: cached.healthStatus,
             lastDataRefreshAt: cached.lastDataRefreshAt,
-            healthLoading: true,
+            healthLoading: _canReadHealth,
           ),
         );
-        
+
         unawaited(
           _revalidate(
             accountEmail: accountEmail,
@@ -77,6 +90,11 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> refresh({String? accountEmail}) async {
+    if (!_canReadDashboard) {
+      emit(const HomeState(status: HomeLoadStatus.success));
+      return;
+    }
+
     final cached = await _sessionStore.readFor(accountEmail);
     if (cached != null || state.hasPayload) {
       if (cached != null) {
@@ -87,11 +105,11 @@ class HomeCubit extends Cubit<HomeState> {
             recentEvents: cached.recentEvents,
             healthStatus: cached.healthStatus ?? state.healthStatus,
             lastDataRefreshAt: cached.lastDataRefreshAt,
-            healthLoading: true,
+            healthLoading: _canReadHealth,
           ),
         );
       } else {
-        emit(state.copyWith(healthLoading: true, clearError: true));
+        emit(state.copyWith(healthLoading: _canReadHealth, clearError: true));
       }
       await _revalidate(
         accountEmail: accountEmail,
@@ -106,25 +124,22 @@ class HomeCubit extends Cubit<HomeState> {
     await load(accountEmail: accountEmail, forceRefresh: true);
   }
 
-  
   void startPolling({String? accountEmail}) {
-    if (isClosed) return;
+    if (isClosed || !_canReadDashboard) return;
     _pollAccountEmail = accountEmail ?? _pollAccountEmail;
     _pollTimer?.cancel();
     _isPolling = true;
     _pollTimer = Timer.periodic(_currentPollInterval, (_) => _onPollTick());
   }
 
-  
   void stopPolling() {
     _pollTimer?.cancel();
     _pollTimer = null;
     _isPolling = false;
   }
 
-  
   Future<void> onAppResumed({String? accountEmail}) async {
-    if (isClosed) return;
+    if (isClosed || !_canReadDashboard) return;
     final email = accountEmail ?? _pollAccountEmail;
     _currentPollInterval = pollInterval;
     await _revalidate(
@@ -137,9 +152,10 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _onPollTick() {
-    if (isClosed || !_isPolling || _isRevalidating) return;
-    
-    
+    if (isClosed || !_isPolling || _isRevalidating || !_canReadDashboard) {
+      return;
+    }
+
     _isRevalidating = true;
     unawaited(
       _revalidate(
@@ -157,6 +173,7 @@ class HomeCubit extends Cubit<HomeState> {
     bool adjustPollBackoff = false,
     bool lockAlreadyHeld = false,
   }) async {
+    if (!_canReadDashboard) return;
     if (!lockAlreadyHeld) {
       if (_isRevalidating) return;
       _isRevalidating = true;
@@ -232,6 +249,12 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _startHealthLoad({String? accountEmail}) {
+    if (!_canReadHealth) {
+      if (!isClosed && state.healthLoading) {
+        emit(state.copyWith(healthLoading: false));
+      }
+      return;
+    }
     final generation = ++_healthLoadGeneration;
     _loadHealthInBackground(
       accountEmail: accountEmail,
@@ -243,7 +266,7 @@ class HomeCubit extends Cubit<HomeState> {
     required String? accountEmail,
     required int generation,
   }) async {
-    if (isClosed) return;
+    if (isClosed || !_canReadHealth) return;
     emit(state.copyWith(healthLoading: true));
     try {
       final healthStatus = await _dashboardService.getSystemHealth();
@@ -274,6 +297,7 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> loadThroughput(int hours) async {
+    if (!_authCubit.state.canReadThroughput) return;
     emit(state.copyWith(throughputHours: hours, throughputLoading: true));
     try {
       final result = await _dashboardService.fetchThroughput(hours);

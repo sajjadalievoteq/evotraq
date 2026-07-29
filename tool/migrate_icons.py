@@ -26,7 +26,6 @@ MAPPING: dict[str, str] = {
     "add_location": "iconMapPin",
     "analytics": "iconBarChart",
     "analytics_outlined": "iconBarChart",
-    "api": "iconApi",
     "arrow_back": "iconChevronL",
     "arrow_back_ios": "iconChevronL",
     "arrow_downward": "iconArrowD",

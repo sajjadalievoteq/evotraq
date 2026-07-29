@@ -1,40 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_ai_table.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 
 class GS1BarcodeParser {
-  static const Map<String, String> _applicationIdentifiers = {
-    '00': 'SSCC',
-    '01': 'GTIN',
-    '02': 'CONTENT GTIN',
-    '10': 'BATCH/LOT',
-    '11': 'PROD DATE',
-    '13': 'PACK DATE',
-    '15': 'BEST BEFORE',
-    '17': 'EXPIRY',
-    '21': 'SERIAL',
-    '30': 'COUNT',
-    '310': 'NET WEIGHT (kg)',
-    '400': 'ORDER NUMBER',
-    '401': 'CONSIGNMENT',
-    '402': 'SHIPMENT ID',
-    '414': 'GLN',
-    '415': 'PAYMENT GLN',
-    '420': 'SHIP TO POST',
-    '421': 'SHIP TO POST+CODE',
-    '422': 'ORIGIN',
-  };
-
-  static const Map<String, int> _fixedLengthAIs = {
-    '00': 20,
-    '01': 16,
-    '02': 16,
-    '11': 8,
-    '12': 8,
-    '13': 8,
-    '15': 8,
-    '16': 8,
-    '17': 8,
-  };
   static Map<String, String>? parseAIString(String input) {
     final trimmed = input.trim();
     if (trimmed.isEmpty || !trimmed.contains('(')) {
@@ -77,43 +46,38 @@ class GS1BarcodeParser {
 
   static Map<String, dynamic> parseGS1Barcode(String rawBarcode) {
     debugPrint('Parsing GS1 barcode: $rawBarcode');
-    
+    Gs1AiTable.ensureSynced();
+
     try {
       final String normalizedBarcode = _normalizeBarcode(rawBarcode);
-      
+
       final parsedData = _parseGS1Data(normalizedBarcode);
-      
+
       final humanReadable = _createHumanReadable(parsedData);
-      
+
       final Map<String, String> standardFields = {};
-      
+
       if (parsedData.containsKey('01')) {
         standardFields['GTIN'] = parsedData['01']!;
       }
-      
+
       if (parsedData.containsKey('17')) {
-        String expiryValue = parsedData['17']!;
+        final expiryValue = parsedData['17']!;
         standardFields['EXPIRY'] = expiryValue;
-        
-        if (expiryValue.length == 6) {
-          try {
-            final year = '20${expiryValue.substring(0, 2)}';
-            final month = expiryValue.substring(2, 4);
-            final day = expiryValue.substring(4, 6);
-            standardFields['EXPIRY_FORMATTED'] = '$year-$month-$day';
-          } catch (e) {
-          }
+        final iso = Gs1DateUtils.toIsoDate(expiryValue);
+        if (iso != null) {
+          standardFields['EXPIRY_FORMATTED'] = iso;
         }
       }
-      
+
       if (parsedData.containsKey('10')) {
         standardFields['BATCH'] = parsedData['10']!;
       }
-      
+
       if (parsedData.containsKey('21')) {
         standardFields['SERIAL'] = parsedData['21']!;
       }
-      
+
       if (parsedData.containsKey('11')) {
         standardFields['PROD_DATE'] = parsedData['11']!;
       }
@@ -185,6 +149,7 @@ class GS1BarcodeParser {
       };
     }
   }
+
   static String _normalizeBarcode(String barcode) {
     if (barcode.contains(RegExp(r'\(\d{2,4}\)'))) {
       return barcode;
@@ -288,11 +253,15 @@ class GS1BarcodeParser {
       
       currentPosition += match.end;
       
-      if (_fixedLengthAIs.containsKey(ai)) {
-        int valueLength = _fixedLengthAIs[ai]! - ai.length;
-        
+      if (Gs1AiTable.isFixedLength(ai)) {
+        final total = Gs1AiTable.fixedAiPlusValueLength(ai)!;
+        final valueLength = total - ai.length;
+
         if (currentPosition + valueLength <= gs1ElementString.length) {
-          result[ai] = gs1ElementString.substring(currentPosition, currentPosition + valueLength);
+          result[ai] = gs1ElementString.substring(
+            currentPosition,
+            currentPosition + valueLength,
+          );
           currentPosition += valueLength;
         } else {
           result[ai] = gs1ElementString.substring(currentPosition);
@@ -325,24 +294,13 @@ class GS1BarcodeParser {
     return result;
   }
   static Map<String, String> _createHumanReadable(Map<String, String> parsedData) {
-    Map<String, String> humanReadable = {};
-    
+    final humanReadable = <String, String>{};
+
     parsedData.forEach((ai, value) {
-      final description = _applicationIdentifiers[ai] ?? '($ai)';
-      
+      final description = Gs1AiTable.titleFor(ai);
+
       if (ai == '17') {
-        if (value.length == 6) {
-          try {
-            final year = '20${value.substring(0, 2)}';
-            final month = value.substring(2, 4);
-            final day = value.substring(4, 6);
-            humanReadable[description] = '$year-$month-$day';
-          } catch (e) {
-            humanReadable[description] = value;
-          }
-        } else {
-          humanReadable[description] = value;
-        }
+        humanReadable[description] = Gs1DateUtils.toIsoDate(value) ?? value;
       } else if (ai == '10') {
         humanReadable['BATCH/LOT'] = value;
       } else if (ai == '21') {
@@ -353,7 +311,7 @@ class GS1BarcodeParser {
         humanReadable[description] = value;
       }
     });
-    
+
     return humanReadable;
   }
 }

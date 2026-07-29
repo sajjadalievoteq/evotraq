@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 
+import '../../../core/utils/responsive_utils.dart';
+
 class WorkbenchRailItem {
   const WorkbenchRailItem({
     required this.id,
@@ -46,10 +48,7 @@ class WorkbenchRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        vertical: TraqSpacing.md,
-        horizontal: TraqSpacing.sm,
-      ),
+      padding:  EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
       children: [
         for (var gi = 0; gi < groups.length; gi++) ...[
           if (gi > 0) const SizedBox(height: TraqSpacing.md),
@@ -64,6 +63,7 @@ class WorkbenchRail extends StatelessWidget {
               colors: colors,
             ),
         ],
+        SizedBox(height: context.padding.top,)
       ],
     );
   }

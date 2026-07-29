@@ -13,13 +13,17 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class WebhookConfigurationScreen extends StatefulWidget {
-  const WebhookConfigurationScreen({super.key});
+  const WebhookConfigurationScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
-  State<WebhookConfigurationScreen> createState() => _WebhookConfigurationScreenState();
+  State<WebhookConfigurationScreen> createState() =>
+      _WebhookConfigurationScreenState();
 }
 
-class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen> {
+class _WebhookConfigurationScreenState
+    extends State<WebhookConfigurationScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _webhookUrlController = TextEditingController();
   String _selectedFilter = 'all';
@@ -42,7 +46,9 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
     if (_isBottom) {
       final state = context.read<NotificationCubit>().state;
       if (state.status == NotificationStatus.success && !state.hasReachedMax) {
-        context.read<NotificationCubit>().loadSubscriptions(page: state.currentPage + 1);
+        context.read<NotificationCubit>().loadSubscriptions(
+          page: state.currentPage + 1,
+        );
       }
     }
   }
@@ -57,26 +63,50 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Webhook Configuration'),
-        actions: [
-          IconButton(
-            icon: TraqIcon(AppAssets.iconInfo),
-            onPressed: () => _showHelpDialog(context),
-            tooltip: 'Help',
-          ),
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: () {
-              context.read<NotificationCubit>().loadSubscriptions(page: 0);
-            },
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      drawer: const AppDrawer(),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: const Text('Webhook Configuration'),
+              actions: [
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconInfo),
+                  onPressed: () => _showHelpDialog(context),
+                  tooltip: 'Help',
+                ),
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconRefresh),
+                  onPressed: () {
+                    context.read<NotificationCubit>().loadSubscriptions(
+                      page: 0,
+                    );
+                  },
+                  tooltip: 'Refresh',
+                ),
+              ],
+            ),
+      drawer: widget.embedded ? null : const AppDrawer(),
       body: Column(
         children: [
+          if (widget.embedded)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                children: [
+                  IconButton(
+                    icon: TraqIcon(AppAssets.iconInfo),
+                    onPressed: () => _showHelpDialog(context),
+                    tooltip: 'Help',
+                  ),
+                  IconButton(
+                    icon: TraqIcon(AppAssets.iconRefresh),
+                    onPressed: () => context
+                        .read<NotificationCubit>()
+                        .loadSubscriptions(page: 0),
+                    tooltip: 'Refresh',
+                  ),
+                ],
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -91,9 +121,9 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
                 const SizedBox(height: 8),
                 Text(
                   'Configure webhook endpoints to receive real-time EPCIS event notifications',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 _buildWebhookTestSection(),
@@ -106,10 +136,12 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
-                if (state.status == NotificationStatus.initial || 
-                    (state.status == NotificationStatus.loading && state.subscriptions.isEmpty)) {
+                if (state.status == NotificationStatus.initial ||
+                    (state.status == NotificationStatus.loading &&
+                        state.subscriptions.isEmpty)) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state.status == NotificationStatus.error && state.subscriptions.isEmpty) {
+                } else if (state.status == NotificationStatus.error &&
+                    state.subscriptions.isEmpty) {
                   return _buildErrorWidget(state.error ?? 'Unknown error');
                 }
                 return _buildWebhooksList(state);
@@ -135,7 +167,10 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           children: [
             Row(
               children: [
-                TraqIcon(AppAssets.iconFlask, color: AppColorMapper.warningColor(context)),
+                TraqIcon(
+                  AppAssets.iconFlask,
+                  color: AppColorMapper.warningColor(context),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Test Webhook Endpoint',
@@ -207,7 +242,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
 
   Widget _buildWebhooksList(NotificationState state) {
     final webhookSubscriptions = _filterWebhooks(state.subscriptions);
-    
+
     if (webhookSubscriptions.isEmpty) {
       return _buildEmptyState();
     }
@@ -239,18 +274,26 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
   }
 
   List<dynamic> _filterWebhooks(List<dynamic> subscriptions) {
-    var webhooks = subscriptions.where((sub) => 
-      sub.subscriptionType?.toUpperCase() == 'WEBHOOK' ||
-      (sub.webhookUrl?.isNotEmpty == true && !sub.webhookUrl.contains('@'))
-    ).toList();
+    var webhooks = subscriptions
+        .where(
+          (sub) =>
+              sub.subscriptionType?.toUpperCase() == 'WEBHOOK' ||
+              (sub.webhookUrl?.isNotEmpty == true &&
+                  !sub.webhookUrl.contains('@')),
+        )
+        .toList();
 
     switch (_selectedFilter) {
       case 'active':
         return webhooks.where((sub) => sub.status == 'ACTIVE').toList();
       case 'failed':
-        return webhooks.where((sub) => 
-          sub.stats?.failedNotifications != null && sub.stats.failedNotifications > 0
-        ).toList();
+        return webhooks
+            .where(
+              (sub) =>
+                  sub.stats?.failedNotifications != null &&
+                  sub.stats.failedNotifications > 0,
+            )
+            .toList();
       case 'webhook':
         return webhooks;
       default:
@@ -260,7 +303,8 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
 
   Widget _buildWebhookCard(dynamic subscription) {
     final stats = subscription.stats;
-    final hasErrors = stats?.failedNotifications != null && stats.failedNotifications > 0;
+    final hasErrors =
+        stats?.failedNotifications != null && stats.failedNotifications > 0;
 
     return Card(
       elevation: 2,
@@ -289,29 +333,41 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
               const SizedBox(height: 8),
               Text(
                 'URL: ${subscription.webhookUrl}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                 overflow: TextOverflow.ellipsis,
               ),
               if (stats != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildStatChip('Success', stats.successfulNotifications ?? 0, AppColorMapper.successColor(context)),
+                    _buildStatChip(
+                      'Success',
+                      stats.successfulNotifications ?? 0,
+                      AppColorMapper.successColor(context),
+                    ),
                     const SizedBox(width: 8),
-                    _buildStatChip('Failed', stats.failedNotifications ?? 0, AppColorMapper.errorColor(context)),
+                    _buildStatChip(
+                      'Failed',
+                      stats.failedNotifications ?? 0,
+                      AppColorMapper.errorColor(context),
+                    ),
                     const SizedBox(width: 8),
-                    _buildStatChip('Total', stats.totalNotifications ?? 0, AppColorMapper.infoColor(context)),
+                    _buildStatChip(
+                      'Total',
+                      stats.totalNotifications ?? 0,
+                      AppColorMapper.infoColor(context),
+                    ),
                   ],
                 ),
               ],
               const SizedBox(height: 8),
               Text(
                 'Created: ${DisplayDateUtils.dmy(subscription.createdAt)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),
@@ -388,8 +444,14 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
         PopupMenuItem(
           value: 'delete',
           child: ListTile(
-            leading: TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
-            title: Text('Delete', style: TextStyle(color: AppColorMapper.errorColor(context))),
+            leading: TraqIcon(
+              AppAssets.iconTrash,
+              color: AppColorMapper.errorColor(context),
+            ),
+            title: Text(
+              'Delete',
+              style: TextStyle(color: AppColorMapper.errorColor(context)),
+            ),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -399,10 +461,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
 
   Widget _buildStatChip(String label, int count, Color color) {
     return Chip(
-      label: Text(
-        '$label: $count',
-        style: const TextStyle(fontSize: 12),
-      ),
+      label: Text('$label: $count', style: const TextStyle(fontSize: 12)),
       backgroundColor: color.withOpacity(0.1),
       side: BorderSide(color: color.withOpacity(0.3)),
     );
@@ -413,24 +472,21 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconSettings,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          TraqIcon(AppAssets.iconSettings, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Webhooks Configured',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             'Create your first webhook to receive real-time event notifications',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -448,7 +504,8 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconAlert,
+          TraqIcon(
+            AppAssets.iconAlert,
             size: 64,
             color: AppColorMapper.errorColor(context).withValues(alpha: 0.5),
           ),
@@ -461,9 +518,9 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           Text(
             message,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -594,7 +651,7 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
 
   void _showWebhookHistory(String subscriptionId) {
     context.read<NotificationCubit>().loadWebhookHistory(subscriptionId);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -619,7 +676,9 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Webhook'),
-        content: const Text('Are you sure you want to delete this webhook? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this webhook? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -628,9 +687,13 @@ class _WebhookConfigurationScreenState extends State<WebhookConfigurationScreen>
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NotificationCubit>().deleteSubscription(subscriptionId);
+              context.read<NotificationCubit>().deleteSubscription(
+                subscriptionId,
+              );
             },
-            style: TextButton.styleFrom(foregroundColor: AppColorMapper.errorColor(context)),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColorMapper.errorColor(context),
+            ),
             child: const Text('Delete'),
           ),
         ],

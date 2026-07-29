@@ -13,13 +13,17 @@ import 'package:traqtrace_app/core/config/nav_icons.dart';
 import 'package:traqtrace_app/core/utils/app_color_mapper.dart';
 
 class SubscriptionManagementScreen extends StatefulWidget {
-  const SubscriptionManagementScreen({super.key});
+  const SubscriptionManagementScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
-  State<SubscriptionManagementScreen> createState() => _SubscriptionManagementScreenState();
+  State<SubscriptionManagementScreen> createState() =>
+      _SubscriptionManagementScreenState();
 }
 
-class _SubscriptionManagementScreenState extends State<SubscriptionManagementScreen> {
+class _SubscriptionManagementScreenState
+    extends State<SubscriptionManagementScreen> {
   final ScrollController _scrollController = ScrollController();
   String _selectedFilter = 'all';
 
@@ -40,7 +44,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
     if (_isBottom) {
       final state = context.read<NotificationCubit>().state;
       if (state.status == NotificationStatus.success && !state.hasReachedMax) {
-        context.read<NotificationCubit>().loadSubscriptions(page: state.currentPage + 1);
+        context.read<NotificationCubit>().loadSubscriptions(
+          page: state.currentPage + 1,
+        );
       }
     }
   }
@@ -55,26 +61,50 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Subscriptions'),
-        actions: [
-          IconButton(
-            icon: TraqIcon(AppAssets.iconInfo),
-            onPressed: () => _showHelpDialog(context),
-            tooltip: 'Help',
-          ),
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: () {
-              context.read<NotificationCubit>().loadSubscriptions(page: 0);
-            },
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      drawer: const AppDrawer(),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: const Text('Manage Subscriptions'),
+              actions: [
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconInfo),
+                  onPressed: () => _showHelpDialog(context),
+                  tooltip: 'Help',
+                ),
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconRefresh),
+                  onPressed: () {
+                    context.read<NotificationCubit>().loadSubscriptions(
+                      page: 0,
+                    );
+                  },
+                  tooltip: 'Refresh',
+                ),
+              ],
+            ),
+      drawer: widget.embedded ? null : const AppDrawer(),
       body: Column(
         children: [
+          if (widget.embedded)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                children: [
+                  IconButton(
+                    icon: TraqIcon(AppAssets.iconInfo),
+                    onPressed: () => _showHelpDialog(context),
+                    tooltip: 'Help',
+                  ),
+                  IconButton(
+                    icon: TraqIcon(AppAssets.iconRefresh),
+                    onPressed: () => context
+                        .read<NotificationCubit>()
+                        .loadSubscriptions(page: 0),
+                    tooltip: 'Refresh',
+                  ),
+                ],
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -89,9 +119,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                 const SizedBox(height: 8),
                 Text(
                   'Configure your email and SMS notification preferences for EPCIS events',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 _buildFilterChips(),
@@ -102,10 +132,12 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
-                if (state.status == NotificationStatus.initial || 
-                    (state.status == NotificationStatus.loading && state.subscriptions.isEmpty)) {
+                if (state.status == NotificationStatus.initial ||
+                    (state.status == NotificationStatus.loading &&
+                        state.subscriptions.isEmpty)) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state.status == NotificationStatus.error && state.subscriptions.isEmpty) {
+                } else if (state.status == NotificationStatus.error &&
+                    state.subscriptions.isEmpty) {
                   return _buildErrorWidget(state.error ?? 'Unknown error');
                 }
                 return _buildSubscriptionsList(state);
@@ -152,7 +184,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
 
   Widget _buildSubscriptionsList(NotificationState state) {
     final filteredSubscriptions = _filterSubscriptions(state.subscriptions);
-    
+
     if (filteredSubscriptions.isEmpty) {
       return _buildEmptyState();
     }
@@ -193,10 +225,14 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   List<dynamic> _filterSubscriptions(List<dynamic> subscriptions) {
     switch (_selectedFilter) {
       case 'email':
-        return subscriptions.where((sub) => 
-          sub.subscriptionType?.toLowerCase().contains('email') == true ||
-          sub.webhookUrl?.contains('@') == true
-        ).toList();
+        return subscriptions
+            .where(
+              (sub) =>
+                  sub.subscriptionType?.toLowerCase().contains('email') ==
+                      true ||
+                  sub.webhookUrl?.contains('@') == true,
+            )
+            .toList();
       case 'active':
         return subscriptions.where((sub) => sub.status == 'ACTIVE').toList();
       case 'paused':
@@ -211,25 +247,21 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(
-            NavIcons.notifications,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          TraqIcon(NavIcons.notifications, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Subscriptions Found',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             'Create your first email or SMS subscription to get notified about EPCIS events',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -247,7 +279,8 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconAlert,
+          TraqIcon(
+            AppAssets.iconAlert,
             size: 64,
             color: AppColorMapper.errorColor(context).withValues(alpha: 0.55),
           ),
@@ -260,9 +293,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           Text(
             message,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -305,7 +338,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Subscription'),
-        content: const Text('Are you sure you want to delete this subscription? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this subscription? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -314,7 +349,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<NotificationCubit>().deleteSubscription(subscriptionId);
+              context.read<NotificationCubit>().deleteSubscription(
+                subscriptionId,
+              );
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColorMapper.errorColor(context),

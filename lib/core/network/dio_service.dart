@@ -277,8 +277,11 @@ class DioService {
     if (statusCode == 403) {
       
       
-      if (looksLikePermissionDenied(response)) return;
-      await handleUnauthorized(options);
+      // 403 = authenticated but NOT authorized (e.g. a role-restricted
+      // endpoint like dashboard/GLNs for a USER). This must never log the user
+      // out. Invalid/expired sessions come back as 401 (handled above), so on a
+      // 403 we simply surface the error and keep the session.
+      return;
     }
   }
 

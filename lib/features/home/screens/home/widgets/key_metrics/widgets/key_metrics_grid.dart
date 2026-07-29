@@ -23,78 +23,80 @@ class KeyMetricsGrid extends StatelessWidget {
         final stats = state.stats;
         final eventCounts = stats?.eventsByType ?? {};
 
-        final items = <
-            (
-              String title,
-              String value,
-              String iconAsset,
-              Color iconTint,
-              VoidCallback onTap,
-            )>[
-          (
-            HomeStrings.metricGtin,
-            stats?.gtinCount.toString() ?? '0',
-            NavIcons.gtin,
-            context.colors.identifierGtin,
-            () => context.go(HomeNavigation.gs1Gtins),
-          ),
-          (
-            HomeStrings.metricGln,
-            stats?.glnCount.toString() ?? '0',
-            NavIcons.gln,
-            context.colors.identifierGln,
-            () => context.go(HomeNavigation.gs1Glns),
-          ),
-          (
-            HomeStrings.metricSgtin,
-            stats?.sgtinCount.toString() ?? '0',
-            NavIcons.sgtin,
-            context.colors.identifierSgtin,
-            () => context.go(HomeNavigation.gs1Sgtins),
-          ),
-          (
-            HomeStrings.metricSscc,
-            stats?.ssccCount.toString() ?? '0',
-            NavIcons.sscc,
-            context.colors.identifierSscc,
-            () => context.go(HomeNavigation.gs1Ssccs),
-          ),
-          (
-            HomeStrings.metricObjectEvents,
-            (eventCounts['Object'] ?? 0).toString(),
-            NavIcons.objectEvents,
-            context.colors.identifierEvent,
-            () => context.go(HomeNavigation.epcisObjectEvents),
-          ),
-          (
-            HomeStrings.metricAggregationEvents,
-            (eventCounts['Aggregation'] ?? 0).toString(),
-            NavIcons.aggregationEvents,
-            context.colors.secondary,
-            () => context.go(HomeNavigation.epcisAggregationEvents),
-          ),
-          (
-            HomeStrings.metricTransactionEvents,
-            (eventCounts['Transaction'] ?? 0).toString(),
-            NavIcons.epcisEvents,
-            context.colors.warning,
-            () => context.go(HomeNavigation.epcisTransactionEvents),
-          ),
-          (
-            HomeStrings.metricTransformationEvents,
-            (eventCounts['Transformation'] ?? 0).toString(),
-            NavIcons.conversion,
-            context.colors.primaryMuted,
-            () => context.go(HomeNavigation.epcisTransformationEvents),
-          ),
-          (
-            HomeStrings.metricTotalEvents,
-            stats?.totalEvents.toString() ?? '0',
-            NavIcons.allEvents,
-            context.colors.textMuted,
-            () => context.go(HomeNavigation.epcisObjectEvents),
-          ),
-        ];
+        final items =
+            <
+              (
+                String title,
+                String value,
+                String iconAsset,
+                Color iconTint,
+                VoidCallback onTap,
+              )
+            >[
+              (
+                HomeStrings.metricGtin,
+                stats?.gtinCount.toString() ?? '0',
+                NavIcons.gtin,
+                context.colors.identifierGtin,
+                () => context.go(HomeNavigation.gs1Gtins),
+              ),
+              (
+                HomeStrings.metricGln,
+                stats?.glnCount.toString() ?? '0',
+                NavIcons.gln,
+                context.colors.identifierGln,
+                () => context.go(HomeNavigation.gs1Glns),
+              ),
+              (
+                HomeStrings.metricSgtin,
+                stats?.sgtinCount.toString() ?? '0',
+                NavIcons.sgtin,
+                context.colors.identifierSgtin,
+                () => context.go(HomeNavigation.gs1Sgtins),
+              ),
+              (
+                HomeStrings.metricSscc,
+                stats?.ssccCount.toString() ?? '0',
+                NavIcons.sscc,
+                context.colors.identifierSscc,
+                () => context.go(HomeNavigation.gs1Ssccs),
+              ),
+              (
+                HomeStrings.metricObjectEvents,
+                (eventCounts['Object'] ?? 0).toString(),
+                NavIcons.objectEvents,
+                context.colors.identifierEvent,
+                () => context.go(HomeNavigation.epcisObjectEvents),
+              ),
+              (
+                HomeStrings.metricAggregationEvents,
+                (eventCounts['Aggregation'] ?? 0).toString(),
+                NavIcons.aggregationEvents,
+                context.colors.secondary,
+                () => context.go(HomeNavigation.epcisAggregationEvents),
+              ),
+              // (
+              //   HomeStrings.metricTransactionEvents,
+              //   (eventCounts['Transaction'] ?? 0).toString(),
+              //   NavIcons.epcisEvents,
+              //   context.colors.warning,
+              //   () => context.go(HomeNavigation.epcisTransactionEvents),
+              // ),
+              // (
+              //   HomeStrings.metricTransformationEvents,
+              //   (eventCounts['Transformation'] ?? 0).toString(),
+              //   NavIcons.conversion,
+              //   context.colors.primaryMuted,
+              //   () => context.go(HomeNavigation.epcisTransformationEvents),
+              // ),
+              // (
+              //   HomeStrings.metricTotalEvents,
+              //   stats?.totalEvents.toString() ?? '0',
+              //   NavIcons.allEvents,
+              //   context.colors.textMuted,
+              //   () => context.go(HomeNavigation.epcisObjectEvents),
+              // ),
+            ];
 
         const gap = 12.0;
         final minTileWidth = layout.isCompact ? 158.0 : 200.0;
@@ -107,6 +109,9 @@ class KeyMetricsGrid extends StatelessWidget {
             if (cols < 1) cols = 1;
             if (cols > maxCols) cols = maxCols;
             final tileW = (maxW - gap * (cols - 1)) / cols;
+            // Height is capped so wide tiles stay compact instead of growing
+            // proportionally with the available width.
+            final tileH = (tileW * 9 / 16).clamp(96.0, 116.0);
 
             return Wrap(
               spacing: gap,
@@ -115,8 +120,8 @@ class KeyMetricsGrid extends StatelessWidget {
                 for (final e in items)
                   SizedBox(
                     width: tileW,
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
+                    height: tileH,
+                    child: SizedBox.expand(
                       child: Card(
                         clipBehavior: Clip.antiAlias,
                         child: LayoutBuilder(

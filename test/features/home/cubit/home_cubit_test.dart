@@ -5,21 +5,36 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:traqtrace_app/core/storage/hive_storage.dart';
+import 'package:traqtrace_app/data/models/auth/auth_models.dart';
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/home/system_health_status.dart';
+import 'package:traqtrace_app/data/services/auth_service/auth_service.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/session/home_overview_session_store.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
 
 import 'home_cubit_test.mocks.dart';
 
 @GenerateMocks([DashboardService])
+class _StubAuthService extends Mock implements AuthService {}
+
+class _TestAuthCubit extends AuthCubit {
+  _TestAuthCubit({required AuthService authService})
+      : super(authService: authService);
+
+  void setState(AuthState state) => emit(state);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockDashboardService mockService;
+  late _StubAuthService mockAuthService;
+  late _TestAuthCubit authCubit;
   late HomeOverviewSessionStore sessionStore;
   late Directory hiveDir;
 
@@ -49,18 +64,105 @@ void main() {
         backendVersion: up ? '1.0.0' : null,
       );
 
+  _TestAuthCubit authCubitFor(String role) {
+    final cubit = _TestAuthCubit(authService: mockAuthService);
+    cubit.setState(
+      AuthState(
+        status: AuthStatus.authenticated,
+        user: User(
+          id: 1,
+          username: role.toLowerCase(),
+          email: '${role.toLowerCase()}@example.com',
+          firstName: 'A',
+          lastName: 'D',
+          role: role,
+          enabled: true,
+          hasProfilePicture: false,
+        ),
+        token: 't',
+        bootstrapCompleted: true,
+      ),
+    );
+    return cubit;
+  }
+
+  HomeCubit buildCubit({Duration? pollInterval}) {
+    return HomeCubit(
+      mockService,
+      sessionStore,
+      authCubit: authCubit,
+      pollInterval: pollInterval ?? const Duration(seconds: 60),
+    );
+  }
+
   setUp(() async {
     hiveDir = await Directory.systemTemp.createTemp('home_cubit_hive_');
     await HiveStorage.initForTests(hiveDir.path);
     mockService = MockDashboardService();
+    mockAuthService = _StubAuthService();
+    authCubit = authCubitFor('ADMIN');
     sessionStore = HomeOverviewSessionStore();
   });
 
   tearDown(() async {
+    await authCubit.close();
     await HiveStorage.resetForTests();
     if (await hiveDir.exists()) {
       await hiveDir.delete(recursive: true);
     }
+  });
+
+  test('plain USER load skips dashboard and health calls', () async {
+    await authCubit.close();
+    authCubit = authCubitFor('USER');
+
+    final cubit = buildCubit();
+    await cubit.load(accountEmail: 'user@example.com');
+
+    expect(cubit.state.status, HomeLoadStatus.success);
+    expect(cubit.state.stats, isNull);
+    verifyNever(mockService.getSummary(
+      recentLimit: anyNamed('recentLimit'),
+      throughputHours: anyNamed('throughputHours'),
+    ));
+    verifyNever(mockService.getSystemHealth());
+
+    await cubit.close();
+  });
+
+  test('manufacturer loads dashboard but skips admin-only health', () async {
+    await authCubit.close();
+    authCubit = authCubitFor('MANUFACTURER');
+
+    when(mockService.getSummary(
+      recentLimit: anyNamed('recentLimit'),
+      throughputHours: anyNamed('throughputHours'),
+    )).thenAnswer(
+      (_) async => (stats: stats(gtin: 5), recentEvents: events('m')),
+    );
+
+    final cubit = buildCubit();
+    await cubit.load(accountEmail: 'manufacturer@example.com');
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+
+    expect(cubit.state.status, HomeLoadStatus.success);
+    expect(cubit.state.stats?.gtinCount, 5);
+    expect(cubit.state.healthLoading, isFalse);
+    verifyNever(mockService.getSystemHealth());
+
+    await cubit.close();
+  });
+
+  test('retailer skips the throughput endpoint', () async {
+    await authCubit.close();
+    authCubit = authCubitFor('RETAILER');
+
+    final cubit = buildCubit();
+    await cubit.loadThroughput(168);
+
+    verifyNever(mockService.fetchThroughput(any));
+
+    await cubit.close();
   });
 
   test('dashboard emits without waiting for health', () async {
@@ -74,7 +176,7 @@ void main() {
     when(mockService.getSystemHealth())
         .thenAnswer((_) => healthCompleter.future);
 
-    final cubit = HomeCubit(mockService, sessionStore);
+    final cubit = buildCubit();
     final states = <HomeState>[];
     final sub = cubit.stream.listen(states.add);
 
@@ -122,7 +224,7 @@ void main() {
     when(mockService.getSystemHealth())
         .thenAnswer((_) async => health(up: true));
 
-    final cubit = HomeCubit(mockService, sessionStore);
+    final cubit = buildCubit();
     final states = <HomeState>[];
     final sub = cubit.stream.listen(states.add);
 
@@ -155,7 +257,7 @@ void main() {
     when(mockService.getSystemHealth())
         .thenAnswer((_) async => throw TimeoutException('health'));
 
-    final cubit = HomeCubit(mockService, sessionStore);
+    final cubit = buildCubit();
     await cubit.load(accountEmail: 'user@example.com');
     await Future<void>.delayed(const Duration(milliseconds: 20));
 
@@ -189,13 +291,9 @@ void main() {
       when(mockService.getSystemHealth())
           .thenAnswer((_) async => health(up: true));
 
-      final cubit = HomeCubit(
-        mockService,
-        sessionStore,
-        pollInterval: pollInterval,
-      );
+      final cubit = buildCubit(pollInterval: pollInterval);
       await cubit.load(accountEmail: 'user@example.com');
-      
+
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(cubit.state.status, HomeLoadStatus.success);
       return cubit;
@@ -262,7 +360,6 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 55));
       expect(summaryCalls, 1);
 
-      
       await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(summaryCalls, 1);
 

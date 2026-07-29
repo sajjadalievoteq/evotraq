@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_entry_screen.dart';
 import 'package:traqtrace_app/features/operations/cancel_receiving/screens/cancel_receiving_operation_detail/cancel_receiving_operation_detail_screen.dart';
@@ -9,6 +11,8 @@ class CancelReceivingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
+        showFloatingActionButton:
+            context.canPerform(OperationSteps.cancelReceive),
         appBarTitle: 'Cancel Receiving',
         fabHeroTag: 'cancel_receiving_fab',
         fabAddTooltip: 'New Cancellation',
@@ -26,7 +30,9 @@ class CancelReceivingScreen extends StatelessWidget {
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
           onBindRefresh: bindRefresh,
-          onEmbeddedCreate: onRequestCreate,
+          onEmbeddedCreate: context.canPerform(OperationSteps.cancelReceive)
+              ? onRequestCreate
+              : null,
         ),
         detailViewBuilder: (context, id) => CancelReceivingOperationDetailScreen(
           key: ValueKey(id),

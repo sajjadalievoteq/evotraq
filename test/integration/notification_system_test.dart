@@ -8,7 +8,7 @@ import 'package:traqtrace_app/features/notifications/presentation/cubit/notifica
 import 'package:traqtrace_app/features/notifications/presentation/cubit/notification_state.dart';
 
 
-import 'notification_system_test.mocks.dart';
+
 
 
 @GenerateMocks([NotificationApiService, WebSocketService])

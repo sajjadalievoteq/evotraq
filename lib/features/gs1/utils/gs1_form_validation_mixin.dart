@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/utils/gs1/check_digit_utils.dart';
 import 'package:traqtrace_app/core/utils/gs1/gs1_canonical_identifier.dart';
+import 'package:traqtrace_app/core/utils/gs1/gs1_date_utils.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 import 'package:traqtrace_app/features/gs1/models/validation_status.dart';
 
@@ -151,10 +152,7 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
       case '13':
       case '15':
       case '17':
-        if (!RegExp(r'^\d{6}$').hasMatch(value)) {
-          return 'Invalid date format. Must be YYMMDD (6 digits).';
-        }
-        break;
+        return Gs1DateUtils.validateYymmdd(value, label: 'Date');
       case '21':
         if (!CheckDigitUtils.sgtinSerialCharset.hasMatch(value)) {
           return 'Serial number must be 1–20 characters using GS1 AI‑21 charset';
@@ -229,34 +227,7 @@ mixin GS1FormValidationMixin<T extends StatefulWidget> on State<T> {
   }
 
   String? validateGS1Date(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Date is required';
-    }
-
-    if (!RegExp(r'^\d{6}$').hasMatch(value)) {
-      return 'Invalid date format. Must be YYMMDD (6 digits).';
-    }
-
-    final month = int.parse(value.substring(2, 4));
-    final day = int.parse(value.substring(4, 6));
-
-    if (month < 1 || month > 12) {
-      return 'Invalid month in date';
-    }
-
-    if (day < 1 || day > 31) {
-      return 'Invalid day in date';
-    }
-
-    if (month == 2 && day > 29) {
-      return 'February cannot have more than 29 days';
-    }
-
-    if ([4, 6, 9, 11].contains(month) && day > 30) {
-      return 'This month cannot have more than 30 days';
-    }
-
-    return null;
+    return Gs1DateUtils.validateYymmdd(value, label: 'Date');
   }
 
   String? validateBatchLot(String? value) {

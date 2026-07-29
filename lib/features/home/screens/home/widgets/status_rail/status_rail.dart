@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
@@ -19,6 +20,7 @@ class StatusRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showHealth = context.isAdmin;
     return WallClockTick(
       builder: (context, now) {
         return BlocBuilder<HomeCubit, HomeState>(
@@ -113,7 +115,9 @@ class StatusRail extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  nominalStatusLine(healthy, now),
+                  showHealth
+                      ? nominalStatusLine(healthy, now)
+                      : greetingOnlyStatusLine(now),
                   style: context.text.h3.copyWith(
                     color: context.colors.primary,
                   ),
@@ -142,8 +146,10 @@ class StatusRail extends StatelessWidget {
                     children: [
                       Expanded(child: statusBlock),
                       clock,
-                      const SizedBox(width: 20),
-                      healthChip,
+                      if (showHealth) ...[
+                        const SizedBox(width: 20),
+                        healthChip,
+                      ],
                     ],
                   ),
                 ),
@@ -165,7 +171,7 @@ class StatusRail extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         clock,
-                        healthChip,
+                        if (showHealth) healthChip,
                       ],
                     ),
                   ],

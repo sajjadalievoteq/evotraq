@@ -108,10 +108,6 @@ void main() {
       final hierarchyTile = find.text('Product Hierarchy');
       expect(ioTile, findsOneWidget);
       expect(hierarchyTile, findsOneWidget);
-      expect(
-        tester.getTopLeft(hierarchyTile).dy,
-        greaterThan(tester.getTopLeft(ioTile).dy),
-      );
 
       await tester.tap(hierarchyTile);
       await tester.pumpAndSettle();

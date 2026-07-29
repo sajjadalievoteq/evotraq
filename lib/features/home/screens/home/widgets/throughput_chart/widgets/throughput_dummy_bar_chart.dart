@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
 import 'package:traqtrace_app/features/home/utils/home_strings.dart';
 import 'package:traqtrace_app/features/home/cubit/home_cubit.dart';
 import 'package:traqtrace_app/features/home/cubit/home_state.dart';
@@ -101,14 +102,15 @@ class _ThroughputDummyBarChartState extends State<ThroughputDummyBarChart> {
                 ],
               ),
             ),
-            ThroughputRangeToggle(
-              selectedIndex: _rangeIndex,
-              onChanged: (i) {
-                setState(() => _rangeIndex = i);
-                final hours = const [1, 24, 168][i];
-                context.read<HomeCubit>().loadThroughput(hours);
-              },
-            ),
+            if (context.canReadThroughput)
+              ThroughputRangeToggle(
+                selectedIndex: _rangeIndex,
+                onChanged: (i) {
+                  setState(() => _rangeIndex = i);
+                  final hours = const [1, 24, 168][i];
+                  context.read<HomeCubit>().loadThroughput(hours);
+                },
+              ),
           ],
         ),
         const SizedBox(height: 16),

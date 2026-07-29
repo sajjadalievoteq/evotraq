@@ -8,7 +8,6 @@ import 'package:traqtrace_app/features/epcis/cubit/object_events_cubit.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_document_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transaction_events_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/transformation_events_provider.dart';
-import 'package:traqtrace_app/features/epcis/providers/validation_rule_provider.dart';
 import 'package:traqtrace_app/features/epcis/providers/validation_service_provider.dart';
 
 /// Provides EPCIS cubits for the feature route subtree.
@@ -45,9 +44,6 @@ class EpcisShell extends StatelessWidget {
         BlocProvider<TransactionDocumentCubit>(
           create: (context) =>
               TransactionDocumentCubit(appConfig: getIt<AppConfig>()),
-        ),
-        BlocProvider<ValidationRuleCubit>(
-          create: (context) => ValidationRuleCubit(),
         ),
         BlocProvider<AggregationEventsCubit>(
           create: (context) => AggregationEventsCubit(),

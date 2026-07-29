@@ -12,10 +12,13 @@ import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/config/nav_icons.dart';
 
 class NotificationCenterScreen extends StatefulWidget {
-  const NotificationCenterScreen({super.key});
+  const NotificationCenterScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
-  State<NotificationCenterScreen> createState() => _NotificationCenterScreenState();
+  State<NotificationCenterScreen> createState() =>
+      _NotificationCenterScreenState();
 }
 
 class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
@@ -53,7 +56,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     if (_isBottom) {
       final state = context.read<NotificationCubit>().state;
       if (state.status == NotificationStatus.success && !state.hasReachedMax) {
-        context.read<NotificationCubit>().loadSubscriptions(page: state.currentPage + 1);
+        context.read<NotificationCubit>().loadSubscriptions(
+          page: state.currentPage + 1,
+        );
       }
     }
   }
@@ -68,36 +73,69 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notification Center'),
-        actions: [
-          IconButton(
-            icon: TraqIcon(
-              _isConnected ? AppAssets.iconWifi : AppAssets.iconWifiOff,
-              color: _isConnected
-                  ? AppColorMapper.successColor(context)
-                  : AppColorMapper.errorColor(context),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: const Text('Notification Center'),
+              actions: [
+                IconButton(
+                  icon: TraqIcon(
+                    _isConnected ? AppAssets.iconWifi : AppAssets.iconWifiOff,
+                    color: _isConnected
+                        ? AppColorMapper.successColor(context)
+                        : AppColorMapper.errorColor(context),
+                  ),
+                  onPressed: _toggleWebSocketConnection,
+                  tooltip: _isConnected
+                      ? 'Connected to real-time updates'
+                      : 'Disconnected',
+                ),
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconSettings),
+                  onPressed: () => context.go('/notifications/subscriptions'),
+                  tooltip: 'Manage Subscriptions',
+                ),
+                IconButton(
+                  icon: TraqIcon(AppAssets.iconRefresh),
+                  onPressed: () {
+                    context.read<NotificationCubit>().loadSubscriptions(
+                      page: 0,
+                    );
+                  },
+                  tooltip: 'Refresh',
+                ),
+              ],
             ),
-            onPressed: _toggleWebSocketConnection,
-            tooltip: _isConnected ? 'Connected to real-time updates' : 'Disconnected',
-          ),
-          IconButton(
-            icon: TraqIcon(AppAssets.iconSettings),
-            onPressed: () => context.go('/notifications/subscriptions'),
-            tooltip: 'Manage Subscriptions',
-          ),
-          IconButton(
-            icon: TraqIcon(AppAssets.iconRefresh),
-            onPressed: () {
-              context.read<NotificationCubit>().loadSubscriptions(page: 0);
-            },
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      drawer: const AppDrawer(),
+      drawer: widget.embedded ? null : const AppDrawer(),
       body: Column(
         children: [
+          if (widget.embedded)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                children: [
+                  IconButton(
+                    icon: TraqIcon(
+                      _isConnected ? AppAssets.iconWifi : AppAssets.iconWifiOff,
+                      color: _isConnected
+                          ? AppColorMapper.successColor(context)
+                          : AppColorMapper.errorColor(context),
+                    ),
+                    onPressed: _toggleWebSocketConnection,
+                    tooltip: _isConnected
+                        ? 'Connected to real-time updates'
+                        : 'Disconnected',
+                  ),
+                  IconButton(
+                    icon: TraqIcon(AppAssets.iconRefresh),
+                    onPressed: () => context
+                        .read<NotificationCubit>()
+                        .loadSubscriptions(page: 0),
+                    tooltip: 'Refresh',
+                  ),
+                ],
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -108,9 +146,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                     Expanded(
                       child: Text(
                         'Recent Notifications',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     _buildConnectionStatus(),
@@ -119,9 +156,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Real-time notifications from your active subscriptions',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 _buildFilterChips(),
@@ -132,10 +169,12 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           Expanded(
             child: BlocBuilder<NotificationCubit, NotificationState>(
               builder: (context, state) {
-                if (state.status == NotificationStatus.initial || 
-                    (state.status == NotificationStatus.loading && state.subscriptions.isEmpty)) {
+                if (state.status == NotificationStatus.initial ||
+                    (state.status == NotificationStatus.loading &&
+                        state.subscriptions.isEmpty)) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state.status == NotificationStatus.error && state.subscriptions.isEmpty) {
+                } else if (state.status == NotificationStatus.error &&
+                    state.subscriptions.isEmpty) {
                   return _buildErrorWidget(state.error ?? 'Unknown error');
                 }
                 return _buildNotificationsList(state);
@@ -161,8 +200,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
             : AppColorMapper.errorColor(context).withValues(alpha: 0.1),
         border: Border.all(
           color: _isConnected
-                  ? AppColorMapper.successColor(context)
-                  : AppColorMapper.errorColor(context),
+              ? AppColorMapper.successColor(context)
+              : AppColorMapper.errorColor(context),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(20),
@@ -171,13 +210,11 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TraqIcon(
-            _isConnected
-                ? AppAssets.iconCheckCircle
-                : AppAssets.iconCircle,
+            _isConnected ? AppAssets.iconCheckCircle : AppAssets.iconCircle,
             size: 16,
             color: _isConnected
-                  ? AppColorMapper.successColor(context)
-                  : AppColorMapper.errorColor(context),
+                ? AppColorMapper.successColor(context)
+                : AppColorMapper.errorColor(context),
           ),
           const SizedBox(width: 6),
           Text(
@@ -217,7 +254,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         FilterChip(
           label: const Text('Transaction Events'),
           selected: _selectedFilter == 'transaction',
-          onSelected: (selected) => setState(() => _selectedFilter = 'transaction'),
+          onSelected: (selected) =>
+              setState(() => _selectedFilter = 'transaction'),
         ),
         FilterChip(
           label: const Text('Object Events'),
@@ -230,7 +268,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
 
   Widget _buildNotificationsList(NotificationState state) {
     final filteredData = _filterNotifications(state);
-    
+
     if (filteredData.isEmpty) {
       return _buildEmptyState();
     }
@@ -268,9 +306,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       case 'today':
         return subscriptions.where((sub) {
           final created = sub.createdAt;
-          return created.day == now.day && 
-                 created.month == now.month && 
-                 created.year == now.year;
+          return created.day == now.day &&
+              created.month == now.month &&
+              created.year == now.year;
         }).toList();
       case 'week':
         final weekAgo = now.subtract(const Duration(days: 7));
@@ -279,13 +317,25 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           return created.isAfter(weekAgo);
         }).toList();
       case 'transaction':
-        return subscriptions.where((sub) =>
-          sub.queryParameters?.toString().toLowerCase().contains('transaction') == true
-        ).toList();
+        return subscriptions
+            .where(
+              (sub) =>
+                  sub.queryParameters?.toString().toLowerCase().contains(
+                    'transaction',
+                  ) ==
+                  true,
+            )
+            .toList();
       case 'object':
-        return subscriptions.where((sub) =>
-          sub.queryParameters?.toString().toLowerCase().contains('object') == true
-        ).toList();
+        return subscriptions
+            .where(
+              (sub) =>
+                  sub.queryParameters?.toString().toLowerCase().contains(
+                    'object',
+                  ) ==
+                  true,
+            )
+            .toList();
       default:
         return subscriptions;
     }
@@ -308,7 +358,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 children: [
                   TraqIcon(
                     _getNotificationIcon(subscription.subscriptionType),
-                    color: hasActivity ? AppColorMapper.infoColor(context) : Colors.grey,
+                    color: hasActivity
+                        ? AppColorMapper.infoColor(context)
+                        : Colors.grey,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -316,16 +368,15 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          subscription.subscriptionName ?? 'Unnamed Subscription',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          subscription.subscriptionName ??
+                              'Unnamed Subscription',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Type: ${subscription.subscriptionType}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -338,19 +389,33 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColorMapper.infoColor(context).withValues(alpha: 0.1),
+                    color: AppColorMapper.infoColor(
+                      context,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _buildStatColumn('Delivered', stats.successfulNotifications ?? 0, AppColorMapper.successColor(context)),
+                        child: _buildStatColumn(
+                          'Delivered',
+                          stats.successfulNotifications ?? 0,
+                          AppColorMapper.successColor(context),
+                        ),
                       ),
                       Expanded(
-                        child: _buildStatColumn('Failed', stats.failedNotifications ?? 0, AppColorMapper.errorColor(context)),
+                        child: _buildStatColumn(
+                          'Failed',
+                          stats.failedNotifications ?? 0,
+                          AppColorMapper.errorColor(context),
+                        ),
                       ),
                       Expanded(
-                        child: _buildStatColumn('Total', stats.totalNotifications ?? 0, AppColorMapper.infoColor(context)),
+                        child: _buildStatColumn(
+                          'Total',
+                          stats.totalNotifications ?? 0,
+                          AppColorMapper.infoColor(context),
+                        ),
                       ),
                     ],
                   ),
@@ -381,9 +446,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                   const Spacer(),
                   Text(
                     'Created: ${_formatDate(subscription.createdAt)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -426,10 +491,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: color.withOpacity(0.8),
-          ),
+          style: TextStyle(fontSize: 12, color: color.withOpacity(0.8)),
         ),
       ],
     );
@@ -453,25 +515,21 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(
-            NavIcons.notifications,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          TraqIcon(NavIcons.notifications, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Notifications Yet',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             'Create subscriptions to start receiving notifications about EPCIS events',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -489,7 +547,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TraqIcon(AppAssets.iconAlert,
+          TraqIcon(
+            AppAssets.iconAlert,
             size: 64,
             color: AppColorMapper.errorColor(context).withValues(alpha: 0.5),
           ),
@@ -502,9 +561,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           ElevatedButton(

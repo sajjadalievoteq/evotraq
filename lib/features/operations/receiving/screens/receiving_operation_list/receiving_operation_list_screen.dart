@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -362,7 +364,8 @@ class _ReceivingOperationListBodyState
             title: const Text('Receiving Operation'),
           ),
           drawer: const AppDrawer(),
-          floatingActionButton: widget.onEmbeddedCreate != null
+          floatingActionButton: widget.onEmbeddedCreate != null ||
+                  !context.canPerform(OperationSteps.receive)
               ? null
               : FloatingActionButton.extended(
                   onPressed: () => context.go(Constants.opReceivingCreateRoute),

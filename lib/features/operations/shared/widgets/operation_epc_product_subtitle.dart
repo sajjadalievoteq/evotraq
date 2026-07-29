@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/features/shared/reference_data/cubit/reference_data_cubit.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
+import 'package:traqtrace_app/data/services/reference_data_service.dart';
 
 class OperationEpcProductSubtitle extends StatelessWidget {
   const OperationEpcProductSubtitle({
@@ -19,7 +19,7 @@ class OperationEpcProductSubtitle extends StatelessWidget {
     }
 
     return FutureBuilder<String?>(
-      future: context.read<ReferenceDataCubit>().resolveProductName(epc),
+      future: getIt<ReferenceDataService>().resolveProductName(epc),
       builder: (context, snapshot) {
         return _productNameText(snapshot.data);
       },

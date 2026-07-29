@@ -84,6 +84,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/images/logo/
+    - assets/gs1/
   fonts:
     - family: Nekst
       fonts:

@@ -31,7 +31,6 @@ class DashboardQuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-
       child: InkWell(
         onTap: () {
           if (action.isDisabled) {
@@ -48,20 +47,21 @@ class DashboardQuickActionCard extends StatelessWidget {
           builder: (context, constraints) {
             final width = constraints.maxWidth;
 
-            final isMobile = width < 420;
-            final isTablet = width >= 420 && width < 820;
+            // Only genuinely narrow tiles scale down; wider tiles keep a
+            // constant compact scale so the card fits its capped height.
+            final isNarrow = width < 200;
 
-            final iconSize = isMobile ? 18.0 : isTablet ? 24.0 : 48.0;
+            final iconSize = isNarrow ? 14.0 : 18.0;
 
-            final iconPadding = isMobile ? 4.0 : isTablet ? 12.0 : 14.0;
+            final iconPadding = isNarrow ? 2.0 : 2.0;
 
-            final titleFontSize = isMobile ? 10.0 : isTablet ? 16.0 : 28.0;
+            final titleFontSize = isNarrow ? 10.0 : 12.0;
 
-            final subtitleFontSize = isMobile ? 8.0 : isTablet ? 13.0 : 22.0;
+            final subtitleFontSize = isNarrow ? 10.0 : 12.0;
 
-            final spacing = isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
+            final spacing = isNarrow ? 10.0 : 12.0;
 
-            final padding = isMobile ? 12.0 : isTablet ? 18.0 : 22.0;
+            final padding = isNarrow ? 12.0 : 14.0;
             return Padding(
               padding: EdgeInsets.all(padding),
               child: Row(
@@ -72,7 +72,7 @@ class DashboardQuickActionCard extends StatelessWidget {
                     padding: EdgeInsets.all(iconPadding),
                     decoration: BoxDecoration(
                       color: action.color.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(2)
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: TraqIcon(
                       action.iconAsset,
@@ -81,38 +81,39 @@ class DashboardQuickActionCard extends StatelessWidget {
                     ),
                   ),
 
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-
-                      Text(
-                        action.title,
-                        style: context.text.bodySm.copyWith(
-                          fontSize:titleFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: action.isDisabled
-                              ? context.colors.textMuted
-                              : context.colors.textPrimary,
-                        ),
-                        textAlign: TextAlign.left,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (action.subtitle != null) ...[
-                        const SizedBox(height: 2),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
-                          action.subtitle!,
-                          style: context.text.cap.copyWith(
-                            fontSize: subtitleFontSize,
-                            color: context.colors.textMuted,
-                            fontStyle: FontStyle.italic,
-                            overflow: TextOverflow.ellipsis,
+                          action.title,
+                          style: context.text.bodySm.copyWith(
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.w600,
+                            color: action.isDisabled
+                                ? context.colors.textMuted
+                                : context.colors.textPrimary,
                           ),
+                          textAlign: TextAlign.left,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        if (action.subtitle != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            action.subtitle!,
+                            style: context.text.cap.copyWith(
+                              fontSize: subtitleFontSize,
+                              color: context.colors.textMuted,
+                              fontStyle: FontStyle.italic,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ],
               ),

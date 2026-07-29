@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_detail/packing_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/packing/screens/packing_operation_list/packing_operation_list_screen.dart';
@@ -9,6 +11,8 @@ class PackingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
+        showFloatingActionButton:
+            context.canPerform(OperationSteps.pack),
         appBarTitle: 'Packing Operations',
         fabHeroTag: 'packing_fab',
         fabAddTooltip: 'New packing operation',
@@ -26,7 +30,9 @@ class PackingScreen extends StatelessWidget {
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
           onBindRefresh: bindRefresh,
-          onEmbeddedCreate: onRequestCreate,
+          onEmbeddedCreate: context.canPerform(OperationSteps.pack)
+              ? onRequestCreate
+              : null,
         ),
         detailViewBuilder: (context, id) => PackingOperationDetailScreen(
           key: ValueKey(id),

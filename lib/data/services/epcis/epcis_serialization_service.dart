@@ -131,6 +131,15 @@ class EPCISSerializationService {
   }
   
   Future<EPCISDocumentDTO> deserializeJsonLd(Map<String, dynamic> jsonLdContent) async {
+    final jsonData = await deserializeJsonLdRaw(jsonLdContent);
+    return EPCISDocumentDTO.fromJson(jsonData);
+  }
+
+  /// Returns the raw backend [EPCISDocumentDTO] JSON (preserves subtype fields
+  /// like action / epcList / parentID that the Flutter [EPCISEvent] DTO drops).
+  Future<Map<String, dynamic>> deserializeJsonLdRaw(
+    Map<String, dynamic> jsonLdContent,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await _dioService.post(
@@ -142,8 +151,7 @@ class EPCISSerializationService {
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.data) as Map<String, dynamic>;
-        return EPCISDocumentDTO.fromJson(jsonData);
+        return json.decode(response.data) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to deserialize JSON-LD: ${response.statusCode}');
       }
@@ -327,13 +335,14 @@ class EPCISSerializationService {
     }
   }
   
-  Future<Map<String, dynamic>> importEvents(EPCISDocumentDTO epcisDocument) async {
+  /// Posts a JSON **array** of [EPCISEventDTO]-shaped maps to bulk import.
+  Future<Map<String, dynamic>> importEventMaps(List<dynamic> events) async {
     try {
       final headers = await _getHeaders();
       final response = await _dioService.post(
         '${_dioService.baseUrl}/events/persistence/bulk/import',
         headers: headers,
-        data: json.encode(epcisDocument.toJson()),
+        data: json.encode(events),
         responseType: ResponseType.plain,
         acceptAllStatusCodes: true,
       );
@@ -341,28 +350,41 @@ class EPCISSerializationService {
       if (response.statusCode == 200) {
         return json.decode(response.data) as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to import events: ${response.statusCode} - ${response.data}');
+        throw Exception(
+          'Failed to import events: ${response.statusCode} - ${response.data}',
+        );
       }
     } catch (e) {
       throw Exception('Error importing events: $e');
     }
   }
-  
+
+  Future<Map<String, dynamic>> importEvents(EPCISDocumentDTO epcisDocument) async {
+    final events = epcisDocument.events.map((e) => e.toJson()).toList();
+    return importEventMaps(events);
+  }
+
   Future<Map<String, dynamic>> importEventsFromXml(String xmlContent) async {
     try {
       final documentDto = await deserializeXml(xmlContent);
-      
       return await importEvents(documentDto);
     } catch (e) {
       throw Exception('Error importing events from XML: $e');
     }
   }
-  
-  Future<Map<String, dynamic>> importEventsFromJsonLd(Map<String, dynamic> jsonLdContent) async {
+
+  /// Deserialize JSON-LD → extract typed events array → bulk/import (array body).
+  /// Uses the raw deserialize payload so subtype fields are not stripped.
+  Future<Map<String, dynamic>> importEventsFromJsonLd(
+    Map<String, dynamic> jsonLdContent,
+  ) async {
     try {
-      final documentDto = await deserializeJsonLd(jsonLdContent);
-      
-      return await importEvents(documentDto);
+      final document = await deserializeJsonLdRaw(jsonLdContent);
+      final events = document['events'];
+      if (events is! List || events.isEmpty) {
+        throw Exception('Deserialized document contains no events to import');
+      }
+      return await importEventMaps(events);
     } catch (e) {
       throw Exception('Error importing events from JSON-LD: $e');
     }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
@@ -417,7 +419,9 @@ class _CommissioningOperationListBodyState
             title: const Text('Commissioning'),
           ),
           drawer: const AppDrawer(),
-          floatingActionButton: FloatingActionButton.extended(
+          floatingActionButton: !context.canPerform(OperationSteps.commission)
+              ? null
+              : FloatingActionButton.extended(
             onPressed: () => context.go(Constants.opCommissioningNewRoute),
             icon: TraqIcon(AppAssets.iconPlus),
             label: const Text('New Commissioning'),

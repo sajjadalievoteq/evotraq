@@ -1,0 +1,41 @@
+{
+  "@context": "https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld",
+  "type": "EPCISDocument",
+  "schemaVersion": "2.0",
+  "creationDate": "REPLACE_WITH_ISO_CREATION_DATE",
+  "id": "REPLACE_WITH_DOCUMENT_URN_UUID",
+  "epcisBody": {
+    "eventList": [
+      {
+        "type": "ObjectEvent",
+        "eventTime": "REPLACE_WITH_ISO_EVENT_TIME",
+        "eventTimeZoneOffset": "REPLACE_WITH_TZ_OFFSET",
+        "eventID": "REPLACE_WITH_EVENT_URN_UUID",
+        "epcList": [
+          "REPLACE_WITH_SGTIN_DIGITAL_LINK"
+        ],
+        "action": "ADD",
+        "bizStep": "commissioning",
+        "disposition": "active",
+        "ilmd": {
+          "cbvmda:lotNumber": "REPLACE_WITH_LOT_NUMBER",
+          "cbvmda:itemExpirationDate": "REPLACE_WITH_ISO_DATE_YYYY_MM_DD",
+          "cbvmda:manufacturerOfGoods": "REPLACE_WITH_MANUFACTURER_NAME"
+        }
+      },
+      {
+        "type": "AggregationEvent",
+        "eventTime": "REPLACE_WITH_ISO_EVENT_TIME",
+        "eventTimeZoneOffset": "REPLACE_WITH_TZ_OFFSET",
+        "eventID": "REPLACE_WITH_EVENT_URN_UUID",
+        "parentID": "REPLACE_WITH_SSCC_DIGITAL_LINK",
+        "childEPCs": [
+          "REPLACE_WITH_SGTIN_DIGITAL_LINK"
+        ],
+        "action": "ADD",
+        "bizStep": "packing",
+        "disposition": "in_progress"
+      }
+    ]
+  }
+}

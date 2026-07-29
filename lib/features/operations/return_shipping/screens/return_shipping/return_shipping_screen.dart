@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/operation_entry_screen.dart';
 import 'package:traqtrace_app/features/operations/return_shipping/screens/return_shipping_operation_detail/return_shipping_operation_detail_screen.dart';
@@ -9,6 +11,8 @@ class ReturnShippingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
+        showFloatingActionButton:
+            context.canPerform(OperationSteps.returnShip),
         appBarTitle: 'Return Shipping',
         fabHeroTag: 'return_shipping_fab',
         fabAddTooltip: 'New Return Shipping',
@@ -26,7 +30,9 @@ class ReturnShippingScreen extends StatelessWidget {
           selectedOperationId: selectedId,
           onSelectOperation: onSelect,
           onBindRefresh: bindRefresh,
-          onEmbeddedCreate: onRequestCreate,
+          onEmbeddedCreate: context.canPerform(OperationSteps.returnShip)
+              ? onRequestCreate
+              : null,
         ),
         detailViewBuilder: (context, id) => ReturnShippingOperationDetailScreen(
           key: ValueKey(id),

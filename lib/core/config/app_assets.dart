@@ -63,7 +63,6 @@ class AppAssets {
 
   static const String iconAirplaneD = '$_traqIcons/airplane-d.svg';
   static const String iconAirplaneUp = '$_traqIcons/airplane-up.svg';
-  static const String iconApi = '$_traqIcons/api.svg';
   static const String iconArrowD = '$_traqIcons/arrow-d.svg';
   static const String iconBarChart = '$_traqIcons/bar-chart.svg';
   static const String iconBlock = '$_traqIcons/block.svg';
@@ -102,7 +101,6 @@ class AppAssets {
   static const String iconInbox = '$_traqIcons/inbox.svg';
   static const String iconInboxOutbox = '$_traqIcons/inbox-outbox.svg';
   static const String iconInvoice = '$_traqIcons/invoice.svg';
-  static const String iconKey = '$_traqIcons/key.svg';
   static const String iconKeyboard = '$_traqIcons/keyboard.svg';
   static const String iconLayers = '$_traqIcons/layers.svg';
   static const String iconLightbulb = '$_traqIcons/lightbulb.svg';
@@ -129,6 +127,7 @@ class AppAssets {
   static const String iconSwapVert = '$_traqIcons/swap-vert.svg';
   static const String iconTable = '$_traqIcons/table.svg';
   static const String iconTag = '$_traqIcons/tag.svg';
+  static const String iconToolbox = '$_traqIcons/toolbox.svg';
   static const String iconTarget = '$_traqIcons/target.svg';
   static const String iconText = '$_traqIcons/text.svg';
   static const String iconTimer = '$_traqIcons/timer.svg';

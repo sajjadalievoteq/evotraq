@@ -45,13 +45,6 @@ class Constants {
   static const String adminEventGenerationTestRoute =
       '/admin/event-generation-test';
   static const String adminIndustryTestDataRoute = '/admin/industry-test-data';
-  static const String adminValidationRulesRoute = '/admin/validation-rules';
-  static const String adminValidationRulesHelpRoute =
-      '/admin/validation-rules/help';
-  static const String adminValidationRulesNewRoute =
-      '/admin/validation-rules/new/:ruleId';
-  static const String adminValidationRulesEditRoute =
-      '/admin/validation-rules/:ruleId/edit';
   static const String adminDatabasePartitioningRoute =
       '/admin/database-partitioning';
   static const String adminCacheRoute = '/admin/cache';
@@ -60,21 +53,6 @@ class Constants {
   static const String adminBulkExportRoute = '/admin/bulk-export';
   static const String adminDataConsistencyIntegrityRoute =
       '/admin/data-consistency-integrity';
-
-  static const String adminApiPartnersRoute = '/admin/api-management/partners';
-  static const String adminApiPartnerDetailRoute =
-      '/admin/api-management/partners/:partnerId';
-  static const String adminApiPartnerCredentialsRoute =
-      '/admin/api-management/partners/:partnerId/credentials';
-  static const String adminApiPartnerAnalyticsRoute =
-      '/admin/api-management/partners/:partnerId/analytics';
-  static const String adminApiServiceAccountsRoute =
-      '/admin/api-management/service-accounts';
-  static const String adminApiCollectionsRoute =
-      '/admin/api-management/collections';
-  static const String adminApiPartnerAccessRoute =
-      '/admin/api-management/partners/:partnerId/access';
-  static const String adminApiAccessRoute = '/admin/api-management/access';
 
   static const String adminCbvVocabularyRoute = '/admin/cbv-vocabulary';
 
@@ -187,9 +165,11 @@ class Constants {
   static const String opCommissioningDetailRoute =
       '/operations/commissioning/:operationId';
 
+  static const String automationCenterRoute = '/automation';
   static const String notificationsRoute = '/notifications';
   static const String notificationSubscriptionsRoute =
       '/notifications/subscriptions';
+  static const String notificationHistoryRoute = '/notifications/history';
   static const String notificationDetailRoute =
       '/notifications/:subscriptionId';
   static const String notificationWebhooksRoute = '/notifications/webhooks';
@@ -197,8 +177,6 @@ class Constants {
   static const String barcodeScanRoute = '/barcode/scan';
   static const String barcodeGenerateRoute = '/barcode/generate';
   static const String barcodeVerifyRoute = '/barcode/verify';
-
-  static const String demoValidationRulesRoute = '/demo/validation-rules';
 
   static const String authLoginEndpoint = '/auth/login';
   static const String authRegisterEndpoint = '/auth/register';

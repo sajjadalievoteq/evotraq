@@ -98,6 +98,7 @@ abstract final class NavIcons {
 
   
   static const String generateVerifyBarcode = AppAssets.iconQr;
+  static const String toolbox = AppAssets.iconToolbox;
   static const String validation = AppAssets.iconCheck;
   static const String gs1ValidationDemo = AppAssets.iconFlask;
   static const String gs1ValidationTests = AppAssets.iconCheckCircle;
@@ -123,10 +124,7 @@ abstract final class NavIcons {
   static const String bulkExport = AppAssets.iconDownload;
 
   
-  static const String apiManagement = AppAssets.iconApi;
-  static const String apiCollections = AppAssets.iconFolder;
   static const String partnerManagement = AppAssets.iconBusiness;
-  static const String serviceAccounts = AppAssets.iconKey;
 
   
   static const String systemTools = AppAssets.iconBuild;

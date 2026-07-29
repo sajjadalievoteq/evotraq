@@ -101,6 +101,60 @@ abstract final class CheckDigitUtils {
   static bool isValidSgtin(String? gtin, String? serial) =>
       validateSgtin(gtin, serial) == null;
 
+  /// GSRN-18 uses the same mod-10 + length rules as SSCC.
+  static const Set<int> gsrnLengths = {18};
+
+  /// GDTI numeric base is 13 digits (like GLN) before optional serial.
+  static const Set<int> gdtiLengths = {13};
+
+  /// GRAI asset type is often a 14-digit GTIN-like key (mod-10).
+  static const Set<int> graiLengths = {14};
+
+  static String? validateGsrn(String? value) => validateGS1CheckDigit(
+        value,
+        allowedLengths: gsrnLengths,
+        label: 'GSRN',
+      );
+
+  static String? validateGdti(String? value) => validateGS1CheckDigit(
+        value,
+        allowedLengths: gdtiLengths,
+        label: 'GDTI',
+      );
+
+  static String? validateGrai(String? value) => validateGS1CheckDigit(
+        value,
+        allowedLengths: graiLengths,
+        label: 'GRAI',
+      );
+
+  /// GIAI / CPID are alphanumeric (AI 8004 / 8010); validate charset + length only.
+  static String? validateGiai(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return 'GIAI is required';
+    if (v.length > 30) return 'GIAI must be at most 30 characters';
+    if (!RegExp(r'''^[A-Za-z0-9 !"%-?_/]+$''').hasMatch(v)) {
+      return 'GIAI contains invalid characters';
+    }
+    return null;
+  }
+
+  static String? validateCpid(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return 'CPID is required';
+    if (v.length > 30) return 'CPID must be at most 30 characters';
+    if (!RegExp(r'''^[A-Za-z0-9 !"%-?_/]+$''').hasMatch(v)) {
+      return 'CPID contains invalid characters';
+    }
+    return null;
+  }
+
+  static bool isValidGsrn(String? value) => validateGsrn(value) == null;
+  static bool isValidGdti(String? value) => validateGdti(value) == null;
+  static bool isValidGrai(String? value) => validateGrai(value) == null;
+  static bool isValidGiai(String? value) => validateGiai(value) == null;
+  static bool isValidCpid(String? value) => validateCpid(value) == null;
+
   /// Computes the check digit for a body (identifier without check digit) and
   /// returns the corrected full number when the provided value is incomplete
   /// or has a wrong trailing digit.

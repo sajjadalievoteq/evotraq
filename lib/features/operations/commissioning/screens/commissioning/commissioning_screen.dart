@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:traqtrace_app/features/auth/utils/auth_role_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_detail/commissioning_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/commissioning/screens/commissioning_operation_list/commissioning_operation_list_screen.dart';
@@ -9,6 +11,8 @@ class CommissioningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OperationEntryScreen(
+        showFloatingActionButton:
+            context.canPerform(OperationSteps.commission),
         appBarTitle: 'Commissioning',
         fabHeroTag: 'commissioning_fab',
         fabAddTooltip: 'New commissioning operation',
@@ -26,7 +30,9 @@ class CommissioningScreen extends StatelessWidget {
           selectedBatchId: selectedId,
           onSelectOperation: onSelect,
           onBindRefresh: bindRefresh,
-          onEmbeddedCreate: onRequestCreate,
+          onEmbeddedCreate: context.canPerform(OperationSteps.commission)
+              ? onRequestCreate
+              : null,
         ),
         detailViewBuilder: (context, id) => CommissioningOperationDetailScreen(
           key: ValueKey(id),

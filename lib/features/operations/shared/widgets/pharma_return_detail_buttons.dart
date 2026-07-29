@@ -8,11 +8,13 @@ import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/data/services/operations/receiving/receiving_operation_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
+import 'package:traqtrace_app/core/widgets/role_gate.dart';
 import 'package:traqtrace_app/data/models/operations/receiving/receiving_response_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/operations/receiving/cubit/receiving_acceptance_cubit.dart';
 import 'package:traqtrace_app/data/models/operations/shared/pharma_return_context.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_context_builder.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 
@@ -155,29 +157,32 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
         builder: (context, state) {
           final submitting = state.status == ReceivingAcceptanceStatus.loading;
           final loading = _evaluating || submitting;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CustomElevatedButton(
-                  label: 'Accept Goods',
-                  onPressed: _eligible && !loading ? _onPressed : () {},
-                  isLoading: loading,
-                  isEnabled: _eligible && !loading,
-                ),
-                if (!loading && !_eligible && _disabledReason != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    _disabledReason!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+          return RoleGate(
+            step: OperationSteps.accept,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CustomElevatedButton(
+                    label: 'Accept Goods',
+                    onPressed: _eligible && !loading ? _onPressed : () {},
+                    isLoading: loading,
+                    isEnabled: _eligible && !loading,
                   ),
+                  if (!loading && !_eligible && _disabledReason != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _disabledReason!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           );
         },
@@ -287,29 +292,32 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
       return const SizedBox.shrink();
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CustomElevatedButton(
-            label: 'Initiate Return Shipping',
-            onPressed: _eligible && !_loading ? _onPressed : () {},
-            isLoading: _loading,
-            isEnabled: _eligible && !_loading,
-          ),
-          if (!_loading && !_eligible && _disabledReason != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _disabledReason!,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.error,
-              ),
+    return RoleGate(
+      step: OperationSteps.returnShip,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CustomElevatedButton(
+              label: 'Initiate Return Shipping',
+              onPressed: _eligible && !_loading ? _onPressed : () {},
+              isLoading: _loading,
+              isEnabled: _eligible && !_loading,
             ),
+            if (!_loading && !_eligible && _disabledReason != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                _disabledReason!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -402,29 +410,32 @@ class _AcceptReturnButtonState extends State<AcceptReturnButton> {
       return const SizedBox.shrink();
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CustomElevatedButton(
-            label: 'Accept Return',
-            onPressed: _eligible && !_loading ? _onPressed : () {},
-            isLoading: _loading,
-            isEnabled: _eligible && !_loading,
-          ),
-          if (!_loading && !_eligible && _disabledReason != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _disabledReason!,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.error,
-              ),
+    return RoleGate(
+      step: OperationSteps.returnReceive,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CustomElevatedButton(
+              label: 'Accept Return',
+              onPressed: _eligible && !_loading ? _onPressed : () {},
+              isLoading: _loading,
+              isEnabled: _eligible && !_loading,
             ),
+            if (!_loading && !_eligible && _disabledReason != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                _disabledReason!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

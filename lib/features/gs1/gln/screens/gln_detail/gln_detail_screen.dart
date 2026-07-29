@@ -465,8 +465,8 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       );
     }
 
-    final role = context.watch<AuthCubit>().state.user?.role;
-    final canEditMasterData = role == 'ADMIN' || role == 'MANUFACTURER';
+    final auth = context.watch<AuthCubit>().state;
+    final canEditMasterData = auth.isAdmin || auth.isManufacturer;
     final allowMasterDataActions =
         canEditMasterData && !widget.awaitingListSelection;
     final formReadOnly = !canEditMasterData;

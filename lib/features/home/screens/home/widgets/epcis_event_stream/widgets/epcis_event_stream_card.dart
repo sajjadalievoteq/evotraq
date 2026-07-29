@@ -60,53 +60,44 @@ class EpcisEventStreamCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.colors.success.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        HomeStrings.epcisStreamLive,
-                        style: context.text.cap.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.success,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: HomeStrings.epcisStreamOpenFiltersTooltip,
-                      icon: SvgPicture.asset(
-                        AppAssets.iconFilter,
-                        width: 20,
-                        height: 20,
-                        colorFilter: ColorFilter.mode(
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      onPressed: () =>
-                          context.go(HomeNavigation.epcisObjectEvents),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          context.go(HomeNavigation.epcisObjectEvents),
-                      child: Text(
-                        HomeStrings.epcisStreamViewAll,
-                        style: context.text.body.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.secondary,
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   padding: const EdgeInsets.symmetric(
+                    //     horizontal: 8,
+                    //     vertical: 4,
+                    //   ),
+                    //   decoration: BoxDecoration(
+                    //     color: context.colors.success.withValues(alpha: 0.12),
+                    //     borderRadius: BorderRadius.circular(4),
+                    //   ),
+                    //   child: Text(
+                    //     HomeStrings.epcisStreamLive,
+                    //     style: context.text.cap.copyWith(
+                    //       fontSize: 10,
+                    //       fontWeight: FontWeight.w700,
+                    //       color: context.colors.success,
+                    //       letterSpacing: 0.6,
+                    //     ),
+                    //   ),
+                    // ),
+
+                    // TextButton(
+                    //   onPressed: () =>
+                    //       context.go(HomeNavigation.epcisObjectEvents),
+                    //   child: Text(
+                    //     HomeStrings.epcisStreamViewAll,
+                    //     style: context.text.body.copyWith(
+                    //       fontWeight: FontWeight.w600,
+                    //       color: context.colors.primary,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
-                Divider(height: 1, color: borderColor),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10,),
+                  child: Divider(
+                      height: 1, color: borderColor),
+                ),
                 ?eventList,
               ],
             ),

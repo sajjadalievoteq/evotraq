@@ -7,77 +7,75 @@ typedef Gs1ToolActionStatus = WorkbenchActionStatus;
 
 class Gs1ToolsState extends Equatable {
   const Gs1ToolsState({
-    this.selectedTool = Gs1ToolKind.checkDigit,
-    this.checkDigit = const WorkbenchSlice(),
-    this.epc = const WorkbenchSlice(),
-    this.digitalLink = const WorkbenchSlice(),
-    this.aiParser = const WorkbenchSlice(),
+    this.selectedTool = Gs1ToolKind.convert,
+    this.initialMode,
+    this.convert = const WorkbenchSlice(),
+    this.validate = const WorkbenchSlice(),
+    this.build = const WorkbenchSlice(),
     this.barcode = const WorkbenchSlice(),
-    this.validator = const WorkbenchSlice(),
-    this.identifier = const WorkbenchSlice(),
-    this.batch = const WorkbenchSlice(),
+    this.aiElement = const WorkbenchSlice(),
+    this.ndc = const WorkbenchSlice(),
+    this.lookup = const WorkbenchSlice(),
     this.serializeConvert = const WorkbenchSlice(),
-    this.serializeValidate = const WorkbenchSlice(),
     this.serializeExport = const WorkbenchSlice(),
     this.serializeImport = const WorkbenchSlice(),
   });
 
   final Gs1ToolKind selectedTool;
-  final WorkbenchSlice checkDigit;
-  final WorkbenchSlice epc;
-  final WorkbenchSlice digitalLink;
-  final WorkbenchSlice aiParser;
+
+  /// Optional deep-link mode for the selected tool (consumed once by the panel).
+  final String? initialMode;
+
+  final WorkbenchSlice convert;
+  final WorkbenchSlice validate;
+  final WorkbenchSlice build;
   final WorkbenchSlice barcode;
-  final WorkbenchSlice validator;
-  final WorkbenchSlice identifier;
-  final WorkbenchSlice batch;
+  final WorkbenchSlice aiElement;
+  final WorkbenchSlice ndc;
+  final WorkbenchSlice lookup;
   final WorkbenchSlice serializeConvert;
-  final WorkbenchSlice serializeValidate;
   final WorkbenchSlice serializeExport;
   final WorkbenchSlice serializeImport;
 
   WorkbenchSlice sliceFor(Gs1ToolKind kind) => switch (kind) {
-        Gs1ToolKind.checkDigit => checkDigit,
-        Gs1ToolKind.epcConversion => epc,
-        Gs1ToolKind.digitalLink => digitalLink,
-        Gs1ToolKind.aiParser => aiParser,
-        Gs1ToolKind.barcode => barcode,
-        Gs1ToolKind.validator => validator,
-        Gs1ToolKind.identifier => identifier,
-        Gs1ToolKind.batch => batch,
-        Gs1ToolKind.serializeConvert => serializeConvert,
-        Gs1ToolKind.serializeValidate => serializeValidate,
-        Gs1ToolKind.serializeExport => serializeExport,
-        Gs1ToolKind.serializeImport => serializeImport,
-      };
+    Gs1ToolKind.convert => convert,
+    Gs1ToolKind.validate => validate,
+    Gs1ToolKind.build => build,
+    Gs1ToolKind.barcode => barcode,
+    Gs1ToolKind.aiElement => aiElement,
+    Gs1ToolKind.ndc => ndc,
+    Gs1ToolKind.lookup => lookup,
+    Gs1ToolKind.serializeConvert => serializeConvert,
+    Gs1ToolKind.serializeExport => serializeExport,
+    Gs1ToolKind.serializeImport => serializeImport,
+  };
 
   Gs1ToolsState copyWith({
     Gs1ToolKind? selectedTool,
-    WorkbenchSlice? checkDigit,
-    WorkbenchSlice? epc,
-    WorkbenchSlice? digitalLink,
-    WorkbenchSlice? aiParser,
+    String? initialMode,
+    bool clearInitialMode = false,
+    WorkbenchSlice? convert,
+    WorkbenchSlice? validate,
+    WorkbenchSlice? build,
     WorkbenchSlice? barcode,
-    WorkbenchSlice? validator,
-    WorkbenchSlice? identifier,
-    WorkbenchSlice? batch,
+    WorkbenchSlice? aiElement,
+    WorkbenchSlice? ndc,
+    WorkbenchSlice? lookup,
     WorkbenchSlice? serializeConvert,
-    WorkbenchSlice? serializeValidate,
     WorkbenchSlice? serializeExport,
     WorkbenchSlice? serializeImport,
   }) {
     return Gs1ToolsState(
       selectedTool: selectedTool ?? this.selectedTool,
-      checkDigit: checkDigit ?? this.checkDigit,
-      epc: epc ?? this.epc,
-      digitalLink: digitalLink ?? this.digitalLink,
-      aiParser: aiParser ?? this.aiParser,
+      initialMode: clearInitialMode ? null : (initialMode ?? this.initialMode),
+      convert: convert ?? this.convert,
+      validate: validate ?? this.validate,
+      build: build ?? this.build,
       barcode: barcode ?? this.barcode,
-      validator: validator ?? this.validator,
-      identifier: identifier ?? this.identifier,
-      batch: batch ?? this.batch,
+      aiElement: aiElement ?? this.aiElement,
+      ndc: ndc ?? this.ndc,
+      lookup: lookup ?? this.lookup,
       serializeConvert: serializeConvert ?? this.serializeConvert,
-      serializeValidate: serializeValidate ?? this.serializeValidate,
       serializeExport: serializeExport ?? this.serializeExport,
       serializeImport: serializeImport ?? this.serializeImport,
     );
@@ -85,16 +83,14 @@ class Gs1ToolsState extends Equatable {
 
   Gs1ToolsState withSlice(Gs1ToolKind kind, WorkbenchSlice slice) {
     return switch (kind) {
-      Gs1ToolKind.checkDigit => copyWith(checkDigit: slice),
-      Gs1ToolKind.epcConversion => copyWith(epc: slice),
-      Gs1ToolKind.digitalLink => copyWith(digitalLink: slice),
-      Gs1ToolKind.aiParser => copyWith(aiParser: slice),
+      Gs1ToolKind.convert => copyWith(convert: slice),
+      Gs1ToolKind.validate => copyWith(validate: slice),
+      Gs1ToolKind.build => copyWith(build: slice),
       Gs1ToolKind.barcode => copyWith(barcode: slice),
-      Gs1ToolKind.validator => copyWith(validator: slice),
-      Gs1ToolKind.identifier => copyWith(identifier: slice),
-      Gs1ToolKind.batch => copyWith(batch: slice),
+      Gs1ToolKind.aiElement => copyWith(aiElement: slice),
+      Gs1ToolKind.ndc => copyWith(ndc: slice),
+      Gs1ToolKind.lookup => copyWith(lookup: slice),
       Gs1ToolKind.serializeConvert => copyWith(serializeConvert: slice),
-      Gs1ToolKind.serializeValidate => copyWith(serializeValidate: slice),
       Gs1ToolKind.serializeExport => copyWith(serializeExport: slice),
       Gs1ToolKind.serializeImport => copyWith(serializeImport: slice),
     };
@@ -102,18 +98,17 @@ class Gs1ToolsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        selectedTool,
-        checkDigit,
-        epc,
-        digitalLink,
-        aiParser,
-        barcode,
-        validator,
-        identifier,
-        batch,
-        serializeConvert,
-        serializeValidate,
-        serializeExport,
-        serializeImport,
-      ];
+    selectedTool,
+    initialMode,
+    convert,
+    validate,
+    build,
+    barcode,
+    aiElement,
+    ndc,
+    lookup,
+    serializeConvert,
+    serializeExport,
+    serializeImport,
+  ];
 }

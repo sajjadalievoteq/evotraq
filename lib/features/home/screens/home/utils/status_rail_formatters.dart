@@ -69,15 +69,24 @@ String relativeRefreshPhrase(DateTime refreshedAt, DateTime now) {
   return DateFormat.yMMMd().add_jm().format(refreshedAt);
 }
 
-String nominalStatusLine(bool healthy, DateTime now) {
+String greetingFor(DateTime now) {
   final h = now.hour;
-  final greeting = h < 12
+  return h < 12
       ? HomeStrings.greetingMorning
       : h < 17
           ? HomeStrings.greetingAfternoon
           : HomeStrings.greetingEvening;
+}
+
+String nominalStatusLine(bool healthy, DateTime now) {
+  final greeting = greetingFor(now);
   if (!healthy) {
     return HomeStrings.statusNominalDegraded(greeting);
   }
   return HomeStrings.statusNominalHealthy(greeting);
 }
+
+/// Used when the signed-in user cannot read service health, so claiming
+/// "nominal" or "degraded" would be misleading.
+String greetingOnlyStatusLine(DateTime now) =>
+    HomeStrings.statusGreetingOnly(greetingFor(now));

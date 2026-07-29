@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:traqtrace_app/core/web/url_strategy_stub.dart'
-    if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
+if (dart.library.html) 'package:traqtrace_app/core/web/url_strategy_web.dart';
 import 'package:traqtrace_app/core/config/app_config.dart';
 import 'package:traqtrace_app/core/config/app_router.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
@@ -16,7 +16,6 @@ import 'package:traqtrace_app/features/auth/cubit/auth_state.dart';
 import 'package:traqtrace_app/data/services/epcis/cbv_vocabulary_service.dart';
 
 import 'package:traqtrace_app/features/user/cubit/profile_cubit.dart';
-import 'package:traqtrace_app/features/shared/reference_data/cubit/reference_data_cubit.dart';
 
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/layout/layout_manager.dart';
@@ -31,19 +30,12 @@ import 'package:traqtrace_app/features/splash/screens/Splash/splash_screen.dart'
 import 'package:traqtrace_app/data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/profile_service.dart';
 import 'package:traqtrace_app/data/services/websocket_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gln/gln_service.dart';
-import 'package:traqtrace_app/data/services/gs1/gtin/gtin_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sgtin/sgtin_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-
     await HiveStorage.init();
-
     configureUrlStrategy();
-
     final appConfig = AppConfig(
       apiBaseUrl: const String.fromEnvironment(
         'API_BASE_URL',
@@ -121,18 +113,10 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
           create: (context) =>
               SystemSettingsCubit(getIt<SystemSettingsService>()),
         ),
-        BlocProvider<ReferenceDataCubit>(
-          create: (context) => ReferenceDataCubit(
-            gtinService: getIt<GTINService>(),
-            sgtinService: getIt<SGTINService>(),
-            ssccService: getIt<SSCCService>(),
-            glnService: getIt<GLNService>(),
-          ),
-        ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         buildWhen: (previous, current) =>
-            previous.isDarkMode != current.isDarkMode,
+        previous.isDarkMode != current.isDarkMode,
         builder: (context, themeState) {
           return BlocListener<AuthCubit, AuthState>(
             listener: (context, state) {
@@ -153,19 +137,22 @@ class _TraqTraceAppState extends State<TraqTraceApp> {
                 ...GlobalMaterialLocalizations.delegates,
                 TypedLocaleDelegate(),
               ],
-              builder: (context, child) => SnackBarInteractionScope(
-                child: AppScreenUtilInit(
-                  child: AppLayoutBuilder(
-                    builder: (context, layout) => BlocBuilder<AuthCubit, AuthState>(
-                      buildWhen: (p, n) =>
-                          p.bootstrapCompleted != n.bootstrapCompleted,
-                      builder: (context, auth) => auth.bootstrapCompleted
-                          ? (child ?? const SizedBox.shrink())
-                          : const SplashScreen(),
+              builder: (context, child) =>
+                  SnackBarInteractionScope(
+                    child: AppScreenUtilInit(
+                      child: AppLayoutBuilder(
+                        builder: (context, layout) =>
+                            BlocBuilder<AuthCubit, AuthState>(
+                              buildWhen: (p, n) =>
+                              p.bootstrapCompleted != n.bootstrapCompleted,
+                              builder: (context, auth) =>
+                              auth.bootstrapCompleted
+                                  ? (child ?? const SizedBox.shrink())
+                                  : const SplashScreen(),
+                            ),
+                      ),
                     ),
                   ),
-                ),
-              ),
             ),
           );
         },

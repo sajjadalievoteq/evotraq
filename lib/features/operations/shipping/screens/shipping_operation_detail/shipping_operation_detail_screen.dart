@@ -2,6 +2,7 @@ import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/data/services/operations/shipping/shipping_operation_service.dart';
+import 'package:traqtrace_app/data/services/reference_data_service.dart';
 import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/generic_operation_detail_screen.dart';
 import 'package:traqtrace_app/features/operations/shared/screens/operation_detail_screen_config.dart';
@@ -13,26 +14,27 @@ final _shippingDetailConfig = OperationDetailScreenConfig<ShippingResponse>(
     return OperationDetailCubit<ShippingResponse>(
       fetchDetail: service.getShippingOperation,
       fallbackErrorMessage: fallbackErrorMessage,
+      referenceDataService: getIt<ReferenceDataService>(),
     );
   },
-  contentBuilder: (
-    context, {
-    required awaitingSelection,
-    required listLoading,
-    required isLoading,
-    required errorMessage,
-    required operation,
-    required onRetry,
-    onOperationUpdated,
-  }) =>
-      ShippingDetailContent(
-    awaitingSelection: awaitingSelection,
-    listLoading: listLoading,
-    isLoading: isLoading,
-    errorMessage: errorMessage,
-    operation: operation,
-    onRetry: onRetry,
-  ),
+  contentBuilder:
+      (
+        context, {
+        required awaitingSelection,
+        required listLoading,
+        required isLoading,
+        required errorMessage,
+        required operation,
+        required onRetry,
+        onOperationUpdated,
+      }) => ShippingDetailContent(
+        awaitingSelection: awaitingSelection,
+        listLoading: listLoading,
+        isLoading: isLoading,
+        errorMessage: errorMessage,
+        operation: operation,
+        onRetry: onRetry,
+      ),
   titleBuilder: (op) => op.shippingReference ?? 'Shipping Detail',
   listRoute: Constants.opShippingRoute,
   defaultTitle: 'Shipping Detail',

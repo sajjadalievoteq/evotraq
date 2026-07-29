@@ -739,8 +739,8 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final role = context.watch<AuthCubit>().state.user?.role;
-    final canEditMasterData = role == 'ADMIN' || role == 'MANUFACTURER';
+    final auth = context.watch<AuthCubit>().state;
+    final canEditMasterData = auth.isAdmin || auth.isManufacturer;
     final recordEditable = widget.isCreating ||
         (widget.isEditing &&
             _sscc != null &&

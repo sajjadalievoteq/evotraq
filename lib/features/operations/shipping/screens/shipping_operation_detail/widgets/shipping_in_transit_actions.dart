@@ -4,14 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/consts/app_consts.dart';
 import 'package:traqtrace_app/core/storage/operational_gln_store.dart';
 import 'package:traqtrace_app/core/widgets/custom_elevated_button.dart';
+import 'package:traqtrace_app/core/widgets/role_gate.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/operations/shipping/shipping_response_model.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/cubit/operation_detail_cubit.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 import 'package:traqtrace_app/features/operations/shared/utils/pharma_return_eligibility.dart';
 import 'package:traqtrace_app/features/operations/shared/widgets/pharma_return_detail_buttons.dart';
-import 'package:traqtrace_app/features/shared/reference_data/cubit/reference_data_cubit.dart';
-
-
 
 class ShippingInTransitActions extends StatefulWidget {
   const ShippingInTransitActions({super.key, required this.operation});
@@ -46,8 +46,7 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
   Future<void> _loadGln() async {
     setState(() => _loading = true);
     final user = context.read<AuthCubit>().state.user;
-    final gln =
-        user == null ? null : await OperationalGlnStore.getGln(user.id);
+    final gln = user == null ? null : await OperationalGlnStore.getGln(user.id);
     if (!mounted) return;
     setState(() {
       _operationalGln = gln;
@@ -56,19 +55,21 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
   }
 
   bool get _isSource => PharmaReturnEligibility.glnMatches(
-        _operationalGln,
-        widget.operation.sourceGLN ?? widget.operation.sourceLocation?.glnCode,
-      );
+    _operationalGln,
+    widget.operation.sourceGLN ?? widget.operation.sourceLocation?.glnCode,
+  );
 
   bool get _isDestination => PharmaReturnEligibility.glnMatches(
-        _operationalGln,
-        widget.operation.destinationGLN ??
-            widget.operation.destinationLocation?.glnCode,
-      );
+    _operationalGln,
+    widget.operation.destinationGLN ??
+        widget.operation.destinationLocation?.glnCode,
+  );
 
   Future<GLN?> _resolveGln(String? code) async {
     if (code == null || code.trim().isEmpty) return null;
-    return context.read<ReferenceDataCubit>().resolveGln(code.trim());
+    return context.read<OperationDetailCubit<ShippingResponse>>().resolveGln(
+      code.trim(),
+    );
   }
 
   Future<void> _goReceive() async {
@@ -134,19 +135,20 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
 
     final isReturn = widget.operation.isReturnShipping;
 
-    
     if (isReturn) {
       if (!_isDestination) return const SizedBox.shrink();
-      return AcceptReturnButton(operation: widget.operation);
+      return RoleGate(
+        step: OperationSteps.returnReceive,
+        child: AcceptReturnButton(operation: widget.operation),
+      );
     }
 
-    
     if (_isDestination) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: CustomElevatedButton(
-          label: 'Receive',
-          onPressed: _goReceive,
+      return RoleGate(
+        step: OperationSteps.receive,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: CustomElevatedButton(label: 'Receive', onPressed: _goReceive),
         ),
       );
     }
@@ -155,15 +157,20 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: CustomElevatedButton(
-              label: 'Cancel Shipping',
-              onPressed: _goCancelShipping,
+          RoleGate(
+            step: OperationSteps.cancelShip,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: CustomElevatedButton(
+                label: 'Cancel Shipping',
+                onPressed: _goCancelShipping,
+              ),
             ),
           ),
-          
-          AcceptReturnButton(operation: widget.operation),
+          RoleGate(
+            step: OperationSteps.returnReceive,
+            child: AcceptReturnButton(operation: widget.operation),
+          ),
         ],
       );
     }

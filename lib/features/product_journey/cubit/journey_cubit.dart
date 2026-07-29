@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/home/recent_event.dart';
 import 'package:traqtrace_app/data/models/product_journey/journey_step.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_journey.dart';
 import 'package:traqtrace_app/data/models/product_journey/product_search_result.dart';
 import 'package:traqtrace_app/data/services/home/dashboard_service.dart';
 import 'package:traqtrace_app/data/services/product_journey/product_journey_service.dart';
+import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/product_journey/utils/journey_event_filter.dart';
 
 part 'journey_state.dart';
@@ -15,12 +17,15 @@ class JourneyCubit extends Cubit<JourneyState> {
   JourneyCubit({
     required ProductJourneyService service,
     required DashboardService dashboardService,
+    AuthCubit? authCubit,
   })  : _service = service,
         _dashboardService = dashboardService,
+        _authCubit = authCubit ?? getIt<AuthCubit>(),
         super(const JourneyState());
 
   final ProductJourneyService _service;
   final DashboardService _dashboardService;
+  final AuthCubit _authCubit;
   bool _recentEventsRequested = false;
   final Map<String, ProductJourney?> _journeyCache = {};
 
@@ -42,6 +47,7 @@ class JourneyCubit extends Cubit<JourneyState> {
 
   
   Future<void> loadRecentEvents() async {
+    if (!_authCubit.state.canReadDashboard) return;
     if (_recentEventsRequested) return;
     if (state.isLoaded || state.isLoading) return;
     if (state.recentEvents.isNotEmpty) return;

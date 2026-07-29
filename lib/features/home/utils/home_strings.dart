@@ -97,6 +97,9 @@
   static String statusNominalDegraded(String greeting) =>
       '$greeting — attention required on one or more services.';
 
+  static String statusGreetingOnly(String greeting) =>
+      "$greeting — here's your latest supply chain activity.";
+
   static const streamDummyFooter =
       'Sample rows — will show live EPCIS events when connected.';
 

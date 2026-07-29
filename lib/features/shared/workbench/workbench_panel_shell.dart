@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
+import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/shared/workbench/workbench_instructions.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_slice.dart';
 
 class WorkbenchPanelShell extends StatelessWidget {
@@ -14,6 +16,8 @@ class WorkbenchPanelShell extends StatelessWidget {
     required this.slice,
     this.actions = const [],
     this.expandBody = false,
+    this.instructions,
+    this.onLoadExample,
   });
 
   final String title;
@@ -24,10 +28,22 @@ class WorkbenchPanelShell extends StatelessWidget {
   /// When true, [child] fills remaining height (for nested CRUD/list UIs).
   final bool expandBody;
 
+  final WorkbenchInstructions? instructions;
+  final WorkbenchExampleLoader? onLoadExample;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final titleBlock = Text(title, style: context.text.h2);
+    final instructionsBlock = instructions == null
+        ? null
+        : Padding(
+            padding: EdgeInsets.only(bottom:context.padding.top ),
+            child: WorkbenchInstructionsCard(
+              instructions: instructions!,
+              onLoadExample: onLoadExample,
+            ),
+          );
     final formCard = Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -77,6 +93,7 @@ class WorkbenchPanelShell extends StatelessWidget {
             children: [
               titleBlock,
               const SizedBox(height: TraqSpacing.md),
+              if (instructionsBlock != null) instructionsBlock,
               Expanded(child: formCard),
               ...statusBlocks,
             ],
@@ -87,12 +104,14 @@ class WorkbenchPanelShell extends StatelessWidget {
 
     return SelectionArea(
       child: ListView(
-        padding: const EdgeInsets.all(TraqSpacing.lg),
+        padding:  EdgeInsets.fromLTRB(context.padding.top, context.padding.top, context.padding.top, 0),
         children: [
           titleBlock,
           const SizedBox(height: TraqSpacing.md),
+          if (instructionsBlock != null) instructionsBlock,
           formCard,
           ...statusBlocks,
+          SizedBox(height: context.padding.top,)
         ],
       ),
     );

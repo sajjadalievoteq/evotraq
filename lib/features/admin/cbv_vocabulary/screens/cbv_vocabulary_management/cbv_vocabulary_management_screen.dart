@@ -50,7 +50,7 @@ class _CbvVocabularyManagementViewState
 
   static const _tabs = ['Pairings', 'Biz Steps', 'Dispositions'];
 
-  bool get _isAdmin => context.read<AuthCubit>().state.user?.role == 'ADMIN';
+  bool get _isAdmin => context.read<AuthCubit>().state.isAdmin;
 
   @override
   void initState() {

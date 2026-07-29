@@ -17,6 +17,7 @@ import 'package:traqtrace_app/core/layout/layout_manager.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
 import 'package:traqtrace_app/core/widgets/traq_expansion_tile.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 
 class DrawerScrollMemory {
   DrawerScrollMemory._();
@@ -106,6 +107,142 @@ class _AppDrawerState extends State<AppDrawer> {
 
   Widget _svgLeading(String asset) => TraqIcon(asset);
 
+  bool _canOp(AuthState auth, String step) => auth.canPerform(step);
+
+  bool _hasAnyOperationNav(AuthState auth) =>
+      _canOp(auth, OperationSteps.commission) ||
+      _canOp(auth, OperationSteps.updateStatus) ||
+      _canOp(auth, OperationSteps.pack) ||
+      _canOp(auth, OperationSteps.unpack) ||
+      _canOp(auth, OperationSteps.ship) ||
+      _canOp(auth, OperationSteps.cancelShip) ||
+      _canOp(auth, OperationSteps.returnShip) ||
+      _canOp(auth, OperationSteps.receive) ||
+      _canOp(auth, OperationSteps.cancelReceive) ||
+      _canOp(auth, OperationSteps.returnReceive);
+
+  List<Widget> _buildOperationsNav(AuthState auth, Color surfaceColor) {
+    final lifecycle = <Widget>[
+      if (_canOp(auth, OperationSteps.commission))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.commissioning),
+          title: const Text('Commissioning'),
+          onTap: () => _navigate(Constants.opCommissioningRoute),
+        ),
+      if (_canOp(auth, OperationSteps.updateStatus))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.updateStatus),
+          title: const Text('Status Updating'),
+          onTap: () => _navigate(Constants.opUpdateStatusRoute),
+        ),
+    ];
+
+    final packaging = <Widget>[
+      if (_canOp(auth, OperationSteps.pack))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.packing),
+          title: const Text('Packing'),
+          onTap: () => _navigate(Constants.opPackingRoute),
+        ),
+      if (_canOp(auth, OperationSteps.unpack))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.unpacking),
+          title: const Text('Unpacking'),
+          onTap: () => _navigate(Constants.opUnpackingRoute),
+        ),
+    ];
+
+    final shippings = <Widget>[
+      if (_canOp(auth, OperationSteps.ship))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.shipping),
+          title: const Text('Shipping'),
+          onTap: () => _navigate(Constants.opShippingRoute),
+        ),
+      if (_canOp(auth, OperationSteps.returnShip))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.returnShipping),
+          title: const Text('Return Shipping'),
+          onTap: () => _navigate(Constants.opReturnShippingRoute),
+        ),
+      if (_canOp(auth, OperationSteps.cancelShip))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.cancelShipping),
+          title: const Text('Cancel Shipping'),
+          onTap: () => _navigate(Constants.opCancelShippingRoute),
+        ),
+    ];
+
+    final receivings = <Widget>[
+      if (_canOp(auth, OperationSteps.receive))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.receiving),
+          title: const Text('Receiving'),
+          onTap: () => _navigate(Constants.opReceivingRoute),
+        ),
+      if (_canOp(auth, OperationSteps.returnReceive))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.returnReceiving),
+          title: const Text('Return Receiving'),
+          onTap: () => _navigate(Constants.opReturnReceivingRoute),
+        ),
+      if (_canOp(auth, OperationSteps.cancelReceive))
+        ListTile(
+          contentPadding: const EdgeInsets.only(left: 32.0),
+          leading: _svgLeading(NavIcons.cancelReceiving),
+          title: const Text('Cancel Receiving'),
+          onTap: () => _navigate(Constants.opCancelReceivingRoute),
+        ),
+    ];
+
+    final logistics = <Widget>[
+      if (shippings.isNotEmpty)
+        TraqExpansionTile(
+          backgroundColor: surfaceColor,
+          leading: _svgLeading(NavIcons.shippings),
+          title: const Text('Shippings'),
+          children: shippings,
+        ),
+      if (receivings.isNotEmpty)
+        TraqExpansionTile(
+          leading: _svgLeading(NavIcons.receivings),
+          title: const Text('Receivings'),
+          children: receivings,
+        ),
+    ];
+
+    return [
+      if (lifecycle.isNotEmpty)
+        TraqExpansionTile(
+          leading: _svgLeading(NavIcons.lifecycle),
+          title: const Text('Lifecycle'),
+          children: lifecycle,
+        ),
+      if (packaging.isNotEmpty)
+        TraqExpansionTile(
+          leading: _svgLeading(NavIcons.packaging),
+          title: const Text('Packaging'),
+          children: packaging,
+        ),
+      if (logistics.isNotEmpty)
+        TraqExpansionTile(
+          leading: _svgLeading(NavIcons.logistics),
+          title: const Text('Logistics'),
+          childrenPadding: const EdgeInsets.only(left: 22),
+          children: logistics,
+        ),
+    ];
+  }
+
   Widget _svgTrailingChevron() => TraqIcon(NavIcons.chevronRight, size: 14);
 
   @override
@@ -126,7 +263,7 @@ class _AppDrawerState extends State<AppDrawer> {
           );
         }
 
-        final bool isAdmin = user.role == 'ADMIN';
+        final bool isAdmin = state.isAdmin;
         final router = GoRouter.of(context);
 
         return Drawer(
@@ -136,349 +273,90 @@ class _AppDrawerState extends State<AppDrawer> {
           child: _DrawerAnimatedContent(
             child: Column(
               children: [
-              BlocBuilder<ThemeCubit, ThemeState>(
-                buildWhen: (previous, current) =>
-                    previous.isDarkMode != current.isDarkMode,
-                builder: (context, themeState) {
-                  return BlocBuilder<SystemSettingsCubit, SystemSettingsState>(
-                    builder: (context, settingsState) {
-                      final isDarkMode = themeState.isDarkMode;
+                BlocBuilder<ThemeCubit, ThemeState>(
+                  buildWhen: (previous, current) =>
+                      previous.isDarkMode != current.isDarkMode,
+                  builder: (context, themeState) {
+                    return BlocBuilder<
+                      SystemSettingsCubit,
+                      SystemSettingsState
+                    >(
+                      builder: (context, settingsState) {
+                        final isDarkMode = themeState.isDarkMode;
 
-                      return UserAccountsDrawerHeader(
-                        accountName: Row(
-                          children: [
-                            Text(
-                              '${user.firstName} ${user.lastName}',
-                              style: const TextStyle(
+                        return UserAccountsDrawerHeader(
+                          accountName: Row(
+                            children: [
+                              Text(
+                                '${user.firstName} ${user.lastName}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                          ),
+                          accountEmail: Text(
+                            user.email,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          currentAccountPicture: CircleAvatar(
+                            backgroundColor: context.colors.background,
+                            child: Text(
+                              user.firstName.isNotEmpty
+                                  ? user.firstName[0].toUpperCase()
+                                  : 'U',
+                              style: TextStyle(
+                                fontSize: 40,
+                                color: context.colors.textPrimary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
-                        accountEmail: Text(
-                          user.email,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        currentAccountPicture: CircleAvatar(
-                          backgroundColor: context.colors.background,
-                          child: Text(
-                            user.firstName.isNotEmpty
-                                ? user.firstName[0].toUpperCase()
-                                : 'U',
-                            style: TextStyle(
-                              fontSize: 40,
-                              color: context.colors.textPrimary,
-                              fontWeight: FontWeight.bold,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.primary,
+                            image: DecorationImage(
+                              image: AssetImage(AppAssets.traqBackgroundPng),
+                              fit: BoxFit.cover,
+                              opacity: 0.2,
                             ),
                           ),
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.colors.primary,
-                          image: DecorationImage(
-                            image: AssetImage(AppAssets.traqBackgroundPng),
-                            fit: BoxFit.cover,
-                            opacity: 0.2,
-                          ),
-                        ),
-                        otherAccountsPictures: [
-                          IconButton(
-                            icon: TraqIcon(
-                              isDarkMode
-                                  ? NavIcons.themeSun
-                                  : NavIcons.themeMoon,
-                              color: context.colors.background,
-                            ),
-                            onPressed: () async {
-                              await context.read<ThemeCubit>().toggleTheme();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-              Expanded(
-                child: ListView(
-                  controller: _scrollController,
-                  padding: EdgeInsets.zero,
-                  children: [
-                    ListTile(
-                      leading: _svgLeading(NavIcons.dashboard),
-                      title: const Text('Dashboard'),
-                      onTap: () =>
-                          _navigate(Constants.homeRoute, isDashboard: true),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.profile),
-                      title: const Text('My Profile'),
-                      onTap: () => _navigate(Constants.profileRoute),
-                    ),
-
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        top: 8.0,
-                        bottom: 8.0,
-                      ),
-                      child: Text(
-                        'DASHBOARDS',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.productJourney),
-                      title: const Text('Product Journey'),
-                      subtitle: const Text('Track supply chain flow'),
-                      onTap: () => _navigate(Constants.journeyDashboardRoute),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.productHierarchy),
-                      title: const Text('Product Hierarchy'),
-                      subtitle: const Text('Explore packaging hierarchy'),
-                      onTap: () => _navigate(Constants.productHierarchyRoute),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.inboxOutbox),
-                      title: const Text('Inbox / Outbox'),
-                      subtitle: const Text('In-transit shipments'),
-                      onTap: () => _navigate(Constants.inboxOutboxRoute),
-                    ),
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        top: 8.0,
-                        bottom: 8.0,
-                      ),
-                      child: Text(
-                        'COCKPIT',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.masterData),
-                      title: const Text('Master Data'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.gtin),
-                          title: const Text('GTIN Management'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(Constants.gs1GtinsRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.gln),
-                          title: const Text('GLN Management'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(Constants.gs1GlnsRoute),
-                        ),
-                      ],
-                    ),
-
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.serialization),
-                      title: const Text('Serialization'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.sscc),
-                          title: const Text('SSCC Management'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(Constants.gs1SsccsRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.sgtin),
-                          title: const Text('SGTIN Management'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () => _navigate(Constants.gs1SgtinsRoute),
-                        ),
-                      ],
-                    ),
-
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.epcisEvents),
-                      title: const Text('EPCIS Events'),
-                      children: [
-                        ListTile(
-                          leading: _svgLeading(NavIcons.objectEvents),
-                          title: const Text('Object Events'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisObjectEventsRoute),
-                        ),
-                        ListTile(
-                          leading: _svgLeading(NavIcons.aggregationEvents),
-                          title: const Text('Aggregation Events'),
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-                          onTap: () =>
-                              _navigate(Constants.epcisAggregationEventsRoute),
-                        ),
-                      ],
-                    ),
-
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        top: 8.0,
-                        bottom: 8.0,
-                      ),
-                      child: Text(
-                        'OPERATIONS',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.lifecycle),
-                      title: const Text('Lifecycle'),
-
-                      children: [
-                        ListTile(
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-
-                          leading: _svgLeading(NavIcons.commissioning),
-                          title: const Text('Commissioning'),
-                          onTap: () =>
-                              _navigate(Constants.opCommissioningRoute),
-                        ),
-
-                        ListTile(
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-
-                          leading: _svgLeading(NavIcons.updateStatus),
-                          title: const Text('Status Updating'),
-                          onTap: () => _navigate(Constants.opUpdateStatusRoute),
-                        ),
-                      ],
-                    ),
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.packaging),
-                      title: const Text('Packaging'),
-                      children: [
-                        ListTile(
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-
-                          leading: _svgLeading(NavIcons.packing),
-                          title: const Text('Packing'),
-                          onTap: () => _navigate(Constants.opPackingRoute),
-                        ),
-
-                        ListTile(
-                          contentPadding: const EdgeInsets.only(left: 32.0),
-
-                          leading: _svgLeading(NavIcons.unpacking),
-                          title: const Text('Unpacking'),
-                          onTap: () => _navigate(Constants.opUnpackingRoute),
-                        ),
-                      ],
-                    ),
-
-                    TraqExpansionTile(
-                      leading: _svgLeading(NavIcons.logistics),
-                      title: const Text('Logistics'),
-                      childrenPadding: EdgeInsets.only(left: 22),
-                      children: [
-                        TraqExpansionTile(
-                          backgroundColor: context.colors.surface,
-                          leading: _svgLeading(NavIcons.shippings),
-                          title: const Text('Shippings'),
-                          children: [
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(NavIcons.shipping),
-                              title: const Text('Shipping'),
-                              onTap: () => _navigate(Constants.opShippingRoute),
-                            ),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(NavIcons.returnShipping),
-                              title: const Text('Return Shipping'),
-                              onTap: () =>
-                                  _navigate(Constants.opReturnShippingRoute),
-                            ),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-
-                              leading: _svgLeading(NavIcons.cancelShipping),
-                              title: const Text('Cancel Shipping'),
-                              onTap: () =>
-                                  _navigate(Constants.opCancelShippingRoute),
+                          otherAccountsPictures: [
+                            IconButton(
+                              icon: TraqIcon(
+                                isDarkMode
+                                    ? NavIcons.themeSun
+                                    : NavIcons.themeMoon,
+                                color: context.colors.background,
+                              ),
+                              onPressed: () async {
+                                await context.read<ThemeCubit>().toggleTheme();
+                              },
                             ),
                           ],
-                        ),
-                        TraqExpansionTile(
-                          leading: _svgLeading(NavIcons.receivings),
-                          title: const Text('Receivings'),
-                          children: [
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(NavIcons.receiving),
-                              title: const Text('Receiving'),
-                              onTap: () =>
-                                  _navigate(Constants.opReceivingRoute),
-                            ),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(NavIcons.returnReceiving),
-                              title: const Text('Return Receiving'),
-                              onTap: () =>
-                                  _navigate(Constants.opReturnReceivingRoute),
-                            ),
-                            ListTile(
-                              contentPadding: const EdgeInsets.only(left: 32.0),
-                              leading: _svgLeading(NavIcons.cancelReceiving),
-                              title: const Text('Cancel Receiving'),
-                              onTap: () =>
-                                  _navigate(Constants.opCancelReceivingRoute),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: EdgeInsets.zero,
+                    children: [
+                      ListTile(
+                        leading: _svgLeading(NavIcons.dashboard),
+                        title: const Text('Dashboard'),
+                        onTap: () =>
+                            _navigate(Constants.homeRoute, isDashboard: true),
+                      ),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.profile),
+                        title: const Text('My Profile'),
+                        onTap: () => _navigate(Constants.profileRoute),
+                      ),
 
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        top: 8.0,
-                        bottom: 8.0,
-                      ),
-                      child: Text(
-                        'GS1 TOOLS',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.generateVerifyBarcode),
-                      title: const Text('GS1 Tools'),
-                      subtitle: const Text(
-                        'Tools · Validation · Serialization',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      trailing: _svgTrailingChevron(),
-                      onTap: () => _navigate(Constants.gs1ToolsRoute),
-                    ),
-
-                    if (isAdmin) ...[
                       const Divider(),
                       const Padding(
                         padding: EdgeInsets.only(
@@ -487,7 +365,41 @@ class _AppDrawerState extends State<AppDrawer> {
                           bottom: 8.0,
                         ),
                         child: Text(
-                          'ADMIN',
+                          'DASHBOARDS',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.productJourney),
+                        title: const Text('Product Journey'),
+                        subtitle: const Text('Track supply chain flow'),
+                        onTap: () => _navigate(Constants.journeyDashboardRoute),
+                      ),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.productHierarchy),
+                        title: const Text('Product Hierarchy'),
+                        subtitle: const Text('Explore packaging hierarchy'),
+                        onTap: () => _navigate(Constants.productHierarchyRoute),
+                      ),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.inboxOutbox),
+                        title: const Text('Inbox / Outbox'),
+                        subtitle: const Text('In-transit shipments'),
+                        onTap: () => _navigate(Constants.inboxOutboxRoute),
+                      ),
+                      const Divider(),
+                      const Padding(
+                        padding: EdgeInsets.only(
+                          left: 16.0,
+                          top: 8.0,
+                          bottom: 8.0,
+                        ),
+                        child: Text(
+                          'COCKPIT',
                           style: TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.bold,
@@ -497,264 +409,313 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
 
                       TraqExpansionTile(
-                        leading: _svgLeading(NavIcons.userManagement),
-                        title: const Text('User Management'),
+                        leading: _svgLeading(NavIcons.masterData),
+                        title: const Text('Master Data'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(NavIcons.userManagement),
-                            title: const Text('User Management'),
+                            leading: _svgLeading(NavIcons.gtin),
+                            title: const Text('GTIN Management'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(Constants.adminUsersRoute),
+                            onTap: () => _navigate(Constants.gs1GtinsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(NavIcons.pendingApprovals),
-                            title: const Text('Pending Approvals'),
+                            leading: _svgLeading(NavIcons.gln),
+                            title: const Text('GLN Management'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminApprovalsRoute),
+                            onTap: () => _navigate(Constants.gs1GlnsRoute),
                           ),
                         ],
                       ),
 
                       TraqExpansionTile(
-                        leading: _svgLeading(NavIcons.notifications),
-                        title: const Text('Notifications'),
+                        leading: _svgLeading(NavIcons.serialization),
+                        title: const Text('Serialization'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(NavIcons.notificationCenter),
-                            title: const Text('Notification Center'),
+                            leading: _svgLeading(NavIcons.sscc),
+                            title: const Text('SSCC Management'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.notificationsRoute),
+                            onTap: () => _navigate(Constants.gs1SsccsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(NavIcons.manageSubscriptions),
-                            title: const Text('Manage Subscriptions'),
+                            leading: _svgLeading(NavIcons.sgtin),
+                            title: const Text('SGTIN Management'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(
-                              Constants.notificationSubscriptionsRoute,
-                            ),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.webhookConfiguration),
-                            title: const Text('Webhook Configuration'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.notificationWebhooksRoute),
+                            onTap: () => _navigate(Constants.gs1SgtinsRoute),
                           ),
                         ],
                       ),
 
                       TraqExpansionTile(
-                        leading: _svgLeading(NavIcons.batchProcessing),
-                        title: const Text('Batch Processing'),
+                        leading: _svgLeading(NavIcons.epcisEvents),
+                        title: const Text('EPCIS Events'),
                         children: [
                           ListTile(
-                            leading: _svgLeading(NavIcons.jobQueueManagement),
-                            title: const Text('Job Queue Management'),
+                            leading: _svgLeading(NavIcons.objectEvents),
+                            title: const Text('Object Events'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () =>
-                                _navigate(Constants.adminJobQueueRoute),
+                                _navigate(Constants.epcisObjectEventsRoute),
                           ),
                           ListTile(
-                            leading: _svgLeading(NavIcons.etlManagement),
-                            title: const Text('ETL Management'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminEtlManagementRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.bulkExport),
-                            title: const Text('Bulk Export'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminBulkExportRoute),
-                          ),
-                        ],
-                      ),
-
-                      // ExpansionTile(
-                      //   leading: _svgLeading(NavIcons.apiManagement),
-                      //   title: const Text('API Management'),
-                      //   children: [
-                      //     ListTile(
-                      //       leading: _svgLeading(NavIcons.apiCollections),
-                      //       title: const Text('API Collections'),
-                      //       contentPadding: const EdgeInsets.only(left: 32.0),
-                      //       onTap: () =>
-                      //           _navigate(Constants.adminApiCollectionsRoute),
-                      //     ),
-                      //     ListTile(
-                      //       leading: _svgLeading(NavIcons.partnerManagement),
-                      //       title: const Text('Partner Management'),
-                      //       contentPadding: const EdgeInsets.only(left: 32.0),
-                      //       onTap: () =>
-                      //           _navigate(Constants.adminApiPartnersRoute),
-                      //     ),
-                      //     ListTile(
-                      //       leading: _svgLeading(NavIcons.serviceAccounts),
-                      //       title: const Text('Service Accounts'),
-                      //       contentPadding: const EdgeInsets.only(left: 32.0),
-                      //       onTap: () => _navigate(
-                      //         Constants.adminApiServiceAccountsRoute,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-
-                      TraqExpansionTile(
-                        leading: _svgLeading(NavIcons.systemTools),
-                        title: const Text('System Tools'),
-                        children: [
-                          ListTile(
-                            leading: _svgLeading(NavIcons.systemSettings),
-                            title: const Text('System Settings'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminSettingsRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.cacheManagement),
-                            title: const Text('Cache Management'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(Constants.adminCacheRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.performanceTests),
-                            title: const Text('Performance Tests'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminPerformanceTestsRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(
-                              NavIcons.performanceOptimization,
-                            ),
-                            title: const Text('Performance Optimization'),
+                            leading: _svgLeading(NavIcons.aggregationEvents),
+                            title: const Text('Aggregation Events'),
                             contentPadding: const EdgeInsets.only(left: 32.0),
                             onTap: () => _navigate(
-                              Constants.adminPerformanceOptimizationRoute,
-                            ),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.systemMonitoring),
-                            title: const Text('System Monitoring'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminMonitoringRoute),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.databasePartitioning),
-                            title: const Text('Database Partitioning'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(
-                              Constants.adminDatabasePartitioningRoute,
-                            ),
-                          ),
-                          ListTile(
-                            leading: _svgLeading(
-                              NavIcons.dataConsistencyIntegrity,
-                            ),
-                            title: const Text('Data Consistency & Integrity'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(
-                              Constants.adminDataConsistencyIntegrityRoute,
+                              Constants.epcisAggregationEventsRoute,
                             ),
                           ),
                         ],
                       ),
 
-                      TraqExpansionTile(
-                        leading: _svgLeading(NavIcons.testDataGeneration),
-                        title: const Text('Test Data Generation'),
-                        children: [
-                          ListTile(
-                            leading: _svgLeading(NavIcons.eventGenerationTests),
-                            title: const Text('Event Generation Tests'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () => _navigate(
-                              Constants.adminEventGenerationTestRoute,
+                      const Divider(),
+                      if (_hasAnyOperationNav(state)) ...[
+                        const Padding(
+                          padding: EdgeInsets.only(
+                            left: 16.0,
+                            top: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Text(
+                            'OPERATIONS',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
-                          ListTile(
-                            leading: _svgLeading(NavIcons.industryTestData),
-                            title: const Text('Industry Test Data'),
-                            contentPadding: const EdgeInsets.only(left: 32.0),
-                            onTap: () =>
-                                _navigate(Constants.adminIndustryTestDataRoute),
+                        ),
+                        ..._buildOperationsNav(state, context.colors.surface),
+                      ],
+
+                      const Divider(),
+                      const Padding(
+                        padding: EdgeInsets.only(
+                          left: 16.0,
+                          top: 8.0,
+                          bottom: 8.0,
+                        ),
+                        child: Text(
+                          'GS1 TOOLS',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        ],
+                        ),
                       ),
                       ListTile(
-                        trailing: _svgTrailingChevron(),
-                        leading: _svgLeading(NavIcons.cbvVocabulary),
-                        title: const Text('CBV Vocabulary'),
+                        leading: _svgLeading(NavIcons.toolbox),
+                        title: const Text('Toolbox'),
+                        subtitle: const Text(
+                          'Validation · Serialization · Utilities',
+                          style: TextStyle(fontSize: 11),
+                        ),
 
-                        onTap: () =>
-                            _navigate(Constants.adminCbvVocabularyRoute),
+                        onTap: () => _navigate(Constants.gs1ToolsRoute),
                       ),
-                      ListTile(
-                        trailing: _svgTrailingChevron(),
-                        leading: _svgLeading(NavIcons.validationRules),
-                        title: const Text('Validation Rules'),
-                        onTap: () =>
-                            _navigate(Constants.adminValidationRulesRoute),
-                      ),
-                    ],
 
-                    const Divider(),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.postmanCollection),
-                      title: const Text('Postman Collection'),
-                      subtitle: Text(
-                        isAdmin
-                            ? 'Download or update the API collection'
-                            : 'Download the API collection',
-                        style: const TextStyle(fontSize: 11),
-                      ),
-                      trailing: isAdmin
-                          ? Tooltip(
-                              message: 'Admin: download or upload',
-                              child: TraqIcon(
-                                NavIcons.security,
-                                size: 16,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.7),
+                      if (isAdmin) ...[
+                        const Divider(),
+                        const Padding(
+                          padding: EdgeInsets.only(
+                            left: 16.0,
+                            top: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Text(
+                            'ADMIN',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+
+                        TraqExpansionTile(
+                          leading: _svgLeading(NavIcons.userManagement),
+                          title: const Text('User Management'),
+                          children: [
+                            ListTile(
+                              leading: _svgLeading(NavIcons.userManagement),
+                              title: const Text('User Management'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(Constants.adminUsersRoute),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.pendingApprovals),
+                              title: const Text('Pending Approvals'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  _navigate(Constants.adminApprovalsRoute),
+                            ),
+                          ],
+                        ),
+
+
+
+                        TraqExpansionTile(
+                          leading: _svgLeading(NavIcons.systemTools),
+                          title: const Text('System Tools'),
+                          children: [
+                            ListTile(
+                              leading: _svgLeading(NavIcons.systemSettings),
+                              title: const Text('System Settings'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  _navigate(Constants.adminSettingsRoute),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.cacheManagement),
+                              title: const Text('Cache Management'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(Constants.adminCacheRoute),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.performanceTests),
+                              title: const Text('Performance Tests'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminPerformanceTestsRoute,
                               ),
-                            )
-                          : null,
-                      onTap: () => PostmanCollectionDialog.show(
-                        context,
-                        isAdmin: isAdmin,
+                            ),
+                            ListTile(
+                              leading: _svgLeading(
+                                NavIcons.performanceOptimization,
+                              ),
+                              title: const Text('Performance Optimization'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminPerformanceOptimizationRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.systemMonitoring),
+                              title: const Text('System Monitoring'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () =>
+                                  _navigate(Constants.adminMonitoringRoute),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(
+                                NavIcons.databasePartitioning,
+                              ),
+                              title: const Text('Database Partitioning'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminDatabasePartitioningRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(
+                                NavIcons.dataConsistencyIntegrity,
+                              ),
+                              title: const Text('Data Consistency & Integrity'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminDataConsistencyIntegrityRoute,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        TraqExpansionTile(
+                          leading: _svgLeading(NavIcons.testDataGeneration),
+                          title: const Text('Test Data Generation'),
+                          children: [
+                            ListTile(
+                              leading: _svgLeading(
+                                NavIcons.eventGenerationTests,
+                              ),
+                              title: const Text('Event Generation Tests'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminEventGenerationTestRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.industryTestData),
+                              title: const Text('Industry Test Data'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminIndustryTestDataRoute,
+                              ),
+                            ),
+                          ],
+                        ),
+                        ListTile(
+                          leading: _svgLeading(NavIcons.batchProcessing),
+                          title: const Text('Automation Center'),
+                          trailing: _svgTrailingChevron(),
+                          onTap: () =>
+                              _navigate(Constants.automationCenterRoute),
+                        ),
+                        ListTile(
+                          trailing: _svgTrailingChevron(),
+                          leading: _svgLeading(NavIcons.cbvVocabulary),
+                          title: const Text('CBV Vocabulary'),
+
+                          onTap: () =>
+                              _navigate(Constants.adminCbvVocabularyRoute),
+                        ),
+                      ],
+
+                      const Divider(),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.postmanCollection),
+                        title: const Text('Postman Collection'),
+                        subtitle: Text(
+                          isAdmin
+                              ? 'Download or update the API collection'
+                              : 'Download the API collection',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        trailing: isAdmin
+                            ? Tooltip(
+                                message: 'Admin: download or upload',
+                                child: TraqIcon(
+                                  NavIcons.security,
+                                  size: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withOpacity(0.7),
+                                ),
+                              )
+                            : null,
+                        onTap: () => PostmanCollectionDialog.show(
+                          context,
+                          isAdmin: isAdmin,
+                        ),
                       ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: _svgLeading(NavIcons.helpSupport),
-                      title: const Text('Help & Support'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: CustomButtonWidget(
+                      const Divider(),
+                      ListTile(
+                        leading: _svgLeading(NavIcons.helpSupport),
+                        title: const Text('Help & Support'),
                         onTap: () {
                           Navigator.pop(context);
-                          final host =
-                              router.routerDelegate.navigatorKey.currentContext;
-                          showLogoutConfirmDialog(host ?? context);
                         },
-                        title: 'Log Out',
-                        iconAsset: NavIcons.logout,
                       ),
-                    ),
-                    SizedBox(height: 16),
-                  ],
+                      const Divider(),
+                      ListTile(
+                        title: CustomButtonWidget(
+                          onTap: () {
+                            Navigator.pop(context);
+                            final host = router
+                                .routerDelegate
+                                .navigatorKey
+                                .currentContext;
+                            showLogoutConfirmDialog(host ?? context);
+                          },
+                          title: 'Log Out',
+                          iconAsset: NavIcons.logout,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
             ),
           ),
         );
@@ -775,10 +736,10 @@ abstract final class AppDrawerMetrics {
 
   static double widthFor(AppLayoutData layout) {
     return layout.resolve<double>(
-      compact: (layout.width * 0.88).clamp(260.0, 300.0),
+      compact: (layout.width * 0.88).clamp(240.0, 280.0),
       medium: 300,
-      expanded: 320,
-      large: (layout.width * 0.20).clamp(340.0, 400.0),
+      expanded: 300,
+      large: (layout.width * 0.20).clamp(300.0, 340.0),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/auth/auth_models.dart';
+import 'package:traqtrace_app/features/operations/shared/utils/operation_permissions.dart';
 
 enum AuthStatus {
   initial,
@@ -60,6 +61,54 @@ class AuthState extends Equatable {
   }
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
+
+  /// Canonical uppercase role name, or `null` when unauthenticated / unset.
+  String? get role {
+    final value = user?.role.trim();
+    if (value == null || value.isEmpty) return null;
+    return value.toUpperCase();
+  }
+
+  /// Canonical admin check — use this instead of ad-hoc `role == 'ADMIN'`.
+  bool get isAdmin => isAuthenticated && role == 'ADMIN';
+
+  bool get isManufacturer => isAuthenticated && role == 'MANUFACTURER';
+
+  bool get isDistributor => isAuthenticated && role == 'DISTRIBUTOR';
+
+  bool get isRetailer => isAuthenticated && role == 'RETAILER';
+
+  bool hasRole(String roleName) =>
+      isAuthenticated && role == roleName.trim().toUpperCase();
+
+  bool hasAnyRole(Iterable<String> roles) => roles.any(hasRole);
+
+  /// Whether this user may perform an EPCIS / operations [step].
+  ///
+  /// Mirrors backend `OperationSecurityExpressions`. ADMIN is always allowed.
+  /// Unknown steps return false.
+  bool canPerform(String step) {
+    if (!isAuthenticated) return false;
+    if (isAdmin) return true;
+    final allowed = OperationPermissions.rolesFor(step);
+    if (allowed == null) return false;
+    return hasAnyRole(allowed);
+  }
+
+  /// Mirrors `DashboardSecurityExpressions.READ_ANY` on the backend, which
+  /// guards `/dashboard/summary` (home stats, throughput, recent events).
+  bool get canReadDashboard => hasAnyRole(
+    const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR', 'RETAILER'],
+  );
+
+  /// Mirrors backend aggregate / manufacturer-distributor throughput access.
+  /// Retailers are excluded.
+  bool get canReadThroughput => hasAnyRole(
+    const ['ADMIN', 'MANUFACTURER', 'DISTRIBUTOR'],
+  );
+
+  /// `/internal/actuator/**` is admin-only in `SecurityConfig`.
+  bool get canReadSystemHealth => isAdmin;
 
   @override
   List<Object?> get props => [

@@ -9,76 +9,63 @@ import 'package:traqtrace_app/data/services/gs1_barcode_api_service.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_cubit.dart';
 import 'package:traqtrace_app/features/gs1_tools/cubit/gs1_tools_state.dart';
 import 'package:traqtrace_app/features/gs1_tools/models/gs1_tool_kind.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/ai_parser_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/ai_element_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/widgets/tools/barcode_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/batch_validation_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/check_digit_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/digital_link_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/epc_conversion_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/identifier_validation_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/build_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/convert_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/lookup_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/ndc_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/widgets/tools/serialize_convert_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/widgets/tools/serialize_export_tool.dart';
 import 'package:traqtrace_app/features/gs1_tools/widgets/tools/serialize_import_tool.dart';
-import 'package:traqtrace_app/features/gs1_tools/widgets/tools/serialize_validate_tool.dart';
+import 'package:traqtrace_app/features/gs1_tools/widgets/tools/validate_tool.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_rail.dart';
 import 'package:traqtrace_app/features/shared/workbench/workbench_scaffold.dart';
 
-/// Unified GS1 Tools workbench: Tools + Validation + EPCIS Serialization.
+/// Unified GS1 Tools workbench: mode-driven tools + EPCIS Serialization.
 class Gs1ToolsScreen extends StatelessWidget {
-  const Gs1ToolsScreen({super.key, this.initialTool});
+  const Gs1ToolsScreen({super.key, this.initialTool, this.initialMode});
 
   final Gs1ToolKind? initialTool;
+  final String? initialMode;
 
   static List<WorkbenchRailGroup> get railGroups => [
-        WorkbenchRailGroup(
-          title: 'Tools',
-          items: [
-            for (final kind in Gs1ToolKindX.toolKinds)
-              WorkbenchRailItem(
-                id: kind.id,
-                iconAsset: _iconFor(kind),
-                label: kind.label,
-              ),
-          ],
-        ),
-        WorkbenchRailGroup(
-          title: 'Validation',
-          items: [
-            for (final kind in Gs1ToolKindX.validationKinds)
-              WorkbenchRailItem(
-                id: kind.id,
-                iconAsset: _iconFor(kind),
-                label: kind.label,
-              ),
-          ],
-        ),
-        WorkbenchRailGroup(
-          title: 'EPCIS Serialization',
-          items: [
-            for (final kind in Gs1ToolKindX.serializationKinds)
-              WorkbenchRailItem(
-                id: kind.id,
-                iconAsset: _iconFor(kind),
-                label: kind.label,
-              ),
-          ],
-        ),
-      ];
+    WorkbenchRailGroup(
+      title: 'Tools',
+      items: [
+        for (final kind in Gs1ToolKindX.toolKinds)
+          WorkbenchRailItem(
+            id: kind.id,
+            iconAsset: _iconFor(kind),
+            label: kind.label,
+          ),
+      ],
+    ),
+    WorkbenchRailGroup(
+      title: 'EPCIS Serialization',
+      items: [
+        for (final kind in Gs1ToolKindX.serializationKinds)
+          WorkbenchRailItem(
+            id: kind.id,
+            iconAsset: _iconFor(kind),
+            label: kind.label,
+          ),
+      ],
+    ),
+  ];
 
   static String _iconFor(Gs1ToolKind kind) => switch (kind) {
-        Gs1ToolKind.checkDigit => NavIcons.validation,
-        Gs1ToolKind.epcConversion => NavIcons.epcConversion,
-        Gs1ToolKind.digitalLink => NavIcons.conversion,
-        Gs1ToolKind.aiParser => NavIcons.validationRules,
-        Gs1ToolKind.barcode => NavIcons.generateVerifyBarcode,
-        Gs1ToolKind.validator => NavIcons.gs1ValidationDemo,
-        Gs1ToolKind.identifier => NavIcons.validation,
-        Gs1ToolKind.batch => NavIcons.gs1ValidationTests,
-        Gs1ToolKind.serializeConvert => NavIcons.conversion,
-        Gs1ToolKind.serializeValidate => NavIcons.validation,
-        Gs1ToolKind.serializeExport => NavIcons.bulkExport,
-        Gs1ToolKind.serializeImport => NavIcons.eventSerialization,
-      };
+    Gs1ToolKind.convert => NavIcons.conversion,
+    Gs1ToolKind.validate => NavIcons.validation,
+    Gs1ToolKind.build => NavIcons.systemTools,
+    Gs1ToolKind.barcode => NavIcons.generateVerifyBarcode,
+    Gs1ToolKind.aiElement => NavIcons.validationRules,
+    Gs1ToolKind.ndc => NavIcons.gtin,
+    Gs1ToolKind.lookup => NavIcons.integrationValidation,
+    Gs1ToolKind.serializeConvert => NavIcons.conversion,
+    Gs1ToolKind.serializeExport => NavIcons.bulkExport,
+    Gs1ToolKind.serializeImport => NavIcons.eventSerialization,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +75,8 @@ class Gs1ToolsScreen extends StatelessWidget {
         barcodeGenerationService: getIt<BarcodeGenerationService>(),
         gs1BarcodeApiService: getIt<GS1BarcodeApiService>(),
         serializationService: getIt<EPCISSerializationService>(),
-        initialTool: initialTool ?? Gs1ToolKind.checkDigit,
+        initialTool: initialTool ?? Gs1ToolKind.convert,
+        initialMode: initialMode,
       ),
       child: const _Gs1ToolsView(),
     );
@@ -107,9 +95,11 @@ class _Gs1ToolsView extends StatelessWidget {
           title: 'GS1 Tools',
           groups: Gs1ToolsScreen.railGroups,
           selectedId: state.selectedTool.id,
-          onSelect: (id) => context.read<Gs1ToolsCubit>().selectTool(
-                Gs1ToolKindX.fromId(id),
-              ),
+          onSelect: (id) {
+            String? mode;
+            final tool = Gs1ToolKindX.fromId(id, onMode: (m) => mode = m);
+            context.read<Gs1ToolsCubit>().selectTool(tool, mode: mode);
+          },
           panelBuilder: (_, id) => _toolPanel(Gs1ToolKindX.fromId(id)),
         );
       },
@@ -117,19 +107,15 @@ class _Gs1ToolsView extends StatelessWidget {
   }
 
   Widget _toolPanel(Gs1ToolKind kind) => switch (kind) {
-        Gs1ToolKind.checkDigit => const CheckDigitTool(),
-        Gs1ToolKind.epcConversion => const EpcConversionTool(),
-        Gs1ToolKind.digitalLink => const DigitalLinkTool(),
-        Gs1ToolKind.aiParser => const AiParserTool(),
-        Gs1ToolKind.barcode => const BarcodeTool(),
-        Gs1ToolKind.validator =>
-          const IdentifierValidationTool(target: Gs1ToolKind.validator),
-        Gs1ToolKind.identifier =>
-          const IdentifierValidationTool(target: Gs1ToolKind.identifier),
-        Gs1ToolKind.batch => const BatchValidationTool(),
-        Gs1ToolKind.serializeConvert => const SerializeConvertTool(),
-        Gs1ToolKind.serializeValidate => const SerializeValidateTool(),
-        Gs1ToolKind.serializeExport => const SerializeExportTool(),
-        Gs1ToolKind.serializeImport => const SerializeImportTool(),
-      };
+    Gs1ToolKind.convert => const ConvertTool(),
+    Gs1ToolKind.validate => const ValidateTool(),
+    Gs1ToolKind.build => const BuildTool(),
+    Gs1ToolKind.barcode => const BarcodeTool(),
+    Gs1ToolKind.aiElement => const AiElementTool(),
+    Gs1ToolKind.ndc => const NdcTool(),
+    Gs1ToolKind.lookup => const LookupTool(),
+    Gs1ToolKind.serializeConvert => const SerializeConvertTool(),
+    Gs1ToolKind.serializeExport => const SerializeExportTool(),
+    Gs1ToolKind.serializeImport => const SerializeImportTool(),
+  };
 }

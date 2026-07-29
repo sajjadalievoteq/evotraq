@@ -262,9 +262,9 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
 
     if (!isFormValid) return;
 
-    final role = context.read<AuthCubit>().state.user?.role;
+    final auth = context.read<AuthCubit>().state;
     final fieldError = validateGtinFieldsForSave(
-      isReadOnly: !(role == 'ADMIN' || role == 'MANUFACTURER'),
+      isReadOnly: !(auth.isAdmin || auth.isManufacturer),
     );
     if (fieldError != null) {
       context.showError(fieldError);
@@ -404,8 +404,8 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       );
     }
 
-    final role = context.watch<AuthCubit>().state.user?.role;
-    final canEditMasterData = role == 'ADMIN' || role == 'MANUFACTURER';
+    final auth = context.watch<AuthCubit>().state;
+    final canEditMasterData = auth.isAdmin || auth.isManufacturer;
     final allowMasterDataActions =
         canEditMasterData && !widget.awaitingListSelection;
     final formFieldsReadOnly = !canEditMasterData;

@@ -13,27 +13,6 @@ abstract final class GlnMasterDataApiConsts {
   static String validatePath(String glnCode) => '$prefix/validate/$glnCode';
 }
 
-abstract final class GlnTobaccoExtensionApiConsts {
-  static const String prefix = '/tobacco/gln';
-  static const String search = '$prefix/search';
-  static const String codeSegment = 'code';
-  static const String glnSubPath = 'gln';
-  static const String euTpdRegistered = '$prefix/eu-tpd-registered';
-  static const String pactActRegistered = '$prefix/pact-act-registered';
-  static const String uiIssuers = '$prefix/ui-issuers';
-  static const String manufacturingFacilities = '$prefix/manufacturing-facilities';
-  static const String firstRetailOutlets = '$prefix/first-retail-outlets';
-  static const String bondedWarehouses = '$prefix/bonded-warehouses';
-  static const String aeoCertified = '$prefix/aeo-certified';
-
-  static String byGlnCodePath(String glnCode) => '$prefix/$codeSegment/$glnCode';
-  static String byIdPath(int id) => '$prefix/$id';
-  static String deleteByGlnIdPath(int glnId) => '$prefix/$glnSubPath/$glnId';
-  static String existsPath(int glnId) => '$prefix/$glnSubPath/$glnId/exists';
-  static String euEconomicOperatorPath(String eoId) =>
-      '$prefix/eu-economic-operator/$eoId';
-}
-
 abstract final class GlnApiHttpConsts {
   static const String contentTypeJson = 'application/json';
   static const String bearerPrefix = 'Bearer ';
@@ -80,29 +59,4 @@ abstract final class GlnApiMessages {
       'Failed to validate GLN code: $statusMessage';
   static String failedDeriveIdentification(Object? statusMessage) =>
       'Failed to derive GLN identification: $statusMessage';
-}
-
-abstract final class GlnTobaccoExtensionMessages {
-  static String createFailed(int? code) =>
-      'Failed to create GLN tobacco extension: $code';
-  static String saveFailed(int? code) => 'Failed to save GLN tobacco extension: $code';
-  static String fetchFailed(int? code) => 'Failed to fetch GLN tobacco extension: $code';
-  static const String createRequiresGlnCodeOrId =
-      'Either glnCode or glnId must be provided to create an extension';
-  static String updateFailed(int? code) => 'Failed to update GLN tobacco extension: $code';
-  static String deleteFailed(int? code) => 'Failed to delete GLN tobacco extension: $code';
-  static String existsCheckFailed(int? code) =>
-      'Failed to check GLN tobacco extension: $code';
-  static String euTpdFailed(int? code) => 'Failed to fetch EU TPD registered: $code';
-  static String pactActFailed(int? code) =>
-      'Failed to fetch PACT Act registered: $code';
-  static String uiIssuersFailed(int? code) => 'Failed to fetch UI issuers: $code';
-  static String manufacturingFailed(int? code) =>
-      'Failed to fetch manufacturing facilities: $code';
-  static String retailOutletsFailed(int? code) =>
-      'Failed to fetch first retail outlets: $code';
-  static String bondedFailed(int? code) => 'Failed to fetch bonded warehouses: $code';
-  static String aeoFailed(int? code) => 'Failed to fetch AEO certified: $code';
-  static String euEoFailed(int? code) => 'Failed to fetch by EU EO ID: $code';
-  static String searchFailed(int? code) => 'Failed to search GLN tobacco extensions: $code';
 }

@@ -20,7 +20,6 @@ import 'package:traqtrace_app/features/gs1/gln/utils/gln_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
 
 class GlnDetailFormBody extends StatelessWidget {
   const GlnDetailFormBody({
@@ -80,7 +79,6 @@ class GlnDetailFormBody extends StatelessWidget {
     required this.nonReuseUntil,
     required this.displayCoordinates,
     required this.pharmaExtensionKey,
-    required this.tobaccoExtensionKey,
     required this.onOperatingStatusChanged,
     required this.onPickEffectiveFrom,
     required this.onPickEffectiveTo,
@@ -153,7 +151,6 @@ class GlnDetailFormBody extends StatelessWidget {
   final GeospatialCoordinates? displayCoordinates;
 
   final GlobalKey<GLNPharmaceuticalExtensionWidgetState> pharmaExtensionKey;
-  final GlobalKey<GLNTobaccoExtensionWidgetState> tobaccoExtensionKey;
 
   final ValueChanged<String?> onOperatingStatusChanged;
   final VoidCallback onPickEffectiveFrom;
@@ -366,7 +363,6 @@ class GlnDetailFormBody extends StatelessWidget {
                   isEditing: canEditMasterData,
                   showFieldSkeleton: false,
                   pharmaExtensionKey: pharmaExtensionKey,
-                  tobaccoExtensionKey: tobaccoExtensionKey,
                 ),
               ),
               const SizedBox(height: 32),

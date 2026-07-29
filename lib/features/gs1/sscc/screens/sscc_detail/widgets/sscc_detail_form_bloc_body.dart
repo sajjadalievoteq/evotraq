@@ -9,7 +9,6 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/utils/sscc_i
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_body.dart';
-import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart' as edit_rules;
 
 class SsccDetailFormBlocBody extends StatelessWidget {
@@ -50,7 +49,6 @@ class SsccDetailFormBlocBody extends StatelessWidget {
     required this.issuingGln,
     required this.issuingGlnError,
     required this.pharmaExtensionKey,
-    required this.tobaccoExtensionKey,
     required this.parseSsccId,
     required this.onRefresh,
     required this.onUnitTypeChanged,
@@ -120,7 +118,6 @@ class SsccDetailFormBlocBody extends StatelessWidget {
   final GLN? issuingGln;
   final String? issuingGlnError;
   final GlobalKey<SSCCPharmaceuticalExtensionWidgetState> pharmaExtensionKey;
-  final GlobalKey<SSCCTobaccoExtensionWidgetState> tobaccoExtensionKey;
   final int? Function(String? id) parseSsccId;
 
   final Future<void> Function() onRefresh;
@@ -219,7 +216,6 @@ class SsccDetailFormBlocBody extends StatelessWidget {
       issuingGln: issuingGln,
       issuingGlnError: issuingGlnError,
       pharmaExtensionKey: pharmaExtensionKey,
-      tobaccoExtensionKey: tobaccoExtensionKey,
       parseSsccId: parseSsccId,
       onRefresh: onRefresh,
       onUnitTypeChanged: onUnitTypeChanged,

@@ -154,51 +154,6 @@ class IndustryTestDataService {
     _throwIfErrors(errors, label: label);
   }
 
-  Future<void> generateTobaccoGTINs({
-    required Function(int current, int total, String productName) onProgress,
-  }) async {
-    onProgress(1, 1, 'UAE tobacco GTINs — seeding on server…');
-    final body = await _postAdminJson('/admin/industry-demo-data/tobacco/gtins');
-    _assertGtinSeed(body, 'Tobacco GTIN seed');
-    onProgress(1, 1, 'UAE tobacco GTINs — done');
-  }
-
-  Future<void> generateTobaccoGLNs({
-    required Function(int current, int total, String locationName) onProgress,
-  }) async {
-    onProgress(1, 1, 'UAE tobacco — seeding on server…');
-    final body = await _postAdminJson('/admin/industry-demo-data/tobacco/glns');
-    _assertGlnSeed(body, 'Tobacco GLN seed');
-    onProgress(1, 1, 'UAE tobacco — done');
-  }
-
-  Future<void> generateTobaccoSGTINs({
-    required Function(int current, int total, String productInfo) onProgress,
-  }) async {
-    onProgress(1, 1, 'UAE tobacco SGTINs — seeding on server…');
-    final body = await _postAdminJson('/admin/industry-demo-data/tobacco/sgtins');
-    _assertSupplyChainSeed(body, 'Tobacco SGTIN seed');
-    onProgress(1, 1, 'UAE tobacco SGTINs — done');
-  }
-
-  Future<void> generateTobaccoSSCCs({
-    required Function(int current, int total, String containerInfo) onProgress,
-  }) async {
-    onProgress(1, 1, 'UAE tobacco SSCCs — seeding on server…');
-    final body = await _postAdminJson('/admin/industry-demo-data/tobacco/ssccs');
-    _assertSupplyChainSeed(body, 'Tobacco SSCC seed');
-    onProgress(1, 1, 'UAE tobacco SSCCs — done');
-  }
-
-  Future<void> generateTobaccoEvents({
-    required Function(int current, int total, String eventInfo) onProgress,
-  }) async {
-    onProgress(1, 1, 'UAE tobacco EPCIS events — seeding on server…');
-    final body = await _postAdminJson('/admin/industry-demo-data/tobacco/events');
-    _assertSupplyChainSeed(body, 'Tobacco EPCIS events seed');
-    onProgress(1, 1, 'UAE tobacco EPCIS events — done');
-  }
-
   Future<void> generatePharmaGTINs({
     required Function(int current, int total, String productName) onProgress,
   }) async {

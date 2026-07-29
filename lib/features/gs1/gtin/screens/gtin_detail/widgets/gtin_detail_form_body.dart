@@ -23,7 +23,6 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin_industry_extensions_section.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
-import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
 
 class GtinDetailFormBody extends StatelessWidget {
@@ -44,7 +43,6 @@ class GtinDetailFormBody extends StatelessWidget {
     required this.forceMountAllSections,
     required this.isSubmitting,
     required this.onSubmit,
-    required this.tobaccoExtensionKey,
     required this.pharmaExtensionKey,
     required this.regulatoryAuthorityKey,
     required this.onPickRegistrationDate,
@@ -72,7 +70,6 @@ class GtinDetailFormBody extends StatelessWidget {
   final bool isSubmitting;
   final VoidCallback onSubmit;
 
-  final GlobalKey<TobaccoExtensionWidgetState> tobaccoExtensionKey;
   final GlobalKey<PharmaceuticalExtensionWidgetState> pharmaExtensionKey;
   final GlobalKey<RegulatoryAuthorityExtensionState> regulatoryAuthorityKey;
 
@@ -374,13 +371,11 @@ class GtinDetailFormBody extends StatelessWidget {
               children: [
                 GtinIndustryExtensionsSection(
                   pharmaExtensionKey: pharmaExtensionKey,
-                  tobaccoExtensionKey: tobaccoExtensionKey,
                   gtinCodeText: fields.gtinCodeController.text,
                   routeGtinCode: routeGtinCode,
                   isEditing: allowMasterDataActions,
                   targetMarketCountry: targetMarket,
                   pharmaceuticalExtension: pharmaExt,
-                  tobaccoExtension: synced?.tobaccoExtension,
                   deferIndustryExtensionNetworkFetch: deferIndustryFetch,
                   industryExtensionFetchResolved: industryFetchResolved,
                   showFieldSkeleton: false,

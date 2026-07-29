@@ -31,8 +31,13 @@ class PharmaReturnContextBuilder {
   final SGTINService _sgtinService;
   final GTINService _gtinService;
 
+  /// Accepting events historically wrote this into ILMD / bizData as camelCase.
   static const _ilmdSourceEventId = 'sourceEventID';
   static const _ilmdReturnReason = 'returnReason';
+
+  /// Return-shipping events persist these in bizData (see ReturnShippingConstants).
+  static const _bizDataSourceEventId = 'source_event_id';
+  static const _bizDataReturnReason = 'return_reason';
 
   Future<PharmaReturnContext?> fromReceiving(ReceivingResponse operation) async {
     final epcs = operation.epcList ?? const [];
@@ -104,13 +109,16 @@ class PharmaReturnContextBuilder {
       }).firstOrNull;
       if (inTransitEvent == null) return null;
       resolvedReturnShippingEventId = inTransitEvent.eventId;
-      final ilmd = inTransitEvent.ilmd ?? const {};
-      final sourceFromIlmd = ilmd[_ilmdSourceEventId]?.toString();
-      if (sourceFromIlmd != null && sourceFromIlmd.trim().isNotEmpty) {
-        resolvedSourceEventId = sourceFromIlmd.trim();
+      final attrs = _eventAttributes(inTransitEvent);
+      final sourceFromEvent = _firstNonEmpty(attrs, [
+        _bizDataSourceEventId,
+        _ilmdSourceEventId,
+      ]);
+      if (sourceFromEvent != null) {
+        resolvedSourceEventId = sourceFromEvent;
       }
       resolvedReason = PharmaReturnReason.fromCode(
-        ilmd[_ilmdReturnReason]?.toString(),
+        _firstNonEmpty(attrs, [_bizDataReturnReason, _ilmdReturnReason]),
       );
       if (resolvedReason == null) return null;
     } else if (operation.isReturnShipping) {
@@ -258,6 +266,23 @@ class PharmaReturnContextBuilder {
       }
       if (gtin.productName.trim().isNotEmpty) return gtin.productName;
     } catch (_) {}
+    return null;
+  }
+
+  /// Merge ILMD + bizData so return metadata is found regardless of where the
+  /// backend stored it (return shipping uses bizData snake_case today).
+  static Map<String, dynamic> _eventAttributes(ObjectEvent event) {
+    return <String, dynamic>{
+      ...?event.ilmd,
+      ...?event.bizData,
+    };
+  }
+
+  static String? _firstNonEmpty(Map<String, dynamic> attrs, List<String> keys) {
+    for (final key in keys) {
+      final value = attrs[key]?.toString().trim();
+      if (value != null && value.isNotEmpty) return value;
+    }
     return null;
   }
 

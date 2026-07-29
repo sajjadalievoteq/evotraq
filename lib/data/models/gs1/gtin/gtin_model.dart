@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gtin/gtin_tobacco_extension_model.dart';
 
 class GTIN extends Equatable {
   final int? id;
@@ -74,12 +73,9 @@ class GTIN extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  final bool isTobaccoProduct;
-
   final bool isPharmaceuticalProduct;
 
   final GTINPharmaceuticalExtension? pharmaceuticalExtension;
-  final GTINTobaccoExtension? tobaccoExtension;
 
   final GLN? currentLocation;
   final String? currentLocationGln;
@@ -147,10 +143,8 @@ class GTIN extends Equatable {
     this.authorizationExpiry,
     this.createdAt,
     this.updatedAt,
-    this.isTobaccoProduct = false,
     this.isPharmaceuticalProduct = false,
     this.pharmaceuticalExtension,
-    this.tobaccoExtension,
     this.currentLocation,
     this.currentLocationGln,
     this.currentLocationName,
@@ -219,10 +213,8 @@ class GTIN extends Equatable {
         authorizationExpiry,
         createdAt,
         updatedAt,
-        isTobaccoProduct,
         isPharmaceuticalProduct,
         pharmaceuticalExtension,
-        tobaccoExtension,
         currentLocation,
         currentLocationGln,
         currentLocationName,
@@ -290,10 +282,8 @@ class GTIN extends Equatable {
     DateTime? authorizationExpiry,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? isTobaccoProduct,
     bool? isPharmaceuticalProduct,
     GTINPharmaceuticalExtension? pharmaceuticalExtension,
-    GTINTobaccoExtension? tobaccoExtension,
     GLN? currentLocation,
     String? currentLocationGln,
     String? currentLocationName,
@@ -366,12 +356,10 @@ class GTIN extends Equatable {
       authorizationExpiry: authorizationExpiry ?? this.authorizationExpiry,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      isTobaccoProduct: isTobaccoProduct ?? this.isTobaccoProduct,
       isPharmaceuticalProduct:
           isPharmaceuticalProduct ?? this.isPharmaceuticalProduct,
       pharmaceuticalExtension:
           pharmaceuticalExtension ?? this.pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension ?? this.tobaccoExtension,
       currentLocation: currentLocation ?? this.currentLocation,
       currentLocationGln: currentLocationGln ?? this.currentLocationGln,
       currentLocationName: currentLocationName ?? this.currentLocationName,
@@ -488,13 +476,6 @@ class GTIN extends Equatable {
         Map<String, dynamic>.from(pharmaRaw),
       );
     }
-    GTINTobaccoExtension? tobaccoExtension;
-    final tobaccoRaw = json['tobaccoExtension'];
-    if (tobaccoRaw is Map) {
-      tobaccoExtension =
-          GTINTobaccoExtension.fromJson(Map<String, dynamic>.from(tobaccoRaw));
-    }
-
     return GTIN(
       id: json['id'] != null ? int.tryParse(json['id'].toString()) : null,
       gtinCode: json['gtinCode'] ?? json['gtin'] ?? '',
@@ -607,10 +588,8 @@ class GTIN extends Equatable {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      isTobaccoProduct: json['isTobaccoProduct'] == true,
       isPharmaceuticalProduct: json['isPharmaceuticalProduct'] == true,
       pharmaceuticalExtension: pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension,
       currentLocation: _parseCurrentLocation(json),
       currentLocationGln: json['currentLocationGln'] as String? ??
           json['currentLocationGLN'] as String?,

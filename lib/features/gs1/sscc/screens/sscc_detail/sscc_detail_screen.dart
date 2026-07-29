@@ -28,20 +28,17 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_form_bloc_body.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/skeleton/sscc_detail_skeleton.dart';
-import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_list_parsing.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_create_form_validation.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_input_parser.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_validators.dart';
-import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/features/barcode/widgets/gs1_barcode_scan_dialog.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_edit_rules.dart'
     as edit_rules;
 
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 
 class SSCCDetailScreen extends StatefulWidget {
@@ -77,7 +74,6 @@ class SSCCDetailScreen extends StatefulWidget {
 class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     with GS1FormValidationMixin<SSCCDetailScreen>, SsccDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
-  final _tobaccoExtensionKey = GlobalKey<SSCCTobaccoExtensionWidgetState>();
   final _pharmaExtensionKey =
       GlobalKey<SSCCPharmaceuticalExtensionWidgetState>();
   GLN? _issuingGln;
@@ -276,44 +272,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
     disposeSsccDetailFields();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _saveTobaccoExtensionIfNeeded(
-    int? ssccId,
-    String ssccCode,
-  ) async {
-    if (!kTobaccoExtensionEnabled) return;
-    final tobaccoState = _tobaccoExtensionKey.currentState;
-    debugPrint(
-      'SSCC Tobacco extension check - state: ${tobaccoState != null}, hasData: ${tobaccoState?.hasData}',
-    );
-
-    if (tobaccoState == null) {
-      debugPrint(
-        'Tobacco extension widget not in tree (probably not in tobacco mode)',
-      );
-      return;
-    }
-
-    if (!tobaccoState.hasData) {
-      debugPrint('No tobacco extension data to save');
-      return;
-    }
-
-    try {
-      final extension = tobaccoState.buildExtension(
-        ssccId: ssccId,
-        ssccCode: ssccCode,
-      );
-      debugPrint('Built tobacco extension: ${extension != null}');
-      if (extension != null) {
-        final tobaccoService = getIt<SSCCTobaccoExtensionService>();
-        await tobaccoService.createBySsccCode(ssccCode, extension);
-        debugPrint('SSCC Tobacco extension saved for SSCC: $ssccCode');
-      }
-    } catch (e) {
-      debugPrint('Error saving SSCC tobacco extension: $e');
-    }
   }
 
   Future<void> _savePharmaExtensionIfNeeded(
@@ -813,7 +771,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
             if (_hasSubmittedForm) {
               setState(() => _hasSubmittedForm = false);
               final ssccCode = ssccCodeText();
-              _saveTobaccoExtensionIfNeeded(null, ssccCode);
               _savePharmaExtensionIfNeeded(
                 _parseSsccId(state.selectedSSCC?.id ?? _sscc?.id),
                 ssccCode,
@@ -983,7 +940,6 @@ class _SSCCDetailScreenState extends State<SSCCDetailScreen>
       issuingGln: _issuingGln,
       issuingGlnError: _issuingGlnError,
       pharmaExtensionKey: _pharmaExtensionKey,
-      tobaccoExtensionKey: _tobaccoExtensionKey,
       parseSsccId: _parseSsccId,
       onRefresh: _refresh,
       onUnitTypeChanged: (v) => setState(() => _unitType = v),

@@ -8,13 +8,11 @@ import 'package:traqtrace_app/core/config/constants.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/features/auth/cubit/auth_cubit.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_master_data_detail_scaffold.dart';
-import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/di/injection.dart';
 import 'package:traqtrace_app/data/models/gs1/gtin/gtin_model.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_cubit.dart';
 import 'package:traqtrace_app/features/gs1/gtin/cubit/gtin_state.dart';
 import 'package:traqtrace_app/data/services/pharmaceutical_service.dart';
-import 'package:traqtrace_app/data/services/gtin_tobacco_extension_service.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/gtin_detail_screen_fields.dart';
 import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/extensions/pharmaceutical_extension_widget.dart';
@@ -24,7 +22,6 @@ import 'package:traqtrace_app/features/gs1/gtin/screens/gtin_detail/widgets/gtin
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_field_validators.dart';
 import 'package:traqtrace_app/features/gs1/gtin/utils/gtin_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
-import 'package:traqtrace_app/features/tobacco/widgets/tobacco_extension_widget.dart';
 
 class GTINDetailScreen extends StatefulWidget {
   final String? gtinCode;
@@ -53,7 +50,6 @@ class GTINDetailScreen extends StatefulWidget {
 class _GTINDetailScreenState extends State<GTINDetailScreen>
     with GtinDetailScreenFields {
   final _formKey = GlobalKey<FormState>();
-  final _tobaccoExtensionKey = GlobalKey<TobaccoExtensionWidgetState>();
   final _pharmaExtensionKey = GlobalKey<PharmaceuticalExtensionWidgetState>();
   final _regulatoryAuthorityKey =
       GlobalKey<RegulatoryAuthorityExtensionState>();
@@ -232,14 +228,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
 
     final isFormValid = _formKey.currentState?.validate() ?? false;
 
-    if (kTobaccoExtensionEnabled) {
-      final tobaccoValidation = _tobaccoExtensionKey.currentState?.validate();
-      if (tobaccoValidation != null) {
-        context.showError(tobaccoValidation);
-        return;
-      }
-    }
-
     final pharmaValidation = _pharmaExtensionKey.currentState?.validate();
     if (pharmaValidation != null) {
       context.showError(pharmaValidation);
@@ -290,31 +278,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
       cubit.updateGTIN(gtin);
     } else {
       cubit.createGTIN(gtin);
-    }
-  }
-
-  Future<void> _saveTobaccoExtensionIfNeeded(
-    int? gtinId,
-    String gtinCode,
-  ) async {
-    if (!kTobaccoExtensionEnabled) return;
-    final tobaccoState = _tobaccoExtensionKey.currentState;
-    if (tobaccoState == null || !tobaccoState.hasData) {
-      return;
-    }
-
-    try {
-      final extension = tobaccoState.buildExtension(
-        gtinId: gtinId,
-        gtinCode: gtinCode,
-      );
-      if (extension != null) {
-        final tobaccoService = getIt<GTINTobaccoExtensionService>();
-        await tobaccoService.createByGtinCode(gtinCode, extension);
-        debugPrint('Tobacco extension saved for GTIN: $gtinCode');
-      }
-    } catch (e) {
-      debugPrint('Error saving tobacco extension: $e');
     }
   }
 
@@ -438,7 +401,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
             final createdGtin = state.gtin;
             final gtinCode = createdGtin?.gtinCode ?? gtinCodeController.text;
 
-            _saveTobaccoExtensionIfNeeded(null, gtinCode);
             _savePharmaExtensionIfNeeded(null, gtinCode);
 
             context.showSuccess(
@@ -491,7 +453,6 @@ class _GTINDetailScreenState extends State<GTINDetailScreen>
           onSubmit: () {
             _submitForm();
           },
-          tobaccoExtensionKey: _tobaccoExtensionKey,
           pharmaExtensionKey: _pharmaExtensionKey,
           regulatoryAuthorityKey: _regulatoryAuthorityKey,
           onPickRegistrationDate: () => _pickDateOnly(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:traqtrace_app/core/config/feature_flags.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
 import 'package:traqtrace_app/core/widgets/custom_button_widget.dart';
@@ -19,7 +18,6 @@ import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/core
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/pharma/sscc_pharmaceutical_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_code_section.dart';
 import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/sscc_detail_header_card.dart';
-import 'package:traqtrace_app/features/gs1/sscc/screens/sscc_detail/widgets/tobacco/sscc_tobacco_extension_widget.dart';
 import 'package:traqtrace_app/features/gs1/sscc/utils/sscc_ui_constants.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_form_shimmer_layer.dart';
 import 'package:traqtrace_app/features/gs1/widgets/gs1_lazy_viewport_section.dart';
@@ -65,7 +63,6 @@ class SsccDetailFormBody extends StatelessWidget {
     required this.issuingGln,
     required this.issuingGlnError,
     required this.pharmaExtensionKey,
-    required this.tobaccoExtensionKey,
     required this.parseSsccId,
     required this.onRefresh,
     required this.onUnitTypeChanged,
@@ -135,7 +132,6 @@ class SsccDetailFormBody extends StatelessWidget {
   final GLN? issuingGln;
   final String? issuingGlnError;
   final GlobalKey<SSCCPharmaceuticalExtensionWidgetState> pharmaExtensionKey;
-  final GlobalKey<SSCCTobaccoExtensionWidgetState> tobaccoExtensionKey;
   final int? Function(String? id) parseSsccId;
 
   final Future<void> Function() onRefresh;
@@ -377,14 +373,6 @@ class SsccDetailFormBody extends StatelessWidget {
                               borderColor: borderColor,
                             ),
                           ],
-                        );
-                      }
-
-                      if (settings.isTobaccoMode && kTobaccoExtensionEnabled) {
-                        return SSCCTobaccoExtensionWidget(
-                          key: tobaccoExtensionKey,
-                          ssccCode: hasSsccCode ? currentSsccCode : null,
-                          isEditing: !isReadOnly,
                         );
                       }
 

@@ -6,7 +6,6 @@ import 'package:traqtrace_app/core/widgets/app_drawer.dart';
 import 'package:traqtrace_app/core/widgets/custom_snackbar_widget.dart';
 import 'package:traqtrace_app/core/models/system_settings_model.dart';
 import 'package:traqtrace_app/core/cubit/system_settings_cubit.dart';
-import 'package:go_router/go_router.dart';
 import 'package:traqtrace_app/core/widgets/traq_icon.dart';
 import 'package:traqtrace_app/core/config/app_assets.dart';
 
@@ -303,10 +302,8 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: settings.isTobaccoMode 
-                  ? Colors.brown.shade300 
-                  : const Color(0xFF4A7A65),
+            side: const BorderSide(
+              color: Color(0xFF4A7A65),
               width: 2,
             ),
           ),
@@ -318,12 +315,8 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                 Row(
                   children: [
                     TraqIcon(
-                      settings.isTobaccoMode
-                          ? AppAssets.iconSparkle
-                          : AppAssets.iconMedical,
-                      color: settings.isTobaccoMode
-                          ? Colors.brown 
-                          : const Color(0xFF121F17),
+                      AppAssets.iconMedical,
+                      color: const Color(0xFF121F17),
                       size: 28,
                     ),
                     const SizedBox(width: 12),
@@ -342,17 +335,13 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: settings.isTobaccoMode 
-                            ? Colors.brown.shade100 
-                            : const Color(0xFFD4E5DC),
+                        color: const Color(0xFFD4E5DC),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         settings.industryMode.displayName,
-                        style: TextStyle(
-                          color: settings.isTobaccoMode 
-                              ? Colors.brown.shade800 
-                              : const Color(0xFF121F17),
+                        style: const TextStyle(
+                          color: Color(0xFF121F17),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -372,27 +361,7 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                 const SizedBox(height: 8),
                 
                 _buildModeFeatureList(settings.industryMode),
-                
-                const SizedBox(height: 16),
-                
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading ? null : () => _showChangeModeDialog(context),
-                    icon: TraqIcon(AppAssets.iconTransform),
-                    label: Text(
-                      'Change to ${settings.isTobaccoMode ? "Pharmaceutical" : "Tobacco"} Mode',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: settings.isTobaccoMode 
-                          ? const Color(0xFF121F17) 
-                          : Colors.brown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                
+
                 if (isLoading)
                   const Padding(
                     padding: EdgeInsets.only(top: 12),
@@ -416,23 +385,14 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
   }
 
   Widget _buildModeFeatureList(IndustryMode mode) {
-    final features = mode == IndustryMode.tobacco
-        ? [
-            'Tax Stamp Management',
-            'Brand Family & Variant Tracking',
-            'Tar/Nicotine Content',
-            'Health Warning Compliance',
-            'Manufacturing Batch Tracking',
-            'Retail Sale with Age Verification',
-          ]
-        : [
-            'NDC Number Management',
-            'Drug Classification',
-            'Controlled Substance Tracking',
-            'Temperature Requirements',
-            'Therapeutic Class',
-            'Dosage Form & Strength',
-          ];
+    final features = [
+      'NDC Number Management',
+      'Drug Classification',
+      'Controlled Substance Tracking',
+      'Temperature Requirements',
+      'Therapeutic Class',
+      'Dosage Form & Strength',
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,163 +423,4 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
     );
   }
 
-  Future<void> _showChangeModeDialog(BuildContext context) async {
-    final cubit = context.read<SystemSettingsCubit>();
-    
-    final currentMode = cubit.state.settings.industryMode;
-    final newMode = currentMode == IndustryMode.tobacco 
-        ? IndustryMode.pharmaceutical 
-        : IndustryMode.tobacco;
-
-    DataClearStatistics? stats;
-    try {
-      stats = await cubit.loadDataStatistics();
-    } catch (e) {
-      if (!mounted) return;
-      context.showError('Failed to load data statistics: $e');
-      return;
-    }
-
-    if (!mounted) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            TraqIcon(AppAssets.iconAlert, color: AppColorMapper.warningColor(context), size: 28),
-            const SizedBox(width: 12),
-            Text('Change to ${newMode.displayName} Mode'),
-          ],
-        ),
-        content: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColorMapper.errorColor(context).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColorMapper.errorColor(context).withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    TraqIcon(AppAssets.iconTrash, color: AppColorMapper.errorColor(context)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'WARNING: This will permanently delete ALL data!',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColorMapper.errorColor(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              if (stats != null && stats.hasData) ...[
-                const Text(
-                  'The following data will be deleted:',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                _buildDataStatRow('GTINs (Products)', stats.gtinCount),
-                _buildDataStatRow('SGTINs (Serialized Items)', stats.sgtinCount),
-                _buildDataStatRow('GLNs (Locations)', stats.glnCount),
-                _buildDataStatRow('EPCIS Events', stats.eventCount),
-                if (stats.tobaccoExtensionCount > 0)
-                  _buildDataStatRow('Tobacco Extensions', stats.tobaccoExtensionCount),
-                if (stats.taxStampCount > 0)
-                  _buildDataStatRow('Tax Stamps', stats.taxStampCount),
-                if (stats.manufacturingBatchCount > 0)
-                  _buildDataStatRow('Manufacturing Batches', stats.manufacturingBatchCount),
-                const Divider(),
-                _buildDataStatRow('TOTAL RECORDS', stats.totalRecords, isBold: true),
-              ] else ...[
-                const Text(
-                  'No data to delete. System is empty.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-              
-              const SizedBox(height: 16),
-              Text(
-                'After switching to ${newMode.displayName} mode:',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '• ${newMode.description}',
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColorMapper.errorColor(context),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Delete All & Switch Mode'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      try {
-        await cubit.changeIndustryMode(
-          newMode: newMode,
-          reason: 'User switched from $currentMode to $newMode',
-        );
-        
-        if (mounted) {
-          context.showSuccess('Successfully switched to ${newMode.displayName} mode');
-          
-          context.go('/');
-        }
-      } catch (e) {
-        if (mounted) {
-          context.showError('Failed to change mode: $e');
-        }
-      }
-    }
-  }
-
-  Widget _buildDataStatRow(String label, int count, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: count > 0 ? AppColorMapper.errorColor(context) : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

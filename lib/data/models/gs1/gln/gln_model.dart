@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/data/models/epcis/geospatial_coordinates.dart';
 
 enum LocationType {
@@ -91,8 +90,6 @@ class GLN extends Equatable {
 
   final GLNPharmaceuticalExtension? pharmaceuticalExtension;
 
-  final GLNTobaccoExtension? tobaccoExtension;
-
   const GLN({
     required this.glnCode,
     required this.locationName,
@@ -138,7 +135,6 @@ class GLN extends Equatable {
     this.supplyChainRoles = const [],
     this.locationRoles = const [],
     this.pharmaceuticalExtension,
-    this.tobaccoExtension,
   });
 
   factory GLN.fromCode(String code) {
@@ -202,7 +198,6 @@ class GLN extends Equatable {
     List<String>? supplyChainRoles,
     List<String>? locationRoles,
     GLNPharmaceuticalExtension? pharmaceuticalExtension,
-    GLNTobaccoExtension? tobaccoExtension,
   }) {
     return GLN(
       glnCode: glnCode ?? this.glnCode,
@@ -257,7 +252,6 @@ class GLN extends Equatable {
       locationRoles: locationRoles ?? this.locationRoles,
       pharmaceuticalExtension:
           pharmaceuticalExtension ?? this.pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension ?? this.tobaccoExtension,
     );
   }
 
@@ -334,12 +328,6 @@ class GLN extends Equatable {
           GLNPharmaceuticalExtension.fromJson(pharmaRaw);
     }
 
-    GLNTobaccoExtension? tobaccoExtension;
-    final tobaccoRaw = json['tobaccoExtension'];
-    if (tobaccoRaw is Map<String, dynamic>) {
-      tobaccoExtension = GLNTobaccoExtension.fromJson(tobaccoRaw);
-    }
-
     return GLN(
       glnCode: json['glnCode']?.toString() ?? '',
       locationName: json['locationName']?.toString() ?? '',
@@ -391,7 +379,6 @@ class GLN extends Equatable {
       supplyChainRoles: _stringListFromJson(json['supplyChainRoles']),
       locationRoles: _stringListFromJson(json['locationRoles']),
       pharmaceuticalExtension: pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension,
     );
   }
 
@@ -475,9 +462,6 @@ class GLN extends Equatable {
     if (coordinates != null) json['coordinates'] = coordinates!.toJson();
     if (pharmaceuticalExtension != null) {
       json['pharmaceuticalExtension'] = pharmaceuticalExtension!.toJson();
-    }
-    if (tobaccoExtension != null) {
-      json['tobaccoExtension'] = tobaccoExtension!.toJson();
     }
 
     return json;
@@ -566,6 +550,5 @@ class GLN extends Equatable {
         effectiveTo,
         glnTypes,
         pharmaceuticalExtension,
-        tobaccoExtension,
       ];
 }

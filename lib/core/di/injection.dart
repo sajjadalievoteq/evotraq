@@ -41,9 +41,7 @@ import '../../data/services/home/dashboard_service.dart';
 import '../../data/session/home_overview_session_store.dart';
 import '../../data/services/database_partitioning_service.dart';
 import 'package:traqtrace_app/data/services/epcis/epc_conversion_service.dart';
-import '../../data/services/gs1/gln/gln_tobacco_extension_service.dart';
 import '../../data/services/gs1/gtin/gtin_service.dart';
-import '../../data/services/gtin_tobacco_extension_service.dart';
 import '../../data/services/industry_test_data_service.dart';
 import 'package:traqtrace_app/data/services/operations/packing/packing_operation_service.dart';
 import 'package:traqtrace_app/data/services/operations/unpacking/unpacking_operation_service.dart';
@@ -62,7 +60,6 @@ import 'package:traqtrace_app/data/services/operations/shared/operation_epc_stat
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharmaceutical_extension_service.dart';
 import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_pharma_compliance_service.dart';
-import 'package:traqtrace_app/data/services/gs1/serialization/sscc/sscc_tobacco_extension_service.dart';
 import 'package:traqtrace_app/data/services/reference_data_service.dart';
 import '../../data/services/system_settings_service.dart';
 import 'package:traqtrace_app/data/services/epcis/transaction_document_service.dart';
@@ -288,18 +285,6 @@ Future<void> initDependencies(AppConfig appConfig) async {
 
   getIt.registerLazySingleton<PharmaceuticalService>(
     () => PharmaceuticalService(dioService: getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<GTINTobaccoExtensionService>(
-    () => GTINTobaccoExtensionService(dioService: getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<GLNTobaccoExtensionService>(
-    () => GLNTobaccoExtensionService(dioService: getIt<DioService>()),
-  );
-
-  getIt.registerLazySingleton<SSCCTobaccoExtensionService>(
-    () => SSCCTobaccoExtensionService(dioService: getIt<DioService>()),
   );
 
   getIt.registerLazySingleton<SSCCPharmaceuticalExtensionService>(

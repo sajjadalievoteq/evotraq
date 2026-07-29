@@ -20,9 +20,6 @@ import 'package:traqtrace_app/data/models/gs1/gln/gln_model.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_route_constants.dart';
 import 'package:traqtrace_app/data/models/gs1/gln/gln_pharmaceutical_extension_model.dart';
 import 'package:traqtrace_app/features/pharmaceutical/widgets/gln_pharmaceutical_extension_widget.dart';
-import 'package:traqtrace_app/core/config/feature_flags.dart';
-import 'package:traqtrace_app/features/tobacco/widgets/gln_tobacco_extension_widget.dart';
-import 'package:traqtrace_app/data/models/gs1/gln/gln_tobacco_extension_model.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_detail_form_body.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/widgets/gln_detail_form_skeleton.dart';
 import 'package:traqtrace_app/features/gs1/gln/screens/gln_detail/gln_detail_screen_fields.dart';
@@ -60,7 +57,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
   final _formKey = GlobalKey<FormState>();
   final _pharmaExtensionKey =
       GlobalKey<GLNPharmaceuticalExtensionWidgetState>();
-  final _tobaccoExtensionKey = GlobalKey<GLNTobaccoExtensionWidgetState>();
 
   String _operatingStatus = 'ACTIVE';
   String _industryClassification = 'HEALTHCARE';
@@ -334,15 +330,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       );
     }
 
-    GLNTobaccoExtension? tobaccoExtension;
-    final tobaccoSt = _tobaccoExtensionKey.currentState;
-    if (kTobaccoExtensionEnabled && tobaccoSt != null && tobaccoSt.hasData) {
-      tobaccoExtension = tobaccoSt.buildExtension(
-        glnId: null,
-        glnCode: glnCode,
-      );
-    }
-
     final gln = GLN(
       glnCode: glnCode,
       locationName: locationName,
@@ -393,7 +380,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
       supplyChainRoles: _splitRoles(glnFieldText('supplyChainRoles')),
       locationRoles: _splitRoles(glnFieldText('locationRoles')),
       pharmaceuticalExtension: pharmaceuticalExtension,
-      tobaccoExtension: tobaccoExtension,
     );
 
     setState(() => _hasSubmittedForm = true);
@@ -570,7 +556,6 @@ class _GLNDetailScreenState extends State<GLNDetailScreen>
           nonReuseUntil: _nonReuseUntil,
           displayCoordinates: _coordinates,
           pharmaExtensionKey: _pharmaExtensionKey,
-          tobaccoExtensionKey: _tobaccoExtensionKey,
           onOperatingStatusChanged: (v) {
             if (v != null) setState(() => _operatingStatus = v);
           },

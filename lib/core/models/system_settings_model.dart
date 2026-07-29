@@ -1,6 +1,5 @@
 enum IndustryMode {
-  pharmaceutical('Pharmaceutical', 'Pharma track & trace for drugs and medical devices'),
-  tobacco('Tobacco', 'Tobacco track & trace with tax stamp and health warning compliance');
+  pharmaceutical('Pharmaceutical', 'Pharma track & trace for drugs and medical devices');
 
   final String displayName;
   final String description;
@@ -72,7 +71,6 @@ class SystemSettings {
   }
 
   bool get isPharmaceuticalMode => industryMode == IndustryMode.pharmaceutical;
-  bool get isTobaccoMode => industryMode == IndustryMode.tobacco;
 
   SystemSettings copyWith({
     IndustryMode? industryMode,
@@ -98,7 +96,6 @@ class DataClearStatistics {
   final int sgtinCount;
   final int glnCount;
   final int eventCount;
-  final int tobaccoExtensionCount;
   final int pharmaceuticalExtensionCount;
   final int taxStampCount;
   final int manufacturingBatchCount;
@@ -108,7 +105,6 @@ class DataClearStatistics {
     this.sgtinCount = 0,
     this.glnCount = 0,
     this.eventCount = 0,
-    this.tobaccoExtensionCount = 0,
     this.pharmaceuticalExtensionCount = 0,
     this.taxStampCount = 0,
     this.manufacturingBatchCount = 0,
@@ -120,7 +116,6 @@ class DataClearStatistics {
       sgtinCount: json['sgtinCount'] ?? 0,
       glnCount: json['glnCount'] ?? 0,
       eventCount: json['eventCount'] ?? 0,
-      tobaccoExtensionCount: json['tobaccoExtensionCount'] ?? 0,
       pharmaceuticalExtensionCount: json['pharmaceuticalExtensionCount'] ?? 0,
       taxStampCount: json['taxStampCount'] ?? 0,
       manufacturingBatchCount: json['manufacturingBatchCount'] ?? 0,
@@ -132,7 +127,6 @@ class DataClearStatistics {
       sgtinCount +
       glnCount +
       eventCount +
-      tobaccoExtensionCount +
       pharmaceuticalExtensionCount +
       taxStampCount +
       manufacturingBatchCount;

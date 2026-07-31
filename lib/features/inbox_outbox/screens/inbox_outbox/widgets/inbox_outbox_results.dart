@@ -26,10 +26,12 @@ class InboxOutboxResults extends StatelessWidget {
     required this.embedded,
     required this.selectedOperationId,
     required this.onSelectOperation,
+    this.perspectiveGln,
   });
 
   final ScrollController scrollController;
   final List<Operation> operations;
+  final String? perspectiveGln;
   final bool isLoading;
   final String? errorMessage;
   final InboxOutboxListFilter filter;
@@ -64,6 +66,7 @@ class InboxOutboxResults extends StatelessWidget {
       onLoadMore: onLoadMore,
       itemBuilder: (context, operation) => OperationListCard(
         isInboxOutbox: true,
+        perspectiveGln: perspectiveGln,
         operation: operation,
         isSelected: embedded &&
             operation.navigableOperationId != null &&

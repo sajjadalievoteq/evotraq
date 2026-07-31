@@ -324,7 +324,10 @@ class _AppDrawerState extends State<AppDrawer> {
                           ),
                           otherAccountsPictures: [
                             IconButton(
+                              iconSize:30,
+
                               icon: TraqIcon(
+
                                 isDarkMode
                                     ? NavIcons.themeSun
                                     : NavIcons.themeMoon,

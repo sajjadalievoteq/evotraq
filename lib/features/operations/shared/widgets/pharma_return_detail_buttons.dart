@@ -86,11 +86,8 @@ class _AcceptGoodsButtonState extends State<AcceptGoodsButton> {
     setState(() {
       _evaluating = false;
       _eligible = matches;
-      if (!matches) {
-        _disabledReason = operationalGln == null
-            ? 'Set your Operational GLN in Profile to accept goods'
-            : 'Your Operational GLN does not match this operation\'s receiving location';
-      }
+      // Operational GLN doesn't match the receiving location: hide the button
+      // entirely (no disabled button or message), same as the return buttons.
     });
   }
 
@@ -257,12 +254,9 @@ class _InitiateReturnShippingButtonState extends State<InitiateReturnShippingBut
       operationalGln,
       widget.operation.receivingGLN,
     )) {
-      setState(() {
-        _loading = false;
-        _disabledReason = operationalGln == null
-            ? 'Set your Operational GLN in Profile to initiate a return'
-            : 'Your Operational GLN does not match this operation\'s receiving location';
-      });
+      // Operational GLN doesn't match the receiving location: hide the button
+      // entirely (no disabled button or message), same as AcceptReturnButton.
+      setState(() => _loading = false);
       return;
     }
 

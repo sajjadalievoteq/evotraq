@@ -61,25 +61,25 @@ class InboxOutboxService {
     required int size,
     String? search,
   }) async {
-    final results = await Future.wait([
-      getInTransitOperationsPage(
-        gln: gln,
-        direction: InboxOutboxDirection.inbound,
-        page: page,
-        size: size,
-        search: search,
-      ),
-      getInTransitOperationsPage(
-        gln: gln,
-        direction: InboxOutboxDirection.outbound,
-        page: page,
-        size: size,
-        search: search,
-      ),
-    ]);
+    // Sequential on purpose: concurrent INBOUND+OUTBOUND held two heavy DB
+    // connections per user and exhausted Hikari under load. Same merge result.
+    final inbound = await getInTransitOperationsPage(
+      gln: gln,
+      direction: InboxOutboxDirection.inbound,
+      page: page,
+      size: size,
+      search: search,
+    );
+    final outbound = await getInTransitOperationsPage(
+      gln: gln,
+      direction: InboxOutboxDirection.outbound,
+      page: page,
+      size: size,
+      search: search,
+    );
 
     final merged = <String, ShippingResponse>{};
-    for (final response in results) {
+    for (final response in [inbound, outbound]) {
       for (final operation in response.operations) {
         final id = operation.navigableOperationId;
         if (id == null) continue;
@@ -94,8 +94,6 @@ class InboxOutboxService {
         return bTime.compareTo(aTime);
       });
 
-    final inbound = results[0];
-    final outbound = results[1];
     final hasMore = inbound.hasMore || outbound.hasMore;
     final estimatedTotalPages = inbound.totalPages > outbound.totalPages
         ? inbound.totalPages

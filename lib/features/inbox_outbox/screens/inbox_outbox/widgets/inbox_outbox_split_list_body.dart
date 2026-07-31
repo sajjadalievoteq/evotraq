@@ -167,6 +167,7 @@ class _InboxOutboxSplitListBodyState extends State<InboxOutboxSplitListBody> {
             ),
             results: InboxOutboxResults(
               scrollController: _scrollController,
+              perspectiveGln: _myGln,
               operations: state.items,
               isLoading: state.isLoading,
               errorMessage: state.errorMessage,

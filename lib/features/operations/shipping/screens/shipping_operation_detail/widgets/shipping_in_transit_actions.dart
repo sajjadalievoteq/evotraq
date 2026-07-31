@@ -154,24 +154,18 @@ class _ShippingInTransitActionsState extends State<ShippingInTransitActions> {
     }
 
     if (_isSource) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          RoleGate(
-            step: OperationSteps.cancelShip,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: CustomElevatedButton(
-                label: 'Cancel Shipping',
-                onPressed: _goCancelShipping,
-              ),
-            ),
+      // Forward shipment we shipped, still in transit: the only action is to cancel it.
+      // Accepting a return is handled on the return shipment's own detail (isReturn branch),
+      // which also arrives as an incoming Inbox item — it must not appear on the outbound shipment.
+      return RoleGate(
+        step: OperationSteps.cancelShip,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: CustomElevatedButton(
+            label: 'Cancel Shipping',
+            onPressed: _goCancelShipping,
           ),
-          RoleGate(
-            step: OperationSteps.returnReceive,
-            child: AcceptReturnButton(operation: widget.operation),
-          ),
-        ],
+        ),
       );
     }
 

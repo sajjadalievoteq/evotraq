@@ -252,9 +252,21 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       }
 
       final parentNode = page.parent!;
+
+      // Re-baseline the grafted parent to a clean page-0 children window so it
+      // paginates on scroll exactly like the original root. Seeding from the
+      // focus-anchored getParentContext window (page == focusPage) left grafted
+      // parents with a wrong hasMore/loadedPage, so their load-more sentinel
+      // never appeared and their earlier sibling pages could never load.
+      final page0 = await _hierarchyService.getHierarchyChildren(
+        parentNode.epc,
+        page: 0,
+        size: _pageSize,
+      );
+
       var focusReused = false;
       final siblings = <HierarchyTreeNodeState>[];
-      for (final n in page.children) {
+      for (final n in page0.children) {
         if (_sameEpc(n.epc, focus)) {
           // Reuse the current view-root subtree (expansion + loaded descendants).
           siblings.add(previousRoot);
@@ -264,6 +276,9 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         }
       }
       if (!focusReused) {
+        // Focus child is on a later page. Keep its subtree grafted now; the
+        // dedupe-by-EPC merge in loadMoreChildren swaps in this node when its
+        // real page is scrolled into view, so no duplicate appears.
         siblings.add(previousRoot);
       }
 
@@ -272,7 +287,7 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
           epc: parentNode.epc,
           type: parentNode.type,
           hasChildren: true,
-          childCount: page.total,
+          childCount: page0.total,
           gtin: parentNode.gtin,
           productName: parentNode.productName,
           lotNumber: parentNode.lotNumber,
@@ -284,9 +299,9 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         ),
         isExpanded: true,
         loadedChildren: siblings,
-        loadedPage: page.page,
-        totalPages: page.totalPages,
-        hasMore: page.hasMore,
+        loadedPage: page0.page,
+        totalPages: page0.totalPages,
+        hasMore: page0.hasMore,
       );
 
       emit(
@@ -429,9 +444,15 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       );
       _mutate(target, (n) {
         n.isLoading = false;
-        n.loadedChildren.addAll(
-          page.children.map((c) => HierarchyTreeNodeState(node: c)),
-        );
+        // Dedupe by EPC: skip any child already present (e.g. a grafted/expanded
+        // subtree kept from a climb) so we keep the loaded node instead of
+        // appending a duplicate plain one.
+        for (final c in page.children) {
+          final exists =
+              n.loadedChildren.any((e) => _sameEpc(e.node.epc, c.epc));
+          if (exists) continue;
+          n.loadedChildren.add(HierarchyTreeNodeState(node: c));
+        }
         n.loadedPage = page.page;
         n.totalPages = page.totalPages;
         n.hasMore = page.hasMore;

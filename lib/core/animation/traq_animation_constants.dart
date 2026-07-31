@@ -29,8 +29,8 @@ abstract final class TraqAnimationConstants {
   
   /// Branding panel entrance — short enough to avoid feeling sluggish alongside
   /// the auth form motion that runs in parallel.
-  static const int brandingEntranceMs = 360;
-  static const int brandingStaggerMs = 48;
+  static const int brandingEntranceMs = 760;
+  static const int brandingStaggerMs = 88;
 
   
   

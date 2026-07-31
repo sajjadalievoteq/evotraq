@@ -3,18 +3,14 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i5;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i9;
-import 'package:traqtrace_app/data/models/auth/auth_models.dart' as _i4;
 import 'package:traqtrace_app/data/models/home/dashboard_stats.dart' as _i2;
-import 'package:traqtrace_app/data/models/home/recent_event.dart' as _i7;
+import 'package:traqtrace_app/data/models/home/recent_event.dart' as _i6;
 import 'package:traqtrace_app/data/models/home/system_health_status.dart'
     as _i3;
-import 'package:traqtrace_app/data/services/auth_service/auth_service.dart'
-    as _i8;
-import 'package:traqtrace_app/data/services/home/dashboard_service.dart' as _i5;
+import 'package:traqtrace_app/data/services/home/dashboard_service.dart' as _i4;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -43,26 +39,16 @@ class _FakeSystemHealthStatus_1 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-class _FakeAuthResponse_2 extends _i1.SmartFake implements _i4.AuthResponse {
-  _FakeAuthResponse_2(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeUser_3 extends _i1.SmartFake implements _i4.User {
-  _FakeUser_3(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
 /// A class which mocks [DashboardService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDashboardService extends _i1.Mock implements _i5.DashboardService {
+class MockDashboardService extends _i1.Mock implements _i4.DashboardService {
   MockDashboardService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<({List<_i7.RecentEvent> recentEvents, _i2.DashboardStats stats})>
+  _i5.Future<({List<_i6.RecentEvent> recentEvents, _i2.DashboardStats stats})>
   getSummary({int? recentLimit = 5, int? throughputHours = 24}) =>
       (super.noSuchMethod(
             Invocation.method(#getSummary, [], {
@@ -70,13 +56,13 @@ class MockDashboardService extends _i1.Mock implements _i5.DashboardService {
               #throughputHours: throughputHours,
             }),
             returnValue:
-                _i6.Future<
+                _i5.Future<
                   ({
-                    List<_i7.RecentEvent> recentEvents,
+                    List<_i6.RecentEvent> recentEvents,
                     _i2.DashboardStats stats,
                   })
                 >.value((
-                  recentEvents: <_i7.RecentEvent>[],
+                  recentEvents: <_i6.RecentEvent>[],
                   stats: _FakeDashboardStats_0(
                     this,
                     Invocation.method(#getSummary, [], {
@@ -86,145 +72,32 @@ class MockDashboardService extends _i1.Mock implements _i5.DashboardService {
                   ),
                 )),
           )
-          as _i6.Future<
-            ({List<_i7.RecentEvent> recentEvents, _i2.DashboardStats stats})
+          as _i5.Future<
+            ({List<_i6.RecentEvent> recentEvents, _i2.DashboardStats stats})
           >);
 
   @override
-  _i6.Future<_i3.SystemHealthStatus> getSystemHealth() =>
+  _i5.Future<_i3.SystemHealthStatus> getSystemHealth() =>
       (super.noSuchMethod(
             Invocation.method(#getSystemHealth, []),
-            returnValue: _i6.Future<_i3.SystemHealthStatus>.value(
+            returnValue: _i5.Future<_i3.SystemHealthStatus>.value(
               _FakeSystemHealthStatus_1(
                 this,
                 Invocation.method(#getSystemHealth, []),
               ),
             ),
           )
-          as _i6.Future<_i3.SystemHealthStatus>);
+          as _i5.Future<_i3.SystemHealthStatus>);
 
   @override
-  _i6.Future<({Map<int, int> buckets, int total})> fetchThroughput(
+  _i5.Future<({Map<int, int> buckets, int total})> fetchThroughput(
     int? hours,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#fetchThroughput, [hours]),
-            returnValue: _i6.Future<({Map<int, int> buckets, int total})>.value(
+            returnValue: _i5.Future<({Map<int, int> buckets, int total})>.value(
               (buckets: <int, int>{}, total: 0),
             ),
           )
-          as _i6.Future<({Map<int, int> buckets, int total})>);
-}
-
-/// A class which mocks [AuthService].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockAuthService extends _i1.Mock implements _i8.AuthService {
-  MockAuthService() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i6.Future<_i4.AuthResponse> login(_i4.LoginRequest? request) =>
-      (super.noSuchMethod(
-            Invocation.method(#login, [request]),
-            returnValue: _i6.Future<_i4.AuthResponse>.value(
-              _FakeAuthResponse_2(this, Invocation.method(#login, [request])),
-            ),
-          )
-          as _i6.Future<_i4.AuthResponse>);
-
-  @override
-  _i6.Future<void> register(_i4.RegisterRequest? request) =>
-      (super.noSuchMethod(
-            Invocation.method(#register, [request]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
-          )
-          as _i6.Future<void>);
-
-  @override
-  _i6.Future<String> resendVerificationEmail(String? email) =>
-      (super.noSuchMethod(
-            Invocation.method(#resendVerificationEmail, [email]),
-            returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(
-                this,
-                Invocation.method(#resendVerificationEmail, [email]),
-              ),
-            ),
-          )
-          as _i6.Future<String>);
-
-  @override
-  _i6.Future<bool> checkUsernameAvailability(String? username) =>
-      (super.noSuchMethod(
-            Invocation.method(#checkUsernameAvailability, [username]),
-            returnValue: _i6.Future<bool>.value(false),
-          )
-          as _i6.Future<bool>);
-
-  @override
-  _i6.Future<_i4.User> getCurrentUser() =>
-      (super.noSuchMethod(
-            Invocation.method(#getCurrentUser, []),
-            returnValue: _i6.Future<_i4.User>.value(
-              _FakeUser_3(this, Invocation.method(#getCurrentUser, [])),
-            ),
-          )
-          as _i6.Future<_i4.User>);
-
-  @override
-  _i6.Future<void> logout() =>
-      (super.noSuchMethod(
-            Invocation.method(#logout, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
-          )
-          as _i6.Future<void>);
-
-  @override
-  _i6.Future<bool> requestPasswordReset(String? email) =>
-      (super.noSuchMethod(
-            Invocation.method(#requestPasswordReset, [email]),
-            returnValue: _i6.Future<bool>.value(false),
-          )
-          as _i6.Future<bool>);
-
-  @override
-  _i6.Future<bool> validatePasswordResetToken(String? token) =>
-      (super.noSuchMethod(
-            Invocation.method(#validatePasswordResetToken, [token]),
-            returnValue: _i6.Future<bool>.value(false),
-          )
-          as _i6.Future<bool>);
-
-  @override
-  _i6.Future<bool> resetPassword(
-    String? token,
-    String? newPassword,
-    String? confirmPassword,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#resetPassword, [
-              token,
-              newPassword,
-              confirmPassword,
-            ]),
-            returnValue: _i6.Future<bool>.value(false),
-          )
-          as _i6.Future<bool>);
-
-  @override
-  _i6.Future<String> verifyEmail(String? token) =>
-      (super.noSuchMethod(
-            Invocation.method(#verifyEmail, [token]),
-            returnValue: _i6.Future<String>.value(
-              _i9.dummyValue<String>(
-                this,
-                Invocation.method(#verifyEmail, [token]),
-              ),
-            ),
-          )
-          as _i6.Future<String>);
+          as _i5.Future<({Map<int, int> buckets, int total})>);
 }

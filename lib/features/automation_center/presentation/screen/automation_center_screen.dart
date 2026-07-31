@@ -77,7 +77,7 @@ class _AutomationCenterViewState extends State<_AutomationCenterView> {
     );
     return Title(
       title: 'Automation Center',
-      color: Colors.transparent,
+      color: Colors.white,
       child: WorkbenchScaffold(
         title: 'Automation Center',
         groups: AutomationCenterSections.groupsFor(isAdmin: isAdmin),
@@ -121,7 +121,6 @@ class _AutomationCenterViewState extends State<_AutomationCenterView> {
       ),
     );
   }
-
   Widget _lazyPanel(String section, Widget panel) {
     return _visitedSections.contains(section)
         ? KeyedSubtree(key: ValueKey(section), child: panel)

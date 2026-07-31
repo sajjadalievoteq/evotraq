@@ -47,7 +47,8 @@ extension Gs1ToolKindX on Gs1ToolKind {
     Gs1ToolKind.barcode,
     Gs1ToolKind.aiElement,
     Gs1ToolKind.ndc,
-    Gs1ToolKind.lookup,
+    // Gs1ToolKind.lookup, // Temporarily hidden: needs an external
+    // Verified-by-GS1 / GEPIR registry integration before it's useful.
   ];
 
   /// Rail tiles for EPCIS Serialization. Import/Export are implemented but

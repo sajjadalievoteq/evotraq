@@ -620,30 +620,30 @@ class _AppDrawerState extends State<AppDrawer> {
                         //   ],
                         // ),
                         //
-                        // TraqExpansionTile(
-                        //   leading: _svgLeading(NavIcons.testDataGeneration),
-                        //   title: const Text('Test Data Generation'),
-                        //   children: [
-                        //     ListTile(
-                        //       leading: _svgLeading(
-                        //         NavIcons.eventGenerationTests,
-                        //       ),
-                        //       title: const Text('Event Generation Tests'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => _navigate(
-                        //         Constants.adminEventGenerationTestRoute,
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       leading: _svgLeading(NavIcons.industryTestData),
-                        //       title: const Text('Industry Test Data'),
-                        //       contentPadding: const EdgeInsets.only(left: 32.0),
-                        //       onTap: () => _navigate(
-                        //         Constants.adminIndustryTestDataRoute,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
+                        TraqExpansionTile(
+                          leading: _svgLeading(NavIcons.testDataGeneration),
+                          title: const Text('Test Data Generation'),
+                          children: [
+                            ListTile(
+                              leading: _svgLeading(
+                                NavIcons.eventGenerationTests,
+                              ),
+                              title: const Text('Event Generation Tests'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminEventGenerationTestRoute,
+                              ),
+                            ),
+                            ListTile(
+                              leading: _svgLeading(NavIcons.industryTestData),
+                              title: const Text('Industry Test Data'),
+                              contentPadding: const EdgeInsets.only(left: 32.0),
+                              onTap: () => _navigate(
+                                Constants.adminIndustryTestDataRoute,
+                              ),
+                            ),
+                          ],
+                        ),
                         // ListTile(
                         //   leading: _svgLeading(NavIcons.batchProcessing),
                         //   title: const Text('Automation Center'),

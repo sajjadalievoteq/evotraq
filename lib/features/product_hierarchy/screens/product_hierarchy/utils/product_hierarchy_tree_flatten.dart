@@ -35,6 +35,7 @@ final class ProductHierarchySentinelItem extends ProductHierarchyFlatItem {
     required this.inGroupBody,
     required this.isFirstInGroupBody,
     required this.isLastInGroupBody,
+    this.isPrevious = false,
   });
 
   final HierarchyTreeNodeState parent;
@@ -42,6 +43,10 @@ final class ProductHierarchySentinelItem extends ProductHierarchyFlatItem {
   final bool inGroupBody;
   final bool isFirstInGroupBody;
   final bool isLastInGroupBody;
+
+  /// True for the leading "load earlier siblings" indicator (scroll-up), false
+  /// for the trailing "load more" indicator (scroll-down).
+  final bool isPrevious;
 }
 
 
@@ -75,10 +80,25 @@ List<ProductHierarchyFlatItem> flattenProductHierarchy(
     if (!expanded) return;
 
     final kids = node.loadedChildren;
-    final slotCount = kids.length + (node.hasMore ? 1 : 0);
+    // Only the view-root (depth 0) can page backwards after a climb.
+    final showPrevious = depth == 0 && node.hasPrevious;
+    final showMore = node.hasMore;
+
+    if (showPrevious) {
+      items.add(
+        ProductHierarchySentinelItem(
+          parent: node,
+          depth: depth + 1,
+          inGroupBody: true,
+          isFirstInGroupBody: true,
+          isLastInGroupBody: kids.isEmpty && !showMore,
+          isPrevious: true,
+        ),
+      );
+    }
     for (var i = 0; i < kids.length; i++) {
-      final first = i == 0;
-      final last = i == slotCount - 1;
+      final first = i == 0 && !showPrevious;
+      final last = i == kids.length - 1 && !showMore;
       walk(
         kids[i],
         depth + 1,
@@ -87,13 +107,13 @@ List<ProductHierarchyFlatItem> flattenProductHierarchy(
         isLast: last,
       );
     }
-    if (node.hasMore) {
+    if (showMore) {
       items.add(
         ProductHierarchySentinelItem(
           parent: node,
           depth: depth + 1,
           inGroupBody: true,
-          isFirstInGroupBody: kids.isEmpty,
+          isFirstInGroupBody: kids.isEmpty && !showPrevious,
           isLastInGroupBody: true,
         ),
       );

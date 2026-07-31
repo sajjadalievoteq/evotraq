@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:traqtrace_app/core/theme/traq_theme.dart';
 import 'package:traqtrace_app/core/utils/responsive_utils.dart';
@@ -23,11 +24,69 @@ class _ProductHierarchyTreePanelState extends State<ProductHierarchyTreePanel> {
   final ScrollController _scrollController = ScrollController();
   String? _pendingFlashClear;
   int? _scrollToken;
+  bool _loadingPrevious = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Load the view-root's earlier sibling page when the user scrolls up to the
+  /// very top. Gated on an active upward drag so it never fires on the
+  /// programmatic settle right after a climb (which lands pinned at the top).
+  void _onScroll() {
+    if (!mounted || _loadingPrevious || !_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    // ScrollDirection.forward == the user is dragging content down (toward the
+    // top / revealing earlier rows).
+    if (pos.userScrollDirection != ScrollDirection.forward) return;
+    if (pos.pixels > pos.minScrollExtent + 120) return;
+
+    final cubit = context.read<ProductHierarchyCubit>();
+    final root = cubit.state.root;
+    if (root == null || !root.hasPrevious || root.isLoading) return;
+    _handleLoadPrevious();
+  }
+
+  /// Fetch the previous page and preserve the visual scroll position: the list
+  /// grows above the viewport, so we advance the offset by the measured extent
+  /// growth to keep the row the user was looking at stable (and push the
+  /// spinner off the top so it can't cascade).
+  Future<void> _handleLoadPrevious() async {
+    if (_loadingPrevious || !_scrollController.hasClients) return;
+    final cubit = context.read<ProductHierarchyCubit>();
+    final root = cubit.state.root;
+    if (root == null) return;
+
+    _loadingPrevious = true;
+    final before = _scrollController.position.pixels;
+    final beforeMax = _scrollController.position.maxScrollExtent;
+    try {
+      final inserted = await cubit.loadPreviousChildren(root);
+      if (!mounted || inserted <= 0 || !_scrollController.hasClients) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        final pos = _scrollController.position;
+        final delta = pos.maxScrollExtent - beforeMax;
+        if (delta > 0) {
+          final target = (before + delta).clamp(
+            pos.minScrollExtent,
+            pos.maxScrollExtent,
+          );
+          _scrollController.jumpTo(target);
+        }
+      });
+    } finally {
+      _loadingPrevious = false;
+    }
   }
 
   /// Animate to [scrollToEpc]. Parent/root (index 0) scrolls to the top;

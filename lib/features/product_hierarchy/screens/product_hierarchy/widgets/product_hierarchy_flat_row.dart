@@ -100,6 +100,7 @@ class ProductHierarchyFlatRow extends StatelessWidget {
         :final inGroupBody,
         :final isFirstInGroupBody,
         :final isLastInGroupBody,
+        :final isPrevious,
       ) =>
         ProductHierarchyGroupChrome(
           depth: depth,
@@ -107,13 +108,43 @@ class ProductHierarchyFlatRow extends StatelessWidget {
           isExpandedHeader: false,
           isFirst: isFirstInGroupBody,
           isLast: isLastInGroupBody,
-          child: ProductHierarchyLoadMoreSentinel(
-            key: ValueKey('${parent.node.epc}-more-${parent.loadedPage}'),
-            isLoading: parent.isLoading,
-            onVisible: () => onLoadMore(parent),
-          ),
+          // The "load earlier" (scroll-up) indicator is driven by the panel's
+          // near-top scroll handler, so it only shows a spinner. The trailing
+          // "load more" sentinel self-triggers when scrolled into view.
+          child: isPrevious
+              ? ProductHierarchyLoadIndicator(isLoading: parent.isLoading)
+              : ProductHierarchyLoadMoreSentinel(
+                  key: ValueKey('${parent.node.epc}-more-${parent.loadedPage}'),
+                  isLoading: parent.isLoading,
+                  onVisible: () => onLoadMore(parent),
+                ),
         ),
     };
+  }
+}
+
+/// Passive scroll-up load indicator. Shows a spinner while [isLoading] and
+/// nothing otherwise; the enclosing panel decides when to fetch the previous
+/// page (near-top scroll), so this widget never triggers a load itself.
+class ProductHierarchyLoadIndicator extends StatelessWidget {
+  const ProductHierarchyLoadIndicator({super.key, required this.isLoading});
+
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoading) return const SizedBox.shrink();
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: TraqSpacing.xs),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
   }
 }
 

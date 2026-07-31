@@ -252,12 +252,11 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
       }
 
       final parentNode = page.parent!;
-
-      // Re-baseline the grafted parent to a clean page-0 children window so it
-      // paginates on scroll exactly like the original root. Seeding from the
-      // focus-anchored getParentContext window (page == focusPage) left grafted
-      // parents with a wrong hasMore/loadedPage, so their load-more sentinel
-      // never appeared and their earlier sibling pages could never load.
+      // Seed the grafted parent from a clean page-0 children window so it
+      // forward-paginates on scroll-down at EVERY depth, exactly like the
+      // original root. Focus-anchored seeding left mid-level grafted parents
+      // unable to load their remaining children on scroll (their siblings were
+      // treated as "earlier" pages), so only the root kept paginating.
       final page0 = await _hierarchyService.getHierarchyChildren(
         parentNode.epc,
         page: 0,
@@ -276,9 +275,9 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         }
       }
       if (!focusReused) {
-        // Focus child is on a later page. Keep its subtree grafted now; the
-        // dedupe-by-EPC merge in loadMoreChildren swaps in this node when its
-        // real page is scrolled into view, so no duplicate appears.
+        // Focus child lives on a later page; keep its subtree grafted so it
+        // stays visible. The dedupe-by-EPC merge in loadMoreChildren swaps it
+        // into place (no duplicate) when its real page is scrolled into view.
         siblings.add(previousRoot);
       }
 
@@ -462,6 +461,49 @@ class ProductHierarchyCubit extends Cubit<ProductHierarchyState> {
         n.isLoading = false;
         n.error = 'Failed to load more: ${e.toString()}';
       });
+    }
+  }
+
+  /// Prepend the child page immediately *before* [target].firstLoadedPage
+  /// (climb-grafted parents only). Dedupes by EPC so a grafted/expanded subtree
+  /// isn't duplicated. Returns the number of newly inserted rows so the caller
+  /// can preserve scroll position after the prepend.
+  Future<int> loadPreviousChildren(HierarchyTreeNodeState target) async {
+    if (!target.hasPrevious || target.isLoading) return 0;
+    final prevPage = target.firstLoadedPage - 1;
+    if (prevPage < 0) {
+      _mutate(target, (n) => n.hasPrevious = false);
+      return 0;
+    }
+    _mutate(target, (n) => n.isLoading = true);
+    try {
+      final page = await _hierarchyService.getHierarchyChildren(
+        target.node.epc,
+        page: prevPage,
+        size: _pageSize,
+      );
+      var inserted = 0;
+      _mutate(target, (n) {
+        n.isLoading = false;
+        final fresh = <HierarchyTreeNodeState>[];
+        for (final c in page.children) {
+          final exists =
+              n.loadedChildren.any((e) => _sameEpc(e.node.epc, c.epc));
+          if (exists) continue;
+          fresh.add(HierarchyTreeNodeState(node: c));
+        }
+        n.loadedChildren.insertAll(0, fresh);
+        inserted = fresh.length;
+        n.firstLoadedPage = page.page;
+        n.hasPrevious = page.page > 0;
+      });
+      return inserted;
+    } catch (e) {
+      _mutate(target, (n) {
+        n.isLoading = false;
+        n.error = 'Failed to load previous: ${e.toString()}';
+      });
+      return 0;
     }
   }
 
